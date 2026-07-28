@@ -1,0 +1,77 @@
+# IDE / local metadata
+.vs/
+.idea/
+.agents/
+.codex/
+.git.old-*/
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+*.VC.db
+*.VC.VC.opendb
+
+# Build / package outputs
+bin/
+bin-int/
+Builds/
+**/bin/
+**/bin-int/
+!vendor/bin/
+!vendor/bin/premake/
+!vendor/bin/premake/premake5.exe
+**/obj/
+x64/
+Debug/
+Release/
+Dist/
+!Wheatear/vendor/mono/lib/
+!Wheatear/vendor/mono/lib/Debug/
+!Wheatear/vendor/mono/lib/Debug/*.lib
+!Wheatear/vendor/mono/lib/Release/
+!Wheatear/vendor/mono/lib/Release/*.lib
+*.log
+*.ilk
+*.idb
+*.pdb
+*.ipdb
+*.iobj
+*.pch
+*.ipch
+*.tlog
+*.lastbuildstate
+*.recipe
+*.wtpack
+
+# Runtime / editor generated files
+WheatearProfile-*.json
+WheatearEditor/imgui.ini
+WheatearEditor/assets/cache/
+WheatearEditor/assets/saves/
+
+# Generated script binaries
+WheatearEditor/assets/scripts/*.dll
+WheatearEditor/assets/scripts/*.pdb
+
+# Heavy optional sample assets not needed by the vertical slice
+cloc.exe
+WheatearEditor/assets/hdr/
+WheatearEditor/assets/models/
+WheatearEditor/assets/scenes/3DTestScene.wt
+WheatearEditor/assets/kenney_rpg-base.zip
+
+# Vendored dependency extras / generated outputs
+Wheatear/vendor/**/bin/
+Wheatear/vendor/**/bin-int/
+Wheatear/vendor/glm/doc/
+Wheatear/vendor/glm/test/
+Wheatear/vendor/imgui/examples/
+Wheatear/vendor/imgui/docs/
+Wheatear/vendor/yaml-cpp/test/
+Wheatear/vendor/yaml-cpp/docs/
+Wheatear/vendor/Box2D/docs/
+Wheatear/vendor/Box2D/testbed/
+Wheatear/vendor/Box2D/unit-test/
+Wheatear/vendor/GLFW/docs/
+Wheatear/vendor/GLFW/examples/
+Wheatear/vendor/GLFW/tests/

@@ -1,0 +1,22 @@
+Scene: Untitled
+Entities:
+  - Entity: 14079899010885952478
+    TagComponent:
+      Tag: Cube1
+    TransformComponent:
+      Translation: [-0.274733037, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1.89041245, 0.184876174, 4.57229376]
+    MeshRendererComponent:
+      MeshPath: ""
+      MaterialPath: ""
+  - Entity: 5067652412180832297
+    TagComponent:
+      Tag: Cube2
+    TransformComponent:
+      Translation: [-0.278269053, 0.549214482, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    MeshRendererComponent:
+      MeshPath: ""
+      MaterialPath: ""

@@ -1,0 +1,5 @@
+externalproject "Wheatear-ScriptCore"
+    filename "Wheatear-ScriptCore"
+    uuid "7E928F90-A730-4D60-9D0B-9E5BB2A9CEB4"
+    kind "SharedLib"
+    language "C#"

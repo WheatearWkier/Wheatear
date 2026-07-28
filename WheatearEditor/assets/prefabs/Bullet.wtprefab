@@ -1,0 +1,26 @@
+Prefab: Bullet
+Entity:
+  Entity: 5332659702471258422
+  TagComponent:
+    Tag: Bullet
+  TransformComponent:
+    Translation: [-4.66631126, 0.771560431, 0]
+    Rotation: [0, 0, 0]
+    Scale: [0.800000012, 0.5, 1]
+  SpriteRendererComponent:
+    Color: [1, 1, 1, 1]
+    Texture: assets\textures\bullet2.png
+    TilingFactor: 1
+  Rigidbody2DComponent:
+    BodyType: Dynamic
+    FixedRotation: false
+    GravityScale: 1
+  BoxCollider2DComponent:
+    Offset: [0, 0]
+    Size: [0.5, 0.5]
+    Density: 1
+    Friction: 0.5
+    Restitution: 0
+    RestitutionThreshold: 0.5
+  ScriptComponent:
+    ClassName: WheatearSandbox.Bullet

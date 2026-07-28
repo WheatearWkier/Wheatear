@@ -1,0 +1,17 @@
+sheet characters.png 512 1024
+
+char SeniorSister 0 0
+char JuniorSister 2 0
+
+SeniorSister: Hmph, I thought you'd be late again today.
+JuniorSister: ...Senior! You're here!
+Me: Senior Sister, I was actually on time today, you know?
+SeniorSister: Just a coincidence. Don't think I don't know-you were dozing off in class last time.
+SeniorSister: I really don't understand how someone like you hasn't been kicked out yet.
+Me: ...As expected, she's sharp-tongued. Her way of showing care is a bit hard to take.
+Me: Good morning, Junior Sister. You seem energetic today.
+JuniorSister: Mm! Just the thought of seeing you makes me feel full of energy. You too, must do your best today!
+Me: This kind of dependence from Junior Sister always heals my soul after Senior Sister's sharp tongue.
+SeniorSister: Stop fooling around here. Hurry into school, don't block others' way.
+JuniorSister: Ah, s-sorry, Senior Sister. Let's go in together, okay?
+Me: Alright, let's go then.

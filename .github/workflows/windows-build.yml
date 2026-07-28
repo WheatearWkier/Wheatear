@@ -1,0 +1,29 @@
+name: Windows Build
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+
+jobs:
+  build:
+    runs-on: windows-2022
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          lfs: true
+          submodules: recursive
+
+      - name: Pull Git LFS objects
+        shell: pwsh
+        run: git lfs pull
+
+      - name: Generate Visual Studio solution
+        shell: pwsh
+        run: .\vendor\bin\premake\premake5.exe vs2022
+
+      - name: Build Debug x64
+        shell: pwsh
+        run: .\scripts\Build-Windows.ps1 -Configuration Debug -Platform x64 -Verbosity m

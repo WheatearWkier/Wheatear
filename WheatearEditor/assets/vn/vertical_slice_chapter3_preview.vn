@@ -1,0 +1,20 @@
+# 竖切结束后的第三章入口预告。
+
+@label start
+@background assets/vertical_slice/vn/backgrounds/chapter3_road.png
+@speed 42
+@character Mira 魔剑士导师 assets/vertical_slice/vn/portraits/mentor_{expression}.png
+@character Leo 主角 assets/vertical_slice/vn/portraits/hero_{expression}.png
+@show Mira:neutral Leo:happy
+Leo: 据点、材料副本、魔剑升级都能跑通了。下一站就是边境村？
+Mira: 边境村里有会白魔法的少女。她会成为你第一位真正意义上的支援队友。
+Leo: 听起来我的技能栏要变得热闹了。
+@expression Mira serious
+Mira: 记住，魔剑会回应羁绊。队友好感不是额外系统，它会改变冷却、伤害和连击上限。
+Leo: 明白。剧情选择影响好感，好感影响战斗，战斗掉落再反过来推进养成。
+@expression Mira thinking
+Mira: 还有一件事。你要找的人，也许并没有你想的那么远。
+Leo: 你这句话听起来很可疑。
+@expression Mira happy
+Mira: 那就继续追下去吧。竖切版本到这里结束，下一章再见。
+@end

@@ -1,0 +1,690 @@
+﻿Scene: VerticalSliceIntro
+Entities:
+  - Entity: 910000001
+    TagComponent:
+      Tag: VN_Camera
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    CameraComponent:
+      Camera:
+        ProjectionType: 1
+        PerspectiveFOV: 0.785398185
+        PerspectiveNear: 0.00999999978
+        PerspectiveFar: 1000
+        OrthographicSize: 10
+        OrthographicNear: -1
+        OrthographicFar: 1
+      Primary: true
+      FixedAspectRatio: false
+  - Entity: 910000002
+    TagComponent:
+      Tag: VN_Background
+    TransformComponent:
+      Translation: [0, 0, -0.8]
+      Rotation: [0, 0, 0]
+      Scale: [20, 11.25, 1]
+    SpriteRendererComponent:
+      Color: [1, 1, 1, 1]
+      Texture: assets\vertical_slice\vn\backgrounds\school_road.png
+      TilingFactor: 1
+  - Entity: 910000003
+    TagComponent:
+      Tag: VN_Floor
+    TransformComponent:
+      Translation: [0, -3.55, -0.7]
+      Rotation: [0, 0, 0]
+      Scale: [20, 3, 1]
+    SpriteRendererComponent:
+      Color: [1, 1, 1, 0]
+      TilingFactor: 1
+  - Entity: 910000004
+    TagComponent:
+      Tag: VN_Window
+    TransformComponent:
+      Translation: [-5.4, 1.65, -0.6]
+      Rotation: [0, 0, 0]
+      Scale: [3.2, 2.2, 1]
+    SpriteRendererComponent:
+      Color: [1, 1, 1, 0]
+      TilingFactor: 1
+  - Entity: 910000005
+    TagComponent:
+      Tag: VN_Character_Mira
+    TransformComponent:
+      Translation: [-3.25, -0.95, -0.1]
+      Rotation: [0, 0, 0]
+      Scale: [2.85, 5.35, 1]
+    SpriteRendererComponent:
+      Color: [1, 1, 1, 1]
+      Texture: assets\vertical_slice\vn\portraits\aoba_happy.png
+      TilingFactor: 1
+  - Entity: 910000006
+    TagComponent:
+      Tag: VN_Character_Leo
+    TransformComponent:
+      Translation: [3.25, -0.95, -0.1]
+      Rotation: [0, 0, 0]
+      Scale: [2.85, 5.35, 1]
+    SpriteRendererComponent:
+      Color: [1, 1, 1, 0.58]
+      Texture: assets\vertical_slice\vn\portraits\hero_neutral.png
+      TilingFactor: 1
+  - Entity: 910000007
+    TagComponent:
+      Tag: VN_DialoguePanel
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    UIWidgetComponent:
+      Visible: true
+      Position: [0.5, 0.74]
+      Size: [0.82, 0.24]
+      Rotation: 0
+      Anchor: 4
+      SortOrder: 10
+    UIImageComponent:
+      Color: [0.06, 0.07, 0.09, 0.88]
+      TexturePath: ""
+  - Entity: 910000008
+    TagComponent:
+      Tag: VN_SpeakerText
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    UIWidgetComponent:
+      Visible: true
+      Position: [0.125, 0.645]
+      Size: [0.25, 0.06]
+      Rotation: 0
+      Anchor: 0
+      SortOrder: 20
+    UITextComponent:
+      Text: "角色"
+      Color: [0.62, 0.92, 0.86, 1]
+      FontSize: 32
+      FontPath: assets/fonts/NotoSansSC-VF.ttf
+  - Entity: 910000009
+    TagComponent:
+      Tag: VN_BodyText
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    UIWidgetComponent:
+      Visible: true
+      Position: [0.125, 0.715]
+      Size: [0.7, 0.14]
+      Rotation: 0
+      Anchor: 0
+      SortOrder: 21
+    UITextComponent:
+      Text: "对白文本"
+      Color: [0.94, 0.92, 0.84, 1]
+      FontSize: 26
+      FontPath: assets/fonts/NotoSansSC-VF.ttf
+  - Entity: 910000010
+    TagComponent:
+      Tag: VN_AdvanceHint
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    UIWidgetComponent:
+      Visible: true
+      Position: [0.53, 0.875]
+      Size: [0.42, 0.045]
+      Rotation: 0
+      Anchor: 0
+      SortOrder: 22
+    UITextComponent:
+      Text: "点击 / 空格"
+      Color: [0.88, 0.74, 0.42, 1]
+      FontSize: 17
+      FontPath: assets/fonts/NotoSansSC-VF.ttf
+  - Entity: 910000011
+    TagComponent:
+      Tag: VN_Controller
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    VisualNovelComponent:
+      ScriptPath: assets/vn/vertical_slice_intro.vn
+      CharactersPerSecond: 48
+      PlayOnStart: true
+      RestartOnFinish: true
+      SpeakerTextEntityName: VN_SpeakerText
+      BodyTextEntityName: VN_BodyText
+      AdvanceHintEntityName: VN_AdvanceHint
+      BackgroundEntityName: VN_Background
+      FloorEntityName: VN_Floor
+      CharacterEntityPrefix: VN_Character_
+      ChoiceEntityPrefix: VN_Choice_
+      MaxVisibleChoices: 3
+      AutoPlayOnStart: false
+      AutoPlayDelay: 1.35
+      HistoryTextEntityName: VN_HistoryText
+      AutoPlayIndicatorEntityName: VN_AutoPlayIndicator
+      CommandBarEntityName: VN_CommandBar
+      HistoryPanelEntityName: VN_HistoryPanel
+      SettingsPanelEntityName: VN_SettingsPanel
+      SettingsTextEntityName: VN_SettingsText
+      SystemMessageEntityName: VN_SystemMessage
+      SaveDirectory: assets/saves
+      AutoLoadSlot: 0
+  - Entity: 910000012
+    TagComponent:
+      Tag: VN_Choice_1
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    UIWidgetComponent:
+      Visible: false
+      Position: [0.5, 0.42]
+      Size: [0.62, 0.065]
+      Rotation: 0
+      Anchor: 4
+      SortOrder: 30
+    UIButtonComponent:
+      NormalColor: [0.1, 0.2, 0.22, 0.9]
+      HoverColor: [0.16, 0.35, 0.34, 0.95]
+      PressedColor: [0.06, 0.16, 0.18, 1]
+      OnClickFunction: ""
+    UITextComponent:
+      Text: "选项 1"
+      Color: [0.94, 0.92, 0.84, 1]
+      FontSize: 22
+      FontPath: assets/fonts/NotoSansSC-VF.ttf
+  - Entity: 910000013
+    TagComponent:
+      Tag: VN_Choice_2
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    UIWidgetComponent:
+      Visible: false
+      Position: [0.5, 0.495]
+      Size: [0.62, 0.065]
+      Rotation: 0
+      Anchor: 4
+      SortOrder: 31
+    UIButtonComponent:
+      NormalColor: [0.1, 0.2, 0.22, 0.9]
+      HoverColor: [0.16, 0.35, 0.34, 0.95]
+      PressedColor: [0.06, 0.16, 0.18, 1]
+      OnClickFunction: ""
+    UITextComponent:
+      Text: "选项 2"
+      Color: [0.94, 0.92, 0.84, 1]
+      FontSize: 22
+      FontPath: assets/fonts/NotoSansSC-VF.ttf
+  - Entity: 910000014
+    TagComponent:
+      Tag: VN_Choice_3
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    UIWidgetComponent:
+      Visible: false
+      Position: [0.5, 0.57]
+      Size: [0.62, 0.065]
+      Rotation: 0
+      Anchor: 4
+      SortOrder: 32
+    UIButtonComponent:
+      NormalColor: [0.1, 0.2, 0.22, 0.9]
+      HoverColor: [0.16, 0.35, 0.34, 0.95]
+      PressedColor: [0.06, 0.16, 0.18, 1]
+      OnClickFunction: ""
+    UITextComponent:
+      Text: "选项 3"
+      Color: [0.94, 0.92, 0.84, 1]
+      FontSize: 22
+      FontPath: assets/fonts/NotoSansSC-VF.ttf
+  - Entity: 910000015
+    TagComponent:
+      Tag: VN_HistoryText
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    UIWidgetComponent:
+      Visible: false
+      Position: [0.17, 0.14]
+      Size: [0.66, 0.55]
+      Rotation: 0
+      Anchor: 0
+      SortOrder: 71
+    UITextComponent:
+      Text: "历史记录"
+      Color: [0.88, 0.94, 0.95, 1]
+      FontSize: 20
+      FontPath: assets/fonts/NotoSansSC-VF.ttf
+  - Entity: 910000016
+    TagComponent:
+      Tag: VN_AutoPlayIndicator
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    UIWidgetComponent:
+      Visible: false
+      Position: [0.86, 0.08]
+      Size: [0.1, 0.04]
+      Rotation: 0
+      Anchor: 0
+      SortOrder: 41
+    UITextComponent:
+      Text: "自动"
+      Color: [0.72, 0.96, 0.74, 1]
+      FontSize: 20
+      FontPath: assets/fonts/NotoSansSC-VF.ttf
+  - Entity: 910000017
+    TagComponent:
+      Tag: VN_CommandBar
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    UIWidgetComponent:
+      Visible: true
+      Position: [0.5, 0.935]
+      Size: [0.78, 0.05]
+      Rotation: 0
+      Anchor: 4
+      SortOrder: 45
+    UIImageComponent:
+      Color: [0.05, 0.07, 0.1, 0.68]
+      TexturePath: ""
+  - Entity: 910000018
+    TagComponent:
+      Tag: VN_Command_Skip
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    UIWidgetComponent:
+      Visible: true
+      Position: [0.2, 0.935]
+      Size: [0.095, 0.034]
+      Rotation: 0
+      Anchor: 4
+      SortOrder: 50
+    UIButtonComponent:
+      NormalColor: [0.12, 0.18, 0.24, 0.55]
+      HoverColor: [0.2, 0.36, 0.46, 0.86]
+      PressedColor: [0.08, 0.14, 0.2, 0.95]
+      OnClickFunction: vn:skip
+    UITextComponent:
+      Text: "跳过"
+      Color: [0.78, 0.84, 0.96, 1]
+      FontSize: 15
+      FontPath: assets/fonts/NotoSansSC-VF.ttf
+  - Entity: 910000019
+    TagComponent:
+      Tag: VN_Command_Auto
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    UIWidgetComponent:
+      Visible: true
+      Position: [0.31, 0.935]
+      Size: [0.095, 0.034]
+      Rotation: 0
+      Anchor: 4
+      SortOrder: 51
+    UIButtonComponent:
+      NormalColor: [0.12, 0.18, 0.24, 0.55]
+      HoverColor: [0.2, 0.36, 0.46, 0.86]
+      PressedColor: [0.08, 0.14, 0.2, 0.95]
+      OnClickFunction: vn:auto
+    UITextComponent:
+      Text: "自动"
+      Color: [0.78, 0.84, 0.96, 1]
+      FontSize: 15
+      FontPath: assets/fonts/NotoSansSC-VF.ttf
+  - Entity: 910000020
+    TagComponent:
+      Tag: VN_Command_Save
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    UIWidgetComponent:
+      Visible: true
+      Position: [0.42, 0.935]
+      Size: [0.095, 0.034]
+      Rotation: 0
+      Anchor: 4
+      SortOrder: 52
+    UIButtonComponent:
+      NormalColor: [0.12, 0.18, 0.24, 0.55]
+      HoverColor: [0.2, 0.36, 0.46, 0.86]
+      PressedColor: [0.08, 0.14, 0.2, 0.95]
+      OnClickFunction: vn:save
+    UITextComponent:
+      Text: "快存"
+      Color: [0.78, 0.84, 0.96, 1]
+      FontSize: 15
+      FontPath: assets/fonts/NotoSansSC-VF.ttf
+  - Entity: 910000021
+    TagComponent:
+      Tag: VN_Command_Load
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    UIWidgetComponent:
+      Visible: true
+      Position: [0.53, 0.935]
+      Size: [0.095, 0.034]
+      Rotation: 0
+      Anchor: 4
+      SortOrder: 53
+    UIButtonComponent:
+      NormalColor: [0.12, 0.18, 0.24, 0.55]
+      HoverColor: [0.2, 0.36, 0.46, 0.86]
+      PressedColor: [0.08, 0.14, 0.2, 0.95]
+      OnClickFunction: vn:load
+    UITextComponent:
+      Text: "快读"
+      Color: [0.78, 0.84, 0.96, 1]
+      FontSize: 15
+      FontPath: assets/fonts/NotoSansSC-VF.ttf
+  - Entity: 910000022
+    TagComponent:
+      Tag: VN_Command_History
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    UIWidgetComponent:
+      Visible: true
+      Position: [0.64, 0.935]
+      Size: [0.095, 0.034]
+      Rotation: 0
+      Anchor: 4
+      SortOrder: 54
+    UIButtonComponent:
+      NormalColor: [0.12, 0.18, 0.24, 0.55]
+      HoverColor: [0.2, 0.36, 0.46, 0.86]
+      PressedColor: [0.08, 0.14, 0.2, 0.95]
+      OnClickFunction: vn:history
+    UITextComponent:
+      Text: "历史"
+      Color: [0.78, 0.84, 0.96, 1]
+      FontSize: 14
+      FontPath: assets/fonts/NotoSansSC-VF.ttf
+  - Entity: 910000023
+    TagComponent:
+      Tag: VN_Command_Settings
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    UIWidgetComponent:
+      Visible: true
+      Position: [0.75, 0.935]
+      Size: [0.095, 0.034]
+      Rotation: 0
+      Anchor: 4
+      SortOrder: 55
+    UIButtonComponent:
+      NormalColor: [0.12, 0.18, 0.24, 0.55]
+      HoverColor: [0.2, 0.36, 0.46, 0.86]
+      PressedColor: [0.08, 0.14, 0.2, 0.95]
+      OnClickFunction: vn:settings
+    UITextComponent:
+      Text: "设置"
+      Color: [0.78, 0.84, 0.96, 1]
+      FontSize: 15
+      FontPath: assets/fonts/NotoSansSC-VF.ttf
+  - Entity: 910000024
+    TagComponent:
+      Tag: VN_Command_Hide
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    UIWidgetComponent:
+      Visible: true
+      Position: [0.86, 0.935]
+      Size: [0.095, 0.034]
+      Rotation: 0
+      Anchor: 4
+      SortOrder: 56
+    UIButtonComponent:
+      NormalColor: [0.12, 0.18, 0.24, 0.55]
+      HoverColor: [0.2, 0.36, 0.46, 0.86]
+      PressedColor: [0.08, 0.14, 0.2, 0.95]
+      OnClickFunction: vn:hide
+    UITextComponent:
+      Text: "隐藏"
+      Color: [0.78, 0.84, 0.96, 1]
+      FontSize: 15
+      FontPath: assets/fonts/NotoSansSC-VF.ttf
+  - Entity: 910000025
+    TagComponent:
+      Tag: VN_HistoryPanel
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    UIWidgetComponent:
+      Visible: false
+      Position: [0.5, 0.43]
+      Size: [0.74, 0.68]
+      Rotation: 0
+      Anchor: 4
+      SortOrder: 70
+    UIImageComponent:
+      Color: [0.04, 0.055, 0.075, 0.93]
+      TexturePath: ""
+  - Entity: 910000026
+    TagComponent:
+      Tag: VN_HistoryClose
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    UIWidgetComponent:
+      Visible: false
+      Position: [0.5, 0.78]
+      Size: [0.16, 0.048]
+      Rotation: 0
+      Anchor: 4
+      SortOrder: 72
+    UIButtonComponent:
+      NormalColor: [0.18, 0.27, 0.33, 0.85]
+      HoverColor: [0.26, 0.42, 0.5, 0.95]
+      PressedColor: [0.1, 0.19, 0.25, 1]
+      OnClickFunction: vn:close
+    UITextComponent:
+      Text: "关闭"
+      Color: [0.9, 0.95, 0.96, 1]
+      FontSize: 17
+      FontPath: assets/fonts/NotoSansSC-VF.ttf
+  - Entity: 910000027
+    TagComponent:
+      Tag: VN_SettingsPanel
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    UIWidgetComponent:
+      Visible: false
+      Position: [0.5, 0.45]
+      Size: [0.54, 0.58]
+      Rotation: 0
+      Anchor: 4
+      SortOrder: 80
+    UIImageComponent:
+      Color: [0.04, 0.055, 0.075, 0.94]
+      TexturePath: ""
+  - Entity: 910000028
+    TagComponent:
+      Tag: VN_SettingsText
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    UIWidgetComponent:
+      Visible: false
+      Position: [0.29, 0.2]
+      Size: [0.42, 0.25]
+      Rotation: 0
+      Anchor: 0
+      SortOrder: 81
+    UITextComponent:
+      Text: "系统设置"
+      Color: [0.9, 0.95, 0.96, 1]
+      FontSize: 20
+      FontPath: assets/fonts/NotoSansSC-VF.ttf
+  - Entity: 910000029
+    TagComponent:
+      Tag: VN_Settings_TextMinus
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    UIWidgetComponent:
+      Visible: false
+      Position: [0.42, 0.56]
+      Size: [0.15, 0.048]
+      Rotation: 0
+      Anchor: 4
+      SortOrder: 82
+    UIButtonComponent:
+      NormalColor: [0.16, 0.24, 0.31, 0.88]
+      HoverColor: [0.24, 0.38, 0.47, 0.96]
+      PressedColor: [0.1, 0.18, 0.24, 1]
+      OnClickFunction: vn:textspeed-
+    UITextComponent:
+      Text: "文字 -"
+      Color: [0.9, 0.95, 0.96, 1]
+      FontSize: 16
+      FontPath: assets/fonts/NotoSansSC-VF.ttf
+  - Entity: 910000030
+    TagComponent:
+      Tag: VN_Settings_TextPlus
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    UIWidgetComponent:
+      Visible: false
+      Position: [0.58, 0.56]
+      Size: [0.15, 0.048]
+      Rotation: 0
+      Anchor: 4
+      SortOrder: 83
+    UIButtonComponent:
+      NormalColor: [0.16, 0.24, 0.31, 0.88]
+      HoverColor: [0.24, 0.38, 0.47, 0.96]
+      PressedColor: [0.1, 0.18, 0.24, 1]
+      OnClickFunction: vn:textspeed+
+    UITextComponent:
+      Text: "文字 +"
+      Color: [0.9, 0.95, 0.96, 1]
+      FontSize: 16
+      FontPath: assets/fonts/NotoSansSC-VF.ttf
+  - Entity: 910000031
+    TagComponent:
+      Tag: VN_Settings_AutoMinus
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    UIWidgetComponent:
+      Visible: false
+      Position: [0.42, 0.64]
+      Size: [0.15, 0.048]
+      Rotation: 0
+      Anchor: 4
+      SortOrder: 84
+    UIButtonComponent:
+      NormalColor: [0.16, 0.24, 0.31, 0.88]
+      HoverColor: [0.24, 0.38, 0.47, 0.96]
+      PressedColor: [0.1, 0.18, 0.24, 1]
+      OnClickFunction: vn:autodelay-
+    UITextComponent:
+      Text: "自动 -"
+      Color: [0.9, 0.95, 0.96, 1]
+      FontSize: 16
+      FontPath: assets/fonts/NotoSansSC-VF.ttf
+  - Entity: 910000032
+    TagComponent:
+      Tag: VN_Settings_AutoPlus
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    UIWidgetComponent:
+      Visible: false
+      Position: [0.58, 0.64]
+      Size: [0.15, 0.048]
+      Rotation: 0
+      Anchor: 4
+      SortOrder: 85
+    UIButtonComponent:
+      NormalColor: [0.16, 0.24, 0.31, 0.88]
+      HoverColor: [0.24, 0.38, 0.47, 0.96]
+      PressedColor: [0.1, 0.18, 0.24, 1]
+      OnClickFunction: vn:autodelay+
+    UITextComponent:
+      Text: "自动 +"
+      Color: [0.9, 0.95, 0.96, 1]
+      FontSize: 16
+      FontPath: assets/fonts/NotoSansSC-VF.ttf
+  - Entity: 910000033
+    TagComponent:
+      Tag: VN_SettingsClose
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    UIWidgetComponent:
+      Visible: false
+      Position: [0.5, 0.74]
+      Size: [0.18, 0.052]
+      Rotation: 0
+      Anchor: 4
+      SortOrder: 86
+    UIButtonComponent:
+      NormalColor: [0.18, 0.27, 0.33, 0.88]
+      HoverColor: [0.28, 0.42, 0.5, 0.96]
+      PressedColor: [0.1, 0.18, 0.24, 1]
+      OnClickFunction: vn:close
+    UITextComponent:
+      Text: "关闭"
+      Color: [0.9, 0.95, 0.96, 1]
+      FontSize: 17
+      FontPath: assets/fonts/NotoSansSC-VF.ttf
+  - Entity: 910000034
+    TagComponent:
+      Tag: VN_SystemMessage
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    UIWidgetComponent:
+      Visible: false
+      Position: [0.5, 0.11]
+      Size: [0.28, 0.05]
+      Rotation: 0
+      Anchor: 4
+      SortOrder: 90
+    UITextComponent:
+      Text: "已保存"
+      Color: [0.92, 0.98, 0.86, 1]
+      FontSize: 18
+      FontPath: assets/fonts/NotoSansSC-VF.ttf
+

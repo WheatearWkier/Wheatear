@@ -1,0 +1,100 @@
+Scene: Untitled
+Entities:
+  - Entity: 13976215309801431112
+    TagComponent:
+      Tag: Circle
+    TransformComponent:
+      Translation: [0.850307226, -0.431117535, 0]
+      Rotation: [0, 0, 0]
+      Scale: [2, 2, 1]
+    CircleRendererComponent:
+      Color: [1, 1, 1, 1]
+      Thickness: 0.100000001
+      Fade: 0.00499999989
+    Rigidbody2DComponent:
+      BodyType: Static
+      FixedRotation: false
+    CircleCollider2DComponent:
+      Offset: [0, 0]
+      Radius: 0.5
+      Density: 1
+      Friction: 0.5
+      Restitution: 0
+      RestitutionThreshold: 0.5
+  - Entity: 13560145209646590153
+    TagComponent:
+      Tag: Square2
+    TransformComponent:
+      Translation: [-0.412110358, -1.390589, 0]
+      Rotation: [0, 0, -0.383220643]
+      Scale: [12, 0.300000012, 1]
+    SpriteRendererComponent:
+      Color: [0.680306911, 0.0852558687, 0.0852558687, 1]
+    Rigidbody2DComponent:
+      BodyType: Static
+      FixedRotation: false
+    BoxCollider2DComponent:
+      Offset: [0, 0]
+      Size: [0.5, 0.5]
+      Density: 1
+      Friction: 0.5
+      Restitution: 0
+      RestitutionThreshold: 0.5
+  - Entity: 12837192831273
+    TagComponent:
+      Tag: Camera
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    CameraComponent:
+      Camera:
+        ProjectionType: 1
+        PerspectiveFOV: 0.785398185
+        PerspectiveNear: 0.00999999978
+        PerspectiveFar: 1000
+        OrthographicSize: 10
+        OrthographicNear: -1
+        OrthographicFar: 1
+      Primary: true
+      FixedAspectRatio: false
+  - Entity: 12837192831273
+    TagComponent:
+      Tag: Square1
+    TransformComponent:
+      Translation: [-1.96195388, 1.03002632, 0]
+      Rotation: [0, 0, 3.94907431e-08]
+      Scale: [1, 1, 1]
+    SpriteRendererComponent:
+      Color: [1, 1, 1, 1]
+    Rigidbody2DComponent:
+      BodyType: Dynamic
+      FixedRotation: false
+    BoxCollider2DComponent:
+      Offset: [0, 0]
+      Size: [0.5, 0.5]
+      Density: 1
+      Friction: 0.5
+      Restitution: 0
+      RestitutionThreshold: 0.5
+    ScriptComponent:
+      ClassName: WheatearSandbox.Player
+  - Entity: 2233826224799755753
+    TagComponent:
+      Tag: Square3
+    TransformComponent:
+      Translation: [2.37818789, -0.677504063, 0]
+      Rotation: [0, 0, 0.718037009]
+      Scale: [12, 0.300000012, 2.3099997]
+    SpriteRendererComponent:
+      Color: [0.358137399, 0.734015346, 0.10325022, 1]
+    Rigidbody2DComponent:
+      BodyType: Static
+      FixedRotation: false
+    BoxCollider2DComponent:
+      Offset: [0, 0]
+      Size: [0.5, 0.5]
+      Density: 1
+      Friction: 0.5
+      Restitution: 0
+      RestitutionThreshold: 0.5

@@ -1,0 +1,210 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|x64">
+      <Configuration>Debug</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|x64">
+      <Configuration>Release</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Dist|x64">
+      <Configuration>Dist</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{1D167E84-09E4-718A-F277-E2B0DEE44DEF}</ProjectGuid>
+    <IgnoreWarnCompileDuplicatedFilename>true</IgnoreWarnCompileDuplicatedFilename>
+    <Keyword>Win32Proj</Keyword>
+    <RootNamespace>WheatearEditor</RootNamespace>
+    <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <CharacterSet>Unicode</CharacterSet>
+    <PlatformToolset>v143</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <CharacterSet>Unicode</CharacterSet>
+    <PlatformToolset>v143</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Dist|x64'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <CharacterSet>Unicode</CharacterSet>
+    <PlatformToolset>v143</PlatformToolset>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Dist|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <LinkIncremental>true</LinkIncremental>
+    <OutDir>$(ProjectDir)..\bin\Debug-windows-x86_64\WheatearEditor\</OutDir>
+    <IntDir>$(ProjectDir)..\bin-int\Debug-windows-x86_64\WheatearEditor\</IntDir>
+    <TargetName>WheatearEditor</TargetName>
+    <TargetExt>.exe</TargetExt>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <LinkIncremental>false</LinkIncremental>
+    <OutDir>$(ProjectDir)..\bin\Release-windows-x86_64\WheatearEditor\</OutDir>
+    <IntDir>$(ProjectDir)..\bin-int\Release-windows-x86_64\WheatearEditor\</IntDir>
+    <TargetName>WheatearEditor</TargetName>
+    <TargetExt>.exe</TargetExt>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Dist|x64'">
+    <LinkIncremental>false</LinkIncremental>
+    <OutDir>$(ProjectDir)..\bin\Dist-windows-x86_64\WheatearEditor\</OutDir>
+    <IntDir>$(ProjectDir)..\bin-int\Dist-windows-x86_64\WheatearEditor\</IntDir>
+    <TargetName>WheatearEditor</TargetName>
+    <TargetExt>.exe</TargetExt>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <ClCompile>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <WarningLevel>Level3</WarningLevel>
+      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;WT_PLATFORM_WINDOWS;WT_DEBUG;WT_ENABLE_ASSERTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>..\Wheatear\vendor\spdlog\include;..\Wheatear\src;..\Wheatear\vendor;..\Wheatear\vendor\glm;..\Wheatear\vendor\entt\include;..\Wheatear\vendor\tinyobjloader\include;src;..\Wheatear\vendor\ImGuizmo;..\Wheatear\vendor\miniaudio;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
+      <Optimization>Disabled</Optimization>
+      <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
+      <AdditionalOptions>/utf-8 /wd4828 %(AdditionalOptions)</AdditionalOptions>
+      <LanguageStandard>stdcpp20</LanguageStandard>
+      <ExternalWarningLevel>Level3</ExternalWarningLevel>
+    </ClCompile>
+    <Link>
+      <SubSystem>Console</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+    </Link>
+    <ProjectReference>
+    </ProjectReference>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <ClCompile>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <WarningLevel>Level3</WarningLevel>
+      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;WT_PLATFORM_WINDOWS;WT_RELEASE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>..\Wheatear\vendor\spdlog\include;..\Wheatear\src;..\Wheatear\vendor;..\Wheatear\vendor\glm;..\Wheatear\vendor\entt\include;..\Wheatear\vendor\tinyobjloader\include;src;..\Wheatear\vendor\ImGuizmo;..\Wheatear\vendor\miniaudio;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <Optimization>Full</Optimization>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <MinimalRebuild>false</MinimalRebuild>
+      <StringPooling>true</StringPooling>
+      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
+      <AdditionalOptions>/utf-8 /wd4828 %(AdditionalOptions)</AdditionalOptions>
+      <LanguageStandard>stdcpp20</LanguageStandard>
+      <ExternalWarningLevel>Level3</ExternalWarningLevel>
+    </ClCompile>
+    <Link>
+      <SubSystem>Console</SubSystem>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+    </Link>
+    <ProjectReference>
+    </ProjectReference>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Dist|x64'">
+    <ClCompile>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <WarningLevel>Level3</WarningLevel>
+      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;WT_PLATFORM_WINDOWS;WT_DIST;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>..\Wheatear\vendor\spdlog\include;..\Wheatear\src;..\Wheatear\vendor;..\Wheatear\vendor\glm;..\Wheatear\vendor\entt\include;..\Wheatear\vendor\tinyobjloader\include;src;..\Wheatear\vendor\ImGuizmo;..\Wheatear\vendor\miniaudio;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <Optimization>Full</Optimization>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <MinimalRebuild>false</MinimalRebuild>
+      <StringPooling>true</StringPooling>
+      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
+      <AdditionalOptions>/utf-8 /wd4828 %(AdditionalOptions)</AdditionalOptions>
+      <LanguageStandard>stdcpp20</LanguageStandard>
+      <ExternalWarningLevel>Level3</ExternalWarningLevel>
+    </ClCompile>
+    <Link>
+      <SubSystem>Console</SubSystem>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+    </Link>
+    <ProjectReference>
+    </ProjectReference>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ClInclude Include="src\Build\PlayerPackager.h" />
+    <ClInclude Include="src\Editor\CoreEditorComponents.h" />
+    <ClInclude Include="src\Editor\EditorComponentRegistry.h" />
+    <ClInclude Include="src\Editor\EditorLayer2D.h" />
+    <ClInclude Include="src\Editor\EditorLayer3D.h" />
+    <ClInclude Include="src\Editor\EditorLayerBase.h" />
+    <ClInclude Include="src\Editor\ModeSelectLayer.h" />
+    <ClInclude Include="src\Modules\ArcadeCombat\ArcadeCombatDrawer.h" />
+    <ClInclude Include="src\Modules\ModuleEditorBootstrap.h" />
+    <ClInclude Include="src\Modules\SideCombat\SideCombatDrawer.h" />
+    <ClInclude Include="src\Modules\VisualNovel\VisualNovelDrawer.h" />
+    <ClInclude Include="src\Panels\AnimationEditorPanel.h" />
+    <ClInclude Include="src\Panels\ContentBrowserPanel.h" />
+    <ClInclude Include="src\Panels\EditorCommands.h" />
+    <ClInclude Include="src\Panels\SceneHierarchy\ComponentDrawers.h" />
+    <ClInclude Include="src\Panels\SceneHierarchy\Drawers\AudioDrawer.h" />
+    <ClInclude Include="src\Panels\SceneHierarchy\Drawers\CameraDrawer.h" />
+    <ClInclude Include="src\Panels\SceneHierarchy\Drawers\CircleRendererDrawer.h" />
+    <ClInclude Include="src\Panels\SceneHierarchy\Drawers\Mesh3DDrawers.h" />
+    <ClInclude Include="src\Panels\SceneHierarchy\Drawers\PhysicsDrawers.h" />
+    <ClInclude Include="src\Panels\SceneHierarchy\Drawers\ScriptDrawer.h" />
+    <ClInclude Include="src\Panels\SceneHierarchy\Drawers\SpriteAnimatorDrawer.h" />
+    <ClInclude Include="src\Panels\SceneHierarchy\Drawers\SpriteRendererDrawer.h" />
+    <ClInclude Include="src\Panels\SceneHierarchy\Drawers\TransformDrawer.h" />
+    <ClInclude Include="src\Panels\SceneHierarchy\Drawers\UIDrawers.h" />
+    <ClInclude Include="src\Panels\SceneHierarchy\WidgetHelpers.h" />
+    <ClInclude Include="src\Panels\SceneHierarchyPanel.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="src\Build\PlayerPackager.cpp" />
+    <ClCompile Include="src\Editor\CoreEditorComponents.cpp" />
+    <ClCompile Include="src\Editor\EditorComponentRegistry.cpp" />
+    <ClCompile Include="src\Editor\EditorLayer2D.cpp" />
+    <ClCompile Include="src\Editor\EditorLayer3D.cpp" />
+    <ClCompile Include="src\Editor\EditorLayerBase.cpp" />
+    <ClCompile Include="src\Editor\ModeSelectLayer.cpp" />
+    <ClCompile Include="src\Modules\ArcadeCombat\ArcadeCombatDrawer.cpp" />
+    <ClCompile Include="src\Modules\ModuleEditorBootstrap.cpp" />
+    <ClCompile Include="src\Modules\SideCombat\SideCombatDrawer.cpp" />
+    <ClCompile Include="src\Modules\VisualNovel\VisualNovelDrawer.cpp" />
+    <ClCompile Include="src\Panels\AnimationEditorPanel.cpp" />
+    <ClCompile Include="src\Panels\ContentBrowserPanel.cpp" />
+    <ClCompile Include="src\Panels\SceneHierarchy\Drawers\AudioDrawer.cpp" />
+    <ClCompile Include="src\Panels\SceneHierarchy\Drawers\CameraDrawer.cpp" />
+    <ClCompile Include="src\Panels\SceneHierarchy\Drawers\CircleRendererDrawer.cpp" />
+    <ClCompile Include="src\Panels\SceneHierarchy\Drawers\Mesh3DDrawers.cpp" />
+    <ClCompile Include="src\Panels\SceneHierarchy\Drawers\PhysicsDrawers.cpp" />
+    <ClCompile Include="src\Panels\SceneHierarchy\Drawers\ScriptDrawer.cpp" />
+    <ClCompile Include="src\Panels\SceneHierarchy\Drawers\SpriteAnimatorDrawer.cpp" />
+    <ClCompile Include="src\Panels\SceneHierarchy\Drawers\SpriteRendererDrawer.cpp" />
+    <ClCompile Include="src\Panels\SceneHierarchy\Drawers\TransformDrawer.cpp" />
+    <ClCompile Include="src\Panels\SceneHierarchy\Drawers\UIDrawers.cpp" />
+    <ClCompile Include="src\Panels\SceneHierarchy\WidgetHelpers.cpp" />
+    <ClCompile Include="src\Panels\SceneHierarchyPanel.cpp" />
+    <ClCompile Include="src\WheatearEditorApp.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Wheatear\Wheatear.vcxproj">
+      <Project>{D6F770FE-C2C4-CB09-EBDD-B9B1D7090198}</Project>
+    </ProjectReference>
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>

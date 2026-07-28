@@ -1,0 +1,364 @@
+Scene: Untitled
+Entities:
+  - Entity: 930000001
+    TagComponent:
+      Tag: Battle_Camera
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    CameraComponent:
+      Camera:
+        ProjectionType: 1
+        PerspectiveFOV: 0.785398185
+        PerspectiveNear: 0.00999999978
+        PerspectiveFar: 1000
+        OrthographicSize: 10
+        OrthographicNear: -1
+        OrthographicFar: 1
+      Primary: true
+      FixedAspectRatio: false
+  - Entity: 930000002
+    TagComponent:
+      Tag: Battle_Background
+    TransformComponent:
+      Translation: [0, 0.2, -0.9]
+      Rotation: [0, 0, 0]
+      Scale: [20, 11, 1]
+    SpriteRendererComponent:
+      Color: [1, 1, 1, 1]
+      Texture: assets\textures\battle\arena_background.png
+      TilingFactor: 1
+  - Entity: 930000003
+    TagComponent:
+      Tag: Battle_ArenaFloor
+    TransformComponent:
+      Translation: [0, -0.1, -0.75]
+      Rotation: [0, 0, 0]
+      Scale: [16.8, 8.2, 1]
+    SpriteRendererComponent:
+      Color: [1, 1, 1, 0]
+      Texture: ""
+      TilingFactor: 1
+  - Entity: 930000004
+    TagComponent:
+      Tag: Battle_DangerLight
+    TransformComponent:
+      Translation: [0, 3.75, -0.65]
+      Rotation: [0, 0, 0]
+      Scale: [15.5, 0.22, 1]
+    SpriteRendererComponent:
+      Color: [1, 1, 1, 1]
+      Texture: assets\textures\battle\danger_bar.png
+      TilingFactor: 1
+  - Entity: 930000005
+    TagComponent:
+      Tag: Battle_TriggerGlow
+    TransformComponent:
+      Translation: [0, -1.65, -0.38]
+      Rotation: [0, 0, 0]
+      Scale: [1.45, 1.45, 1]
+    CircleRendererComponent:
+      Color: [0.42, 1, 0.72, 0.75]
+      Thickness: 0.22
+      Fade: 0.02
+    ArcadeTriggerComponent:
+      Type: 0
+      TriggerName: BossIntro
+      Radius: 0.82
+  - Entity: 930000006
+    TagComponent:
+      Tag: Battle_Player
+    TransformComponent:
+      Translation: [0, -3.2, -0.05]
+      Rotation: [0, 0, 0]
+      Scale: [0.58, 0.78, 1]
+    SpriteRendererComponent:
+      Color: [1, 1, 1, 1]
+      Texture: assets\textures\battle\player.png
+      TilingFactor: 1
+    ArcadeCombatantComponent:
+      Team: 1
+      MaxHealth: 120
+      Health: 120
+      MoveSpeed: 4.8
+      CollisionRadius: 0.42
+      Invulnerable: false
+    ArcadePlayerControllerComponent:
+      CurrentWeapon: 0
+      AutoAim: true
+  - Entity: 930000007
+    TagComponent:
+      Tag: Battle_Boss
+    TransformComponent:
+      Translation: [0, 2.2, -0.05]
+      Rotation: [0, 0, 0]
+      Scale: [1.28, 1.28, 1]
+    SpriteRendererComponent:
+      Color: [1, 1, 1, 0]
+      Texture: assets\textures\battle\boss.png
+      TilingFactor: 1
+    ArcadeCombatantComponent:
+      Team: 2
+      MaxHealth: 220
+      Health: 220
+      MoveSpeed: 0
+      CollisionRadius: 0.72
+      Invulnerable: false
+    ArcadeBossComponent:
+      Active: false
+      IntroStartPosition: [0, 6, -0.05]
+      FightPosition: [0, 2.2, -0.05]
+      IntroDuration: 1.25
+      ShootInterval: 1.05
+      JumpInterval: 2.7
+      JumpDuration: 0.65
+  - Entity: 930000008
+    TagComponent:
+      Tag: Battle_Cover_Left
+    TransformComponent:
+      Translation: [-3.15, -0.55, -0.12]
+      Rotation: [0, 0, 0]
+      Scale: [1.35, 0.70, 1]
+    SpriteRendererComponent:
+      Color: [1, 1, 1, 0.96]
+      Texture: assets\textures\battle\cover.png
+      TilingFactor: 1
+    ArcadeCoverComponent:
+      Radius: 0.78
+      MaxHealth: 85
+      Health: 85
+      BlocksProjectiles: true
+  - Entity: 930000009
+    TagComponent:
+      Tag: Battle_Cover_Right
+    TransformComponent:
+      Translation: [3.05, -0.85, -0.12]
+      Rotation: [0, 0, 0]
+      Scale: [1.45, 0.75, 1]
+    SpriteRendererComponent:
+      Color: [1, 1, 1, 0.96]
+      Texture: assets\textures\battle\cover.png
+      TilingFactor: 1
+    ArcadeCoverComponent:
+      Radius: 0.82
+      MaxHealth: 90
+      Health: 90
+      BlocksProjectiles: true
+  - Entity: 930000010
+    TagComponent:
+      Tag: Battle_Cover_Center
+    TransformComponent:
+      Translation: [0.15, 0.55, -0.12]
+      Rotation: [0, 0, 0]
+      Scale: [1.25, 0.62, 1]
+    SpriteRendererComponent:
+      Color: [1, 1, 1, 0.88]
+      Texture: assets\textures\battle\cover.png
+      TilingFactor: 1
+    ArcadeCoverComponent:
+      Radius: 0.68
+      MaxHealth: 70
+      Health: 70
+      BlocksProjectiles: true
+  - Entity: 930000011
+    TagComponent:
+      Tag: Battle_Controller
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    ArcadeCombatLevelComponent:
+      PlayOnStart: true
+      ArenaMin: [-7.6, -3.85]
+      ArenaMax: [7.6, 4.05]
+      PlayerEntityName: Battle_Player
+      BossEntityName: Battle_Boss
+      FadeEntityName: Battle_Fade
+      PausePanelEntityName: Battle_PausePanel
+      MessageTextEntityName: Battle_Message
+      WeaponTextEntityName: Battle_WeaponText
+      PlayerHealthBarEntityName: Battle_PlayerHealth
+      PlayerHealthTextEntityName: Battle_PlayerHealthText
+      BossHealthBarEntityName: Battle_BossHealth
+      BossHealthTextEntityName: Battle_BossHealthText
+      StartFadeDuration: 0.85
+      VictoryReturnDelay: 2.6
+      DefeatReturnDelay: 2.2
+      ResultSceneFadeDuration: 0.55
+      BossDefeatFadeDuration: 1.15
+      VictorySceneCommand: "scene:assets/scenes/VerticalSlicePostFake.wt"
+      DefeatSceneCommand: ""
+  - Entity: 930000012
+    TagComponent:
+      Tag: Battle_PlayerHealth
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    UIWidgetComponent:
+      Visible: true
+      Position: [0.035, 0.045]
+      Size: [0.24, 0.026]
+      Rotation: 0
+      Anchor: 0
+      SortOrder: 20
+    UIProgressBarComponent:
+      Value: 120
+      MaxValue: 120
+      ForegroundColor: [0.22, 0.82, 0.58, 0.95]
+      BackgroundColor: [0.05, 0.08, 0.09, 0.78]
+  - Entity: 930000013
+    TagComponent:
+      Tag: Battle_PlayerHealthText
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    UIWidgetComponent:
+      Visible: true
+      Position: [0.035, 0.015]
+      Size: [0.22, 0.03]
+      Rotation: 0
+      Anchor: 0
+      SortOrder: 21
+    UITextComponent:
+      Text: "生命 120/120"
+      Color: [0.88, 0.96, 0.92, 1]
+      FontSize: 18
+      FontPath: assets/fonts/NotoSansSC-VF.ttf
+  - Entity: 930000014
+    TagComponent:
+      Tag: Battle_BossHealth
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    UIWidgetComponent:
+      Visible: true
+      Position: [0.5, 0.045]
+      Size: [0.36, 0.026]
+      Rotation: 0
+      Anchor: 4
+      SortOrder: 20
+    UIProgressBarComponent:
+      Value: 220
+      MaxValue: 220
+      ForegroundColor: [0.86, 0.20, 0.30, 0.95]
+      BackgroundColor: [0.06, 0.04, 0.06, 0.78]
+  - Entity: 930000015
+    TagComponent:
+      Tag: Battle_BossHealthText
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    UIWidgetComponent:
+      Visible: true
+      Position: [0.5, 0.014]
+      Size: [0.24, 0.03]
+      Rotation: 0
+      Anchor: 4
+      SortOrder: 21
+    UITextComponent:
+      Text: "首领 ???"
+      Color: [1, 0.86, 0.88, 1]
+      FontSize: 18
+      FontPath: assets/fonts/NotoSansSC-VF.ttf
+  - Entity: 930000016
+    TagComponent:
+      Tag: Battle_WeaponText
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    UIWidgetComponent:
+      Visible: true
+      Position: [0.035, 0.925]
+      Size: [0.48, 0.04]
+      Rotation: 0
+      Anchor: 0
+      SortOrder: 22
+    UITextComponent:
+      Text: "武器: 手枪  [1 手枪] [2 重炮] [3 太刀]"
+      Color: [0.86, 0.94, 0.98, 1]
+      FontSize: 18
+      FontPath: assets/fonts/NotoSansSC-VF.ttf
+  - Entity: 930000017
+    TagComponent:
+      Tag: Battle_Message
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    UIWidgetComponent:
+      Visible: true
+      Position: [0.5, 0.86]
+      Size: [0.78, 0.045]
+      Rotation: 0
+      Anchor: 4
+      SortOrder: 23
+    UITextComponent:
+      Text: "移动到发光点。"
+      Color: [0.92, 0.96, 0.92, 1]
+      FontSize: 18
+      FontPath: assets/fonts/NotoSansSC-VF.ttf
+  - Entity: 930000018
+    TagComponent:
+      Tag: Battle_PausePanel
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    UIWidgetComponent:
+      Visible: false
+      Position: [0.5, 0.5]
+      Size: [0.34, 0.18]
+      Rotation: 0
+      Anchor: 4
+      SortOrder: 80
+    UIPanelComponent:
+      BackgroundColor: [0.03, 0.04, 0.06, 0.90]
+      BorderColor: [0.45, 0.82, 0.92, 0.82]
+      BorderThickness: 2
+    UITextComponent:
+      Text: "已暂停"
+      Color: [0.90, 0.96, 0.98, 1]
+      FontSize: 38
+      FontPath: assets/fonts/NotoSansSC-VF.ttf
+  - Entity: 930000020
+    TagComponent:
+      Tag: Battle_ScriptDirectorText
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    UIWidgetComponent:
+      Visible: true
+      Position: [0.5, 0.805]
+      Size: [0.72, 0.04]
+      Rotation: 0
+      Anchor: 4
+      SortOrder: 24
+    UITextComponent:
+      Text: "原生战斗流程已接管，胜利后返回剧情。"
+      Color: [0.72, 0.92, 1, 1]
+      FontSize: 16
+      FontPath: assets/fonts/NotoSansSC-VF.ttf
+  - Entity: 930000019
+    TagComponent:
+      Tag: Battle_Fade
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    UIWidgetComponent:
+      Visible: true
+      Position: [0.5, 0.5]
+      Size: [1, 1]
+      Rotation: 0
+      Anchor: 4
+      SortOrder: 100
+    UIImageComponent:
+      Color: [0, 0, 0, 1]
+      TexturePath: ""

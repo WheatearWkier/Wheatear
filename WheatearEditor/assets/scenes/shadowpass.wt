@@ -1,0 +1,32 @@
+Scene: Untitled
+Entities:
+  - Entity: 16497192135511754828
+    TagComponent:
+      Tag: cube
+    TransformComponent:
+      Translation: [-2.43078947, -0.253403157, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    MeshRendererComponent:
+      MeshPath: ""
+      MaterialPath: ""
+  - Entity: 11026805006791065830
+    TagComponent:
+      Tag: sph
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    MeshRendererComponent:
+      MeshPath: ""
+      MaterialPath: ""
+  - Entity: 16243489248281164128
+    TagComponent:
+      Tag: Empty Entity
+    TransformComponent:
+      Translation: [2.38897157, 1.26663446, 0]
+      Rotation: [-0.062865071, -1.30527627, -1.16819537]
+      Scale: [0.999999762, 0.999999523, 0.999999642]
+    DirectionalLightComponent:
+      Color: [1, 1, 1]
+      Intensity: 1

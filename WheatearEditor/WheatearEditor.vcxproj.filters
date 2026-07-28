@@ -1,0 +1,193 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Build">
+      <UniqueIdentifier>{B546EB0C-215B-13BE-EADC-B61D56B00FEF}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Editor">
+      <UniqueIdentifier>{8C1A20B0-78BC-4A86-6177-5EDA4DB8D1D6}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Modules">
+      <UniqueIdentifier>{DE144435-4AF4-C2D0-530C-4EA7BF6A2932}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Modules\ArcadeCombat">
+      <UniqueIdentifier>{437F8A6D-2F0E-1437-D82C-2832C49A24DD}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Modules\SideCombat">
+      <UniqueIdentifier>{68116838-54F5-288E-BD55-23E1A9581310}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Modules\VisualNovel">
+      <UniqueIdentifier>{25711269-91D2-EF76-1A40-362986A02636}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Panels">
+      <UniqueIdentifier>{A80D95C9-94AF-BF9F-7D6A-D3F369AB46F0}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Panels\SceneHierarchy">
+      <UniqueIdentifier>{E46D399C-50DA-F496-19CE-8CF485F916FF}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Panels\SceneHierarchy\Drawers">
+      <UniqueIdentifier>{EBA8C363-57C1-AA8D-206E-3A278C453F27}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="src\Build\PlayerPackager.h">
+      <Filter>Build</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Editor\CoreEditorComponents.h">
+      <Filter>Editor</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Editor\EditorComponentRegistry.h">
+      <Filter>Editor</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Editor\EditorLayer2D.h">
+      <Filter>Editor</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Editor\EditorLayer3D.h">
+      <Filter>Editor</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Editor\EditorLayerBase.h">
+      <Filter>Editor</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Editor\ModeSelectLayer.h">
+      <Filter>Editor</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Modules\ArcadeCombat\ArcadeCombatDrawer.h">
+      <Filter>Modules\ArcadeCombat</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Modules\ModuleEditorBootstrap.h">
+      <Filter>Modules</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Modules\SideCombat\SideCombatDrawer.h">
+      <Filter>Modules\SideCombat</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Modules\VisualNovel\VisualNovelDrawer.h">
+      <Filter>Modules\VisualNovel</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Panels\AnimationEditorPanel.h">
+      <Filter>Panels</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Panels\ContentBrowserPanel.h">
+      <Filter>Panels</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Panels\EditorCommands.h">
+      <Filter>Panels</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Panels\SceneHierarchy\ComponentDrawers.h">
+      <Filter>Panels\SceneHierarchy</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Panels\SceneHierarchy\Drawers\AudioDrawer.h">
+      <Filter>Panels\SceneHierarchy\Drawers</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Panels\SceneHierarchy\Drawers\CameraDrawer.h">
+      <Filter>Panels\SceneHierarchy\Drawers</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Panels\SceneHierarchy\Drawers\CircleRendererDrawer.h">
+      <Filter>Panels\SceneHierarchy\Drawers</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Panels\SceneHierarchy\Drawers\Mesh3DDrawers.h">
+      <Filter>Panels\SceneHierarchy\Drawers</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Panels\SceneHierarchy\Drawers\PhysicsDrawers.h">
+      <Filter>Panels\SceneHierarchy\Drawers</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Panels\SceneHierarchy\Drawers\ScriptDrawer.h">
+      <Filter>Panels\SceneHierarchy\Drawers</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Panels\SceneHierarchy\Drawers\SpriteAnimatorDrawer.h">
+      <Filter>Panels\SceneHierarchy\Drawers</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Panels\SceneHierarchy\Drawers\SpriteRendererDrawer.h">
+      <Filter>Panels\SceneHierarchy\Drawers</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Panels\SceneHierarchy\Drawers\TransformDrawer.h">
+      <Filter>Panels\SceneHierarchy\Drawers</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Panels\SceneHierarchy\Drawers\UIDrawers.h">
+      <Filter>Panels\SceneHierarchy\Drawers</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Panels\SceneHierarchy\WidgetHelpers.h">
+      <Filter>Panels\SceneHierarchy</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Panels\SceneHierarchyPanel.h">
+      <Filter>Panels</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="src\Build\PlayerPackager.cpp">
+      <Filter>Build</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Editor\CoreEditorComponents.cpp">
+      <Filter>Editor</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Editor\EditorComponentRegistry.cpp">
+      <Filter>Editor</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Editor\EditorLayer2D.cpp">
+      <Filter>Editor</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Editor\EditorLayer3D.cpp">
+      <Filter>Editor</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Editor\EditorLayerBase.cpp">
+      <Filter>Editor</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Editor\ModeSelectLayer.cpp">
+      <Filter>Editor</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Modules\ArcadeCombat\ArcadeCombatDrawer.cpp">
+      <Filter>Modules\ArcadeCombat</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Modules\ModuleEditorBootstrap.cpp">
+      <Filter>Modules</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Modules\SideCombat\SideCombatDrawer.cpp">
+      <Filter>Modules\SideCombat</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Modules\VisualNovel\VisualNovelDrawer.cpp">
+      <Filter>Modules\VisualNovel</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Panels\AnimationEditorPanel.cpp">
+      <Filter>Panels</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Panels\ContentBrowserPanel.cpp">
+      <Filter>Panels</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Panels\SceneHierarchy\Drawers\AudioDrawer.cpp">
+      <Filter>Panels\SceneHierarchy\Drawers</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Panels\SceneHierarchy\Drawers\CameraDrawer.cpp">
+      <Filter>Panels\SceneHierarchy\Drawers</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Panels\SceneHierarchy\Drawers\CircleRendererDrawer.cpp">
+      <Filter>Panels\SceneHierarchy\Drawers</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Panels\SceneHierarchy\Drawers\Mesh3DDrawers.cpp">
+      <Filter>Panels\SceneHierarchy\Drawers</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Panels\SceneHierarchy\Drawers\PhysicsDrawers.cpp">
+      <Filter>Panels\SceneHierarchy\Drawers</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Panels\SceneHierarchy\Drawers\ScriptDrawer.cpp">
+      <Filter>Panels\SceneHierarchy\Drawers</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Panels\SceneHierarchy\Drawers\SpriteAnimatorDrawer.cpp">
+      <Filter>Panels\SceneHierarchy\Drawers</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Panels\SceneHierarchy\Drawers\SpriteRendererDrawer.cpp">
+      <Filter>Panels\SceneHierarchy\Drawers</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Panels\SceneHierarchy\Drawers\TransformDrawer.cpp">
+      <Filter>Panels\SceneHierarchy\Drawers</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Panels\SceneHierarchy\Drawers\UIDrawers.cpp">
+      <Filter>Panels\SceneHierarchy\Drawers</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Panels\SceneHierarchy\WidgetHelpers.cpp">
+      <Filter>Panels\SceneHierarchy</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Panels\SceneHierarchyPanel.cpp">
+      <Filter>Panels</Filter>
+    </ClCompile>
+    <ClCompile Include="src\WheatearEditorApp.cpp" />
+  </ItemGroup>
+</Project>

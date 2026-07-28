@@ -1,0 +1,195 @@
+Scene: VerticalSliceHub
+Entities:
+  - Entity: 950000001
+    TagComponent:
+      Tag: Hub_Camera
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    CameraComponent:
+      Camera:
+        ProjectionType: 1
+        PerspectiveFOV: 0.785398185
+        PerspectiveNear: 0.00999999978
+        PerspectiveFar: 1000
+        OrthographicSize: 10
+        OrthographicNear: -1
+        OrthographicFar: 1
+      Primary: true
+      FixedAspectRatio: false
+  - Entity: 950000002
+    TagComponent:
+      Tag: Hub_Background
+    TransformComponent:
+      Translation: [0, 0.35, -0.8]
+      Rotation: [0, 0, 0]
+      Scale: [20, 11.25, 1]
+    SpriteRendererComponent:
+      Color: [1, 1, 1, 1]
+      Texture: assets/vertical_slice/vn/backgrounds/forest_camp.png
+      TilingFactor: 1
+  - Entity: 950000003
+    TagComponent:
+      Tag: Hub_Mentor
+    TransformComponent:
+      Translation: [5.6, -1.2, -0.1]
+      Rotation: [0, 0, 0]
+      Scale: [2.75, 4.45, 1]
+    SpriteRendererComponent:
+      Color: [1, 1, 1, 0.95]
+      Texture: assets/vertical_slice/vn/portraits/mentor_happy.png
+      TilingFactor: 1
+  - Entity: 950000010
+    TagComponent:
+      Tag: Hub_Title
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    UIWidgetComponent:
+      Visible: true
+      Position: [0.07, 0.095]
+      Size: [0.62, 0.08]
+      Rotation: 0
+      Anchor: 0
+      SortOrder: 20
+    UITextComponent:
+      Text: "黑林临时据点"
+      Color: [0.94, 0.98, 0.9, 1]
+      FontSize: 44
+      FontPath: assets/fonts/NotoSansSC-VF.ttf
+  - Entity: 950000011
+    TagComponent:
+      Tag: Hub_Subtitle
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    UIWidgetComponent:
+      Visible: true
+      Position: [0.075, 0.18]
+      Size: [0.7, 0.05]
+      Rotation: 0
+      Anchor: 0
+      SortOrder: 20
+    UITextComponent:
+      Text: "魔剑 Lv1  /  主角 Lv1  /  材料副本已解锁"
+      Color: [0.76, 0.88, 0.82, 1]
+      FontSize: 22
+      FontPath: assets/fonts/NotoSansSC-VF.ttf
+  - Entity: 950000012
+    TagComponent:
+      Tag: Hub_Status
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    UIWidgetComponent:
+      Visible: true
+      Position: [0.075, 0.275]
+      Size: [0.52, 0.18]
+      Rotation: 0
+      Anchor: 0
+      SortOrder: 20
+    UITextComponent:
+      Text: "结算: 魔核碎片 x1 / 兽筋 x2 / 熊爪 x1\n可强化: 魔剑基础斩击、火球术、旅人护甲 +1\n提示: 好感支援会影响技能冷却和连击窗口。"
+      Color: [0.94, 0.92, 0.82, 1]
+      FontSize: 20
+      FontPath: assets/fonts/NotoSansSC-VF.ttf
+  - Entity: 950000020
+    TagComponent:
+      Tag: Hub_Button_Dungeon
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    UIWidgetComponent:
+      Visible: true
+      Position: [0.09, 0.54]
+      Size: [0.28, 0.072]
+      Rotation: 0
+      Anchor: 0
+      SortOrder: 30
+    UIButtonComponent:
+      NormalColor: [0.13, 0.30, 0.26, 0.93]
+      HoverColor: [0.20, 0.44, 0.38, 0.98]
+      PressedColor: [0.08, 0.20, 0.18, 1]
+      OnClickFunction: scene:assets/scenes/SideCombatVerticalSlice.wt
+    UITextComponent:
+      Text: "重刷黑林兽道"
+      Color: [0.94, 0.98, 0.9, 1]
+      FontSize: 26
+      FontPath: assets/fonts/NotoSansSC-VF.ttf
+  - Entity: 950000021
+    TagComponent:
+      Tag: Hub_Button_Skill
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    UIWidgetComponent:
+      Visible: true
+      Position: [0.09, 0.63]
+      Size: [0.28, 0.072]
+      Rotation: 0
+      Anchor: 0
+      SortOrder: 30
+    UIButtonComponent:
+      NormalColor: [0.23, 0.26, 0.43, 0.93]
+      HoverColor: [0.32, 0.36, 0.58, 0.98]
+      PressedColor: [0.16, 0.18, 0.32, 1]
+      OnClickFunction: progression:upgrade_magic_sword
+    UITextComponent:
+      Text: "技能树原型"
+      Color: [0.94, 0.96, 1, 1]
+      FontSize: 26
+      FontPath: assets/fonts/NotoSansSC-VF.ttf
+  - Entity: 950000022
+    TagComponent:
+      Tag: Hub_Button_Equip
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    UIWidgetComponent:
+      Visible: true
+      Position: [0.09, 0.72]
+      Size: [0.28, 0.072]
+      Rotation: 0
+      Anchor: 0
+      SortOrder: 30
+    UIButtonComponent:
+      NormalColor: [0.30, 0.24, 0.16, 0.93]
+      HoverColor: [0.44, 0.34, 0.22, 0.98]
+      PressedColor: [0.20, 0.15, 0.10, 1]
+      OnClickFunction: progression:upgrade_traveler_armor
+    UITextComponent:
+      Text: "装备强化原型"
+      Color: [1, 0.94, 0.84, 1]
+      FontSize: 26
+      FontPath: assets/fonts/NotoSansSC-VF.ttf
+  - Entity: 950000023
+    TagComponent:
+      Tag: Hub_Button_Continue
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    UIWidgetComponent:
+      Visible: true
+      Position: [0.09, 0.815]
+      Size: [0.28, 0.075]
+      Rotation: 0
+      Anchor: 0
+      SortOrder: 30
+    UIButtonComponent:
+      NormalColor: [0.38, 0.16, 0.24, 0.94]
+      HoverColor: [0.55, 0.24, 0.35, 0.98]
+      PressedColor: [0.25, 0.10, 0.16, 1]
+      OnClickFunction: scene:assets/scenes/VerticalSliceChapter3Preview.wt
+    UITextComponent:
+      Text: "继续剧情"
+      Color: [1, 0.92, 0.94, 1]
+      FontSize: 28
+      FontPath: assets/fonts/NotoSansSC-VF.ttf

@@ -1,0 +1,335 @@
+Scene: SideCombatVerticalSlice
+Entities:
+  - Entity: 940000001
+    TagComponent:
+      Tag: SC_Camera
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    CameraComponent:
+      Camera:
+        ProjectionType: 1
+        PerspectiveFOV: 0.785398185
+        PerspectiveNear: 0.00999999978
+        PerspectiveFar: 1000
+        OrthographicSize: 10
+        OrthographicNear: -1
+        OrthographicFar: 1
+      Primary: true
+      FixedAspectRatio: false
+  - Entity: 940000002
+    TagComponent:
+      Tag: SC_Background
+    TransformComponent:
+      Translation: [0, 0.15, -0.9]
+      Rotation: [0, 0, 0]
+      Scale: [20, 11.25, 1]
+    SpriteRendererComponent:
+      Color: [1, 1, 1, 1]
+      Texture: assets/vertical_slice/side_combat/backgrounds/black_forest_stage.png
+      TilingFactor: 1
+  - Entity: 940000003
+    TagComponent:
+      Tag: SC_Ground
+    TransformComponent:
+      Translation: [0, -2.45, -0.25]
+      Rotation: [0, 0, 0]
+      Scale: [18.4, 2.45, 1]
+    SpriteRendererComponent:
+      Color: [1, 1, 1, 0.16]
+      Texture: ""
+      TilingFactor: 1
+  - Entity: 940000020
+    TagComponent:
+      Tag: SC_Player_Shadow
+    TransformComponent:
+      Translation: [-5.2, -2.72, -0.07]
+      Rotation: [0, 0, 0]
+      Scale: [1.05, 0.36, 1]
+    SpriteRendererComponent:
+      Color: [0, 0, 0, 0.38]
+      Texture: assets/vertical_slice/side_combat/ui/blob_shadow.png
+      TilingFactor: 1
+  - Entity: 940000021
+    TagComponent:
+      Tag: SC_Boss_BearHusband_Shadow
+    TransformComponent:
+      Translation: [4.4, -2.68, -0.06]
+      Rotation: [0, 0, 0]
+      Scale: [1.72, 0.50, 1]
+    SpriteRendererComponent:
+      Color: [0, 0, 0, 0.42]
+      Texture: assets/vertical_slice/side_combat/ui/blob_shadow.png
+      TilingFactor: 1
+  - Entity: 940000004
+    TagComponent:
+      Tag: SC_Player
+    TransformComponent:
+      Translation: [-5.35, -2.52, -0.05]
+      Rotation: [0, 0, 0]
+      Scale: [1.42, 1.42, 1]
+    SpriteRendererComponent:
+      Color: [1, 1, 1, 1]
+      Texture: assets/vertical_slice/side_combat/characters/player_magic_swordsman.png
+      TilingFactor: 1
+    SideCombatantComponent:
+      Team: 1
+      MaxHealth: 420
+      Health: 420
+      Attack: 54
+      Defense: 18
+      MoveSpeed: 5.4
+      CollisionSize: [0.66, 0.42]
+      CollisionHeight: 1.55
+      GravityScale: 1
+      KnockbackResistance: 0.05
+      Invulnerable: false
+    SidePlayerControllerComponent:
+      MaxJumps: 1
+      JumpImpulse: 7.8
+      Gravity: 20
+      AirControl: 13
+      LaneSpeedScale: 0.72
+      LaneAcceleration: 30
+      GroundFriction: 18
+      BasicCooldown: 0.19
+      LauncherCooldown: 0.42
+      MagicBoltCooldown: 0.64
+      AllySupportCooldown: 4.2
+  - Entity: 940000005
+    TagComponent:
+      Tag: SC_Boss_BearHusband
+    TransformComponent:
+      Translation: [4.45, -2.34, -0.04]
+      Rotation: [0, 0, 0]
+      Scale: [1.95, 1.55, 1]
+    SpriteRendererComponent:
+      Color: [1, 1, 1, 1]
+      Texture: assets/vertical_slice/side_combat/enemies/bear_husband.png
+      TilingFactor: 1
+    SideCombatantComponent:
+      Team: 2
+      MaxHealth: 1450
+      Health: 1450
+      Attack: 44
+      Defense: 22
+      MoveSpeed: 3.4
+      CollisionSize: [1.28, 0.76]
+      CollisionHeight: 1.82
+      GravityScale: 1
+      KnockbackResistance: 0.12
+      Invulnerable: false
+    SideEnemyAIComponent:
+      Kind: 3
+      AggroRange: 12
+      AttackRange: 1.55
+      PreferredRange: 1.2
+      AttackInterval: 1.18
+      PatrolMinX: -7.8
+      PatrolMaxX: 7.8
+      LaneTolerance: 0.58
+  - Entity: 940000006
+    TagComponent:
+      Tag: SC_Controller
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    SideCombatLevelComponent:
+      PlayOnStart: true
+      LevelId: CH02_MAIN_BearAwakening
+      TuningPath: assets/vertical_slice/data/side_combat_tuning.yaml
+      ArenaMin: [-8.8, -3.75]
+      ArenaMax: [8.8, 3.2]
+      GroundY: -3.25
+      LaneMinY: -3.55
+      LaneMaxY: -1.25
+      PlayerEntityName: SC_Player
+      BossEntityName: SC_Boss_BearHusband
+      FadeEntityName: SC_Fade
+      MessageTextEntityName: SC_Message
+      ComboTextEntityName: SC_ComboText
+      SkillTextEntityName: SC_SkillText
+      RewardTextEntityName: SC_RewardText
+      PlayerHealthBarEntityName: SC_PlayerHealth
+      PlayerHealthTextEntityName: SC_PlayerHealthText
+      BossHealthBarEntityName: SC_BossHealth
+      BossHealthTextEntityName: SC_BossHealthText
+      StartFadeDuration: 0.65
+      VictoryReturnDelay: 4
+      DefeatReturnDelay: 2.5
+      ResultSceneFadeDuration: 0.65
+      VictorySceneCommand: "scene:assets/scenes/VerticalSliceHub.wt"
+      DefeatSceneCommand: "scene:assets/scenes/SideCombatVerticalSlice.wt"
+      ComboDropDelay: 1.15
+      FirstClearRewardText: "获得: 魔核碎片 x1 / 兽筋 x2 / 熊爪 x1"
+  - Entity: 940000010
+    TagComponent:
+      Tag: SC_PlayerHealth
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    UIWidgetComponent:
+      Visible: true
+      Position: [0.04, 0.058]
+      Size: [0.255, 0.024]
+      Rotation: 0
+      Anchor: 0
+      SortOrder: 20
+    UIProgressBarComponent:
+      Value: 420
+      MaxValue: 420
+      ForegroundColor: [0.28, 0.86, 0.62, 0.96]
+      BackgroundColor: [0.05, 0.07, 0.08, 0.78]
+  - Entity: 940000011
+    TagComponent:
+      Tag: SC_PlayerHealthText
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    UIWidgetComponent:
+      Visible: true
+      Position: [0.04, 0.018]
+      Size: [0.255, 0.026]
+      Rotation: 0
+      Anchor: 0
+      SortOrder: 21
+    UITextComponent:
+      Text: "生命 420/420"
+      Color: [0.9, 0.98, 0.92, 1]
+      FontSize: 18
+      FontPath: assets/fonts/NotoSansSC-VF.ttf
+  - Entity: 940000012
+    TagComponent:
+      Tag: SC_BossHealth
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    UIWidgetComponent:
+      Visible: true
+      Position: [0.96, 0.058]
+      Size: [0.34, 0.024]
+      Rotation: 0
+      Anchor: 2
+      SortOrder: 20
+    UIProgressBarComponent:
+      Value: 1450
+      MaxValue: 1450
+      ForegroundColor: [0.9, 0.24, 0.22, 0.96]
+      BackgroundColor: [0.06, 0.04, 0.05, 0.78]
+  - Entity: 940000013
+    TagComponent:
+      Tag: SC_BossHealthText
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    UIWidgetComponent:
+      Visible: true
+      Position: [0.96, 0.018]
+      Size: [0.34, 0.026]
+      Rotation: 0
+      Anchor: 2
+      SortOrder: 21
+    UITextComponent:
+      Text: "黑熊丈夫 1450/1450"
+      Color: [1, 0.9, 0.86, 1]
+      FontSize: 18
+      FontPath: assets/fonts/NotoSansSC-VF.ttf
+  - Entity: 940000014
+    TagComponent:
+      Tag: SC_Message
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    UIWidgetComponent:
+      Visible: true
+      Position: [0.04, 0.905]
+      Size: [0.58, 0.034]
+      Rotation: 0
+      Anchor: 6
+      SortOrder: 24
+    UITextComponent:
+      Text: "A/D推进  W/S纵深  Space跳  J三斩  K上挑  U魔法  I支援"
+      Color: [0.92, 0.96, 0.9, 1]
+      FontSize: 16
+      FontPath: assets/fonts/NotoSansSC-VF.ttf
+  - Entity: 940000015
+    TagComponent:
+      Tag: SC_ComboText
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    UIWidgetComponent:
+      Visible: true
+      Position: [0.78, 0.13]
+      Size: [0.2, 0.045]
+      Rotation: 0
+      Anchor: 0
+      SortOrder: 24
+    UITextComponent:
+      Text: "最佳连击 x0"
+      Color: [0.98, 0.88, 0.42, 1]
+      FontSize: 22
+      FontPath: assets/fonts/NotoSansSC-VF.ttf
+  - Entity: 940000016
+    TagComponent:
+      Tag: SC_SkillText
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    UIWidgetComponent:
+      Visible: true
+      Position: [0.04, 0.955]
+      Size: [0.25, 0.032]
+      Rotation: 0
+      Anchor: 6
+      SortOrder: 24
+    UITextComponent:
+      Text: "K 0.0  U 0.0  I 0.0"
+      Color: [0.76, 0.94, 1, 1]
+      FontSize: 16
+      FontPath: assets/fonts/NotoSansSC-VF.ttf
+  - Entity: 940000017
+    TagComponent:
+      Tag: SC_RewardText
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    UIWidgetComponent:
+      Visible: true
+      Position: [0.04, 0.858]
+      Size: [0.44, 0.032]
+      Rotation: 0
+      Anchor: 6
+      SortOrder: 24
+    UITextComponent:
+      Text: "掉落: 魔核碎片 / 兽筋 / 熊爪"
+      Color: [0.92, 0.82, 0.64, 1]
+      FontSize: 15
+      FontPath: assets/fonts/NotoSansSC-VF.ttf
+  - Entity: 940000018
+    TagComponent:
+      Tag: SC_Fade
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    UIWidgetComponent:
+      Visible: true
+      Position: [0.5, 0.5]
+      Size: [1, 1]
+      Rotation: 0
+      Anchor: 4
+      SortOrder: 100
+    UIImageComponent:
+      Color: [0, 0, 0, 1]
+      TexturePath: ""

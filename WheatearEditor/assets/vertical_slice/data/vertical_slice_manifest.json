@@ -1,0 +1,69 @@
+{
+  "assetSchema": "wheatear.vertical_slice.manifest.v1",
+  "version": "0.3.0",
+  "entryScene": "assets/scenes/VisualNovelMainMenu.wt",
+  "flow": [
+    "assets/scenes/VerticalSliceIntro.wt",
+    "assets/scenes/VisualNovelBattle.wt",
+    "assets/scenes/VerticalSlicePostFake.wt",
+    "assets/scenes/SideCombatVerticalSlice.wt",
+    "assets/scenes/VerticalSliceHub.wt",
+    "assets/scenes/VerticalSliceChapter3Preview.wt"
+  ],
+  "vnScripts": [
+    "assets/vn/vertical_slice_intro.vn",
+    "assets/vn/vertical_slice_post_fake.vn",
+    "assets/vn/vertical_slice_chapter3_preview.vn"
+  ],
+  "portraitSets": [
+    {
+      "id": "CHAR_OS_REAL",
+      "displayName": "青梅",
+      "slot": "VN_Character_Mira",
+      "template": "assets/vertical_slice/vn/portraits/aoba_{expression}.png",
+      "expressions": ["neutral", "happy", "serious", "surprised", "thinking"]
+    },
+    {
+      "id": "CHAR_MENTOR",
+      "displayName": "魔剑士导师",
+      "slot": "VN_Character_Mira",
+      "template": "assets/vertical_slice/vn/portraits/mentor_{expression}.png",
+      "expressions": ["neutral", "happy", "serious", "surprised", "thinking"]
+    },
+    {
+      "id": "CHAR_PROTAG",
+      "displayName": "主角",
+      "slot": "VN_Character_Leo",
+      "template": "assets/vertical_slice/vn/portraits/hero_{expression}.png",
+      "expressions": ["neutral", "happy", "serious", "surprised", "thinking"]
+    }
+  ],
+  "sideCombat": {
+    "levelScene": "assets/scenes/SideCombatVerticalSlice.wt",
+    "tuning": "assets/vertical_slice/data/side_combat_tuning.yaml",
+    "background": "assets/vertical_slice/side_combat/backgrounds/black_forest_stage.png",
+    "player": "assets/vertical_slice/side_combat/characters/player_magic_swordsman.png",
+    "boss": "assets/vertical_slice/side_combat/enemies/bear_husband.png",
+    "shadow": "assets/vertical_slice/side_combat/ui/blob_shadow.png",
+    "effects": [
+      "assets/vertical_slice/side_combat/effects/slash_basic_{frame}.png",
+      "assets/vertical_slice/side_combat/effects/slash_launcher_{frame}.png",
+      "assets/vertical_slice/side_combat/effects/magic_bolt_{frame}.png",
+      "assets/vertical_slice/side_combat/effects/ally_support_{frame}.png",
+      "assets/vertical_slice/side_combat/effects/enemy_claw_{frame}.png",
+      "assets/vertical_slice/side_combat/effects/bear_charge_{frame}.png",
+      "assets/vertical_slice/side_combat/effects/bear_shockwave_{frame}.png"
+    ],
+    "drops": [
+      "assets/vertical_slice/side_combat/ui/mat_magic_core.png",
+      "assets/vertical_slice/side_combat/ui/mat_beast_sinew.png",
+      "assets/vertical_slice/side_combat/ui/mat_beast_claw.png"
+    ]
+  },
+  "replacementPolicy": {
+    "keepPathsStable": true,
+    "replaceGeneratedPngInPlace": true,
+    "sourceGenerator": "tools/vertical_slice/generate_vertical_slice_assets.py",
+    "sideCombatGenerator": "tools/vertical_slice/generate_side_combat_assets.py"
+  }
+}

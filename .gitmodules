@@ -1,0 +1,3 @@
+[submodule "Wheatear/vendor/spdlog"]
+	path = Wheatear/vendor/spdlog
+	url = https://github.com/gabime/spdlog.git

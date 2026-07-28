@@ -1,0 +1,229 @@
+Scene: Untitled
+Entities:
+  - Entity: 15687307925216717625
+    TagComponent:
+      Tag: HealthBar
+    TransformComponent:
+      Translation: [0, 0, 1]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    UIWidgetComponent:
+      Visible: true
+      Position: [0.5, 0.100000001]
+      Size: [0.400000006, 0.0399999991]
+      Rotation: 0
+      Anchor: 4
+      SortOrder: 0
+    UIProgressBarComponent:
+      Value: 80
+      MaxValue: 100
+      ForegroundColor: [0.200000003, 0.800000012, 0.200000003, 1]
+      BackgroundColor: [0.200000003, 0.200000003, 0.200000003, 1]
+  - Entity: 2530780827987725878
+    TagComponent:
+      Tag: Floor
+    TransformComponent:
+      Translation: [-0.408390373, -1.3469255, 0]
+      Rotation: [0, 0, 0]
+      Scale: [11.6064329, 0.433961958, 1]
+    SpriteRendererComponent:
+      Color: [1, 1, 1, 1]
+      Texture: ""
+      TilingFactor: 1
+    Rigidbody2DComponent:
+      BodyType: Static
+      FixedRotation: false
+      GravityScale: 1
+    BoxCollider2DComponent:
+      Offset: [0, 0]
+      Size: [0.5, 0.5]
+      Density: 1
+      Friction: 0.5
+      Restitution: 0
+      RestitutionThreshold: 0.5
+  - Entity: 10030072215338936358
+    TagComponent:
+      Tag: Player
+    TransformComponent:
+      Translation: [-4.6332674, -0.614944994, 0.100000001]
+      Rotation: [0, 0, 3.08558334e-08]
+      Scale: [1, 1, 1]
+    SpriteRendererComponent:
+      Color: [1, 1, 1, 1]
+      Texture: assets\textures\idle1.png
+      TilingFactor: 1
+    SpriteAnimatorComponent:
+      DefaultClip: idle
+      PlayOnStart: true
+      Clips:
+        - Name: idle
+          Looping: true
+          Frames:
+            - Texture: assets\textures\idle1.png
+              UVMin: [0, 0]
+              UVMax: [1, 1]
+              Duration: 0.300000012
+            - Texture: assets\textures\idle2.png
+              UVMin: [0, 0]
+              UVMax: [1, 1]
+              Duration: 0.300000012
+          PropertyTracks:
+            []
+        - Name: jump
+          Looping: false
+          Frames:
+            - Texture: assets\textures\jump1.png
+              UVMin: [0, 0]
+              UVMax: [1, 1]
+              Duration: 0.100000001
+            - Texture: assets\textures\jump2.png
+              UVMin: [0, 0]
+              UVMax: [1, 1]
+              Duration: 0.100000001
+            - Texture: assets\textures\jump3.png
+              UVMin: [0, 0]
+              UVMax: [1, 1]
+              Duration: 0.100000001
+            - Texture: assets\textures\jump4.png
+              UVMin: [0, 0]
+              UVMax: [1, 1]
+              Duration: 0.100000001
+          PropertyTracks:
+            []
+        - Name: fall
+          Looping: false
+          Frames:
+            - Texture: assets\textures\fall1.png
+              UVMin: [0, 0]
+              UVMax: [1, 1]
+              Duration: 0.100000001
+            - Texture: assets\textures\fall2.png
+              UVMin: [0, 0]
+              UVMax: [1, 1]
+              Duration: 0.100000001
+            - Texture: assets\textures\fall3.png
+              UVMin: [0, 0]
+              UVMax: [1, 1]
+              Duration: 0.100000001
+            - Texture: assets\textures\fall4.png
+              UVMin: [0, 0]
+              UVMax: [1, 1]
+              Duration: 0.100000001
+          PropertyTracks:
+            []
+        - Name: run
+          Looping: true
+          Frames:
+            - Texture: assets\textures\run1.png
+              UVMin: [0, 0]
+              UVMax: [1, 1]
+              Duration: 0.200000003
+            - Texture: assets\textures\run2.png
+              UVMin: [0, 0]
+              UVMax: [1, 1]
+              Duration: 0.200000003
+          PropertyTracks:
+            []
+    Rigidbody2DComponent:
+      BodyType: Dynamic
+      FixedRotation: true
+      GravityScale: 1
+    BoxCollider2DComponent:
+      Offset: [0, 0]
+      Size: [0.5, 0.5]
+      Density: 1
+      Friction: 0.5
+      Restitution: 0
+      RestitutionThreshold: 0.5
+    ScriptComponent:
+      ClassName: WheatearSandbox.Player
+    AudioSourceComponent:
+      AudioFilePath: audios\battle.wav
+      Volume: 0.101999998
+      Loop: true
+      PlayOnStart: true
+  - Entity: 680858899334009237
+    TagComponent:
+      Tag: Camera
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    CameraComponent:
+      Camera:
+        ProjectionType: 1
+        PerspectiveFOV: 0.785398185
+        PerspectiveNear: 0.00999999978
+        PerspectiveFar: 1000
+        OrthographicSize: 10
+        OrthographicNear: -1
+        OrthographicFar: 1
+      Primary: true
+      FixedAspectRatio: false
+  - Entity: 8019634248645417199
+    TagComponent:
+      Tag: Enemy
+    TransformComponent:
+      Translation: [3.01238418, -0.56462431, 0.100000001]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    SpriteRendererComponent:
+      Color: [1, 1, 1, 1]
+      Texture: assets\textures\booom1.png
+      TilingFactor: 1
+    SpriteAnimatorComponent:
+      DefaultClip: ""
+      PlayOnStart: false
+      Clips:
+        - Name: boom
+          Looping: false
+          Frames:
+            - Texture: assets\textures\booom1.png
+              UVMin: [0, 0]
+              UVMax: [1, 1]
+              Duration: 0.5
+            - Texture: assets\textures\booom5.png
+              UVMin: [0, 0]
+              UVMax: [1, 1]
+              Duration: 0.300000012
+          PropertyTracks:
+            - Property: 4
+              Keyframes:
+                - Time: 0
+                  Value: 0
+                  Mode: 0
+                - Time: 0.800000012
+                  Value: 1
+                  Mode: 0
+            - Property: 11
+              Keyframes:
+                - Time: 0
+                  Value: 1
+                  Mode: 0
+                - Time: 0.800000012
+                  Value: 1.5
+                  Mode: 0
+    Rigidbody2DComponent:
+      BodyType: Static
+      FixedRotation: false
+      GravityScale: 1
+    BoxCollider2DComponent:
+      Offset: [0, 0]
+      Size: [0.5, 0.5]
+      Density: 1
+      Friction: 0.5
+      Restitution: 0
+      RestitutionThreshold: 0.5
+    ScriptComponent:
+      ClassName: WheatearSandbox.Enemy
+  - Entity: 17867312845864350248
+    TagComponent:
+      Tag: BackGround
+    TransformComponent:
+      Translation: [-0.321083099, 0.166677058, -0.100000001]
+      Rotation: [0, 0, 0]
+      Scale: [20, 10, 1]
+    SpriteRendererComponent:
+      Color: [1, 1, 1, 1]
+      Texture: assets\textures\test2.png
+      TilingFactor: 1
