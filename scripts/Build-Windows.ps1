@@ -4,6 +4,7 @@ param(
     [string]$Platform = "x64",
     [string]$Target = "",
     [string]$Verbosity = "m",
+    [string]$LinkIncremental = "",
     [string]$LogFile = "build-msbuild.log"
 )
 
@@ -169,6 +170,9 @@ if (-not [string]::IsNullOrWhiteSpace($Target)) {
 $arguments.Add((Quote-CommandLineArgument $resolvedProject))
 $arguments.Add("/p:Configuration=$Configuration")
 $arguments.Add("/p:Platform=$Platform")
+if (-not [string]::IsNullOrWhiteSpace($LinkIncremental)) {
+    $arguments.Add("/p:LinkIncremental=$LinkIncremental")
+}
 $arguments.Add("/m")
 $arguments.Add("/nr:false")
 $arguments.Add("/nologo")

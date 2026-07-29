@@ -1,4 +1,4 @@
-#include "wtpch.h"
+ï»¿#include "wtpch.h"
 #include "AnimationEditorPanel.h"
 
 #include <imgui/imgui.h>
@@ -13,16 +13,16 @@
 
 namespace Wheatear {
 
-    // ¹ìµÀĞĞ¸ß
+    // è½¨é“è¡Œé«˜
     static constexpr float kTrackHeight = 36.0f;
-    // ×ó²à±êÇ©ÁĞ¿í
+    // å·¦ä¾§æ ‡ç­¾åˆ—å®½
     static constexpr float kLabelWidth = 150.0f;
-    // Ê±¼äÖá±ê³ß¸ß¶È
+    // æ—¶é—´è½´æ ‡å°ºé«˜åº¦
     static constexpr float kRulerHeight = 36.0f;
 
-    // ¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T
-    //  ²åÖµÄ£Ê½ÏÂÀ­
-    // ¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T
+    // â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+    //  æ’å€¼æ¨¡å¼ä¸‹æ‹‰
+    // â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
     static void DrawInterpModeCombo(InterpolationMode& mode)
     {
@@ -44,9 +44,9 @@ namespace Wheatear {
         }
     }
 
-    // ¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T
-    //  SetEntity£º´Ó Hierarchy Ñ¡ÖĞÊµÌåÊ±µ÷ÓÃ
-    // ¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T
+    // â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+    //  SetEntityï¼šä» Hierarchy é€‰ä¸­å®ä½“æ—¶è°ƒç”¨
+    // â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
     void AnimationEditorPanel::SetEntity(Entity entity)
     {
@@ -70,9 +70,9 @@ namespace Wheatear {
             m_Scene->SetAnimationEditorPreviewActive(true);
     }
 
-    // ¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T
-    //  ¹¤¾ßº¯Êı£ºÈ¡µ±Ç°ÕıÔÚ±à¼­µÄ Clip
-    // ¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T
+    // â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+    //  å·¥å…·å‡½æ•°ï¼šå–å½“å‰æ­£åœ¨ç¼–è¾‘çš„ Clip
+    // â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
     Ref<AnimationClip> AnimationEditorPanel::GetCurrentClip() const
     {
@@ -81,13 +81,13 @@ namespace Wheatear {
         return it != m_Animator->Clips.end() ? it->second : nullptr;
     }
 
-    // ¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T
-    //  ²ÉÑù¹¤¾ßº¯Êı£¨±ÜÃâ time ±äÁ¿±»¿ç¹ìµÀÎÛÈ¾£©
-    // ¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T
+    // â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+    //  é‡‡æ ·å·¥å…·å‡½æ•°ï¼ˆé¿å… time å˜é‡è¢«è·¨è½¨é“æ±¡æŸ“ï¼‰
+    // â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
-    // BUG FIX #3: ½«²ÉÑùÂß¼­ÌáÈ¡Îª¶ÀÁ¢º¯Êı£¬Ã¿Ìõ¹ìµÀÊ¹ÓÃ¶ÀÁ¢µÄ localTime£¬
-    // ·ÀÖ¹Ô­´úÂëÖĞ float ¹ìµÀµÄ looping fmod ĞŞ¸Ä¹²ÏíµÄ time ±äÁ¿£¬
-    // ´Ó¶ø´íÎóÓ°ÏìºóĞø vec4 ¹ìµÀµÄ²ÉÑù¡£
+    // BUG FIX #3: å°†é‡‡æ ·é€»è¾‘æå–ä¸ºç‹¬ç«‹å‡½æ•°ï¼Œæ¯æ¡è½¨é“ä½¿ç”¨ç‹¬ç«‹çš„ localTimeï¼Œ
+    // é˜²æ­¢åŸä»£ç ä¸­ float è½¨é“çš„ looping fmod ä¿®æ”¹å…±äº«çš„ time å˜é‡ï¼Œ
+    // ä»è€Œé”™è¯¯å½±å“åç»­ vec4 è½¨é“çš„é‡‡æ ·ã€‚
     static float SampleFloat(
         const std::vector<Keyframe<float>>& kfs,
         float playbackTime,
@@ -162,20 +162,20 @@ namespace Wheatear {
         return prev.Value + (next.Value - prev.Value) * alpha;
     }
 
-    // ¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T
+    // â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
     //  SyncPreviewToEntity
-    //  BUG FIX #1: Ö»ÔÚÔ¤ÀÀ¼¤»î£¨m_IsPlaying »òÓÃ»§Ö÷¶¯ÍÏ¶¯Ê±¼äÖá£©Ê±Ğ´»Ø×é¼ş£¬
-    //  ÇÒ¿ìÕÕ±ØĞëÔÚµÚÒ»´ÎĞ´»ØÖ®Ç°ÒÑ¾­ÅÄºÃ£¬·ñÔò±¾º¯Êı²»Ö´ĞĞ¡£
-    //  ÕâÑù¿ÉÒÔ±£Ö¤£º±à¼­Æ÷²»ÔÚÔ¤ÀÀÊ±¾ø²»ÎÛÈ¾ÊµÌåµÄĞòÁĞ»¯×´Ì¬¡£
-    // ¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T
+    //  BUG FIX #1: åªåœ¨é¢„è§ˆæ¿€æ´»ï¼ˆm_IsPlaying æˆ–ç”¨æˆ·ä¸»åŠ¨æ‹–åŠ¨æ—¶é—´è½´ï¼‰æ—¶å†™å›ç»„ä»¶ï¼Œ
+    //  ä¸”å¿«ç…§å¿…é¡»åœ¨ç¬¬ä¸€æ¬¡å†™å›ä¹‹å‰å·²ç»æ‹å¥½ï¼Œå¦åˆ™æœ¬å‡½æ•°ä¸æ‰§è¡Œã€‚
+    //  è¿™æ ·å¯ä»¥ä¿è¯ï¼šç¼–è¾‘å™¨ä¸åœ¨é¢„è§ˆæ—¶ç»ä¸æ±¡æŸ“å®ä½“çš„åºåˆ—åŒ–çŠ¶æ€ã€‚
+    // â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
     void AnimationEditorPanel::SyncPreviewToEntity()
     {
         if (!m_Entity || !m_Animator) return;
 
-        // BUG FIX #1 ºËĞÄ£ºÃ»ÓĞ¿ìÕÕ¾Í²»Ğ´»Ø£¬·ÀÖ¹ÔÚ·ÇÔ¤ÀÀ×´Ì¬ÏÂÎÛÈ¾×é¼şÊı¾İ¡£
-        // ¿ìÕÕÖ»ÔÚ Play »òÖ÷¶¯ Scrub Ê±²ÅÅÄ£¬È·±£ Sync ²»»áÔÚÓÃ»§Ã»ÓĞ
-        // Ã÷È·´¥·¢Ô¤ÀÀµÄÇé¿öÏÂĞŞ¸ÄÊµÌå×´Ì¬¡£
+        // BUG FIX #1 æ ¸å¿ƒï¼šæ²¡æœ‰å¿«ç…§å°±ä¸å†™å›ï¼Œé˜²æ­¢åœ¨éé¢„è§ˆçŠ¶æ€ä¸‹æ±¡æŸ“ç»„ä»¶æ•°æ®ã€‚
+        // å¿«ç…§åªåœ¨ Play æˆ–ä¸»åŠ¨ Scrub æ—¶æ‰æ‹ï¼Œç¡®ä¿ Sync ä¸ä¼šåœ¨ç”¨æˆ·æ²¡æœ‰
+        // æ˜ç¡®è§¦å‘é¢„è§ˆçš„æƒ…å†µä¸‹ä¿®æ”¹å®ä½“çŠ¶æ€ã€‚
         if (!m_HasSnapshot) return;
 
         auto clip = GetCurrentClip();
@@ -184,7 +184,7 @@ namespace Wheatear {
         float duration = clip->GetTotalDuration();
         bool  looping = clip->IsLooping();
 
-        // ©¤©¤ ĞòÁĞÖ¡Ğ´»Ø SpriteRenderer ©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤
+        // â”€â”€ åºåˆ—å¸§å†™å› SpriteRenderer â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
         if (clip->GetFrameCount() > 0 &&
             m_Entity.HasComponent<SpriteRendererComponent>())
         {
@@ -211,19 +211,19 @@ namespace Wheatear {
             if (frame.Texture)
             {
                 sr.Texture = frame.Texture;
-                // BUG FIX #2: Í¬Ê±Ğ´»Ø UV£¬·ÀÖ¹ Atlas Ö¡Ö»»»ÎÆÀí²»»» UV µ¼ÖÂÏÔÊ¾´íÎó
+                // BUG FIX #2: åŒæ—¶å†™å› UVï¼Œé˜²æ­¢ Atlas å¸§åªæ¢çº¹ç†ä¸æ¢ UV å¯¼è‡´æ˜¾ç¤ºé”™è¯¯
                 sr.UVMin = frame.TexCoordMin;
                 sr.UVMax = frame.TexCoordMax;
             }
         }
 
-        // ©¤©¤ ÊôĞÔ¹ìµÀĞ´»Ø ©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤
+        // â”€â”€ å±æ€§è½¨é“å†™å› â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
         for (auto& trackBase : clip->GetPropertyTracks())
         {
             if (trackBase->GetDataType() == TrackDataType::Float)
             {
                 auto track = std::static_pointer_cast<PropertyTrack<float>>(trackBase);
-                // BUG FIX #3: Ã¿Ìõ¹ìµÀÓÃ¶ÀÁ¢º¯Êı²ÉÑù£¬²»¹²Ïí¡¢²»ÎÛÈ¾ time ±äÁ¿
+                // BUG FIX #3: æ¯æ¡è½¨é“ç”¨ç‹¬ç«‹å‡½æ•°é‡‡æ ·ï¼Œä¸å…±äº«ã€ä¸æ±¡æŸ“ time å˜é‡
                 float sampledValue = SampleFloat(
                     track->Keyframes, m_PlaybackTime, duration, looping);
 
@@ -273,9 +273,9 @@ namespace Wheatear {
         }
     }
 
-    // ¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T
+    // â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
     //  TakeSnapshot / RestoreSnapshot
-    // ¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T
+    // â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
     void AnimationEditorPanel::TakeSnapshot()
     {
@@ -286,9 +286,9 @@ namespace Wheatear {
         {
             auto& sr = m_Entity.GetComponent<SpriteRendererComponent>();
             m_SnapshotColor = sr.Color;
-            // BUG FIX #2: ¿ìÕÕÒ²ĞèÒª±£´æ Texture¡¢TexCoord£¬
-            // ·ñÔò Stop ºóÎŞ·¨»Ö¸´ĞòÁĞÖ¡²¥·ÅÇ°µÄÎÆÀí×´Ì¬£¬
-            // µÚ¶ş´Î Play Ê± TakeSnapshot »áÅÄµ½ÉÏ´Î²¥·Å²ĞÁôµÄ×îºóÒ»Ö¡ÎÆÀí¡£
+            // BUG FIX #2: å¿«ç…§ä¹Ÿéœ€è¦ä¿å­˜ Textureã€TexCoordï¼Œ
+            // å¦åˆ™ Stop åæ— æ³•æ¢å¤åºåˆ—å¸§æ’­æ”¾å‰çš„çº¹ç†çŠ¶æ€ï¼Œ
+            // ç¬¬äºŒæ¬¡ Play æ—¶ TakeSnapshot ä¼šæ‹åˆ°ä¸Šæ¬¡æ’­æ”¾æ®‹ç•™çš„æœ€åä¸€å¸§çº¹ç†ã€‚
             m_SnapshotTexture = sr.Texture;
             m_SnapshotTexCoordMin = sr.UVMin;
             m_SnapshotTexCoordMax = sr.UVMax;
@@ -313,7 +313,7 @@ namespace Wheatear {
         {
             auto& sr = m_Entity.GetComponent<SpriteRendererComponent>();
             sr.Color = m_SnapshotColor;
-            // BUG FIX #2: »Ö¸´ÎÆÀíºÍ UV£¬È·±£Ô¤ÀÀ½áÊøºóÊµÌå»Øµ½Ô­Ê¼Íâ¹Û
+            // BUG FIX #2: æ¢å¤çº¹ç†å’Œ UVï¼Œç¡®ä¿é¢„è§ˆç»“æŸåå®ä½“å›åˆ°åŸå§‹å¤–è§‚
             sr.Texture = m_SnapshotTexture;
             sr.UVMin = m_SnapshotTexCoordMin;
             sr.UVMax = m_SnapshotTexCoordMax;
@@ -340,32 +340,32 @@ namespace Wheatear {
             m_Scene->SetAnimationEditorPreviewActive(false);
     }
 
-    // ¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T
-    //  Scrub£¨ÍÏ¶¯Ê±¼äÖá£©Ê±Ö÷¶¯´¥·¢¿ìÕÕ + Sync
-    //  BUG FIX #1: Ìá¹©Ò»¸ö×¨ÓÃº¯Êı£¬ÈÃÊ±¼äÖáµã»÷/ÍÏ¶¯Ò²×ß¿ìÕÕ±£»¤Á÷³Ì
-    // ¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T
+    // â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+    //  Scrubï¼ˆæ‹–åŠ¨æ—¶é—´è½´ï¼‰æ—¶ä¸»åŠ¨è§¦å‘å¿«ç…§ + Sync
+    //  BUG FIX #1: æä¾›ä¸€ä¸ªä¸“ç”¨å‡½æ•°ï¼Œè®©æ—¶é—´è½´ç‚¹å‡»/æ‹–åŠ¨ä¹Ÿèµ°å¿«ç…§ä¿æŠ¤æµç¨‹
+    // â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
     void AnimationEditorPanel::BeginScrub()
     {
-        // ¿ªÊ¼ÍÏ¶¯Ê±¼äÖáÊ±ÅÄ¿ìÕÕ£¨Èç¹û»¹Ã»ÓĞµÄ»°£©
+        // å¼€å§‹æ‹–åŠ¨æ—¶é—´è½´æ—¶æ‹å¿«ç…§ï¼ˆå¦‚æœè¿˜æ²¡æœ‰çš„è¯ï¼‰
         TakeSnapshot();
         m_IsScrubbing = true;
-        // ÖØĞÂ¼¤»îÔ¤ÀÀÄ£Ê½£¬·ÀÖ¹ Scene::OnUpdateEditor ¸²¸Ç UV
+        // é‡æ–°æ¿€æ´»é¢„è§ˆæ¨¡å¼ï¼Œé˜²æ­¢ Scene::OnUpdateEditor è¦†ç›– UV
         if (m_Scene)
             m_Scene->SetAnimationEditorPreviewActive(true);
     }
 
     void AnimationEditorPanel::EndScrub()
     {
-        // ËÉ¿ªÊó±êºóÍ£ÁôÔÚµ±Ç°Ê±¼ä£¬²»×Ô¶¯»Ö¸´¿ìÕÕ
-        // £¨ÓÃ»§¿ÉÄÜÏë²é¿´Ä³Ò»Ö¡µÄ×´Ì¬£©
-        // ¿ìÕÕ½«ÔÚÏÂ´Î StopPreview / ÇĞ»» Clip / ÇĞ»» Entity Ê±»Ö¸´
+        // æ¾å¼€é¼ æ ‡ååœç•™åœ¨å½“å‰æ—¶é—´ï¼Œä¸è‡ªåŠ¨æ¢å¤å¿«ç…§
+        // ï¼ˆç”¨æˆ·å¯èƒ½æƒ³æŸ¥çœ‹æŸä¸€å¸§çš„çŠ¶æ€ï¼‰
+        // å¿«ç…§å°†åœ¨ä¸‹æ¬¡ StopPreview / åˆ‡æ¢ Clip / åˆ‡æ¢ Entity æ—¶æ¢å¤
         m_IsScrubbing = false;
     }
 
-    // ¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T
-    //  Ö÷Èë¿Ú
-    // ¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T
+    // â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+    //  ä¸»å…¥å£
+    // â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
     void AnimationEditorPanel::OnImGuiRender(Timestep ts)
     {
@@ -378,7 +378,7 @@ namespace Wheatear {
             return;
         }
 
-        // Ô¤ÀÀ²¥·ÅÍÆ½øÊ±¼ä
+        // é¢„è§ˆæ’­æ”¾æ¨è¿›æ—¶é—´
         if (m_IsPlaying)
         {
             auto clip = GetCurrentClip();
@@ -396,8 +396,8 @@ namespace Wheatear {
             }
         }
 
-        // BUG FIX #1: SyncPreviewToEntity ÄÚ²¿ÒÑ×ö m_HasSnapshot ÊØÎÀ£¬
-        // Ö»ÓĞÔÚ¿ìÕÕ´æÔÚ£¨¼´ÓÃ»§ÒÑ´¥·¢Ô¤ÀÀ/Scrub£©Ê±²ÅĞ´»Ø×é¼ş¡£
+        // BUG FIX #1: SyncPreviewToEntity å†…éƒ¨å·²åš m_HasSnapshot å®ˆå«ï¼Œ
+        // åªæœ‰åœ¨å¿«ç…§å­˜åœ¨ï¼ˆå³ç”¨æˆ·å·²è§¦å‘é¢„è§ˆ/Scrubï¼‰æ—¶æ‰å†™å›ç»„ä»¶ã€‚
         SyncPreviewToEntity();
 
         DrawToolbar();
@@ -411,15 +411,15 @@ namespace Wheatear {
         ImGui::End();
     }
 
-    // ¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T
-    //  ¹¤¾ßÀ¸
-    // ¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T
+    // â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+    //  å·¥å…·æ 
+    // â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
     void AnimationEditorPanel::DrawToolbar()
     {
         if (!m_Animator) return;
 
-        // ©¤©¤ µÚÒ»ĞĞ£ºÊµÌåÃû + Clip ¹ÜÀí ©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤
+        // â”€â”€ ç¬¬ä¸€è¡Œï¼šå®ä½“å + Clip ç®¡ç† â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
         ImGui::TextDisabled("Entity:");
         ImGui::SameLine();
         ImGui::Text("%s", m_Entity.GetName().c_str());
@@ -457,7 +457,7 @@ namespace Wheatear {
                 bool sel = (name == m_CurrentClipName);
                 if (ImGui::Selectable(name.c_str(), sel))
                 {
-                    // ÇĞ»» Clip Ê±»Ö¸´¿ìÕÕ£¬·ÀÖ¹¿ç Clip ÎÛÈ¾
+                    // åˆ‡æ¢ Clip æ—¶æ¢å¤å¿«ç…§ï¼Œé˜²æ­¢è·¨ Clip æ±¡æŸ“
                     StopPreview();
                     m_CurrentClipName = name;
                     //m_Animator->CurrentClipName = name;
@@ -469,7 +469,7 @@ namespace Wheatear {
             ImGui::EndCombo();
         }
 
-        // Clip ÖØÃüÃû
+        // Clip é‡å‘½å
         ImGui::SameLine();
         ImGui::SetNextItemWidth(120.0f);
         static char s_RenameBuffer[64] = {};
@@ -520,7 +520,7 @@ namespace Wheatear {
             ImGui::SameLine();
             if (ImGui::Button("Delete Clip"))
             {
-                StopPreview(); // BUG FIX #1: É¾³ı Clip Ç°ÏÈ»Ö¸´¿ìÕÕ
+                StopPreview(); // BUG FIX #1: åˆ é™¤ Clip å‰å…ˆæ¢å¤å¿«ç…§
                 m_AtlasConfigs.erase(m_CurrentClipName);
                 m_Animator->Clips.erase(m_CurrentClipName);
                 if (m_Animator->CurrentClipName == m_CurrentClipName)
@@ -536,7 +536,7 @@ namespace Wheatear {
         auto clip = GetCurrentClip();
         if (!clip) return;
 
-        // ©¤©¤ µÚ¶şĞĞ£º²¥·Å¿ØÖÆ ©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤
+        // â”€â”€ ç¬¬äºŒè¡Œï¼šæ’­æ”¾æ§åˆ¶ â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
         ImGui::Spacing();
 
         if (m_IsPlaying)
@@ -547,12 +547,12 @@ namespace Wheatear {
         {
             if (ImGui::Button(">  Play"))
             {
-                TakeSnapshot(); // Ã»¿ìÕÕ²ÅÅÄ£¬ÒÑÓĞ¿ìÕÕ²»¸²¸Ç
+                TakeSnapshot(); // æ²¡å¿«ç…§æ‰æ‹ï¼Œå·²æœ‰å¿«ç…§ä¸è¦†ç›–
 
                 m_IsPlaying = true;
                 if (m_PlaybackTime >= clip->GetTotalDuration())
                     m_PlaybackTime = 0.0f;
-                // ÖØĞÂ¼¤»îÔ¤ÀÀÄ£Ê½£¬·ÀÖ¹ Scene::OnUpdateEditor ¸²¸Ç UV
+                // é‡æ–°æ¿€æ´»é¢„è§ˆæ¨¡å¼ï¼Œé˜²æ­¢ Scene::OnUpdateEditor è¦†ç›– UV
                 if (m_Scene)
                     m_Scene->SetAnimationEditorPreviewActive(true);
             }
@@ -595,7 +595,7 @@ namespace Wheatear {
         ImGui::SetNextItemWidth(100.0f);
         ImGui::SliderFloat("##zoom", &m_PixelsPerSecond, 40.0f, 400.0f, "%.0fpx/s");
 
-        // ©¤©¤ µÚÈıĞĞ£ºAdd Track ©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤
+        // â”€â”€ ç¬¬ä¸‰è¡Œï¼šAdd Track â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
         ImGui::Spacing();
 
         static const AnimatedProperty kAllProperties[] = {
@@ -638,9 +638,9 @@ namespace Wheatear {
         }
     }
 
-    // ¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T
-    //  Ê±¼äÖáÖ÷Ìå
-    // ¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T
+    // â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+    //  æ—¶é—´è½´ä¸»ä½“
+    // â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
     void AnimationEditorPanel::DrawTimeline()
     {
@@ -656,7 +656,7 @@ namespace Wheatear {
         const int   trackCount = 1 + (int)clip->GetPropertyTracks().size();
         const float totalHeight = kRulerHeight + trackCount * kTrackHeight + 4.0f;
 
-        // ©¤©¤ ×ó²à±êÇ©ÁĞ ©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤
+        // â”€â”€ å·¦ä¾§æ ‡ç­¾åˆ— â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
         ImGui::BeginChild("##labels",
             ImVec2(kLabelWidth, totalHeight + 20.0f), false,
             ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse);
@@ -688,7 +688,7 @@ namespace Wheatear {
 
         ImGui::SameLine(0, 0);
 
-        // ©¤©¤ ÓÒ²àÊ±¼äÖá£¨¿ÉºáÏò¹ö¶¯£©©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤
+        // â”€â”€ å³ä¾§æ—¶é—´è½´ï¼ˆå¯æ¨ªå‘æ»šåŠ¨ï¼‰â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
         ImGui::BeginChild("##timeline_scroll",
             ImVec2(0, totalHeight + 20.0f), false,
             ImGuiWindowFlags_HorizontalScrollbar);
@@ -703,7 +703,7 @@ namespace Wheatear {
 
             float trackY = origin.y;
 
-            // ©¤©¤ ±ê³ß±³¾° ©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤
+            // â”€â”€ æ ‡å°ºèƒŒæ™¯ â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
             dl->AddRectFilled(
                 ImVec2(origin.x, trackY),
                 ImVec2(origin.x + totalWidth, trackY + kRulerHeight),
@@ -729,13 +729,13 @@ namespace Wheatear {
                 }
             }
 
-            // ±ê³ßµã»÷/ÍÏ¶¯Ìø×ª
+            // æ ‡å°ºç‚¹å‡»/æ‹–åŠ¨è·³è½¬
             ImGui::SetCursorScreenPos(ImVec2(ImGui::GetWindowPos().x, origin.y));
             ImGui::InvisibleButton("##ruler_hit",
                 ImVec2(ImGui::GetWindowWidth(), kRulerHeight));
 
-            // BUG FIX #1: ÍÏ¶¯±ê³ßÊ±Ò²ĞèÒª×ß¿ìÕÕÁ÷³Ì£¬
-            // ·ñÔòÓÃ»§ Scrub Ê±»áÖ±½ÓÎÛÈ¾×é¼şÊı¾İ
+            // BUG FIX #1: æ‹–åŠ¨æ ‡å°ºæ—¶ä¹Ÿéœ€è¦èµ°å¿«ç…§æµç¨‹ï¼Œ
+            // å¦åˆ™ç”¨æˆ· Scrub æ—¶ä¼šç›´æ¥æ±¡æŸ“ç»„ä»¶æ•°æ®
             if (ImGui::IsItemActivated())
                 BeginScrub();
 
@@ -751,7 +751,7 @@ namespace Wheatear {
             if (ImGui::IsItemDeactivated())
                 EndScrub();
 
-            // ¹öÂÖËõ·Å
+            // æ»šè½®ç¼©æ”¾
             if (ImGui::IsWindowHovered())
             {
                 float wheel = ImGui::GetIO().MouseWheel;
@@ -762,11 +762,11 @@ namespace Wheatear {
 
             trackY += kRulerHeight;
 
-            // ©¤©¤ Frames ¹ìµÀ ©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤
+            // â”€â”€ Frames è½¨é“ â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
             DrawFrameTrack(ImVec2(origin.x, trackY), kTrackHeight);
             trackY += kTrackHeight;
 
-            // ©¤©¤ ÊôĞÔ¹ìµÀ ©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤
+            // â”€â”€ å±æ€§è½¨é“ â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
             auto& tracks = clip->GetPropertyTracks();
             for (int ti = 0; ti < (int)tracks.size(); ti++)
             {
@@ -774,7 +774,7 @@ namespace Wheatear {
                 trackY += kTrackHeight;
             }
 
-            // ©¤©¤ Ê±¼äÖ¸ÕëºìÏß ©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤
+            // â”€â”€ æ—¶é—´æŒ‡é’ˆçº¢çº¿ â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
             float cursorX = origin.x + m_PlaybackTime * m_PixelsPerSecond;
             dl->AddLine(
                 ImVec2(cursorX, origin.y),
@@ -789,9 +789,9 @@ namespace Wheatear {
         ImGui::EndChild();
     }
 
-    // ¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T
-    //  Ö¡ĞòÁĞ¹ìµÀ
-    // ¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T
+    // â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+    //  å¸§åºåˆ—è½¨é“
+    // â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
     void AnimationEditorPanel::DrawFrameTrack(ImVec2 origin, float trackHeight)
     {
@@ -809,7 +809,7 @@ namespace Wheatear {
         auto& frames = clip->GetFrames();
         float x = origin.x;
 
-        // Ô¤ÏÈËã³öµ±Ç°Ö¡Ë÷Òı£¬±ÜÃâÔÚÄÚ²ãÑ­»·ÖØ¸´¼ÆËã
+        // é¢„å…ˆç®—å‡ºå½“å‰å¸§ç´¢å¼•ï¼Œé¿å…åœ¨å†…å±‚å¾ªç¯é‡å¤è®¡ç®—
         float elapsed = 0.0f;
         int currentFrameIndex = (int)frames.size() - 1;
         {
@@ -847,9 +847,9 @@ namespace Wheatear {
             if (frame.Texture && w > 4.0f)
             {
                 dl->AddImageRounded(
-                    reinterpret_cast<ImTextureID>(static_cast<uintptr_t>(frame.Texture->GetRendererID())),
+                    static_cast<ImTextureID>(static_cast<uintptr_t>(frame.Texture->GetRendererID())),
                     cellMin, cellMax,
-                    // ×¢Òâ´¹Ö±·­×ªÏÔÊ¾Í¼Æ¬
+                    // æ³¨æ„å‚ç›´ç¿»è½¬æ˜¾ç¤ºå›¾ç‰‡
                     ImVec2(frame.TexCoordMin.x, frame.TexCoordMax.y),
                     ImVec2(frame.TexCoordMax.x, frame.TexCoordMin.y),
                     IM_COL32_WHITE, 2.0f);
@@ -875,9 +875,9 @@ namespace Wheatear {
         }
     }
 
-    // ¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T
-    //  ÊôĞÔ¹ìµÀ
-    // ¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T
+    // â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+    //  å±æ€§è½¨é“
+    // â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
     void AnimationEditorPanel::DrawPropertyTrack(ImVec2 origin, float trackHeight, int trackIndex)
     {
@@ -916,8 +916,8 @@ namespace Wheatear {
                     IM_COL32(150, 200, 255, 120), 1.5f);
             }
 
-            // BUG FIX #4: ÊÕ¼¯´ıÉ¾³ıµÄ¹Ø¼üÖ¡Ë÷Òı£¬ÔÚÑ­»·½áÊøºóÔÙÉ¾³ı£¬
-            // ·ÀÖ¹ÔÚ±éÀúÊ±ĞŞ¸ÄÈİÆ÷µ¼ÖÂµü´úÆ÷Ê§Ğ§/Ô½½ç±ÀÀ£¡£
+            // BUG FIX #4: æ”¶é›†å¾…åˆ é™¤çš„å…³é”®å¸§ç´¢å¼•ï¼Œåœ¨å¾ªç¯ç»“æŸåå†åˆ é™¤ï¼Œ
+            // é˜²æ­¢åœ¨éå†æ—¶ä¿®æ”¹å®¹å™¨å¯¼è‡´è¿­ä»£å™¨å¤±æ•ˆ/è¶Šç•Œå´©æºƒã€‚
             int kfToDelete = -1;
 
             for (int ki = 0; ki < (int)kfs.size(); ki++)
@@ -962,18 +962,18 @@ namespace Wheatear {
                     DrawInterpModeCombo(kf.Mode);
                     ImGui::Separator();
                     if (ImGui::MenuItem("Delete"))
-                        kfToDelete = ki; // BUG FIX #4: ÑÓ³ÙÉ¾³ı
+                        kfToDelete = ki; // BUG FIX #4: å»¶è¿Ÿåˆ é™¤
                     ImGui::EndPopup();
                 }
 
                 ImGui::PopID();
             }
 
-            // BUG FIX #4: Ñ­»·½áÊøºóÔÙÖ´ĞĞÉ¾³ı
+            // BUG FIX #4: å¾ªç¯ç»“æŸåå†æ‰§è¡Œåˆ é™¤
             if (kfToDelete >= 0)
                 track->RemoveKeyframe(kfToDelete);
 
-            // Ë«»÷¿Õ°×´¦Ìí¼Ó¹Ø¼üÖ¡
+            // åŒå‡»ç©ºç™½å¤„æ·»åŠ å…³é”®å¸§
             ImGui::SetCursorScreenPos(origin);
             ImGui::InvisibleButton(
                 ("##track_bg" + std::to_string(trackIndex)).c_str(),
@@ -998,7 +998,7 @@ namespace Wheatear {
                     IM_COL32(255, 200, 100, 120), 1.5f);
             }
 
-            // BUG FIX #4: Í¬ÑùÑÓ³ÙÉ¾³ı
+            // BUG FIX #4: åŒæ ·å»¶è¿Ÿåˆ é™¤
             int kfToDelete = -1;
 
             for (int ki = 0; ki < (int)kfs.size(); ki++)
@@ -1047,18 +1047,18 @@ namespace Wheatear {
                     DrawInterpModeCombo(kf.Mode);
                     ImGui::Separator();
                     if (ImGui::MenuItem("Delete"))
-                        kfToDelete = ki; // BUG FIX #4: ÑÓ³ÙÉ¾³ı
+                        kfToDelete = ki; // BUG FIX #4: å»¶è¿Ÿåˆ é™¤
                     ImGui::EndPopup();
                 }
 
                 ImGui::PopID();
             }
 
-            // BUG FIX #4: Ñ­»·½áÊøºóÔÙÖ´ĞĞÉ¾³ı
+            // BUG FIX #4: å¾ªç¯ç»“æŸåå†æ‰§è¡Œåˆ é™¤
             if (kfToDelete >= 0)
                 track->RemoveKeyframe(kfToDelete);
 
-            // Ë«»÷Ìí¼Ó
+            // åŒå‡»æ·»åŠ 
             ImGui::SetCursorScreenPos(origin);
             ImGui::InvisibleButton(
                 ("##track_bg4_" + std::to_string(trackIndex)).c_str(),
@@ -1071,9 +1071,9 @@ namespace Wheatear {
         }
     }
 
-    // ¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T
+    // â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
     //  Atlas Generator
-    // ¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T
+    // â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
     void AnimationEditorPanel::DrawAtlasSection()
     {
@@ -1086,10 +1086,10 @@ namespace Wheatear {
         AtlasConfig& atlas = m_AtlasConfigs[m_CurrentClipName];
 
         ImTextureID atlasThumb = atlas.Texture
-            ? reinterpret_cast<ImTextureID>(static_cast<uintptr_t>(atlas.Texture->GetRendererID()))
-            : reinterpret_cast<ImTextureID>(0);
+            ? static_cast<ImTextureID>(static_cast<uintptr_t>(atlas.Texture->GetRendererID()))
+            : static_cast<ImTextureID>(0);
 
-        // ×¢Òâµßµ¹Í¼Æ¬ÏÔÊ¾
+        // æ³¨æ„é¢ å€’å›¾ç‰‡æ˜¾ç¤º
         ImGui::Image(atlasThumb, ImVec2(60, 60), ImVec2(0, 1), ImVec2(1, 0));
         if (ImGui::BeginDragDropTarget())
         {
@@ -1152,9 +1152,9 @@ namespace Wheatear {
         }
     }
 
-    // ¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T
-    //  Frames ÁĞ±í
-    // ¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T
+    // â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+    //  Frames åˆ—è¡¨
+    // â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
     void AnimationEditorPanel::DrawFramesSection()
     {
@@ -1173,14 +1173,14 @@ namespace Wheatear {
             auto& frame = frames[i];
 
             ImTextureID thumbID = frame.Texture
-                ? reinterpret_cast<ImTextureID>(
+                ? static_cast<ImTextureID>(
                     static_cast<uintptr_t>(frame.Texture->GetRendererID()))
-                : reinterpret_cast<ImTextureID>(0);
+                : static_cast<ImTextureID>(0);
 
-            // ×¢Òâµßµ¹Í¼Æ¬ÏÔÊ¾
+            // æ³¨æ„é¢ å€’å›¾ç‰‡æ˜¾ç¤º
             ImGui::Image(thumbID, ImVec2(48, 48),
-                ImVec2(frame.TexCoordMin.x, frame.TexCoordMax.y), // ÕâÀï¸ÄÓÃ Max.y
-                ImVec2(frame.TexCoordMax.x, frame.TexCoordMin.y)  // ÕâÀï¸ÄÓÃ Min.y
+                ImVec2(frame.TexCoordMin.x, frame.TexCoordMax.y), // è¿™é‡Œæ”¹ç”¨ Max.y
+                ImVec2(frame.TexCoordMax.x, frame.TexCoordMin.y)  // è¿™é‡Œæ”¹ç”¨ Min.y
             );
 
             if (ImGui::BeginDragDropTarget())

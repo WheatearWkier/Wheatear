@@ -1,57 +1,68 @@
 schema: wheatear.side_combat.tuning.v1
-version: 0.6.0
+version: 0.8.0
 
-# 玩家手感。跳跃高度主要由 jumpImpulse 决定，gravity 越高下落越快。
+# 战斗手感总原则：
+# - 这类带纵深横板动作不使用通用物理引擎自动驱动跳跃/浮空。
+# - X/Y 地面移动、RuntimeAirHeight、重力、滞空、受击硬直、击飞全部由本表和战斗状态机控制。
+# - 跳跃高度主要看 jumpImpulse；下落速度主要看 gravity；空中连击滞空主要看 attackerAirImpulse / targetAirFallStep / hitStun。
 player:
-  moveSpeed: 5.4
+  moveSpeed: 5.55
   maxJumps: 1
-  jumpImpulse: 12.6
-  gravity: 16.2
-  airControl: 13.0
+  jumpImpulse: 13.2
+  gravity: 15.0
+  airControl: 14.4
+  jumpBufferTime: 0.16
+  coyoteTime: 0.10
   laneSpeedScale: 0.72
-  laneAcceleration: 30.0
-  groundAcceleration: 40.0
-  groundFriction: 18.0
-  basicCooldown: 0.19
-  basicFinisherExtraCooldown: 0.08
-  launcherCooldown: 0.42
-  magicBoltCooldown: 0.64
-  allySupportCooldown: 4.2
-  basicChainWindow: 0.72
-  launcherChainWindow: 0.82
-  magicChainWindow: 0.78
+  laneAcceleration: 32.0
+  groundAcceleration: 44.0
+  groundFriction: 20.0
+  basicCooldown: 0.17
+  basicFinisherExtraCooldown: 0.07
+  launcherCooldown: 0.38
+  magicBoltCooldown: 0.62
+  allySupportCooldown: 4.0
+  basicChainWindow: 0.76
+  launcherChainWindow: 0.86
+  magicChainWindow: 0.82
   supportChainWindow: 1.0
 
-# 通用战斗规则。defenseBase 越大，防御减伤越温和。
 combat:
-  comboDropDelay: 1.15
-  hitInvulnerableTime: 0.06
+  comboDropDelay: 1.20
+  hitInvulnerableTime: 0.035
   defenseBase: 100.0
   minDamage: 1.0
 
-# 空连高度资源。空中攻击命中会滞空，但仍会按 fallStep 慢慢下坠。
+feedback:
+  hitPauseTimeScale: 0.10
+  jumpSound: assets/vertical_slice/side_combat/audio/jump.wav
+  landSound: assets/vertical_slice/side_combat/audio/land.wav
+  jumpSoundVolume: 0.38
+  landSoundVolume: 0.40
+
+# 空中普攻是基础连击核心：每次命中都会给玩家一点上抬和滞空，但双方仍会慢慢下降。
+# 断限追击后续作为高手机制开放，用来重置空中行动和再次抬高连击高度。
 airCombo:
   airActionLimit: 3
   airActionLimitAfterBreak: 3
   breakLimitEnabled: false
   breakLimitDebugKeyEnabled: false
   showBreakLimitHint: false
-  airBasicCooldown: 0.16
-  airChaseCooldown: 0.36
+  airBasicCooldown: 0.14
+  airChaseCooldown: 0.32
   breakLimitCooldown: 3.0
   breakLimitMinCombo: 4
   breakLimitGaugeCost: 1.0
   magicSwordGaugeMax: 3.0
   gaugeGainGroundHit: 0.10
   gaugeGainAirHit: 0.16
-  breakLimitMaxHeight: 2.85
-  breakLimitFallingVelocity: 2.2
-  breakLimitHangImpulse: 2.9
-  breakLimitHeightBoost: 0.34
+  breakLimitMaxHeight: 3.00
+  breakLimitFallingVelocity: 2.3
+  breakLimitHangImpulse: 3.1
+  breakLimitHeightBoost: 0.36
   groundThreatHeight: 1.25
-  highAirSafetyHeight: 2.35
+  highAirSafetyHeight: 2.45
 
-# Boss 保护条。满槽后 Boss 强制脱离连击；后期断限用于压回保护条。
 protection:
   bossProtectionMax: 100.0
   bossProtectionDecayPerSecond: 16.0
@@ -63,9 +74,8 @@ protection:
   showBossProtectionHud: false
   showCombatStateHud: false
 
-# 敌人 AI 与 Boss 阶段参数。
 enemy:
-  initialAttackDelay: 0.35
+  initialAttackDelay: 0.45
   attackRangePadding: 0.45
   laneAttackPadding: 0.28
   bossPreferredRangeBonus: 0.45
@@ -82,17 +92,16 @@ enemy:
     aggroRange: 12.0
     attackRange: 1.55
     preferredRange: 1.2
-    attackInterval: 1.18
+    attackInterval: 1.24
     laneTolerance: 0.58
     midHealthThreshold: 0.68
     lowHealthThreshold: 0.36
-    midAttackInterval: 0.96
-    lowAttackInterval: 0.78
+    midAttackInterval: 1.02
+    lowAttackInterval: 0.84
     chargeDistance: 1.8
     shockwaveDistance: 2.0
     chargeSpeed: 5.8
 
-# 掉落物拾取手感。
 pickup:
   pickupRadius: 0.45
   attractRadius: 2.25
@@ -109,57 +118,89 @@ visuals:
   shadowMinAlpha: 0.20
   shadowMaxAlpha: 0.44
   shadowAirFadeHeight: 3.8
+  playerAnimations:
+    idle: { pattern: assets/vertical_slice/side_combat/characters/player_idle_{frame}.png, frameCount: 4, frameRate: 7.0, loop: true }
+    run: { pattern: assets/vertical_slice/side_combat/characters/player_run_{frame}.png, frameCount: 6, frameRate: 12.0, loop: true }
+    jump: { pattern: assets/vertical_slice/side_combat/characters/player_jump_{frame}.png, frameCount: 3, frameRate: 10.0, loop: false }
+    fall: { pattern: assets/vertical_slice/side_combat/characters/player_fall_{frame}.png, frameCount: 3, frameRate: 9.0, loop: true }
+    hit: { pattern: assets/vertical_slice/side_combat/characters/player_hit_{frame}.png, frameCount: 3, frameRate: 12.0, loop: false }
+    dead: { pattern: assets/vertical_slice/side_combat/characters/player_dead_{frame}.png, frameCount: 4, frameRate: 7.0, loop: false }
+    basic1: { pattern: assets/vertical_slice/side_combat/characters/player_basic1_{frame}.png, frameCount: 4, frameRate: 18.0, loop: false }
+    basic2: { pattern: assets/vertical_slice/side_combat/characters/player_basic2_{frame}.png, frameCount: 4, frameRate: 18.0, loop: false }
+    basic3: { pattern: assets/vertical_slice/side_combat/characters/player_basic3_{frame}.png, frameCount: 5, frameRate: 18.0, loop: false }
+    air_basic: { pattern: assets/vertical_slice/side_combat/characters/player_air_basic_{frame}.png, frameCount: 4, frameRate: 18.0, loop: false }
+    launcher: { pattern: assets/vertical_slice/side_combat/characters/player_launcher_{frame}.png, frameCount: 5, frameRate: 18.0, loop: false }
+    air_chase: { pattern: assets/vertical_slice/side_combat/characters/player_air_chase_{frame}.png, frameCount: 4, frameRate: 18.0, loop: false }
+    magic_bolt: { pattern: assets/vertical_slice/side_combat/characters/player_magic_{frame}.png, frameCount: 4, frameRate: 16.0, loop: false }
+    ally_support: { pattern: assets/vertical_slice/side_combat/characters/player_support_{frame}.png, frameCount: 4, frameRate: 14.0, loop: false }
+    break_limit: { pattern: assets/vertical_slice/side_combat/characters/player_break_limit_{frame}.png, frameCount: 5, frameRate: 18.0, loop: false }
+  gruntAnimations:
+    idle: { pattern: assets/vertical_slice/side_combat/enemies/claw_beast_idle_{frame}.png, frameCount: 4, frameRate: 7.0, loop: true }
+    run: { pattern: assets/vertical_slice/side_combat/enemies/claw_beast_run_{frame}.png, frameCount: 5, frameRate: 11.0, loop: true }
+    hit: { pattern: assets/vertical_slice/side_combat/enemies/claw_beast_hit_{frame}.png, frameCount: 3, frameRate: 12.0, loop: false }
+    fall: { pattern: assets/vertical_slice/side_combat/enemies/claw_beast_fall_{frame}.png, frameCount: 3, frameRate: 9.0, loop: true }
+    dead: { pattern: assets/vertical_slice/side_combat/enemies/claw_beast_dead_{frame}.png, frameCount: 4, frameRate: 7.0, loop: false }
+    enemy_claw: { pattern: assets/vertical_slice/side_combat/enemies/claw_beast_attack_{frame}.png, frameCount: 4, frameRate: 14.0, loop: false }
+  bossAnimations:
+    idle: { pattern: assets/vertical_slice/side_combat/enemies/bear_idle_{frame}.png, frameCount: 4, frameRate: 6.0, loop: true }
+    run: { pattern: assets/vertical_slice/side_combat/enemies/bear_walk_{frame}.png, frameCount: 5, frameRate: 8.0, loop: true }
+    hit: { pattern: assets/vertical_slice/side_combat/enemies/bear_hit_{frame}.png, frameCount: 3, frameRate: 10.0, loop: false }
+    fall: { pattern: assets/vertical_slice/side_combat/enemies/bear_fall_{frame}.png, frameCount: 3, frameRate: 8.0, loop: true }
+    dead: { pattern: assets/vertical_slice/side_combat/enemies/bear_dead_{frame}.png, frameCount: 4, frameRate: 7.0, loop: false }
+    enemy_claw: { pattern: assets/vertical_slice/side_combat/enemies/bear_attack_{frame}.png, frameCount: 4, frameRate: 12.0, loop: false }
+    bear_charge: { pattern: assets/vertical_slice/side_combat/enemies/bear_charge_anim_{frame}.png, frameCount: 4, frameRate: 12.0, loop: false }
+    bear_shockwave: { pattern: assets/vertical_slice/side_combat/enemies/bear_shockwave_anim_{frame}.png, frameCount: 4, frameRate: 12.0, loop: false }
 
 reactions:
-  bossLaunchBonus: 1.42
+  bossLaunchBonus: 1.46
 
 skills:
   basic_attack:
-    displayName: 三段斩
-    input: J
-    comboRole: 地面起手 / 基础续连
+    displayName: "三段斩"
+    input: "J"
+    comboRole: "地面起手 / 基础续连"
     attackIds: [basic1, basic2, basic3]
     unlockChapter: 2
     coreMove: true
   air_basic:
-    displayName: 跳斩
-    input: 空中 J
-    comboRole: 前期默认空中续连
+    displayName: "跳斩"
+    input: "空中 J"
+    comboRole: "前期默认空中续连"
     attackIds: [air_basic]
     unlockChapter: 2
     coreMove: true
   launcher:
-    displayName: 裂空上挑
-    input: K
-    comboRole: 地面浮空起手
+    displayName: "裂空上挑"
+    input: "S+J"
+    comboRole: "地面浮空起手"
     attackIds: [launcher]
     unlockChapter: 2
     coreMove: true
   air_chase:
-    displayName: 空中追斩
-    input: 空中 K
-    comboRole: 空中续连 / 低空补救
+    displayName: "空中追斩"
+    input: "空中 S+J"
+    comboRole: "空中续连 / 低空补救"
     attackIds: [air_chase]
     unlockChapter: 2
     coreMove: true
   magic_bolt:
-    displayName: 火球术
-    input: U
-    comboRole: 远程补 hit / 空中魔法续连
+    displayName: "火球术"
+    input: "U"
+    comboRole: "远程补 hit / 空中魔法续连"
     attackIds: [magic_bolt]
     unlockChapter: 2
     coreMove: true
   ally_support:
-    displayName: 真青梅支援
-    input: I
-    comboRole: 支援浮空 / 新手容错
+    displayName: "真青梅支援"
+    input: "I"
+    comboRole: "支援浮空 / 新手容错"
     attackIds: [ally_support]
     unlockChapter: 2
     coreMove: true
   break_limit:
-    displayName: 断限追击
-    input: L
-    comboRole: Boss 保护临界时刷新空中行动
+    displayName: "断限追击"
+    input: "L"
+    comboRole: "Boss 保护临界时刷新空中行动"
     attackIds: [break_limit]
     unlockChapter: 7
     coreMove: false
@@ -168,7 +209,7 @@ progression:
   defaultProfile: CH02_MAIN_BearAwakening
   profiles:
     CH02_MAIN_BearAwakening:
-      displayName: 第二章：魔剑觉醒
+      displayName: "第二章：魔剑觉醒"
       chapter: 2
       unlockedSkills: [basic_attack, air_basic, launcher, air_chase, magic_bolt, ally_support]
       debugSkills: [break_limit]
@@ -177,7 +218,7 @@ progression:
         combatStateHud: false
         breakLimitHint: false
     CH02_MAT_BeastPath:
-      displayName: 第二章：黑林兽道
+      displayName: "第二章：黑林兽道"
       chapter: 2
       unlockedSkills: [basic_attack, air_basic, launcher, air_chase, magic_bolt, ally_support]
       debugSkills: [break_limit]
@@ -186,7 +227,7 @@ progression:
         combatStateHud: false
         breakLimitHint: false
     CH06_MAIN_MageLair:
-      displayName: 第六章：魔法师老巢
+      displayName: "第六章：魔法师老巢"
       chapter: 6
       unlockedSkills: [basic_attack, air_basic, launcher, air_chase, magic_bolt, ally_support]
       debugSkills: []
@@ -195,7 +236,7 @@ progression:
         combatStateHud: false
         breakLimitHint: false
     CH07_MAIN_PalaceAssault:
-      displayName: 第七章：进攻王宫
+      displayName: "第七章：进攻王宫"
       chapter: 7
       unlockedSkills: [basic_attack, air_basic, launcher, air_chase, magic_bolt, ally_support, break_limit]
       debugSkills: []
@@ -215,13 +256,24 @@ attacks:
     damageScale: 0.70
     damageFlat: 10.0
     lifetime: 0.15
-    hitStun: 0.30
+    startup: 0.055
+    recovery: 0.09
+    cancelWindowStart: 0.11
+    cancelWindowEnd: 0.25
+    movementScale: 0.60
+    hitStun: 0.31
     attackerAirImpulse: 0.0
     protectionGain: 4.0
     destroyOnHit: true
     textureFramePattern: assets/vertical_slice/side_combat/effects/slash_basic_{frame}.png
     textureFrameCount: 4
-    textureFrameRate: 24.0
+    textureFrameRate: 26.0
+    swingSound: assets/vertical_slice/side_combat/audio/swing_light.wav
+    hitSound: assets/vertical_slice/side_combat/audio/hit_light.wav
+    soundVolume: 0.44
+    hitPause: 0.035
+    cameraShake: 0.016
+    cameraShakeDuration: 0.060
 
   basic2:
     size: [1.48, 0.78]
@@ -233,142 +285,224 @@ attacks:
     damageScale: 0.78
     damageFlat: 11.0
     lifetime: 0.16
-    hitStun: 0.32
+    startup: 0.065
+    recovery: 0.105
+    cancelWindowStart: 0.12
+    cancelWindowEnd: 0.29
+    movementScale: 0.54
+    hitStun: 0.34
     attackerAirImpulse: 0.0
     protectionGain: 5.0
     destroyOnHit: true
     textureFramePattern: assets/vertical_slice/side_combat/effects/slash_basic_{frame}.png
     textureFrameCount: 4
-    textureFrameRate: 24.0
+    textureFrameRate: 26.0
+    swingSound: assets/vertical_slice/side_combat/audio/swing_light.wav
+    hitSound: assets/vertical_slice/side_combat/audio/hit_light.wav
+    soundVolume: 0.45
+    hitPause: 0.040
+    cameraShake: 0.018
+    cameraShakeDuration: 0.065
 
   basic3:
     size: [1.64, 0.88]
     offset: [1.02, 0.02]
     velocity: [0.0, 0.0]
-    launchVelocity: [2.25, 5.2]
+    launchVelocity: [2.25, 5.4]
     airHeight: 0.75
     airRange: 1.42
     damageScale: 0.96
     damageFlat: 13.0
     lifetime: 0.18
-    hitStun: 0.38
+    startup: 0.085
+    recovery: 0.16
+    cancelWindowStart: 0.18
+    cancelWindowEnd: 0.37
+    movementScale: 0.38
+    hitStun: 0.40
     attackerAirImpulse: 0.0
     protectionGain: 8.0
     destroyOnHit: true
     textureFramePattern: assets/vertical_slice/side_combat/effects/slash_basic_{frame}.png
     textureFrameCount: 4
-    textureFrameRate: 24.0
+    textureFrameRate: 26.0
+    swingSound: assets/vertical_slice/side_combat/audio/swing_heavy.wav
+    hitSound: assets/vertical_slice/side_combat/audio/hit_heavy.wav
+    soundVolume: 0.52
+    hitPause: 0.055
+    cameraShake: 0.028
+    cameraShakeDuration: 0.085
 
   air_basic:
     size: [1.42, 0.82]
     offset: [0.86, 0.04]
     velocity: [0.0, 0.0]
-    launchVelocity: [0.90, 2.65]
+    launchVelocity: [0.90, 3.05]
     airHeight: 0.18
-    airRange: 1.70
+    airRange: 1.74
     damageScale: 0.42
     damageFlat: 7.0
     lifetime: 0.14
-    hitStun: 0.44
-    attackerAirImpulse: 1.35
-    attackerAirFallStep: 0.05
-    targetAirFallStep: 0.03
+    startup: 0.035
+    recovery: 0.08
+    cancelWindowStart: 0.075
+    cancelWindowEnd: 0.22
+    movementScale: 0.92
+    hitStun: 0.48
+    attackerAirImpulse: 1.65
+    attackerAirFallStep: 0.04
+    targetAirFallStep: 0.025
     protectionGain: 7.0
     destroyOnHit: true
     textureFramePattern: assets/vertical_slice/side_combat/effects/slash_basic_{frame}.png
     textureFrameCount: 4
-    textureFrameRate: 24.0
+    textureFrameRate: 28.0
+    swingSound: assets/vertical_slice/side_combat/audio/swing_air.wav
+    hitSound: assets/vertical_slice/side_combat/audio/hit_air.wav
+    soundVolume: 0.42
+    hitPause: 0.032
+    cameraShake: 0.014
+    cameraShakeDuration: 0.052
 
   launcher:
     size: [1.12, 0.92]
     offset: [0.66, 0.02]
     velocity: [0.0, 0.0]
-    launchVelocity: [0.95, 11.2]
+    launchVelocity: [0.95, 12.4]
     airHeight: 1.02
-    airRange: 2.12
+    airRange: 2.18
     damageScale: 0.74
     damageFlat: 12.0
     lifetime: 0.23
-    hitStun: 0.64
-    attackerAirImpulse: 5.8
+    startup: 0.10
+    recovery: 0.18
+    cancelWindowStart: 0.19
+    cancelWindowEnd: 0.42
+    movementScale: 0.35
+    hitStun: 0.70
+    attackerAirImpulse: 6.4
     protectionGain: 12.0
     destroyOnHit: true
     textureFramePattern: assets/vertical_slice/side_combat/effects/slash_launcher_{frame}.png
     textureFrameCount: 5
-    textureFrameRate: 24.0
+    textureFrameRate: 26.0
+    swingSound: assets/vertical_slice/side_combat/audio/swing_upper.wav
+    hitSound: assets/vertical_slice/side_combat/audio/hit_launcher.wav
+    soundVolume: 0.54
+    hitPause: 0.065
+    cameraShake: 0.034
+    cameraShakeDuration: 0.095
 
   air_chase:
     size: [1.42, 0.96]
     offset: [0.84, 0.02]
     velocity: [0.0, 0.0]
-    launchVelocity: [0.80, 4.25]
+    launchVelocity: [0.80, 5.10]
     airHeight: 0.16
-    airRange: 2.00
+    airRange: 2.02
     damageScale: 0.58
     damageFlat: 10.0
     lifetime: 0.19
-    hitStun: 0.55
-    attackerAirImpulse: 1.85
-    attackerAirFallStep: 0.06
-    targetAirFallStep: 0.03
+    startup: 0.055
+    recovery: 0.12
+    cancelWindowStart: 0.10
+    cancelWindowEnd: 0.30
+    movementScale: 0.88
+    hitStun: 0.60
+    attackerAirImpulse: 2.35
+    attackerAirFallStep: 0.045
+    targetAirFallStep: 0.02
     protectionGain: 9.0
     destroyOnHit: true
     textureFramePattern: assets/vertical_slice/side_combat/effects/slash_launcher_{frame}.png
     textureFrameCount: 5
-    textureFrameRate: 24.0
+    textureFrameRate: 26.0
+    swingSound: assets/vertical_slice/side_combat/audio/swing_air.wav
+    hitSound: assets/vertical_slice/side_combat/audio/hit_air.wav
+    soundVolume: 0.48
+    hitPause: 0.046
+    cameraShake: 0.024
+    cameraShakeDuration: 0.075
 
   magic_bolt:
     size: [0.92, 0.58]
     offset: [0.86, 0.0]
-    velocity: [8.9, 0.0]
-    launchVelocity: [1.20, 3.6]
+    velocity: [9.2, 0.0]
+    launchVelocity: [1.20, 3.8]
     airHeight: 0.74
     airRange: 1.04
     damageScale: 0.70
     damageFlat: 11.0
     lifetime: 1.15
-    hitStun: 0.40
-    attackerAirImpulse: 0.85
-    attackerAirFallStep: 0.03
+    startup: 0.09
+    recovery: 0.18
+    cancelWindowStart: 0.16
+    cancelWindowEnd: 0.38
+    movementScale: 0.52
+    hitStun: 0.42
+    attackerAirImpulse: 0.95
+    attackerAirFallStep: 0.02
     targetAirFallStep: 0.02
     protectionGain: 5.0
     destroyOnHit: true
     textureFramePattern: assets/vertical_slice/side_combat/effects/magic_bolt_{frame}.png
     textureFrameCount: 4
-    textureFrameRate: 16.0
+    textureFrameRate: 18.0
+    swingSound: assets/vertical_slice/side_combat/audio/magic_cast.wav
+    hitSound: assets/vertical_slice/side_combat/audio/magic_hit.wav
+    soundVolume: 0.50
+    hitPause: 0.040
+    cameraShake: 0.018
+    cameraShakeDuration: 0.070
 
   ally_support:
     size: [1.42, 1.08]
     offset: [0.0, 0.0]
     velocity: [0.0, 0.0]
-    launchVelocity: [0.0, 8.6]
+    launchVelocity: [0.0, 9.2]
     airHeight: 1.02
-    airRange: 2.28
+    airRange: 2.30
     damageScale: 0.55
     damageFlat: 9.0
     lifetime: 0.36
-    hitStun: 0.70
-    attackerAirImpulse: 1.0
-    attackerAirFallStep: 0.02
+    startup: 0.16
+    recovery: 0.22
+    cancelWindowStart: 0.26
+    cancelWindowEnd: 0.58
+    movementScale: 0.72
+    hitStun: 0.72
+    attackerAirImpulse: 1.10
+    attackerAirFallStep: 0.015
     targetAirFallStep: 0.0
     protectionGain: 10.0
     destroyOnHit: false
     textureFramePattern: assets/vertical_slice/side_combat/effects/ally_support_{frame}.png
     textureFrameCount: 5
     textureFrameRate: 18.0
+    swingSound: assets/vertical_slice/side_combat/audio/support_cast.wav
+    hitSound: assets/vertical_slice/side_combat/audio/support_hit.wav
+    soundVolume: 0.50
+    hitPause: 0.052
+    cameraShake: 0.026
+    cameraShakeDuration: 0.085
 
   break_limit:
     size: [1.72, 1.30]
     offset: [0.62, 0.0]
     velocity: [0.0, 0.0]
-    launchVelocity: [0.35, 6.8]
+    launchVelocity: [0.35, 7.2]
     airHeight: 0.05
-    airRange: 1.78
+    airRange: 1.82
     damageScale: 0.34
     damageFlat: 6.0
     lifetime: 0.24
-    hitStun: 0.64
-    attackerAirImpulse: 2.9
+    startup: 0.035
+    recovery: 0.11
+    cancelWindowStart: 0.09
+    cancelWindowEnd: 0.27
+    movementScale: 0.94
+    hitStun: 0.66
+    attackerAirImpulse: 3.15
     attackerAirFallStep: 0.0
     targetAirFallStep: 0.0
     protectionGain: 0.0
@@ -376,6 +510,12 @@ attacks:
     textureFramePattern: assets/vertical_slice/side_combat/effects/ally_support_{frame}.png
     textureFrameCount: 5
     textureFrameRate: 22.0
+    swingSound: assets/vertical_slice/side_combat/audio/break_limit.wav
+    hitSound: assets/vertical_slice/side_combat/audio/hit_launcher.wav
+    soundVolume: 0.56
+    hitPause: 0.070
+    cameraShake: 0.040
+    cameraShakeDuration: 0.120
 
   enemy_claw:
     size: [1.24, 0.86]
@@ -387,11 +527,22 @@ attacks:
     damageScale: 0.64
     damageFlat: 8.0
     lifetime: 0.20
+    startup: 0.32
+    recovery: 0.42
+    cancelWindowStart: 0.0
+    cancelWindowEnd: 0.0
+    movementScale: 0.12
     hitStun: 0.34
     destroyOnHit: true
     textureFramePattern: assets/vertical_slice/side_combat/effects/enemy_claw_{frame}.png
     textureFrameCount: 3
     textureFrameRate: 18.0
+    swingSound: assets/vertical_slice/side_combat/audio/enemy_swing.wav
+    hitSound: assets/vertical_slice/side_combat/audio/player_hit.wav
+    soundVolume: 0.42
+    hitPause: 0.030
+    cameraShake: 0.016
+    cameraShakeDuration: 0.060
 
   bear_charge:
     size: [1.88, 0.94]
@@ -403,11 +554,22 @@ attacks:
     damageScale: 0.82
     damageFlat: 12.0
     lifetime: 0.34
+    startup: 0.48
+    recovery: 0.70
+    cancelWindowStart: 0.0
+    cancelWindowEnd: 0.0
+    movementScale: 0.08
     hitStun: 0.46
     destroyOnHit: false
     textureFramePattern: assets/vertical_slice/side_combat/effects/bear_charge_{frame}.png
     textureFrameCount: 3
     textureFrameRate: 16.0
+    swingSound: assets/vertical_slice/side_combat/audio/bear_charge.wav
+    hitSound: assets/vertical_slice/side_combat/audio/player_hit.wav
+    soundVolume: 0.50
+    hitPause: 0.045
+    cameraShake: 0.026
+    cameraShakeDuration: 0.085
 
   bear_shockwave:
     size: [1.02, 0.66]
@@ -419,8 +581,19 @@ attacks:
     damageScale: 0.56
     damageFlat: 8.0
     lifetime: 1.50
+    startup: 0.62
+    recovery: 0.55
+    cancelWindowStart: 0.0
+    cancelWindowEnd: 0.0
+    movementScale: 0.05
     hitStun: 0.30
     destroyOnHit: true
     textureFramePattern: assets/vertical_slice/side_combat/effects/bear_shockwave_{frame}.png
     textureFrameCount: 4
     textureFrameRate: 16.0
+    swingSound: assets/vertical_slice/side_combat/audio/shockwave_cast.wav
+    hitSound: assets/vertical_slice/side_combat/audio/player_hit.wav
+    soundVolume: 0.46
+    hitPause: 0.035
+    cameraShake: 0.020
+    cameraShakeDuration: 0.070

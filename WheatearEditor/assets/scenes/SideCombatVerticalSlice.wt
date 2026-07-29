@@ -1,5 +1,37 @@
-Scene: SideCombatVerticalSlice
+﻿Scene: SideCombatVerticalSlice
 Entities:
+  - Entity: 946100902
+    TagComponent:
+      Tag: FlowController
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    EventScriptComponent:
+      ScriptPath: "assets/events/vertical_slice_flow.wts"
+      StartEvent: "on_start"
+      RunOnStart: false
+      RunOnce: false
+      Enabled: true
+  - Entity: 946100046
+    TagComponent:
+      Tag: WT_UI_Canvas
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    UICanvasComponent:
+      Visible: true
+      ReferenceWidth: 1920
+      ReferenceHeight: 1080
+    UIWidgetComponent:
+      Visible: true
+      Position: [0, 0]
+      Size: [1, 1]
+      Rotation: 0
+      Anchor: 0
+      SortOrder: 0
+      ParentTag: ""
   - Entity: 940000001
     TagComponent:
       Tag: SC_Camera
@@ -160,10 +192,91 @@ Entities:
       VictoryReturnDelay: 4
       DefeatReturnDelay: 2.5
       ResultSceneFadeDuration: 0.65
-      VictorySceneCommand: "scene:assets/scenes/VerticalSliceHub.wt"
-      DefeatSceneCommand: "scene:assets/scenes/SideCombatVerticalSlice.wt"
+      VictorySceneCommand: "event:FlowController:side_combat_victory"
+      DefeatSceneCommand: "event:FlowController:side_combat_retry"
       ComboDropDelay: 1.15
       FirstClearRewardText: "获得: 魔核碎片 x1 / 兽筋 x2 / 熊爪 x1"
+  - Entity: 940000007
+    TagComponent:
+      Tag: SC_TopPanel
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    UIWidgetComponent:
+      Visible: true
+      Position: [0.5, 0.022]
+      Size: [0.94, 0.088]
+      Rotation: 0
+      Anchor: 1
+      SortOrder: 18
+      ParentTag: WT_UI_Canvas
+    UIAnimatorComponent:
+      Preset: "slide_fade_in"
+      PlayOnStart: true
+      Loop: false
+      Delay: 0.04
+      Duration: 0.30
+      Amplitude: 0.035
+      Speed: 1
+      FromOffset: [0, -0.025]
+    UIImageComponent:
+      Color: [1, 1, 1, 0.84]
+      TexturePath: assets/vertical_slice/ui/panels/panel_dark.png
+  - Entity: 940000008
+    TagComponent:
+      Tag: SC_TutorialPanel
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    UIWidgetComponent:
+      Visible: true
+      Position: [0.035, 0.835]
+      Size: [0.60, 0.145]
+      Rotation: 0
+      Anchor: 6
+      SortOrder: 18
+      ParentTag: WT_UI_Canvas
+    UIAnimatorComponent:
+      Preset: "slide_fade_in"
+      PlayOnStart: true
+      Loop: false
+      Delay: 0.12
+      Duration: 0.30
+      Amplitude: 0.035
+      Speed: 1
+      FromOffset: [0, 0.035]
+    UIImageComponent:
+      Color: [1, 1, 1, 0.82]
+      TexturePath: assets/vertical_slice/ui/panels/panel_dark.png
+  - Entity: 940000009
+    TagComponent:
+      Tag: SC_ComboPanel
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    UIWidgetComponent:
+      Visible: true
+      Position: [0.755, 0.115]
+      Size: [0.22, 0.075]
+      Rotation: 0
+      Anchor: 0
+      SortOrder: 18
+      ParentTag: WT_UI_Canvas
+    UIAnimatorComponent:
+      Preset: "fade_in"
+      PlayOnStart: true
+      Loop: false
+      Delay: 0.16
+      Duration: 0.28
+      Amplitude: 0.035
+      Speed: 1
+      FromOffset: [0, 0]
+    UIImageComponent:
+      Color: [1, 1, 1, 0.78]
+      TexturePath: assets/vertical_slice/ui/panels/panel_dark.png
   - Entity: 940000010
     TagComponent:
       Tag: SC_PlayerHealth
@@ -178,6 +291,7 @@ Entities:
       Rotation: 0
       Anchor: 0
       SortOrder: 20
+      ParentTag: WT_UI_Canvas
     UIProgressBarComponent:
       Value: 420
       MaxValue: 420
@@ -197,11 +311,16 @@ Entities:
       Rotation: 0
       Anchor: 0
       SortOrder: 21
+      ParentTag: WT_UI_Canvas
     UITextComponent:
       Text: "生命 420/420"
       Color: [0.9, 0.98, 0.92, 1]
       FontSize: 18
-      FontPath: assets/fonts/NotoSansSC-VF.ttf
+      FontPath: assets/fonts/wqy-microhei.ttc
+      ShadowColor: [0.02, 0.02, 0.025, 0.78]
+      ShadowOffset: [2.0, 2.0]
+      OutlineColor: [0.01, 0.01, 0.012, 0.86]
+      OutlineThickness: 1.25
   - Entity: 940000012
     TagComponent:
       Tag: SC_BossHealth
@@ -216,6 +335,7 @@ Entities:
       Rotation: 0
       Anchor: 2
       SortOrder: 20
+      ParentTag: WT_UI_Canvas
     UIProgressBarComponent:
       Value: 1450
       MaxValue: 1450
@@ -235,11 +355,16 @@ Entities:
       Rotation: 0
       Anchor: 2
       SortOrder: 21
+      ParentTag: WT_UI_Canvas
     UITextComponent:
       Text: "黑熊丈夫 1450/1450"
       Color: [1, 0.9, 0.86, 1]
       FontSize: 18
-      FontPath: assets/fonts/NotoSansSC-VF.ttf
+      FontPath: assets/fonts/wqy-microhei.ttc
+      ShadowColor: [0.02, 0.02, 0.025, 0.78]
+      ShadowOffset: [2.0, 2.0]
+      OutlineColor: [0.01, 0.01, 0.012, 0.86]
+      OutlineThickness: 1.25
   - Entity: 940000014
     TagComponent:
       Tag: SC_Message
@@ -254,11 +379,25 @@ Entities:
       Rotation: 0
       Anchor: 6
       SortOrder: 24
+      ParentTag: WT_UI_Canvas
+    UIAnimatorComponent:
+      Preset: "fade_in"
+      PlayOnStart: true
+      Loop: false
+      Delay: 0.18
+      Duration: 0.28
+      Amplitude: 0.035
+      Speed: 1
+      FromOffset: [0, 0]
     UITextComponent:
-      Text: "A/D推进  W/S纵深  Space跳  J三斩  K上挑  U魔法  I支援"
+      Text: "A/D移动  W/S纵深  K跳跃  J斩击  S+J上挑  U魔法  I支援"
       Color: [0.92, 0.96, 0.9, 1]
       FontSize: 16
-      FontPath: assets/fonts/NotoSansSC-VF.ttf
+      FontPath: assets/fonts/wqy-microhei.ttc
+      ShadowColor: [0.02, 0.02, 0.025, 0.78]
+      ShadowOffset: [2.0, 2.0]
+      OutlineColor: [0.01, 0.01, 0.012, 0.86]
+      OutlineThickness: 1.25
   - Entity: 940000015
     TagComponent:
       Tag: SC_ComboText
@@ -273,11 +412,25 @@ Entities:
       Rotation: 0
       Anchor: 0
       SortOrder: 24
+      ParentTag: WT_UI_Canvas
+    UIAnimatorComponent:
+      Preset: "pulse"
+      PlayOnStart: true
+      Loop: true
+      Delay: 0
+      Duration: 1
+      Amplitude: 0.018
+      Speed: 0.85
+      FromOffset: [0, 0]
     UITextComponent:
       Text: "最佳连击 x0"
       Color: [0.98, 0.88, 0.42, 1]
       FontSize: 22
-      FontPath: assets/fonts/NotoSansSC-VF.ttf
+      FontPath: assets/fonts/wqy-microhei.ttc
+      ShadowColor: [0.02, 0.02, 0.025, 0.78]
+      ShadowOffset: [2.0, 2.0]
+      OutlineColor: [0.01, 0.01, 0.012, 0.86]
+      OutlineThickness: 1.25
   - Entity: 940000016
     TagComponent:
       Tag: SC_SkillText
@@ -292,11 +445,25 @@ Entities:
       Rotation: 0
       Anchor: 6
       SortOrder: 24
+      ParentTag: WT_UI_Canvas
+    UIAnimatorComponent:
+      Preset: "fade_in"
+      PlayOnStart: true
+      Loop: false
+      Delay: 0.24
+      Duration: 0.28
+      Amplitude: 0.035
+      Speed: 1
+      FromOffset: [0, 0]
     UITextComponent:
-      Text: "K 0.0  U 0.0  I 0.0"
+      Text: "魔剑槽 3.0/3  空中动作 3"
       Color: [0.76, 0.94, 1, 1]
       FontSize: 16
-      FontPath: assets/fonts/NotoSansSC-VF.ttf
+      FontPath: assets/fonts/wqy-microhei.ttc
+      ShadowColor: [0.02, 0.02, 0.025, 0.78]
+      ShadowOffset: [2.0, 2.0]
+      OutlineColor: [0.01, 0.01, 0.012, 0.86]
+      OutlineThickness: 1.25
   - Entity: 940000017
     TagComponent:
       Tag: SC_RewardText
@@ -311,11 +478,25 @@ Entities:
       Rotation: 0
       Anchor: 6
       SortOrder: 24
+      ParentTag: WT_UI_Canvas
+    UIAnimatorComponent:
+      Preset: "fade_in"
+      PlayOnStart: true
+      Loop: false
+      Delay: 0.28
+      Duration: 0.28
+      Amplitude: 0.035
+      Speed: 1
+      FromOffset: [0, 0]
     UITextComponent:
-      Text: "掉落: 魔核碎片 / 兽筋 / 熊爪"
+      Text: "主要掉落"
       Color: [0.92, 0.82, 0.64, 1]
       FontSize: 15
-      FontPath: assets/fonts/NotoSansSC-VF.ttf
+      FontPath: assets/fonts/wqy-microhei.ttc
+      ShadowColor: [0.02, 0.02, 0.025, 0.78]
+      ShadowOffset: [2.0, 2.0]
+      OutlineColor: [0.01, 0.01, 0.012, 0.86]
+      OutlineThickness: 1.25
   - Entity: 940000018
     TagComponent:
       Tag: SC_Fade
@@ -330,6 +511,752 @@ Entities:
       Rotation: 0
       Anchor: 4
       SortOrder: 100
+      ParentTag: WT_UI_Canvas
     UIImageComponent:
       Color: [0, 0, 0, 1]
       TexturePath: ""
+  - Entity: 946100000
+    TagComponent:
+      Tag: SC_SkillBarPanel
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    UIWidgetComponent:
+      Visible: true
+      Position: [0.58, 0.83]
+      Size: [0.33, 0.128]
+      Rotation: 0.0
+      Anchor: 0
+      SortOrder: 50
+      ParentTag: WT_UI_Canvas
+    UIPanelComponent:
+      BackgroundColor: [0.03, 0.045, 0.055, 0.72]
+      BorderColor: [0.2, 0.72, 0.78, 0.7]
+      BorderThickness: 1.5
+  - Entity: 946100001
+    TagComponent:
+      Tag: SC_SkillSlot_SJ
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    UIWidgetComponent:
+      Visible: true
+      Position: [0.602, 0.848]
+      Size: [0.058, 0.083]
+      Rotation: 0.0
+      Anchor: 0
+      SortOrder: 51
+      ParentTag: WT_UI_Canvas
+    UIPanelComponent:
+      BackgroundColor: [0.025, 0.032, 0.038, 0.88]
+      BorderColor: [0.32, 0.7, 0.76, 0.78]
+      BorderThickness: 1.5
+  - Entity: 946100002
+    TagComponent:
+      Tag: SC_SkillIcon_SJ
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    UIWidgetComponent:
+      Visible: true
+      Position: [0.608, 0.854]
+      Size: [0.046, 0.061]
+      Rotation: 0.0
+      Anchor: 0
+      SortOrder: 52
+      ParentTag: WT_UI_Canvas
+    UIImageComponent:
+      Color: [1, 1, 1, 1.0]
+      TexturePath: assets/vertical_slice/side_combat/ui/skill_sj_uppercut.png
+    UIButtonComponent:
+      NormalColor: [0, 0, 0, 0]
+      HoverColor: [0.95, 1, 0.82, 0.14]
+      PressedColor: [1, 0.90, 0.45, 0.24]
+      OnClickFunction: ""
+  - Entity: 946100003
+    TagComponent:
+      Tag: SC_SkillCooldown_SJ
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    UIWidgetComponent:
+      Visible: true
+      Position: [0.608, 0.854]
+      Size: [0.046, 0.061]
+      Rotation: 0.0
+      Anchor: 0
+      SortOrder: 54
+      ParentTag: WT_UI_Canvas
+    UIProgressBarComponent:
+      Value: 0
+      MaxValue: 1
+      ForegroundColor: [0.02, 0.02, 0.025, 0.68]
+      BackgroundColor: [0.02, 0.02, 0.025, 0.28]
+  - Entity: 946100004
+    TagComponent:
+      Tag: SC_SkillCooldownText_SJ
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    UIWidgetComponent:
+      Visible: true
+      Position: [0.607, 0.872]
+      Size: [0.048, 0.03]
+      Rotation: 0.0
+      Anchor: 0
+      SortOrder: 57
+      ParentTag: WT_UI_Canvas
+    UITextComponent:
+      Text: ""
+      Color: [1, 1, 1, 1]
+      FontSize: 16
+      FontPath: assets/fonts/wqy-microhei.ttc
+      ShadowColor: [0.01, 0.015, 0.018, 0.78]
+      ShadowOffset: [1.6, 1.6]
+      OutlineColor: [0.0, 0.0, 0.0, 0.86]
+      OutlineThickness: 1.2
+  - Entity: 946100005
+    TagComponent:
+      Tag: SC_SkillKey_SJ
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    UIWidgetComponent:
+      Visible: true
+      Position: [0.608, 0.9139999999999999]
+      Size: [0.046, 0.02]
+      Rotation: 0.0
+      Anchor: 0
+      SortOrder: 57
+      ParentTag: WT_UI_Canvas
+    UITextComponent:
+      Text: "S+J"
+      Color: [0.9, 0.98, 1, 1]
+      FontSize: 14
+      FontPath: assets/fonts/wqy-microhei.ttc
+      ShadowColor: [0.01, 0.015, 0.018, 0.78]
+      ShadowOffset: [1.6, 1.6]
+      OutlineColor: [0.0, 0.0, 0.0, 0.86]
+      OutlineThickness: 1.2
+  - Entity: 946100011
+    TagComponent:
+      Tag: SC_SkillSlot_U
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    UIWidgetComponent:
+      Visible: true
+      Position: [0.6759999999999999, 0.848]
+      Size: [0.058, 0.083]
+      Rotation: 0.0
+      Anchor: 0
+      SortOrder: 51
+      ParentTag: WT_UI_Canvas
+    UIPanelComponent:
+      BackgroundColor: [0.025, 0.032, 0.038, 0.88]
+      BorderColor: [0.32, 0.7, 0.76, 0.78]
+      BorderThickness: 1.5
+  - Entity: 946100012
+    TagComponent:
+      Tag: SC_SkillIcon_U
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    UIWidgetComponent:
+      Visible: true
+      Position: [0.6819999999999999, 0.854]
+      Size: [0.046, 0.061]
+      Rotation: 0.0
+      Anchor: 0
+      SortOrder: 52
+      ParentTag: WT_UI_Canvas
+    UIImageComponent:
+      Color: [1, 1, 1, 1.0]
+      TexturePath: assets/vertical_slice/side_combat/ui/skill_u_magic.png
+    UIButtonComponent:
+      NormalColor: [0, 0, 0, 0]
+      HoverColor: [0.95, 1, 0.82, 0.14]
+      PressedColor: [1, 0.90, 0.45, 0.24]
+      OnClickFunction: ""
+  - Entity: 946100013
+    TagComponent:
+      Tag: SC_SkillCooldown_U
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    UIWidgetComponent:
+      Visible: true
+      Position: [0.6819999999999999, 0.854]
+      Size: [0.046, 0.061]
+      Rotation: 0.0
+      Anchor: 0
+      SortOrder: 54
+      ParentTag: WT_UI_Canvas
+    UIProgressBarComponent:
+      Value: 0
+      MaxValue: 1
+      ForegroundColor: [0.02, 0.02, 0.025, 0.68]
+      BackgroundColor: [0.02, 0.02, 0.025, 0.28]
+  - Entity: 946100014
+    TagComponent:
+      Tag: SC_SkillCooldownText_U
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    UIWidgetComponent:
+      Visible: true
+      Position: [0.6809999999999999, 0.872]
+      Size: [0.048, 0.03]
+      Rotation: 0.0
+      Anchor: 0
+      SortOrder: 57
+      ParentTag: WT_UI_Canvas
+    UITextComponent:
+      Text: ""
+      Color: [1, 1, 1, 1]
+      FontSize: 16
+      FontPath: assets/fonts/wqy-microhei.ttc
+      ShadowColor: [0.01, 0.015, 0.018, 0.78]
+      ShadowOffset: [1.6, 1.6]
+      OutlineColor: [0.0, 0.0, 0.0, 0.86]
+      OutlineThickness: 1.2
+  - Entity: 946100015
+    TagComponent:
+      Tag: SC_SkillKey_U
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    UIWidgetComponent:
+      Visible: true
+      Position: [0.6819999999999999, 0.9139999999999999]
+      Size: [0.046, 0.02]
+      Rotation: 0.0
+      Anchor: 0
+      SortOrder: 57
+      ParentTag: WT_UI_Canvas
+    UITextComponent:
+      Text: "U"
+      Color: [0.9, 0.98, 1, 1]
+      FontSize: 14
+      FontPath: assets/fonts/wqy-microhei.ttc
+      ShadowColor: [0.01, 0.015, 0.018, 0.78]
+      ShadowOffset: [1.6, 1.6]
+      OutlineColor: [0.0, 0.0, 0.0, 0.86]
+      OutlineThickness: 1.2
+  - Entity: 946100021
+    TagComponent:
+      Tag: SC_SkillSlot_I
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    UIWidgetComponent:
+      Visible: true
+      Position: [0.75, 0.848]
+      Size: [0.058, 0.083]
+      Rotation: 0.0
+      Anchor: 0
+      SortOrder: 51
+      ParentTag: WT_UI_Canvas
+    UIPanelComponent:
+      BackgroundColor: [0.025, 0.032, 0.038, 0.88]
+      BorderColor: [0.32, 0.7, 0.76, 0.78]
+      BorderThickness: 1.5
+  - Entity: 946100022
+    TagComponent:
+      Tag: SC_SkillIcon_I
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    UIWidgetComponent:
+      Visible: true
+      Position: [0.756, 0.854]
+      Size: [0.046, 0.061]
+      Rotation: 0.0
+      Anchor: 0
+      SortOrder: 52
+      ParentTag: WT_UI_Canvas
+    UIImageComponent:
+      Color: [1, 1, 1, 1.0]
+      TexturePath: assets/vertical_slice/side_combat/ui/skill_i_support.png
+    UIButtonComponent:
+      NormalColor: [0, 0, 0, 0]
+      HoverColor: [0.95, 1, 0.82, 0.14]
+      PressedColor: [1, 0.90, 0.45, 0.24]
+      OnClickFunction: ""
+  - Entity: 946100023
+    TagComponent:
+      Tag: SC_SkillCooldown_I
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    UIWidgetComponent:
+      Visible: true
+      Position: [0.756, 0.854]
+      Size: [0.046, 0.061]
+      Rotation: 0.0
+      Anchor: 0
+      SortOrder: 54
+      ParentTag: WT_UI_Canvas
+    UIProgressBarComponent:
+      Value: 0
+      MaxValue: 1
+      ForegroundColor: [0.02, 0.02, 0.025, 0.68]
+      BackgroundColor: [0.02, 0.02, 0.025, 0.28]
+  - Entity: 946100024
+    TagComponent:
+      Tag: SC_SkillCooldownText_I
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    UIWidgetComponent:
+      Visible: true
+      Position: [0.755, 0.872]
+      Size: [0.048, 0.03]
+      Rotation: 0.0
+      Anchor: 0
+      SortOrder: 57
+      ParentTag: WT_UI_Canvas
+    UITextComponent:
+      Text: ""
+      Color: [1, 1, 1, 1]
+      FontSize: 16
+      FontPath: assets/fonts/wqy-microhei.ttc
+      ShadowColor: [0.01, 0.015, 0.018, 0.78]
+      ShadowOffset: [1.6, 1.6]
+      OutlineColor: [0.0, 0.0, 0.0, 0.86]
+      OutlineThickness: 1.2
+  - Entity: 946100025
+    TagComponent:
+      Tag: SC_SkillKey_I
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    UIWidgetComponent:
+      Visible: true
+      Position: [0.756, 0.9139999999999999]
+      Size: [0.046, 0.02]
+      Rotation: 0.0
+      Anchor: 0
+      SortOrder: 57
+      ParentTag: WT_UI_Canvas
+    UITextComponent:
+      Text: "I"
+      Color: [0.9, 0.98, 1, 1]
+      FontSize: 14
+      FontPath: assets/fonts/wqy-microhei.ttc
+      ShadowColor: [0.01, 0.015, 0.018, 0.78]
+      ShadowOffset: [1.6, 1.6]
+      OutlineColor: [0.0, 0.0, 0.0, 0.86]
+      OutlineThickness: 1.2
+  - Entity: 946100031
+    TagComponent:
+      Tag: SC_SkillSlot_L
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    UIWidgetComponent:
+      Visible: true
+      Position: [0.824, 0.848]
+      Size: [0.058, 0.083]
+      Rotation: 0.0
+      Anchor: 0
+      SortOrder: 51
+      ParentTag: WT_UI_Canvas
+    UIPanelComponent:
+      BackgroundColor: [0.025, 0.032, 0.038, 0.88]
+      BorderColor: [0.32, 0.7, 0.76, 0.78]
+      BorderThickness: 1.5
+  - Entity: 946100032
+    TagComponent:
+      Tag: SC_SkillIcon_L
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    UIWidgetComponent:
+      Visible: true
+      Position: [0.83, 0.854]
+      Size: [0.046, 0.061]
+      Rotation: 0.0
+      Anchor: 0
+      SortOrder: 52
+      ParentTag: WT_UI_Canvas
+    UIImageComponent:
+      Color: [1, 1, 1, 1.0]
+      TexturePath: assets/vertical_slice/side_combat/ui/skill_l_break.png
+    UIButtonComponent:
+      NormalColor: [0, 0, 0, 0]
+      HoverColor: [0.95, 1, 0.82, 0.14]
+      PressedColor: [1, 0.90, 0.45, 0.24]
+      OnClickFunction: ""
+  - Entity: 946100033
+    TagComponent:
+      Tag: SC_SkillCooldown_L
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    UIWidgetComponent:
+      Visible: true
+      Position: [0.83, 0.854]
+      Size: [0.046, 0.061]
+      Rotation: 0.0
+      Anchor: 0
+      SortOrder: 54
+      ParentTag: WT_UI_Canvas
+    UIProgressBarComponent:
+      Value: 0
+      MaxValue: 1
+      ForegroundColor: [0.02, 0.02, 0.025, 0.68]
+      BackgroundColor: [0.02, 0.02, 0.025, 0.28]
+  - Entity: 946100034
+    TagComponent:
+      Tag: SC_SkillCooldownText_L
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    UIWidgetComponent:
+      Visible: true
+      Position: [0.829, 0.872]
+      Size: [0.048, 0.03]
+      Rotation: 0.0
+      Anchor: 0
+      SortOrder: 57
+      ParentTag: WT_UI_Canvas
+    UITextComponent:
+      Text: ""
+      Color: [1, 1, 1, 1]
+      FontSize: 16
+      FontPath: assets/fonts/wqy-microhei.ttc
+      ShadowColor: [0.01, 0.015, 0.018, 0.78]
+      ShadowOffset: [1.6, 1.6]
+      OutlineColor: [0.0, 0.0, 0.0, 0.86]
+      OutlineThickness: 1.2
+  - Entity: 946100035
+    TagComponent:
+      Tag: SC_SkillKey_L
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    UIWidgetComponent:
+      Visible: true
+      Position: [0.83, 0.9139999999999999]
+      Size: [0.046, 0.02]
+      Rotation: 0.0
+      Anchor: 0
+      SortOrder: 57
+      ParentTag: WT_UI_Canvas
+    UITextComponent:
+      Text: "L"
+      Color: [0.9, 0.98, 1, 1]
+      FontSize: 14
+      FontPath: assets/fonts/wqy-microhei.ttc
+      ShadowColor: [0.01, 0.015, 0.018, 0.78]
+      ShadowOffset: [1.6, 1.6]
+      OutlineColor: [0.0, 0.0, 0.0, 0.86]
+      OutlineThickness: 1.2
+  - Entity: 946100900
+    TagComponent:
+      Tag: SC_SkillTooltipPanel
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    UIWidgetComponent:
+      Visible: false
+      Position: [0.580, 0.725]
+      Size: [0.225, 0.090]
+      Rotation: 0.0
+      Anchor: 0
+      SortOrder: 76
+      ParentTag: WT_UI_Canvas
+    UIPanelComponent:
+      BackgroundColor: [0.025, 0.032, 0.038, 0.92]
+      BorderColor: [0.28, 0.78, 0.82, 0.82]
+      BorderThickness: 1.25
+  - Entity: 946100901
+    TagComponent:
+      Tag: SC_SkillTooltipText
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    UIWidgetComponent:
+      Visible: false
+      Position: [0.592, 0.735]
+      Size: [0.201, 0.070]
+      Rotation: 0.0
+      Anchor: 0
+      SortOrder: 77
+      ParentTag: WT_UI_Canvas
+    UITextComponent:
+      Text: ""
+      Color: [0.92, 0.98, 0.96, 1]
+      FontSize: 15
+      FontPath: assets/fonts/wqy-microhei.ttc
+      ShadowColor: [0.01, 0.015, 0.018, 0.82]
+      ShadowOffset: [1.6, 1.6]
+      OutlineColor: [0.0, 0.0, 0.0, 0.86]
+      OutlineThickness: 1.1
+  - Entity: 946100700
+    TagComponent:
+      Tag: SC_ItemSlot_1_Frame
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    UIWidgetComponent:
+      Visible: true
+      Position: [0.04, 0.807]
+      Size: [0.05, 0.066]
+      Rotation: 0.0
+      Anchor: 0
+      SortOrder: 58
+      ParentTag: WT_UI_Canvas
+    UIPanelComponent:
+      BackgroundColor: [0.025, 0.032, 0.038, 0.82]
+      BorderColor: [0.7, 0.58, 0.3, 0.78]
+      BorderThickness: 1.2
+  - Entity: 946100701
+    TagComponent:
+      Tag: SC_ItemSlot_1_Icon
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    UIWidgetComponent:
+      Visible: true
+      Position: [0.047, 0.8130000000000001]
+      Size: [0.036, 0.046]
+      Rotation: 0.0
+      Anchor: 0
+      SortOrder: 59
+      ParentTag: WT_UI_Canvas
+    UIImageComponent:
+      Color: [1, 1, 1, 1.0]
+      TexturePath: assets/vertical_slice/side_combat/ui/items/item_slot_1_heal_potion.png
+  - Entity: 946100702
+    TagComponent:
+      Tag: SC_ItemSlot_1_Button
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    UIWidgetComponent:
+      Visible: true
+      Position: [0.04, 0.807]
+      Size: [0.05, 0.066]
+      Rotation: 0.0
+      Anchor: 0
+      SortOrder: 61
+      ParentTag: WT_UI_Canvas
+    UIButtonComponent:
+      NormalColor: [0, 0, 0, 0]
+      HoverColor: [0.95, 1, 0.82, 0.14]
+      PressedColor: [1, 0.90, 0.45, 0.24]
+      OnClickFunction: ""
+  - Entity: 946100703
+    TagComponent:
+      Tag: SC_ItemSlot_1_Count
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    UIWidgetComponent:
+      Visible: true
+      Position: [0.044, 0.811]
+      Size: [0.018, 0.018]
+      Rotation: 0.0
+      Anchor: 0
+      SortOrder: 62
+      ParentTag: WT_UI_Canvas
+    UITextComponent:
+      Text: "1"
+      Color: [1.0, 0.92, 0.68, 1]
+      FontSize: 13
+      FontPath: assets/fonts/wqy-microhei.ttc
+      ShadowColor: [0.01, 0.015, 0.018, 0.78]
+      ShadowOffset: [1.6, 1.6]
+      OutlineColor: [0.0, 0.0, 0.0, 0.86]
+      OutlineThickness: 1.2
+  - Entity: 946100710
+    TagComponent:
+      Tag: SC_ItemSlot_2_Frame
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    UIWidgetComponent:
+      Visible: true
+      Position: [0.098, 0.807]
+      Size: [0.05, 0.066]
+      Rotation: 0.0
+      Anchor: 0
+      SortOrder: 58
+      ParentTag: WT_UI_Canvas
+    UIPanelComponent:
+      BackgroundColor: [0.025, 0.032, 0.038, 0.82]
+      BorderColor: [0.7, 0.58, 0.3, 0.78]
+      BorderThickness: 1.2
+  - Entity: 946100711
+    TagComponent:
+      Tag: SC_ItemSlot_2_Icon
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    UIWidgetComponent:
+      Visible: true
+      Position: [0.10500000000000001, 0.8130000000000001]
+      Size: [0.036, 0.046]
+      Rotation: 0.0
+      Anchor: 0
+      SortOrder: 59
+      ParentTag: WT_UI_Canvas
+    UIImageComponent:
+      Color: [1, 1, 1, 1.0]
+      TexturePath: assets/vertical_slice/side_combat/ui/items/item_slot_2_focus_vial.png
+  - Entity: 946100712
+    TagComponent:
+      Tag: SC_ItemSlot_2_Button
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    UIWidgetComponent:
+      Visible: true
+      Position: [0.098, 0.807]
+      Size: [0.05, 0.066]
+      Rotation: 0.0
+      Anchor: 0
+      SortOrder: 61
+      ParentTag: WT_UI_Canvas
+    UIButtonComponent:
+      NormalColor: [0, 0, 0, 0]
+      HoverColor: [0.95, 1, 0.82, 0.14]
+      PressedColor: [1, 0.90, 0.45, 0.24]
+      OnClickFunction: ""
+  - Entity: 946100713
+    TagComponent:
+      Tag: SC_ItemSlot_2_Count
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    UIWidgetComponent:
+      Visible: true
+      Position: [0.102, 0.811]
+      Size: [0.018, 0.018]
+      Rotation: 0.0
+      Anchor: 0
+      SortOrder: 62
+      ParentTag: WT_UI_Canvas
+    UITextComponent:
+      Text: "2"
+      Color: [1.0, 0.92, 0.68, 1]
+      FontSize: 13
+      FontPath: assets/fonts/wqy-microhei.ttc
+      ShadowColor: [0.01, 0.015, 0.018, 0.78]
+      ShadowOffset: [1.6, 1.6]
+      OutlineColor: [0.0, 0.0, 0.0, 0.86]
+      OutlineThickness: 1.2
+  - Entity: 946100720
+    TagComponent:
+      Tag: SC_ItemSlot_3_Frame
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    UIWidgetComponent:
+      Visible: true
+      Position: [0.156, 0.807]
+      Size: [0.05, 0.066]
+      Rotation: 0.0
+      Anchor: 0
+      SortOrder: 58
+      ParentTag: WT_UI_Canvas
+    UIPanelComponent:
+      BackgroundColor: [0.025, 0.032, 0.038, 0.82]
+      BorderColor: [0.7, 0.58, 0.3, 0.78]
+      BorderThickness: 1.2
+  - Entity: 946100721
+    TagComponent:
+      Tag: SC_ItemSlot_3_Icon
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    UIWidgetComponent:
+      Visible: true
+      Position: [0.163, 0.8130000000000001]
+      Size: [0.036, 0.046]
+      Rotation: 0.0
+      Anchor: 0
+      SortOrder: 59
+      ParentTag: WT_UI_Canvas
+    UIImageComponent:
+      Color: [1, 1, 1, 1.0]
+      TexturePath: assets/vertical_slice/side_combat/ui/items/item_slot_3_burst_bomb.png
+  - Entity: 946100722
+    TagComponent:
+      Tag: SC_ItemSlot_3_Button
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    UIWidgetComponent:
+      Visible: true
+      Position: [0.156, 0.807]
+      Size: [0.05, 0.066]
+      Rotation: 0.0
+      Anchor: 0
+      SortOrder: 61
+      ParentTag: WT_UI_Canvas
+    UIButtonComponent:
+      NormalColor: [0, 0, 0, 0]
+      HoverColor: [0.95, 1, 0.82, 0.14]
+      PressedColor: [1, 0.90, 0.45, 0.24]
+      OnClickFunction: ""
+  - Entity: 946100723
+    TagComponent:
+      Tag: SC_ItemSlot_3_Count
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    UIWidgetComponent:
+      Visible: true
+      Position: [0.160, 0.811]
+      Size: [0.018, 0.018]
+      Rotation: 0.0
+      Anchor: 0
+      SortOrder: 62
+      ParentTag: WT_UI_Canvas
+    UITextComponent:
+      Text: "3"
+      Color: [1.0, 0.92, 0.68, 1]
+      FontSize: 13
+      FontPath: assets/fonts/wqy-microhei.ttc
+      ShadowColor: [0.01, 0.015, 0.018, 0.78]
+      ShadowOffset: [1.6, 1.6]
+      OutlineColor: [0.0, 0.0, 0.0, 0.86]
+      OutlineThickness: 1.2

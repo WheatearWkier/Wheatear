@@ -1,6 +1,8 @@
 #include "wtpch.h"
 #include "ScriptGlue.h"
 
+#if defined(WT_ENABLE_CSHARP_SCRIPTING)
+
 #include "Wheatear/Scene/Scene.h"
 #include "Wheatear/Scene/Entity.h"
 #include "Wheatear/Scene/Components.h"
@@ -22,9 +24,9 @@ namespace Wheatear {
     mono_add_internal_call("Wheatear.InternalCalls::" #Name, (void*)Name)
 
     // =========================================================
-    //  ÀàĞÍ×¢²á±í
-    //  ÓÃ std::unordered_map ´úÌæÒ»¶Ñ if-else ×Ö·û´®±È½Ï£¬
-    //  ĞÂÔö×é¼şÖ»ĞèÔÚ RegisterFunctions() Ä©Î²¼ÓÒ»ĞĞ REGISTER ºê
+    //  ç±»å‹æ³¨å†Œè¡¨
+    //  ç”¨ std::unordered_map ä»£æ›¿ä¸€å † if-else å­—ç¬¦ä¸²æ¯”è¾ƒï¼Œ
+    //  æ–°å¢ç»„ä»¶åªéœ€åœ¨ RegisterFunctions() æœ«å°¾åŠ ä¸€è¡Œ REGISTER å®
     // =========================================================
 
     using HasComponentFn = bool(*)(Entity&);
@@ -33,7 +35,7 @@ namespace Wheatear {
     static std::unordered_map<MonoType*, HasComponentFn> s_HasComponentFns;
     static std::unordered_map<MonoType*, AddComponentFn> s_AddComponentFns;
 
-    // ×¢²á¸¨Öúºê
+    // æ³¨å†Œè¾…åŠ©å®
 #define REGISTER_COMPONENT(CppType, CSharpName)                                         \
     {                                                                                    \
         MonoType* mt = mono_reflection_type_from_name(                                  \
@@ -114,8 +116,8 @@ namespace Wheatear {
             mono_type_get_name(monoType));
     }
 
-    // ÔÚ³¡¾°ÖĞ°´Ãû×Ö²éÕÒ Entity£¬·µ»ØÆä UUID£¨ÕÒ²»µ½·µ»Ø 0£©
-    // C# ¶Ë£ºulong id = InternalCalls.Scene_FindEntityByName("Player");
+    // åœ¨åœºæ™¯ä¸­æŒ‰åå­—æŸ¥æ‰¾ Entityï¼Œè¿”å›å…¶ UUIDï¼ˆæ‰¾ä¸åˆ°è¿”å› 0ï¼‰
+    // C# ç«¯ï¼šulong id = InternalCalls.Scene_FindEntityByName("Player");
     static uint64_t Scene_FindEntityByName(MonoString* name)
     {
         char* cStr = mono_string_to_utf8(name);
@@ -216,7 +218,7 @@ namespace Wheatear {
         body->SetLinearVelocity(b2Vec2(velocity->x, velocity->y));
     }
 
-    // GravityScale ¡ª¡ª ¶ÁÈ¡ / ÉèÖÃÖØÁ¦Ëõ·Å±ÈÀı£¨0 = ²»ÊÜÖØÁ¦£©
+    // GravityScale â€”â€” è¯»å– / è®¾ç½®é‡åŠ›ç¼©æ”¾æ¯”ä¾‹ï¼ˆ0 = ä¸å—é‡åŠ›ï¼‰
     static float Rigidbody2DComponent_GetGravityScale(uint64_t entityID)
     {
         Entity entity = ScriptEngine::GetSceneContext()->GetEntityByUUID(entityID);
@@ -234,13 +236,13 @@ namespace Wheatear {
         if (!entity || !entity.HasComponent<Rigidbody2DComponent>()) return;
 
         auto& rb2d = entity.GetComponent<Rigidbody2DComponent>();
-        rb2d.GravityScale = scale;   // Í¬Ê±Ğ´»Ø×é¼şÊı¾İ£¬ÒÔ±ãĞòÁĞ»¯±£´æ
+        rb2d.GravityScale = scale;   // åŒæ—¶å†™å›ç»„ä»¶æ•°æ®ï¼Œä»¥ä¾¿åºåˆ—åŒ–ä¿å­˜
 
         b2Body* body = static_cast<b2Body*>(rb2d.RuntimeBody);
         if (body) body->SetGravityScale(scale);
     }
 
-    // FixedRotation ¡ª¡ª Ëø¶¨Ğı×ª
+    // FixedRotation â€”â€” é”å®šæ—‹è½¬
     static bool Rigidbody2DComponent_GetFixedRotation(uint64_t entityID)
     {
         Entity entity = ScriptEngine::GetSceneContext()->GetEntityByUUID(entityID);
@@ -447,7 +449,7 @@ namespace Wheatear {
     //  Audio
     // =========================================================
 
-    // ×î¼òµ¥µÄÒ»´ÎĞÔ²¥·Å£¬C# Àï Audio.PlaySound("path") ¾Í×ßÕâÀï
+    // æœ€ç®€å•çš„ä¸€æ¬¡æ€§æ’­æ”¾ï¼ŒC# é‡Œ Audio.PlaySound("path") å°±èµ°è¿™é‡Œ
     static void Audio_PlaySound(MonoString* filepath, float volume)
     {
         char* path = mono_string_to_utf8(filepath);
@@ -455,7 +457,7 @@ namespace Wheatear {
         mono_free(path);
     }
 
-    // ²¥·Å²¢·µ»Ø¾ä±ú£¬C# Àï¿ÉÒÔÄÃµ½ handle ÔÙ¿ØÖÆ
+    // æ’­æ”¾å¹¶è¿”å›å¥æŸ„ï¼ŒC# é‡Œå¯ä»¥æ‹¿åˆ° handle å†æ§åˆ¶
     static uint32_t Audio_PlaySoundWithHandle(MonoString* filepath,
         float volume, bool loop)
     {
@@ -491,7 +493,7 @@ namespace Wheatear {
         return AudioEngine::IsPlaying(handle);
     }
 
-    // ---- AudioSourceComponent ×é¼ş¶ÁĞ´ ----
+    // ---- AudioSourceComponent ç»„ä»¶è¯»å†™ ----
     static void AudioSourceComponent_Play(UUID entityID)
     {
         Scene* scene = ScriptEngine::GetSceneContext();
@@ -501,7 +503,7 @@ namespace Wheatear {
         auto& asc = entity.GetComponent<AudioSourceComponent>();
         if (asc.AudioFilePath.empty()) return;
 
-        // Èç¹ûÒÑ¾­ÔÚ²¥·Å£¬ÏÈÍ£µô
+        // å¦‚æœå·²ç»åœ¨æ’­æ”¾ï¼Œå…ˆåœæ‰
         if (asc.RuntimeHandle != 0)
             AudioEngine::StopSound(asc.RuntimeHandle);
 
@@ -549,7 +551,7 @@ namespace Wheatear {
 
         auto& asc = entity.GetComponent<AudioSourceComponent>();
         asc.Volume = volume;
-        // Èç¹ûÕıÔÚ²¥·Å£¬ÊµÊ±¸üĞÂÒôÁ¿
+        // å¦‚æœæ­£åœ¨æ’­æ”¾ï¼Œå®æ—¶æ›´æ–°éŸ³é‡
         if (asc.RuntimeHandle != 0)
             AudioEngine::SetVolume(asc.RuntimeHandle, volume);
     }
@@ -557,7 +559,7 @@ namespace Wheatear {
     // =========================================================
     //  UI
     // =========================================================
-    // ©¤©¤ UI: UIWidgetComponent ©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤
+    // â”€â”€ UI: UIWidgetComponent â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
     static bool UICanvasComponent_GetVisible(uint64_t entityID)
     {
@@ -615,7 +617,7 @@ namespace Wheatear {
         entity.GetComponent<UIWidgetComponent>().Size = *size;
     }
 
-    // ©¤©¤ UI: UIImageComponent ©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤
+    // â”€â”€ UI: UIImageComponent â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
     static void UIImageComponent_GetColor(uint64_t entityID, glm::vec4* outColor)
     {
@@ -631,7 +633,7 @@ namespace Wheatear {
         entity.GetComponent<UIImageComponent>().Color = *color;
     }
 
-    // ©¤©¤ UI: UIProgressBarComponent ©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤
+    // â”€â”€ UI: UIProgressBarComponent â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
     static float UIProgressBarComponent_GetValue(uint64_t entityID)
     {
@@ -675,7 +677,7 @@ namespace Wheatear {
         entity.GetComponent<UIProgressBarComponent>().ForegroundColor = *color;
     }
 
-    // ©¤©¤ UI: UIButtonComponent ©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤
+    // â”€â”€ UI: UIButtonComponent â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
     static bool UIButtonComponent_GetIsHovered(uint64_t entityID)
     {
@@ -691,8 +693,8 @@ namespace Wheatear {
         return entity.GetComponent<UIButtonComponent>().IsPressed;
     }
 
-    // Buttonµã»÷ÊÂ¼şµÄºËĞÄ£ºC++¼ì²âµ½µã»÷ºó£¬µ÷ÓÃ´Ëº¯Êı´¥·¢C#»Øµ÷
-    // Õâ¸öº¯ÊıÓÉUIInputSystemµ÷ÓÃ£¬²»ÊÇInternalCall
+    // Buttonç‚¹å‡»äº‹ä»¶çš„æ ¸å¿ƒï¼šC++æ£€æµ‹åˆ°ç‚¹å‡»åï¼Œè°ƒç”¨æ­¤å‡½æ•°è§¦å‘C#å›è°ƒ
+    // è¿™ä¸ªå‡½æ•°ç”±UIInputSystemè°ƒç”¨ï¼Œä¸æ˜¯InternalCall
 
     static void UIButtonComponent_SetOnClickFunction(uint64_t entityID, MonoString* funcName)
     {
@@ -711,7 +713,7 @@ namespace Wheatear {
         return mono_string_new(mono_domain_get(), func.c_str());
     }
 
-    // ©¤©¤ UI: UITextComponent ©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤
+    // â”€â”€ UI: UITextComponent â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
     static MonoString* UITextComponent_GetText(uint64_t entityID)
     {
@@ -839,7 +841,7 @@ namespace Wheatear {
         return (uint64_t)entity.GetUUID();
     }
 
-    // ¿ç½Å±¾Í¨ĞÅ£ºÍ¨¹ı UUID ÄÃµ½ÁíÒ»¸ö Entity µÄ½Å±¾ÊµÀı£¨·µ»Ø object£¬C# ¶ËÇ¿×ª£©
+    // è·¨è„šæœ¬é€šä¿¡ï¼šé€šè¿‡ UUID æ‹¿åˆ°å¦ä¸€ä¸ª Entity çš„è„šæœ¬å®ä¾‹ï¼ˆè¿”å› objectï¼ŒC# ç«¯å¼ºè½¬ï¼‰
     static MonoObject* Entity_GetScriptInstance(uint64_t entityID)
     {
         Ref<ScriptInstance> instance = ScriptEngine::GetEntityScriptInstance(entityID);
@@ -848,7 +850,7 @@ namespace Wheatear {
     }
 
     // =========================================================
-    //  ×¢²áËùÓĞº¯Êı
+    //  æ³¨å†Œæ‰€æœ‰å‡½æ•°
     // =========================================================
 
     void ScriptGlue::RegisterFunctions()
@@ -856,18 +858,18 @@ namespace Wheatear {
         s_HasComponentFns.clear();
         s_AddComponentFns.clear();
 
-        // ©¤©¤ Entity ©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤
+        // â”€â”€ Entity â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
         WT_ADD_INTERNAL_CALL(Entity_GetTag);
         WT_ADD_INTERNAL_CALL(Entity_Destroy);
         WT_ADD_INTERNAL_CALL(Entity_HasComponent);
         WT_ADD_INTERNAL_CALL(Entity_AddComponent);
         WT_ADD_INTERNAL_CALL(Entity_GetScriptInstance);
 
-        // ©¤©¤ Scene ©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤
+        // â”€â”€ Scene â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
         WT_ADD_INTERNAL_CALL(Scene_FindEntityByName);
         WT_ADD_INTERNAL_CALL(Scene_InstantiateFromPrefab);
 
-        // ©¤©¤ Transform ©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤
+        // â”€â”€ Transform â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
         WT_ADD_INTERNAL_CALL(TransformComponent_GetTranslation);
         WT_ADD_INTERNAL_CALL(TransformComponent_SetTranslation);
         WT_ADD_INTERNAL_CALL(TransformComponent_GetRotation);
@@ -875,7 +877,7 @@ namespace Wheatear {
         WT_ADD_INTERNAL_CALL(TransformComponent_GetScale);
         WT_ADD_INTERNAL_CALL(TransformComponent_SetScale);
 
-        // ©¤©¤ Rigidbody2D ©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤
+        // â”€â”€ Rigidbody2D â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
         WT_ADD_INTERNAL_CALL(Rigidbody2DComponent_ApplyLinearImpulse);
         WT_ADD_INTERNAL_CALL(Rigidbody2DComponent_GetLinearVelocity);
         WT_ADD_INTERNAL_CALL(Rigidbody2DComponent_SetLinearVelocity);
@@ -886,22 +888,22 @@ namespace Wheatear {
         WT_ADD_INTERNAL_CALL(Rigidbody2DComponent_GetBodyType);
         WT_ADD_INTERNAL_CALL(Rigidbody2DComponent_SetBodyType);
 
-        // ©¤©¤ Input ©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤
+        // â”€â”€ Input â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
         WT_ADD_INTERNAL_CALL(Input_IsKeyDown);
         WT_ADD_INTERNAL_CALL(Input_IsMouseButtonDown);
         WT_ADD_INTERNAL_CALL(Input_GetMousePosition);
 
-        // ©¤©¤ Time ©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤
+        // â”€â”€ Time â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
         WT_ADD_INTERNAL_CALL(Time_GetDeltaTime);
         WT_ADD_INTERNAL_CALL(Time_GetElapsedTime);
         WT_ADD_INTERNAL_CALL(Time_GetFrameCount);
 
-        // ©¤©¤ Log ©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤
+        // â”€â”€ Log â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
         WT_ADD_INTERNAL_CALL(Log_Info);
         WT_ADD_INTERNAL_CALL(Log_Warn);
         WT_ADD_INTERNAL_CALL(Log_Error);
 
-        // ©¤©¤ SpriteRenderer ©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤
+        // â”€â”€ SpriteRenderer â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
         WT_ADD_INTERNAL_CALL(SpriteRendererComponent_GetColor);
         WT_ADD_INTERNAL_CALL(SpriteRendererComponent_SetColor);
         WT_ADD_INTERNAL_CALL(SpriteRendererComponent_GetTilingFactor);
@@ -909,14 +911,14 @@ namespace Wheatear {
         WT_ADD_INTERNAL_CALL(SpriteRendererComponent_GetFlipX);
         WT_ADD_INTERNAL_CALL(SpriteRendererComponent_SetFlipX);
 
-        // ©¤©¤ SpriteAnimator ©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤
+        // â”€â”€ SpriteAnimator â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
         WT_ADD_INTERNAL_CALL(SpriteAnimatorComponent_Play);
         WT_ADD_INTERNAL_CALL(SpriteAnimatorComponent_Stop);
         WT_ADD_INTERNAL_CALL(SpriteAnimatorComponent_Resume);
         WT_ADD_INTERNAL_CALL(SpriteAnimatorComponent_GetCurrentClip);
         WT_ADD_INTERNAL_CALL(SpriteAnimatorComponent_IsFinished);
 
-        // ©¤©¤ Audio ©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤
+        // â”€â”€ Audio â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
         WT_ADD_INTERNAL_CALL(Audio_PlaySound);
         WT_ADD_INTERNAL_CALL(Audio_PlaySoundWithHandle);
         WT_ADD_INTERNAL_CALL(Audio_StopSound);
@@ -930,7 +932,7 @@ namespace Wheatear {
         WT_ADD_INTERNAL_CALL(AudioSourceComponent_GetVolume);
         WT_ADD_INTERNAL_CALL(AudioSourceComponent_SetVolume);
 
-        // ©¤©¤ UI Components ©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤
+        // â”€â”€ UI Components â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
         WT_ADD_INTERNAL_CALL(UICanvasComponent_GetVisible);
         WT_ADD_INTERNAL_CALL(UICanvasComponent_SetVisible);
         WT_ADD_INTERNAL_CALL(UIWidgetComponent_GetVisible);
@@ -964,15 +966,15 @@ namespace Wheatear {
         WT_ADD_INTERNAL_CALL(UITextComponent_GetFontPath);
         WT_ADD_INTERNAL_CALL(UITextComponent_SetFontPath);
 
-        // ©¤©¤ Arcade Combat ©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤
+        // â”€â”€ Arcade Combat â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
         WT_ADD_INTERNAL_CALL(ArcadeCombatLevelComponent_GetPaused);
         WT_ADD_INTERNAL_CALL(ArcadeCombatLevelComponent_GetBossIntroStarted);
         WT_ADD_INTERNAL_CALL(ArcadeCombatLevelComponent_GetBossIntroFinished);
         WT_ADD_INTERNAL_CALL(ArcadeCombatLevelComponent_GetVictory);
         WT_ADD_INTERNAL_CALL(ArcadeCombatLevelComponent_GetDefeat);
         WT_ADD_INTERNAL_CALL(ArcadeCombatLevelComponent_RequestSceneCommand);
-        // ©¤©¤ ÀàĞÍ×¢²á±í£¨HasComponent / AddComponent ÓÃ£©©¤©¤©¤©¤©¤©¤
-        // ĞÂÔö×é¼şÖ»ĞèÔÚÕâÀï¼ÓÒ»ĞĞ£¬ÎŞĞèĞŞ¸Ä HasComponent/AddComponent º¯ÊıÌå
+        // â”€â”€ ç±»å‹æ³¨å†Œè¡¨ï¼ˆHasComponent / AddComponent ç”¨ï¼‰â”€â”€â”€â”€â”€â”€
+        // æ–°å¢ç»„ä»¶åªéœ€åœ¨è¿™é‡ŒåŠ ä¸€è¡Œï¼Œæ— éœ€ä¿®æ”¹ HasComponent/AddComponent å‡½æ•°ä½“
         REGISTER_COMPONENT(TransformComponent, "Wheatear.TransformComponent");
         REGISTER_COMPONENT(Rigidbody2DComponent, "Wheatear.Rigidbody2DComponent");
         REGISTER_COMPONENT(SpriteAnimatorComponent, "Wheatear.SpriteAnimatorComponent");
@@ -992,3 +994,14 @@ namespace Wheatear {
     }
 
 } // namespace Wheatear
+#else
+
+namespace Wheatear {
+
+    void ScriptGlue::RegisterFunctions()
+    {
+    }
+
+} // namespace Wheatear
+
+#endif

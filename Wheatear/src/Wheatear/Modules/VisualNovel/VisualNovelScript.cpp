@@ -85,6 +85,13 @@ namespace Wheatear {
         return value.rfind(prefix, 0) == 0;
     }
 
+    static std::string ToLower(std::string value)
+    {
+        std::transform(value.begin(), value.end(), value.begin(),
+            [](unsigned char c) { return static_cast<char>(std::tolower(c)); });
+        return value;
+    }
+
     static bool ReadCommandPayload(const std::string& line,
         const std::string& command,
         std::string& payload)
@@ -231,6 +238,8 @@ namespace Wheatear {
         m_Labels.clear();
 
         std::string currentBackground = m_DefaultBackground;
+        std::string currentMusic;
+        std::string currentMusicTitle;
         std::vector<std::string> activeCharacters;
         std::unordered_map<std::string, std::string> activeExpressions;
         float currentSpeed = 42.0f;
@@ -238,6 +247,8 @@ namespace Wheatear {
         auto applyState = [&](VisualNovelLine& line)
         {
             line.Background = currentBackground;
+            line.Music = currentMusic;
+            line.MusicTitle = currentMusicTitle;
             line.VisibleCharacters = activeCharacters;
             line.CharacterExpressions = activeExpressions;
             line.CharactersPerSecond = currentSpeed;
@@ -260,6 +271,21 @@ namespace Wheatear {
                 currentBackground = StripQuotes(payload);
                 if (!currentBackground.empty())
                     m_DefaultBackground = currentBackground;
+                continue;
+            }
+
+            if (ReadAnyCommandPayload(line, { "music", "bgm" }, payload))
+            {
+                std::string remaining = payload;
+                currentMusic = StripQuotes(ConsumeToken(remaining));
+                currentMusicTitle = StripQuotes(remaining);
+
+                const std::string loweredMusic = ToLower(currentMusic);
+                if (loweredMusic == "none" || loweredMusic == "stop" || loweredMusic == "off")
+                {
+                    currentMusic.clear();
+                    currentMusicTitle.clear();
+                }
                 continue;
             }
 

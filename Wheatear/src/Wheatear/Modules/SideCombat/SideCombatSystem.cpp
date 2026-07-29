@@ -1,16 +1,21 @@
 #include "wtpch.h"
 #include "SideCombatSystem.h"
 
+#include "Wheatear/Audio/AudioEngine.h"
 #include "Wheatear/Core/Input.h"
 #include "Wheatear/Core/AssetPath.h"
 #include "Wheatear/Core/KeyCodes.h"
 #include "Wheatear/Core/MouseButtonCodes.h"
 #include "Wheatear/Modules/Progression/GameProgress.h"
+#include "Wheatear/Renderer/Texture.h"
 #include "Wheatear/Scene/Components.h"
 #include "Wheatear/Scene/Entity.h"
+#include "Wheatear/Scene/SceneQueries.h"
 #include "Wheatear/Scene/Scene.h"
+#include "Wheatear/UI/UIRuntimeTools.h"
 
 #include <algorithm>
+#include <array>
 #include <cmath>
 #include <filesystem>
 #include <iomanip>
@@ -29,6 +34,16 @@ namespace Wheatear {
 
     namespace {
 
+        using SceneQueries::FindEntityByName;
+        using UIRuntimeTools::IsButtonHovered;
+        using UIRuntimeTools::SetImageAlpha;
+        using UIRuntimeTools::SetImageColor;
+        using UIRuntimeTools::SetImageTexture;
+        using UIRuntimeTools::SetProgress;
+        using UIRuntimeTools::SetText;
+        using UIRuntimeTools::SetWidgetTopLeft;
+        using UIRuntimeTools::SetWidgetVisible;
+
         constexpr float GravityDefault = 22.0f;
         constexpr float DefaultLaneMinY = -3.55f;
         constexpr float DefaultLaneMaxY = -1.30f;
@@ -44,6 +59,11 @@ namespace Wheatear {
             float DamageScale = 0.75f;
             float DamageFlat = 8.0f;
             float Lifetime = 0.14f;
+            float Startup = 0.0f;
+            float Recovery = 0.0f;
+            float CancelWindowStart = 0.0f;
+            float CancelWindowEnd = 0.0f;
+            float MovementScale = 1.0f;
             float HitStun = 0.30f;
             float AttackerAirImpulse = 0.0f;
             float AttackerAirFallStep = 0.0f;
@@ -53,6 +73,12 @@ namespace Wheatear {
             std::string TextureFramePattern;
             int TextureFrameCount = 1;
             float TextureFrameRate = 16.0f;
+            std::string SwingSound;
+            std::string HitSound;
+            float SoundVolume = 1.0f;
+            float HitPause = 0.0f;
+            float CameraShake = 0.0f;
+            float CameraShakeDuration = 0.0f;
         };
 
         struct SidePlayerTuning
@@ -62,6 +88,8 @@ namespace Wheatear {
             float JumpImpulse = 7.8f;
             float Gravity = 20.0f;
             float AirControl = 13.0f;
+            float JumpBufferTime = 0.12f;
+            float CoyoteTime = 0.08f;
             float LaneSpeedScale = 0.72f;
             float LaneAcceleration = 30.0f;
             float GroundAcceleration = 40.0f;
@@ -143,6 +171,37 @@ namespace Wheatear {
             bool ShowBreakLimitHint = false;
         };
 
+        struct CombatItemSlot
+        {
+            const char* Key;
+            const char* Shortcut;
+            const char* IconPath;
+            const char* DisplayName;
+            const char* Usage;
+        };
+
+        struct SideAnimationClipTuning
+        {
+            std::string Pattern;
+            int FrameCount = 1;
+            float FrameRate = 8.0f;
+            bool Loop = true;
+        };
+
+        struct SideAnimationSetTuning
+        {
+            std::unordered_map<std::string, SideAnimationClipTuning> Clips;
+        };
+
+        struct SideFeedbackTuning
+        {
+            float HitPauseTimeScale = 0.12f;
+            std::string JumpSound = "assets/vertical_slice/side_combat/audio/jump.wav";
+            std::string LandSound = "assets/vertical_slice/side_combat/audio/land.wav";
+            float JumpSoundVolume = 0.55f;
+            float LandSoundVolume = 0.58f;
+        };
+
         struct SideProgressionTuning
         {
             std::string DefaultProfileId = "CH02_MAIN_BearAwakening";
@@ -204,24 +263,14 @@ namespace Wheatear {
             float ShadowMaxAlpha = 0.46f;
             float ShadowAirFadeHeight = 3.8f;
             float BossLaunchBonus = 1.35f;
+            SideFeedbackTuning Feedback;
+            SideAnimationSetTuning PlayerAnimations;
+            SideAnimationSetTuning GruntAnimations;
+            SideAnimationSetTuning BossAnimations;
             std::unordered_map<std::string, SideAttackTuning> Attacks;
             std::unordered_map<std::string, SideSkillDefinition> Skills;
             SideProgressionTuning Progression;
         };
-
-        static Entity FindEntityByName(Scene* scene, const std::string& name)
-        {
-            if (!scene || name.empty())
-                return {};
-
-            auto& registry = scene->GetRegistry();
-            for (auto e : registry.view<TagComponent>())
-            {
-                if (registry.get<TagComponent>(e).Tag == name)
-                    return { e, scene };
-            }
-            return {};
-        }
 
         static float SignNonZero(float value)
         {
@@ -259,6 +308,31 @@ namespace Wheatear {
             std::string result = pattern;
             result.replace(marker, 7, index.str());
             return result;
+        }
+
+        static SideAnimationClipTuning MakeAnimationClip(
+            const std::string& pattern,
+            int frameCount,
+            float frameRate,
+            bool loop = true)
+        {
+            SideAnimationClipTuning clip;
+            clip.Pattern = pattern;
+            clip.FrameCount = std::max(1, frameCount);
+            clip.FrameRate = std::max(1.0f, frameRate);
+            clip.Loop = loop;
+            return clip;
+        }
+
+        static void AddAnimationClip(
+            SideAnimationSetTuning& set,
+            const std::string& key,
+            const std::string& pattern,
+            int frameCount,
+            float frameRate,
+            bool loop = true)
+        {
+            set.Clips[key] = MakeAnimationClip(pattern, frameCount, frameRate, loop);
         }
 
         static std::filesystem::path FindLooseTuningPath(const std::filesystem::path& path)
@@ -349,6 +423,11 @@ namespace Wheatear {
             tuning.DamageScale = node["damageScale"].as<float>(tuning.DamageScale);
             tuning.DamageFlat = node["damageFlat"].as<float>(tuning.DamageFlat);
             tuning.Lifetime = node["lifetime"].as<float>(tuning.Lifetime);
+            tuning.Startup = node["startup"].as<float>(tuning.Startup);
+            tuning.Recovery = node["recovery"].as<float>(tuning.Recovery);
+            tuning.CancelWindowStart = node["cancelWindowStart"].as<float>(tuning.CancelWindowStart);
+            tuning.CancelWindowEnd = node["cancelWindowEnd"].as<float>(tuning.CancelWindowEnd);
+            tuning.MovementScale = node["movementScale"].as<float>(tuning.MovementScale);
             tuning.HitStun = node["hitStun"].as<float>(tuning.HitStun);
             tuning.AttackerAirImpulse = node["attackerAirImpulse"].as<float>(tuning.AttackerAirImpulse);
             tuning.AttackerAirFallStep = node["attackerAirFallStep"].as<float>(tuning.AttackerAirFallStep);
@@ -358,7 +437,68 @@ namespace Wheatear {
             tuning.TextureFramePattern = node["textureFramePattern"].as<std::string>(tuning.TextureFramePattern);
             tuning.TextureFrameCount = node["textureFrameCount"].as<int>(tuning.TextureFrameCount);
             tuning.TextureFrameRate = node["textureFrameRate"].as<float>(tuning.TextureFrameRate);
+            tuning.SwingSound = node["swingSound"].as<std::string>(tuning.SwingSound);
+            tuning.HitSound = node["hitSound"].as<std::string>(tuning.HitSound);
+            tuning.SoundVolume = node["soundVolume"].as<float>(tuning.SoundVolume);
+            tuning.HitPause = node["hitPause"].as<float>(tuning.HitPause);
+            tuning.CameraShake = node["cameraShake"].as<float>(tuning.CameraShake);
+            tuning.CameraShakeDuration = node["cameraShakeDuration"].as<float>(tuning.CameraShakeDuration);
             return tuning;
+        }
+
+        static SideFeedbackTuning ReadFeedbackTuning(const YAML::Node& node, const SideFeedbackTuning& fallback)
+        {
+            SideFeedbackTuning tuning = fallback;
+            if (!node)
+                return tuning;
+
+            tuning.HitPauseTimeScale = node["hitPauseTimeScale"].as<float>(tuning.HitPauseTimeScale);
+            tuning.JumpSound = node["jumpSound"].as<std::string>(tuning.JumpSound);
+            tuning.LandSound = node["landSound"].as<std::string>(tuning.LandSound);
+            tuning.JumpSoundVolume = node["jumpSoundVolume"].as<float>(tuning.JumpSoundVolume);
+            tuning.LandSoundVolume = node["landSoundVolume"].as<float>(tuning.LandSoundVolume);
+            return tuning;
+        }
+
+        static SideAnimationClipTuning ReadAnimationClip(
+            const YAML::Node& node,
+            const SideAnimationClipTuning& fallback)
+        {
+            SideAnimationClipTuning clip = fallback;
+            if (!node)
+                return clip;
+
+            clip.Pattern = node["pattern"].as<std::string>(clip.Pattern);
+            clip.FrameCount = node["frameCount"].as<int>(clip.FrameCount);
+            clip.FrameRate = node["frameRate"].as<float>(clip.FrameRate);
+            clip.Loop = node["loop"].as<bool>(clip.Loop);
+            clip.FrameCount = std::max(1, clip.FrameCount);
+            clip.FrameRate = std::max(1.0f, clip.FrameRate);
+            return clip;
+        }
+
+        static SideAnimationSetTuning ReadAnimationSet(
+            const YAML::Node& node,
+            const SideAnimationSetTuning& fallback)
+        {
+            SideAnimationSetTuning set = fallback;
+            if (!node || !node.IsMap())
+                return set;
+
+            for (auto it = node.begin(); it != node.end(); ++it)
+            {
+                const std::string key = it->first.as<std::string>("");
+                if (key.empty())
+                    continue;
+
+                const auto fallbackIt = set.Clips.find(key);
+                const SideAnimationClipTuning fallbackClip = fallbackIt != set.Clips.end()
+                    ? fallbackIt->second
+                    : SideAnimationClipTuning{};
+                set.Clips[key] = ReadAnimationClip(it->second, fallbackClip);
+            }
+
+            return set;
         }
 
         static SidePlayerTuning ReadPlayerTuning(const YAML::Node& node, const SidePlayerTuning& fallback)
@@ -372,6 +512,8 @@ namespace Wheatear {
             tuning.JumpImpulse = node["jumpImpulse"].as<float>(tuning.JumpImpulse);
             tuning.Gravity = node["gravity"].as<float>(tuning.Gravity);
             tuning.AirControl = node["airControl"].as<float>(tuning.AirControl);
+            tuning.JumpBufferTime = node["jumpBufferTime"].as<float>(tuning.JumpBufferTime);
+            tuning.CoyoteTime = node["coyoteTime"].as<float>(tuning.CoyoteTime);
             tuning.LaneSpeedScale = node["laneSpeedScale"].as<float>(tuning.LaneSpeedScale);
             tuning.LaneAcceleration = node["laneAcceleration"].as<float>(tuning.LaneAcceleration);
             tuning.GroundAcceleration = node["groundAcceleration"].as<float>(tuning.GroundAcceleration);
@@ -639,8 +781,8 @@ namespace Wheatear {
         {
             AddDefaultSkill(tuning, "basic_attack", "三段斩", "J", "地面起手 / 基础续连", { "basic1", "basic2", "basic3" }, 2, true);
             AddDefaultSkill(tuning, "air_basic", "跳斩", "空中 J", "前期默认空中续连", { "air_basic" }, 2, true);
-            AddDefaultSkill(tuning, "launcher", "裂空上挑", "K", "地面浮空起手", { "launcher" }, 2, true);
-            AddDefaultSkill(tuning, "air_chase", "空中追斩", "空中 K", "空中续连 / 低空补救", { "air_chase" }, 2, true);
+            AddDefaultSkill(tuning, "launcher", "裂空挑斩", "S+J", "地面浮空起手", { "launcher" }, 2, true);
+            AddDefaultSkill(tuning, "air_chase", "空中追斩", "空中 S+J", "空中续连 / 低空补救", { "air_chase" }, 2, true);
             AddDefaultSkill(tuning, "magic_bolt", "火球术", "U", "远程补 hit / 空中魔法续连", { "magic_bolt" }, 2, true);
             AddDefaultSkill(tuning, "ally_support", "真青梅支援", "I", "支援浮空 / 新手容错", { "ally_support" }, 2, true);
             AddDefaultSkill(tuning, "break_limit", "断限追击", "L", "Boss 保护临界时刷新空中行动", { "break_limit" }, 7, false);
@@ -694,10 +836,86 @@ namespace Wheatear {
                 true);
         }
 
+        static void AddDefaultAnimationData(SideCombatTuning& tuning)
+        {
+            const std::string characterRoot = "assets/vertical_slice/side_combat/characters/";
+            AddAnimationClip(tuning.PlayerAnimations, "idle", characterRoot + "player_idle_{frame}.png", 4, 7.0f);
+            AddAnimationClip(tuning.PlayerAnimations, "run", characterRoot + "player_run_{frame}.png", 6, 12.0f);
+            AddAnimationClip(tuning.PlayerAnimations, "jump", characterRoot + "player_jump_{frame}.png", 3, 10.0f, false);
+            AddAnimationClip(tuning.PlayerAnimations, "fall", characterRoot + "player_fall_{frame}.png", 3, 9.0f);
+            AddAnimationClip(tuning.PlayerAnimations, "hit", characterRoot + "player_hit_{frame}.png", 3, 12.0f, false);
+            AddAnimationClip(tuning.PlayerAnimations, "dead", characterRoot + "player_dead_{frame}.png", 4, 7.0f, false);
+            AddAnimationClip(tuning.PlayerAnimations, "basic1", characterRoot + "player_basic1_{frame}.png", 4, 18.0f, false);
+            AddAnimationClip(tuning.PlayerAnimations, "basic2", characterRoot + "player_basic2_{frame}.png", 4, 18.0f, false);
+            AddAnimationClip(tuning.PlayerAnimations, "basic3", characterRoot + "player_basic3_{frame}.png", 5, 18.0f, false);
+            AddAnimationClip(tuning.PlayerAnimations, "air_basic", characterRoot + "player_air_basic_{frame}.png", 4, 18.0f, false);
+            AddAnimationClip(tuning.PlayerAnimations, "launcher", characterRoot + "player_launcher_{frame}.png", 5, 18.0f, false);
+            AddAnimationClip(tuning.PlayerAnimations, "air_chase", characterRoot + "player_air_chase_{frame}.png", 4, 18.0f, false);
+            AddAnimationClip(tuning.PlayerAnimations, "magic_bolt", characterRoot + "player_magic_{frame}.png", 4, 16.0f, false);
+            AddAnimationClip(tuning.PlayerAnimations, "ally_support", characterRoot + "player_support_{frame}.png", 4, 14.0f, false);
+            AddAnimationClip(tuning.PlayerAnimations, "break_limit", characterRoot + "player_break_limit_{frame}.png", 5, 18.0f, false);
+
+            const std::string enemyRoot = "assets/vertical_slice/side_combat/enemies/";
+            AddAnimationClip(tuning.GruntAnimations, "idle", enemyRoot + "claw_beast_idle_{frame}.png", 4, 7.0f);
+            AddAnimationClip(tuning.GruntAnimations, "run", enemyRoot + "claw_beast_run_{frame}.png", 5, 11.0f);
+            AddAnimationClip(tuning.GruntAnimations, "hit", enemyRoot + "claw_beast_hit_{frame}.png", 3, 12.0f, false);
+            AddAnimationClip(tuning.GruntAnimations, "fall", enemyRoot + "claw_beast_fall_{frame}.png", 3, 9.0f);
+            AddAnimationClip(tuning.GruntAnimations, "dead", enemyRoot + "claw_beast_dead_{frame}.png", 4, 7.0f, false);
+            AddAnimationClip(tuning.GruntAnimations, "enemy_claw", enemyRoot + "claw_beast_attack_{frame}.png", 4, 14.0f, false);
+
+            AddAnimationClip(tuning.BossAnimations, "idle", enemyRoot + "bear_idle_{frame}.png", 4, 6.0f);
+            AddAnimationClip(tuning.BossAnimations, "run", enemyRoot + "bear_walk_{frame}.png", 5, 8.0f);
+            AddAnimationClip(tuning.BossAnimations, "hit", enemyRoot + "bear_hit_{frame}.png", 3, 10.0f, false);
+            AddAnimationClip(tuning.BossAnimations, "fall", enemyRoot + "bear_fall_{frame}.png", 3, 8.0f);
+            AddAnimationClip(tuning.BossAnimations, "dead", enemyRoot + "bear_dead_{frame}.png", 4, 7.0f, false);
+            AddAnimationClip(tuning.BossAnimations, "enemy_claw", enemyRoot + "bear_attack_{frame}.png", 4, 12.0f, false);
+            AddAnimationClip(tuning.BossAnimations, "bear_charge", enemyRoot + "bear_charge_anim_{frame}.png", 4, 12.0f, false);
+            AddAnimationClip(tuning.BossAnimations, "bear_shockwave", enemyRoot + "bear_shockwave_anim_{frame}.png", 4, 12.0f, false);
+        }
+
+        static void ApplyDefaultAttackFeedback(SideCombatTuning& tuning)
+        {
+            auto apply = [&](const std::string& id,
+                const std::string& swing,
+                const std::string& hit,
+                float volume,
+                float hitPause,
+                float cameraShake,
+                float cameraShakeDuration)
+            {
+                auto attackIt = tuning.Attacks.find(id);
+                if (attackIt == tuning.Attacks.end())
+                    return;
+
+                auto& attack = attackIt->second;
+                attack.SwingSound = swing;
+                attack.HitSound = hit;
+                attack.SoundVolume = volume;
+                attack.HitPause = hitPause;
+                attack.CameraShake = cameraShake;
+                attack.CameraShakeDuration = cameraShakeDuration;
+            };
+
+            const std::string audioRoot = "assets/vertical_slice/side_combat/audio/";
+            apply("basic1", audioRoot + "swing_light.wav", audioRoot + "hit_light.wav", 0.70f, 0.035f, 0.016f, 0.060f);
+            apply("basic2", audioRoot + "swing_light.wav", audioRoot + "hit_light.wav", 0.72f, 0.040f, 0.018f, 0.065f);
+            apply("basic3", audioRoot + "swing_heavy.wav", audioRoot + "hit_heavy.wav", 0.80f, 0.055f, 0.028f, 0.085f);
+            apply("air_basic", audioRoot + "swing_air.wav", audioRoot + "hit_air.wav", 0.68f, 0.032f, 0.014f, 0.052f);
+            apply("launcher", audioRoot + "swing_upper.wav", audioRoot + "hit_launcher.wav", 0.82f, 0.065f, 0.034f, 0.095f);
+            apply("air_chase", audioRoot + "swing_air.wav", audioRoot + "hit_air.wav", 0.76f, 0.046f, 0.024f, 0.075f);
+            apply("magic_bolt", audioRoot + "magic_cast.wav", audioRoot + "magic_hit.wav", 0.78f, 0.040f, 0.018f, 0.070f);
+            apply("ally_support", audioRoot + "support_cast.wav", audioRoot + "support_hit.wav", 0.78f, 0.052f, 0.026f, 0.085f);
+            apply("break_limit", audioRoot + "break_limit.wav", audioRoot + "hit_launcher.wav", 0.88f, 0.070f, 0.040f, 0.120f);
+            apply("enemy_claw", audioRoot + "enemy_swing.wav", audioRoot + "player_hit.wav", 0.70f, 0.030f, 0.016f, 0.060f);
+            apply("bear_charge", audioRoot + "bear_charge.wav", audioRoot + "player_hit.wav", 0.80f, 0.045f, 0.026f, 0.085f);
+            apply("bear_shockwave", audioRoot + "shockwave_cast.wav", audioRoot + "player_hit.wav", 0.74f, 0.035f, 0.020f, 0.070f);
+        }
+
         static SideCombatTuning BuildDefaultTuning()
         {
             SideCombatTuning tuning;
             AddDefaultProgressionData(tuning);
+            AddDefaultAnimationData(tuning);
 
             SideAttackTuning basic1;
             basic1.Size = { 1.30f, 0.70f };
@@ -707,6 +925,11 @@ namespace Wheatear {
             basic1.DamageScale = 0.70f;
             basic1.DamageFlat = 10.0f;
             basic1.Lifetime = 0.15f;
+            basic1.Startup = 0.06f;
+            basic1.Recovery = 0.10f;
+            basic1.CancelWindowStart = 0.12f;
+            basic1.CancelWindowEnd = 0.26f;
+            basic1.MovementScale = 0.58f;
             basic1.HitStun = 0.30f;
             basic1.LaunchVelocity = { 1.15f, 1.8f };
             basic1.ProtectionGain = 4.0f;
@@ -717,6 +940,11 @@ namespace Wheatear {
             basic2.Offset = { 0.94f, 0.02f };
             basic2.DamageScale = 0.78f;
             basic2.LaunchVelocity = { 1.35f, 2.2f };
+            basic2.Startup = 0.07f;
+            basic2.Recovery = 0.12f;
+            basic2.CancelWindowStart = 0.13f;
+            basic2.CancelWindowEnd = 0.30f;
+            basic2.MovementScale = 0.52f;
             basic2.ProtectionGain = 5.0f;
             tuning.Attacks["basic2"] = basic2;
 
@@ -728,6 +956,11 @@ namespace Wheatear {
             basic3.DamageScale = 0.96f;
             basic3.DamageFlat = 13.0f;
             basic3.Lifetime = 0.17f;
+            basic3.Startup = 0.09f;
+            basic3.Recovery = 0.18f;
+            basic3.CancelWindowStart = 0.19f;
+            basic3.CancelWindowEnd = 0.39f;
+            basic3.MovementScale = 0.36f;
             basic3.HitStun = 0.36f;
             basic3.LaunchVelocity = { 2.2f, 4.2f };
             basic3.ProtectionGain = 8.0f;
@@ -741,6 +974,11 @@ namespace Wheatear {
             airBasic.DamageScale = 0.40f;
             airBasic.DamageFlat = 7.0f;
             airBasic.Lifetime = 0.14f;
+            airBasic.Startup = 0.04f;
+            airBasic.Recovery = 0.10f;
+            airBasic.CancelWindowStart = 0.09f;
+            airBasic.CancelWindowEnd = 0.24f;
+            airBasic.MovementScale = 0.90f;
             airBasic.HitStun = 0.36f;
             airBasic.LaunchVelocity = { 0.85f, 2.15f };
             airBasic.AttackerAirImpulse = 0.85f;
@@ -757,6 +995,11 @@ namespace Wheatear {
             launcher.DamageScale = 0.74f;
             launcher.DamageFlat = 12.0f;
             launcher.Lifetime = 0.22f;
+            launcher.Startup = 0.11f;
+            launcher.Recovery = 0.20f;
+            launcher.CancelWindowStart = 0.20f;
+            launcher.CancelWindowEnd = 0.44f;
+            launcher.MovementScale = 0.35f;
             launcher.HitStun = 0.54f;
             launcher.LaunchVelocity = { 0.95f, 9.8f };
             launcher.AttackerAirImpulse = 3.2f;
@@ -771,6 +1014,11 @@ namespace Wheatear {
             airChase.DamageScale = 0.58f;
             airChase.DamageFlat = 10.0f;
             airChase.Lifetime = 0.19f;
+            airChase.Startup = 0.06f;
+            airChase.Recovery = 0.14f;
+            airChase.CancelWindowStart = 0.11f;
+            airChase.CancelWindowEnd = 0.32f;
+            airChase.MovementScale = 0.86f;
             airChase.HitStun = 0.46f;
             airChase.LaunchVelocity = { 0.75f, 3.4f };
             airChase.AttackerAirImpulse = 1.20f;
@@ -788,6 +1036,11 @@ namespace Wheatear {
             magic.DamageScale = 0.70f;
             magic.DamageFlat = 11.0f;
             magic.Lifetime = 1.15f;
+            magic.Startup = 0.10f;
+            magic.Recovery = 0.20f;
+            magic.CancelWindowStart = 0.18f;
+            magic.CancelWindowEnd = 0.40f;
+            magic.MovementScale = 0.48f;
             magic.HitStun = 0.34f;
             magic.LaunchVelocity = { 1.2f, 3.1f };
             magic.ProtectionGain = 5.0f;
@@ -801,6 +1054,11 @@ namespace Wheatear {
             support.DamageScale = 0.55f;
             support.DamageFlat = 9.0f;
             support.Lifetime = 0.34f;
+            support.Startup = 0.18f;
+            support.Recovery = 0.24f;
+            support.CancelWindowStart = 0.28f;
+            support.CancelWindowEnd = 0.60f;
+            support.MovementScale = 0.70f;
             support.HitStun = 0.58f;
             support.LaunchVelocity = { 0.0f, 6.8f };
             support.DestroyOnHit = false;
@@ -815,6 +1073,11 @@ namespace Wheatear {
             breakLimit.DamageScale = 0.34f;
             breakLimit.DamageFlat = 6.0f;
             breakLimit.Lifetime = 0.24f;
+            breakLimit.Startup = 0.04f;
+            breakLimit.Recovery = 0.12f;
+            breakLimit.CancelWindowStart = 0.10f;
+            breakLimit.CancelWindowEnd = 0.28f;
+            breakLimit.MovementScale = 0.92f;
             breakLimit.HitStun = 0.52f;
             breakLimit.LaunchVelocity = { 0.30f, 5.4f };
             breakLimit.AttackerAirImpulse = 2.25f;
@@ -832,6 +1095,9 @@ namespace Wheatear {
             enemyClaw.DamageScale = 0.64f;
             enemyClaw.DamageFlat = 7.0f;
             enemyClaw.Lifetime = 0.19f;
+            enemyClaw.Startup = 0.32f;
+            enemyClaw.Recovery = 0.42f;
+            enemyClaw.MovementScale = 0.12f;
             enemyClaw.HitStun = 0.32f;
             enemyClaw.LaunchVelocity = { 3.0f, 2.0f };
             tuning.Attacks["enemy_claw"] = enemyClaw;
@@ -843,6 +1109,9 @@ namespace Wheatear {
             bearCharge.DamageScale = 0.82f;
             bearCharge.DamageFlat = 12.0f;
             bearCharge.Lifetime = 0.32f;
+            bearCharge.Startup = 0.48f;
+            bearCharge.Recovery = 0.70f;
+            bearCharge.MovementScale = 0.08f;
             bearCharge.HitStun = 0.44f;
             bearCharge.DestroyOnHit = false;
             tuning.Attacks["bear_charge"] = bearCharge;
@@ -856,9 +1125,14 @@ namespace Wheatear {
             shockwave.DamageScale = 0.56f;
             shockwave.DamageFlat = 8.0f;
             shockwave.Lifetime = 1.5f;
+            shockwave.Startup = 0.62f;
+            shockwave.Recovery = 0.55f;
+            shockwave.MovementScale = 0.05f;
             shockwave.HitStun = 0.30f;
             shockwave.LaunchVelocity = { 2.5f, 1.6f };
             tuning.Attacks["bear_shockwave"] = shockwave;
+
+            ApplyDefaultAttackFeedback(tuning);
 
             return tuning;
         }
@@ -890,6 +1164,9 @@ namespace Wheatear {
                     tuning.ShadowMinAlpha = visuals["shadowMinAlpha"].as<float>(tuning.ShadowMinAlpha);
                     tuning.ShadowMaxAlpha = visuals["shadowMaxAlpha"].as<float>(tuning.ShadowMaxAlpha);
                     tuning.ShadowAirFadeHeight = visuals["shadowAirFadeHeight"].as<float>(tuning.ShadowAirFadeHeight);
+                    tuning.PlayerAnimations = ReadAnimationSet(visuals["playerAnimations"], tuning.PlayerAnimations);
+                    tuning.GruntAnimations = ReadAnimationSet(visuals["gruntAnimations"], tuning.GruntAnimations);
+                    tuning.BossAnimations = ReadAnimationSet(visuals["bossAnimations"], tuning.BossAnimations);
                 }
 
                 if (YAML::Node reactions = root["reactions"])
@@ -897,6 +1174,7 @@ namespace Wheatear {
 
                 tuning.Player = ReadPlayerTuning(root["player"], tuning.Player);
                 tuning.Combat = ReadCombatRuleTuning(root["combat"], tuning.Combat);
+                tuning.Feedback = ReadFeedbackTuning(root["feedback"], tuning.Feedback);
                 tuning.AirCombo = ReadAirComboTuning(root["airCombo"], tuning.AirCombo);
                 tuning.Protection = ReadProtectionTuning(root["protection"], tuning.Protection);
                 tuning.Enemy = ReadEnemyTuning(root["enemy"], tuning.Enemy);
@@ -1058,45 +1336,194 @@ namespace Wheatear {
                 (profile && profile->ShowCombatStateHud);
         }
 
-        static void SetWidgetVisible(Scene* scene, const std::string& entityName, bool visible)
+        static std::string FormatCooldownSeconds(float value)
         {
-            Entity entity = FindEntityByName(scene, entityName);
-            if (entity && entity.HasComponent<UIWidgetComponent>())
-                entity.GetComponent<UIWidgetComponent>().Visible = visible;
+            std::ostringstream stream;
+            stream << std::fixed << std::setprecision(1) << std::max(0.0f, value);
+            return stream.str();
         }
 
-        static void SetText(Scene* scene, const std::string& entityName, const std::string& text)
+        static void SetSkillSlotVisible(Scene* scene, const std::string& key, bool visible)
         {
-            Entity entity = FindEntityByName(scene, entityName);
-            if (entity && entity.HasComponent<UITextComponent>())
-                entity.GetComponent<UITextComponent>().Text = text;
+            SetWidgetVisible(scene, "SC_SkillSlot_" + key, visible);
+            SetWidgetVisible(scene, "SC_SkillIcon_" + key, visible);
+            SetWidgetVisible(scene, "SC_SkillCooldown_" + key, visible);
+            SetWidgetVisible(scene, "SC_SkillCooldownText_" + key, visible);
+            SetWidgetVisible(scene, "SC_SkillKey_" + key, visible);
         }
 
-        static void SetProgress(Scene* scene,
-            const std::string& entityName,
-            float value,
-            float maxValue)
+        static void UpdateSkillSlot(Scene* scene,
+            const std::string& key,
+            const std::string& keyLabel,
+            bool unlocked,
+            float cooldown,
+            float maxCooldown)
         {
-            Entity entity = FindEntityByName(scene, entityName);
-            if (!entity || !entity.HasComponent<UIProgressBarComponent>())
+            const std::string slot = "SC_SkillSlot_" + key;
+            const std::string icon = "SC_SkillIcon_" + key;
+            const std::string overlay = "SC_SkillCooldown_" + key;
+            const std::string text = "SC_SkillCooldownText_" + key;
+            const std::string keyText = "SC_SkillKey_" + key;
+
+            if (!FindEntityByName(scene, slot))
                 return;
 
-            auto& bar = entity.GetComponent<UIProgressBarComponent>();
-            bar.MaxValue = std::max(0.01f, maxValue);
-            bar.Value = std::clamp(value, 0.0f, bar.MaxValue);
+            SetWidgetVisible(scene, slot, true);
+            SetWidgetVisible(scene, icon, true);
+            SetWidgetVisible(scene, keyText, true);
+            SetText(scene, keyText, keyLabel);
+            SetImageColor(scene, icon, unlocked
+                ? glm::vec4(1.0f, 1.0f, 1.0f, 1.0f)
+                : glm::vec4(0.35f, 0.37f, 0.40f, 0.86f));
+
+            if (!unlocked)
+            {
+                SetProgress(scene, overlay, 1.0f, 1.0f);
+                SetWidgetVisible(scene, overlay, true);
+                SetText(scene, text, "LOCK");
+                SetWidgetVisible(scene, text, true);
+                return;
+            }
+
+            if (cooldown > 0.05f)
+            {
+                SetProgress(scene, overlay, cooldown, std::max(0.05f, maxCooldown));
+                SetWidgetVisible(scene, overlay, true);
+                SetText(scene, text, FormatCooldownSeconds(cooldown));
+                SetWidgetVisible(scene, text, true);
+            }
+            else
+            {
+                SetWidgetVisible(scene, overlay, false);
+                SetWidgetVisible(scene, text, false);
+            }
         }
 
-        static void SetImageAlpha(Scene* scene, const std::string& entityName, float alpha)
+        static void UpdateSkillTooltip(Scene* scene,
+            const std::string& key,
+            const std::string& text)
         {
-            Entity entity = FindEntityByName(scene, entityName);
-            if (!entity)
+            const bool visible = !key.empty() && !text.empty();
+            SetWidgetVisible(scene, "SC_SkillTooltipPanel", visible);
+            SetWidgetVisible(scene, "SC_SkillTooltipText", visible);
+            if (!visible)
                 return;
 
-            alpha = std::clamp(alpha, 0.0f, 1.0f);
-            if (entity.HasComponent<UIImageComponent>())
-                entity.GetComponent<UIImageComponent>().Color.a = alpha;
-            if (entity.HasComponent<UIWidgetComponent>())
-                entity.GetComponent<UIWidgetComponent>().Visible = alpha > 0.01f;
+            float x = 0.58f;
+            float y = 0.725f;
+            if (key == "U")
+                x = 0.64f;
+            else if (key == "I")
+                x = 0.70f;
+            else if (key == "L")
+                x = 0.76f;
+            else if (key == "ItemSlot1")
+            {
+                x = 0.04f;
+                y = 0.705f;
+            }
+            else if (key == "ItemSlot2")
+            {
+                x = 0.10f;
+                y = 0.705f;
+            }
+            else if (key == "ItemSlot3")
+            {
+                x = 0.16f;
+                y = 0.705f;
+            }
+
+            const glm::vec2 size = { 0.225f, 0.090f };
+            const glm::vec2 position = {
+                std::clamp(x, 0.04f, 0.96f - size.x),
+                y
+            };
+            SetWidgetTopLeft(scene, "SC_SkillTooltipPanel", position, size);
+            SetWidgetTopLeft(scene, "SC_SkillTooltipText",
+                position + glm::vec2(0.012f, 0.010f),
+                size - glm::vec2(0.024f, 0.020f));
+            SetText(scene, "SC_SkillTooltipText", text);
+        }
+
+        static const std::array<CombatItemSlot, 3>& GetCombatItemSlots()
+        {
+            static const std::array<CombatItemSlot, 3> slots = {
+                CombatItemSlot{
+                    "1",
+                    "1",
+                    "assets/vertical_slice/side_combat/ui/items/item_slot_1_heal_potion.png",
+                    "回复药",
+                    "恢复生命。正式道具效果后续接入消耗品系统。" },
+                CombatItemSlot{
+                    "2",
+                    "2",
+                    "assets/vertical_slice/side_combat/ui/items/item_slot_2_focus_vial.png",
+                    "凝神药剂",
+                    "短时间提高魔剑槽恢复。当前为道具栏占位。" },
+                CombatItemSlot{
+                    "3",
+                    "3",
+                    "assets/vertical_slice/side_combat/ui/items/item_slot_3_burst_bomb.png",
+                    "裂空爆弹",
+                    "用于打断小怪包围。当前为道具栏占位。" }
+            };
+            return slots;
+        }
+
+        static void SetItemSlotVisible(Scene* scene, const CombatItemSlot& slot, bool visible)
+        {
+            const std::string prefix = std::string("SC_ItemSlot_") + slot.Key;
+            SetWidgetVisible(scene, prefix + "_Frame", visible);
+            SetWidgetVisible(scene, prefix + "_Icon", visible);
+            SetWidgetVisible(scene, prefix + "_Button", visible);
+            SetWidgetVisible(scene, prefix + "_Count", visible);
+        }
+
+        static void UpdateCombatItemSlots(Scene* scene)
+        {
+            if (!FindEntityByName(scene, "SC_ItemSlot_1_Frame"))
+                return;
+
+            int index = 0;
+            for (const CombatItemSlot& slot : GetCombatItemSlots())
+            {
+                const std::string prefix = std::string("SC_ItemSlot_") + slot.Key;
+                SetItemSlotVisible(scene, slot, true);
+                SetImageTexture(scene, prefix + "_Icon", slot.IconPath);
+                SetImageColor(scene, prefix + "_Icon", glm::vec4(1.0f));
+                SetWidgetTopLeft(scene, prefix + "_Count",
+                    { 0.044f + 0.058f * static_cast<float>(index), 0.811f },
+                    { 0.018f, 0.018f });
+                SetText(scene, prefix + "_Count", slot.Shortcut);
+                ++index;
+            }
+        }
+
+        static void ApplyCombatItemTooltip(Scene* scene,
+            std::string& hoveredKey,
+            std::string& tooltip)
+        {
+            if (!tooltip.empty())
+                return;
+
+            int index = 1;
+            for (const CombatItemSlot& slot : GetCombatItemSlots())
+            {
+                const std::string prefix = std::string("SC_ItemSlot_") + slot.Key;
+                if (!IsButtonHovered(scene, prefix + "_Button") &&
+                    !IsButtonHovered(scene, prefix + "_Icon"))
+                {
+                    ++index;
+                    continue;
+                }
+
+                hoveredKey = "ItemSlot" + std::to_string(index);
+                std::ostringstream stream;
+                stream << slot.Shortcut << "  " << slot.DisplayName << "\n";
+                stream << slot.Usage;
+                tooltip = stream.str();
+                return;
+            }
         }
 
         static Ref<Texture2D> LoadTexture(const std::string& texturePath)
@@ -1114,6 +1541,85 @@ namespace Wheatear {
 
             textureCache[texturePath] = texture;
             return texture;
+        }
+
+        static float GetSfxVolume(float volume)
+        {
+            const auto& settings = GameProgress::GetState().Settings;
+            const float master = AudioEngine::PercentToGain(static_cast<float>(settings.MasterVolume));
+            const float sfx = AudioEngine::PercentToGain(static_cast<float>(settings.SFXVolume));
+            return std::clamp(volume, 0.0f, 2.0f) * master * sfx;
+        }
+
+        static void PlaySfx(const std::string& path, float volume = 1.0f)
+        {
+            if (path.empty())
+                return;
+
+            AudioEngine::PlaySound(path, GetSfxVolume(volume));
+        }
+
+        static void TriggerHitFeedback(Scene* scene,
+            SideCombatLevelComponent& level,
+            const SideHitboxComponent& hitbox)
+        {
+            PlaySfx(hitbox.HitSound, hitbox.HitSoundVolume);
+            level.RuntimeHitPauseTimer = std::max(level.RuntimeHitPauseTimer, std::max(0.0f, hitbox.HitPause));
+
+            if (!scene || !GameProgress::GetState().Settings.ScreenShake || hitbox.CameraShake <= 0.0f)
+                return;
+
+            Entity camera = scene->GetPrimaryCameraEntity();
+            if (!camera || !camera.HasComponent<TransformComponent>())
+                camera = FindEntityByName(scene, "SC_Camera");
+            if (!camera || !camera.HasComponent<TransformComponent>())
+                return;
+
+            auto& transform = camera.GetComponent<TransformComponent>();
+            if (!level.RuntimeCameraBaseCaptured)
+            {
+                level.RuntimeCameraBaseTranslation = transform.Translation;
+                level.RuntimeCameraBaseCaptured = true;
+            }
+
+            level.RuntimeCameraShakeTimer = std::max(level.RuntimeCameraShakeTimer, std::max(0.01f, hitbox.CameraShakeDuration));
+            level.RuntimeCameraShakeDuration = std::max(level.RuntimeCameraShakeDuration, std::max(0.01f, hitbox.CameraShakeDuration));
+            level.RuntimeCameraShakeStrength = std::max(level.RuntimeCameraShakeStrength, hitbox.CameraShake);
+        }
+
+        static void UpdateCameraFeedback(Scene* scene,
+            SideCombatLevelComponent& level,
+            float dt)
+        {
+            if (!scene || !level.RuntimeCameraBaseCaptured)
+                return;
+
+            Entity camera = scene->GetPrimaryCameraEntity();
+            if (!camera || !camera.HasComponent<TransformComponent>())
+                camera = FindEntityByName(scene, "SC_Camera");
+            if (!camera || !camera.HasComponent<TransformComponent>())
+                return;
+
+            auto& transform = camera.GetComponent<TransformComponent>();
+            if (level.RuntimeCameraShakeTimer <= 0.0f || !GameProgress::GetState().Settings.ScreenShake)
+            {
+                transform.Translation = level.RuntimeCameraBaseTranslation;
+                level.RuntimeCameraShakeTimer = 0.0f;
+                level.RuntimeCameraShakeDuration = 0.0f;
+                level.RuntimeCameraShakeStrength = 0.0f;
+                level.RuntimeCameraBaseCaptured = false;
+                return;
+            }
+
+            level.RuntimeCameraShakeTimer = std::max(0.0f, level.RuntimeCameraShakeTimer - dt);
+            const float duration = std::max(0.01f, level.RuntimeCameraShakeDuration);
+            const float normalized = level.RuntimeCameraShakeTimer / duration;
+            const float strength = level.RuntimeCameraShakeStrength * normalized * normalized;
+            const float phase = level.RuntimeElapsed * 95.0f;
+            transform.Translation = level.RuntimeCameraBaseTranslation + glm::vec3(
+                std::sin(phase) * strength,
+                std::sin(phase * 1.37f + 1.6f) * strength * 0.62f,
+                0.0f);
         }
 
         static const char* ResolveAttackTexture(SideAttackKind kind, int team)
@@ -1154,10 +1660,119 @@ namespace Wheatear {
             }
         }
 
+        static const SideAnimationSetTuning& SelectAnimationSet(
+            entt::registry& registry,
+            entt::entity entity,
+            const SideCombatantComponent& combatant,
+            const SideCombatTuning& tuning)
+        {
+            if (combatant.Team == (int)SideCombatTeam::Player)
+                return tuning.PlayerAnimations;
+
+            if (registry.all_of<SideEnemyAIComponent>(entity) &&
+                registry.get<SideEnemyAIComponent>(entity).Kind == SideEnemyKind::BearBoss)
+            {
+                return tuning.BossAnimations;
+            }
+
+            return tuning.GruntAnimations;
+        }
+
+        static bool HasAnimationClip(const SideAnimationSetTuning& set, const std::string& key)
+        {
+            return set.Clips.find(key) != set.Clips.end();
+        }
+
+        static std::string SelectVisualClipKey(
+            entt::registry& registry,
+            entt::entity entity,
+            const SideCombatantComponent& combatant,
+            const SideAnimationSetTuning& set)
+        {
+            if (!combatant.Alive || combatant.RuntimeState == SideCombatState::Dead)
+                return HasAnimationClip(set, "dead") ? "dead" : "idle";
+
+            if (combatant.Team == (int)SideCombatTeam::Player &&
+                registry.all_of<SidePlayerControllerComponent>(entity))
+            {
+                const auto& controller = registry.get<SidePlayerControllerComponent>(entity);
+                const bool actionActive = !controller.RuntimeActionAttackId.empty() &&
+                    controller.RuntimeActionTimer < controller.RuntimeActionDuration;
+                if (actionActive && HasAnimationClip(set, controller.RuntimeActionAttackId))
+                    return controller.RuntimeActionAttackId;
+            }
+
+            if (combatant.Team == (int)SideCombatTeam::Enemy &&
+                registry.all_of<SideEnemyAIComponent>(entity))
+            {
+                const auto& ai = registry.get<SideEnemyAIComponent>(entity);
+                const bool actionActive = !ai.RuntimeActionAttackId.empty() &&
+                    ai.RuntimeActionTimer < ai.RuntimeActionDuration;
+                if (actionActive && HasAnimationClip(set, ai.RuntimeActionAttackId))
+                    return ai.RuntimeActionAttackId;
+            }
+
+            if (combatant.RuntimeHitStun > 0.0f)
+                return HasAnimationClip(set, "hit") ? "hit" : "idle";
+
+            if (!combatant.RuntimeOnGround)
+            {
+                if (combatant.RuntimeAirVelocity > 0.2f && HasAnimationClip(set, "jump"))
+                    return "jump";
+                return HasAnimationClip(set, "fall") ? "fall" : "idle";
+            }
+
+            if (std::abs(combatant.RuntimeVelocity.x) > 0.10f ||
+                std::abs(combatant.RuntimeVelocity.y) > 0.10f)
+            {
+                return HasAnimationClip(set, "run") ? "run" : "idle";
+            }
+
+            return "idle";
+        }
+
+        static void ApplyCombatantAnimation(
+            entt::registry& registry,
+            entt::entity entity,
+            SideCombatantComponent& combatant,
+            SpriteRendererComponent& sprite,
+            const SideCombatTuning& tuning,
+            float dt)
+        {
+            const SideAnimationSetTuning& set = SelectAnimationSet(registry, entity, combatant, tuning);
+            const std::string clipKey = SelectVisualClipKey(registry, entity, combatant, set);
+            auto clipIt = set.Clips.find(clipKey);
+            if (clipIt == set.Clips.end())
+                return;
+
+            const auto& clip = clipIt->second;
+            if (combatant.RuntimeVisualClipKey != clipKey)
+            {
+                combatant.RuntimeVisualClipKey = clipKey;
+                combatant.RuntimeVisualTimer = 0.0f;
+            }
+            else
+            {
+                combatant.RuntimeVisualTimer += dt;
+            }
+
+            const int frameCount = std::max(1, clip.FrameCount);
+            const float frameRate = std::max(1.0f, clip.FrameRate);
+            int frame = 1 + (int)std::floor(combatant.RuntimeVisualTimer * frameRate);
+            if (clip.Loop)
+                frame = ((frame - 1) % frameCount) + 1;
+            else
+                frame = std::min(frame, frameCount);
+
+            if (Ref<Texture2D> texture = LoadTexture(FormatFramePath(clip.Pattern, frame)))
+                sprite.Texture = texture;
+        }
+
         static void UpdateCombatantVisual(Scene* scene,
             Entity entity,
             const SideCombatLevelComponent& level,
-            const SideCombatTuning& tuning)
+            const SideCombatTuning& tuning,
+            float dt)
         {
             if (!entity || !entity.HasComponent<TransformComponent>() || !entity.HasComponent<SideCombatantComponent>())
                 return;
@@ -1171,6 +1786,12 @@ namespace Wheatear {
             if (entity.HasComponent<SpriteRendererComponent>())
             {
                 auto& sprite = entity.GetComponent<SpriteRendererComponent>();
+                ApplyCombatantAnimation(scene->GetRegistry(),
+                    static_cast<entt::entity>(entity),
+                    combatant,
+                    sprite,
+                    tuning,
+                    dt);
                 sprite.FlipX = combatant.RuntimeFacing < 0.0f;
                 if (!combatant.Alive)
                 {
@@ -1273,7 +1894,7 @@ namespace Wheatear {
 
         static bool IsBossEntity(entt::registry& registry, entt::entity entity)
         {
-            return registry.has<SideEnemyAIComponent>(entity) &&
+            return registry.all_of<SideEnemyAIComponent>(entity) &&
                 registry.get<SideEnemyAIComponent>(entity).Kind == SideEnemyKind::BearBoss;
         }
 
@@ -1322,6 +1943,8 @@ namespace Wheatear {
             controller.JumpImpulse = tuning.Player.JumpImpulse;
             controller.Gravity = tuning.Player.Gravity;
             controller.AirControl = tuning.Player.AirControl;
+            controller.JumpBufferTime = std::max(0.0f, tuning.Player.JumpBufferTime);
+            controller.CoyoteTime = std::max(0.0f, tuning.Player.CoyoteTime);
             controller.LaneSpeedScale = tuning.Player.LaneSpeedScale;
             controller.LaneAcceleration = tuning.Player.LaneAcceleration;
             controller.GroundFriction = tuning.Player.GroundFriction;
@@ -1368,6 +1991,18 @@ namespace Wheatear {
             level.RuntimeComboTimer = 0.0f;
             level.RuntimeCollectedPickups = 0;
             level.RuntimeRewardsSpawned = false;
+            level.RuntimePlayerHitsTaken = 0;
+            level.RuntimeResultExperience = 0;
+            level.RuntimeResultRepeatExperience = 0;
+            level.RuntimeResultFirstClear = false;
+            level.RuntimeResultGrade.clear();
+            level.RuntimeResultSummary.clear();
+            level.RuntimeHitPauseTimer = 0.0f;
+            level.RuntimeCameraShakeTimer = 0.0f;
+            level.RuntimeCameraShakeDuration = 0.0f;
+            level.RuntimeCameraShakeStrength = 0.0f;
+            level.RuntimeCameraBaseTranslation = { 0.0f, 0.0f, 0.0f };
+            level.RuntimeCameraBaseCaptured = false;
 
             SetImageAlpha(scene, level.FadeEntityName, 1.0f);
         }
@@ -1398,7 +2033,7 @@ namespace Wheatear {
                 combatant.RuntimeHitStun = 0.0f;
                 combatant.RuntimeInvulnerableTimer = 0.0f;
                 combatant.RuntimeProtection = 0.0f;
-                combatant.RuntimeProtectionMax = registry.has<SideEnemyAIComponent>(e) &&
+                combatant.RuntimeProtectionMax = registry.all_of<SideEnemyAIComponent>(e) &&
                     registry.get<SideEnemyAIComponent>(e).Kind == SideEnemyKind::BearBoss
                     ? std::max(1.0f, tuning.Protection.BossProtectionMax)
                     : 100.0f;
@@ -1406,14 +2041,16 @@ namespace Wheatear {
                 combatant.RuntimeStateTimer = 0.0f;
                 combatant.RuntimeDeathProcessed = false;
                 combatant.RuntimeOnGround = true;
+                combatant.RuntimeVisualClipKey.clear();
+                combatant.RuntimeVisualTimer = 0.0f;
 
-                if (registry.has<SidePlayerControllerComponent>(e))
+                if (registry.all_of<SidePlayerControllerComponent>(e))
                 {
                     auto& controller = registry.get<SidePlayerControllerComponent>(e);
                     ApplyPlayerTuning(tuning, combatant, controller);
                 }
 
-                if (registry.has<SideEnemyAIComponent>(e))
+                if (registry.all_of<SideEnemyAIComponent>(e))
                 {
                     auto& ai = registry.get<SideEnemyAIComponent>(e);
                     ApplyBearBossTuning(tuning, combatant, ai);
@@ -1422,9 +2059,9 @@ namespace Wheatear {
                 if (combatant.Team == (int)SideCombatTeam::Enemy && transform.Translation.x != 0.0f)
                     combatant.RuntimeFacing = transform.Translation.x > 0.0f ? -1.0f : 1.0f;
 
-                if (registry.has<SpriteRendererComponent>(e))
+                if (registry.all_of<SpriteRendererComponent>(e))
                     registry.get<SpriteRendererComponent>(e).Color.a = 1.0f;
-                UpdateCombatantVisual(scene, { e, scene }, level, tuning);
+                UpdateCombatantVisual(scene, { e, scene }, level, tuning, 0.0f);
             }
 
             for (auto e : registry.view<SidePlayerControllerComponent>())
@@ -1438,9 +2075,21 @@ namespace Wheatear {
                 controller.RuntimeMagicSwordGaugeMax = std::max(1.0f, tuning.AirCombo.MagicSwordGaugeMax);
                 controller.RuntimeMagicSwordGauge = controller.RuntimeMagicSwordGaugeMax;
                 controller.RuntimeJumpsRemaining = controller.MaxJumps;
+                controller.RuntimeJumpBufferTimer = 0.0f;
+                controller.RuntimeCoyoteTimer = 0.0f;
                 controller.RuntimeAttackChain = 0;
                 controller.RuntimeAttackChainTimer = 0.0f;
                 controller.RuntimeAirActionsRemaining = tuning.AirCombo.AirActionLimit;
+                controller.RuntimeActionAttackId.clear();
+                controller.RuntimeActionEntityName.clear();
+                controller.RuntimeActionKind = SideAttackKind::Basic;
+                controller.RuntimeActionTimer = 0.0f;
+                controller.RuntimeActionDuration = 0.0f;
+                controller.RuntimeActionHitboxTime = 0.0f;
+                controller.RuntimeActionCancelStart = 0.0f;
+                controller.RuntimeActionCancelEnd = 0.0f;
+                controller.RuntimeActionMovementScale = 1.0f;
+                controller.RuntimeActionHitboxSpawned = false;
             }
 
             for (auto e : registry.view<SideEnemyAIComponent>())
@@ -1449,6 +2098,15 @@ namespace Wheatear {
                 ai.RuntimeAttackTimer = tuning.Enemy.InitialAttackDelay;
                 ai.RuntimeDecisionTimer = 0.0f;
                 ai.RuntimeAwake = true;
+                ai.RuntimeActionAttackId.clear();
+                ai.RuntimeActionEntityName.clear();
+                ai.RuntimeActionKind = SideAttackKind::EnemyMelee;
+                ai.RuntimeActionTimer = 0.0f;
+                ai.RuntimeActionDuration = 0.0f;
+                ai.RuntimeActionHitboxTime = 0.0f;
+                ai.RuntimeActionMovementScale = 1.0f;
+                ai.RuntimeActionFacing = 1.0f;
+                ai.RuntimeActionHitboxSpawned = false;
             }
         }
 
@@ -1468,6 +2126,7 @@ namespace Wheatear {
 
         static Entity CreateHitbox(Scene* scene,
             const std::string& name,
+            entt::entity ownerEntity,
             const glm::vec2& sourceGroundPosition,
             float sourceAirHeight,
             float facing,
@@ -1497,6 +2156,7 @@ namespace Wheatear {
             sprite.FlipX = facing < 0.0f;
 
             auto& component = hitbox.AddComponent<SideHitboxComponent>();
+            component.RuntimeOwnerEntity = static_cast<uint32_t>(ownerEntity);
             component.Team = team;
             component.AttackKind = kind;
             component.Size = tuning.Size;
@@ -1515,6 +2175,11 @@ namespace Wheatear {
             component.TextureFramePattern = tuning.TextureFramePattern;
             component.TextureFrameCount = std::max(1, tuning.TextureFrameCount);
             component.TextureFrameRate = std::max(1.0f, tuning.TextureFrameRate);
+            component.HitSound = tuning.HitSound;
+            component.HitSoundVolume = tuning.SoundVolume;
+            component.HitPause = tuning.HitPause;
+            component.CameraShake = tuning.CameraShake;
+            component.CameraShakeDuration = tuning.CameraShakeDuration;
             component.RuntimeGroundPosition = groundPosition;
             ApplyFrameTexture(sprite, component);
             if (!sprite.Texture)
@@ -1523,6 +2188,27 @@ namespace Wheatear {
                     sprite.Texture = texture;
             }
             return hitbox;
+        }
+
+        static void DestroyOwnedHitboxes(Scene* scene, entt::entity ownerEntity)
+        {
+            if (!scene || ownerEntity == entt::null)
+                return;
+
+            const uint32_t owner = static_cast<uint32_t>(ownerEntity);
+            auto& registry = scene->GetRegistry();
+            std::vector<entt::entity> hitboxes;
+            for (auto e : registry.view<SideHitboxComponent>())
+            {
+                if (registry.get<SideHitboxComponent>(e).RuntimeOwnerEntity == owner)
+                    hitboxes.push_back(e);
+            }
+
+            for (auto e : hitboxes)
+            {
+                if (registry.valid(e))
+                    scene->DestroyEntity({ e, scene });
+            }
         }
 
         static void CreatePickup(Scene* scene,
@@ -1560,6 +2246,79 @@ namespace Wheatear {
             level.RuntimeComboTimer = level.ComboDropDelay;
         }
 
+        static float GetActionDuration(const SideAttackTuning& attack)
+        {
+            return std::max(0.0f, attack.Startup) +
+                std::max(0.01f, attack.Lifetime) +
+                std::max(0.0f, attack.Recovery);
+        }
+
+        static bool IsPlayerActionActive(const SidePlayerControllerComponent& controller)
+        {
+            return !controller.RuntimeActionAttackId.empty() &&
+                controller.RuntimeActionTimer < controller.RuntimeActionDuration;
+        }
+
+        static bool CanStartPlayerAction(const SidePlayerControllerComponent& controller)
+        {
+            if (!IsPlayerActionActive(controller))
+                return true;
+
+            return controller.RuntimeActionTimer >= controller.RuntimeActionCancelStart &&
+                controller.RuntimeActionTimer <= controller.RuntimeActionCancelEnd;
+        }
+
+        static float GetPlayerActionMovementScale(const SidePlayerControllerComponent& controller)
+        {
+            return IsPlayerActionActive(controller)
+                ? std::clamp(controller.RuntimeActionMovementScale, 0.0f, 1.0f)
+                : 1.0f;
+        }
+
+        static void ClearPlayerAction(SidePlayerControllerComponent& controller)
+        {
+            controller.RuntimeActionAttackId.clear();
+            controller.RuntimeActionEntityName.clear();
+            controller.RuntimeActionKind = SideAttackKind::Basic;
+            controller.RuntimeActionTimer = 0.0f;
+            controller.RuntimeActionDuration = 0.0f;
+            controller.RuntimeActionHitboxTime = 0.0f;
+            controller.RuntimeActionCancelStart = 0.0f;
+            controller.RuntimeActionCancelEnd = 0.0f;
+            controller.RuntimeActionMovementScale = 1.0f;
+            controller.RuntimeActionHitboxSpawned = false;
+        }
+
+        static void BeginPlayerAction(SidePlayerControllerComponent& controller,
+            const SideAttackTuning& attack,
+            const std::string& attackId,
+            const std::string& entityName,
+            SideAttackKind kind)
+        {
+            const float duration = GetActionDuration(attack);
+            float cancelStart = std::clamp(attack.CancelWindowStart, 0.0f, duration);
+            float cancelEnd = attack.CancelWindowEnd > 0.0f
+                ? std::clamp(attack.CancelWindowEnd, cancelStart, duration)
+                : duration;
+            if (attack.CancelWindowStart <= 0.0f && attack.CancelWindowEnd <= 0.0f)
+            {
+                cancelStart = duration;
+                cancelEnd = duration;
+            }
+
+            controller.RuntimeActionAttackId = attackId;
+            controller.RuntimeActionEntityName = entityName;
+            controller.RuntimeActionKind = kind;
+            controller.RuntimeActionTimer = 0.0f;
+            controller.RuntimeActionDuration = duration;
+            controller.RuntimeActionHitboxTime = std::clamp(attack.Startup, 0.0f, duration);
+            controller.RuntimeActionCancelStart = cancelStart;
+            controller.RuntimeActionCancelEnd = cancelEnd;
+            controller.RuntimeActionMovementScale = attack.MovementScale;
+            controller.RuntimeActionHitboxSpawned = false;
+            PlaySfx(attack.SwingSound, attack.SoundVolume);
+        }
+
         static Entity FindNearestAliveEnemy(Scene* scene, const glm::vec3& origin)
         {
             Entity best;
@@ -1582,6 +2341,166 @@ namespace Wheatear {
             return best;
         }
 
+        static void UpdatePlayerAction(Scene* scene,
+            SideCombatLevelComponent& level,
+            Entity player,
+            SideCombatantComponent& combatant,
+            SidePlayerControllerComponent& controller,
+            float dt)
+        {
+            if (!IsPlayerActionActive(controller))
+            {
+                ClearPlayerAction(controller);
+                return;
+            }
+
+            const SideCombatTuning& tuning = GetTuning(level);
+            const std::string attackId = controller.RuntimeActionAttackId;
+            const SideAttackTuning& attack = GetAttack(tuning, attackId);
+            controller.RuntimeActionTimer += dt;
+
+            if (!controller.RuntimeActionHitboxSpawned &&
+                controller.RuntimeActionTimer >= controller.RuntimeActionHitboxTime)
+            {
+                glm::vec2 origin = combatant.RuntimeGroundPosition;
+                float sourceAirHeight = combatant.RuntimeAirHeight;
+                float facing = combatant.RuntimeFacing;
+
+                if (attackId == "launcher" && combatant.RuntimeOnGround && attack.AttackerAirImpulse > 0.0f)
+                {
+                    combatant.RuntimeOnGround = false;
+                    combatant.RuntimeAirVelocity = std::max(combatant.RuntimeAirVelocity, attack.AttackerAirImpulse);
+                }
+
+                if (controller.RuntimeActionKind == SideAttackKind::AllySupport ||
+                    controller.RuntimeActionKind == SideAttackKind::BreakLimit)
+                {
+                    Entity target = FindNearestAliveEnemy(scene, player.GetComponent<TransformComponent>().Translation);
+                    if (target && target.HasComponent<SideCombatantComponent>())
+                    {
+                        const auto& targetCombatant = target.GetComponent<SideCombatantComponent>();
+                        origin = targetCombatant.RuntimeGroundPosition;
+                        sourceAirHeight = targetCombatant.RuntimeAirHeight;
+                        if (controller.RuntimeActionKind == SideAttackKind::BreakLimit)
+                        {
+                            facing = SignNonZero(origin.x - combatant.RuntimeGroundPosition.x);
+                            combatant.RuntimeFacing = facing;
+                        }
+                    }
+                    else if (controller.RuntimeActionKind == SideAttackKind::AllySupport)
+                    {
+                        origin += glm::vec2{ combatant.RuntimeFacing * 2.0f, 0.0f };
+                    }
+                }
+
+                CreateHitbox(scene,
+                    controller.RuntimeActionEntityName.empty() ? "Side_PlayerAction" : controller.RuntimeActionEntityName,
+                    static_cast<entt::entity>(player),
+                    origin,
+                    sourceAirHeight,
+                    facing,
+                    controller.RuntimeActionKind,
+                    (int)SideCombatTeam::Player,
+                    attack,
+                    combatant.Attack * attack.DamageScale + attack.DamageFlat,
+                    tuning);
+                controller.RuntimeActionHitboxSpawned = true;
+            }
+
+            if (controller.RuntimeActionTimer >= controller.RuntimeActionDuration)
+                ClearPlayerAction(controller);
+        }
+
+        static bool IsEnemyActionActive(const SideEnemyAIComponent& ai)
+        {
+            return !ai.RuntimeActionAttackId.empty() &&
+                ai.RuntimeActionTimer < ai.RuntimeActionDuration;
+        }
+
+        static void ClearEnemyAction(SideEnemyAIComponent& ai)
+        {
+            ai.RuntimeActionAttackId.clear();
+            ai.RuntimeActionEntityName.clear();
+            ai.RuntimeActionKind = SideAttackKind::EnemyMelee;
+            ai.RuntimeActionTimer = 0.0f;
+            ai.RuntimeActionDuration = 0.0f;
+            ai.RuntimeActionHitboxTime = 0.0f;
+            ai.RuntimeActionMovementScale = 1.0f;
+            ai.RuntimeActionFacing = 1.0f;
+            ai.RuntimeActionHitboxSpawned = false;
+        }
+
+        static void BeginEnemyAction(SideEnemyAIComponent& ai,
+            const SideAttackTuning& attack,
+            const std::string& attackId,
+            const std::string& entityName,
+            SideAttackKind kind,
+            float facing)
+        {
+            ai.RuntimeActionAttackId = attackId;
+            ai.RuntimeActionEntityName = entityName;
+            ai.RuntimeActionKind = kind;
+            ai.RuntimeActionTimer = 0.0f;
+            ai.RuntimeActionDuration = GetActionDuration(attack);
+            ai.RuntimeActionHitboxTime = std::clamp(attack.Startup, 0.0f, ai.RuntimeActionDuration);
+            ai.RuntimeActionMovementScale = attack.MovementScale;
+            ai.RuntimeActionFacing = facing;
+            ai.RuntimeActionHitboxSpawned = false;
+            PlaySfx(attack.SwingSound, attack.SoundVolume);
+        }
+
+        static void UpdateEnemyAction(Scene* scene,
+            SideCombatLevelComponent& level,
+            Entity enemy,
+            SideCombatantComponent& combatant,
+            SideEnemyAIComponent& ai,
+            float dt)
+        {
+            if (!IsEnemyActionActive(ai))
+            {
+                ClearEnemyAction(ai);
+                return;
+            }
+
+            const SideCombatTuning& tuning = GetTuning(level);
+            const std::string attackId = ai.RuntimeActionAttackId;
+            const SideAttackTuning& attack = GetAttack(tuning, attackId);
+            ai.RuntimeActionTimer += dt;
+
+            const float movementScale = std::clamp(ai.RuntimeActionMovementScale, 0.0f, 1.0f);
+            combatant.RuntimeVelocity.x = Approach(
+                combatant.RuntimeVelocity.x,
+                combatant.RuntimeVelocity.x * movementScale,
+                tuning.Enemy.XBrakeAcceleration * dt);
+            combatant.RuntimeVelocity.y = Approach(
+                combatant.RuntimeVelocity.y,
+                combatant.RuntimeVelocity.y * movementScale,
+                tuning.Enemy.LaneBrakeAcceleration * dt);
+
+            if (!ai.RuntimeActionHitboxSpawned &&
+                ai.RuntimeActionTimer >= ai.RuntimeActionHitboxTime)
+            {
+                if (attackId == "bear_charge")
+                    combatant.RuntimeVelocity.x = ai.RuntimeActionFacing * tuning.Enemy.BearBossChargeSpeed;
+
+                CreateHitbox(scene,
+                    ai.RuntimeActionEntityName.empty() ? "Side_EnemyAction" : ai.RuntimeActionEntityName,
+                    static_cast<entt::entity>(enemy),
+                    combatant.RuntimeGroundPosition,
+                    combatant.RuntimeAirHeight,
+                    ai.RuntimeActionFacing,
+                    ai.RuntimeActionKind,
+                    (int)SideCombatTeam::Enemy,
+                    attack,
+                    combatant.Attack * attack.DamageScale + attack.DamageFlat,
+                    tuning);
+                ai.RuntimeActionHitboxSpawned = true;
+            }
+
+            if (ai.RuntimeActionTimer >= ai.RuntimeActionDuration)
+                ClearEnemyAction(ai);
+        }
+
         static void CreatePlayerBasic(Scene* scene,
             SideCombatLevelComponent& level,
             Entity player,
@@ -1602,16 +2521,7 @@ namespace Wheatear {
                 controller.RuntimeBasicCooldown = tuning.AirCombo.AirBasicCooldown;
 
                 const SideAttackTuning& attack = GetAttack(tuning, "air_basic");
-                const float facing = combatant.RuntimeFacing;
-                CreateHitbox(scene, "Side_PlayerAirSlash",
-                    combatant.RuntimeGroundPosition,
-                    combatant.RuntimeAirHeight,
-                    facing,
-                    SideAttackKind::Basic,
-                    (int)SideCombatTeam::Player,
-                    attack,
-                    combatant.Attack * attack.DamageScale + attack.DamageFlat,
-                    tuning);
+                BeginPlayerAction(controller, attack, "air_basic", "Side_PlayerAirSlash", SideAttackKind::Basic);
                 return;
             }
 
@@ -1628,18 +2538,7 @@ namespace Wheatear {
                 : controller.BasicCooldown;
 
             const SideAttackTuning& attack = GetAttack(tuning, "basic" + std::to_string(chain));
-            const float facing = combatant.RuntimeFacing;
-            const float damage = combatant.Attack * attack.DamageScale + attack.DamageFlat;
-
-            CreateHitbox(scene, "Side_PlayerSlash",
-                combatant.RuntimeGroundPosition,
-                combatant.RuntimeAirHeight,
-                facing,
-                SideAttackKind::Basic,
-                (int)SideCombatTeam::Player,
-                attack,
-                damage,
-                tuning);
+            BeginPlayerAction(controller, attack, "basic" + std::to_string(chain), "Side_PlayerSlash", SideAttackKind::Basic);
         }
 
         static void CreatePlayerLauncher(Scene* scene,
@@ -1668,20 +2567,13 @@ namespace Wheatear {
             else
             {
                 controller.RuntimeAirActionsRemaining = tuning.AirCombo.AirActionLimit;
-                combatant.RuntimeOnGround = false;
-                combatant.RuntimeAirVelocity = std::max(combatant.RuntimeAirVelocity, attack.AttackerAirImpulse);
             }
 
-            const float facing = combatant.RuntimeFacing;
-            CreateHitbox(scene, airborne ? "Side_PlayerAirChase" : "Side_PlayerLauncher",
-                combatant.RuntimeGroundPosition,
-                combatant.RuntimeAirHeight,
-                facing,
-                SideAttackKind::Launcher,
-                (int)SideCombatTeam::Player,
+            BeginPlayerAction(controller,
                 attack,
-                combatant.Attack * attack.DamageScale + attack.DamageFlat,
-                tuning);
+                airborne ? "air_chase" : "launcher",
+                airborne ? "Side_PlayerAirChase" : "Side_PlayerLauncher",
+                SideAttackKind::Launcher);
         }
 
         static bool CanUseBreakLimit(Scene* scene,
@@ -1733,7 +2625,6 @@ namespace Wheatear {
             if (!CanUseBreakLimit(scene, level, tuning, target, combatant, controller))
                 return;
 
-            const SideAttackTuning& attack = GetAttack(tuning, "break_limit");
             controller.RuntimeBreakLimitCooldown = tuning.AirCombo.BreakLimitCooldown;
             controller.RuntimeMagicSwordGauge = std::max(0.0f,
                 controller.RuntimeMagicSwordGauge - tuning.AirCombo.BreakLimitGaugeCost);
@@ -1745,25 +2636,14 @@ namespace Wheatear {
             combatant.RuntimeAirVelocity = std::max(combatant.RuntimeAirVelocity,
                 tuning.AirCombo.BreakLimitHangImpulse);
 
-            glm::vec2 origin = combatant.RuntimeGroundPosition;
-            float sourceAirHeight = combatant.RuntimeAirHeight;
             if (target && target.HasComponent<SideCombatantComponent>())
             {
                 const auto& targetCombatant = target.GetComponent<SideCombatantComponent>();
-                origin = targetCombatant.RuntimeGroundPosition;
-                sourceAirHeight = targetCombatant.RuntimeAirHeight;
-                combatant.RuntimeFacing = SignNonZero(origin.x - combatant.RuntimeGroundPosition.x);
+                combatant.RuntimeFacing = SignNonZero(targetCombatant.RuntimeGroundPosition.x - combatant.RuntimeGroundPosition.x);
             }
 
-            CreateHitbox(scene, "Side_BreakLimitChase",
-                origin,
-                sourceAirHeight,
-                combatant.RuntimeFacing,
-                SideAttackKind::BreakLimit,
-                (int)SideCombatTeam::Player,
-                attack,
-                combatant.Attack * attack.DamageScale + attack.DamageFlat,
-                tuning);
+            const SideAttackTuning& attack = GetAttack(tuning, "break_limit");
+            BeginPlayerAction(controller, attack, "break_limit", "Side_BreakLimitChase", SideAttackKind::BreakLimit);
         }
 
         static void CreatePlayerMagicBolt(Scene* scene,
@@ -1779,16 +2659,7 @@ namespace Wheatear {
             controller.RuntimeAttackChainTimer = tuning.Player.MagicChainWindow;
 
             const SideAttackTuning& attack = GetAttack(tuning, "magic_bolt");
-            const float facing = combatant.RuntimeFacing;
-            CreateHitbox(scene, "Side_PlayerMagicBolt",
-                combatant.RuntimeGroundPosition,
-                combatant.RuntimeAirHeight,
-                facing,
-                SideAttackKind::MagicBolt,
-                (int)SideCombatTeam::Player,
-                attack,
-                combatant.Attack * attack.DamageScale + attack.DamageFlat,
-                tuning);
+            BeginPlayerAction(controller, attack, "magic_bolt", "Side_PlayerMagicBolt", SideAttackKind::MagicBolt);
         }
 
         static void CreateAllySupport(Scene* scene,
@@ -1804,25 +2675,7 @@ namespace Wheatear {
             controller.RuntimeAttackChainTimer = tuning.Player.SupportChainWindow;
 
             const SideAttackTuning& attack = GetAttack(tuning, "ally_support");
-            Entity target = FindNearestAliveEnemy(scene, player.GetComponent<TransformComponent>().Translation);
-            glm::vec2 origin = combatant.RuntimeGroundPosition + glm::vec2{ combatant.RuntimeFacing * 2.0f, 0.0f };
-            float targetAirHeight = combatant.RuntimeAirHeight;
-            if (target && target.HasComponent<SideCombatantComponent>())
-            {
-                const auto& targetCombatant = target.GetComponent<SideCombatantComponent>();
-                origin = targetCombatant.RuntimeGroundPosition;
-                targetAirHeight = targetCombatant.RuntimeAirHeight;
-            }
-
-            CreateHitbox(scene, "Side_AllySupport",
-                origin,
-                targetAirHeight,
-                combatant.RuntimeFacing,
-                SideAttackKind::AllySupport,
-                (int)SideCombatTeam::Player,
-                attack,
-                combatant.Attack * attack.DamageScale + attack.DamageFlat,
-                tuning);
+            BeginPlayerAction(controller, attack, "ally_support", "Side_AllySupport", SideAttackKind::AllySupport);
         }
 
         static void UpdatePlayer(Scene* scene,
@@ -1836,6 +2689,7 @@ namespace Wheatear {
             bool supportPressed,
             bool breakLimitPressed,
             bool previousJumpPressed,
+            bool previousBasicPressed,
             bool previousLauncherPressed,
             bool previousMagicPressed,
             bool previousSupportPressed,
@@ -1871,11 +2725,30 @@ namespace Wheatear {
             controller.RuntimeAllySupportCooldown = std::max(0.0f, controller.RuntimeAllySupportCooldown - dt);
             controller.RuntimeBreakLimitCooldown = std::max(0.0f, controller.RuntimeBreakLimitCooldown - dt);
             controller.RuntimeAttackChainTimer = std::max(0.0f, controller.RuntimeAttackChainTimer - dt);
+            controller.RuntimeJumpBufferTimer = std::max(0.0f, controller.RuntimeJumpBufferTimer - dt);
+            controller.RuntimeCoyoteTimer = std::max(0.0f, controller.RuntimeCoyoteTimer - dt);
             if (controller.RuntimeAttackChainTimer <= 0.0f)
                 controller.RuntimeAttackChain = 0;
 
+            if (jumpPressed && !previousJumpPressed)
+                controller.RuntimeJumpBufferTimer = std::max(0.0f, controller.JumpBufferTime);
+
             if (combatant.ControlsLocked || level.RuntimeVictory || level.RuntimeDefeat)
                 return;
+
+            if (combatant.RuntimeHitStun > 0.0f ||
+                combatant.RuntimeState == SideCombatState::Knockdown ||
+                combatant.RuntimeState == SideCombatState::Dead)
+            {
+                ClearPlayerAction(controller);
+                if (player.HasComponent<SpriteRendererComponent>())
+                    player.GetComponent<SpriteRendererComponent>().FlipX = combatant.RuntimeFacing < 0.0f;
+                return;
+            }
+
+            UpdatePlayerAction(scene, level, player, combatant, controller, dt);
+            const bool canStartAction = CanStartPlayerAction(controller);
+            const float actionMovementScale = GetPlayerActionMovementScale(controller);
 
             float horizontal = 0.0f;
             if (Input::IsKeyPressed(WT_KEY_A) || Input::IsKeyPressed(WT_KEY_LEFT))
@@ -1892,7 +2765,7 @@ namespace Wheatear {
             if (horizontal != 0.0f)
             {
                 combatant.RuntimeFacing = SignNonZero(horizontal);
-                const float targetSpeed = horizontal * combatant.MoveSpeed;
+                const float targetSpeed = horizontal * combatant.MoveSpeed * actionMovementScale;
                 const float accel = combatant.RuntimeOnGround ? tuning.Player.GroundAcceleration : controller.AirControl;
                 combatant.RuntimeVelocity.x = Approach(combatant.RuntimeVelocity.x, targetSpeed, accel * dt);
             }
@@ -1906,7 +2779,7 @@ namespace Wheatear {
 
             if (lane != 0.0f)
             {
-                const float targetLaneSpeed = lane * combatant.MoveSpeed * controller.LaneSpeedScale * tuning.LaneSpeedScale;
+                const float targetLaneSpeed = lane * combatant.MoveSpeed * controller.LaneSpeedScale * tuning.LaneSpeedScale * actionMovementScale;
                 combatant.RuntimeVelocity.y = Approach(
                     combatant.RuntimeVelocity.y,
                     targetLaneSpeed,
@@ -1924,30 +2797,36 @@ namespace Wheatear {
             {
                 controller.RuntimeJumpsRemaining = controller.MaxJumps;
                 controller.RuntimeAirActionsRemaining = tuning.AirCombo.AirActionLimit;
+                controller.RuntimeCoyoteTimer = std::max(controller.RuntimeCoyoteTimer, controller.CoyoteTime);
             }
 
-            if (jumpPressed && !previousJumpPressed && controller.RuntimeJumpsRemaining > 0)
+            const bool canBufferedJump = controller.RuntimeJumpBufferTimer > 0.0f &&
+                (controller.RuntimeJumpsRemaining > 0 || controller.RuntimeCoyoteTimer > 0.0f) &&
+                canStartAction;
+            if (canBufferedJump)
             {
                 combatant.RuntimeOnGround = false;
                 combatant.RuntimeAirVelocity = controller.JumpImpulse;
-                --controller.RuntimeJumpsRemaining;
+                if (controller.RuntimeJumpsRemaining > 0)
+                    --controller.RuntimeJumpsRemaining;
+                else
+                    controller.RuntimeJumpsRemaining = 0;
                 controller.RuntimeAirActionsRemaining = tuning.AirCombo.AirActionLimit;
+                controller.RuntimeJumpBufferTimer = 0.0f;
+                controller.RuntimeCoyoteTimer = 0.0f;
+                PlaySfx(tuning.Feedback.JumpSound, tuning.Feedback.JumpSoundVolume);
             }
 
-            if (basicPressed && controller.RuntimeBasicCooldown <= 0.0f)
-                CreatePlayerBasic(scene, level, player, combatant, controller);
-
-            if (launcherPressed && !previousLauncherPressed && controller.RuntimeLauncherCooldown <= 0.0f)
-                CreatePlayerLauncher(scene, level, player, combatant, controller);
-
-            if (magicPressed && !previousMagicPressed && controller.RuntimeMagicBoltCooldown <= 0.0f)
-                CreatePlayerMagicBolt(scene, level, player, combatant, controller);
-
-            if (supportPressed && !previousSupportPressed && controller.RuntimeAllySupportCooldown <= 0.0f)
-                CreateAllySupport(scene, level, player, combatant, controller);
-
-            if (breakLimitPressed && !previousBreakLimitPressed)
+            if (breakLimitPressed && !previousBreakLimitPressed && canStartAction)
                 CreateBreakLimitChase(scene, level, player, combatant, controller);
+            else if (supportPressed && !previousSupportPressed && controller.RuntimeAllySupportCooldown <= 0.0f && canStartAction)
+                CreateAllySupport(scene, level, player, combatant, controller);
+            else if (magicPressed && !previousMagicPressed && controller.RuntimeMagicBoltCooldown <= 0.0f && canStartAction)
+                CreatePlayerMagicBolt(scene, level, player, combatant, controller);
+            else if (launcherPressed && !previousLauncherPressed && controller.RuntimeLauncherCooldown <= 0.0f && canStartAction)
+                CreatePlayerLauncher(scene, level, player, combatant, controller);
+            else if (!launcherPressed && basicPressed && !previousBasicPressed && controller.RuntimeBasicCooldown <= 0.0f && canStartAction)
+                CreatePlayerBasic(scene, level, player, combatant, controller);
 
             if (player.HasComponent<SpriteRendererComponent>())
                 player.GetComponent<SpriteRendererComponent>().FlipX = combatant.RuntimeFacing < 0.0f;
@@ -1983,59 +2862,26 @@ namespace Wheatear {
 
                 if (lowHealth && distance > tuning.Enemy.BearBossChargeDistance)
                 {
-                    combatant.RuntimeVelocity.x = facing * tuning.Enemy.BearBossChargeSpeed;
                     const SideAttackTuning& attack = GetAttack(tuning, "bear_charge");
-                    CreateHitbox(scene, "Side_BearCharge",
-                        combatant.RuntimeGroundPosition,
-                        combatant.RuntimeAirHeight,
-                        facing,
-                        SideAttackKind::EnemyMelee,
-                        (int)SideCombatTeam::Enemy,
-                        attack,
-                        combatant.Attack * attack.DamageScale + attack.DamageFlat,
-                        tuning);
+                    BeginEnemyAction(ai, attack, "bear_charge", "Side_BearCharge", SideAttackKind::EnemyMelee, facing);
                     return;
                 }
 
                 if (midHealth && distance > tuning.Enemy.BearBossShockwaveDistance)
                 {
                     const SideAttackTuning& attack = GetAttack(tuning, "bear_shockwave");
-                    CreateHitbox(scene, "Side_BearShockwave",
-                        combatant.RuntimeGroundPosition,
-                        combatant.RuntimeAirHeight,
-                        facing,
-                        SideAttackKind::EnemyShockwave,
-                        (int)SideCombatTeam::Enemy,
-                        attack,
-                        combatant.Attack * attack.DamageScale + attack.DamageFlat,
-                        tuning);
+                    BeginEnemyAction(ai, attack, "bear_shockwave", "Side_BearShockwave", SideAttackKind::EnemyShockwave, facing);
                     return;
                 }
 
                 const SideAttackTuning& attack = GetAttack(tuning, "enemy_claw");
-                CreateHitbox(scene, "Side_BearClaw",
-                    combatant.RuntimeGroundPosition,
-                    combatant.RuntimeAirHeight,
-                    facing,
-                    SideAttackKind::EnemyMelee,
-                    (int)SideCombatTeam::Enemy,
-                    attack,
-                    combatant.Attack * attack.DamageScale + attack.DamageFlat,
-                    tuning);
+                BeginEnemyAction(ai, attack, "enemy_claw", "Side_BearClaw", SideAttackKind::EnemyMelee, facing);
                 return;
             }
 
             ai.RuntimeAttackTimer = ai.AttackInterval;
             const SideAttackTuning& attack = GetAttack(tuning, "enemy_claw");
-            CreateHitbox(scene, "Side_EnemyClaw",
-                combatant.RuntimeGroundPosition,
-                combatant.RuntimeAirHeight,
-                facing,
-                SideAttackKind::EnemyMelee,
-                (int)SideCombatTeam::Enemy,
-                attack,
-                combatant.Attack * attack.DamageScale + attack.DamageFlat,
-                tuning);
+            BeginEnemyAction(ai, attack, "enemy_claw", "Side_EnemyClaw", SideAttackKind::EnemyMelee, facing);
         }
 
         static void UpdateEnemyAI(Scene* scene,
@@ -2064,6 +2910,8 @@ namespace Wheatear {
 
                 if (!CanEnemyAct(combatant))
                 {
+                    ClearEnemyAction(ai);
+                    DestroyOwnedHitboxes(scene, e);
                     combatant.RuntimeVelocity.x = Approach(
                         combatant.RuntimeVelocity.x,
                         0.0f,
@@ -2072,6 +2920,14 @@ namespace Wheatear {
                         combatant.RuntimeVelocity.y,
                         0.0f,
                         tuning.Enemy.LaneBrakeAcceleration * dt);
+                    continue;
+                }
+
+                if (IsEnemyActionActive(ai))
+                {
+                    UpdateEnemyAction(scene, level, enemy, combatant, ai, dt);
+                    if (enemy.HasComponent<SpriteRendererComponent>())
+                        enemy.GetComponent<SpriteRendererComponent>().FlipX = combatant.RuntimeFacing < 0.0f;
                     continue;
                 }
 
@@ -2249,7 +3105,7 @@ namespace Wheatear {
                     hitbox.RuntimeGroundPosition.y + hitbox.AirHeight,
                     CalculateSortZ(hitbox.RuntimeGroundPosition.y, tuning) + 0.04f
                 };
-                if (registry.has<SpriteRendererComponent>(e))
+                if (registry.all_of<SpriteRendererComponent>(e))
                     ApplyFrameTexture(registry.get<SpriteRendererComponent>(e), hitbox);
 
                 if (hitbox.Lifetime <= 0.0f)
@@ -2260,7 +3116,6 @@ namespace Wheatear {
 
                 for (auto targetEntity : registry.view<TransformComponent, SideCombatantComponent>())
                 {
-                    auto& targetTransform = registry.get<TransformComponent>(targetEntity);
                     auto& target = registry.get<SideCombatantComponent>(targetEntity);
                     if (!target.Alive || target.Team == hitbox.Team || target.Team == (int)SideCombatTeam::Neutral)
                         continue;
@@ -2271,21 +3126,39 @@ namespace Wheatear {
                     if (!OverlapsHitbox(hitbox, target))
                         continue;
 
+                    if (!hitbox.RuntimeHitSomething)
+                        TriggerHitFeedback(scene, level, hitbox);
+
                     const float damage = CalculateDamage(hitbox.Damage, target.Defense, tuning.Combat);
                     target.Health = std::max(0.0f, target.Health - damage);
                     target.Alive = target.Health > 0.0f;
                     target.RuntimeHitStun = std::max(target.RuntimeHitStun, hitbox.HitStun);
                     target.RuntimeInvulnerableTimer = tuning.Combat.HitInvulnerableTime;
+                    if (hitbox.Team == (int)SideCombatTeam::Enemy &&
+                        target.Team == (int)SideCombatTeam::Player)
+                    {
+                        ++level.RuntimePlayerHitsTaken;
+                    }
                     if (!target.Alive)
                     {
                         SetCombatState(target, SideCombatState::Dead);
+                    }
+                    if (target.Team == (int)SideCombatTeam::Enemy &&
+                        registry.all_of<SideEnemyAIComponent>(targetEntity))
+                    {
+                        ClearEnemyAction(registry.get<SideEnemyAIComponent>(targetEntity));
+                    }
+                    if (target.Team == (int)SideCombatTeam::Player &&
+                        registry.all_of<SidePlayerControllerComponent>(targetEntity))
+                    {
+                        ClearPlayerAction(registry.get<SidePlayerControllerComponent>(targetEntity));
                     }
 
                     const float resistanceScale = std::clamp(1.0f - target.KnockbackResistance, 0.25f, 1.0f);
                     target.RuntimeVelocity.x = hitbox.LaunchVelocity.x * resistanceScale;
                     float launchY = hitbox.LaunchVelocity.y;
                     if (hitbox.Team == (int)SideCombatTeam::Player &&
-                        registry.has<SideEnemyAIComponent>(targetEntity) &&
+                        registry.all_of<SideEnemyAIComponent>(targetEntity) &&
                         registry.get<SideEnemyAIComponent>(targetEntity).Kind == SideEnemyKind::BearBoss &&
                         launchY > 0.0f)
                     {
@@ -2346,6 +3219,7 @@ namespace Wheatear {
             {
                 auto& transform = registry.get<TransformComponent>(e);
                 auto& combatant = registry.get<SideCombatantComponent>(e);
+                const bool wasOnGround = combatant.RuntimeOnGround;
 
                 combatant.RuntimeHitStun = std::max(0.0f, combatant.RuntimeHitStun - dt);
                 combatant.RuntimeInvulnerableTimer = std::max(0.0f, combatant.RuntimeInvulnerableTimer - dt);
@@ -2358,7 +3232,7 @@ namespace Wheatear {
                 }
 
                 float gravity = GravityDefault;
-                if (registry.has<SidePlayerControllerComponent>(e))
+                if (registry.all_of<SidePlayerControllerComponent>(e))
                     gravity = registry.get<SidePlayerControllerComponent>(e).Gravity;
 
                 if (!combatant.RuntimeOnGround)
@@ -2372,6 +3246,8 @@ namespace Wheatear {
                     combatant.RuntimeAirHeight = 0.0f;
                     combatant.RuntimeAirVelocity = 0.0f;
                     combatant.RuntimeOnGround = true;
+                    if (!wasOnGround && combatant.Team == (int)SideCombatTeam::Player)
+                        PlaySfx(tuning.Feedback.LandSound, tuning.Feedback.LandSoundVolume);
                 }
                 else
                 {
@@ -2439,7 +3315,7 @@ namespace Wheatear {
                         combatant.RuntimeProtection - tuning.Protection.BossProtectionDecayPerSecond * dt);
                 }
 
-                UpdateCombatantVisual(scene, { e, scene }, level, tuning);
+                UpdateCombatantVisual(scene, { e, scene }, level, tuning, dt);
             }
         }
 
@@ -2477,6 +3353,76 @@ namespace Wheatear {
                 pickupTuning);
         }
 
+        static std::string CalculateResultGrade(const SideCombatLevelComponent& level)
+        {
+            int score = 0;
+            if (level.RuntimeBestCombo >= 30)
+                score += 40;
+            else if (level.RuntimeBestCombo >= 18)
+                score += 30;
+            else if (level.RuntimeBestCombo >= 10)
+                score += 20;
+            else if (level.RuntimeBestCombo >= 5)
+                score += 10;
+
+            if (level.RuntimePlayerHitsTaken == 0)
+                score += 30;
+            else if (level.RuntimePlayerHitsTaken <= 2)
+                score += 22;
+            else if (level.RuntimePlayerHitsTaken <= 5)
+                score += 14;
+            else if (level.RuntimePlayerHitsTaken <= 8)
+                score += 6;
+
+            if (level.RuntimeElapsed <= 75.0f)
+                score += 30;
+            else if (level.RuntimeElapsed <= 110.0f)
+                score += 22;
+            else if (level.RuntimeElapsed <= 150.0f)
+                score += 14;
+            else
+                score += 6;
+
+            if (score >= 88)
+                return "S";
+            if (score >= 72)
+                return "A";
+            if (score >= 56)
+                return "B";
+            return "C";
+        }
+
+        static int GetGradeExperienceBonus(const std::string& grade, bool firstClear)
+        {
+            if (grade == "S")
+                return firstClear ? 70 : 25;
+            if (grade == "A")
+                return firstClear ? 45 : 16;
+            if (grade == "B")
+                return firstClear ? 25 : 10;
+            return firstClear ? 10 : 5;
+        }
+
+        static void BuildResultSummary(SideCombatLevelComponent& level)
+        {
+            level.RuntimeResultGrade = CalculateResultGrade(level);
+            level.RuntimeResultExperience = 100 + level.RuntimeBestCombo * 2 +
+                GetGradeExperienceBonus(level.RuntimeResultGrade, true);
+            level.RuntimeResultRepeatExperience = 35 + level.RuntimeBestCombo +
+                GetGradeExperienceBonus(level.RuntimeResultGrade, false);
+
+            std::ostringstream stream;
+            stream << (level.RuntimeResultFirstClear ? "首通" : "重刷")
+                   << "  评价 " << level.RuntimeResultGrade
+                   << "  经验 +" << (level.RuntimeResultFirstClear
+                       ? level.RuntimeResultExperience
+                       : level.RuntimeResultRepeatExperience)
+                   << "  最佳连击 x" << level.RuntimeBestCombo
+                   << "  受击 " << level.RuntimePlayerHitsTaken
+                   << "  用时 " << FormatFloat(level.RuntimeElapsed) << "s";
+            level.RuntimeResultSummary = stream.str();
+        }
+
         static void UpdateDeathsAndVictory(Scene* scene,
             SideCombatLevelComponent& level,
             Entity player)
@@ -2502,12 +3448,12 @@ namespace Wheatear {
 
                 combatant.RuntimeDeathProcessed = true;
                 combatant.RuntimeVelocity = { 0.0f, 0.0f };
-                const SideEnemyAIComponent* ai = registry.has<SideEnemyAIComponent>(e)
+                const SideEnemyAIComponent* ai = registry.all_of<SideEnemyAIComponent>(e)
                     ? &registry.get<SideEnemyAIComponent>(e)
                     : nullptr;
                 SpawnDeathRewards(scene, level, transform, ai);
 
-                if (registry.has<SpriteRendererComponent>(e))
+                if (registry.all_of<SpriteRendererComponent>(e))
                     registry.get<SpriteRendererComponent>(e).Color.a = 0.18f;
             }
 
@@ -2517,7 +3463,26 @@ namespace Wheatear {
                 level.RuntimeResultTimer = 0.0f;
                 level.RuntimeResultCommandIssued = false;
                 level.RuntimeRewardsSpawned = true;
-                GameProgress::RecordDungeonClear(level.LevelId, level.RuntimeBestCombo, 120, 45);
+                level.RuntimeResultGrade = CalculateResultGrade(level);
+                level.RuntimeResultExperience = 100 + level.RuntimeBestCombo * 2 +
+                    GetGradeExperienceBonus(level.RuntimeResultGrade, true);
+                level.RuntimeResultRepeatExperience = 35 + level.RuntimeBestCombo +
+                    GetGradeExperienceBonus(level.RuntimeResultGrade, false);
+                level.RuntimeResultFirstClear = GameProgress::RecordDungeonClear(
+                    level.LevelId,
+                    level.RuntimeBestCombo,
+                    level.RuntimeResultExperience,
+                    level.RuntimeResultRepeatExperience);
+                BuildResultSummary(level);
+                GameProgress::RecordLastDungeonResult(
+                    level.LevelId,
+                    level.RuntimeResultGrade,
+                    level.RuntimeResultFirstClear,
+                    level.RuntimeBestCombo,
+                    level.RuntimePlayerHitsTaken,
+                    level.RuntimeElapsed,
+                    level.RuntimeResultFirstClear ? level.RuntimeResultExperience : level.RuntimeResultRepeatExperience,
+                    level.FirstClearRewardText);
                 if (player && player.HasComponent<SideCombatantComponent>())
                     player.GetComponent<SideCombatantComponent>().ControlsLocked = true;
             }
@@ -2617,13 +3582,11 @@ namespace Wheatear {
 
             const bool showBreakLimitUi = ShouldShowBreakLimitUi(level, tuning);
             const std::string breakLimitInputText = IsBreakLimitOfficiallyAvailable(level, tuning) ? "L断限" : "L调试断";
-            std::string message = "A/D推进  W/S纵深  Space跳";
+            std::string message = "A/D移动  W/S纵深  K跳  J斩  S+J上挑";
             if (IsSkillUnlocked(level, tuning, "basic_attack") || IsSkillUnlocked(level, tuning, "air_basic"))
-                message += "  J斩/空斩";
-            if (IsSkillUnlocked(level, tuning, "launcher") || IsSkillUnlocked(level, tuning, "air_chase"))
-                message += "  K挑/追";
+                message += "  空中J跳斩";
             if (IsSkillUnlocked(level, tuning, "magic_bolt"))
-                message += "  U魔";
+                message += "  U火球";
             if (IsSkillUnlocked(level, tuning, "ally_support"))
                 message += "  I支";
             if (showBreakLimitUi)
@@ -2658,40 +3621,83 @@ namespace Wheatear {
 
             if (controller)
             {
-                std::string skillText;
-                if (IsSkillUnlocked(level, tuning, "launcher") || IsSkillUnlocked(level, tuning, "air_chase"))
-                    skillText += "K " + FormatFloat(controller->RuntimeLauncherCooldown, 1);
-                if (IsSkillUnlocked(level, tuning, "magic_bolt"))
-                {
-                    if (!skillText.empty())
-                        skillText += "  ";
-                    skillText += "U " + FormatFloat(controller->RuntimeMagicBoltCooldown, 1);
-                }
-                if (IsSkillUnlocked(level, tuning, "ally_support"))
-                {
-                    if (!skillText.empty())
-                        skillText += "  ";
-                    skillText += "I " + FormatFloat(controller->RuntimeAllySupportCooldown, 1);
-                }
+                const bool launcherUnlocked = IsSkillUnlocked(level, tuning, "launcher") || IsSkillUnlocked(level, tuning, "air_chase");
+                const bool magicUnlocked = IsSkillUnlocked(level, tuning, "magic_bolt");
+                const bool supportUnlocked = IsSkillUnlocked(level, tuning, "ally_support");
+
+                SetSkillSlotVisible(scene, "J", false);
+                SetSkillSlotVisible(scene, "K", false);
+                UpdateSkillSlot(scene, "SJ", "S+J", launcherUnlocked, controller->RuntimeLauncherCooldown,
+                    std::max(controller->LauncherCooldown, tuning.AirCombo.AirChaseCooldown));
+                UpdateSkillSlot(scene, "U", "U", magicUnlocked, controller->RuntimeMagicBoltCooldown,
+                    controller->MagicBoltCooldown);
+                UpdateSkillSlot(scene, "I", "I", supportUnlocked, controller->RuntimeAllySupportCooldown,
+                    controller->AllySupportCooldown);
                 if (showBreakLimitUi)
                 {
-                    if (!skillText.empty())
-                        skillText += "  ";
-                    skillText += "L " + FormatFloat(controller->RuntimeBreakLimitCooldown, 1);
+                    UpdateSkillSlot(scene, "L", "L", true, controller->RuntimeBreakLimitCooldown,
+                        tuning.AirCombo.BreakLimitCooldown);
                 }
-                if (!skillText.empty())
-                    skillText += "  ";
-                skillText += "槽 " + FormatFloat(controller->RuntimeMagicSwordGauge, 1) + "/" + FormatFloat(controller->RuntimeMagicSwordGaugeMax, 0)
-                    + "  空击 " + std::to_string(controller->RuntimeAirActionsRemaining);
-                SetText(scene, level.SkillTextEntityName, skillText);
+                else
+                {
+                    SetSkillSlotVisible(scene, "L", false);
+                }
+
+                SetText(scene, level.SkillTextEntityName,
+                    "魔剑槽 " + FormatFloat(controller->RuntimeMagicSwordGauge, 1)
+                    + "/" + FormatFloat(controller->RuntimeMagicSwordGaugeMax, 0)
+                    + "  空中动作 " + std::to_string(controller->RuntimeAirActionsRemaining));
+
+                std::string hoveredKey;
+                std::string tooltip;
+                if (IsButtonHovered(scene, "SC_SkillIcon_SJ"))
+                {
+                    hoveredKey = "SJ";
+                    tooltip = "裂空挑斩\nS+J 指令技。挑起目标后按 K 起跳，接空中 J 维持浮空。";
+                    if (controller->RuntimeLauncherCooldown > 0.05f)
+                        tooltip += "\n冷却 " + FormatCooldownSeconds(controller->RuntimeLauncherCooldown) + " 秒";
+                }
+                else if (IsButtonHovered(scene, "SC_SkillIcon_U"))
+                {
+                    hoveredKey = "U";
+                    tooltip = "火球术\n远程补 hit，也能在空中帮你把连段接住。";
+                    if (controller->RuntimeMagicBoltCooldown > 0.05f)
+                        tooltip += "\n冷却 " + FormatCooldownSeconds(controller->RuntimeMagicBoltCooldown) + " 秒";
+                }
+                else if (IsButtonHovered(scene, "SC_SkillIcon_I"))
+                {
+                    hoveredKey = "I";
+                    tooltip = "真青梅支援\n召唤支援浮空，给新手容错，也给高手延长窗口。";
+                    if (controller->RuntimeAllySupportCooldown > 0.05f)
+                        tooltip += "\n冷却 " + FormatCooldownSeconds(controller->RuntimeAllySupportCooldown) + " 秒";
+                }
+                else if (showBreakLimitUi && IsButtonHovered(scene, "SC_SkillIcon_L"))
+                {
+                    hoveredKey = "L";
+                    tooltip = breakLimitInputText + "\n高阶空连机制。快坠落且保护临界时刷新跳跃和空中动作。";
+                    if (controller->RuntimeBreakLimitCooldown > 0.05f)
+                        tooltip += "\n冷却 " + FormatCooldownSeconds(controller->RuntimeBreakLimitCooldown) + " 秒";
+                }
+                ApplyCombatItemTooltip(scene, hoveredKey, tooltip);
+                UpdateSkillTooltip(scene, hoveredKey, tooltip);
+            }
+            else
+            {
+                std::string hoveredKey;
+                std::string tooltip;
+                ApplyCombatItemTooltip(scene, hoveredKey, tooltip);
+                UpdateSkillTooltip(scene, hoveredKey, tooltip);
             }
 
             std::string reward = level.RuntimeVictory
-                ? level.FirstClearRewardText
-                : "掉落: 魔核碎片 / 兽筋 / 熊爪";
+                ? (level.RuntimeResultSummary.empty()
+                    ? level.FirstClearRewardText
+                    : level.RuntimeResultSummary)
+                : "主要掉落";
             if (level.RuntimeCollectedPickups > 0)
                 reward += "  已吸收 " + std::to_string(level.RuntimeCollectedPickups);
             SetText(scene, level.RewardTextEntityName, reward);
+            UpdateCombatItemSlots(scene);
         }
 
         static void UpdateResultTransition(Scene* scene,
@@ -2760,9 +3766,10 @@ namespace Wheatear {
         auto& registry = scene->GetRegistry();
 
         const bool pausePressed = Input::IsKeyPressed(WT_KEY_ESCAPE) || Input::IsKeyPressed(WT_KEY_P);
-        const bool jumpPressed = Input::IsKeyPressed(WT_KEY_SPACE);
+        const bool downHeld = Input::IsKeyPressed(WT_KEY_S) || Input::IsKeyPressed(WT_KEY_DOWN);
+        const bool jumpPressed = Input::IsKeyPressed(WT_KEY_K) || Input::IsKeyPressed(WT_KEY_SPACE);
         const bool basicPressed = Input::IsMouseButtonPressed(WT_MOUSE_BUTTON_LEFT) || Input::IsKeyPressed(WT_KEY_J);
-        const bool launcherPressed = Input::IsKeyPressed(WT_KEY_K);
+        const bool launcherPressed = downHeld && basicPressed;
         const bool magicPressed = Input::IsKeyPressed(WT_KEY_U);
         const bool supportPressed = Input::IsKeyPressed(WT_KEY_I);
         const bool breakLimitPressed = Input::IsKeyPressed(WT_KEY_L);
@@ -2775,6 +3782,7 @@ namespace Wheatear {
 
             level.RuntimeElapsed += dt;
             UpdateStartFade(scene, level, dt);
+            UpdateCameraFeedback(scene, level, dt);
 
             if (pausePressed && !m_PreviousPausePressed)
                 level.RuntimePaused = !level.RuntimePaused;
@@ -2784,8 +3792,16 @@ namespace Wheatear {
 
             if (!level.RuntimePaused)
             {
-                UpdateCombo(level, dt);
-                UpdatePlayer(scene, level, player, dt,
+                const SideCombatTuning& tuning = GetTuning(level);
+                float simulationDt = dt;
+                if (level.RuntimeHitPauseTimer > 0.0f)
+                {
+                    level.RuntimeHitPauseTimer = std::max(0.0f, level.RuntimeHitPauseTimer - dt);
+                    simulationDt = dt * std::clamp(tuning.Feedback.HitPauseTimeScale, 0.0f, 1.0f);
+                }
+
+                UpdateCombo(level, simulationDt);
+                UpdatePlayer(scene, level, player, simulationDt,
                     jumpPressed,
                     basicPressed,
                     launcherPressed,
@@ -2793,15 +3809,16 @@ namespace Wheatear {
                     supportPressed,
                     breakLimitPressed,
                     m_PreviousJumpPressed,
+                    m_PreviousBasicPressed,
                     m_PreviousLauncherPressed,
                     m_PreviousMagicPressed,
                     m_PreviousSupportPressed,
                     m_PreviousBreakLimitPressed);
-                UpdateEnemyAI(scene, level, player, dt);
-                UpdateHitboxes(scene, level, dt);
-                UpdateCombatantPhysics(scene, level, dt);
+                UpdateEnemyAI(scene, level, player, simulationDt);
+                UpdateHitboxes(scene, level, simulationDt);
+                UpdateCombatantPhysics(scene, level, simulationDt);
                 UpdateDeathsAndVictory(scene, level, player);
-                UpdatePickups(scene, level, player, dt);
+                UpdatePickups(scene, level, player, simulationDt);
                 UpdateResultTransition(scene, level, dt);
             }
 

@@ -1,0 +1,348 @@
+﻿#include "wtpch.h"
+#include "SceneHierarchyPanel.h"
+#include "EditorCommands.h"
+
+#include "Wheatear/Core/AssetPath.h"
+#include "Wheatear/Core/EngineInfo.h"
+#include "Wheatear/Scene/Components.h"
+#include "Wheatear/Scene/SceneSerializer.h"
+
+#include <imgui/imgui.h>
+#include <algorithm>
+#include <cctype>
+#include <filesystem>
+#include <string>
+#include <unordered_set>
+#include <vector>
+
+namespace Wheatear {
+
+    namespace {
+
+        static std::string ToLower(std::string value)
+        {
+            std::transform(value.begin(), value.end(), value.begin(), [](unsigned char c)
+            {
+                return static_cast<char>(std::tolower(c));
+            });
+            return value;
+        }
+
+        static bool ContainsInsensitive(const std::string& value, const char* query)
+        {
+            if (!query || query[0] == '\0')
+                return true;
+            return ToLower(value).find(ToLower(query)) != std::string::npos;
+        }
+
+        static const char* EntityKindPrefix(Entity entity)
+        {
+            if (entity.HasComponent<UIWidgetComponent>()) return "[UI]";
+            if (entity.HasComponent<CameraComponent>()) return "[Camera]";
+            if (entity.HasComponent<MeshRendererComponent>()) return "[3D]";
+            if (entity.HasComponent<SpriteRendererComponent>() || entity.HasComponent<CircleRendererComponent>()) return "[2D]";
+            return "[Entity]";
+        }
+
+        static uint32_t EntityKey(Entity entity)
+        {
+            return static_cast<uint32_t>(static_cast<entt::entity>(entity));
+        }
+
+    } // namespace
+    bool SceneHierarchyPanel::EntityPassesFilter(Entity entity) const
+    {
+        if (!entity || !entity.HasComponent<TagComponent>())
+            return false;
+
+        if (m_ShowOnlyUI && !entity.HasComponent<UIWidgetComponent>())
+            return false;
+
+        const std::string& tag = entity.GetComponent<TagComponent>().Tag;
+        return ContainsInsensitive(tag, m_SearchBuffer);
+    }
+
+    bool SceneHierarchyPanel::EntityOrDescendantPassesFilter(Entity entity,
+        const UIChildMap& childMap,
+        std::unordered_set<uint32_t>& visiting) const
+    {
+        if (!entity)
+            return false;
+
+        const uint32_t key = EntityKey(entity);
+        if (!visiting.insert(key).second)
+            return false;
+
+        bool passes = EntityPassesFilter(entity);
+        if (!passes)
+        {
+            if (auto it = childMap.find(key); it != childMap.end())
+            {
+                for (Entity child : it->second)
+                {
+                    if (EntityOrDescendantPassesFilter(child, childMap, visiting))
+                    {
+                        passes = true;
+                        break;
+                    }
+                }
+            }
+        }
+
+        visiting.erase(key);
+        return passes;
+    }
+
+    bool SceneHierarchyPanel::IsUIDescendantOf(Entity parent,
+        Entity candidate,
+        const UIChildMap& childMap,
+        std::unordered_set<uint32_t>& visiting) const
+    {
+        if (!parent || !candidate || parent == candidate)
+            return false;
+
+        const uint32_t parentKey = EntityKey(parent);
+        if (!visiting.insert(parentKey).second)
+            return false;
+
+        bool found = false;
+        if (auto it = childMap.find(parentKey); it != childMap.end())
+        {
+            for (Entity child : it->second)
+            {
+                if (child == candidate || IsUIDescendantOf(child, candidate, childMap, visiting))
+                {
+                    found = true;
+                    break;
+                }
+            }
+        }
+
+        visiting.erase(parentKey);
+        return found;
+    }
+
+    std::vector<Entity> SceneHierarchyPanel::CollectUIChildrenRecursive(Entity entity,
+        const UIChildMap& childMap) const
+    {
+        std::vector<Entity> result;
+        std::unordered_set<uint32_t> visited;
+
+        std::function<void(Entity)> collect = [&](Entity parent)
+        {
+            const uint32_t parentKey = EntityKey(parent);
+            auto it = childMap.find(parentKey);
+            if (it == childMap.end())
+                return;
+
+            for (Entity child : it->second)
+            {
+                const uint32_t childKey = EntityKey(child);
+                if (!visited.insert(childKey).second)
+                    continue;
+
+                result.push_back(child);
+                collect(child);
+            }
+        };
+
+        collect(entity);
+        return result;
+    }
+
+    void SceneHierarchyPanel::MarkUIDescendantsDrawn(Entity entity,
+        const UIChildMap& childMap,
+        std::unordered_set<uint32_t>& drawn,
+        std::unordered_set<uint32_t>& visiting) const
+    {
+        if (!entity)
+            return;
+
+        const uint32_t key = EntityKey(entity);
+        if (!visiting.insert(key).second)
+            return;
+
+        if (auto it = childMap.find(key); it != childMap.end())
+        {
+            for (Entity child : it->second)
+            {
+                if (!child)
+                    continue;
+
+                drawn.insert(EntityKey(child));
+                MarkUIDescendantsDrawn(child, childMap, drawn, visiting);
+            }
+        }
+
+        visiting.erase(key);
+    }
+
+    void SceneHierarchyPanel::DrawEntityNode(Entity entity,
+        const UIChildMap& childMap,
+        std::unordered_set<uint32_t>& drawn,
+        bool& selectionVisible)
+    {
+        if (!entity || !entity.HasComponent<TagComponent>())
+            return;
+
+        const uint32_t key = EntityKey(entity);
+        if (drawn.find(key) != drawn.end())
+            return;
+
+        std::unordered_set<uint32_t> filterVisiting;
+        if (!EntityOrDescendantPassesFilter(entity, childMap, filterVisiting))
+            return;
+
+        drawn.insert(key);
+
+        const auto& tag = entity.GetComponent<TagComponent>().Tag;
+        const std::string displayName = std::string(EntityKindPrefix(entity)) + " " + tag;
+
+        std::vector<Entity> visibleChildren;
+        if (auto it = childMap.find(key); it != childMap.end())
+        {
+            for (Entity child : it->second)
+            {
+                std::unordered_set<uint32_t> childFilterVisiting;
+                if (EntityOrDescendantPassesFilter(child, childMap, childFilterVisiting))
+                    visibleChildren.push_back(child);
+            }
+        }
+
+        ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_SpanAvailWidth;
+        if (visibleChildren.empty())
+            flags |= ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_NoTreePushOnOpen;
+        else if (entity.HasComponent<UICanvasComponent>())
+            flags |= ImGuiTreeNodeFlags_DefaultOpen;
+
+        const bool selected = m_SelectionContext == entity;
+        std::unordered_set<uint32_t> canvasSelectionVisiting;
+        const bool canvasOwnsSelection = entity.HasComponent<UICanvasComponent>()
+            && IsUIDescendantOf(entity, m_SelectionContext, childMap, canvasSelectionVisiting);
+
+        if (selected || canvasOwnsSelection)
+        {
+            flags |= ImGuiTreeNodeFlags_Selected;
+            if (selected)
+                selectionVisible = true;
+        }
+
+        if (canvasOwnsSelection && !selected)
+        {
+            ImGui::PushStyleColor(ImGuiCol_Header, ImVec4(0.18f, 0.28f, 0.25f, 0.72f));
+            ImGui::PushStyleColor(ImGuiCol_HeaderHovered, ImVec4(0.22f, 0.36f, 0.32f, 0.82f));
+        }
+
+        const bool opened = ImGui::TreeNodeEx(
+            reinterpret_cast<void*>(static_cast<uint64_t>(static_cast<uint32_t>(entity))),
+            flags,
+            "%s", displayName.c_str()
+        );
+
+        if (canvasOwnsSelection && !selected)
+            ImGui::PopStyleColor(2);
+
+        if (ImGui::IsItemClicked())
+            m_SelectionContext = entity;
+
+        if (selected && m_ScrollToSelection)
+        {
+            ImGui::SetScrollHereY(0.5f);
+            m_ScrollToSelection = false;
+        }
+
+        bool entityDeleted = false;
+
+        if (ImGui::BeginPopupContextItem())
+        {
+            if (ImGui::MenuItem("Rename"))
+            {
+                m_SelectionContext = entity;
+                m_RenameRequested = true;
+            }
+
+            if (ImGui::MenuItem("Duplicate Entity"))
+            {
+                auto command = std::make_unique<EntityDuplicateCommand>(m_Context.get(), entity);
+                command->Execute();
+                m_SelectionContext = command->GetEntity();
+                CommandHistory::Get().Push(std::move(command));
+            }
+
+            ImGui::Separator();
+
+            if (ImGui::MenuItem("Save as Prefab"))
+            {
+                std::filesystem::path prefabDir = AssetPath::Resolve("assets/prefabs");
+                std::filesystem::create_directories(prefabDir);
+
+                std::string baseName = entity.GetName() + "Prefab";
+                std::filesystem::path savePath;
+
+                int index = 0;
+                do
+                {
+                    std::string filename = baseName;
+                    if (index > 0)
+                        filename += std::to_string(index);
+                    filename += AssetFileType::PrefabExtension;
+                    savePath = prefabDir / filename;
+                    index++;
+                } while (std::filesystem::exists(savePath));
+
+                SceneSerializer::SerializePrefab(entity, savePath);
+                WT_CORE_INFO("Saved prefab: {}", savePath.string());
+            }
+
+            ImGui::Separator();
+
+            if (ImGui::MenuItem("Delete Entity"))
+                entityDeleted = true;
+
+            ImGui::EndPopup();
+        }
+
+        if (opened)
+        {
+            for (Entity child : visibleChildren)
+                DrawEntityNode(child, childMap, drawn, selectionVisible);
+
+            if (!visibleChildren.empty())
+                ImGui::TreePop();
+        }
+        else if (!visibleChildren.empty())
+        {
+            std::unordered_set<uint32_t> visiting;
+            MarkUIDescendantsDrawn(entity, childMap, drawn, visiting);
+        }
+
+        if (entityDeleted)
+        {
+            auto deleteTargets = CollectUIChildrenRecursive(entity, childMap);
+            deleteTargets.push_back(entity);
+
+            const bool selectionWillBeDeleted = std::any_of(
+                deleteTargets.begin(),
+                deleteTargets.end(),
+                [&](Entity target) { return target == m_SelectionContext; });
+
+            if (selectionWillBeDeleted)
+                m_SelectionContext = {};
+
+            auto composite = std::make_unique<CompositeCommand>();
+            for (Entity target : deleteTargets)
+            {
+                if (!target)
+                    continue;
+
+                auto command = std::make_unique<EntityCreateCommand>(m_Context.get(), target, false);
+                command->Execute();
+                composite->Add(std::move(command));
+            }
+
+            if (!composite->Empty())
+                CommandHistory::Get().Push(std::move(composite));
+        }
+    }
+
+} // namespace Wheatear

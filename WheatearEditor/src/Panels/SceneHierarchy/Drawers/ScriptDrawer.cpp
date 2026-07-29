@@ -3,6 +3,8 @@
 
 #include "../ComponentDrawers.h"
 
+#include "Editor/EventScriptGraphPanel.h"
+#include "Editor/TextAssetEditor.h"
 #include "Wheatear/Scene/Components.h"
 #include "Wheatear/Scripting/ScriptEngine.h"
 
@@ -27,6 +29,19 @@ namespace Wheatear {
         };
 
         static std::unordered_map<uint64_t, ScriptSelectorState> s_SelectorStates;
+        static std::unordered_map<std::string, EditorUI::TextAssetEditorState> s_EventScriptEditors;
+
+        static bool InputString(const char* label, std::string& value, size_t capacity = 256)
+        {
+            std::vector<char> buffer(capacity, 0);
+            strncpy_s(buffer.data(), buffer.size(), value.c_str(), _TRUNCATE);
+            if (ImGui::InputText(label, buffer.data(), buffer.size()))
+            {
+                value = buffer.data();
+                return true;
+            }
+            return false;
+        }
 
         static std::string ToLower(std::string value)
         {
@@ -374,6 +389,42 @@ namespace Wheatear {
                 else
                     DrawEditField(name, field, entityFields[name]);
             }
+
+            ImGui::PopID();
+        });
+    }
+
+    void DrawEventScriptComponent(Entity entity)
+    {
+        DrawComponent<EventScriptComponent>("Event Script", entity, [entity](auto& component)
+        {
+            ImGui::PushID(static_cast<int>(static_cast<uint32_t>(entity.GetUUID())));
+
+            InputString("Script Path", component.ScriptPath, 320);
+            InputString("Start Event", component.StartEvent, 128);
+            ImGui::Checkbox("Enabled", &component.Enabled);
+            ImGui::Checkbox("Run On Start", &component.RunOnStart);
+            ImGui::Checkbox("Run Once", &component.RunOnce);
+            if (ImGui::Button("Open Event Graph"))
+                EventScriptGraphRequests::RequestOpenScript(component.ScriptPath, component.StartEvent);
+
+            ImGui::Separator();
+            ImGui::TextDisabled("Runtime");
+            ImGui::TextDisabled("Active: %s", component.RuntimeActive ? "true" : "false");
+            ImGui::TextDisabled("Started: %s", component.RuntimeStarted ? "true" : "false");
+            ImGui::TextDisabled("Completed: %s", component.RuntimeCompleted ? "true" : "false");
+            ImGui::TextDisabled("Current Event: %s",
+                component.RuntimeEventName.empty() ? "(none)" : component.RuntimeEventName.c_str());
+            ImGui::TextDisabled("Instruction: %zu / Wait: %.2fs",
+                component.RuntimeInstructionIndex,
+                component.RuntimeWaitRemaining);
+
+            EditorUI::DrawTextAssetEditor(
+                "Wheatear Event Script (.wts)",
+                "EventScriptTextEditor",
+                component.ScriptPath,
+                s_EventScriptEditors,
+                256 * 1024);
 
             ImGui::PopID();
         });

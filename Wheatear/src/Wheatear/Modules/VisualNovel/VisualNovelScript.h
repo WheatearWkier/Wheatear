@@ -36,6 +36,8 @@ namespace Wheatear {
         std::string Speaker;
         std::string Text;
         std::string Background;
+        std::string Music;
+        std::string MusicTitle;
         std::string TargetLabel;
         std::vector<std::string> VisibleCharacters;
         std::vector<VisualNovelChoice> Choices;

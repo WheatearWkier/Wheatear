@@ -1,11 +1,28 @@
 #include "wtpch.h"
 #include "UIInputSystem.h"
 #include "Wheatear/Scene/Components.h"
+#include "Wheatear/Modules/Progression/GameProgress.h"
+#include "Wheatear/Runtime/CommandBus.h"
 #include "Wheatear/Scripting/ScriptEngine.h"
+#include "Wheatear/UI/UIWidgetLayout.h"
+
+#include <algorithm>
+#include <cmath>
+#include <limits>
+#include <vector>
 
 namespace Wheatear {
 
     bool UIInputSystem::s_MouseWasPressed = false;
+
+    namespace {
+
+        static entt::entity s_DraggingPanel = entt::null;
+        static entt::entity s_DraggingScrollView = entt::null;
+        static entt::entity s_DraggingSkillTreeView = entt::null;
+        static bool s_DragStartResolved = false;
+
+    } // namespace
 
     struct UINormalizedRect
     {
@@ -22,12 +39,118 @@ namespace Wheatear {
 
     static bool IsNativeButtonCommand(const std::string& command)
     {
-        return command == "quit"
-            || StartsWith(command, "scene:")
-            || StartsWith(command, "newgame:")
-            || StartsWith(command, "loadgame:")
-            || StartsWith(command, "progression:")
-            || StartsWith(command, "vn:");
+        return CommandBus::IsNativeCommand(command);
+    }
+
+    static std::vector<std::string> SplitCommand(const std::string& command)
+    {
+        std::vector<std::string> parts;
+        size_t start = 0;
+        while (start <= command.size())
+        {
+            const size_t separator = command.find(':', start);
+            if (separator == std::string::npos)
+            {
+                parts.push_back(command.substr(start));
+                break;
+            }
+
+            parts.push_back(command.substr(start, separator - start));
+            start = separator + 1;
+        }
+        return parts;
+    }
+
+    static bool ExecuteUIPagerCommand(Scene* scene, const std::string& command)
+    {
+        if (!scene || !StartsWith(command, "ui:pager:"))
+            return false;
+
+        const std::vector<std::string> parts = SplitCommand(command);
+        if (parts.size() < 4 || parts[0] != "ui" || parts[1] != "pager")
+            return false;
+
+        const std::string& pagerTag = parts[2];
+        const std::string& action = parts[3];
+        if (pagerTag.empty() || action.empty())
+            return false;
+
+        UIWidgetLayout::Context layout(scene);
+        const entt::entity pagerEntity = layout.FindByTag(pagerTag);
+        auto& registry = scene->GetRegistry();
+        if (pagerEntity == entt::null || !registry.valid(pagerEntity) || !registry.all_of<UIPagerComponent>(pagerEntity))
+            return false;
+
+        auto& pager = registry.get<UIPagerComponent>(pagerEntity);
+        pager.PageCount = std::max(pager.PageCount, 1);
+        pager.CurrentPage = std::clamp(pager.CurrentPage, 1, pager.PageCount);
+
+        int nextPage = pager.CurrentPage;
+        if (action == "next")
+        {
+            nextPage = pager.CurrentPage + 1;
+            if (nextPage > pager.PageCount)
+                nextPage = pager.Wrap ? 1 : pager.PageCount;
+        }
+        else if (action == "prev" || action == "previous")
+        {
+            nextPage = pager.CurrentPage - 1;
+            if (nextPage < 1)
+                nextPage = pager.Wrap ? pager.PageCount : 1;
+        }
+        else if (action == "first")
+        {
+            nextPage = 1;
+        }
+        else if (action == "last")
+        {
+            nextPage = pager.PageCount;
+        }
+        else if ((action == "page" || action == "set") && parts.size() >= 5)
+        {
+            try
+            {
+                nextPage = std::stoi(parts[4]);
+            }
+            catch (...)
+            {
+                return false;
+            }
+        }
+        else
+        {
+            return false;
+        }
+
+        pager.CurrentPage = std::clamp(nextPage, 1, pager.PageCount);
+        return true;
+    }
+
+    static bool ExecuteProgressionCommand(const std::string& command)
+    {
+        if (!StartsWith(command, "progression:"))
+            return false;
+
+        GameProgress::ExecuteCommand(command);
+        return true;
+    }
+
+    static bool ExecuteSliderNativeCommand(Scene* scene, const std::string& command, float value)
+    {
+        if (!CommandBus::IsNativeCommand(command))
+            return false;
+
+        std::string resolvedCommand = command;
+        if (command == "progression:set_text_speed"
+            || command == "progression:set_master_volume"
+            || command == "progression:set_bgm_volume"
+            || command == "progression:set_sfx_volume"
+            || command == "progression:equipment_page_slider")
+        {
+            resolvedCommand += ":" + std::to_string(value);
+        }
+
+        return CommandBus::Execute(scene, resolvedCommand).Handled;
     }
 
     static UINormalizedRect WidgetToNormalizedRect(const UIWidgetComponent& widget)
@@ -85,6 +208,156 @@ namespace Wheatear {
             && normMouseY >= rect.Top && normMouseY <= rect.Bottom;
     }
 
+    static bool PointInLayoutRect(const UIWidgetLayout::Rect& rect, float normMouseX, float normMouseY)
+    {
+        return normMouseX >= rect.Left && normMouseX <= rect.Right
+            && normMouseY >= rect.Top && normMouseY <= rect.Bottom;
+    }
+
+    static bool PointInPanelDragHandle(const UIWidgetLayout::Rect& rect,
+        const UIPanelComponent& panel,
+        float normMouseX,
+        float normMouseY)
+    {
+        if (!PointInLayoutRect(rect, normMouseX, normMouseY))
+            return false;
+
+        const float height = rect.Bottom - rect.Top;
+        if (height <= 0.0f)
+            return false;
+
+        if (panel.DragHandleHeight <= 0.0f)
+            return true;
+
+        const float handleHeight = height * std::clamp(panel.DragHandleHeight, 0.0f, 1.0f);
+        return normMouseY <= rect.Top + handleHeight;
+    }
+
+    static UIWidgetLayout::Rect GetScrollThumbRect(const UIWidgetLayout::Rect& rect,
+        const UIScrollViewComponent& scrollView)
+    {
+        const float width = std::max(rect.Right - rect.Left, 0.0f);
+        const float height = std::max(rect.Bottom - rect.Top, 0.0f);
+        const float barWidth = std::clamp(scrollView.ScrollbarWidth, 0.004f, std::max(width * 0.25f, 0.004f));
+        const float thumbHeight = std::clamp(height / std::max(scrollView.ContentHeight, 1.0f), std::min(height, 0.05f), height);
+        const float travel = std::max(height - thumbHeight, 0.0f);
+        const float thumbTop = rect.Top + travel * scrollView.GetNormalized();
+
+        return {
+            rect.Right - barWidth,
+            rect.Right,
+            thumbTop,
+            thumbTop + thumbHeight
+        };
+    }
+
+    static std::string HitTestSkillTreeNode(const UISkillTreeViewComponent& tree,
+        const UIWidgetLayout::Rect& rect,
+        float normMouseX,
+        float normMouseY)
+    {
+        const float width = rect.Right - rect.Left;
+        const float height = rect.Bottom - rect.Top;
+        if (width <= 0.0f || height <= 0.0f || !PointInLayoutRect(rect, normMouseX, normMouseY))
+            return {};
+
+        const glm::vec2 local = {
+            (normMouseX - rect.Left) / width,
+            (normMouseY - rect.Top) / height
+        };
+
+        std::string bestId;
+        float bestDistance = std::numeric_limits<float>::max();
+        const float halfWidth = std::max(tree.NodeSize.x * 0.5f, 0.001f);
+        const float halfHeight = std::max(tree.NodeSize.y * 0.5f, 0.001f);
+        for (const auto& node : tree.Nodes)
+        {
+            const glm::vec2 nodeLocal = node.Position + tree.Pan;
+            if (nodeLocal.x + halfWidth < 0.0f || nodeLocal.x - halfWidth > 1.0f
+                || nodeLocal.y + halfHeight < 0.0f || nodeLocal.y - halfHeight > 1.0f)
+                continue;
+
+            const float dx = (local.x - nodeLocal.x) / halfWidth;
+            const float dy = (local.y - nodeLocal.y) / halfHeight;
+            const float distance = dx * dx + dy * dy;
+            if (distance <= 1.0f && distance < bestDistance)
+            {
+                bestDistance = distance;
+                bestId = node.Id;
+            }
+        }
+        return bestId;
+    }
+
+    static UIWidgetLayout::Rect GetParentRect(UIWidgetLayout::Context& layout,
+        Scene* scene,
+        const UIWidgetComponent& widget)
+    {
+        if (!scene)
+            return { 0.0f, 1.0f, 0.0f, 1.0f };
+
+        auto& registry = scene->GetRegistry();
+        const entt::entity parent = layout.ResolveReference(widget.ParentEntity, widget.ParentTag);
+        if (parent == entt::null || !registry.valid(parent) || !registry.all_of<UIWidgetComponent>(parent))
+            return { 0.0f, 1.0f, 0.0f, 1.0f };
+
+        return UIWidgetLayout::ResolveRect(layout, parent);
+    }
+
+    static void SetWidgetLocalTopLeft(UIWidgetComponent& widget, float left, float top)
+    {
+        const UIWidgetLayout::Rect localRect = UIWidgetLayout::WidgetToLocalRect(widget);
+        const float width = localRect.Right - localRect.Left;
+        const float height = localRect.Bottom - localRect.Top;
+        const float halfW = width * 0.5f;
+        const float halfH = height * 0.5f;
+
+        switch (widget.Anchor)
+        {
+        case UIAnchor::TopLeft:
+            widget.Position = { left, top };
+            break;
+        case UIAnchor::TopCenter:
+            widget.Position = { left + halfW, top };
+            break;
+        case UIAnchor::TopRight:
+            widget.Position = { left + width, top };
+            break;
+        case UIAnchor::MiddleLeft:
+            widget.Position = { left, top + halfH };
+            break;
+        case UIAnchor::MiddleCenter:
+            widget.Position = { left + halfW, top + halfH };
+            break;
+        case UIAnchor::MiddleRight:
+            widget.Position = { left + width, top + halfH };
+            break;
+        case UIAnchor::BottomLeft:
+            widget.Position = { left, top + height };
+            break;
+        case UIAnchor::BottomCenter:
+            widget.Position = { left + halfW, top + height };
+            break;
+        case UIAnchor::BottomRight:
+            widget.Position = { left + width, top + height };
+            break;
+        }
+    }
+
+    static bool PointBlockedByParentClip(UIWidgetLayout::Context& layout,
+        entt::entity entity,
+        float normMouseX,
+        float normMouseY)
+    {
+        const auto clip = UIWidgetLayout::ResolveParentClipRect(layout, entity);
+        return clip && !UIWidgetLayout::PointInRect(*clip, normMouseX, normMouseY);
+    }
+
+    static bool WidgetCanReceivePointer(UIWidgetLayout::Context& layout, entt::entity entity)
+    {
+        return UIWidgetLayout::EntityVisibleInClipAndViewport(layout, entity, 0.004f);
+    }
+
     static void FireScriptCallback(Scene* scene, entt::entity e, const std::string& function)
     {
         if (function.empty()) return;
@@ -111,6 +384,12 @@ namespace Wheatear {
         if (!entity.HasComponent<UIButtonComponent>()) return;
 
         auto& button = entity.GetComponent<UIButtonComponent>();
+        if (button.OnClickFunction.empty())
+            return;
+
+        if (CommandBus::Execute(scene, button.OnClickFunction).Handled)
+            return;
+
         FireScriptCallback(scene, e, button.OnClickFunction);
     }
 
@@ -125,21 +404,261 @@ namespace Wheatear {
         const float normY = mouseY / static_cast<float>(viewportHeight);
         const bool mouseInViewport = (normX >= 0.0f && normX <= 1.0f &&
             normY >= 0.0f && normY <= 1.0f);
+        UIWidgetLayout::Context layout(scene);
+
+        auto panelView = scene->GetRegistry().view<UIWidgetComponent, UIPanelComponent>();
+        auto scrollView = scene->GetRegistry().view<UIWidgetComponent, UIScrollViewComponent>();
+        auto skillTreeView = scene->GetRegistry().view<UIWidgetComponent, UISkillTreeViewComponent>();
+
+        if (s_MouseWasPressed && !s_DragStartResolved && s_DraggingScrollView == entt::null)
+        {
+            entt::entity bestScrollView = entt::null;
+            int bestSortOrder = std::numeric_limits<int>::min();
+            for (auto e : scrollView)
+            {
+                auto& scroll = scrollView.get<UIScrollViewComponent>(e);
+                scroll.ClampOffset();
+                if (!scroll.ShowScrollbar || !scroll.DragScrollbar || scroll.ContentHeight <= 1.0f || !WidgetCanReceivePointer(layout, e))
+                    continue;
+
+                const UIWidgetLayout::Rect rect = UIWidgetLayout::ResolveRect(layout, e);
+                const UIWidgetLayout::Rect thumbRect = GetScrollThumbRect(rect, scroll);
+                const UIWidgetComponent resolvedWidget = UIWidgetLayout::ResolveWidget(layout, e);
+                const bool hit = mouseInViewport
+                    && !PointBlockedByParentClip(layout, e, normX, normY)
+                    && PointInLayoutRect(thumbRect, normX, normY);
+                if (hit && (bestScrollView == entt::null || resolvedWidget.SortOrder >= bestSortOrder))
+                {
+                    bestScrollView = e;
+                    bestSortOrder = resolvedWidget.SortOrder;
+                }
+            }
+
+            if (bestScrollView != entt::null)
+            {
+                auto& scroll = scene->GetRegistry().get<UIScrollViewComponent>(bestScrollView);
+                scroll.RuntimeThumbDragging = true;
+                scroll.RuntimeDragStartMouse = { normX, normY };
+                scroll.RuntimeDragStartOffsetY = scroll.OffsetY;
+                s_DraggingScrollView = bestScrollView;
+                s_DragStartResolved = true;
+            }
+        }
+
+        const bool scrollViewIsDragging = s_DraggingScrollView != entt::null
+            && scene->GetRegistry().valid(s_DraggingScrollView)
+            && scene->GetRegistry().all_of<UIWidgetComponent>(s_DraggingScrollView)
+            && scene->GetRegistry().all_of<UIScrollViewComponent>(s_DraggingScrollView);
+        if (scrollViewIsDragging)
+        {
+            auto& registry = scene->GetRegistry();
+            auto& scroll = registry.get<UIScrollViewComponent>(s_DraggingScrollView);
+            const UIWidgetLayout::Rect rect = UIWidgetLayout::ResolveRect(layout, s_DraggingScrollView);
+            const float height = std::max(rect.Bottom - rect.Top, 0.0001f);
+            const float thumbHeight = std::clamp(height / std::max(scroll.ContentHeight, 1.0f), std::min(height, 0.05f), height);
+            const float travel = std::max(height - thumbHeight, 0.0001f);
+            const float delta = (normY - scroll.RuntimeDragStartMouse.y) / travel;
+            scroll.OffsetY = scroll.RuntimeDragStartOffsetY + delta * scroll.GetMaxOffset();
+            scroll.ClampOffset();
+            layout.RectCache.clear();
+            layout.VisibilityCache.clear();
+        }
+
+        if (s_MouseWasPressed && !s_DragStartResolved
+            && s_DraggingSkillTreeView == entt::null
+            && !scrollViewIsDragging)
+        {
+            entt::entity bestSkillTree = entt::null;
+            int bestSortOrder = std::numeric_limits<int>::min();
+            for (auto e : skillTreeView)
+            {
+                if (!WidgetCanReceivePointer(layout, e))
+                    continue;
+
+                const UIWidgetLayout::Rect rect = UIWidgetLayout::ResolveRect(layout, e);
+                const UIWidgetComponent resolvedWidget = UIWidgetLayout::ResolveWidget(layout, e);
+                const bool hit = mouseInViewport
+                    && !PointBlockedByParentClip(layout, e, normX, normY)
+                    && PointInLayoutRect(rect, normX, normY);
+                if (hit && (bestSkillTree == entt::null || resolvedWidget.SortOrder >= bestSortOrder))
+                {
+                    bestSkillTree = e;
+                    bestSortOrder = resolvedWidget.SortOrder;
+                }
+            }
+
+            if (bestSkillTree != entt::null)
+            {
+                auto& tree = scene->GetRegistry().get<UISkillTreeViewComponent>(bestSkillTree);
+                tree.RuntimeDragging = true;
+                tree.RuntimeDragStartMouse = { normX, normY };
+                tree.RuntimeDragStartPan = tree.Pan;
+                tree.RuntimeDragDistance = 0.0f;
+                s_DraggingSkillTreeView = bestSkillTree;
+                s_DragStartResolved = true;
+            }
+        }
+
+        const bool skillTreeIsDragging = s_DraggingSkillTreeView != entt::null
+            && scene->GetRegistry().valid(s_DraggingSkillTreeView)
+            && scene->GetRegistry().all_of<UIWidgetComponent>(s_DraggingSkillTreeView)
+            && scene->GetRegistry().all_of<UISkillTreeViewComponent>(s_DraggingSkillTreeView);
+        if (skillTreeIsDragging)
+        {
+            auto& registry = scene->GetRegistry();
+            auto& tree = registry.get<UISkillTreeViewComponent>(s_DraggingSkillTreeView);
+            const UIWidgetLayout::Rect rect = UIWidgetLayout::ResolveRect(layout, s_DraggingSkillTreeView);
+            const float width = std::max(rect.Right - rect.Left, 0.0001f);
+            const float height = std::max(rect.Bottom - rect.Top, 0.0001f);
+            const glm::vec2 delta = {
+                (normX - tree.RuntimeDragStartMouse.x) / width,
+                (normY - tree.RuntimeDragStartMouse.y) / height
+            };
+            tree.Pan = tree.RuntimeDragStartPan + delta;
+            tree.ClampPan();
+            GameProgress::GetState().SkillTreePanX = tree.Pan.x;
+            GameProgress::GetState().SkillTreePanY = tree.Pan.y;
+            tree.RuntimeDragDistance = std::max(tree.RuntimeDragDistance, std::sqrt(delta.x * delta.x + delta.y * delta.y));
+            layout.RectCache.clear();
+            layout.VisibilityCache.clear();
+        }
+
+        if (s_MouseWasPressed && !s_DragStartResolved && s_DraggingPanel == entt::null && !skillTreeIsDragging)
+        {
+            entt::entity bestPanel = entt::null;
+            int bestSortOrder = std::numeric_limits<int>::min();
+            for (auto e : panelView)
+            {
+                auto& panel = panelView.get<UIPanelComponent>(e);
+                if (!panel.Draggable || !WidgetCanReceivePointer(layout, e))
+                    continue;
+
+                const UIWidgetLayout::Rect rect = UIWidgetLayout::ResolveRect(layout, e);
+                if (mouseInViewport
+                    && !scrollViewIsDragging
+                    && !skillTreeIsDragging
+                    && !PointBlockedByParentClip(layout, e, normX, normY)
+                    && PointInPanelDragHandle(rect, panel, normX, normY))
+                {
+                    const UIWidgetComponent resolvedWidget = UIWidgetLayout::ResolveWidget(layout, e);
+                    if (bestPanel == entt::null || resolvedWidget.SortOrder >= bestSortOrder)
+                    {
+                        bestPanel = e;
+                        bestSortOrder = resolvedWidget.SortOrder;
+                    }
+                }
+            }
+
+            if (bestPanel != entt::null)
+            {
+                auto& panel = scene->GetRegistry().get<UIPanelComponent>(bestPanel);
+                const UIWidgetLayout::Rect rect = UIWidgetLayout::ResolveRect(layout, bestPanel);
+                panel.RuntimeIsDragging = true;
+                panel.RuntimeDragPointerOffset = { normX - rect.Left, normY - rect.Top };
+                s_DraggingPanel = bestPanel;
+            }
+
+            s_DragStartResolved = true;
+        }
+
+        const bool panelIsDragging = s_DraggingPanel != entt::null
+            && scene->GetRegistry().valid(s_DraggingPanel)
+            && scene->GetRegistry().all_of<UIWidgetComponent>(s_DraggingPanel)
+            && scene->GetRegistry().all_of<UIPanelComponent>(s_DraggingPanel);
+        if (panelIsDragging)
+        {
+            auto& registry = scene->GetRegistry();
+            auto& widget = registry.get<UIWidgetComponent>(s_DraggingPanel);
+            auto& panel = registry.get<UIPanelComponent>(s_DraggingPanel);
+
+            const UIWidgetLayout::Rect parentRect = GetParentRect(layout, scene, widget);
+            const float parentWidth = std::max(parentRect.Right - parentRect.Left, 0.0001f);
+            const float parentHeight = std::max(parentRect.Bottom - parentRect.Top, 0.0001f);
+            const UIWidgetLayout::Rect localRect = UIWidgetLayout::WidgetToLocalRect(widget);
+            const float localWidth = localRect.Right - localRect.Left;
+            const float localHeight = localRect.Bottom - localRect.Top;
+
+            float localLeft = (normX - panel.RuntimeDragPointerOffset.x - parentRect.Left) / parentWidth;
+            float localTop = (normY - panel.RuntimeDragPointerOffset.y - parentRect.Top) / parentHeight;
+            if (panel.ConstrainDragToParent)
+            {
+                localLeft = std::clamp(localLeft, 0.0f, std::max(0.0f, 1.0f - localWidth));
+                localTop = std::clamp(localTop, 0.0f, std::max(0.0f, 1.0f - localHeight));
+            }
+
+            SetWidgetLocalTopLeft(widget, localLeft, localTop);
+            panel.RuntimeIsDragging = true;
+            layout.RectCache.clear();
+        }
+
+        for (auto e : panelView)
+        {
+            auto& panel = panelView.get<UIPanelComponent>(e);
+            if (e != s_DraggingPanel)
+                panel.RuntimeIsDragging = false;
+        }
+
+        for (auto e : scrollView)
+        {
+            auto& scroll = scrollView.get<UIScrollViewComponent>(e);
+            scroll.ClampOffset();
+            if (!scroll.ShowScrollbar || scroll.ContentHeight <= 1.0f || !WidgetCanReceivePointer(layout, e))
+            {
+                scroll.RuntimeThumbHovered = false;
+                if (e != s_DraggingScrollView)
+                    scroll.RuntimeThumbDragging = false;
+                continue;
+            }
+
+            const UIWidgetLayout::Rect rect = UIWidgetLayout::ResolveRect(layout, e);
+            const UIWidgetLayout::Rect thumbRect = GetScrollThumbRect(rect, scroll);
+            scroll.RuntimeThumbHovered = mouseInViewport
+                && !PointBlockedByParentClip(layout, e, normX, normY)
+                && PointInLayoutRect(thumbRect, normX, normY);
+            if (e != s_DraggingScrollView)
+                scroll.RuntimeThumbDragging = false;
+        }
+
+        for (auto e : skillTreeView)
+        {
+            auto& tree = skillTreeView.get<UISkillTreeViewComponent>(e);
+            if (!WidgetCanReceivePointer(layout, e))
+            {
+                tree.RuntimeHoveredNodeId.clear();
+                if (e != s_DraggingSkillTreeView)
+                    tree.RuntimeDragging = false;
+                continue;
+            }
+
+            const UIWidgetLayout::Rect rect = UIWidgetLayout::ResolveRect(layout, e);
+            const bool hit = mouseInViewport
+                && !panelIsDragging
+                && !scrollViewIsDragging
+                && !PointBlockedByParentClip(layout, e, normX, normY)
+                && PointInLayoutRect(rect, normX, normY);
+            tree.RuntimeHoveredNodeId = hit ? HitTestSkillTreeNode(tree, rect, normX, normY) : std::string{};
+            if (e != s_DraggingSkillTreeView)
+                tree.RuntimeDragging = false;
+        }
 
         auto buttonView = scene->GetRegistry().view<UIWidgetComponent, UIButtonComponent>();
         for (auto e : buttonView)
         {
-            auto& widget = buttonView.get<UIWidgetComponent>(e);
             auto& button = buttonView.get<UIButtonComponent>(e);
-
-            if (!widget.Visible)
+            if (!WidgetCanReceivePointer(layout, e))
             {
                 button.IsHovered = false;
                 button.IsPressed = false;
                 continue;
             }
 
-            const bool hit = mouseInViewport && HitTest(widget, normX, normY);
+            const UIWidgetComponent resolvedWidget = UIWidgetLayout::ResolveWidget(layout, e);
+            const bool hit = mouseInViewport
+                && !panelIsDragging
+                && !scrollViewIsDragging
+                && !skillTreeIsDragging
+                && !PointBlockedByParentClip(layout, e, normX, normY)
+                && HitTest(resolvedWidget, normX, normY);
             button.IsHovered = hit;
             button.IsPressed = hit && s_MouseWasPressed;
         }
@@ -147,17 +666,21 @@ namespace Wheatear {
         auto checkboxView = scene->GetRegistry().view<UIWidgetComponent, UICheckboxComponent>();
         for (auto e : checkboxView)
         {
-            auto& widget = checkboxView.get<UIWidgetComponent>(e);
             auto& checkbox = checkboxView.get<UICheckboxComponent>(e);
-
-            if (!widget.Visible)
+            if (!WidgetCanReceivePointer(layout, e))
             {
                 checkbox.IsHovered = false;
                 checkbox.IsPressed = false;
                 continue;
             }
 
-            const bool hit = mouseInViewport && HitTest(widget, normX, normY);
+            const UIWidgetComponent resolvedWidget = UIWidgetLayout::ResolveWidget(layout, e);
+            const bool hit = mouseInViewport
+                && !panelIsDragging
+                && !scrollViewIsDragging
+                && !skillTreeIsDragging
+                && !PointBlockedByParentClip(layout, e, normX, normY)
+                && HitTest(resolvedWidget, normX, normY);
             checkbox.IsHovered = hit;
             checkbox.IsPressed = hit && s_MouseWasPressed;
         }
@@ -165,18 +688,22 @@ namespace Wheatear {
         auto sliderView = scene->GetRegistry().view<UIWidgetComponent, UISliderComponent>();
         for (auto e : sliderView)
         {
-            auto& widget = sliderView.get<UIWidgetComponent>(e);
             auto& slider = sliderView.get<UISliderComponent>(e);
-
-            if (!widget.Visible)
+            if (!WidgetCanReceivePointer(layout, e))
             {
                 slider.IsHovered = false;
                 slider.IsDragging = false;
                 continue;
             }
 
-            const UINormalizedRect rect = WidgetToNormalizedRect(widget);
-            const bool hit = mouseInViewport && PointInRect(rect, normX, normY);
+            const UIWidgetComponent resolvedWidget = UIWidgetLayout::ResolveWidget(layout, e);
+            const UINormalizedRect rect = WidgetToNormalizedRect(resolvedWidget);
+            const bool hit = mouseInViewport
+                && !panelIsDragging
+                && !scrollViewIsDragging
+                && !skillTreeIsDragging
+                && !PointBlockedByParentClip(layout, e, normX, normY)
+                && PointInRect(rect, normX, normY);
             slider.IsHovered = hit;
 
             if (s_MouseWasPressed && (hit || slider.IsDragging))
@@ -196,29 +723,75 @@ namespace Wheatear {
     void UIInputSystem::OnMousePressed(Scene* scene)
     {
         s_MouseWasPressed = true;
+        s_DragStartResolved = false;
     }
 
     void UIInputSystem::OnMouseReleased(Scene* scene)
     {
         if (!s_MouseWasPressed) return;
         s_MouseWasPressed = false;
+        s_DragStartResolved = false;
+        UIWidgetLayout::Context layout(scene);
+
+        if (s_DraggingPanel != entt::null && scene->GetRegistry().valid(s_DraggingPanel)
+            && scene->GetRegistry().all_of<UIPanelComponent>(s_DraggingPanel))
+        {
+            scene->GetRegistry().get<UIPanelComponent>(s_DraggingPanel).RuntimeIsDragging = false;
+        }
+        s_DraggingPanel = entt::null;
+        if (s_DraggingScrollView != entt::null && scene->GetRegistry().valid(s_DraggingScrollView)
+            && scene->GetRegistry().all_of<UIScrollViewComponent>(s_DraggingScrollView))
+        {
+            scene->GetRegistry().get<UIScrollViewComponent>(s_DraggingScrollView).RuntimeThumbDragging = false;
+        }
+        s_DraggingScrollView = entt::null;
+
+        bool releaseConsumedBySkillTree = false;
+        if (s_DraggingSkillTreeView != entt::null && scene->GetRegistry().valid(s_DraggingSkillTreeView)
+            && scene->GetRegistry().all_of<UISkillTreeViewComponent>(s_DraggingSkillTreeView))
+        {
+            auto& tree = scene->GetRegistry().get<UISkillTreeViewComponent>(s_DraggingSkillTreeView);
+            releaseConsumedBySkillTree = true;
+            if (tree.RuntimeDragDistance <= 0.006f && !tree.RuntimeHoveredNodeId.empty())
+            {
+                tree.SelectedNodeId = tree.RuntimeHoveredNodeId;
+                for (auto& node : tree.Nodes)
+                    node.Selected = node.Id == tree.SelectedNodeId;
+
+                if (!tree.CommandPrefix.empty())
+                    ExecuteProgressionCommand(tree.CommandPrefix + tree.SelectedNodeId);
+            }
+
+            tree.RuntimeDragging = false;
+            tree.RuntimeDragDistance = 0.0f;
+        }
+        s_DraggingSkillTreeView = entt::null;
 
         auto buttonView = scene->GetRegistry().view<UIWidgetComponent, UIButtonComponent>();
+        entt::entity clickedButton = entt::null;
+        int clickedButtonSortOrder = std::numeric_limits<int>::min();
         for (auto e : buttonView)
         {
-            auto& widget = buttonView.get<UIWidgetComponent>(e);
             auto& button = buttonView.get<UIButtonComponent>(e);
-            if (widget.Visible && button.IsHovered)
-                FireOnClick(scene, e);
+            if (!releaseConsumedBySkillTree && WidgetCanReceivePointer(layout, e) && button.IsHovered)
+            {
+                const UIWidgetComponent resolvedWidget = UIWidgetLayout::ResolveWidget(layout, e);
+                if (clickedButton == entt::null || resolvedWidget.SortOrder >= clickedButtonSortOrder)
+                {
+                    clickedButton = e;
+                    clickedButtonSortOrder = resolvedWidget.SortOrder;
+                }
+            }
             button.IsPressed = false;
         }
+        if (clickedButton != entt::null)
+            FireOnClick(scene, clickedButton);
 
         auto checkboxView = scene->GetRegistry().view<UIWidgetComponent, UICheckboxComponent>();
         for (auto e : checkboxView)
         {
-            auto& widget = checkboxView.get<UIWidgetComponent>(e);
             auto& checkbox = checkboxView.get<UICheckboxComponent>(e);
-            if (widget.Visible && checkbox.IsHovered)
+            if (WidgetCanReceivePointer(layout, e) && checkbox.IsHovered)
             {
                 checkbox.Checked = !checkbox.Checked;
                 FireScriptCallback(scene, e, checkbox.OnValueChangedFunction);
@@ -231,9 +804,60 @@ namespace Wheatear {
         {
             auto& slider = sliderView.get<UISliderComponent>(e);
             if (slider.IsDragging)
-                FireScriptCallback(scene, e, slider.OnValueChangedFunction);
+            {
+                if (!ExecuteSliderNativeCommand(scene, slider.OnValueChangedFunction, slider.Value))
+                    FireScriptCallback(scene, e, slider.OnValueChangedFunction);
+            }
             slider.IsDragging = false;
         }
+    }
+
+    bool UIInputSystem::OnMouseScrolled(Scene* scene,
+        float yOffset,
+        float mouseX,
+        float mouseY,
+        uint32_t viewportWidth,
+        uint32_t viewportHeight)
+    {
+        if (!scene || viewportWidth == 0 || viewportHeight == 0)
+            return false;
+
+        const float normX = mouseX / static_cast<float>(viewportWidth);
+        const float normY = mouseY / static_cast<float>(viewportHeight);
+        const bool mouseInViewport = normX >= 0.0f && normX <= 1.0f && normY >= 0.0f && normY <= 1.0f;
+        if (!mouseInViewport)
+            return false;
+
+        UIWidgetLayout::Context layout(scene);
+        auto view = scene->GetRegistry().view<UIWidgetComponent, UIScrollViewComponent>();
+
+        entt::entity bestScrollView = entt::null;
+        int bestSortOrder = std::numeric_limits<int>::min();
+        for (auto e : view)
+        {
+            auto& scroll = view.get<UIScrollViewComponent>(e);
+            scroll.ClampOffset();
+            if (!scroll.EnableWheel || scroll.ContentHeight <= 1.0f || !WidgetCanReceivePointer(layout, e))
+                continue;
+
+            const UIWidgetLayout::Rect rect = UIWidgetLayout::ResolveRect(layout, e);
+            const UIWidgetComponent resolvedWidget = UIWidgetLayout::ResolveWidget(layout, e);
+            const bool hit = !PointBlockedByParentClip(layout, e, normX, normY)
+                && PointInLayoutRect(rect, normX, normY);
+            if (hit && (bestScrollView == entt::null || resolvedWidget.SortOrder >= bestSortOrder))
+            {
+                bestScrollView = e;
+                bestSortOrder = resolvedWidget.SortOrder;
+            }
+        }
+
+        if (bestScrollView == entt::null)
+            return false;
+
+        auto& scroll = scene->GetRegistry().get<UIScrollViewComponent>(bestScrollView);
+        scroll.OffsetY -= yOffset * scroll.WheelStep;
+        scroll.ClampOffset();
+        return true;
     }
 
 } // namespace Wheatear

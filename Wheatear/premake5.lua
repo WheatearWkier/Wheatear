@@ -30,7 +30,6 @@ project "Wheatear"
         "%{IncludeDir.ImGuizmo}",
         "%{IncludeDir.VulkanSDK}",
         "%{IncludeDir.Box2D}",
-        "%{IncludeDir.mono}",
         "%{IncludeDir.miniaudio}",
     }
 
@@ -60,17 +59,31 @@ project "Wheatear"
 
     filter {}
 
+    if _OPTIONS["csharp-scripting"] then
+        defines { "WT_ENABLE_CSHARP_SCRIPTING" }
+        includedirs { "%{IncludeDir.mono}" }
+
+        filter "configurations:Debug"
+            links { Library.mono_Debug }
+
+        filter "configurations:Release"
+            links { Library.mono_Release }
+
+        filter "configurations:Dist"
+            links { Library.mono_Release }
+
+        filter {}
+    end
+
     wt_configurations(
         {
             Library.ShaderC_Debug,
             Library.SPIRV_Cross_Debug,
             Library.SPIRV_Cross_GLSL_Debug,
-            Library.mono_Debug,
         },
         {
             Library.ShaderC_Release,
             Library.SPIRV_Cross_Release,
             Library.SPIRV_Cross_GLSL_Release,
-            Library.mono_Release,
         }
     )

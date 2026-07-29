@@ -12,9 +12,9 @@
 
 namespace Wheatear {
 
-    // �T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T
-    //  ���� & ����ģ��
-    // �T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T
+    // 鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺?
+    //  甯搁噺 & 椤剁偣妯℃澘
+    // 鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺?
 
     static constexpr uint32_t k_MaxQuads = 10000;
     static constexpr uint32_t k_MaxVertices = k_MaxQuads * 4;
@@ -33,44 +33,45 @@ namespace Wheatear {
         { 1.0f, 1.0f }, { 0.0f, 1.0f },
     };
 
-    // �T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T
+    // 鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺?
     //  Renderer2DData
-    //  ����ͼԪ���������һ�� RenderBatch<��Vertex> �ֶΣ���������Զ�����
-    // �T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T
+    //  鏂板鍥惧厓锛氬湪杩欓噷鍔犱竴涓?RenderBatch<鏂癡ertex> 瀛楁锛屽叾浣欎唬鐮佽嚜鍔ㄩ€傞厤
+    // 鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺?
 
     struct Renderer2DData
     {
-        // ���� �����ۣ�Quad / AnimFrame ���ã�����������������������������������������������������������������������
+        // 鈹€鈹€ 绾圭悊妲斤紙Quad / AnimFrame 鍏辩敤锛夆攢鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€
         std::array<Ref<Texture2D>, k_MaxTexSlots> TextureSlots;
-        uint32_t TextureSlotIndex = 1;          // slot 0 = ��ɫ����
+        uint32_t TextureSlotIndex = 1;          // slot 0 = 鐧借壊绾圭悊
         Ref<Texture2D> WhiteTexture;
 
-        // ���� ������ʵ�� ����������������������������������������������������������������������������������������������������������������
+        // 鈹€鈹€ 鎵瑰鐞嗗疄渚?鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€
         Scope<RenderBatch<QuadVertex>>   QuadBatch;
         Scope<RenderBatch<CircleVertex>> CircleBatch;
         Scope<RenderBatch<LineVertex>>   LineBatch;
-        // δ��ֻ����������µ� Scope<RenderBatch<XxxVertex>> XxxBatch;
+        Scope<RenderBatch<TextVertex>>   TextBatch;
+        // 鏈潵鍙渶鍦ㄨ繖閲屽姞鏂扮殑 Scope<RenderBatch<XxxVertex>> XxxBatch;
 
-        // ���� ��� UBO ��������������������������������������������������������������������������������������������������������������������
+        // 鈹€鈹€ 鐩告満 UBO 鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€
         struct CameraData { glm::mat4 ViewProjection; };
         CameraData         CameraBuffer;
         Ref<UniformBuffer> CameraUniformBuffer;
 
-        // ���� ͳ�� ����������������������������������������������������������������������������������������������������������������������������
+        // 鈹€鈹€ 缁熻 鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€
         Renderer2D::Statistics Stats;
     };
 
     static Renderer2DData s_Data;
 
-    // �T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T
-    //  ��ʼ�� / �ر�
-    // �T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T
+    // 鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺?
+    //  鍒濆鍖?/ 鍏抽棴
+    // 鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺?
 
     void Renderer2D::Init()
     {
         WT_PROFILE_FUNCTION();
 
-        // ���� �����������壨Quad + Circle �ã���������������������������������������������������������������������
+        // 鈹€鈹€ 鍏辩敤绱㈠紩缂撳啿锛圦uad + Circle 鐢級鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€
         auto* indices = new uint32_t[k_MaxIndices];
         for (uint32_t i = 0, offset = 0; i < k_MaxIndices; i += 6, offset += 4)
         {
@@ -80,13 +81,13 @@ namespace Wheatear {
         Ref<IndexBuffer> sharedIBO = IndexBuffer::Create(indices, k_MaxIndices);
         delete[] indices;
 
-        // ���� ��ɫ���� ��������������������������������������������������������������������������������������������������������������������
+        // 鈹€鈹€ 鐧借壊绾圭悊 鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€
         s_Data.WhiteTexture = Texture2D::Create(1, 1);
         constexpr uint32_t white = 0xffffffff;
         s_Data.WhiteTexture->SetData(const_cast<uint32_t*>(&white), sizeof(uint32_t));
         s_Data.TextureSlots[0] = s_Data.WhiteTexture;
 
-        // ���� QuadBatch ������������������������������������������������������������������������������������������������������������������
+        // 鈹€鈹€ QuadBatch 鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€
         s_Data.QuadBatch = CreateScope<RenderBatch<QuadVertex>>(
             k_MaxVertices,
             Shader::Create("assets/shaders/Renderer2D_Quad.glsl"),
@@ -108,14 +109,14 @@ namespace Wheatear {
         s_Data.QuadBatch->GetShader()->Bind();
         s_Data.QuadBatch->GetShader()->SetIntArray("u_Textures", samplers, k_MaxTexSlots);
 
-        // Quad Flush ǰ������������
+        // Quad Flush 鍓嶇粦瀹氭墍鏈夌汗鐞嗘Ы
         s_Data.QuadBatch->SetPreDrawCallback([]()
             {
                 for (uint32_t i = 0; i < s_Data.TextureSlotIndex; i++)
                     s_Data.TextureSlots[i]->Bind(i);
             });
 
-        // ���� CircleBatch ��������������������������������������������������������������������������������������������������������������
+        // 鈹€鈹€ CircleBatch 鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€
         s_Data.CircleBatch = CreateScope<RenderBatch<CircleVertex>>(
             k_MaxVertices,
             Shader::Create("assets/shaders/Renderer2D_Circle.glsl"),
@@ -131,7 +132,7 @@ namespace Wheatear {
             sharedIBO
         );
 
-        // ���� LineBatch ������������������������������������������������������������������������������������������������������������������
+        // 鈹€鈹€ LineBatch 鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€
         s_Data.LineBatch = CreateScope<RenderBatch<LineVertex>>(
             k_MaxVertices,
             Shader::Create("assets/shaders/Renderer2D_Line.glsl"),
@@ -143,7 +144,32 @@ namespace Wheatear {
             BatchDrawMode::Lines
         );
 
-        // ���� Camera UBO ����������������������������������������������������������������������������������������������������������������
+        s_Data.TextBatch = CreateScope<RenderBatch<TextVertex>>(
+            k_MaxVertices,
+            Shader::Create("assets/shaders/Renderer2D_TextSDF.glsl"),
+            BufferLayout{
+                { "a_Position",     ShaderDataType::Float3 },
+                { "a_Color",        ShaderDataType::Float4 },
+                { "a_TexCoord",     ShaderDataType::Float2 },
+                { "a_TexIndex",     ShaderDataType::Float  },
+                { "a_OutlineColor", ShaderDataType::Float4 },
+                { "a_OutlineWidth", ShaderDataType::Float  },
+                { "a_EdgeSoftness", ShaderDataType::Float  },
+                { "a_EntityID",     ShaderDataType::Int    }
+            },
+            BatchDrawMode::Triangles,
+            sharedIBO
+        );
+
+        s_Data.TextBatch->GetShader()->Bind();
+        s_Data.TextBatch->GetShader()->SetIntArray("u_Textures", samplers, k_MaxTexSlots);
+        s_Data.TextBatch->SetPreDrawCallback([]()
+            {
+                for (uint32_t i = 0; i < s_Data.TextureSlotIndex; i++)
+                    s_Data.TextureSlots[i]->Bind(i);
+            });
+
+        // 鈹€鈹€ Camera UBO 鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€
         s_Data.CameraUniformBuffer = UniformBuffer::Create(
             sizeof(Renderer2DData::CameraData), 0);
     }
@@ -151,15 +177,16 @@ namespace Wheatear {
     void Renderer2D::Shutdown()
     {
         WT_PROFILE_FUNCTION();
-        // RenderBatch ����ʱ�Զ� delete[] CPU ���壬Scope ����ʱ�Զ�����
+        // RenderBatch 鏋愭瀯鏃惰嚜鍔?delete[] CPU 缂撳啿锛孲cope 鏋愭瀯鏃惰嚜鍔ㄨ皟鐢?
         s_Data.QuadBatch.reset();
         s_Data.CircleBatch.reset();
         s_Data.LineBatch.reset();
+        s_Data.TextBatch.reset();
     }
 
-    // �T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T
-    //  ������ʼ / ����
-    // �T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T
+    // 鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺?
+    //  鍦烘櫙寮€濮?/ 缁撴潫
+    // 鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺?
 
     static void UploadCameraAndReset(const glm::mat4& vp)
     {
@@ -170,6 +197,7 @@ namespace Wheatear {
         s_Data.QuadBatch->Reset();
         s_Data.CircleBatch->Reset();
         s_Data.LineBatch->Reset();
+        s_Data.TextBatch->Reset();
         s_Data.TextureSlotIndex = 1;
     }
 
@@ -198,17 +226,23 @@ namespace Wheatear {
             &s_Data.CameraBuffer, sizeof(Renderer2DData::CameraData));
     }
 
-    // �T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T
+    // 鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺?
     //  Flush
-    //  ����ͼԪ���������һ�� s_Data.XxxBatch->Flush(s_Data.Stats);
-    // �T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T
+    //  鏂板鍥惧厓锛氬湪杩欓噷鍔犱竴琛?s_Data.XxxBatch->Flush(s_Data.Stats);
+    // 鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺?
 
     void Renderer2D::Flush()
     {
         WT_PROFILE_FUNCTION();
         s_Data.QuadBatch->Flush(s_Data.Stats);
+        s_Data.TextBatch->Flush(s_Data.Stats);
         s_Data.CircleBatch->Flush(s_Data.Stats);
         s_Data.LineBatch->Flush(s_Data.Stats);
+        s_Data.QuadBatch->Reset();
+        s_Data.CircleBatch->Reset();
+        s_Data.LineBatch->Reset();
+        s_Data.TextBatch->Reset();
+        s_Data.TextureSlotIndex = 1;
     }
 
     static void FlushAndReset()
@@ -217,12 +251,13 @@ namespace Wheatear {
         s_Data.QuadBatch->Reset();
         s_Data.CircleBatch->Reset();
         s_Data.LineBatch->Reset();
+        s_Data.TextBatch->Reset();
         s_Data.TextureSlotIndex = 1;
     }
 
-    // �T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T
-    //  �ڲ�����
-    // �T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T
+    // 鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺?
+    //  鍐呴儴杈呭姪
+    // 鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺?
 
     static float GetOrAllocTextureSlot(const Ref<Texture2D>& texture)
     {
@@ -264,9 +299,9 @@ namespace Wheatear {
         s_Data.Stats.QuadCount++;
     }
 
-    // �T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T
+    // 鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺?
     //  DrawQuad
-    // �T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T
+    // 鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺?
 
     void Renderer2D::DrawQuad(const glm::mat4& transform,
         const glm::vec4& color, int entityID)
@@ -323,9 +358,9 @@ namespace Wheatear {
             subTexture->GetTexCoords(), texIndex, tilingFactor, -1);
     }
 
-    // �T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T
+    // 鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺?
     //  DrawCircle
-    // �T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T
+    // 鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺?
 
     void Renderer2D::DrawCircle(const glm::mat4& transform,
         const glm::vec4& color,
@@ -350,9 +385,9 @@ namespace Wheatear {
         s_Data.Stats.QuadCount++;
     }
 
-    // �T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T
+    // 鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺?
     //  DrawSprite / DrawAnimationFrame
-    // �T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T
+    // 鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺?
 
     void Renderer2D::DrawSprite(const glm::mat4& transform,
         SpriteRendererComponent& src, int entityID)
@@ -387,9 +422,47 @@ namespace Wheatear {
         SubmitQuadVertices(transform, tintColor, uvs, texIndex, 1.0f, entityID);
     }
 
-    // �T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T
-    //  DrawLine / DrawRect
-    // �T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T
+    void Renderer2D::DrawTextGlyph(const glm::mat4& transform,
+        const Ref<Texture2D>& texture,
+        const glm::vec2& uvMin,
+        const glm::vec2& uvMax,
+        const glm::vec4& fillColor,
+        const glm::vec4& outlineColor,
+        float outlineWidth,
+        float edgeSoftness,
+        int entityID)
+    {
+        WT_PROFILE_FUNCTION();
+
+        if (s_Data.TextBatch->IsFull(4))
+            FlushAndReset();
+
+        const float texIndex = GetOrAllocTextureSlot(texture);
+        const glm::vec2 uvs[4] = {
+            { uvMin.x, uvMin.y },
+            { uvMax.x, uvMin.y },
+            { uvMax.x, uvMax.y },
+            { uvMin.x, uvMax.y },
+        };
+
+        for (int i = 0; i < 4; i++)
+        {
+            auto* v = s_Data.TextBatch->AllocVertex();
+            v->Position = transform * k_QuadPositions[i];
+            v->Color = fillColor;
+            v->TexCoord = uvs[i];
+            v->TexIndex = texIndex;
+            v->OutlineColor = outlineColor;
+            v->OutlineWidth = outlineWidth;
+            v->EdgeSoftness = edgeSoftness;
+            v->EntityID = entityID;
+        }
+        s_Data.TextBatch->AddIndexCount(6);
+        s_Data.Stats.QuadCount++;
+    }
+
+    // 鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺?    //  DrawLine / DrawRect
+    // 鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺?
 
     void Renderer2D::DrawLine(const glm::vec3& p0, const glm::vec3& p1,
         const glm::vec4& color, int entityID)
@@ -404,6 +477,17 @@ namespace Wheatear {
         v1->Position = p1; v1->Color = color; v1->EntityID = entityID;
 
         s_Data.LineBatch->AddVertexCount(2);
+    }
+
+    void Renderer2D::DrawPolyline(const std::vector<glm::vec3>& points,
+        const glm::vec4& color,
+        int entityID)
+    {
+        if (points.size() < 2)
+            return;
+
+        for (size_t i = 1; i < points.size(); ++i)
+            DrawLine(points[i - 1], points[i], color, entityID);
     }
 
     void Renderer2D::DrawRect(const glm::vec3& pos, const glm::vec2& size,
@@ -429,9 +513,9 @@ namespace Wheatear {
         DrawLine(corners[3], corners[0], color, entityID);
     }
 
-    // �T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T
-    //  �߿� / ͳ��
-    // �T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T
+    // 鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺?
+    //  绾垮 / 缁熻
+    // 鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺?
 
     float Renderer2D::GetLineWidth() { return s_Data.LineBatch->GetLineWidth(); }
     void  Renderer2D::SetLineWidth(float w) { s_Data.LineBatch->SetLineWidth(w); }

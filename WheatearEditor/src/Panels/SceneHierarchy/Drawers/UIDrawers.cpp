@@ -1,63 +1,341 @@
 #include "UIDrawers.h"
 #include "../ComponentDrawers.h"
+#include "Editor/EditorCanvasTools.h"
 #include <imgui/imgui.h>
 #include <glm/gtc/type_ptr.hpp>
+#include <algorithm>
 #include <filesystem>
 #include <cstring>
 #include "Wheatear/Core/AssetPath.h"
 #include "Wheatear/Scene/Components.h"
+#include "Wheatear/UI/UIWidgetLayout.h"
 
 namespace Wheatear {
 
-    // ©§©§ UICanvas ©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§
+    namespace {
+
+        static const char* AnchorLabel(UIAnchor anchor)
+        {
+            switch (anchor)
+            {
+            case UIAnchor::TopLeft: return "Top Left";
+            case UIAnchor::TopCenter: return "Top Center";
+            case UIAnchor::TopRight: return "Top Right";
+            case UIAnchor::MiddleLeft: return "Middle Left";
+            case UIAnchor::MiddleCenter: return "Middle Center";
+            case UIAnchor::MiddleRight: return "Middle Right";
+            case UIAnchor::BottomLeft: return "Bottom Left";
+            case UIAnchor::BottomCenter: return "Bottom Center";
+            case UIAnchor::BottomRight: return "Bottom Right";
+            }
+            return "Unknown";
+        }
+
+        static UIAnchor AnchorFromGridIndex(int index)
+        {
+            static const UIAnchor anchors[] = {
+                UIAnchor::TopLeft, UIAnchor::TopCenter, UIAnchor::TopRight,
+                UIAnchor::MiddleLeft, UIAnchor::MiddleCenter, UIAnchor::MiddleRight,
+                UIAnchor::BottomLeft, UIAnchor::BottomCenter, UIAnchor::BottomRight
+            };
+            return anchors[std::clamp(index, 0, 8)];
+        }
+
+        static int AnchorToGridIndex(UIAnchor anchor)
+        {
+            switch (anchor)
+            {
+            case UIAnchor::TopLeft: return 0;
+            case UIAnchor::TopCenter: return 1;
+            case UIAnchor::TopRight: return 2;
+            case UIAnchor::MiddleLeft: return 3;
+            case UIAnchor::MiddleCenter: return 4;
+            case UIAnchor::MiddleRight: return 5;
+            case UIAnchor::BottomLeft: return 6;
+            case UIAnchor::BottomCenter: return 7;
+            case UIAnchor::BottomRight: return 8;
+            }
+            return 4;
+        }
+
+        static void DrawAnchorGrid(UIAnchor& anchor)
+        {
+            ImGui::TextUnformatted("Anchor");
+            ImGui::SameLine();
+            ImGui::TextDisabled("%s", AnchorLabel(anchor));
+
+            ImGui::PushID("AnchorGrid");
+            const int selected = AnchorToGridIndex(anchor);
+            const ImVec2 buttonSize = { 28.0f, 24.0f };
+            for (int i = 0; i < 9; ++i)
+            {
+                if (i % 3 != 0)
+                    ImGui::SameLine(0.0f, 4.0f);
+
+                const bool active = i == selected;
+                if (active)
+                    ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.25f, 0.58f, 0.62f, 1.0f));
+
+                const char* label = i == 4 ? "C" : ".";
+                if (ImGui::Button(label, buttonSize))
+                    anchor = AnchorFromGridIndex(i);
+
+                if (active)
+                    ImGui::PopStyleColor();
+            }
+            ImGui::PopID();
+        }
+
+        static void DrawUIWidgetPresets(UIWidgetComponent& widget)
+        {
+            ImGui::TextUnformatted("Layout Presets");
+            if (ImGui::Button("Center Panel"))
+            {
+                widget.Anchor = UIAnchor::MiddleCenter;
+                widget.Position = { 0.5f, 0.5f };
+                widget.Size = { 0.42f, 0.28f };
+            }
+            ImGui::SameLine();
+            if (ImGui::Button("Full Screen"))
+            {
+                widget.Anchor = UIAnchor::TopLeft;
+                widget.Position = { 0.0f, 0.0f };
+                widget.Size = { 1.0f, 1.0f };
+            }
+
+            if (ImGui::Button("Top Bar"))
+            {
+                widget.Anchor = UIAnchor::TopLeft;
+                widget.Position = { 0.0f, 0.0f };
+                widget.Size = { 1.0f, 0.12f };
+            }
+            ImGui::SameLine();
+            if (ImGui::Button("Bottom Bar"))
+            {
+                widget.Anchor = UIAnchor::BottomLeft;
+                widget.Position = { 0.0f, 1.0f };
+                widget.Size = { 1.0f, 0.14f };
+            }
+
+            if (ImGui::Button("Left Panel"))
+            {
+                widget.Anchor = UIAnchor::TopLeft;
+                widget.Position = { 0.0f, 0.0f };
+                widget.Size = { 0.28f, 1.0f };
+            }
+            ImGui::SameLine();
+            if (ImGui::Button("Right Panel"))
+            {
+                widget.Anchor = UIAnchor::TopRight;
+                widget.Position = { 1.0f, 0.0f };
+                widget.Size = { 0.28f, 1.0f };
+            }
+        }
+
+        static void SectionLabel(const char* label)
+        {
+            ImGui::Separator();
+            ImGui::TextDisabled("%s", label);
+        }
+
+        static std::string EntityReferenceLabel(Scene* scene, entt::entity entity)
+        {
+            if (!scene || entity == entt::null)
+                return "<None>";
+
+            auto& registry = scene->GetRegistry();
+            if (!registry.valid(entity))
+                return "<Missing>";
+
+            std::string name = registry.all_of<TagComponent>(entity)
+                ? registry.get<TagComponent>(entity).Tag
+                : std::string("Entity");
+
+            if (registry.all_of<IDComponent>(entity))
+                name += "  [" + std::to_string(static_cast<uint64_t>(registry.get<IDComponent>(entity).ID)) + "]";
+            return name;
+        }
+
+        static void DrawUIReferenceCombo(Entity owner,
+            const char* label,
+            UUID& targetID,
+            std::string& fallbackTag,
+            bool requirePager,
+            bool allowSelf)
+        {
+            Scene* scene = owner.GetScene();
+            if (!scene)
+                return;
+
+            auto& registry = scene->GetRegistry();
+            UIWidgetLayout::Context layout(scene);
+            const entt::entity current = layout.ResolveReference(targetID, fallbackTag);
+            std::string preview = EntityReferenceLabel(scene, current);
+            if (current == entt::null && !fallbackTag.empty())
+                preview = "<Missing> " + fallbackTag;
+
+            if (ImGui::BeginCombo(label, preview.c_str()))
+            {
+                const bool noneSelected = current == entt::null
+                    && static_cast<uint64_t>(targetID) == 0
+                    && fallbackTag.empty();
+                if (ImGui::Selectable("<None>", noneSelected))
+                {
+                    targetID = 0;
+                    fallbackTag.clear();
+                }
+
+                for (auto candidate : registry.view<IDComponent, TagComponent, UIWidgetComponent>())
+                {
+                    if (!allowSelf && candidate == static_cast<entt::entity>(owner))
+                        continue;
+                    if (requirePager && !registry.all_of<UIPagerComponent>(candidate))
+                        continue;
+
+                    const auto& id = registry.get<IDComponent>(candidate).ID;
+                    const auto& tag = registry.get<TagComponent>(candidate).Tag;
+                    const bool selected = candidate == current;
+                    if (ImGui::Selectable(EntityReferenceLabel(scene, candidate).c_str(), selected))
+                    {
+                        targetID = id;
+                        fallbackTag = tag;
+                    }
+                    if (selected)
+                        ImGui::SetItemDefaultFocus();
+                }
+
+                ImGui::EndCombo();
+            }
+        }
+
+    } // namespace
+
+    // Èàπ‚Ç¨Èàπ‚Ç¨ UICanvas Èàπ‚Ç¨Èàπ‚Ç¨Èàπ‚Ç¨Èàπ‚Ç¨Èàπ‚Ç¨Èàπ‚Ç¨Èàπ‚Ç¨Èàπ‚Ç¨Èàπ‚Ç¨Èàπ‚Ç¨Èàπ‚Ç¨Èàπ‚Ç¨Èàπ‚Ç¨Èàπ‚Ç¨Èàπ‚Ç¨Èàπ‚Ç¨Èàπ‚Ç¨Èàπ‚Ç¨Èàπ‚Ç¨Èàπ‚Ç¨Èàπ‚Ç¨Èàπ‚Ç¨Èàπ‚Ç¨Èàπ‚Ç¨Èàπ‚Ç¨Èàπ‚Ç¨Èàπ‚Ç¨Èàπ‚Ç¨Èàπ‚Ç¨Èàπ‚Ç¨Èàπ‚Ç¨Èàπ‚Ç¨Èàπ‚Ç¨Èàπ‚Ç¨Èàπ‚Ç¨Èàπ‚Ç¨Èàπ‚Ç¨Èàπ‚Ç¨Èàπ‚Ç¨Èàπ‚Ç¨Èàπ‚Ç¨Èàπ‚Ç¨Èàπ‚Ç¨Èàπ‚Ç¨Èàπ‚Ç¨Èàπ‚Ç¨Èàπ‚Ç¨Èàπ‚Ç¨Èàπ‚Ç¨Èàπ‚Ç¨Èàπ‚Ç¨Èàπ‚Ç¨Èàπ‚Ç¨Èàπ‚Ç¨Èàπ‚Ç¨Èàπ‚Ç¨Èàπ‚Ç¨Èàπ‚Ç¨
     void DrawUICanvasComponent(Entity entity)
     {
-        DrawComponent<UICanvasComponent>("UI Canvas", entity, [](auto& canvas)
+        DrawComponent<UICanvasComponent>("UI Canvas", entity, [entity](auto& canvas)
             {
                 ImGui::Checkbox("Visible", &canvas.Visible);
                 ImGui::DragFloat("Ref Width", &canvas.ReferenceWidth, 1.0f, 1.0f, 7680.0f);
                 ImGui::DragFloat("Ref Height", &canvas.ReferenceHeight, 1.0f, 1.0f, 4320.0f);
+                EditorCanvasTools::DrawCanvasInspectorTools(entity);
             });
     }
 
-    // ©§©§ UIWidget ©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§
+    // Èàπ‚Ç¨Èàπ‚Ç¨ UIWidget Èàπ‚Ç¨Èàπ‚Ç¨Èàπ‚Ç¨Èàπ‚Ç¨Èàπ‚Ç¨Èàπ‚Ç¨Èàπ‚Ç¨Èàπ‚Ç¨Èàπ‚Ç¨Èàπ‚Ç¨Èàπ‚Ç¨Èàπ‚Ç¨Èàπ‚Ç¨Èàπ‚Ç¨Èàπ‚Ç¨Èàπ‚Ç¨Èàπ‚Ç¨Èàπ‚Ç¨Èàπ‚Ç¨Èàπ‚Ç¨Èàπ‚Ç¨Èàπ‚Ç¨Èàπ‚Ç¨Èàπ‚Ç¨Èàπ‚Ç¨Èàπ‚Ç¨Èàπ‚Ç¨Èàπ‚Ç¨Èàπ‚Ç¨Èàπ‚Ç¨Èàπ‚Ç¨Èàπ‚Ç¨Èàπ‚Ç¨Èàπ‚Ç¨Èàπ‚Ç¨Èàπ‚Ç¨Èàπ‚Ç¨Èàπ‚Ç¨Èàπ‚Ç¨Èàπ‚Ç¨Èàπ‚Ç¨Èàπ‚Ç¨Èàπ‚Ç¨Èàπ‚Ç¨Èàπ‚Ç¨Èàπ‚Ç¨Èàπ‚Ç¨Èàπ‚Ç¨Èàπ‚Ç¨Èàπ‚Ç¨Èàπ‚Ç¨Èàπ‚Ç¨Èàπ‚Ç¨Èàπ‚Ç¨Èàπ‚Ç¨Èàπ‚Ç¨Èàπ‚Ç¨Èàπ‚Ç¨
     void DrawUIWidgetComponent(Entity entity)
     {
-        DrawComponent<UIWidgetComponent>("UI Widget", entity, [](auto& widget)
+        DrawComponent<UIWidgetComponent>("UI Widget", entity, [entity](auto& widget)
             {
                 ImGui::Checkbox("Visible", &widget.Visible);
 
-                ImGui::DragFloat2("Position", glm::value_ptr(widget.Position), 0.001f, 0.0f, 1.0f);
-                ImGui::DragFloat2("Size", glm::value_ptr(widget.Size), 0.001f, 0.0f, 1.0f);
-                ImGui::DragFloat("Rotation", &widget.Rotation, 0.5f);
-                ImGui::DragInt("Sort Order", &widget.SortOrder);
+                SectionLabel("Rect");
+                ImGui::TextDisabled("Normalized screen-space values. Drag the widget in Viewport for rough layout.");
+                ImGui::DragFloat2("Position", glm::value_ptr(widget.Position), 0.001f, -2.0f, 2.0f, "%.3f");
+                ImGui::DragFloat2("Size", glm::value_ptr(widget.Size), 0.001f, 0.001f, 2.0f, "%.3f");
+                widget.Size.x = std::max(widget.Size.x, 0.001f);
+                widget.Size.y = std::max(widget.Size.y, 0.001f);
 
-                static const char* anchorLabels[] = {
-                    "Top Left",    "Top Center",    "Top Right",
-                    "Middle Left", "Middle Center", "Middle Right",
-                    "Bottom Left", "Bottom Center", "Bottom Right"
-                };
-                int anchorIndex = (int)widget.Anchor;
-                if (ImGui::Combo("Anchor", &anchorIndex, anchorLabels, 9))
-                    widget.Anchor = (UIAnchor)anchorIndex;
+                if (ImGui::Button("Nudge Left")) widget.Position.x -= 0.001f;
+                ImGui::SameLine();
+                if (ImGui::Button("Right")) widget.Position.x += 0.001f;
+                ImGui::SameLine();
+                if (ImGui::Button("Up")) widget.Position.y -= 0.001f;
+                ImGui::SameLine();
+                if (ImGui::Button("Down")) widget.Position.y += 0.001f;
+
+                ImGui::DragFloat("Rotation", &widget.Rotation, 0.5f);
+
+                SectionLabel("Layering");
+                ImGui::DragInt("Sort Order", &widget.SortOrder);
+                if (ImGui::Button("Send Back")) widget.SortOrder -= 10;
+                ImGui::SameLine();
+                if (ImGui::Button("Bring Front")) widget.SortOrder += 10;
+
+                SectionLabel("Hierarchy");
+                DrawUIReferenceCombo(entity, "Parent", widget.ParentEntity, widget.ParentTag, false, false);
+
+                char parentBuffer[128];
+                memset(parentBuffer, 0, sizeof(parentBuffer));
+                strncpy_s(parentBuffer, sizeof(parentBuffer), widget.ParentTag.c_str(), _TRUNCATE);
+                if (ImGui::InputText("Parent Tag", parentBuffer, sizeof(parentBuffer)))
+                {
+                    widget.ParentTag = parentBuffer;
+                    widget.ParentEntity = 0;
+                }
+                ImGui::SameLine();
+                if (ImGui::Button("Clear##ParentTag"))
+                {
+                    widget.ParentEntity = 0;
+                    widget.ParentTag.clear();
+                }
+
+                DrawAnchorGrid(widget.Anchor);
+
+                SectionLabel("Presets");
+                DrawUIWidgetPresets(widget);
             });
     }
 
-    // ©§©§ UIImage ©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§
+    // -- UIAnimator -------------------------------------------------------
+    void DrawUIAnimatorComponent(Entity entity)
+    {
+        DrawComponent<UIAnimatorComponent>("UI Animator", entity, [](auto& animator)
+            {
+                static const char* presets[] = {
+                    "fade_in",
+                    "slide_fade_in",
+                    "result_pop",
+                    "pulse",
+                    "hover_pulse"
+                };
+
+                int currentPreset = 0;
+                for (int i = 0; i < IM_ARRAYSIZE(presets); ++i)
+                {
+                    if (animator.Preset == presets[i])
+                    {
+                        currentPreset = i;
+                        break;
+                    }
+                }
+                if (ImGui::Combo("Preset", &currentPreset, presets, IM_ARRAYSIZE(presets)))
+                    animator.Preset = presets[currentPreset];
+
+                ImGui::Checkbox("Play On Start", &animator.PlayOnStart);
+                ImGui::Checkbox("Loop", &animator.Loop);
+                ImGui::DragFloat("Delay", &animator.Delay, 0.01f, 0.0f, 10.0f);
+                ImGui::DragFloat("Duration", &animator.Duration, 0.01f, 0.01f, 10.0f);
+                ImGui::DragFloat("Amplitude", &animator.Amplitude, 0.001f, 0.0f, 0.5f);
+                ImGui::DragFloat("Speed", &animator.Speed, 0.01f, 0.0f, 10.0f);
+                ImGui::DragFloat2("From Offset", glm::value_ptr(animator.FromOffset), 0.001f, -1.0f, 1.0f);
+
+                ImGui::PushItemFlag(ImGuiItemFlags_Disabled, true);
+                ImGui::PushStyleVar(ImGuiStyleVar_Alpha, ImGui::GetStyle().Alpha * 0.5f);
+                bool initialized = animator.RuntimeInitialized;
+                float runtimeTime = animator.RuntimeTime;
+                ImGui::Checkbox("Runtime Initialized", &initialized);
+                ImGui::DragFloat("Runtime Time", &runtimeTime, 0.01f);
+                ImGui::PopStyleVar();
+                ImGui::PopItemFlag();
+            });
+    }
+
+    // Èàπ‚Ç¨Èàπ‚Ç¨ UIImage Èàπ‚Ç¨Èàπ‚Ç¨Èàπ‚Ç¨Èàπ‚Ç¨Èàπ‚Ç¨Èàπ‚Ç¨Èàπ‚Ç¨Èàπ‚Ç¨Èàπ‚Ç¨Èàπ‚Ç¨Èàπ‚Ç¨Èàπ‚Ç¨Èàπ‚Ç¨Èàπ‚Ç¨Èàπ‚Ç¨Èàπ‚Ç¨Èàπ‚Ç¨Èàπ‚Ç¨Èàπ‚Ç¨Èàπ‚Ç¨Èàπ‚Ç¨Èàπ‚Ç¨Èàπ‚Ç¨Èàπ‚Ç¨Èàπ‚Ç¨Èàπ‚Ç¨Èàπ‚Ç¨Èàπ‚Ç¨Èàπ‚Ç¨Èàπ‚Ç¨Èàπ‚Ç¨Èàπ‚Ç¨Èàπ‚Ç¨Èàπ‚Ç¨Èàπ‚Ç¨Èàπ‚Ç¨Èàπ‚Ç¨Èàπ‚Ç¨Èàπ‚Ç¨Èàπ‚Ç¨Èàπ‚Ç¨Èàπ‚Ç¨Èàπ‚Ç¨Èàπ‚Ç¨Èàπ‚Ç¨Èàπ‚Ç¨Èàπ‚Ç¨Èàπ‚Ç¨Èàπ‚Ç¨Èàπ‚Ç¨Èàπ‚Ç¨Èàπ‚Ç¨Èàπ‚Ç¨Èàπ‚Ç¨Èàπ‚Ç¨Èàπ‚Ç¨Èàπ‚Ç¨Èàπ‚Ç¨Èàπ‚Ç¨
     void DrawUIImageComponent(Entity entity)
     {
         DrawComponent<UIImageComponent>("UI Image", entity, [](auto& image)
             {
                 ImGui::ColorEdit4("Color", glm::value_ptr(image.Color));
 
-                // Õº±Í‘§¿¿ + Õœ∑≈«¯”Ú£®”Î SpriteRenderer ±£≥÷“ª÷¬£©
+                // Èç•ÁÇ¨Áà£Ê£∞ÂãÆÓùç + Èé∑Ê†®ÊñÅÈçñÂìÑÁÖôÈîõÂ†úÁ¨å SpriteRenderer Ê∑áÊøáÂØîÊ∂ì‚Ç¨Èë∑ËææÁ¥ö
                 const ImVec2      buttonSize = { 80.0f, 80.0f };
                 const ImTextureID textureID = image.Texture
-                    ? reinterpret_cast<ImTextureID>(static_cast<uintptr_t>(image.Texture->GetRendererID()))
-                    : reinterpret_cast<ImTextureID>(0);
+                    ? static_cast<ImTextureID>(static_cast<uintptr_t>(image.Texture->GetRendererID()))
+                    : static_cast<ImTextureID>(0);
 
                 ImGui::PushID(&image);
-                ImGui::ImageButton(textureID, buttonSize);
+                ImGui::ImageButton("##UIImageTexture", textureID, buttonSize);
 
                 if (ImGui::BeginDragDropTarget())
                 {
@@ -95,13 +373,13 @@ namespace Wheatear {
             });
     }
 
-    // ©§©§ UIText ©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§
+    // Èàπ‚Ç¨Èàπ‚Ç¨ UIText Èàπ‚Ç¨Èàπ‚Ç¨Èàπ‚Ç¨Èàπ‚Ç¨Èàπ‚Ç¨Èàπ‚Ç¨Èàπ‚Ç¨Èàπ‚Ç¨Èàπ‚Ç¨Èàπ‚Ç¨Èàπ‚Ç¨Èàπ‚Ç¨Èàπ‚Ç¨Èàπ‚Ç¨Èàπ‚Ç¨Èàπ‚Ç¨Èàπ‚Ç¨Èàπ‚Ç¨Èàπ‚Ç¨Èàπ‚Ç¨Èàπ‚Ç¨Èàπ‚Ç¨Èàπ‚Ç¨Èàπ‚Ç¨Èàπ‚Ç¨Èàπ‚Ç¨Èàπ‚Ç¨Èàπ‚Ç¨Èàπ‚Ç¨Èàπ‚Ç¨Èàπ‚Ç¨Èàπ‚Ç¨Èàπ‚Ç¨Èàπ‚Ç¨Èàπ‚Ç¨Èàπ‚Ç¨Èàπ‚Ç¨Èàπ‚Ç¨Èàπ‚Ç¨Èàπ‚Ç¨Èàπ‚Ç¨Èàπ‚Ç¨Èàπ‚Ç¨Èàπ‚Ç¨Èàπ‚Ç¨Èàπ‚Ç¨Èàπ‚Ç¨Èàπ‚Ç¨Èàπ‚Ç¨Èàπ‚Ç¨Èàπ‚Ç¨Èàπ‚Ç¨Èàπ‚Ç¨Èàπ‚Ç¨Èàπ‚Ç¨Èàπ‚Ç¨Èàπ‚Ç¨Èàπ‚Ç¨Èàπ‚Ç¨Èàπ‚Ç¨
     void DrawUITextComponent(Entity entity)
     {
         DrawComponent<UITextComponent>("UI Text", entity, [entity](auto& text)
             {
-                // BUG FIX: ‘≠¿¥”√ static buffer£¨∂‡∏ˆ UIText π≤œÌª∫≥Â£¨
-                // µº÷¬ ‰»ÎΩπµ„ªÏ¬“°£∏ƒŒ™æ÷≤ø buffer + entity PushID°£
+                // BUG FIX: ÈçòÁÜ∏ÊΩµÈê¢?static bufferÈîõÂ±ΩÓòøÊ∂ì?UIText ÈçèÂèòÈü©ÁºÇÊí≥ÂïøÈîõ?
+                // ÁÄµËâ∞ÂößÊùàÊí≥ÂèÜÈêíÔ∏æÂÅ£Â®£ËúÇË¥°ÈäÜÂÇõÊïºÊ∂ìÂìÑÁú¨ÈñÆ?buffer + entity PushIDÈäÜ?
                 char buffer[1024];
                 memset(buffer, 0, sizeof(buffer));
                 strncpy_s(buffer, sizeof(buffer), text.Text.c_str(), _TRUNCATE);
@@ -114,6 +392,10 @@ namespace Wheatear {
 
                 ImGui::ColorEdit4("Color", glm::value_ptr(text.Color));
                 ImGui::DragFloat("Font Size", &text.FontSize, 0.5f, 1.0f, 256.0f);
+                ImGui::ColorEdit4("Shadow Color", glm::value_ptr(text.ShadowColor));
+                ImGui::DragFloat2("Shadow Offset px", glm::value_ptr(text.ShadowOffset), 0.25f, -32.0f, 32.0f);
+                ImGui::ColorEdit4("Outline Color", glm::value_ptr(text.OutlineColor));
+                ImGui::DragFloat("Outline px", &text.OutlineThickness, 0.1f, 0.0f, 8.0f);
 
                 char fontBuffer[260];
                 memset(fontBuffer, 0, sizeof(fontBuffer));
@@ -136,7 +418,7 @@ namespace Wheatear {
             });
     }
 
-    // ©§©§ UIButton ©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§
+    // Èàπ‚Ç¨Èàπ‚Ç¨ UIButton Èàπ‚Ç¨Èàπ‚Ç¨Èàπ‚Ç¨Èàπ‚Ç¨Èàπ‚Ç¨Èàπ‚Ç¨Èàπ‚Ç¨Èàπ‚Ç¨Èàπ‚Ç¨Èàπ‚Ç¨Èàπ‚Ç¨Èàπ‚Ç¨Èàπ‚Ç¨Èàπ‚Ç¨Èàπ‚Ç¨Èàπ‚Ç¨Èàπ‚Ç¨Èàπ‚Ç¨Èàπ‚Ç¨Èàπ‚Ç¨Èàπ‚Ç¨Èàπ‚Ç¨Èàπ‚Ç¨Èàπ‚Ç¨Èàπ‚Ç¨Èàπ‚Ç¨Èàπ‚Ç¨Èàπ‚Ç¨Èàπ‚Ç¨Èàπ‚Ç¨Èàπ‚Ç¨Èàπ‚Ç¨Èàπ‚Ç¨Èàπ‚Ç¨Èàπ‚Ç¨Èàπ‚Ç¨Èàπ‚Ç¨Èàπ‚Ç¨Èàπ‚Ç¨Èàπ‚Ç¨Èàπ‚Ç¨Èàπ‚Ç¨Èàπ‚Ç¨Èàπ‚Ç¨Èàπ‚Ç¨Èàπ‚Ç¨Èàπ‚Ç¨Èàπ‚Ç¨Èàπ‚Ç¨Èàπ‚Ç¨Èàπ‚Ç¨Èàπ‚Ç¨Èàπ‚Ç¨Èàπ‚Ç¨Èàπ‚Ç¨Èàπ‚Ç¨Èàπ‚Ç¨Èàπ‚Ç¨
     void DrawUIButtonComponent(Entity entity)
     {
         DrawComponent<UIButtonComponent>("UI Button", entity, [entity](auto& button)
@@ -145,7 +427,7 @@ namespace Wheatear {
                 ImGui::ColorEdit4("Hover Color", glm::value_ptr(button.HoverColor));
                 ImGui::ColorEdit4("Pressed Color", glm::value_ptr(button.PressedColor));
 
-                // BUG FIX: Õ¨…œ£¨∏ƒŒ™æ÷≤ø buffer + entity PushID
+                // BUG FIX: ÈçöÂ±ºÁ¨ÇÈîõÂ±æÊïºÊ∂ìÂìÑÁú¨ÈñÆ?buffer + entity PushID
                 char funcBuffer[64];
                 memset(funcBuffer, 0, sizeof(funcBuffer));
                 strncpy_s(funcBuffer, sizeof(funcBuffer), button.OnClickFunction.c_str(), _TRUNCATE);
@@ -155,7 +437,7 @@ namespace Wheatear {
                     button.OnClickFunction = funcBuffer;
                 ImGui::PopID();
 
-                // ÷ª∂¡‘À–– ±◊¥Ã¨
+                // ÈçôÓÅáÓá∞Êù©ÊÑØÓîëÈèÉÂâÅÂß∏Èé¨?
                 ImGui::PushItemFlag(ImGuiItemFlags_Disabled, true);
                 ImGui::PushStyleVar(ImGuiStyleVar_Alpha, ImGui::GetStyle().Alpha * 0.5f);
                 bool hovered = button.IsHovered;
@@ -168,7 +450,7 @@ namespace Wheatear {
             });
     }
 
-    // ©§©§ UIProgressBar ©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§
+    // Èàπ‚Ç¨Èàπ‚Ç¨ UIProgressBar Èàπ‚Ç¨Èàπ‚Ç¨Èàπ‚Ç¨Èàπ‚Ç¨Èàπ‚Ç¨Èàπ‚Ç¨Èàπ‚Ç¨Èàπ‚Ç¨Èàπ‚Ç¨Èàπ‚Ç¨Èàπ‚Ç¨Èàπ‚Ç¨Èàπ‚Ç¨Èàπ‚Ç¨Èàπ‚Ç¨Èàπ‚Ç¨Èàπ‚Ç¨Èàπ‚Ç¨Èàπ‚Ç¨Èàπ‚Ç¨Èàπ‚Ç¨Èàπ‚Ç¨Èàπ‚Ç¨Èàπ‚Ç¨Èàπ‚Ç¨Èàπ‚Ç¨Èàπ‚Ç¨Èàπ‚Ç¨Èàπ‚Ç¨Èàπ‚Ç¨Èàπ‚Ç¨Èàπ‚Ç¨Èàπ‚Ç¨Èàπ‚Ç¨Èàπ‚Ç¨Èàπ‚Ç¨Èàπ‚Ç¨Èàπ‚Ç¨Èàπ‚Ç¨Èàπ‚Ç¨Èàπ‚Ç¨Èàπ‚Ç¨Èàπ‚Ç¨Èàπ‚Ç¨Èàπ‚Ç¨Èàπ‚Ç¨Èàπ‚Ç¨Èàπ‚Ç¨Èàπ‚Ç¨Èàπ‚Ç¨Èàπ‚Ç¨Èàπ‚Ç¨Èàπ‚Ç¨
     void DrawUIProgressBarComponent(Entity entity)
     {
         DrawComponent<UIProgressBarComponent>("UI Progress Bar", entity, [](auto& bar)
@@ -176,7 +458,7 @@ namespace Wheatear {
                 ImGui::DragFloat("Value", &bar.Value, 0.1f, 0.0f, bar.MaxValue);
                 ImGui::DragFloat("Max Value", &bar.MaxValue, 0.1f, 0.1f, 99999.0f);
 
-                // ‘§¿¿Ω¯∂»Ãı
+                // Ê£∞ÂãÆÓùçÊù©Ê∂òÂÆ≥Èèâ?
                 float normalized = bar.GetNormalized();
                 char overlay[32];
                 sprintf_s(overlay, "%.0f / %.0f", bar.Value, bar.MaxValue);
@@ -195,6 +477,15 @@ namespace Wheatear {
                 ImGui::ColorEdit4("Background", glm::value_ptr(panel.BackgroundColor));
                 ImGui::ColorEdit4("Border", glm::value_ptr(panel.BorderColor));
                 ImGui::DragFloat("Border Thickness", &panel.BorderThickness, 0.1f, 0.0f, 12.0f);
+                ImGui::Checkbox("Clip Children", &panel.ClipChildren);
+                ImGui::Separator();
+                ImGui::TextDisabled("Drag");
+                ImGui::Checkbox("Draggable", &panel.Draggable);
+                ImGui::BeginDisabled(!panel.Draggable);
+                ImGui::Checkbox("Constrain To Parent", &panel.ConstrainDragToParent);
+                ImGui::DragFloat("Handle Height", &panel.DragHandleHeight, 0.01f, 0.0f, 1.0f);
+                ImGui::TextDisabled("0 = drag from the whole panel; otherwise top part of panel.");
+                ImGui::EndDisabled();
             });
     }
 
@@ -232,6 +523,227 @@ namespace Wheatear {
                 ImGui::Checkbox("Is Dragging", &dragging);
                 ImGui::PopStyleVar();
                 ImGui::PopItemFlag();
+            });
+    }
+
+    // -- UIPager ----------------------------------------------------------
+    void DrawUIPagerComponent(Entity entity)
+    {
+        DrawComponent<UIPagerComponent>("UI Pager", entity, [entity](auto& pager)
+            {
+                pager.PageCount = std::max(pager.PageCount, 1);
+                pager.CurrentPage = std::clamp(pager.CurrentPage, 1, pager.PageCount);
+
+                ImGui::DragInt("Current Page", &pager.CurrentPage, 1.0f, 1, pager.PageCount);
+                ImGui::DragInt("Page Count", &pager.PageCount, 1.0f, 1, 999);
+                if (pager.PageCount < 1)
+                    pager.PageCount = 1;
+                pager.CurrentPage = std::clamp(pager.CurrentPage, 1, pager.PageCount);
+                ImGui::Checkbox("Wrap", &pager.Wrap);
+
+                const std::string tag = entity.HasComponent<TagComponent>()
+                    ? entity.GetComponent<TagComponent>().Tag
+                    : std::string{};
+                ImGui::Separator();
+                ImGui::TextDisabled("Button Commands");
+                ImGui::TextDisabled("Next: ui:pager:%s:next", tag.c_str());
+                ImGui::TextDisabled("Prev: ui:pager:%s:prev", tag.c_str());
+                ImGui::TextDisabled("Page: ui:pager:%s:page:<number>", tag.c_str());
+            });
+    }
+
+    // -- UIScrollView -----------------------------------------------------
+    void DrawUIScrollViewComponent(Entity entity)
+    {
+        DrawComponent<UIScrollViewComponent>("UI Scroll View", entity, [entity](auto& scrollView) mutable
+            {
+                scrollView.ClampOffset();
+
+                ImGui::DragFloat("Offset Y", &scrollView.OffsetY, 0.005f, 0.0f, std::max(scrollView.GetMaxOffset(), 0.0f), "%.3f");
+                ImGui::DragFloat("Content Height", &scrollView.ContentHeight, 0.01f, 1.0f, 20.0f, "%.3f");
+                ImGui::DragFloat("Wheel Step", &scrollView.WheelStep, 0.005f, 0.001f, 1.0f, "%.3f");
+                ImGui::DragFloat("Scrollbar Width", &scrollView.ScrollbarWidth, 0.001f, 0.004f, 0.10f, "%.3f");
+                ImGui::Checkbox("Enable Wheel", &scrollView.EnableWheel);
+                ImGui::Checkbox("Show Scrollbar", &scrollView.ShowScrollbar);
+                ImGui::Checkbox("Drag Scrollbar", &scrollView.DragScrollbar);
+                ImGui::Checkbox("Clamp To Content", &scrollView.ClampToContent);
+                scrollView.ClampOffset();
+
+                ImGui::ProgressBar(scrollView.GetNormalized(), ImVec2(-1.0f, 0.0f), "Scroll");
+                ImGui::TextDisabled("Use with a UI Panel that has Clip Children enabled.");
+
+                if (entity.HasComponent<UIPanelComponent>())
+                {
+                    auto& panel = entity.GetComponent<UIPanelComponent>();
+                    if (ImGui::SmallButton(panel.ClipChildren ? "Clip Children Enabled" : "Enable Clip Children"))
+                        panel.ClipChildren = true;
+                }
+
+                ImGui::PushItemFlag(ImGuiItemFlags_Disabled, true);
+                ImGui::PushStyleVar(ImGuiStyleVar_Alpha, ImGui::GetStyle().Alpha * 0.5f);
+                bool hovered = scrollView.RuntimeThumbHovered;
+                bool dragging = scrollView.RuntimeThumbDragging;
+                ImGui::Checkbox("Thumb Hovered", &hovered);
+                ImGui::SameLine();
+                ImGui::Checkbox("Thumb Dragging", &dragging);
+                ImGui::PopStyleVar();
+                ImGui::PopItemFlag();
+            });
+    }
+
+    // -- UIPath -----------------------------------------------------------
+    void DrawUIPathComponent(Entity entity)
+    {
+        DrawComponent<UIPathComponent>("UI Path", entity, [entity](auto& path) mutable
+            {
+                static const char* modes[] = { "Polyline", "Quadratic Bezier", "Cubic Bezier" };
+                int mode = static_cast<int>(path.Mode);
+                if (ImGui::Combo("Mode", &mode, modes, IM_ARRAYSIZE(modes)))
+                    path.Mode = static_cast<UIPathMode>(std::clamp(mode, 0, 2));
+
+                ImGui::DragFloat("Thickness", &path.Thickness, 0.0005f, 0.001f, 0.05f, "%.4f");
+                ImGui::DragInt("Segments", &path.Segments, 1.0f, 2, 96);
+                ImGui::Checkbox("Closed", &path.Closed);
+                ImGui::Checkbox("Draw Glow", &path.DrawGlow);
+                ImGui::DragFloat("Glow Multiplier", &path.GlowThicknessMultiplier, 0.05f, 1.0f, 8.0f, "%.2f");
+                ImGui::ColorEdit4("Color", glm::value_ptr(path.Color));
+                ImGui::ColorEdit4("Glow Color", glm::value_ptr(path.GlowColor));
+
+                ImGui::Separator();
+                if (ImGui::SmallButton("Arc Preset"))
+                {
+                    path.Mode = UIPathMode::QuadraticBezier;
+                    path.Points = {
+                        { 0.10f, 0.62f },
+                        { 0.50f, 0.18f },
+                        { 0.90f, 0.62f }
+                    };
+                    path.Closed = false;
+                }
+                ImGui::SameLine();
+                if (ImGui::SmallButton("Circle-ish Preset"))
+                {
+                    path.Mode = UIPathMode::CubicBezier;
+                    path.Points = {
+                        { 0.50f, 0.08f },
+                        { 0.92f, 0.08f },
+                        { 0.92f, 0.92f },
+                        { 0.50f, 0.92f },
+                        { 0.08f, 0.92f },
+                        { 0.08f, 0.08f },
+                        { 0.50f, 0.08f }
+                    };
+                    path.Closed = false;
+                }
+
+                if (ImGui::TreeNode("Points"))
+                {
+                    for (size_t i = 0; i < path.Points.size(); ++i)
+                    {
+                        ImGui::PushID(static_cast<int>(i));
+                        ImGui::DragFloat2("##point", glm::value_ptr(path.Points[i]), 0.005f, -2.0f, 3.0f, "%.3f");
+                        ImGui::SameLine();
+                        if (ImGui::SmallButton("Remove") && path.Points.size() > 2)
+                        {
+                            path.Points.erase(path.Points.begin() + static_cast<std::ptrdiff_t>(i));
+                            ImGui::PopID();
+                            break;
+                        }
+                        ImGui::PopID();
+                    }
+
+                    if (ImGui::Button("Add Point"))
+                        path.Points.push_back(path.Points.empty() ? glm::vec2(0.5f) : path.Points.back());
+                    ImGui::TreePop();
+                }
+
+                ImGui::TextDisabled("Points are local to this widget rectangle. Use Panel Clip Children to mask overflow.");
+            });
+    }
+
+    // -- UISkillTreeView --------------------------------------------------
+    void DrawUISkillTreeViewComponent(Entity entity)
+    {
+        DrawComponent<UISkillTreeViewComponent>("UI Skill Tree View", entity, [entity](auto& tree) mutable
+            {
+                tree.ClampPan();
+
+                ImGui::DragFloat2("Pan", glm::value_ptr(tree.Pan), 0.005f, -2.0f, 2.0f, "%.3f");
+                ImGui::DragFloat2("Min Pan", glm::value_ptr(tree.MinPan), 0.005f, -2.0f, 2.0f, "%.3f");
+                ImGui::DragFloat2("Max Pan", glm::value_ptr(tree.MaxPan), 0.005f, -2.0f, 2.0f, "%.3f");
+                ImGui::DragFloat2("Node Size", glm::value_ptr(tree.NodeSize), 0.001f, 0.01f, 0.30f, "%.3f");
+                ImGui::DragFloat("Node Edge Inset", &tree.NodeEdgeInset, 0.001f, 0.0f, 0.20f, "%.3f");
+                ImGui::DragFloat("Line Thickness", &tree.LineThickness, 0.0005f, 0.001f, 0.05f, "%.4f");
+                ImGui::DragFloat("Curve Amount", &tree.CurveAmount, 0.001f, -0.30f, 0.30f, "%.3f");
+                ImGui::DragFloat("Virtualization Margin", &tree.VirtualizationMargin, 0.005f, 0.0f, 0.50f, "%.3f");
+                ImGui::DragInt("Line Segments", &tree.LineSegments, 1.0f, 2, 96);
+                ImGui::DragInt("Background Rings", &tree.BackgroundRingCount, 1.0f, 0, 8);
+                ImGui::Checkbox("Draw Line Glow", &tree.DrawLineGlow);
+
+                char commandBuffer[128];
+                memset(commandBuffer, 0, sizeof(commandBuffer));
+                strncpy_s(commandBuffer, sizeof(commandBuffer), tree.CommandPrefix.c_str(), _TRUNCATE);
+                ImGui::PushID((int)(uint32_t)entity);
+                if (ImGui::InputText("Command Prefix", commandBuffer, sizeof(commandBuffer)))
+                    tree.CommandPrefix = commandBuffer;
+                ImGui::PopID();
+
+                if (ImGui::TreeNode("Colors"))
+                {
+                    ImGui::ColorEdit4("Background", glm::value_ptr(tree.BackgroundColor));
+                    ImGui::ColorEdit4("Grid", glm::value_ptr(tree.GridColor));
+                    ImGui::ColorEdit4("Line", glm::value_ptr(tree.LineColor));
+                    ImGui::ColorEdit4("Active Line", glm::value_ptr(tree.ActiveLineColor));
+                    ImGui::ColorEdit4("Line Glow", glm::value_ptr(tree.LineGlowColor));
+                    ImGui::ColorEdit4("Node", glm::value_ptr(tree.NodeColor));
+                    ImGui::ColorEdit4("Locked Node", glm::value_ptr(tree.LockedNodeColor));
+                    ImGui::ColorEdit4("Hover Node", glm::value_ptr(tree.HoverNodeColor));
+                    ImGui::ColorEdit4("Selected Node", glm::value_ptr(tree.SelectedNodeColor));
+                    ImGui::ColorEdit4("Core Node", glm::value_ptr(tree.CoreNodeColor));
+                    ImGui::ColorEdit4("Lock Overlay", glm::value_ptr(tree.LockColor));
+                    ImGui::TreePop();
+                }
+
+                ImGui::Separator();
+                ImGui::Text("Nodes: %d", static_cast<int>(tree.Nodes.size()));
+                ImGui::TextDisabled("Selected: %s", tree.SelectedNodeId.empty() ? "-" : tree.SelectedNodeId.c_str());
+                ImGui::TextDisabled("Hovered: %s", tree.RuntimeHoveredNodeId.empty() ? "-" : tree.RuntimeHoveredNodeId.c_str());
+
+                ImGui::PushItemFlag(ImGuiItemFlags_Disabled, true);
+                ImGui::PushStyleVar(ImGuiStyleVar_Alpha, ImGui::GetStyle().Alpha * 0.5f);
+                bool dragging = tree.RuntimeDragging;
+                ImGui::Checkbox("Dragging", &dragging);
+                ImGui::PopStyleVar();
+                ImGui::PopItemFlag();
+
+                tree.ClampPan();
+            });
+    }
+
+    // -- UIPageItem -------------------------------------------------------
+    void DrawUIPageItemComponent(Entity entity)
+    {
+        DrawComponent<UIPageItemComponent>("UI Page Item", entity, [entity](auto& pageItem)
+            {
+                DrawUIReferenceCombo(entity, "Pager", pageItem.PagerEntity, pageItem.PagerTag, true, false);
+
+                char pagerBuffer[128];
+                memset(pagerBuffer, 0, sizeof(pagerBuffer));
+                strncpy_s(pagerBuffer, sizeof(pagerBuffer), pageItem.PagerTag.c_str(), _TRUNCATE);
+
+                ImGui::PushID((int)(uint32_t)entity);
+                if (ImGui::InputText("Pager Tag", pagerBuffer, sizeof(pagerBuffer)))
+                {
+                    pageItem.PagerTag = pagerBuffer;
+                    pageItem.PagerEntity = 0;
+                }
+                ImGui::PopID();
+
+                ImGui::DragInt("Page", &pageItem.Page, 1.0f, 1, 999);
+                if (pageItem.Page < 1)
+                    pageItem.Page = 1;
+
+                ImGui::TextDisabled("This widget is visible only while the pager is on this page.");
             });
     }
 

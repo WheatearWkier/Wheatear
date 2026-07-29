@@ -1,5 +1,7 @@
 #include "wtpch.h"
 #include "ScriptEngine.h"
+
+#if defined(WT_ENABLE_CSHARP_SCRIPTING)
 #include "ScriptGlue.h"
 
 #include "Wheatear/Core/AssetPath.h"
@@ -20,23 +22,23 @@
 
 namespace Wheatear {
 
-    // ¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T
-    //  ÄÚ²¿Êı¾İ½á¹¹
-    // ¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T
+    // â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+    //  å†…éƒ¨æ•°æ®ç»“æ„
+    // â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
     struct ScriptEngineData
     {
-        // ©¤©¤ Mono ÔËĞĞÊ± ©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤
+        // â”€â”€ Mono è¿è¡Œæ—¶ â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
         MonoDomain* RootDomain = nullptr;
         MonoDomain* AppDomain = nullptr;
         MonoAssembly* CoreAssembly = nullptr;
         MonoImage* CoreAssemblyImage = nullptr;
 
-        // ©¤©¤ ½Å±¾Àà×¢²á±í ©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤
-        // key = ÍêÕûÀàÃû£¨Èç "MyGame.PlayerController"£©
+        // â”€â”€ è„šæœ¬ç±»æ³¨å†Œè¡¨ â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+        // key = å®Œæ•´ç±»åï¼ˆå¦‚ "MyGame.PlayerController"ï¼‰
         std::unordered_map<std::string, Ref<ScriptClass>> EntityClasses;
 
-        // ©¤©¤ ÔËĞĞÊ±×´Ì¬ ©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤
+        // â”€â”€ è¿è¡Œæ—¶çŠ¶æ€ â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
         Scene* SceneContext = nullptr;
         std::unordered_map<UUID, Ref<ScriptInstance>> EntityInstances;
         float LastDeltaTime = 0.0f;
@@ -46,12 +48,12 @@ namespace Wheatear {
 
     static ScriptEngineData* s_Data = nullptr;
 
-    // ±à¼­Ì¬×Ö¶ÎÔİ´æ±í£¨ÔËĞĞÊ±Ò²±£Áô£¬Stop ºó¼ÌĞøÏÔÊ¾ÉÏ´ÎµÄÖµ£©
-    // key = ÊµÌå UUID£¬value = { ×Ö¶ÎÃû ¡ú ScriptFieldInstance }
+    // ç¼–è¾‘æ€å­—æ®µæš‚å­˜è¡¨ï¼ˆè¿è¡Œæ—¶ä¹Ÿä¿ç•™ï¼ŒStop åç»§ç»­æ˜¾ç¤ºä¸Šæ¬¡çš„å€¼ï¼‰
+    // key = å®ä½“ UUIDï¼Œvalue = { å­—æ®µå â†’ ScriptFieldInstance }
     static std::unordered_map<UUID, ScriptFieldMap> s_EntityScriptFields;
-    // ¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T
-    //  ÄÚ²¿¹¤¾ßº¯Êı
-    // ¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T
+    // â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+    //  å†…éƒ¨å·¥å…·å‡½æ•°
+    // â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
     static MonoAssembly* LoadMonoAssembly(const std::filesystem::path& filepath)
     {
@@ -77,9 +79,9 @@ namespace Wheatear {
         return assembly;
     }
 
-    // ÔÚ¼Ì³ĞÁ´ÉÏ¾«È·²éÕÒ"µÚÒ»¸ö²ÎÊıÀàĞÍÎª ulong (MONO_TYPE_U8)"µÄ·½·¨¡£
-    // ÓÃÓÚÇø·Ö Entity »ùÀàÀïµÄ OnCollisionEnter(ulong id) ºÍÓÃ»§¿ÉÄÜÖØĞ´µÄ
-    // OnCollisionEnter(Entity e) Á½¸öÖØÔØ£¬±ÜÃâ´íÎóµ÷ÓÃ¡£
+    // åœ¨ç»§æ‰¿é“¾ä¸Šç²¾ç¡®æŸ¥æ‰¾"ç¬¬ä¸€ä¸ªå‚æ•°ç±»å‹ä¸º ulong (MONO_TYPE_U8)"çš„æ–¹æ³•ã€‚
+    // ç”¨äºåŒºåˆ† Entity åŸºç±»é‡Œçš„ OnCollisionEnter(ulong id) å’Œç”¨æˆ·å¯èƒ½é‡å†™çš„
+    // OnCollisionEnter(Entity e) ä¸¤ä¸ªé‡è½½ï¼Œé¿å…é”™è¯¯è°ƒç”¨ã€‚
     static MonoMethod* FindMethodWithULongParam(MonoClass* klass, const char* methodName)
     {
         for (MonoClass* current = klass; current; current = mono_class_get_parent(current))
@@ -104,7 +106,7 @@ namespace Wheatear {
         return nullptr;
     }
 
-    // MonoType Ãû³Æ ¡ú ScriptFieldType µÄÓ³Éä
+    // MonoType åç§° â†’ ScriptFieldType çš„æ˜ å°„
     static ScriptFieldType MonoTypeToScriptFieldType(MonoType* monoType)
     {
         static const std::unordered_map<std::string, ScriptFieldType> s_TypeMap =
@@ -129,9 +131,9 @@ namespace Wheatear {
         return it != s_TypeMap.end() ? it->second : ScriptFieldType::None;
     }
 
-    // ¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T
-    //  ScriptEngine£ºÒıÇæ³õÊ¼»¯ / ¹Ø±Õ
-    // ¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T
+    // â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+    //  ScriptEngineï¼šå¼•æ“åˆå§‹åŒ– / å…³é—­
+    // â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
     void ScriptEngine::Init()
     {
@@ -197,9 +199,9 @@ namespace Wheatear {
         LoadEntityClasses();
     }
 
-    // ¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T
-    //  ScriptEngine£º³¡¾°ÉúÃüÖÜÆÚ
-    // ¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T
+    // â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+    //  ScriptEngineï¼šåœºæ™¯ç”Ÿå‘½å‘¨æœŸ
+    // â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
     void ScriptEngine::OnRuntimeStart(Scene* scene)
     {
@@ -220,13 +222,13 @@ namespace Wheatear {
     {
         s_Data->SceneContext = nullptr;
         s_Data->EntityInstances.clear();
-        // ×¢Òâ£º²»Çå³ı s_EntityScriptFields¡£
-        // Stop ºó»Øµ½±à¼­Ì¬£¬Inspector ÀïµÄÖµÓ¦¸Ã»¹ÔÚ¡£
+        // æ³¨æ„ï¼šä¸æ¸…é™¤ s_EntityScriptFieldsã€‚
+        // Stop åå›åˆ°ç¼–è¾‘æ€ï¼ŒInspector é‡Œçš„å€¼åº”è¯¥è¿˜åœ¨ã€‚
     }
 
-    // ¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T
-    //  ScriptEngine£ºEntity ÉúÃüÖÜÆÚ
-    // ¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T
+    // â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+    //  ScriptEngineï¼šEntity ç”Ÿå‘½å‘¨æœŸ
+    // â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
     void ScriptEngine::OnCreateEntity(Entity entity)
     {
@@ -236,13 +238,13 @@ namespace Wheatear {
 
         UUID entityID = entity.GetUUID();
 
-        // 1. ´´½¨ÊµÀı
+        // 1. åˆ›å»ºå®ä¾‹
         Ref<ScriptClass>    scriptClass = GetEntityClass(sc.ClassName);
         Ref<ScriptInstance> instance = CreateRef<ScriptInstance>(scriptClass, entity);
         s_Data->EntityInstances[entityID] = instance;
 
-        // 2. ½«±à¼­Æ÷/³¡¾°ÎÄ¼şÀï±£´æµÄ×Ö¶ÎÖµ×¢Èëµ½ÊµÀı¡£
-        //    ×Ö¶ÎÀàĞÍÒÔµ±Ç° C# ³ÌĞò¼¯Îª×¼£¬±ÜÃâ½Å±¾¸ÄÃû»ò¸ÄÀàĞÍºóÊ¹ÓÃ¾ÉÔªÊı¾İ¡£
+        // 2. å°†ç¼–è¾‘å™¨/åœºæ™¯æ–‡ä»¶é‡Œä¿å­˜çš„å­—æ®µå€¼æ³¨å…¥åˆ°å®ä¾‹ã€‚
+        //    å­—æ®µç±»å‹ä»¥å½“å‰ C# ç¨‹åºé›†ä¸ºå‡†ï¼Œé¿å…è„šæœ¬æ”¹åæˆ–æ”¹ç±»å‹åä½¿ç”¨æ—§å…ƒæ•°æ®ã€‚
         auto fieldsIt = s_EntityScriptFields.find(entityID);
         if (fieldsIt != s_EntityScriptFields.end())
         {
@@ -295,7 +297,7 @@ namespace Wheatear {
             }
         }
 
-        // 3. µ÷ÓÃ½Å±¾µÄ OnCreate
+        // 3. è°ƒç”¨è„šæœ¬çš„ OnCreate
         instance->InvokeOnCreate();
     }
 
@@ -316,9 +318,9 @@ namespace Wheatear {
         s_Data->EntityInstances.erase(entity.GetUUID());
     }
 
-    // ¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T
-    //  ScriptEngine£ºÅö×²ÊÂ¼ş
-    // ¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T
+    // â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+    //  ScriptEngineï¼šç¢°æ’äº‹ä»¶
+    // â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
     void ScriptEngine::OnCollisionBegin(Entity entity, Entity other)
     {
@@ -340,9 +342,9 @@ namespace Wheatear {
         it->second->InvokeOnCollisionExit(other);
     }
 
-    // ¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T
-    //  ScriptEngine£ºÊÖ¶¯µ÷ÓÃ½Å±¾·½·¨£¨¹© UIButton µÈÊ¹ÓÃ£©
-    // ¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T
+    // â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+    //  ScriptEngineï¼šæ‰‹åŠ¨è°ƒç”¨è„šæœ¬æ–¹æ³•ï¼ˆä¾› UIButton ç­‰ä½¿ç”¨ï¼‰
+    // â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
     void ScriptEngine::InvokeMethod(Entity entity, const std::string& methodName)
     {
@@ -366,13 +368,13 @@ namespace Wheatear {
             WT_CORE_ERROR("ScriptEngine::InvokeMethod - exception in '{}'", methodName);
     }
 
-    // ¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T
-    //  ScriptEngine£º±à¼­Ì¬×Ö¶ÎÔİ´æ
-    // ¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T
+    // â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+    //  ScriptEngineï¼šç¼–è¾‘æ€å­—æ®µæš‚å­˜
+    // â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
     ScriptFieldMap& ScriptEngine::GetScriptFieldMap(Entity entity)
     {
-        // operator[] ÔÚ key ²»´æÔÚÊ±»á×Ô¶¯²åÈëÒ»¸ö¿Õ map£¬ÕıºÃÊÇÎÒÃÇÏëÒªµÄĞĞÎª
+        // operator[] åœ¨ key ä¸å­˜åœ¨æ—¶ä¼šè‡ªåŠ¨æ’å…¥ä¸€ä¸ªç©º mapï¼Œæ­£å¥½æ˜¯æˆ‘ä»¬æƒ³è¦çš„è¡Œä¸º
         return s_EntityScriptFields[entity.GetUUID()];
     }
 
@@ -451,9 +453,9 @@ namespace Wheatear {
             }
         }
     }
-    // ¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T
-    //  ScriptEngine£º²éÑ¯½Ó¿Ú
-    // ¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T
+    // â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+    //  ScriptEngineï¼šæŸ¥è¯¢æ¥å£
+    // â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
     bool ScriptEngine::EntityClassExists(const std::string& fullClassName)
     {
@@ -496,9 +498,9 @@ namespace Wheatear {
     float ScriptEngine::GetElapsedTime() { return s_Data ? s_Data->ElapsedTime : 0.0f; }
     uint64_t ScriptEngine::GetFrameCount() { return s_Data ? s_Data->FrameCount : 0; }
 
-    // ¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T
-    //  ScriptEngine£º³ÌĞò¼¯É¨Ãè
-    // ¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T
+    // â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+    //  ScriptEngineï¼šç¨‹åºé›†æ‰«æ
+    // â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
     void ScriptEngine::LoadEntityClasses()
     {
@@ -533,9 +535,9 @@ namespace Wheatear {
         }
     }
 
-    // ¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T
-    //  ScriptClass ÊµÏÖ
-    // ¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T
+    // â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+    //  ScriptClass å®ç°
+    // â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
     ScriptClass::ScriptClass(const std::string& classNamespace, const std::string& className)
         : m_ClassNamespace(classNamespace), m_ClassName(className)
@@ -545,7 +547,7 @@ namespace Wheatear {
             classNamespace.c_str(),
             className.c_str());
 
-        // É¨ÃèËùÓĞ public ÊµÀı×Ö¶Î
+        // æ‰«ææ‰€æœ‰ public å®ä¾‹å­—æ®µ
         void* iter = nullptr;
         while (MonoClassField* field = mono_class_get_fields(m_MonoClass, &iter))
         {
@@ -557,7 +559,7 @@ namespace Wheatear {
 
             ScriptFieldType type = MonoTypeToScriptFieldType(fieldType);
             if (type == ScriptFieldType::None)
-                continue;  // ºöÂÔ²»Ö§³ÖµÄÀàĞÍ£¨Èç string¡¢×Ô¶¨ÒåÀàµÈ£©
+                continue;  // å¿½ç•¥ä¸æ”¯æŒçš„ç±»å‹ï¼ˆå¦‚ stringã€è‡ªå®šä¹‰ç±»ç­‰ï¼‰
 
             m_Fields[fieldName] = { type, fieldName, field };
         }
@@ -565,13 +567,13 @@ namespace Wheatear {
 
     MonoObject* ScriptClass::Instantiate()
     {
-        // Ö»·ÖÅäÄÚ´æ£¬²»µ÷ÓÃ C# ¹¹Ôìº¯Êı£¨ÓÉ ScriptInstance ÊÖ¶¯µ÷ÓÃ»ùÀà .ctor£©
+        // åªåˆ†é…å†…å­˜ï¼Œä¸è°ƒç”¨ C# æ„é€ å‡½æ•°ï¼ˆç”± ScriptInstance æ‰‹åŠ¨è°ƒç”¨åŸºç±» .ctorï¼‰
         return mono_object_new(s_Data->AppDomain, m_MonoClass);
     }
 
     MonoMethod* ScriptClass::GetMethod(const std::string& name, int parameterCount)
     {
-        // ÑØ¼Ì³ĞÁ´ÏòÉÏ²éÕÒ£¬È·±£ÄÜÕÒµ½¶¨ÒåÔÚ»ùÀàÀïµÄ·½·¨
+        // æ²¿ç»§æ‰¿é“¾å‘ä¸ŠæŸ¥æ‰¾ï¼Œç¡®ä¿èƒ½æ‰¾åˆ°å®šä¹‰åœ¨åŸºç±»é‡Œçš„æ–¹æ³•
         for (MonoClass* klass = m_MonoClass; klass; klass = mono_class_get_parent(klass))
         {
             MonoMethod* method = mono_class_get_method_from_name(
@@ -595,21 +597,21 @@ namespace Wheatear {
         return result;
     }
 
-    // ¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T
-    //  ScriptInstance ÊµÏÖ
-    // ¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T
+    // â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+    //  ScriptInstance å®ç°
+    // â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
     ScriptInstance::ScriptInstance(Ref<ScriptClass> scriptClass, Entity entity)
         : m_ScriptClass(scriptClass)
     {
         m_Instance = scriptClass->Instantiate();
 
-        // ²éÕÒÉúÃüÖÜÆÚ·½·¨
+        // æŸ¥æ‰¾ç”Ÿå‘½å‘¨æœŸæ–¹æ³•
         m_OnCreateMethod = scriptClass->GetMethod("OnCreate", 0);
         m_OnUpdateMethod = scriptClass->GetMethod("OnUpdate", 1);
 
-        // ¾«È·²éÕÒ½ÓÊÕ ulong µÄÅö×²»Øµ÷£¨¶¨ÒåÔÚ Entity »ùÀàÀï£©
-        // ±ÜÃâÓëÓÃ»§¿ÉÄÜÖØĞ´µÄ OnCollisionEnter(Entity) »ìÏı
+        // ç²¾ç¡®æŸ¥æ‰¾æ¥æ”¶ ulong çš„ç¢°æ’å›è°ƒï¼ˆå®šä¹‰åœ¨ Entity åŸºç±»é‡Œï¼‰
+        // é¿å…ä¸ç”¨æˆ·å¯èƒ½é‡å†™çš„ OnCollisionEnter(Entity) æ··æ·†
         m_OnCollisionEnterMethod = FindMethodWithULongParam(
             scriptClass->GetMonoClass(), "OnCollisionEnter");
         m_OnCollisionExitMethod = FindMethodWithULongParam(
@@ -619,8 +621,8 @@ namespace Wheatear {
             WT_CORE_WARN("ScriptInstance: OnCollisionEnter(ulong) not found in '{}'",
                 scriptClass->GetName());
 
-        // ÏÈµ÷ÓÃ½Å±¾×ÓÀàÄ¬ÈÏ¹¹Ôì£¬ÈÃ C# ×Ö¶Î³õÊ¼»¯Æ÷Õı³£Ö´ĞĞ£»
-        // È»ºóÔÙ°ÑÕæÊµ Entity ID Ğ´»Ø»ùÀà¡£
+        // å…ˆè°ƒç”¨è„šæœ¬å­ç±»é»˜è®¤æ„é€ ï¼Œè®© C# å­—æ®µåˆå§‹åŒ–å™¨æ­£å¸¸æ‰§è¡Œï¼›
+        // ç„¶åå†æŠŠçœŸå® Entity ID å†™å›åŸºç±»ã€‚
         MonoMethod* scriptConstructor = mono_class_get_method_from_name(scriptClass->GetMonoClass(), ".ctor", 0);
         if (scriptConstructor)
         {
@@ -720,3 +722,190 @@ namespace Wheatear {
     }
 
 } // namespace Wheatear
+#else
+
+namespace Wheatear {
+
+    namespace {
+
+        struct DisabledScriptEngineData
+        {
+            Scene* SceneContext = nullptr;
+            float LastDeltaTime = 0.0f;
+            float ElapsedTime = 0.0f;
+            uint64_t FrameCount = 0;
+        };
+
+        static DisabledScriptEngineData s_DisabledData;
+        static std::unordered_map<UUID, ScriptFieldMap> s_EntityScriptFields;
+
+    } // namespace
+
+    ScriptClass::ScriptClass(const std::string& classNamespace, const std::string& className)
+        : m_ClassNamespace(classNamespace), m_ClassName(className)
+    {
+    }
+
+    MonoObject* ScriptClass::Instantiate()
+    {
+        return nullptr;
+    }
+
+    MonoMethod* ScriptClass::GetMethod(const std::string&, int)
+    {
+        return nullptr;
+    }
+
+    MonoObject* ScriptClass::InvokeMethod(MonoObject*, MonoMethod*, void**)
+    {
+        return nullptr;
+    }
+
+    ScriptInstance::ScriptInstance(Ref<ScriptClass> scriptClass, Entity)
+        : m_ScriptClass(std::move(scriptClass))
+    {
+    }
+
+    void ScriptInstance::InvokeOnCreate() {}
+    void ScriptInstance::InvokeOnUpdate(float) {}
+    void ScriptInstance::InvokeOnCollisionEnter(Entity) {}
+    void ScriptInstance::InvokeOnCollisionExit(Entity) {}
+
+    std::string ScriptInstance::GetStringFieldValue(const std::string&)
+    {
+        return {};
+    }
+
+    void ScriptInstance::SetStringFieldValue(const std::string&, const std::string&) {}
+
+    bool ScriptInstance::GetFieldValueInternal(const std::string&, void*)
+    {
+        return false;
+    }
+
+    bool ScriptInstance::SetFieldValueInternal(const std::string&, const void*)
+    {
+        return false;
+    }
+
+    void ScriptEngine::Init()
+    {
+        WT_CORE_INFO("C# scripting is disabled for this build. Define WT_ENABLE_CSHARP_SCRIPTING to enable Mono.");
+    }
+
+    void ScriptEngine::Shutdown() {}
+
+    bool ScriptEngine::IsInitialized()
+    {
+        return false;
+    }
+
+    void ScriptEngine::LoadAssembly(const std::filesystem::path&) {}
+
+    bool ScriptEngine::EntityClassExists(const std::string&)
+    {
+        return false;
+    }
+
+    Ref<ScriptClass> ScriptEngine::GetEntityClass(const std::string&)
+    {
+        return nullptr;
+    }
+
+    std::vector<std::string> ScriptEngine::GetEntityClassNames()
+    {
+        return {};
+    }
+
+    Ref<ScriptInstance> ScriptEngine::GetEntityScriptInstance(UUID)
+    {
+        return nullptr;
+    }
+
+    Scene* ScriptEngine::GetSceneContext()
+    {
+        return s_DisabledData.SceneContext;
+    }
+
+    MonoImage* ScriptEngine::GetCoreAssemblyImage()
+    {
+        return nullptr;
+    }
+
+    float ScriptEngine::GetDeltaTime()
+    {
+        return s_DisabledData.LastDeltaTime;
+    }
+
+    float ScriptEngine::GetElapsedTime()
+    {
+        return s_DisabledData.ElapsedTime;
+    }
+
+    uint64_t ScriptEngine::GetFrameCount()
+    {
+        return s_DisabledData.FrameCount;
+    }
+
+    void ScriptEngine::OnRuntimeStart(Scene* scene)
+    {
+        s_DisabledData.SceneContext = scene;
+        s_DisabledData.LastDeltaTime = 0.0f;
+        s_DisabledData.ElapsedTime = 0.0f;
+        s_DisabledData.FrameCount = 0;
+    }
+
+    void ScriptEngine::OnRuntimeUpdate(Timestep ts)
+    {
+        s_DisabledData.LastDeltaTime = ts.GetSeconds();
+        s_DisabledData.ElapsedTime += ts.GetSeconds();
+        s_DisabledData.FrameCount++;
+    }
+
+    void ScriptEngine::OnRuntimeStop()
+    {
+        s_DisabledData.SceneContext = nullptr;
+    }
+
+    void ScriptEngine::OnCreateEntity(Entity) {}
+    void ScriptEngine::OnUpdateEntity(Entity, Timestep) {}
+
+    void ScriptEngine::OnDestroyEntity(Entity entity)
+    {
+        if (entity)
+            s_EntityScriptFields.erase(entity.GetUUID());
+    }
+
+    void ScriptEngine::OnCollisionBegin(Entity, Entity) {}
+    void ScriptEngine::OnCollisionEnd(Entity, Entity) {}
+    void ScriptEngine::InvokeMethod(Entity, const std::string&) {}
+
+    ScriptFieldMap& ScriptEngine::GetScriptFieldMap(Entity entity)
+    {
+        return s_EntityScriptFields[entity.GetUUID()];
+    }
+
+    bool ScriptEngine::HasScriptFieldMap(UUID entityID)
+    {
+        return s_EntityScriptFields.find(entityID) != s_EntityScriptFields.end();
+    }
+
+    void ScriptEngine::InitializeScriptFieldMap(Entity entity)
+    {
+        if (entity)
+            s_EntityScriptFields.try_emplace(entity.GetUUID());
+    }
+
+    void ScriptEngine::ClearScriptFieldMap(Entity entity)
+    {
+        if (entity)
+            s_EntityScriptFields.erase(entity.GetUUID());
+    }
+
+    void ScriptEngine::InitMono() {}
+    void ScriptEngine::ShutdownMono() {}
+    void ScriptEngine::LoadEntityClasses() {}
+
+} // namespace Wheatear
+
+#endif

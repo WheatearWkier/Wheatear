@@ -1,11 +1,14 @@
 #include "VisualNovelDrawer.h"
 
+#include "Editor/TextAssetEditor.h"
+#include "Modules/VisualNovel/VisualNovelScriptEditorPanel.h"
 #include "Panels/SceneHierarchy/ComponentDrawers.h"
 #include "Wheatear/Scene/Components.h"
 
 #include <imgui/imgui.h>
 
 #include <cstring>
+#include <unordered_map>
 #include <vector>
 
 namespace Wheatear {
@@ -24,6 +27,8 @@ namespace Wheatear {
             return false;
         }
 
+        static std::unordered_map<std::string, EditorUI::TextAssetEditorState> s_ScriptEditors;
+
     }
 
     void DrawVisualNovelComponent(Entity entity)
@@ -31,9 +36,12 @@ namespace Wheatear {
         DrawComponent<VisualNovelComponent>("Visual Novel", entity, [](auto& component)
             {
                 InputString("Script Path", component.ScriptPath);
+                if (ImGui::Button("Open VN Script Editor"))
+                    VisualNovelEditorRequests::RequestOpenScript(component.ScriptPath);
                 ImGui::DragFloat("Characters / Second", &component.CharactersPerSecond, 1.0f, 1.0f, 240.0f);
                 ImGui::Checkbox("Play On Start", &component.PlayOnStart);
                 ImGui::Checkbox("Restart On Finish", &component.RestartOnFinish);
+                EditorUI::DrawTextAssetEditor("VN Script Editor", "VisualNovelScriptEditor", component.ScriptPath, s_ScriptEditors, 512 * 1024);
 
                 ImGui::Separator();
                 ImGui::TextDisabled("Scene Bindings");
@@ -59,7 +67,11 @@ namespace Wheatear {
                 InputString("History Panel", component.HistoryPanelEntityName);
                 InputString("Settings Panel", component.SettingsPanelEntityName);
                 InputString("Settings Text", component.SettingsTextEntityName);
+                InputString("Save Load Panel", component.SaveLoadPanelEntityName);
+                InputString("Save Load Text", component.SaveLoadTextEntityName);
                 InputString("System Message", component.SystemMessageEntityName);
+                InputString("Music Notice Panel", component.MusicNoticePanelEntityName);
+                InputString("Music Notice Text", component.MusicNoticeTextEntityName);
                 InputString("Save Directory", component.SaveDirectory);
                 ImGui::DragInt("Auto Load Slot", &component.AutoLoadSlot, 1.0f, 0, 9);
             });

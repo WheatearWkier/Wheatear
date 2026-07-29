@@ -7,6 +7,8 @@
 #define MINIAUDIO_IMPLEMENTATION
 #include "miniaudio.h"
 
+#include <algorithm>
+#include <cmath>
 #include <filesystem>
 
 namespace Wheatear {
@@ -35,6 +37,11 @@ namespace Wheatear {
         WT_CORE_INFO("AudioEngine: initialization successful");
     }
 
+    float AudioEngine::PercentToGain(float percent)
+    {
+        const float normalized = std::clamp(percent, 0.0f, 100.0f) / 100.0f;
+        return std::pow(normalized, 1.5f);
+    }
     void AudioEngine::Shutdown()
     {
         // Stop and release all sounds first
@@ -90,7 +97,7 @@ namespace Wheatear {
             return 0;
         }
 
-        ma_sound_set_volume(sound, volume);
+        ma_sound_set_volume(sound, std::clamp(volume, 0.0f, 2.0f));
         ma_sound_set_looping(sound, loop ? MA_TRUE : MA_FALSE);
         ma_sound_start(sound);
 
@@ -128,7 +135,7 @@ namespace Wheatear {
     {
         auto it = s_Sounds.find(handle);
         if (it != s_Sounds.end())
-            ma_sound_set_volume(it->second, volume);
+            ma_sound_set_volume(it->second, std::clamp(volume, 0.0f, 2.0f));
     }
 
     bool AudioEngine::IsPlaying(uint32_t handle)

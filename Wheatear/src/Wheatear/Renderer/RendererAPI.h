@@ -20,7 +20,7 @@ namespace Wheatear {
         {
             None = 0,
             OpenGL = 1
-            // Ô¤Áô: Vulkan = 2, DirectX12 = 3
+            // é¢„ç•™: Vulkan = 2, DirectX12 = 3
         };
 
         virtual ~RendererAPI() = default;
@@ -36,21 +36,25 @@ namespace Wheatear {
             uint32_t indexCount = 0) = 0;
         virtual void DrawLines(const Ref<VertexArray>& vertexArray,
             uint32_t vertexCount) = 0;
-        // ·ÇË÷ÒıÈı½ÇĞÎ»æÖÆ£¨Ìì¿ÕºĞ¡¢Grid µÈ£©
+        // éç´¢å¼•ä¸‰è§’å½¢ç»˜åˆ¶ï¼ˆå¤©ç©ºç›’ã€Grid ç­‰ï¼‰
         virtual void DrawArrays(const Ref<VertexArray>& vertexArray,
             uint32_t vertexCount) = 0;
 
         virtual void SetLineWidth(float width) = 0;
+
+        virtual void SetScissor(uint32_t x, uint32_t y,
+            uint32_t width, uint32_t height) = 0;
+        virtual void SetScissorTest(bool enabled) = 0;
 
         virtual void EnableDepthTest() = 0;
         virtual void DisableDepthTest() = 0;
         virtual void SetDepthWrite(bool enabled) = 0;
         virtual void SetDepthFunc(DepthFunc func) = 0;
 
-        // ¿ª/¹Ø alpha »ìºÏ£¨ÒıÇæÄ¬ÈÏ¿ªÆô£¬¾Ö²¿ pass ¿ÉÁÙÊ±ĞŞ¸Ä£©
+        // å¼€/å…³ alpha æ··åˆï¼ˆå¼•æ“é»˜è®¤å¼€å¯ï¼Œå±€éƒ¨ pass å¯ä¸´æ—¶ä¿®æ”¹ï¼‰
         virtual void SetBlend(bool enabled) = 0;
 
-        // ±£´æ/»Ö¸´ FBO °ó¶¨£¬ÓÃÓÚ shadow pass Ç°ºóÇĞ»»
+        // ä¿å­˜/æ¢å¤ FBO ç»‘å®šï¼Œç”¨äº shadow pass å‰ååˆ‡æ¢
         virtual uint32_t GetBoundFramebuffer() = 0;
         virtual void     BindFramebuffer(uint32_t id) = 0;
 
@@ -58,7 +62,7 @@ namespace Wheatear {
 
         static API GetAPI() { return s_API; }
 
-        // ¹¤³§·½·¨£º¸ù¾İµ±Ç° API ´´½¨¾ßÌåÊµÏÖ
+        // å·¥å‚æ–¹æ³•ï¼šæ ¹æ®å½“å‰ API åˆ›å»ºå…·ä½“å®ç°
         static Scope<RendererAPI> Create();
 
     private:

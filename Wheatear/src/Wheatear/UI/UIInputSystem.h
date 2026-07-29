@@ -7,23 +7,29 @@ namespace Wheatear {
     class UIInputSystem
     {
     public:
-        // Ã¿Ö¡ÔÚScene::OnUpdateRuntimeÀïµ÷ÓÃ
-        // mouseX/Y ÊÇÊó±êÔÚviewportÀïµÄÏñËØ×ø±ê£¨×óÉÏ½ÇÎªÔ­µã£©
+        // æ¯å¸§åœ¨Scene::OnUpdateRuntimeé‡Œè°ƒç”¨
+        // mouseX/Y æ˜¯é¼ æ ‡åœ¨viewporté‡Œçš„åƒç´ åæ ‡ï¼ˆå·¦ä¸Šè§’ä¸ºåŸç‚¹ï¼‰
         static void OnUpdate(Scene* scene,
             float mouseX, float mouseY,
             uint32_t viewportWidth,
             uint32_t viewportHeight);
 
-        // Êó±ê°´ÏÂ/Ì§ÆğÊÂ¼ş£¨´ÓEditorLayer»òGameLayer×ª·¢¹ıÀ´£©
+        // é¼ æ ‡æŒ‰ä¸‹/æŠ¬èµ·äº‹ä»¶ï¼ˆä»EditorLayeræˆ–GameLayerè½¬å‘è¿‡æ¥ï¼‰
         static void OnMousePressed(Scene* scene);
         static void OnMouseReleased(Scene* scene);
+        static bool OnMouseScrolled(Scene* scene,
+            float yOffset,
+            float mouseX,
+            float mouseY,
+            uint32_t viewportWidth,
+            uint32_t viewportHeight);
 
     private:
-        // ÅĞ¶Ï¹éÒ»»¯Êó±ê×ø±êÊÇ·ñÔÚwidgetµÄAABBÄÚ
+        // åˆ¤æ–­å½’ä¸€åŒ–é¼ æ ‡åæ ‡æ˜¯å¦åœ¨widgetçš„AABBå†…
         static bool HitTest(const UIWidgetComponent& widget,
             float normMouseX, float normMouseY);
 
-        // ´¥·¢C#½Å±¾ÀïµÄOnClick»Øµ÷
+        // è§¦å‘C#è„šæœ¬é‡Œçš„OnClickå›è°ƒ
         static void FireOnClick(Scene* scene, entt::entity entity);
 
         static bool s_MouseWasPressed;

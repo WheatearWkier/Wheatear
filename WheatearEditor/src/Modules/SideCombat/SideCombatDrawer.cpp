@@ -1,5 +1,7 @@
 #include "SideCombatDrawer.h"
 
+#include "Editor/TextAssetEditor.h"
+#include "Modules/SideCombat/SideCombatTuningEditorPanel.h"
 #include "Panels/SceneHierarchy/ComponentDrawers.h"
 #include "Wheatear/Scene/Components.h"
 
@@ -8,6 +10,7 @@
 
 #include <algorithm>
 #include <cstring>
+#include <unordered_map>
 #include <vector>
 
 namespace Wheatear {
@@ -74,6 +77,8 @@ namespace Wheatear {
             return labels[std::clamp((int)state, 0, 7)];
         }
 
+        static std::unordered_map<std::string, EditorUI::TextAssetEditorState> s_TuningEditors;
+
     } // namespace
 
     void DrawSideCombatLevelComponent(Entity entity)
@@ -84,6 +89,10 @@ namespace Wheatear {
             InputString("Level Id / Unlock Profile", level.LevelId);
             ImGui::TextDisabled("Level Id selects progression.profiles in the tuning YAML.");
             InputString("Tuning Path", level.TuningPath, 260);
+            if (ImGui::Button("Open Side Combat Tuning Editor"))
+                SideCombatEditorRequests::RequestOpenTuning(level.TuningPath);
+            if (ImGui::CollapsingHeader("Raw Side Combat Tuning YAML"))
+                EditorUI::DrawTextAssetEditor("Side Combat Tuning YAML", "SideCombatTuningEditor", level.TuningPath, s_TuningEditors, 512 * 1024);
             ImGui::DragFloat2("Arena Min", glm::value_ptr(level.ArenaMin), 0.05f);
             ImGui::DragFloat2("Arena Max", glm::value_ptr(level.ArenaMax), 0.05f);
             ImGui::DragFloat("Ground Y", &level.GroundY, 0.02f, -20.0f, 20.0f);
@@ -156,6 +165,8 @@ namespace Wheatear {
             ImGui::DragFloat("Jump Impulse", &controller.JumpImpulse, 0.05f, 0.0f, 40.0f);
             ImGui::DragFloat("Gravity", &controller.Gravity, 0.05f, 0.0f, 80.0f);
             ImGui::DragFloat("Air Control", &controller.AirControl, 0.05f, 0.0f, 80.0f);
+            ImGui::DragFloat("Jump Buffer Time", &controller.JumpBufferTime, 0.005f, 0.0f, 0.5f);
+            ImGui::DragFloat("Coyote Time", &controller.CoyoteTime, 0.005f, 0.0f, 0.5f);
             ImGui::DragFloat("Lane Speed Scale", &controller.LaneSpeedScale, 0.01f, 0.0f, 3.0f);
             ImGui::DragFloat("Lane Acceleration", &controller.LaneAcceleration, 0.05f, 0.0f, 80.0f);
             ImGui::DragFloat("Ground Friction", &controller.GroundFriction, 0.05f, 0.0f, 80.0f);
@@ -172,6 +183,9 @@ namespace Wheatear {
                 controller.RuntimeMagicBoltCooldown,
                 controller.RuntimeAllySupportCooldown);
             ImGui::Text("Jumps: %d", controller.RuntimeJumpsRemaining);
+            ImGui::Text("Jump Buffer %.2f / Coyote %.2f",
+                controller.RuntimeJumpBufferTimer,
+                controller.RuntimeCoyoteTimer);
             ImGui::Text("Air Actions: %d / Break Limit %.2f",
                 controller.RuntimeAirActionsRemaining,
                 controller.RuntimeBreakLimitCooldown);

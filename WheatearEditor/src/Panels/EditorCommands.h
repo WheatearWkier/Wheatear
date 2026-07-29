@@ -1,7 +1,10 @@
-#pragma once
+ï»¿#pragma once
 #include <functional>
 #include <memory>
+#include <optional>
 #include <stack>
+#include <tuple>
+#include <type_traits>
 #include <vector>
 #include "Wheatear/Scene/Entity.h"
 #include "Wheatear/Scene/Scene.h"
@@ -9,22 +12,49 @@
 
 namespace Wheatear {
 
-    // ©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤
-    //  ³éÏóÃüÁî½Ó¿Ú
-    // ©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤
+    // â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+    //  æŠ½è±¡å‘½ä»¤æ¥å£
+    // â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     struct ICommand
     {
         virtual ~ICommand() = default;
         virtual void Execute() = 0;
         virtual void Undo() = 0;
 
-        // ¹©ÊôĞÔĞŞ¸ÄÃüÁîºÏ²¢ÓÃ£ºÍ¬Ò»´ÎÍÏ×§Ö»±£ÁôÒ»ÌõÀúÊ·
+        // ä¾›å±æ€§ä¿®æ”¹å‘½ä»¤åˆå¹¶ç”¨ï¼šåŒä¸€æ¬¡æ‹–æ‹½åªä¿ç•™ä¸€æ¡å†å²
         virtual bool TryMerge(ICommand*) { return false; }
     };
 
-    // ©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤
-    //  ÀúÊ·¹ÜÀíÆ÷£¨µ¥Àı£©
-    // ©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤
+    class CompositeCommand : public ICommand
+    {
+    public:
+        void Add(std::unique_ptr<ICommand> command)
+        {
+            if (command)
+                m_Commands.push_back(std::move(command));
+        }
+
+        bool Empty() const { return m_Commands.empty(); }
+
+        void Execute() override
+        {
+            for (auto& command : m_Commands)
+                command->Execute();
+        }
+
+        void Undo() override
+        {
+            for (auto it = m_Commands.rbegin(); it != m_Commands.rend(); ++it)
+                (*it)->Undo();
+        }
+
+    private:
+        std::vector<std::unique_ptr<ICommand>> m_Commands;
+    };
+
+    // â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+    //  å†å²ç®¡ç†å™¨ï¼ˆå•ä¾‹ï¼‰
+    // â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     class CommandHistory
     {
     public:
@@ -34,9 +64,9 @@ namespace Wheatear {
             return s_Instance;
         }
 
-        // BUG FIX: Push Ö»¸ºÔğÈëÕ»£¬²»µ÷ÓÃ Execute¡£
-        // µ÷ÓÃ·½±ØĞëÏÈÊÖ¶¯µ÷ÓÃ cmd->Execute()£¬ÔÙ Push¡£
-        // ÕâÑù Redo ÖØĞÂµ÷ÓÃ Execute() Ê±²»»áÔì³É¶şÖØÖ´ĞĞ¡£
+        // BUG FIX: Push åªè´Ÿè´£å…¥æ ˆï¼Œä¸è°ƒç”¨ Executeã€‚
+        // è°ƒç”¨æ–¹å¿…é¡»å…ˆæ‰‹åŠ¨è°ƒç”¨ cmd->Execute()ï¼Œå† Pushã€‚
+        // è¿™æ · Redo é‡æ–°è°ƒç”¨ Execute() æ—¶ä¸ä¼šé€ æˆäºŒé‡æ‰§è¡Œã€‚
         void Push(std::unique_ptr<ICommand> cmd, bool tryMerge = false)
         {
             if (tryMerge && !m_UndoStack.empty())
@@ -45,7 +75,7 @@ namespace Wheatear {
                     return;
             }
             m_UndoStack.push(std::move(cmd));
-            // ĞÂ²Ù×÷Çå¿Õ redo
+            // æ–°æ“ä½œæ¸…ç©º redo
             while (!m_RedoStack.empty())
                 m_RedoStack.pop();
         }
@@ -68,8 +98,8 @@ namespace Wheatear {
             m_UndoStack.push(std::move(cmd));
         }
 
-        // BUG FIX: Clear ¤Ï Scene ÇĞ¤êÌæ¤¨Ç°¤Ë±Ø¤ººô¤Ö¤³¤È¡£
-        // ¹Å¤¤ Scene* ¤ò³Ö¤Ä¥³¥Ş¥ó¥É¤¬²Ğ¤ë¤È¥À¥ó¥°¥ê¥ó¥°¥İ¥¤¥ó¥¿¤Ë¤Ê¤ë¡£
+        // BUG FIX: Clear ã¯ Scene åˆ‡ã‚Šæ›¿ãˆå‰ã«å¿…ãšå‘¼ã¶ã“ã¨ã€‚
+        // å¤ã„ Scene* ã‚’æŒã¤ã‚³ãƒãƒ³ãƒ‰ãŒæ®‹ã‚‹ã¨ãƒ€ãƒ³ã‚°ãƒªãƒ³ã‚°ãƒã‚¤ãƒ³ã‚¿ã«ãªã‚‹ã€‚
         void Clear()
         {
             while (!m_RedoStack.empty()) m_RedoStack.pop();
@@ -85,35 +115,131 @@ namespace Wheatear {
         std::stack<std::unique_ptr<ICommand>> m_RedoStack;
     };
 
-    // ©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤
-    //  ÃüÁî1£ºÊµÌå´´½¨ / É¾³ı
-    //
-    //  Ê¹ÓÃÔ¼¶¨£¨ÖØÒª£©£º
-    //    1. ÏÈ¹¹ÔìÃüÁî£¬ÉèÖÃºÃ OnCreate »Øµ÷
-    //    2. µ÷ÓÃ cmd->Execute()
-    //    3. µ÷ÓÃ CommandHistory::Get().Push(std::move(cmd))
-    //
-    //  Undo£¨³·ÏúÉ¾³ı£©»áÖØ½¨ÊµÌå²¢»Ö¸´ËùÓĞÒÑ¿ìÕÕµÄ×é¼ş¡£
-    //  ÎªÁËÈÃ Undo ÍêÕû»Ö¸´£¬É¾³ıÇ°Ğèµ÷ÓÃ SnapshotComponents()¡£
-    // ©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤
+    namespace EditorCommandDetail {
+
+        template<typename T>
+        struct ComponentSnapshotSlot
+        {
+            std::optional<T> Value;
+        };
+
+        template<typename... Ts>
+        class EntityComponentSnapshot
+        {
+        public:
+            void Capture(Entity entity)
+            {
+                (CaptureOne<Ts>(entity), ...);
+            }
+
+            void Restore(Entity entity, bool restoreIdentity = true) const
+            {
+                (RestoreOne<Ts>(entity, restoreIdentity), ...);
+            }
+
+        private:
+            template<typename T>
+            void CaptureOne(Entity entity)
+            {
+                auto& slot = std::get<ComponentSnapshotSlot<T>>(m_Slots);
+                if (entity.HasComponent<T>())
+                    slot.Value = entity.GetComponent<T>();
+                else
+                    slot.Value.reset();
+            }
+
+            template<typename T>
+            void RestoreOne(Entity entity, bool restoreIdentity) const
+            {
+                if constexpr (std::is_same_v<T, IDComponent>)
+                {
+                    if (!restoreIdentity)
+                        return;
+                }
+
+                const auto& slot = std::get<ComponentSnapshotSlot<T>>(m_Slots);
+                if (!slot.Value)
+                    return;
+
+                entity.AddOrReplaceComponent<T>(*slot.Value);
+            }
+
+        private:
+            std::tuple<ComponentSnapshotSlot<Ts>...> m_Slots;
+        };
+
+    } // namespace EditorCommandDetail
+
+    using EditorEntitySnapshot = EditorCommandDetail::EntityComponentSnapshot<
+        IDComponent,
+        TagComponent,
+        TransformComponent,
+        SpriteRendererComponent,
+        SpriteAnimatorComponent,
+        CircleRendererComponent,
+        MeshRendererComponent,
+        DirectionalLightComponent,
+        PointLightComponent,
+        CameraComponent,
+        NativeScriptComponent,
+        Rigidbody2DComponent,
+        BoxCollider2DComponent,
+        CircleCollider2DComponent,
+        ScriptComponent,
+        EventScriptComponent,
+        UICanvasComponent,
+        UIWidgetComponent,
+        UIAnimatorComponent,
+        UIImageComponent,
+        UIPanelComponent,
+        UITextComponent,
+        UIButtonComponent,
+        UIProgressBarComponent,
+        UISliderComponent,
+        UIPagerComponent,
+        UIScrollViewComponent,
+        UIPathComponent,
+        UISkillTreeViewComponent,
+        UIPageItemComponent,
+        UICheckboxComponent,
+        AudioSourceComponent,
+        VisualNovelComponent,
+        ArcadeCombatLevelComponent,
+        ArcadeCombatantComponent,
+        ArcadePlayerControllerComponent,
+        ArcadeBossComponent,
+        ArcadeProjectileComponent,
+        ArcadeCoverComponent,
+        ArcadeTriggerComponent,
+        SideCombatLevelComponent,
+        SideCombatantComponent,
+        SidePlayerControllerComponent,
+        SideEnemyAIComponent,
+        SideHitboxComponent,
+        SidePickupComponent
+    >;
+
+    // â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+    //  å‘½ä»¤1ï¼šå®ä½“åˆ›å»º / åˆ é™¤
+    // â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     class EntityCreateCommand : public ICommand
     {
     public:
-        // ´´½¨ĞÂÊµÌå
+        // åˆ›å»ºæ–°å®ä½“
         EntityCreateCommand(Scene* scene, const std::string& name)
             : m_Scene(scene), m_Name(name), m_IsCreate(true)
         {
         }
 
-        // É¾³ıÒÑÓĞÊµÌå£¨isCreate=false£©
-        // BUG FIX: É¾³ıÊ±Á¢¼´¿ìÕÕÈ«²¿×é¼şÊı¾İ£¬Undo Ê±²ÅÄÜÍêÕû»Ö¸´
+        // åˆ é™¤å·²æœ‰å®ä½“ï¼ˆisCreate=falseï¼‰
+        // BUG FIX: åˆ é™¤æ—¶ç«‹å³å¿«ç…§å…¨éƒ¨ç»„ä»¶æ•°æ®ï¼ŒUndo æ—¶æ‰èƒ½å®Œæ•´æ¢å¤
         EntityCreateCommand(Scene* scene, Entity existingEntity, bool /*isCreate_false*/)
             : m_Scene(scene)
             , m_Name(existingEntity.GetName())
             , m_IsCreate(false)
             , m_CreatedEntity(existingEntity)
         {
-            SnapshotComponents(existingEntity);
+            m_Snapshot.Capture(existingEntity);
         }
 
         void Execute() override
@@ -127,7 +253,7 @@ namespace Wheatear {
             else
             {
                 if (IsEntityValid())
-                    m_Scene->DestroyEntity(m_CreatedEntity);
+                    m_Scene->DestroyEntityImmediate(m_CreatedEntity);
                 m_CreatedEntity = {};
             }
         }
@@ -137,14 +263,13 @@ namespace Wheatear {
             if (m_IsCreate)
             {
                 if (IsEntityValid())
-                    m_Scene->DestroyEntity(m_CreatedEntity);
+                    m_Scene->DestroyEntityImmediate(m_CreatedEntity);
                 m_CreatedEntity = {};
             }
             else
             {
-                // ³·ÏúÉ¾³ı£ºÖØ½¨²¢»Ö¸´¿ìÕÕÊı¾İ
                 m_CreatedEntity = m_Scene->CreateEntity(m_Name);
-                RestoreComponents(m_CreatedEntity);
+                m_Snapshot.Restore(m_CreatedEntity);
             }
         }
 
@@ -160,71 +285,57 @@ namespace Wheatear {
                     static_cast<entt::entity>(static_cast<uint32_t>(m_CreatedEntity)));
         }
 
-        // ©¤©¤ ×é¼ş¿ìÕÕ£¨°´ĞèÀ©Õ¹£© ©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤
-        // ÔÚÕâÀïÁĞ³öËùÓĞĞèÒªÖ§³Ö³·ÏúÉ¾³ıµÄ×é¼şÀàĞÍ¡£
-        // TransformComponent ÊÇ×î»ù±¾µÄ£¬ÆäËû°´ÏîÄ¿ĞèÒª×·¼Ó¼´¿É¡£
-        void SnapshotComponents(Entity e)
-        {
-            if (e.HasComponent<TransformComponent>())
-                m_TransformSnapshot = e.GetComponent<TransformComponent>();
-            m_HasTransform = e.HasComponent<TransformComponent>();
-
-            if (e.HasComponent<SpriteRendererComponent>())
-            {
-                m_SpriteSnapshot = e.GetComponent<SpriteRendererComponent>(); m_HasSprite = true;
-            }
-            if (e.HasComponent<CircleRendererComponent>())
-            {
-                m_CircleSnapshot = e.GetComponent<CircleRendererComponent>(); m_HasCircle = true;
-            }
-            if (e.HasComponent<CameraComponent>())
-            {
-                m_CameraSnapshot = e.GetComponent<CameraComponent>(); m_HasCamera = true;
-            }
-            if (e.HasComponent<Rigidbody2DComponent>())
-            {
-                m_Rb2dSnapshot = e.GetComponent<Rigidbody2DComponent>(); m_HasRb2d = true;
-            }
-            if (e.HasComponent<BoxCollider2DComponent>())
-            {
-                m_BoxCol2dSnapshot = e.GetComponent<BoxCollider2DComponent>(); m_HasBoxCol2d = true;
-            }
-            if (e.HasComponent<CircleCollider2DComponent>())
-            {
-                m_CircleCol2dSnapshot = e.GetComponent<CircleCollider2DComponent>(); m_HasCircleCol2d = true;
-            }
-        }
-
-        void RestoreComponents(Entity e)
-        {
-            if (m_HasTransform)   e.AddComponent<TransformComponent>() = m_TransformSnapshot;
-            if (m_HasSprite)      e.AddComponent<SpriteRendererComponent>() = m_SpriteSnapshot;
-            if (m_HasCircle)      e.AddComponent<CircleRendererComponent>() = m_CircleSnapshot;
-            if (m_HasCamera)      e.AddComponent<CameraComponent>() = m_CameraSnapshot;
-            if (m_HasRb2d)        e.AddComponent<Rigidbody2DComponent>() = m_Rb2dSnapshot;
-            if (m_HasBoxCol2d)    e.AddComponent<BoxCollider2DComponent>() = m_BoxCol2dSnapshot;
-            if (m_HasCircleCol2d) e.AddComponent<CircleCollider2DComponent>() = m_CircleCol2dSnapshot;
-        }
-
         Scene* m_Scene = nullptr;
         std::string m_Name;
         bool        m_IsCreate = true;
         Entity      m_CreatedEntity{};
         std::function<void(Entity)> m_OnCreate;
-
-        // ¸÷×é¼ş¿ìÕÕ£¨½öÔÚ isCreate=false Ê±Ìî³ä£©
-        bool m_HasTransform = false;  TransformComponent       m_TransformSnapshot{};
-        bool m_HasSprite = false;  SpriteRendererComponent  m_SpriteSnapshot{};
-        bool m_HasCircle = false;  CircleRendererComponent  m_CircleSnapshot{};
-        bool m_HasCamera = false;  CameraComponent          m_CameraSnapshot{};
-        bool m_HasRb2d = false;  Rigidbody2DComponent     m_Rb2dSnapshot{};
-        bool m_HasBoxCol2d = false;  BoxCollider2DComponent   m_BoxCol2dSnapshot{};
-        bool m_HasCircleCol2d = false;  CircleCollider2DComponent m_CircleCol2dSnapshot{};
+        EditorEntitySnapshot m_Snapshot;
     };
 
-    // ©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤
-    //  ÃüÁî2£º×é¼şÊôĞÔĞŞ¸Ä£¨Ä£°å£¬Ö§³ÖÈÎÒâ×é¼ş£©
-    // ©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤
+    class EntityDuplicateCommand : public ICommand
+    {
+    public:
+        EntityDuplicateCommand(Scene* scene, Entity source)
+            : m_Scene(scene), m_Source(source)
+        {
+        }
+
+        void Execute() override
+        {
+            if (!IsEntityValid(m_Source))
+                return;
+
+            m_Duplicate = m_Scene->DuplicateEntity(m_Source);
+        }
+
+        void Undo() override
+        {
+            if (IsEntityValid(m_Duplicate))
+                m_Scene->DestroyEntityImmediate(m_Duplicate);
+            m_Duplicate = {};
+        }
+
+        Entity GetEntity() const { return m_Duplicate; }
+
+    private:
+        bool IsEntityValid(Entity entity) const
+        {
+            return entity
+                && m_Scene
+                && m_Scene->GetRegistry().valid(
+                    static_cast<entt::entity>(static_cast<uint32_t>(entity)));
+        }
+
+    private:
+        Scene* m_Scene = nullptr;
+        Entity m_Source;
+        Entity m_Duplicate;
+    };
+
+    // â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+    //  å‘½ä»¤2ï¼šç»„ä»¶å±æ€§ä¿®æ”¹ï¼ˆæ¨¡æ¿ï¼Œæ”¯æŒä»»æ„ç»„ä»¶ï¼‰
+    // â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     template<typename T>
     class ComponentValueCommand : public ICommand
     {
@@ -246,7 +357,7 @@ namespace Wheatear {
                 m_Entity.GetComponent<T>() = m_Before;
         }
 
-        // Í¬Ò»ÊµÌåÍ¬Ò»×é¼şÁ¬ĞøĞŞ¸ÄºÏ²¢£ºÖ»¸üĞÂÖÕÌ¬£¬¶ªÆúÖĞ¼äÖµ
+        // åŒä¸€å®ä½“åŒä¸€ç»„ä»¶è¿ç»­ä¿®æ”¹åˆå¹¶ï¼šåªæ›´æ–°ç»ˆæ€ï¼Œä¸¢å¼ƒä¸­é—´å€¼
         bool TryMerge(ICommand* other) override
         {
             auto* o = dynamic_cast<ComponentValueCommand<T>*>(other);
@@ -267,9 +378,9 @@ namespace Wheatear {
         return std::make_unique<ComponentValueCommand<T>>(e, before, after);
     }
 
-    // ©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤
-    //  ÃüÁî3£ºÌí¼Ó / ÒÆ³ı×é¼ş
-    // ©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤
+    // â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+    //  å‘½ä»¤3ï¼šæ·»åŠ  / ç§»é™¤ç»„ä»¶
+    // â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     template<typename T>
     class AddComponentCommand : public ICommand
     {

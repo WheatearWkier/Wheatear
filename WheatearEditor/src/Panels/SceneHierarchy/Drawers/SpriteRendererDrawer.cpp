@@ -1,4 +1,4 @@
-#include "SpriteRendererDrawer.h"
+ï»¿#include "SpriteRendererDrawer.h"
 
 #include "../ComponentDrawers.h"
 
@@ -21,22 +21,22 @@ namespace Wheatear {
 
                 const ImVec2      buttonSize = { 100.0f, 100.0f };
                 const ImTextureID textureID = c.Texture
-                    ? reinterpret_cast<ImTextureID>(static_cast<uintptr_t>(c.Texture->GetRendererID()))
-                    : reinterpret_cast<ImTextureID>(0);
+                    ? static_cast<ImTextureID>(static_cast<uintptr_t>(c.Texture->GetRendererID()))
+                    : static_cast<ImTextureID>(0);
 
-                // 1. ´¦Àí X Öá·­×ª
+                // 1. å¤„ç† X è½´ç¿»è½¬
                 float uv0x = c.FlipX ? 1.0f : 0.0f;
                 float uv1x = c.FlipX ? 0.0f : 1.0f;
 
-                // 2. ´¦Àí Y Öá·­×ª (ºËĞÄ£ºÓÉÓÚ OpenGL Ä¬ÈÏµ¹ÖÃ£¬»ù´¡Ó³ÉäÊÇ 1 -> 0)
-                // Èç¹ûÒÔºóÔÚ×é¼ş¼ÓÁË FlipY ×Ö¶Î£¬°ÑÏÂÃæµÄ false »»³É c.FlipY
+                // 2. å¤„ç† Y è½´ç¿»è½¬ (æ ¸å¿ƒï¼šç”±äº OpenGL é»˜è®¤å€’ç½®ï¼ŒåŸºç¡€æ˜ å°„æ˜¯ 1 -> 0)
+                // å¦‚æœä»¥ååœ¨ç»„ä»¶åŠ äº† FlipY å­—æ®µï¼ŒæŠŠä¸‹é¢çš„ false æ¢æˆ c.FlipY
                 bool isFlippedY = false;
-                float uv0y = isFlippedY ? 0.0f : 1.0f; // Ä¬ÈÏ 1.0 (¶¥²¿)
-                float uv1y = isFlippedY ? 1.0f : 0.0f; // Ä¬ÈÏ 0.0 (µ×²¿)
+                float uv0y = isFlippedY ? 0.0f : 1.0f; // é»˜è®¤ 1.0 (é¡¶éƒ¨)
+                float uv1y = isFlippedY ? 1.0f : 0.0f; // é»˜è®¤ 0.0 (åº•éƒ¨)
 
                 ImGui::PushID(&c);
-                // ×¢ÒâÍ¼Æ¬µÄ´¹Ö±·­×ª
-                ImGui::ImageButton(textureID, buttonSize, ImVec2(uv0x, uv0y), ImVec2(uv1x, uv1y));
+                // æ³¨æ„å›¾ç‰‡çš„å‚ç›´ç¿»è½¬
+                ImGui::ImageButton("##SpriteTexture", textureID, buttonSize, ImVec2(uv0x, uv0y), ImVec2(uv1x, uv1y));
 
                 if (ImGui::BeginDragDropTarget())
                 {

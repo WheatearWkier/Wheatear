@@ -9,21 +9,24 @@ namespace Wheatear {
     struct UICheckboxComponent;
     struct UIImageComponent;
     struct UIPanelComponent;
+    struct UIPathComponent;
     struct UIProgressBarComponent;
     struct UISliderComponent;
+    struct UIScrollViewComponent;
+    struct UISkillTreeViewComponent;
     struct UITextComponent;
     struct UIWidgetComponent;
 
-    // °Ñ¹éÒ»»¯UI×ø±ê×ª»»ÎªÊÀ½ç¿Õ¼äµÄmat4
-    // viewportWidth/Height ÊÇµ±Ç°Ö¡»º³åµÄÏñËØ³ß´ç
+    // æŠŠå½’ä¸€åŒ–UIåæ ‡è½¬æ¢ä¸ºä¸–ç•Œç©ºé—´çš„mat4
+    // viewportWidth/Height æ˜¯å½“å‰å¸§ç¼“å†²çš„åƒç´ å°ºå¯¸
     class UIRenderer
     {
     public:
-        // ÔÚScene::OnUpdateRuntimeÄ©Î²µ÷ÓÃ
+        // åœ¨Scene::OnUpdateRuntimeæœ«å°¾è°ƒç”¨
         static void BeginUIPass(uint32_t viewportWidth, uint32_t viewportHeight);
         static void EndUIPass(const glm::mat4& restoreViewProjection = glm::mat4(1.0f));
 
-        // äÖÈ¾µ¥¸öUIÊµÌå£¨ÓÉScene±éÀú×é¼şºóµ÷ÓÃ£©
+        // æ¸²æŸ“å•ä¸ªUIå®ä½“ï¼ˆç”±Sceneéå†ç»„ä»¶åè°ƒç”¨ï¼‰
         static void DrawUIImage(
             const UIWidgetComponent& widget,
             const UIImageComponent& image,
@@ -50,6 +53,31 @@ namespace Wheatear {
             const UISliderComponent& slider,
             int entityID = -1);
 
+        static void DrawUIScrollView(
+            const UIWidgetComponent& widget,
+            const UIScrollViewComponent& scrollView,
+            int entityID = -1);
+
+        static void DrawUIPath(
+            const UIWidgetComponent& widget,
+            const UIPathComponent& path,
+            int entityID = -1);
+
+        static void DrawUIBezier(
+            const UIWidgetComponent& widget,
+            const glm::vec2& start,
+            const glm::vec2& control,
+            const glm::vec2& end,
+            const glm::vec4& color,
+            float lineWidth = 1.0f,
+            int segments = 16,
+            int entityID = -1);
+
+        static void DrawUISkillTreeView(
+            const UIWidgetComponent& widget,
+            const UISkillTreeViewComponent& skillTreeView,
+            int entityID = -1);
+
         static void DrawUICheckbox(
             const UIWidgetComponent& widget,
             const UICheckboxComponent& checkbox,
@@ -58,8 +86,9 @@ namespace Wheatear {
             const UIWidgetComponent& widget,
             const UITextComponent& text,
             int entityID = -1);
+        static void PreloadUIText(const UITextComponent& text);
 
-        // ¹¤¾ß£º¹éÒ»»¯×ø±ê ¡ú Renderer2DÓÃµÄmat4
+        // å·¥å…·ï¼šå½’ä¸€åŒ–åæ ‡ â†’ Renderer2Dç”¨çš„mat4
         static glm::mat4 WidgetToTransform(
             const UIWidgetComponent& widget,
             uint32_t viewportWidth,

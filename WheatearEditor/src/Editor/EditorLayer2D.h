@@ -8,7 +8,7 @@ namespace Wheatear {
     ///
     /// 在基类的基础上增加：
     ///   - 2D 物理碰撞体叠加可视化
-    ///   - （预留）2D 专属 Settings 面板
+    ///   - 2D 专属 ImGui 扩展入口
     ///
     /// 未来可在此添加：
     ///   - 2D 动画编辑专属工具
@@ -28,7 +28,7 @@ namespace Wheatear {
         /// 绘制物理碰撞体线框叠加层
         void OnOverlayRender() override;
 
-        /// 2D 专属设置面板
+        /// 2D 专属 ImGui 扩展，当前不绘制独立 Settings 窗口
         void OnImGuiExtra() override;
     };
 

@@ -13,7 +13,9 @@ namespace Wheatear {
     class Event;
     class MouseButtonPressedEvent;
     class MouseButtonReleasedEvent;
+    class MouseScrolledEvent;
     class Scene;
+    struct SceneTransitionRequest;
 }
 
 class RuntimeSceneLayer : public Wheatear::Layer
@@ -33,9 +35,12 @@ private:
     void ApplyPendingVisualNovelLoad();
     void UpdateViewport();
     bool ConsumeRuntimeSceneCommands();
+    bool ConsumeSceneTransitionRequests();
+    void ExecuteSceneTransitionRequest(const Wheatear::SceneTransitionRequest& request);
 
     bool OnMouseButtonPressed(Wheatear::MouseButtonPressedEvent& event);
     bool OnMouseButtonReleased(Wheatear::MouseButtonReleasedEvent& event);
+    bool OnMouseScrolled(Wheatear::MouseScrolledEvent& event);
     bool ExecuteButtonCommand(const std::string& command);
 
 private:

@@ -20,5 +20,11 @@
 #include "Wheatear/Debug/Instrumentor.h"
 
 #ifdef WT_PLATFORM_WINDOWS
+	#ifndef WIN32_LEAN_AND_MEAN
+		#define WIN32_LEAN_AND_MEAN
+	#endif
+	#ifndef NOMINMAX
+		#define NOMINMAX
+	#endif
 	#include <Windows.h>
 #endif // WT_PLATFORM_WINDOWS

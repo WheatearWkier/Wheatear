@@ -260,6 +260,7 @@ namespace Wheatear {
                 extension == AssetFileType::PrefabExtension ||
                 extension == AssetFileType::MaterialExtension ||
                 extension == ".vn" ||
+                extension == ".wts" ||
                 extension == ".yaml" ||
                 extension == ".yml" ||
                 extension == ".json";
@@ -442,6 +443,11 @@ namespace Wheatear {
             TryAddPackageAsset(projectRoot, startupScene, &assets, &parseQueue);
 
             AddDirectoryFiles(projectRoot, "assets/shaders", &assets);
+            TryAddPackageAsset(projectRoot, "assets/fonts/wqy-microhei.ttc", &assets, nullptr);
+            TryAddPackageAsset(projectRoot, "assets/fonts/licenses/WenQuanYiMicroHei/LICENSE_Apache2.txt", &assets, nullptr);
+            TryAddPackageAsset(projectRoot, "assets/fonts/licenses/WenQuanYiMicroHei/LICENSE_GPLv3.txt", &assets, nullptr);
+            TryAddPackageAsset(projectRoot, "assets/fonts/licenses/WenQuanYiMicroHei/README.txt", &assets, nullptr);
+            TryAddPackageAsset(projectRoot, "assets/fonts/licenses/WenQuanYiMicroHei/AUTHORS.txt", &assets, nullptr);
             TryAddPackageAsset(projectRoot, "assets/fonts/NotoSansSC-VF.ttf", &assets, nullptr);
             TryAddPackageAsset(projectRoot, "assets/fonts/Open-Sans-2.ttf", &assets, nullptr);
 
@@ -629,7 +635,7 @@ namespace Wheatear {
             " -NoProfile -ExecutionPolicy Bypass -File " + Quote(buildScript) +
             " -ProjectPath " + Quote(projectPath) +
             " -Configuration " + options.Configuration +
-            " -Platform x64 -Verbosity m -LogFile build-msbuild.log";
+            " -Platform x64 -Verbosity m -LinkIncremental false -LogFile build-msbuild.log";
 
         WT_CORE_INFO("PlayerPackager: building WheatearSandbox with '{}'", command);
 #ifdef WT_PLATFORM_WINDOWS
@@ -637,7 +643,7 @@ namespace Wheatear {
             L"-NoProfile -ExecutionPolicy Bypass -File " + QuoteWide(buildScript) +
             L" -ProjectPath " + QuoteWide(projectPath) +
             L" -Configuration " + std::wstring(options.Configuration.begin(), options.Configuration.end()) +
-            L" -Platform x64 -Verbosity m -LogFile build-msbuild.log";
+            L" -Platform x64 -Verbosity m -LinkIncremental false -LogFile build-msbuild.log";
         const int buildResult = RunProcess(powerShell, arguments, repositoryRoot);
 #else
         const int buildResult = std::system(command.c_str());

@@ -77,7 +77,7 @@
       <PrecompiledHeaderFile>wtpch.h</PrecompiledHeaderFile>
       <WarningLevel>Level3</WarningLevel>
       <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;WT_PLATFORM_WINDOWS;WT_BUILD_DLL;GLFW_INCLUDE_NONE;WT_DEBUG;WT_ENABLE_ASSERTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>src;vendor\spdlog\include;vendor\GLFW\include;vendor\GLAD\include;vendor\imgui;vendor\glm;vendor\stb_image;vendor\entt\include;vendor\tinyobjloader\include;vendor\yaml-cpp\include;vendor\ImGuizmo;D:\softwares\VulkanSDK\1.4.341.1\Include;vendor\Box2D\include;vendor\mono\include;vendor\miniaudio;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>src;vendor\spdlog\include;vendor\GLFW\include;vendor\GLAD\include;vendor\imgui;vendor\glm;vendor\stb_image;vendor\entt\include;vendor\tinyobjloader\include;vendor\yaml-cpp\include;vendor\ImGuizmo;D:\softwares\VulkanSDK\1.4.341.1\Include;vendor\Box2D\include;vendor\miniaudio;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
       <Optimization>Disabled</Optimization>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
@@ -90,7 +90,7 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
     <Lib>
-      <AdditionalDependencies>opengl32.lib;Ws2_32.lib;Winmm.lib;Version.lib;Bcrypt.lib;D:\softwares\VulkanSDK\1.4.341.1\Lib\shaderc_sharedd.lib;D:\softwares\VulkanSDK\1.4.341.1\Lib\spirv-cross-cored.lib;D:\softwares\VulkanSDK\1.4.341.1\Lib\spirv-cross-glsld.lib;vendor\mono\lib\Debug\libmono-static-sgen.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>opengl32.lib;Ws2_32.lib;Winmm.lib;Version.lib;Bcrypt.lib;D:\softwares\VulkanSDK\1.4.341.1\Lib\shaderc_sharedd.lib;D:\softwares\VulkanSDK\1.4.341.1\Lib\spirv-cross-cored.lib;D:\softwares\VulkanSDK\1.4.341.1\Lib\spirv-cross-glsld.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Lib>
     <ProjectReference>
     </ProjectReference>
@@ -101,7 +101,7 @@
       <PrecompiledHeaderFile>wtpch.h</PrecompiledHeaderFile>
       <WarningLevel>Level3</WarningLevel>
       <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;WT_PLATFORM_WINDOWS;WT_BUILD_DLL;GLFW_INCLUDE_NONE;WT_RELEASE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>src;vendor\spdlog\include;vendor\GLFW\include;vendor\GLAD\include;vendor\imgui;vendor\glm;vendor\stb_image;vendor\entt\include;vendor\tinyobjloader\include;vendor\yaml-cpp\include;vendor\ImGuizmo;D:\softwares\VulkanSDK\1.4.341.1\Include;vendor\Box2D\include;vendor\mono\include;vendor\miniaudio;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>src;vendor\spdlog\include;vendor\GLFW\include;vendor\GLAD\include;vendor\imgui;vendor\glm;vendor\stb_image;vendor\entt\include;vendor\tinyobjloader\include;vendor\yaml-cpp\include;vendor\ImGuizmo;D:\softwares\VulkanSDK\1.4.341.1\Include;vendor\Box2D\include;vendor\miniaudio;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <Optimization>Full</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
@@ -118,7 +118,7 @@
       <OptimizeReferences>true</OptimizeReferences>
     </Link>
     <Lib>
-      <AdditionalDependencies>opengl32.lib;Ws2_32.lib;Winmm.lib;Version.lib;Bcrypt.lib;D:\softwares\VulkanSDK\1.4.341.1\Lib\shaderc_shared.lib;D:\softwares\VulkanSDK\1.4.341.1\Lib\spirv-cross-core.lib;D:\softwares\VulkanSDK\1.4.341.1\Lib\spirv-cross-glsl.lib;vendor\mono\lib\Release\libmono-static-sgen.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>opengl32.lib;Ws2_32.lib;Winmm.lib;Version.lib;Bcrypt.lib;D:\softwares\VulkanSDK\1.4.341.1\Lib\shaderc_shared.lib;D:\softwares\VulkanSDK\1.4.341.1\Lib\spirv-cross-core.lib;D:\softwares\VulkanSDK\1.4.341.1\Lib\spirv-cross-glsl.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Lib>
     <ProjectReference>
     </ProjectReference>
@@ -129,7 +129,7 @@
       <PrecompiledHeaderFile>wtpch.h</PrecompiledHeaderFile>
       <WarningLevel>Level3</WarningLevel>
       <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;WT_PLATFORM_WINDOWS;WT_BUILD_DLL;GLFW_INCLUDE_NONE;WT_DIST;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>src;vendor\spdlog\include;vendor\GLFW\include;vendor\GLAD\include;vendor\imgui;vendor\glm;vendor\stb_image;vendor\entt\include;vendor\tinyobjloader\include;vendor\yaml-cpp\include;vendor\ImGuizmo;D:\softwares\VulkanSDK\1.4.341.1\Include;vendor\Box2D\include;vendor\mono\include;vendor\miniaudio;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>src;vendor\spdlog\include;vendor\GLFW\include;vendor\GLAD\include;vendor\imgui;vendor\glm;vendor\stb_image;vendor\entt\include;vendor\tinyobjloader\include;vendor\yaml-cpp\include;vendor\ImGuizmo;D:\softwares\VulkanSDK\1.4.341.1\Include;vendor\Box2D\include;vendor\miniaudio;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <Optimization>Full</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
@@ -146,7 +146,7 @@
       <OptimizeReferences>true</OptimizeReferences>
     </Link>
     <Lib>
-      <AdditionalDependencies>opengl32.lib;Ws2_32.lib;Winmm.lib;Version.lib;Bcrypt.lib;D:\softwares\VulkanSDK\1.4.341.1\Lib\shaderc_shared.lib;D:\softwares\VulkanSDK\1.4.341.1\Lib\spirv-cross-core.lib;D:\softwares\VulkanSDK\1.4.341.1\Lib\spirv-cross-glsl.lib;vendor\mono\lib\Release\libmono-static-sgen.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>opengl32.lib;Ws2_32.lib;Winmm.lib;Version.lib;Bcrypt.lib;D:\softwares\VulkanSDK\1.4.341.1\Lib\shaderc_shared.lib;D:\softwares\VulkanSDK\1.4.341.1\Lib\spirv-cross-core.lib;D:\softwares\VulkanSDK\1.4.341.1\Lib\spirv-cross-glsl.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Lib>
     <ProjectReference>
     </ProjectReference>
@@ -225,13 +225,20 @@
     <ClInclude Include="src\Wheatear\Renderer\Texture.h" />
     <ClInclude Include="src\Wheatear\Renderer\UniformBuffer.h" />
     <ClInclude Include="src\Wheatear\Renderer\VertexArray.h" />
+    <ClInclude Include="src\Wheatear\Runtime\CommandBus.h" />
+    <ClInclude Include="src\Wheatear\Runtime\SceneTransitionService.h" />
     <ClInclude Include="src\Wheatear\Scene\ComponentGroup.h" />
     <ClInclude Include="src\Wheatear\Scene\Components.h" />
     <ClInclude Include="src\Wheatear\Scene\Entity.h" />
     <ClInclude Include="src\Wheatear\Scene\Scene.h" />
     <ClInclude Include="src\Wheatear\Scene\SceneSerializer.h" />
+    <ClInclude Include="src\Wheatear\Scene\SceneSerializerComponentGroups.h" />
+    <ClInclude Include="src\Wheatear\Scene\SceneSerializerComponentSupport.h" />
+    <ClInclude Include="src\Wheatear\Scene\SceneQueries.h" />
     <ClInclude Include="src\Wheatear\Scene\SceneSystemRegistry.h" />
     <ClInclude Include="src\Wheatear\Scene\ScriptableEntity.h" />
+    <ClInclude Include="src\Wheatear\Scripting\EventScript.h" />
+    <ClInclude Include="src\Wheatear\Scripting\EventScriptSystem.h" />
     <ClInclude Include="src\Wheatear\Scripting\ScriptEngine.h" />
     <ClInclude Include="src\Wheatear\Scripting\ScriptGlue.h" />
     <ClInclude Include="src\Wheatear\Systems\AnimationSystem.h" />
@@ -243,6 +250,8 @@
     <ClInclude Include="src\Wheatear\Systems\UISystem.h" />
     <ClInclude Include="src\Wheatear\UI\UIInputSystem.h" />
     <ClInclude Include="src\Wheatear\UI\UIRenderer.h" />
+    <ClInclude Include="src\Wheatear\UI\UIRuntimeTools.h" />
+    <ClInclude Include="src\Wheatear\UI\UIWidgetLayout.h" />
     <ClInclude Include="src\Wheatear\Utils\PlatformUtils.h" />
     <ClInclude Include="src\wtpch.h" />
     <ClInclude Include="vendor\ImGuizmo\ImGuizmo.h" />
@@ -664,10 +673,20 @@
     <ClCompile Include="src\Wheatear\Renderer\Texture.cpp" />
     <ClCompile Include="src\Wheatear\Renderer\UniformBuffer.cpp" />
     <ClCompile Include="src\Wheatear\Renderer\VertexArray.cpp" />
+    <ClCompile Include="src\Wheatear\Runtime\CommandBus.cpp" />
+    <ClCompile Include="src\Wheatear\Runtime\SceneTransitionService.cpp" />
     <ClCompile Include="src\Wheatear\Scene\Entity.cpp" />
     <ClCompile Include="src\Wheatear\Scene\Scene.cpp" />
     <ClCompile Include="src\Wheatear\Scene\SceneSerializer.cpp" />
+    <ClCompile Include="src\Wheatear\Scene\SceneSerializerAnimationComponents.cpp" />
+    <ClCompile Include="src\Wheatear\Scene\SceneSerializerCoreComponents.cpp" />
+    <ClCompile Include="src\Wheatear\Scene\SceneSerializerModuleComponents.cpp" />
+    <ClCompile Include="src\Wheatear\Scene\SceneSerializerScriptingComponents.cpp" />
+    <ClCompile Include="src\Wheatear\Scene\SceneSerializerUIComponents.cpp" />
+    <ClCompile Include="src\Wheatear\Scene\SceneQueries.cpp" />
     <ClCompile Include="src\Wheatear\Scene\SceneSystemRegistry.cpp" />
+    <ClCompile Include="src\Wheatear\Scripting\EventScript.cpp" />
+    <ClCompile Include="src\Wheatear\Scripting\EventScriptSystem.cpp" />
     <ClCompile Include="src\Wheatear\Scripting\ScriptEngine.cpp" />
     <ClCompile Include="src\Wheatear\Scripting\ScriptGlue.cpp" />
     <ClCompile Include="src\Wheatear\Systems\AnimationSystem.cpp" />
@@ -678,6 +697,7 @@
     <ClCompile Include="src\Wheatear\Systems\UISystem.cpp" />
     <ClCompile Include="src\Wheatear\UI\UIInputSystem.cpp" />
     <ClCompile Include="src\Wheatear\UI\UIRenderer.cpp" />
+    <ClCompile Include="src\Wheatear\UI\UIRuntimeTools.cpp" />
     <ClCompile Include="src\wtpch.cpp">
       <PrecompiledHeader>Create</PrecompiledHeader>
     </ClCompile>

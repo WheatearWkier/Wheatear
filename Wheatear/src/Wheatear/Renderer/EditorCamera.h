@@ -1,5 +1,5 @@
-#pragma once
-// GLM_ENABLE_EXPERIMENTAL ÊÇÎªÁËÓÃ gtx ÀïµÄº¯Êı£¬Í¨³£·ÅÔÚ pch Àï£¬ÕâÀïÏÔÊ½¼ÓÒ»±é±£ÏÕ
+ï»¿#pragma once
+// GLM_ENABLE_EXPERIMENTAL æ˜¯ä¸ºäº†ç”¨ gtx é‡Œçš„å‡½æ•°ï¼Œé€šå¸¸æ”¾åœ¨ pch é‡Œï¼Œè¿™é‡Œæ˜¾å¼åŠ ä¸€éä¿é™©
 #define GLM_ENABLE_EXPERIMENTAL
 #include "Wheatear/Core/Timestep.h"
 #include "Wheatear/Events/Event.h"
@@ -13,11 +13,11 @@ namespace Wheatear {
     class EditorCamera : public Camera
     {
     public:
-        // Ïà»úÄ£Ê½
+        // ç›¸æœºæ¨¡å¼
         enum class Mode
         {
-            Orbit,  // ¹ìµÀÄ£Ê½£¨Ä¬ÈÏ£©£ºÈÆ½¹µãĞı×ª£¬Alt+Êó±ê¿ØÖÆ
-            Fly     // ·ÉĞĞÄ£Ê½£º°´×¡Êó±êÓÒ¼ü¼¤»î£¬WASDÒÆ¶¯
+            Orbit,  // è½¨é“æ¨¡å¼ï¼ˆé»˜è®¤ï¼‰ï¼šç»•ç„¦ç‚¹æ—‹è½¬ï¼ŒAlt+é¼ æ ‡æ§åˆ¶
+            Fly     // é£è¡Œæ¨¡å¼ï¼šæŒ‰ä½é¼ æ ‡å³é”®æ¿€æ´»ï¼ŒWASDç§»åŠ¨
         };
 
     public:
@@ -27,8 +27,11 @@ namespace Wheatear {
         void OnUpdate(Timestep ts);
         void OnEvent(Event& e);
 
-        // ÊÓ¿Ú
+        // è§†å£
         void SetViewportSize(float width, float height);
+        void SetViewTransform(const glm::vec3& position,
+            const glm::vec3& rotation,
+            float orbitDistance = 10.0f);
 
         // Getters
         float GetDistance() const { return m_Distance; }
@@ -52,49 +55,49 @@ namespace Wheatear {
         void UpdateProjection();
         void UpdateView();
 
-        // ÊÂ¼ş´¦Àí
+        // äº‹ä»¶å¤„ç†
         bool OnMouseScroll(MouseScrolledEvent& e);
 
-        // ¹ìµÀÄ£Ê½²Ù×÷
+        // è½¨é“æ¨¡å¼æ“ä½œ
         void MousePan(const glm::vec2& delta);
         void MouseRotate(const glm::vec2& delta);
         void MouseZoom(float delta);
 
-        // ¸¨Öú
+        // è¾…åŠ©
         glm::vec3 CalculateOrbitPosition() const;
         std::pair<float, float> PanSpeed()    const;
         float                   RotationSpeed() const;
         float                   ZoomSpeed()     const;
 
     private:
-        // Í¶Ó°²ÎÊı
+        // æŠ•å½±å‚æ•°
         float m_FOV = 45.0f;
         float m_AspectRatio = 1.778f;
         float m_NearClip = 0.1f;
         float m_FarClip = 1000.0f;
 
-        // ÊÓÍ¼¾ØÕó
+        // è§†å›¾çŸ©é˜µ
         glm::mat4 m_ViewMatrix = glm::mat4(1.0f);
 
-        // Ïà»úÎ»ÖÃÓë³¯Ïò£¨Á½ÖÖÄ£Ê½¹²ÓÃ£©
+        // ç›¸æœºä½ç½®ä¸æœå‘ï¼ˆä¸¤ç§æ¨¡å¼å…±ç”¨ï¼‰
         glm::vec3 m_Position = { 0.0f, 8.0f, 15.0f };
-        float     m_Pitch = 0.0f;   // ¸©Ñö½Ç£¨»¡¶È£©
-        float     m_Yaw = 0.0f;   // Æ«º½½Ç£¨»¡¶È£©
+        float     m_Pitch = 0.0f;   // ä¿¯ä»°è§’ï¼ˆå¼§åº¦ï¼‰
+        float     m_Yaw = 0.0f;   // åèˆªè§’ï¼ˆå¼§åº¦ï¼‰
 
-        // ¹ìµÀÄ£Ê½×¨ÓÃ
+        // è½¨é“æ¨¡å¼ä¸“ç”¨
         glm::vec3 m_FocalPoint = { 0.0f, 0.0f, 0.0f };
         float     m_Distance = 10.0f;
 
-        // ·ÉĞĞÄ£Ê½×¨ÓÃ
-        float m_FlySpeed = 5.0f;  // µ¥Î»/Ãë£¬Shift ¼ÓËÙ x3
+        // é£è¡Œæ¨¡å¼ä¸“ç”¨
+        float m_FlySpeed = 5.0f;  // å•ä½/ç§’ï¼ŒShift åŠ é€Ÿ x3
 
-        // µ±Ç°Ä£Ê½
+        // å½“å‰æ¨¡å¼
         Mode m_Mode = Mode::Orbit;
 
-        // Êó±ê
+        // é¼ æ ‡
         glm::vec2 m_InitialMousePosition = { 0.0f, 0.0f };
 
-        // ÊÓ¿Ú³ß´ç
+        // è§†å£å°ºå¯¸
         float m_ViewportWidth = 1920.0f;
         float m_ViewportHeight = 1080.0f;
     };

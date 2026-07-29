@@ -1,14 +1,23 @@
 {
   "assetSchema": "wheatear.vertical_slice.manifest.v1",
-  "version": "0.3.0",
+  "version": "0.6.0",
   "entryScene": "assets/scenes/VisualNovelMainMenu.wt",
   "flow": [
     "assets/scenes/VerticalSliceIntro.wt",
     "assets/scenes/VisualNovelBattle.wt",
     "assets/scenes/VerticalSlicePostFake.wt",
     "assets/scenes/SideCombatVerticalSlice.wt",
+    "assets/scenes/VerticalSliceResult.wt",
     "assets/scenes/VerticalSliceHub.wt",
-    "assets/scenes/VerticalSliceChapter3Preview.wt"
+    "assets/scenes/VerticalSliceSkillTree.wt",
+    "assets/scenes/VerticalSliceEquipment.wt",
+    "assets/scenes/VerticalSliceChapter3Preview.wt",
+    "assets/scenes/SideCombatBeastPath.wt",
+    "assets/scenes/VerticalSliceDungeonSelect.wt",
+    "assets/scenes/VerticalSliceRelationship.wt",
+    "assets/scenes/VerticalSliceSupport.wt",
+    "assets/scenes/VerticalSliceSettings.wt",
+    "assets/scenes/VerticalSliceSaveLoad.wt"
   ],
   "vnScripts": [
     "assets/vn/vertical_slice_intro.vn",
@@ -21,21 +30,39 @@
       "displayName": "青梅",
       "slot": "VN_Character_Mira",
       "template": "assets/vertical_slice/vn/portraits/aoba_{expression}.png",
-      "expressions": ["neutral", "happy", "serious", "surprised", "thinking"]
+      "expressions": [
+        "neutral",
+        "happy",
+        "serious",
+        "surprised",
+        "thinking"
+      ]
     },
     {
       "id": "CHAR_MENTOR",
       "displayName": "魔剑士导师",
       "slot": "VN_Character_Mira",
       "template": "assets/vertical_slice/vn/portraits/mentor_{expression}.png",
-      "expressions": ["neutral", "happy", "serious", "surprised", "thinking"]
+      "expressions": [
+        "neutral",
+        "happy",
+        "serious",
+        "surprised",
+        "thinking"
+      ]
     },
     {
       "id": "CHAR_PROTAG",
       "displayName": "主角",
       "slot": "VN_Character_Leo",
       "template": "assets/vertical_slice/vn/portraits/hero_{expression}.png",
-      "expressions": ["neutral", "happy", "serious", "surprised", "thinking"]
+      "expressions": [
+        "neutral",
+        "happy",
+        "serious",
+        "surprised",
+        "thinking"
+      ]
     }
   ],
   "sideCombat": {
@@ -60,10 +87,79 @@
       "assets/vertical_slice/side_combat/ui/mat_beast_claw.png"
     ]
   },
+  "ui": {
+    "panels": [
+      "assets/vertical_slice/ui/panels/panel_dark.png",
+      "assets/vertical_slice/ui/panels/panel_hub.png",
+      "assets/vertical_slice/ui/panels/panel_result.png",
+      "assets/vertical_slice/ui/panels/panel_skill.png",
+      "assets/vertical_slice/ui/panels/panel_equipment.png",
+      "assets/vertical_slice/ui/panels/panel_dungeon.png",
+      "assets/vertical_slice/ui/panels/panel_relationship.png",
+      "assets/vertical_slice/ui/panels/panel_support.png",
+      "assets/vertical_slice/ui/panels/panel_settings.png",
+      "assets/vertical_slice/ui/panels/panel_save_load.png"
+    ],
+    "icons": [
+      "assets/vertical_slice/ui/icons/icon_dungeon.png",
+      "assets/vertical_slice/ui/icons/icon_skill_tree.png",
+      "assets/vertical_slice/ui/icons/icon_magic_sword.png",
+      "assets/vertical_slice/ui/icons/icon_armor.png",
+      "assets/vertical_slice/ui/icons/icon_result.png",
+      "assets/vertical_slice/ui/icons/icon_history.png",
+      "assets/vertical_slice/ui/icons/icon_tutorial.png",
+      "assets/vertical_slice/ui/icons/icon_material_core.png",
+      "assets/vertical_slice/ui/icons/icon_material_sinew.png",
+      "assets/vertical_slice/ui/icons/icon_material_claw.png",
+      "assets/vertical_slice/ui/icons/icon_relationship.png",
+      "assets/vertical_slice/ui/icons/icon_support.png",
+      "assets/vertical_slice/ui/icons/icon_settings.png",
+      "assets/vertical_slice/ui/icons/icon_save.png",
+      "assets/vertical_slice/ui/icons/icon_back.png"
+    ],
+    "nodes": [
+      "assets/vertical_slice/ui/nodes/node_active.png",
+      "assets/vertical_slice/ui/nodes/node_unlocked.png",
+      "assets/vertical_slice/ui/nodes/node_locked.png"
+    ]
+  },
   "replacementPolicy": {
     "keepPathsStable": true,
     "replaceGeneratedPngInPlace": true,
     "sourceGenerator": "tools/vertical_slice/generate_vertical_slice_assets.py",
-    "sideCombatGenerator": "tools/vertical_slice/generate_side_combat_assets.py"
-  }
+    "sideCombatGenerator": "tools/vertical_slice/generate_side_combat_assets.py",
+    "uiGenerator": "tools/vertical_slice/generate_vertical_slice_ui_assets.py"
+  },
+  "assets": [
+    "assets/vertical_slice/ui/icons/icon_equipment_angel_feather.png",
+    "assets/vertical_slice/ui/icons/icon_equipment_beast_tooth.png",
+    "assets/vertical_slice/ui/icons/icon_equipment_black_forest_armor.png",
+    "assets/vertical_slice/ui/icons/icon_equipment_magic_ring.png",
+    "assets/vertical_slice/ui/icons/icon_equipment_training_blade.png",
+    "assets/vertical_slice/ui/icons/icon_equipment_traveler_armor.png",
+    "assets/vertical_slice/ui/icons/icon_equipment_ward_charm.png",
+    "assets/vertical_slice/ui/icons/icon_equipment_wind_boots.png",
+    "assets/vertical_slice/ui/icons/icon_skill_air.png",
+    "assets/vertical_slice/ui/icons/icon_skill_break.png",
+    "assets/vertical_slice/ui/icons/icon_skill_core.png",
+    "assets/vertical_slice/ui/icons/icon_skill_dash.png",
+    "assets/vertical_slice/ui/icons/icon_skill_fire.png",
+    "assets/vertical_slice/ui/icons/icon_skill_locked.png",
+    "assets/vertical_slice/ui/icons/icon_skill_slash.png",
+    "assets/vertical_slice/ui/icons/icon_skill_support.png",
+    "assets/vertical_slice/ui/icons/icon_skill_tree.png",
+    "assets/vertical_slice/ui/icons/icon_skill_uppercut.png"
+  ],
+  "interactive_ui_revision": "2026-07-28-skillbar-tree-pages",
+  "generated_assets": [
+    "assets/scenes/VerticalSliceEquipment.wt",
+    "assets/scenes/VerticalSliceSkillTree.wt",
+    "assets/vertical_slice/side_combat/ui/skill_i_support.png",
+    "assets/vertical_slice/side_combat/ui/skill_j_slash.png",
+    "assets/vertical_slice/side_combat/ui/skill_k_launcher.png",
+    "assets/vertical_slice/side_combat/ui/skill_l_break.png",
+    "assets/vertical_slice/side_combat/ui/skill_sj_uppercut.png",
+    "assets/vertical_slice/side_combat/ui/skill_u_magic.png",
+    "assets/vertical_slice/ui/skill_tree/skill_magic_sword_core.png"
+  ]
 }

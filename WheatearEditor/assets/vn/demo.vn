@@ -1,4 +1,4 @@
-# 可编辑的视觉小说脚本资产。
+﻿# 可编辑的视觉小说脚本资产。
 # 常用命令：
 # @label name
 # @goto name
@@ -10,6 +10,7 @@
 
 @label start
 @background assets/textures/vn/studio.png
+@music assets/vertical_slice/audio/bgm/vn_school_morning.wav "演示日常"
 @speed 34
 @character Mira 可怜 assets/textures/vn/mira_{expression}.png
 @character Leo 林舟 assets/textures/vn/leo_{expression}.png
@@ -39,6 +40,7 @@ Leo: 按 H 可以查看历史记录，F5 快速存档，F9 读取 1 号存档。
 
 @label common
 @background assets/textures/vn/sunset.png
+@music assets/vertical_slice/audio/bgm/vn_unease.wav "庭院异兆"
 @expression Mira surprised
 Mira: 背景颜色变了，我的表情也从脚本里切换了。
 @expression Leo happy
@@ -46,7 +48,7 @@ Leo: 按 A 可以切换自动播放。遇到选项时，自动播放会停下来
 Mira: 等等，庭院那边的光突然变红了。
 Leo: 有东西正在闯进学校。如果我们过去，VN 场景会把控制权交给一个原生 2D 战斗场景。
 Mira: 你愿意为我战斗吗？
-@choice 为可怜战斗 -> scene:assets/scenes/VisualNovelBattle.wt | 留下做准备 -> stay_prepare
+@choice 为可怜战斗 -> event:FlowController:go_fake_combat | 留下做准备 -> stay_prepare
 
 @label stay_prepare
 @expression Mira serious

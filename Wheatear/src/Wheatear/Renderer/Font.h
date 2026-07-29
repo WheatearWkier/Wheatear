@@ -32,6 +32,7 @@ namespace Wheatear {
 
         const FontGlyph* GetGlyph(uint32_t codepoint);
         const FontGlyph* GetGlyph(char character) { return GetGlyph(static_cast<uint32_t>(static_cast<unsigned char>(character))); }
+        void PreloadText(const std::string& text);
 
         const Ref<Texture2D>& GetAtlasTexture() const { return m_AtlasTexture; }
         bool IsLoaded() const { return m_Loaded; }
@@ -44,6 +45,7 @@ namespace Wheatear {
         float GetLineHeight() const { return m_LineHeight; }
         uint32_t GetAtlasWidth() const { return m_AtlasWidth; }
         uint32_t GetAtlasHeight() const { return m_AtlasHeight; }
+        float GetOutlinePixelScale() const { return 1.0f; }
 
     private:
         Font(const std::string& filepath, float pixelSize,
@@ -64,6 +66,9 @@ namespace Wheatear {
         float m_Descent = 0.0f;
         float m_LineGap = 0.0f;
         float m_LineHeight = 0.0f;
+        int m_GlyphPadding = 2;
+        bool m_AtlasDirty = false;
+        bool m_DeferAtlasUpload = false;
 
         std::vector<unsigned char> m_FontData;
         int m_FontOffset = 0;

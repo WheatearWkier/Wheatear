@@ -1,5 +1,10 @@
 outputdir = "%{cfg.buildcfg}-%{cfg.system}-%{cfg.architecture}"
 
+newoption {
+    trigger = "csharp-scripting",
+    description = "Enable optional Mono/C# scripting support"
+}
+
 local vulkan_sdk = os.getenv("VULKAN_SDK")
 if not vulkan_sdk then
     error("VULKAN_SDK is not set. Install the Vulkan SDK or set the VULKAN_SDK environment variable before generating projects.")
@@ -92,6 +97,5 @@ function wt_app_includes()
         "%{IncludeDir.WheatearVendor}",
         "%{IncludeDir.glm}",
         "%{IncludeDir.entt}",
-        "%{IncludeDir.tinyobjloader}",
     }
 end

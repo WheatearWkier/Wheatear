@@ -42,6 +42,8 @@ Dist/
 *.lastbuildstate
 *.recipe
 *.wtpack
+__pycache__/
+*.py[cod]
 
 # Runtime / editor generated files
 WheatearProfile-*.json
@@ -67,6 +69,14 @@ Wheatear/vendor/glm/doc/
 Wheatear/vendor/glm/test/
 Wheatear/vendor/imgui/examples/
 Wheatear/vendor/imgui/docs/
+Wheatear/vendor/imgui/backends/*
+!Wheatear/vendor/imgui/backends/
+!Wheatear/vendor/imgui/backends/imgui_impl_glfw.cpp
+!Wheatear/vendor/imgui/backends/imgui_impl_glfw.h
+!Wheatear/vendor/imgui/backends/imgui_impl_opengl3.cpp
+!Wheatear/vendor/imgui/backends/imgui_impl_opengl3.h
+!Wheatear/vendor/imgui/backends/imgui_impl_opengl3_loader.h
+Wheatear/vendor/imgui/misc/debuggers/
 Wheatear/vendor/yaml-cpp/test/
 Wheatear/vendor/yaml-cpp/docs/
 Wheatear/vendor/Box2D/docs/
@@ -75,3 +85,6 @@ Wheatear/vendor/Box2D/unit-test/
 Wheatear/vendor/GLFW/docs/
 Wheatear/vendor/GLFW/examples/
 Wheatear/vendor/GLFW/tests/
+Wheatear/vendor/ImGuizmo/docs/
+Wheatear/vendor/ImGuizmo/images/
+Wheatear/vendor/ImGuizmo/example/CMakeLists.txt

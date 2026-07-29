@@ -1,4 +1,4 @@
-# 《Wheatear 异世界项目》据点 UI 与流程策划方案 v0.1
+# 《Wheatear 异世界项目》据点 UI 与流程策划方案 v0.2
 
 ## 0. 文档定位
 
@@ -256,6 +256,18 @@
 
 这是避免玩家迷路的关键。
 
+### 6.4 当前竖切落地
+
+当前 `VerticalSliceSkillTree.wt` 已经从文字横排改为图标化分支节点网络：
+
+- 中心是魔剑核心，近战、上挑、空连、魔法、支援、机动和断限节点向外分支。
+- 点击节点会写入 `GameProgress::State.SelectedSkillNodeId`。
+- `SkillTree_Details` 显示选中节点的类型、连招职责、已学 / 未学状态、材料或章节条件。
+- `SkillTree_Button_UpgradeMagicSword` 当前改为“学习选中节点”，竖切阶段主要验证魔法弹和疾风步的 Lv2 解锁流程。
+- 断限追击节点只展示规则和后期教学定位，不在第二章竖切中正式开放给玩家。
+
+后续正式化还需要补：节点高亮框、材料来源点击跳转、技能装备栏、节点前置连线状态和多级升级。
+
 ## 7. 装备页
 
 ### 7.1 页面结构
@@ -300,6 +312,18 @@
 - 显示缺少数量。
 - 提供材料来源副本入口。
 - 不允许误点消耗不存在的材料。
+
+### 7.4 当前竖切落地
+
+当前 `VerticalSliceEquipment.wt` 已经从单装备文字说明改为装备管理页面底稿：
+
+- 左侧显示当前装备槽，先用魔剑、防具、饰品、护符、特殊位做竖切占位。
+- 中央显示背包图标网格，当前放入旅人护衣、黑林皮甲、兽牙坠饰、初级魔晶戒、疾风短靴、旧护符、练习短剑、天使羽饰。
+- 点击装备图标会写入 `GameProgress::State.SelectedEquipmentId`，并刷新 `Equipment_Details` 和材料需求。
+- 分页按钮会写入 `GameProgress::State.EquipmentPage`，`Equipment_PageSlider` 用于显示页码进度。
+- 当前只有旅人护衣接入真实强化消耗和属性提升，其他装备先验证选择、分页和详情展示。
+
+后续正式化还需要补：装备实例 ID、真实穿戴、属性对比箭头、拖拽交换、词条列表、材料来源跳转和多页背包容量规则。
 
 ## 8. 队友关系页
 
@@ -484,20 +508,41 @@
 | `HubState.CurrentObjectiveId` | 当前先用 `GameProgress::State.Objective` 文本表达 |
 | `HubState.UnlockedDungeons` | `GameProgress::State.UnlockedDungeons` |
 | `HubState.CompletedDungeons` | `GameProgress::State.CompletedDungeons` |
-| `HubState.BestRanks` | 当前先记录 `BestCombosByDungeon`，评分系统后补 |
+| `HubState.BestRanks` | 当前先记录 `BestCombosByDungeon`，结算文案已有评分，正式评分表后补 |
 | `HubState.StoryFlags` | `GameProgress::State.StoryFlags` |
 | `PlayerProgress.Level / Experience / Attributes` | `GameProgress::State.PlayerLevel / Experience / Attributes` |
 | `PlayerProgress.MagicSwordLevel` | `GameProgress::State.MagicSwordLevel` |
 | `InventoryState.Materials` | `GameProgress::State.Materials` |
+| `RelationshipState` | `GameProgress::State.Relationships` |
+| `SupportLoadout` | `GameProgress::State.ActiveSupportCharacterId` |
+| `SettingsState` | `GameProgress::State.Settings` |
 
 竖切已经接入的命令：
 
 | 命令 | 行为 |
 | --- | --- |
-| `progression:upgrade_magic_sword` | 消耗 `魔核碎片 x1 / 兽筋 x2 / 熊爪 x1`，把魔剑升到 Lv2，提升 ATK / MATK，并解锁基础强化标记 |
+| `progression:learn_selected_skill` | 根据当前选中技能节点执行学习；竖切中魔法弹 / 疾风步会尝试把魔剑升到 Lv2 |
+| `progression:select_skill_core / select_skill_melee / select_skill_launcher / select_skill_air / select_skill_magic / select_skill_support / select_skill_mobility / select_skill_break` | 选择技能树节点并刷新详情 |
+| `progression:upgrade_magic_sword` | 旧版直升命令，仍可消耗 `魔核碎片 x1 / 兽筋 x2 / 熊爪 x1` 把魔剑升到 Lv2 |
 | `progression:upgrade_traveler_armor` | 消耗 `兽筋 x1 / 熊爪 x1`，把旅人护衣强化到 +1，提升 HP / DEF |
+| `progression:select_equipment_<id>` | 选择背包装备并刷新装备详情 |
+| `progression:equipment_page_1 / equipment_page_2` | 切换背包分页并刷新页码滑条 |
+| `progression:select_support_mentor` | 选择导师作为当前主动支援 |
+| `progression:select_support_white_mage` | 白魔法队友解锁后选择其支援 |
+| `progression:select_support_guard` | 剑盾护卫解锁后选择其支援 |
+| `progression:select_support_black_mage` | 黑魔法队友解锁后选择其支援 |
+| `progression:save_1 / save_slot1` | 保存竖切一号槽 |
+| `progression:load_1 / load_slot1` | 读取竖切一号槽 |
+| `vn:savemenu / vn:loadmenu` | 在 VN 中打开同风格存读档覆盖层 |
+| `vn:save / vn:load` | 在 VN 中保存 / 读取一号槽，同时处理 VN 剧情位置和 `GameProgress` 成长进度 |
+| `progression:text_speed_up / text_speed_down` | 调整 VN 文本速度 |
+| `progression:master_volume_up / master_volume_down` | 记录主音量偏好，音频系统后续接入 |
+| `progression:toggle_screen_shake` | 记录震屏偏好，战斗反馈系统后续接入 |
+| `progression:toggle_fullscreen` | 记录全屏偏好，窗口系统后续接入 |
 
-当前版本不做磁盘存档，进度只在一次运行中保留。后续正式化时，`GameProgress` 应成为 `SaveGame / Inventory / Equipment / Relationship` 的门面或临时适配层，而不是永久把所有系统都堆在一个类里。
+当前版本已具备竖切用轻量磁盘存档，默认写入 `assets/saves/progression_slot1.wtsave`。后续正式化时，`GameProgress` 应成为 `SaveGame / Inventory / Equipment / Relationship / Settings` 的门面或临时适配层，而不是永久把所有系统都堆在一个类里。
+
+VN 剧情位置当前写入对应 VN 组件的 1 号槽存档文件，和 `progression_slot1.wtsave` 一起构成竖切阶段的共享存读档体验。正式化时应合并到统一 `SaveGame`，避免 VN、战斗和据点各自维护独立槽位。
 
 ## 13. 场景跳转
 
@@ -507,7 +552,7 @@
 | --- | --- | --- |
 | 序章 VN 完成 | `Flag_PrologueComplete` | 第一章假玩法 |
 | 第一章完成 | `Flag_CH01Complete` | 第二章 VN / 正式教程 |
-| 第二章 Boss 击败 | `Flag_CH02_BossDefeated` | 据点首页 |
+| 第二章 Boss 击败 | `Flag_CH02_BossDefeated` | 战斗结算页 |
 | 据点继续剧情 | `CurrentObjective = CH03_Start` | 第三章 VN |
 | 副本选择 | 已解锁副本 ID | 对应战斗场景 |
 | 副本结算 | 通关或失败 | 据点首页或重试 |
@@ -522,23 +567,26 @@
 
 ## 14. 竖切 UI 范围
 
-第一个竖切只做以下页面：
+第一个竖切当前已做以下页面：
 
 - 首页。
 - 继续剧情。
 - 副本选择。
-- 战斗结算。
-- 魔剑技能树简版。
-- 装备简版。
-- 支援配置占位。
-- 队友关系占位。
-- 保存 / 载入基础入口。
+- 战斗结算页。
+- 魔剑技能树页。
+- 装备强化页。
+- 支援配置页。
+- 队友关系页。
+- 保存 / 载入页。
+- 系统设置页。
+
+其中魔剑技能树、装备页、保存 / 载入页和设置页已经完成第一轮图标化 UI 打磨：技能树有分支节点，装备页有图标背包和分页，VN 内可以打开保存 / 读取覆盖层，设置页有滑条显示。
 
 竖切不做：
 
 - 完整图鉴。
 - 装备重铸。
-- 多角色完整好感。
+- 多角色完整好感事件链。
 - 组合奥义配置。
 - 复杂动画演出。
 - 可探索据点。
@@ -559,7 +607,11 @@
 10. 打开副本选择。
 11. 进入黑林兽道重刷。
 12. 结算后回到据点。
-13. 点击继续剧情进入第三章入口。
+13. 打开队友关系页查看当前好感和支援等级。
+14. 打开支援配置页选择导师支援。
+15. 打开保存 / 读取页保存一次进度。
+16. 打开设置页调整文本速度。
+17. 点击继续剧情进入第三章入口。
 
 如果这条链路稳定，核心循环就成立。
 
@@ -592,12 +644,13 @@
 1. 据点状态数据。当前竖切已用 `GameProgress` 完成内存版。
 2. 首页和继续剧情。当前竖切已完成首页刷新和继续剧情。
 3. 战斗结算回据点。当前竖切已写入经验、材料、首通和重刷记录。
-4. 副本选择。当前竖切先用黑林兽道按钮重进同一战斗场景。
-5. 魔剑技能树简版。当前竖切先用按钮完成魔剑 Lv2 升级。
-6. 背包和装备简版。当前竖切先用按钮完成旅人护衣 +1。
-7. 材料来源跳转。
-8. 队友关系和支援配置。
-9. 图鉴、回放、设置。
-10. 更丰富的视觉表现。
+4. 副本选择。当前竖切已做独立页面，可进入 `SideCombatBeastPath.wt`。
+5. 魔剑技能树页。当前竖切已做独立页面，可显示图标分支节点、选中详情、材料需求，并用学习按钮完成部分节点的 Lv2 解锁验证。
+6. 装备强化页。当前竖切已做独立页面，可显示装备槽、背包图标网格、分页、选中详情、旅人护衣强化材料和强化按钮。
+7. 队友关系和支援配置。当前竖切已做独立页面和基础状态刷新。
+8. 保存 / 载入、设置入口。当前竖切已做一号槽、VN 内覆盖层、基础偏好状态和滑条显示。
+9. 材料来源跳转、正式副本详情、角色事件入口、正式多槽存档和读档信息细化。
+10. VN 历史记录分页、自动播放、快进等 Galgame 通用页面。
+11. 统一视觉表现、选中高亮、分页反馈、拖拽/滑条交互和更完整的 UI 动效。
 
-竖切做到第 1-7 步即可。
+当前竖切已完成第 1-8 步的可运行骨架，并完成技能树、装备、VN 存读档和设置的第一轮 UI 结构升级。下一步重点是第 9-11 步，把页面从“能跳转、能显示状态”推进到“玩家能真正管理路线、资源、队友、存档和通用 VN 操作”。

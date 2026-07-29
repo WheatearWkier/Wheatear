@@ -2,6 +2,7 @@
 
 @label start
 @background assets/vertical_slice/vn/backgrounds/chapter3_road.png
+@music assets/vertical_slice/audio/bgm/vn_chapter3_road.wav "边境旅路"
 @speed 42
 @character Mira 魔剑士导师 assets/vertical_slice/vn/portraits/mentor_{expression}.png
 @character Leo 主角 assets/vertical_slice/vn/portraits/hero_{expression}.png

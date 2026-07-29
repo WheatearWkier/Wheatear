@@ -6,6 +6,7 @@
 #include "Wheatear/Modules/SideCombat/SideCombatSystem.h"
 #include "Wheatear/Modules/VisualNovel/VisualNovelSystem.h"
 #include "Wheatear/Scene/SceneSystemRegistry.h"
+#include "Wheatear/Scripting/EventScriptSystem.h"
 
 namespace Wheatear {
 
@@ -26,6 +27,10 @@ namespace Wheatear {
         SceneSystemRegistry::RegisterRuntimeSystem(
             "Progression",
             []() -> Scope<ISystem> { return CreateScope<ProgressionSystem>(); });
+
+        SceneSystemRegistry::RegisterRuntimeSystem(
+            "EventScript",
+            []() -> Scope<ISystem> { return CreateScope<EventScriptSystem>(); });
     }
 
 } // namespace Wheatear

@@ -76,10 +76,12 @@
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
-      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <PrecompiledHeader>Use</PrecompiledHeader>
+      <PrecompiledHeaderFile>wepch.h</PrecompiledHeaderFile>
       <WarningLevel>Level3</WarningLevel>
       <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;WT_PLATFORM_WINDOWS;WT_DEBUG;WT_ENABLE_ASSERTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>..\Wheatear\vendor\spdlog\include;..\Wheatear\src;..\Wheatear\vendor;..\Wheatear\vendor\glm;..\Wheatear\vendor\entt\include;..\Wheatear\vendor\tinyobjloader\include;src;..\Wheatear\vendor\ImGuizmo;..\Wheatear\vendor\miniaudio;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\Wheatear\vendor\spdlog\include;..\Wheatear\src;..\Wheatear\vendor;..\Wheatear\vendor\glm;..\Wheatear\vendor\entt\include;src;..\Wheatear\vendor\ImGuizmo;..\Wheatear\vendor\miniaudio;..\Wheatear\vendor\yaml-cpp\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <ForcedIncludeFiles>wepch.h</ForcedIncludeFiles>
       <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
       <Optimization>Disabled</Optimization>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
@@ -96,10 +98,12 @@
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
-      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <PrecompiledHeader>Use</PrecompiledHeader>
+      <PrecompiledHeaderFile>wepch.h</PrecompiledHeaderFile>
       <WarningLevel>Level3</WarningLevel>
       <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;WT_PLATFORM_WINDOWS;WT_RELEASE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>..\Wheatear\vendor\spdlog\include;..\Wheatear\src;..\Wheatear\vendor;..\Wheatear\vendor\glm;..\Wheatear\vendor\entt\include;..\Wheatear\vendor\tinyobjloader\include;src;..\Wheatear\vendor\ImGuizmo;..\Wheatear\vendor\miniaudio;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\Wheatear\vendor\spdlog\include;..\Wheatear\src;..\Wheatear\vendor;..\Wheatear\vendor\glm;..\Wheatear\vendor\entt\include;src;..\Wheatear\vendor\ImGuizmo;..\Wheatear\vendor\miniaudio;..\Wheatear\vendor\yaml-cpp\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <ForcedIncludeFiles>wepch.h</ForcedIncludeFiles>
       <Optimization>Full</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
@@ -120,10 +124,12 @@
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Dist|x64'">
     <ClCompile>
-      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <PrecompiledHeader>Use</PrecompiledHeader>
+      <PrecompiledHeaderFile>wepch.h</PrecompiledHeaderFile>
       <WarningLevel>Level3</WarningLevel>
       <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;WT_PLATFORM_WINDOWS;WT_DIST;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>..\Wheatear\vendor\spdlog\include;..\Wheatear\src;..\Wheatear\vendor;..\Wheatear\vendor\glm;..\Wheatear\vendor\entt\include;..\Wheatear\vendor\tinyobjloader\include;src;..\Wheatear\vendor\ImGuizmo;..\Wheatear\vendor\miniaudio;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\Wheatear\vendor\spdlog\include;..\Wheatear\src;..\Wheatear\vendor;..\Wheatear\vendor\glm;..\Wheatear\vendor\entt\include;src;..\Wheatear\vendor\ImGuizmo;..\Wheatear\vendor\miniaudio;..\Wheatear\vendor\yaml-cpp\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <ForcedIncludeFiles>wepch.h</ForcedIncludeFiles>
       <Optimization>Full</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
@@ -145,15 +151,20 @@
   <ItemGroup>
     <ClInclude Include="src\Build\PlayerPackager.h" />
     <ClInclude Include="src\Editor\CoreEditorComponents.h" />
+    <ClInclude Include="src\Editor\EditorCanvasTools.h" />
     <ClInclude Include="src\Editor\EditorComponentRegistry.h" />
+    <ClInclude Include="src\Editor\EventScriptGraphPanel.h" />
     <ClInclude Include="src\Editor\EditorLayer2D.h" />
     <ClInclude Include="src\Editor\EditorLayer3D.h" />
     <ClInclude Include="src\Editor\EditorLayerBase.h" />
     <ClInclude Include="src\Editor\ModeSelectLayer.h" />
+    <ClInclude Include="src\Editor\TextAssetEditor.h" />
     <ClInclude Include="src\Modules\ArcadeCombat\ArcadeCombatDrawer.h" />
     <ClInclude Include="src\Modules\ModuleEditorBootstrap.h" />
     <ClInclude Include="src\Modules\SideCombat\SideCombatDrawer.h" />
+    <ClInclude Include="src\Modules\SideCombat\SideCombatTuningEditorPanel.h" />
     <ClInclude Include="src\Modules\VisualNovel\VisualNovelDrawer.h" />
+    <ClInclude Include="src\Modules\VisualNovel\VisualNovelScriptEditorPanel.h" />
     <ClInclude Include="src\Panels\AnimationEditorPanel.h" />
     <ClInclude Include="src\Panels\ContentBrowserPanel.h" />
     <ClInclude Include="src\Panels\EditorCommands.h" />
@@ -170,19 +181,26 @@
     <ClInclude Include="src\Panels\SceneHierarchy\Drawers\UIDrawers.h" />
     <ClInclude Include="src\Panels\SceneHierarchy\WidgetHelpers.h" />
     <ClInclude Include="src\Panels\SceneHierarchyPanel.h" />
+    <ClInclude Include="src\wepch.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Build\PlayerPackager.cpp" />
     <ClCompile Include="src\Editor\CoreEditorComponents.cpp" />
     <ClCompile Include="src\Editor\EditorComponentRegistry.cpp" />
+    <ClCompile Include="src\Editor\EventScriptGraphPanel.cpp" />
     <ClCompile Include="src\Editor\EditorLayer2D.cpp" />
     <ClCompile Include="src\Editor\EditorLayer3D.cpp" />
     <ClCompile Include="src\Editor\EditorLayerBase.cpp" />
+    <ClCompile Include="src\Editor\EditorLayerBaseLifecycle.cpp" />
+    <ClCompile Include="src\Editor\EditorLayerBaseScene.cpp" />
+    <ClCompile Include="src\Editor\EditorLayerBaseUI.cpp" />
     <ClCompile Include="src\Editor\ModeSelectLayer.cpp" />
     <ClCompile Include="src\Modules\ArcadeCombat\ArcadeCombatDrawer.cpp" />
     <ClCompile Include="src\Modules\ModuleEditorBootstrap.cpp" />
     <ClCompile Include="src\Modules\SideCombat\SideCombatDrawer.cpp" />
+    <ClCompile Include="src\Modules\SideCombat\SideCombatTuningEditorPanel.cpp" />
     <ClCompile Include="src\Modules\VisualNovel\VisualNovelDrawer.cpp" />
+    <ClCompile Include="src\Modules\VisualNovel\VisualNovelScriptEditorPanel.cpp" />
     <ClCompile Include="src\Panels\AnimationEditorPanel.cpp" />
     <ClCompile Include="src\Panels\ContentBrowserPanel.cpp" />
     <ClCompile Include="src\Panels\SceneHierarchy\Drawers\AudioDrawer.cpp" />
@@ -197,11 +215,19 @@
     <ClCompile Include="src\Panels\SceneHierarchy\Drawers\UIDrawers.cpp" />
     <ClCompile Include="src\Panels\SceneHierarchy\WidgetHelpers.cpp" />
     <ClCompile Include="src\Panels\SceneHierarchyPanel.cpp" />
+    <ClCompile Include="src\Panels\SceneHierarchyPanelComponents.cpp" />
+    <ClCompile Include="src\Panels\SceneHierarchyPanelTree.cpp" />
     <ClCompile Include="src\WheatearEditorApp.cpp" />
+    <ClCompile Include="src\wepch.cpp">
+      <PrecompiledHeader>Create</PrecompiledHeader>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Wheatear\Wheatear.vcxproj">
       <Project>{D6F770FE-C2C4-CB09-EBDD-B9B1D7090198}</Project>
+    </ProjectReference>
+    <ProjectReference Include="..\Wheatear\vendor\yaml-cpp\yaml-cpp.vcxproj">
+      <Project>{88F1A057-74BE-FB62-9DD7-E90A890331F1}</Project>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

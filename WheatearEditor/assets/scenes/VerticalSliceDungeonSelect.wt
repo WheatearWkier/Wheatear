@@ -1,0 +1,401 @@
+﻿Scene: VerticalSliceDungeonSelect
+Entities:
+  - Entity: 981000055
+    TagComponent:
+      Tag: FlowController
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    EventScriptComponent:
+      ScriptPath: "assets/events/vertical_slice_flow.wts"
+      StartEvent: "on_start"
+      RunOnStart: false
+      RunOnce: false
+      Enabled: true
+  - Entity: 981000054
+    TagComponent:
+      Tag: WT_UI_Canvas
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    UICanvasComponent:
+      Visible: true
+      ReferenceWidth: 1920
+      ReferenceHeight: 1080
+    UIWidgetComponent:
+      Visible: true
+      Position: [0, 0]
+      Size: [1, 1]
+      Rotation: 0
+      Anchor: 0
+      SortOrder: 0
+      ParentTag: ""
+  - Entity: 981000001
+    TagComponent:
+      Tag: Dungeon_Camera
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    CameraComponent:
+      Camera:
+        ProjectionType: 1
+        PerspectiveFOV: 0.785398185
+        PerspectiveNear: 0.00999999978
+        PerspectiveFar: 1000
+        OrthographicSize: 10
+        OrthographicNear: -1
+        OrthographicFar: 1
+      Primary: true
+      FixedAspectRatio: false
+  - Entity: 981000002
+    TagComponent:
+      Tag: Dungeon_Background
+    TransformComponent:
+      Translation: [0, 0.35, -0.8]
+      Rotation: [0, 0, 0]
+      Scale: [20, 11.25, 1]
+    SpriteRendererComponent:
+      Color: [0.88, 0.94, 0.98, 1]
+      Texture: assets/vertical_slice/vn/backgrounds/forest_camp.png
+      TilingFactor: 1
+  - Entity: 981000010
+    TagComponent:
+      Tag: Dungeon_MainPanel
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    UIWidgetComponent:
+      Visible: true
+      Position: [0.055, 0.08]
+      Size: [0.89, 0.8]
+      Rotation: 0
+      Anchor: 0
+      SortOrder: 10
+      ParentTag: WT_UI_Canvas
+    UIAnimatorComponent:
+      Preset: "slide_fade_in"
+      PlayOnStart: true
+      Loop: false
+      Delay: 0.0
+      Duration: 0.34
+      Amplitude: 0.035
+      Speed: 1
+      FromOffset: [0, 0.035]
+    UIImageComponent:
+      Color: [1, 1, 1, 0.96]
+      TexturePath: assets/vertical_slice/ui/panels/panel_dungeon.png
+  - Entity: 981000011
+    TagComponent:
+      Tag: Dungeon_Icon
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    UIWidgetComponent:
+      Visible: true
+      Position: [0.81, 0.12]
+      Size: [0.1, 0.145]
+      Rotation: 0
+      Anchor: 0
+      SortOrder: 31
+      ParentTag: WT_UI_Canvas
+    UIAnimatorComponent:
+      Preset: "slide_fade_in"
+      PlayOnStart: true
+      Loop: false
+      Delay: 0.08
+      Duration: 0.34
+      Amplitude: 0.035
+      Speed: 1
+      FromOffset: [0, 0.035]
+    UIImageComponent:
+      Color: [1, 1, 1, 1.0]
+      TexturePath: assets/vertical_slice/ui/icons/icon_dungeon.png
+  - Entity: 981000020
+    TagComponent:
+      Tag: Dungeon_Title
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    UIWidgetComponent:
+      Visible: true
+      Position: [0.09, 0.115]
+      Size: [0.55, 0.065]
+      Rotation: 0
+      Anchor: 0
+      SortOrder: 30
+      ParentTag: WT_UI_Canvas
+    UIAnimatorComponent:
+      Preset: "fade_in"
+      PlayOnStart: true
+      Loop: false
+      Delay: 0.06
+      Duration: 0.25
+      Amplitude: 0.035
+      Speed: 1
+      FromOffset: [0, 0.035]
+    UITextComponent:
+      Text: "副本选择"
+      Color: [0.94, 0.98, 0.92, 1]
+      FontSize: 42
+      FontPath: assets/fonts/wqy-microhei.ttc
+      ShadowColor: [0.02, 0.02, 0.025, 0.86]
+      ShadowOffset: [2.5, 2.5]
+      OutlineColor: [0.01, 0.01, 0.012, 0.92]
+      OutlineThickness: 1.7
+  - Entity: 981000021
+    TagComponent:
+      Tag: Dungeon_Subtitle
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    UIWidgetComponent:
+      Visible: true
+      Position: [0.09, 0.18]
+      Size: [0.72, 0.045]
+      Rotation: 0
+      Anchor: 0
+      SortOrder: 30
+      ParentTag: WT_UI_Canvas
+    UIAnimatorComponent:
+      Preset: "fade_in"
+      PlayOnStart: true
+      Loop: false
+      Delay: 0.1
+      Duration: 0.25
+      Amplitude: 0.035
+      Speed: 1
+      FromOffset: [0, 0.035]
+    UITextComponent:
+      Text: "第2章 / 魔剑 Lv1 / 主角 Lv1"
+      Color: [0.74, 0.9, 0.84, 1]
+      FontSize: 20
+      FontPath: assets/fonts/wqy-microhei.ttc
+      ShadowColor: [0.02, 0.02, 0.025, 0.82]
+      ShadowOffset: [2.0, 2.0]
+      OutlineColor: [0.01, 0.01, 0.012, 0.88]
+      OutlineThickness: 1.35
+  - Entity: 981000022
+    TagComponent:
+      Tag: Dungeon_Status
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    UIWidgetComponent:
+      Visible: true
+      Position: [0.09, 0.27]
+      Size: [0.58, 0.45]
+      Rotation: 0
+      Anchor: 0
+      SortOrder: 30
+      ParentTag: WT_UI_Canvas
+    UIAnimatorComponent:
+      Preset: "fade_in"
+      PlayOnStart: true
+      Loop: false
+      Delay: 0.14
+      Duration: 0.25
+      Amplitude: 0.035
+      Speed: 1
+      FromOffset: [0, 0.035]
+    UITextComponent:
+      Text: "副本状态会显示在这里。"
+      Color: [0.93, 0.96, 0.9, 1]
+      FontSize: 20
+      FontPath: assets/fonts/wqy-microhei.ttc
+      ShadowColor: [0.02, 0.02, 0.025, 0.82]
+      ShadowOffset: [2.0, 2.0]
+      OutlineColor: [0.01, 0.01, 0.012, 0.88]
+      OutlineThickness: 1.35
+  - Entity: 981000023
+    TagComponent:
+      Tag: Dungeon_Rewards
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    UIWidgetComponent:
+      Visible: true
+      Position: [0.09, 0.7]
+      Size: [0.58, 0.12]
+      Rotation: 0
+      Anchor: 0
+      SortOrder: 30
+      ParentTag: WT_UI_Canvas
+    UIAnimatorComponent:
+      Preset: "fade_in"
+      PlayOnStart: true
+      Loop: false
+      Delay: 0.18
+      Duration: 0.25
+      Amplitude: 0.035
+      Speed: 1
+      FromOffset: [0, 0.035]
+    UITextComponent:
+      Text: "主要掉落和材料用途会显示在这里。"
+      Color: [1.0, 0.92, 0.74, 1]
+      FontSize: 18
+      FontPath: assets/fonts/wqy-microhei.ttc
+      ShadowColor: [0.02, 0.02, 0.025, 0.82]
+      ShadowOffset: [2.0, 2.0]
+      OutlineColor: [0.01, 0.01, 0.012, 0.88]
+      OutlineThickness: 1.35
+  - Entity: 981000050
+    TagComponent:
+      Tag: Dungeon_Button_1
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    UIWidgetComponent:
+      Visible: true
+      Position: [0.68, 0.32]
+      Size: [0.23, 0.068]
+      Rotation: 0
+      Anchor: 0
+      SortOrder: 40
+      ParentTag: WT_UI_Canvas
+    UIAnimatorComponent:
+      Preset: "hover_pulse"
+      PlayOnStart: true
+      Loop: false
+      Delay: 0.0
+      Duration: 0.18
+      Amplitude: 0.035
+      Speed: 1
+      FromOffset: [0, 0.035]
+    UIButtonComponent:
+      NormalColor: [0.2, 0.3, 0.5, 0.94]
+      HoverColor: [0.3, 0.43, 0.7, 0.98]
+      PressedColor: [0.13, 0.2, 0.35, 1]
+      OnClickFunction: event:FlowController:go_side_combat
+    UITextComponent:
+      Text: "挑战黑熊丈夫"
+      Color: [0.94, 0.98, 1, 1]
+      FontSize: 23
+      FontPath: assets/fonts/wqy-microhei.ttc
+      ShadowColor: [0.02, 0.02, 0.025, 0.72]
+      ShadowOffset: [1.8, 1.8]
+      OutlineColor: [0.01, 0.01, 0.012, 0.82]
+      OutlineThickness: 1.2
+  - Entity: 981000051
+    TagComponent:
+      Tag: Dungeon_Button_2
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    UIWidgetComponent:
+      Visible: true
+      Position: [0.68, 0.405]
+      Size: [0.23, 0.068]
+      Rotation: 0
+      Anchor: 0
+      SortOrder: 40
+      ParentTag: WT_UI_Canvas
+    UIAnimatorComponent:
+      Preset: "hover_pulse"
+      PlayOnStart: true
+      Loop: false
+      Delay: 0.0
+      Duration: 0.18
+      Amplitude: 0.035
+      Speed: 1
+      FromOffset: [0, 0.035]
+    UIButtonComponent:
+      NormalColor: [0.13, 0.3, 0.26, 0.94]
+      HoverColor: [0.2, 0.44, 0.38, 0.98]
+      PressedColor: [0.08, 0.2, 0.18, 1]
+      OnClickFunction: event:FlowController:go_beast_path
+    UITextComponent:
+      Text: "重刷黑林兽道"
+      Color: [0.94, 0.98, 0.9, 1]
+      FontSize: 23
+      FontPath: assets/fonts/wqy-microhei.ttc
+      ShadowColor: [0.02, 0.02, 0.025, 0.72]
+      ShadowOffset: [1.8, 1.8]
+      OutlineColor: [0.01, 0.01, 0.012, 0.82]
+      OutlineThickness: 1.2
+  - Entity: 981000052
+    TagComponent:
+      Tag: Dungeon_Button_3
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    UIWidgetComponent:
+      Visible: true
+      Position: [0.68, 0.49000000000000005]
+      Size: [0.23, 0.068]
+      Rotation: 0
+      Anchor: 0
+      SortOrder: 40
+      ParentTag: WT_UI_Canvas
+    UIAnimatorComponent:
+      Preset: "hover_pulse"
+      PlayOnStart: true
+      Loop: false
+      Delay: 0.0
+      Duration: 0.18
+      Amplitude: 0.035
+      Speed: 1
+      FromOffset: [0, 0.035]
+    UIButtonComponent:
+      NormalColor: [0.27, 0.22, 0.48, 0.94]
+      HoverColor: [0.4, 0.32, 0.68, 0.98]
+      PressedColor: [0.18, 0.14, 0.34, 1]
+      OnClickFunction: event:FlowController:go_skill_tree
+    UITextComponent:
+      Text: "魔剑技能树"
+      Color: [0.96, 0.94, 1, 1]
+      FontSize: 23
+      FontPath: assets/fonts/wqy-microhei.ttc
+      ShadowColor: [0.02, 0.02, 0.025, 0.72]
+      ShadowOffset: [1.8, 1.8]
+      OutlineColor: [0.01, 0.01, 0.012, 0.82]
+      OutlineThickness: 1.2
+  - Entity: 981000053
+    TagComponent:
+      Tag: Dungeon_Button_4
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    UIWidgetComponent:
+      Visible: true
+      Position: [0.68, 0.5750000000000001]
+      Size: [0.23, 0.068]
+      Rotation: 0
+      Anchor: 0
+      SortOrder: 40
+      ParentTag: WT_UI_Canvas
+    UIAnimatorComponent:
+      Preset: "hover_pulse"
+      PlayOnStart: true
+      Loop: false
+      Delay: 0.0
+      Duration: 0.18
+      Amplitude: 0.035
+      Speed: 1
+      FromOffset: [0, 0.035]
+    UIButtonComponent:
+      NormalColor: [0.34, 0.25, 0.13, 0.94]
+      HoverColor: [0.52, 0.38, 0.2, 0.98]
+      PressedColor: [0.22, 0.16, 0.09, 1]
+      OnClickFunction: event:FlowController:go_hub
+    UITextComponent:
+      Text: "返回据点"
+      Color: [1, 0.94, 0.82, 1]
+      FontSize: 23
+      FontPath: assets/fonts/wqy-microhei.ttc
+      ShadowColor: [0.02, 0.02, 0.025, 0.72]
+      ShadowOffset: [1.8, 1.8]
+      OutlineColor: [0.01, 0.01, 0.012, 0.82]
+      OutlineThickness: 1.2

@@ -33,6 +33,8 @@ namespace Wheatear {
         const VisualNovelLine* GetCurrentLine() const;
 
         const std::string& GetCurrentBackground() const;
+        const std::string& GetCurrentMusic() const;
+        const std::string& GetCurrentMusicTitle() const;
         const std::vector<std::string>& GetCurrentVisibleCharacters() const;
         const std::unordered_map<std::string, std::string>& GetCurrentCharacterExpressions() const;
         const std::vector<VisualNovelChoice>& GetCurrentChoices() const;

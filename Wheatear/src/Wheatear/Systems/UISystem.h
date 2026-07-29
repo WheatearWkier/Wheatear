@@ -6,22 +6,23 @@
 
 namespace Wheatear {
 
-    /// @brief UI ÏµÍ³
+    /// @brief UI ç³»ç»Ÿ
     /// 
-    /// ¸ºÔğ£º
-    ///   - ÔËĞĞÊ± UI ÊäÈë´¦Àí£¨Êó±êÊÂ¼ş·Ö·¢µ½ UIButton µÈ£©
-    ///   - ÔËĞĞÊ± + ±à¼­Ä£Ê½ÏÂµÄ UI äÖÈ¾
-    ///   - ÊÓ¿ÚÆ«ÒÆµÄ¹ÜÀí£¨Êó±ê×ø±êĞŞÕı£©
+    /// è´Ÿè´£ï¼š
+    ///   - è¿è¡Œæ—¶ UI è¾“å…¥å¤„ç†ï¼ˆé¼ æ ‡äº‹ä»¶åˆ†å‘åˆ° UIButton ç­‰ï¼‰
+    ///   - è¿è¡Œæ—¶ + ç¼–è¾‘æ¨¡å¼ä¸‹çš„ UI æ¸²æŸ“
+    ///   - è§†å£åç§»çš„ç®¡ç†ï¼ˆé¼ æ ‡åæ ‡ä¿®æ­£ï¼‰
     class UISystem : public ISystem
     {
     public:
+        void OnRuntimeStart(Scene* scene) override;
         void OnUpdateRuntime(Scene* scene, Timestep ts) override;
         void OnUpdateEditor(Scene* scene, Timestep ts) override;
 
-        /// ÓÉ±à¼­Æ÷Í¨ÖªÊÓ¿Ú×óÉÏ½ÇÏñËØÆ«ÒÆ£¬ÓÃÓÚÕıÈ·¹éÒ»»¯Êó±ê×ø±ê
+        /// ç”±ç¼–è¾‘å™¨é€šçŸ¥è§†å£å·¦ä¸Šè§’åƒç´ åç§»ï¼Œç”¨äºæ­£ç¡®å½’ä¸€åŒ–é¼ æ ‡åæ ‡
         void SetViewportOffset(float x, float y) { m_ViewportOffset = { x, y }; }
 
-        /// äÖÈ¾ËùÓĞ UI Widget£¨ÔËĞĞÊ±ºÍ±à¼­Ä£Ê½¹²ÓÃ£©
+        /// æ¸²æŸ“æ‰€æœ‰ UI Widgetï¼ˆè¿è¡Œæ—¶å’Œç¼–è¾‘æ¨¡å¼å…±ç”¨ï¼‰
         void RenderUI(Scene* scene);
 
     private:

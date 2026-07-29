@@ -233,7 +233,7 @@ namespace Wheatear {
         const float panelWidth  = ImGui::GetContentRegionAvail().x;
         const int   columnCount = std::max(1, static_cast<int>(panelWidth / cellSize));
 
-        if (ImGui::IsWindowFocused() && ImGui::GetIO().KeyCtrl && ImGui::IsKeyPressed(ImGui::GetKeyIndex(ImGuiKey_A)))
+        if (ImGui::IsWindowFocused() && ImGui::GetIO().KeyCtrl && ImGui::IsKeyPressed(ImGuiKey_A))
         {
             // Reserved for future multi-selection.
         }
@@ -264,7 +264,8 @@ namespace Wheatear {
             ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(1, 1, 1, 0.08f));
             ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4(1, 1, 1, 0.12f));
             ImGui::ImageButton(
-                reinterpret_cast<ImTextureID>(static_cast<uintptr_t>(icon->GetRendererID())),
+                "##AssetIcon",
+                static_cast<ImTextureID>(static_cast<uintptr_t>(icon->GetRendererID())),
                 { m_ThumbnailSize, m_ThumbnailSize },
                 { 0, 1 }, { 1, 0 }
             );
@@ -275,7 +276,7 @@ namespace Wheatear {
                 const std::wstring itemPath = relativePath.wstring();
                 ImGui::SetDragDropPayload("CONTENT_BROWSER_ITEM", itemPath.c_str(), (itemPath.size() + 1) * sizeof(wchar_t));
                 ImGui::Image(
-                    reinterpret_cast<ImTextureID>(static_cast<uintptr_t>(icon->GetRendererID())),
+                    static_cast<ImTextureID>(static_cast<uintptr_t>(icon->GetRendererID())),
                     { 32, 32 }, { 0, 1 }, { 1, 0 }
                 );
                 ImGui::SameLine();
@@ -351,7 +352,7 @@ namespace Wheatear {
             const Ref<Texture2D>& icon = GetIconForType(type);
 
             ImGui::Image(
-                reinterpret_cast<ImTextureID>(static_cast<uintptr_t>(icon->GetRendererID())),
+                static_cast<ImTextureID>(static_cast<uintptr_t>(icon->GetRendererID())),
                 ImVec2(160, 160), { 0, 1 }, { 1, 0 }
             );
 

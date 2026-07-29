@@ -2,6 +2,7 @@
 
 #include "Wheatear/Core/Application.h"
 #include "Wheatear/Core/AssetPath.h"
+#include "Wheatear/Core/Input.h"
 #include "Wheatear/Core/Log.h"
 #include "Wheatear/Core/MouseButtonCodes.h"
 #include "Wheatear/Core/PlayerConfig.h"
@@ -10,6 +11,8 @@
 #include "Wheatear/Events/MouseEvent.h"
 #include "Wheatear/Modules/Progression/GameProgress.h"
 #include "Wheatear/Renderer/RenderCommand.h"
+#include "Wheatear/Runtime/CommandBus.h"
+#include "Wheatear/Runtime/SceneTransitionService.h"
 #include "Wheatear/Scene/Components.h"
 #include "Wheatear/Scene/Scene.h"
 #include "Wheatear/Scene/SceneSerializer.h"
@@ -23,23 +26,6 @@ namespace {
     static bool StartsWith(const std::string& value, const std::string& prefix)
     {
         return value.rfind(prefix, 0) == 0;
-    }
-
-    static std::string PayloadAfter(const std::string& value, const std::string& prefix)
-    {
-        return StartsWith(value, prefix) ? value.substr(prefix.size()) : std::string{};
-    }
-
-    static int ParseSlot(const std::string& value, int fallback)
-    {
-        try
-        {
-            return std::max(1, std::stoi(value));
-        }
-        catch (...)
-        {
-            return fallback;
-        }
     }
 
 } // namespace
@@ -99,6 +85,8 @@ void RuntimeSceneLayer::OnEvent(Wheatear::Event& event)
         [this](Wheatear::MouseButtonPressedEvent& e) { return OnMouseButtonPressed(e); });
     dispatcher.Dispatch<Wheatear::MouseButtonReleasedEvent>(
         [this](Wheatear::MouseButtonReleasedEvent& e) { return OnMouseButtonReleased(e); });
+    dispatcher.Dispatch<Wheatear::MouseScrolledEvent>(
+        [this](Wheatear::MouseScrolledEvent& e) { return OnMouseScrolled(e); });
 }
 
 std::filesystem::path RuntimeSceneLayer::ResolveScenePath(
@@ -209,6 +197,8 @@ bool RuntimeSceneLayer::ConsumeRuntimeSceneCommands()
             component.RuntimeRequestedCommand.clear();
         }
     }
+    for (const std::string& command : Wheatear::CommandBus::DrainRuntimeCommands())
+        commands.push_back(command);
 
     bool consumed = false;
     for (const std::string& command : commands)
@@ -218,7 +208,39 @@ bool RuntimeSceneLayer::ConsumeRuntimeSceneCommands()
             break;
     }
 
+    consumed |= ConsumeSceneTransitionRequests();
     return consumed;
+}
+
+bool RuntimeSceneLayer::ConsumeSceneTransitionRequests()
+{
+    std::vector<Wheatear::SceneTransitionRequest> requests = Wheatear::SceneTransitionService::DrainRequests();
+    if (requests.empty())
+        return false;
+
+    // Multiple scene requests in one frame are resolved by the final request.
+    ExecuteSceneTransitionRequest(requests.back());
+    return true;
+}
+
+void RuntimeSceneLayer::ExecuteSceneTransitionRequest(const Wheatear::SceneTransitionRequest& request)
+{
+    switch (request.Mode)
+    {
+    case Wheatear::SceneTransitionMode::LoadScene:
+        LoadScene(request.ScenePath);
+        break;
+    case Wheatear::SceneTransitionMode::NewGame:
+        Wheatear::GameProgress::ResetForNewGame();
+        m_PendingVisualNovelLoadSlot = 0;
+        LoadScene(request.ScenePath);
+        break;
+    case Wheatear::SceneTransitionMode::LoadGame:
+        m_PendingVisualNovelLoadSlot = request.Slot;
+        Wheatear::GameProgress::LoadSlot(request.Slot);
+        LoadScene(request.ScenePath);
+        break;
+    }
 }
 
 bool RuntimeSceneLayer::OnMouseButtonPressed(Wheatear::MouseButtonPressedEvent& event)
@@ -235,22 +257,23 @@ bool RuntimeSceneLayer::OnMouseButtonReleased(Wheatear::MouseButtonReleasedEvent
     if (!m_ActiveScene || event.GetMouseButton() != WT_MOUSE_BUTTON_LEFT)
         return false;
 
-    std::vector<std::string> commands;
-    auto view = m_ActiveScene->GetRegistry().view<Wheatear::UIWidgetComponent, Wheatear::UIButtonComponent>();
-    for (auto e : view)
-    {
-        auto [widget, button] = view.get<Wheatear::UIWidgetComponent, Wheatear::UIButtonComponent>(e);
-        if (widget.Visible && button.IsHovered && !button.OnClickFunction.empty())
-            commands.push_back(button.OnClickFunction);
-    }
-
     Wheatear::UIInputSystem::OnMouseReleased(m_ActiveScene.get());
+    return ConsumeRuntimeSceneCommands();
+}
 
-    bool consumed = false;
-    for (const std::string& command : commands)
-        consumed |= ExecuteButtonCommand(command);
+bool RuntimeSceneLayer::OnMouseScrolled(Wheatear::MouseScrolledEvent& event)
+{
+    if (!m_ActiveScene)
+        return false;
 
-    return consumed;
+    Wheatear::Window& window = Wheatear::Application::Get().GetWindow();
+    return Wheatear::UIInputSystem::OnMouseScrolled(
+        m_ActiveScene.get(),
+        event.GetYOffset(),
+        Wheatear::Input::GetMouseX(),
+        Wheatear::Input::GetMouseY(),
+        window.GetWidth(),
+        window.GetHeight());
 }
 
 bool RuntimeSceneLayer::ExecuteButtonCommand(const std::string& command)
@@ -264,41 +287,5 @@ bool RuntimeSceneLayer::ExecuteButtonCommand(const std::string& command)
         return true;
     }
 
-    if (StartsWith(command, "scene:"))
-    {
-        LoadScene(PayloadAfter(command, "scene:"));
-        return true;
-    }
-
-    if (StartsWith(command, "newgame:"))
-    {
-        Wheatear::GameProgress::ResetForNewGame();
-        m_PendingVisualNovelLoadSlot = 0;
-        LoadScene(PayloadAfter(command, "newgame:"));
-        return true;
-    }
-
-    if (StartsWith(command, "loadgame:"))
-    {
-        std::string payload = PayloadAfter(command, "loadgame:");
-        int slot = 1;
-
-        const size_t separator = payload.rfind(':');
-        if (separator != std::string::npos)
-        {
-            slot = ParseSlot(payload.substr(separator + 1), 1);
-            payload = payload.substr(0, separator);
-        }
-
-        m_PendingVisualNovelLoadSlot = slot;
-        LoadScene(payload);
-        return true;
-    }
-
-    if (StartsWith(command, "progression:"))
-    {
-        return Wheatear::GameProgress::ExecuteCommand(command).Handled;
-    }
-
-    return false;
+    return Wheatear::CommandBus::Execute(m_ActiveScene.get(), command).Handled;
 }

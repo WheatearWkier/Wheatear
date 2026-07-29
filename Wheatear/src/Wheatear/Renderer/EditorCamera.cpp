@@ -1,4 +1,4 @@
-#include "wtpch.h"
+ï»¿#include "wtpch.h"
 #include "EditorCamera.h"
 #include "Wheatear/Core/Input.h"
 #include "Wheatear/Core/KeyCodes.h"
@@ -8,7 +8,7 @@
 namespace Wheatear {
 
     // -------------------------------------------------------------------------
-    // ¹¹Ôì / Í¶Ó°
+    // æ„é€  / æŠ•å½±
     // -------------------------------------------------------------------------
 
     EditorCamera::EditorCamera(float fovDegrees, float aspectRatio,
@@ -29,6 +29,20 @@ namespace Wheatear {
         UpdateProjection();
     }
 
+    void EditorCamera::SetViewTransform(const glm::vec3& position,
+        const glm::vec3& rotation,
+        float orbitDistance)
+    {
+        m_Mode = Mode::Orbit;
+        m_Distance = std::max(orbitDistance, 1.0f);
+        m_Pitch = -rotation.x;
+        m_Yaw = -rotation.y;
+        m_Position = position;
+        m_FocalPoint = m_Position + GetForwardDirection() * m_Distance;
+        UpdateProjection();
+        UpdateView();
+    }
+
     void EditorCamera::UpdateProjection()
     {
         m_AspectRatio = m_ViewportWidth / m_ViewportHeight;
@@ -38,17 +52,17 @@ namespace Wheatear {
     }
 
     // -------------------------------------------------------------------------
-    // ÊÓÍ¼¾ØÕó
-    // Á½ÖÖÄ£Ê½Î»ÖÃÀ´Ô´²»Í¬£º
-    //   Orbit -> ´Ó½¹µã + ¾àÀë·´Ëã
-    //   Fly   -> Ö±½ÓÓÃ m_Position
+    // è§†å›¾çŸ©é˜µ
+    // ä¸¤ç§æ¨¡å¼ä½ç½®æ¥æºä¸åŒï¼š
+    //   Orbit -> ä»ç„¦ç‚¹ + è·ç¦»åç®—
+    //   Fly   -> ç›´æ¥ç”¨ m_Position
     // -------------------------------------------------------------------------
 
     void EditorCamera::UpdateView()
     {
         if (m_Mode == Mode::Orbit)
             m_Position = CalculateOrbitPosition();
-        // Fly Ä£Ê½ÏÂ m_Position ÓÉ OnUpdate Ö±½ÓĞŞ¸Ä£¬ÕâÀï²»¸²¸Ç
+        // Fly æ¨¡å¼ä¸‹ m_Position ç”± OnUpdate ç›´æ¥ä¿®æ”¹ï¼Œè¿™é‡Œä¸è¦†ç›–
 
         const glm::quat orientation = GetOrientation();
         m_ViewMatrix = glm::inverse(
@@ -57,48 +71,48 @@ namespace Wheatear {
     }
 
     // -------------------------------------------------------------------------
-    // Ã¿Ö¡¸üĞÂ
+    // æ¯å¸§æ›´æ–°
     // -------------------------------------------------------------------------
 
     void EditorCamera::OnUpdate(Timestep ts)
     {
         const bool rightMouseHeld = Input::IsMouseButtonPressed(WT_MOUSE_BUTTON_RIGHT);
 
-        // ---- Ä£Ê½ÇĞ»» ----
-        // °´ÏÂÊó±êÓÒ¼ü -> ½øÈë·ÉĞĞÄ£Ê½£¬¼ÇÂ¼½¹µãÎ»ÖÃ£¨ÈÃÁ½Ä£Ê½Ö®¼äÎ»ÖÃÁ¬Ğø£©
+        // ---- æ¨¡å¼åˆ‡æ¢ ----
+        // æŒ‰ä¸‹é¼ æ ‡å³é”® -> è¿›å…¥é£è¡Œæ¨¡å¼ï¼Œè®°å½•ç„¦ç‚¹ä½ç½®ï¼ˆè®©ä¸¤æ¨¡å¼ä¹‹é—´ä½ç½®è¿ç»­ï¼‰
         if (rightMouseHeld && m_Mode == Mode::Orbit)
         {
             m_Mode = Mode::Fly;
-            // ½øÈë·ÉĞĞÊ±£¬°Ñ½¹µãÀ­µ½Ïà»úÇ°·½Ò»¶Î¾àÀë£¬
-            // ÕâÑùÏÂ´ÎÇĞ»Ø¹ìµÀÄ£Ê½Ê±²»»áÌø±ä
+            // è¿›å…¥é£è¡Œæ—¶ï¼ŒæŠŠç„¦ç‚¹æ‹‰åˆ°ç›¸æœºå‰æ–¹ä¸€æ®µè·ç¦»ï¼Œ
+            // è¿™æ ·ä¸‹æ¬¡åˆ‡å›è½¨é“æ¨¡å¼æ—¶ä¸ä¼šè·³å˜
             m_FocalPoint = m_Position + GetForwardDirection() * m_Distance;
             m_InitialMousePosition = { Input::GetMouseX(), Input::GetMouseY() };
         }
         else if (!rightMouseHeld && m_Mode == Mode::Fly)
         {
             m_Mode = Mode::Orbit;
-            // ÍË³ö·ÉĞĞÊ±£¬ÓÃµ±Ç°Î»ÖÃ·´Ëã¹ìµÀ¾àÀë£¬Ê¹¹ìµÀÄ£Ê½Æ½»¬½Ó¹Ü
+            // é€€å‡ºé£è¡Œæ—¶ï¼Œç”¨å½“å‰ä½ç½®åç®—è½¨é“è·ç¦»ï¼Œä½¿è½¨é“æ¨¡å¼å¹³æ»‘æ¥ç®¡
             m_FocalPoint = m_Position + GetForwardDirection() * m_Distance;
         }
 
-        // ---- ·ÉĞĞÄ£Ê½ ----
+        // ---- é£è¡Œæ¨¡å¼ ----
         if (m_Mode == Mode::Fly)
         {
-            // Êó±ê×ªÏò£¨ÓÒ¼ü°´×¡ÆÚ¼ä£©
+            // é¼ æ ‡è½¬å‘ï¼ˆå³é”®æŒ‰ä½æœŸé—´ï¼‰
             const glm::vec2 mouse = { Input::GetMouseX(), Input::GetMouseY() };
             const glm::vec2 delta = (mouse - m_InitialMousePosition) * 0.003f;
             m_InitialMousePosition = mouse;
 
-            // delta.x -> Yaw£¬delta.y -> Pitch
+            // delta.x -> Yawï¼Œdelta.y -> Pitch
             const float yawSign = (GetUpDirection().y < 0.0f) ? -1.0f : 1.0f;
             m_Yaw += yawSign * delta.x * RotationSpeed();
             m_Pitch += delta.y * RotationSpeed();
 
-            // Pitch ¼Ğ½Ç£¬±ÜÃâ·­×ª£¨¡À89¡ã£©
+            // Pitch å¤¹è§’ï¼Œé¿å…ç¿»è½¬ï¼ˆÂ±89Â°ï¼‰
             const float pitchLimit = glm::radians(89.0f);
             m_Pitch = glm::clamp(m_Pitch, -pitchLimit, pitchLimit);
 
-            // WASD / QE ÒÆ¶¯
+            // WASD / QE ç§»åŠ¨
             const float speed = m_FlySpeed * (float)ts;
             const float fastMult = Input::IsKeyPressed(WT_KEY_LEFT_SHIFT) ? 3.0f : 1.0f;
             const float slowMult = Input::IsKeyPressed(WT_KEY_LEFT_CONTROL) ? 0.25f : 1.0f;
@@ -108,11 +122,11 @@ namespace Wheatear {
             if (Input::IsKeyPressed(WT_KEY_S)) m_Position -= GetForwardDirection() * finalSpeed;
             if (Input::IsKeyPressed(WT_KEY_A)) m_Position -= GetRightDirection() * finalSpeed;
             if (Input::IsKeyPressed(WT_KEY_D)) m_Position += GetRightDirection() * finalSpeed;
-            if (Input::IsKeyPressed(WT_KEY_Q)) m_Position -= GetUpDirection() * finalSpeed;  // ÏÂ½µ
-            if (Input::IsKeyPressed(WT_KEY_E)) m_Position += GetUpDirection() * finalSpeed;  // ÉÏÉı
+            if (Input::IsKeyPressed(WT_KEY_Q)) m_Position -= GetUpDirection() * finalSpeed;  // ä¸‹é™
+            if (Input::IsKeyPressed(WT_KEY_E)) m_Position += GetUpDirection() * finalSpeed;  // ä¸Šå‡
         }
 
-        // ---- ¹ìµÀÄ£Ê½£ºAlt + Êó±ê£¨±£³ÖÔ­Âß¼­²»±ä£©----
+        // ---- è½¨é“æ¨¡å¼ï¼šAlt + é¼ æ ‡ï¼ˆä¿æŒåŸé€»è¾‘ä¸å˜ï¼‰----
         if (m_Mode == Mode::Orbit && Input::IsKeyPressed(WT_KEY_LEFT_ALT))
         {
             const glm::vec2 mouse = { Input::GetMouseX(), Input::GetMouseY() };
@@ -128,7 +142,7 @@ namespace Wheatear {
     }
 
     // -------------------------------------------------------------------------
-    // ÊÂ¼ş£º¹öÂÖÖ»ÔÚ¹ìµÀÄ£Ê½ÉúĞ§£¨·ÉĞĞÄ£Ê½ÓÃ¼üÅÌ¿ØËÙ£©
+    // äº‹ä»¶ï¼šæ»šè½®åªåœ¨è½¨é“æ¨¡å¼ç”Ÿæ•ˆï¼ˆé£è¡Œæ¨¡å¼ç”¨é”®ç›˜æ§é€Ÿï¼‰
     // -------------------------------------------------------------------------
 
     void EditorCamera::OnEvent(Event& e)
@@ -146,14 +160,14 @@ namespace Wheatear {
         }
         else
         {
-            // ·ÉĞĞÄ£Ê½£º¹öÂÖµ÷Õû·ÉĞĞËÙ¶È
+            // é£è¡Œæ¨¡å¼ï¼šæ»šè½®è°ƒæ•´é£è¡Œé€Ÿåº¦
             m_FlySpeed = glm::max(0.5f, m_FlySpeed + e.GetYOffset() * 0.5f);
         }
         return false;
     }
 
     // -------------------------------------------------------------------------
-    // ¹ìµÀÄ£Ê½²Ù×÷£¨Ô­Âß¼­±£Áô£©
+    // è½¨é“æ¨¡å¼æ“ä½œï¼ˆåŸé€»è¾‘ä¿ç•™ï¼‰
     // -------------------------------------------------------------------------
 
     void EditorCamera::MousePan(const glm::vec2& delta)
@@ -181,7 +195,7 @@ namespace Wheatear {
     }
 
     // -------------------------------------------------------------------------
-    // ËÙ¶È²ÎÊı£¨Ô­Âß¼­±£Áô£©
+    // é€Ÿåº¦å‚æ•°ï¼ˆåŸé€»è¾‘ä¿ç•™ï¼‰
     // -------------------------------------------------------------------------
 
     std::pair<float, float> EditorCamera::PanSpeed() const
@@ -206,7 +220,7 @@ namespace Wheatear {
     }
 
     // -------------------------------------------------------------------------
-    // ·½ÏòÏòÁ¿ & Î»ÖÃ¼ÆËã
+    // æ–¹å‘å‘é‡ & ä½ç½®è®¡ç®—
     // -------------------------------------------------------------------------
 
     glm::quat EditorCamera::GetOrientation() const

@@ -1,4 +1,4 @@
-#include "Mesh3DDrawers.h"
+ï»¿#include "Mesh3DDrawers.h"
 #include "../ComponentDrawers.h"
 #include "Wheatear/Core/AssetPath.h"
 #include "Wheatear/Core/EngineInfo.h"
@@ -17,7 +17,7 @@ namespace Wheatear {
     {
         DrawComponent<MeshRendererComponent>("Mesh Renderer", entity, [](auto& c)
             {
-                // ---- Mesh ²¿·Ö²»±ä ----
+                // ---- Mesh éƒ¨åˆ†ä¸å˜ ----
                 std::string meshName = "None";
                 if (c.Mesh)
                 {
@@ -47,7 +47,7 @@ namespace Wheatear {
                 if (ImGui::Button("Sphere")) c.Mesh = Mesh::CreateSphere();
                 ImGui::Separator();
 
-                // ---- Material ²¿·Ö ----
+                // ---- Material éƒ¨åˆ† ----
                 ImGui::Text("Material");
                 ImGui::SameLine();
 
@@ -57,7 +57,7 @@ namespace Wheatear {
 
                 ImGui::Button(matName.c_str(), ImVec2(-1, 0));
 
-                // ÍÏ×§ .wtmaterial ÎÄ¼şÌæ»»²ÄÖÊ
+                // æ‹–æ‹½ .wtmaterial æ–‡ä»¶æ›¿æ¢æè´¨
                 if (ImGui::BeginDragDropTarget())
                 {
                     if (const ImGuiPayload* payload =
@@ -72,7 +72,7 @@ namespace Wheatear {
                     ImGui::EndDragDropTarget();
                 }
 
-                // ĞÂ½¨²ÄÖÊ / ±£´æ²ÄÖÊ
+                // æ–°å»ºæè´¨ / ä¿å­˜æè´¨
                 if (ImGui::Button("New Material"))
                     c.Material = Material::Create();
 
@@ -84,7 +84,7 @@ namespace Wheatear {
                     {
                         if (c.Material->GetPath().empty())
                         {
-                            // »¹Ã»ÓĞÂ·¾¶£¬µ¯³ö±£´æ¶Ô»°¿ò
+                            // è¿˜æ²¡æœ‰è·¯å¾„ï¼Œå¼¹å‡ºä¿å­˜å¯¹è¯æ¡†
                             std::string savePath = std::string("assets/materials/NewMaterial") + AssetFileType::MaterialExtension;
                             c.Material->Save(savePath);
                         }
@@ -95,7 +95,7 @@ namespace Wheatear {
                     }
                 }
 
-                // ²ÄÖÊÄÚÈİ±à¼­£¨ÕÛµş£©
+                // æè´¨å†…å®¹ç¼–è¾‘ï¼ˆæŠ˜å ï¼‰
                 if (c.Material && ImGui::TreeNode("Edit Material"))
                 {
                     auto& mat = *c.Material;
@@ -106,7 +106,7 @@ namespace Wheatear {
                     ImGui::Checkbox("Flip Normals", &mat.FlipNormals);
                     ImGui::Separator();
 
-                    // ÌùÍ¼ÍÏ×§£¬ºÍÖ®Ç°Ò»Ñù£¬¸´ÓÃÔ­À´ÄÇÌ×´úÂë
+                    // è´´å›¾æ‹–æ‹½ï¼Œå’Œä¹‹å‰ä¸€æ ·ï¼Œå¤ç”¨åŸæ¥é‚£å¥—ä»£ç 
                     // AlbedoMap
                     const ImVec2 thumbSize = { 64.0f, 64.0f };
                     auto drawTexSlot = [&](const char* label, Ref<Texture2D>& tex,
@@ -115,10 +115,10 @@ namespace Wheatear {
                             ImGui::Text("%s", label);
                             ImGui::SameLine();
                             const ImTextureID texID = tex
-                                ? reinterpret_cast<ImTextureID>(static_cast<uintptr_t>(tex->GetRendererID()))
-                                : reinterpret_cast<ImTextureID>(0);
+                                ? static_cast<ImTextureID>(static_cast<uintptr_t>(tex->GetRendererID()))
+                                : static_cast<ImTextureID>(0);
                             ImGui::PushID(&tex);
-                            ImGui::ImageButton(texID, thumbSize, ImVec2(0, 1), ImVec2(1, 0));
+                            ImGui::ImageButton("##MaterialTexture", texID, thumbSize, ImVec2(0, 1), ImVec2(1, 0));
                             if (ImGui::BeginDragDropTarget())
                             {
                                 if (const ImGuiPayload* payload =
@@ -188,14 +188,14 @@ namespace Wheatear {
                 ImGui::DragFloat("Linear", &c.Linear, 0.001f, 0.0f, 1.0f);
                 ImGui::DragFloat("Quadratic", &c.Quadratic, 0.001f, 0.0f, 1.0f);
 
-                // Ë¥¼õÔ¤ÀÀ£ºÏÔÊ¾ÓĞĞ§ÕÕÉä°ë¾¶¹ÀËãÖµ
-                // ½â·½³Ì att < 0.05 ¡ú ÓĞĞ§·¶Î§Ô¼ÎªÕâ¸ö¾àÀë
+                // è¡°å‡é¢„è§ˆï¼šæ˜¾ç¤ºæœ‰æ•ˆç…§å°„åŠå¾„ä¼°ç®—å€¼
+                // è§£æ–¹ç¨‹ att < 0.05 â†’ æœ‰æ•ˆèŒƒå›´çº¦ä¸ºè¿™ä¸ªè·ç¦»
                 if (c.Constant > 0.0f)
                 {
-                    // ÓÃ¶ş´Î¹«Ê½¹ÀËãÁÁ¶È½µµ½ 5% Ê±µÄ¾àÀë
+                    // ç”¨äºŒæ¬¡å…¬å¼ä¼°ç®—äº®åº¦é™åˆ° 5% æ—¶çš„è·ç¦»
                     float a = c.Quadratic;
                     float b = c.Linear;
-                    float cc = c.Constant - 20.0f * c.Intensity; // 1/att = 20 Ê±
+                    float cc = c.Constant - 20.0f * c.Intensity; // 1/att = 20 æ—¶
                     float disc = b * b - 4.0f * a * cc;
                     if (a > 0.0f && disc >= 0.0f)
                     {

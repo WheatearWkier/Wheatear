@@ -1,6 +1,12 @@
 from __future__ import annotations
 
+import math
+import random
+import struct
+import wave
 from pathlib import Path
+from typing import Callable
+
 from PIL import Image, ImageDraw, ImageFilter
 
 
@@ -17,7 +23,7 @@ def save(image: Image.Image, path: Path) -> None:
     image.save(path)
 
 
-def upscale(image: Image.Image, scale: int = 4) -> Image.Image:
+def upscale(image: Image.Image, scale: int = 3) -> Image.Image:
     return image.resize((image.width * scale, image.height * scale), Image.Resampling.NEAREST)
 
 
@@ -70,8 +76,7 @@ def stage_background() -> Image.Image:
     gd = ImageDraw.Draw(glow)
     for x in range(120, w, 180):
         gd.ellipse((x, 714, x + 42, 736), fill=(80, 224, 255, 115))
-    glow = glow.filter(ImageFilter.GaussianBlur(12))
-    image.alpha_composite(glow)
+    image.alpha_composite(glow.filter(ImageFilter.GaussianBlur(12)))
     return image
 
 
@@ -81,58 +86,190 @@ def blob_shadow() -> Image.Image:
     return image.filter(ImageFilter.GaussianBlur(4))
 
 
-def player_magic_swordsman() -> Image.Image:
-    image, d = alpha_canvas((80, 96))
-    d.ellipse((24, 84, 58, 91), fill=(0, 0, 0, 62))
-    d.polygon([(39, 14), (51, 20), (48, 32), (33, 30), (29, 20)], fill=(236, 190, 158, 255))
-    d.polygon([(30, 15), (42, 7), (58, 16), (48, 19), (38, 18)], fill=(39, 43, 62, 255))
-    d.rectangle((31, 32, 51, 58), fill=(34, 104, 128, 255))
-    d.polygon([(31, 34), (21, 52), (29, 58), (38, 42)], fill=(42, 161, 158, 255))
-    d.polygon([(51, 35), (62, 52), (55, 59), (45, 42)], fill=(29, 72, 102, 255))
-    d.rectangle((35, 58, 43, 80), fill=(27, 36, 54, 255))
-    d.rectangle((47, 58, 55, 81), fill=(27, 36, 54, 255))
-    d.rectangle((33, 80, 44, 86), fill=(41, 75, 85, 255))
-    d.rectangle((46, 80, 58, 86), fill=(41, 75, 85, 255))
-    d.line((60, 17, 66, 72), fill=(35, 222, 238, 255), width=4)
-    d.line((61, 17, 68, 7), fill=(228, 255, 255, 255), width=3)
-    d.line((65, 26, 69, 64), fill=(137, 255, 255, 210), width=2)
-    d.rectangle((28, 44, 54, 50), fill=(74, 226, 222, 210))
-    d.point((38, 23), fill=(53, 92, 118, 255))
-    d.point((47, 23), fill=(53, 92, 118, 255))
-    return upscale(image, 3)
+def draw_player_pose(
+    pose: str,
+    frame: int,
+    frame_count: int,
+) -> Image.Image:
+    image, d = alpha_canvas((92, 104))
+    t = 0.0 if frame_count <= 1 else (frame - 1) / (frame_count - 1)
+    wave_offset = int(round(math.sin((frame - 1) * math.pi * 2.0 / max(1, frame_count)) * 2))
+
+    body_x = 43
+    body_y = 36
+    torso_color = (34, 118, 142, 255)
+    cloak_dark = (23, 35, 57, 255)
+    cyan = (57, 236, 243, 255)
+
+    if pose == "run":
+        body_x += wave_offset
+        body_y += abs(wave_offset) // 2
+    elif pose in {"jump", "launcher", "break_limit"}:
+        body_y -= 4
+    elif pose in {"fall", "air_basic", "air_chase"}:
+        body_y -= 2
+    elif pose == "hit":
+        body_x -= 3 + frame
+    elif pose == "dead":
+        body_y += 14
+
+    d.ellipse((22, 88, 70, 98), fill=(0, 0, 0, 65))
+
+    if pose == "dead":
+        d.polygon([(25, 74), (67, 76), (70, 88), (21, 88)], fill=cloak_dark)
+        d.rectangle((32, 67, 58, 82), fill=torso_color)
+        d.ellipse((57, 57, 73, 73), fill=(238, 190, 158, 255))
+        d.line((26, 62, 73, 82), fill=cyan, width=3)
+        return upscale(image)
+
+    d.polygon([(body_x - 8, body_y - 24), (body_x + 3, body_y - 31), (body_x + 21, body_y - 22), (body_x + 8, body_y - 18)],
+              fill=(38, 42, 64, 255))
+    d.polygon([(body_x - 7, body_y - 21), (body_x + 9, body_y - 24), (body_x + 18, body_y - 14), (body_x + 9, body_y - 2), (body_x - 6, body_y - 4)],
+              fill=(238, 190, 158, 255))
+    d.point((body_x + 3, body_y - 12), fill=(46, 93, 122, 255))
+    d.point((body_x + 11, body_y - 12), fill=(46, 93, 122, 255))
+
+    d.rectangle((body_x - 8, body_y, body_x + 12, body_y + 30), fill=torso_color)
+    d.polygon([(body_x - 8, body_y + 2), (body_x - 20, body_y + 20), (body_x - 11, body_y + 26), (body_x - 2, body_y + 11)],
+              fill=(43, 178, 171, 255))
+    d.polygon([(body_x + 12, body_y + 2), (body_x + 25, body_y + 19), (body_x + 16, body_y + 27), (body_x + 6, body_y + 11)],
+              fill=(28, 75, 105, 255))
+
+    if pose == "run":
+        leg_a = 12 if frame % 2 else -9
+        leg_b = -leg_a
+    elif pose in {"jump", "air_basic", "air_chase", "break_limit"}:
+        leg_a, leg_b = -4, 7
+    elif pose == "launcher":
+        leg_a, leg_b = -8, 10
+    elif pose == "hit":
+        leg_a, leg_b = -3, -8
+    else:
+        leg_a, leg_b = 0, 5
+
+    d.line((body_x - 3, body_y + 30, body_x - 5 + leg_a, body_y + 55), fill=(24, 37, 57, 255), width=6)
+    d.line((body_x + 8, body_y + 30, body_x + 8 + leg_b, body_y + 56), fill=(24, 37, 57, 255), width=6)
+    d.rectangle((body_x - 13 + leg_a, body_y + 55, body_x + 1 + leg_a, body_y + 61), fill=(38, 76, 88, 255))
+    d.rectangle((body_x + 1 + leg_b, body_y + 55, body_x + 16 + leg_b, body_y + 61), fill=(38, 76, 88, 255))
+    d.rectangle((body_x - 12, body_y + 11, body_x + 14, body_y + 17), fill=(75, 232, 224, 218))
+
+    sword_start = (body_x + 22, body_y - 14)
+    sword_end = (body_x + 31, body_y + 48)
+    if pose in {"basic1", "basic2", "basic3"}:
+        sword_start = (body_x + 6, body_y + 8)
+        sword_end = (body_x + int(8 + 42 * t), body_y + int(45 - 42 * t))
+        d.arc((body_x + 8, body_y - 8, body_x + 61, body_y + 47), 210 - int(t * 70), 316, fill=(70, 236, 255, 155), width=5)
+    elif pose == "launcher":
+        sword_start = (body_x + 2, body_y + 28)
+        sword_end = (body_x + int(3 + 22 * t), body_y - 34)
+        d.line((body_x + 20, body_y + 35, body_x + 20, body_y - 31), fill=(77, 240, 255, 126), width=7)
+    elif pose in {"air_basic", "air_chase"}:
+        sword_start = (body_x + 1, body_y + 3)
+        sword_end = (body_x + 46, body_y + int(4 + 20 * t))
+        d.arc((body_x + 1, body_y - 12, body_x + 59, body_y + 45), 190, 338, fill=(88, 248, 255, 150), width=5)
+    elif pose == "magic_bolt":
+        sword_start = (body_x + 15, body_y + 7)
+        sword_end = (body_x + 45, body_y + 7)
+        d.ellipse((body_x + 33 + frame * 2, body_y - 3, body_x + 51 + frame * 2, body_y + 15), fill=(90, 222, 255, 190))
+    elif pose == "ally_support":
+        d.ellipse((body_x - 16 - frame, body_y - 16 - frame, body_x + 31 + frame, body_y + 32 + frame), outline=(255, 235, 128, 190), width=3)
+    elif pose == "break_limit":
+        sword_start = (body_x - 7, body_y + 24)
+        sword_end = (body_x + 42, body_y - 22)
+        d.arc((body_x - 23, body_y - 23, body_x + 67, body_y + 66), 206, 336, fill=(91, 255, 223, 180), width=6)
+
+    d.line(sword_start + sword_end, fill=(35, 222, 238, 255), width=4)
+    d.line((sword_end[0] - 1, sword_end[1], sword_end[0] + 5, sword_end[1] - 7), fill=(228, 255, 255, 255), width=2)
+    return upscale(image)
 
 
-def bear_husband() -> Image.Image:
-    image, d = alpha_canvas((112, 88))
-    d.ellipse((22, 26, 92, 76), fill=(87, 54, 42, 255))
-    d.ellipse((54, 12, 104, 60), fill=(112, 70, 48, 255))
-    d.ellipse((54, 9, 70, 25), fill=(60, 38, 32, 255))
-    d.ellipse((91, 9, 108, 27), fill=(60, 38, 32, 255))
-    d.rectangle((28, 62, 42, 84), fill=(54, 34, 28, 255))
-    d.rectangle((69, 62, 85, 84), fill=(54, 34, 28, 255))
-    d.polygon([(18, 38), (5, 48), (18, 55), (34, 45)], fill=(95, 58, 42, 255))
-    d.polygon([(87, 42), (110, 46), (93, 56)], fill=(82, 50, 38, 255))
-    d.ellipse((73, 28, 80, 35), fill=(248, 75, 54, 255))
-    d.ellipse((92, 28, 99, 35), fill=(248, 75, 54, 255))
-    d.rectangle((83, 40, 91, 46), fill=(32, 24, 22, 255))
-    d.line((70, 52, 101, 53), fill=(230, 210, 164, 255), width=3)
-    d.line((11, 55, 2, 61), fill=(230, 220, 188, 255), width=2)
-    d.line((98, 55, 111, 62), fill=(230, 220, 188, 255), width=2)
-    return upscale(image, 3)
+def draw_bear_pose(pose: str, frame: int, frame_count: int) -> Image.Image:
+    image, d = alpha_canvas((126, 92))
+    t = 0.0 if frame_count <= 1 else (frame - 1) / (frame_count - 1)
+    bob = int(round(math.sin((frame - 1) * math.pi * 2.0 / max(1, frame_count)) * 2))
+    x = 60 + (bob if pose == "run" else 0)
+    y = 42 + (abs(bob) if pose == "run" else 0)
+    if pose == "hit":
+        x -= 2 + frame
+    if pose == "fall":
+        y -= 5
+    if pose == "dead":
+        y += 16
+
+    d.ellipse((24, 78, 104, 88), fill=(0, 0, 0, 72))
+    if pose == "dead":
+        d.ellipse((19, y + 3, 96, y + 36), fill=(87, 54, 42, 255))
+        d.ellipse((63, y - 4, 113, y + 30), fill=(111, 69, 48, 255))
+        d.line((72, y + 14, 101, y + 15), fill=(225, 200, 158, 255), width=3)
+        return upscale(image)
+
+    d.ellipse((20, y - 14, 96, y + 37), fill=(87, 54, 42, 255))
+    d.ellipse((61, y - 30, 114, y + 18), fill=(112, 70, 48, 255))
+    d.ellipse((61, y - 33, 78, y - 16), fill=(60, 38, 32, 255))
+    d.ellipse((98, y - 33, 116, y - 14), fill=(60, 38, 32, 255))
+    leg_shift = 5 if frame % 2 else -3
+    d.rectangle((30 + leg_shift, y + 26, 45 + leg_shift, y + 50), fill=(54, 34, 28, 255))
+    d.rectangle((72 - leg_shift, y + 25, 88 - leg_shift, y + 50), fill=(54, 34, 28, 255))
+
+    arm_extend = int(12 * t) if pose in {"enemy_claw", "bear_charge"} else 0
+    d.polygon([(18, y - 4), (2, y + 7), (18, y + 14), (35, y + 4)], fill=(95, 58, 42, 255))
+    d.polygon([(90, y + 1), (121 + arm_extend, y + 3), (96, y + 16)], fill=(82, 50, 38, 255))
+    d.ellipse((80, y - 13, 87, y - 6), fill=(248, 75, 54, 255))
+    d.ellipse((100, y - 13, 107, y - 6), fill=(248, 75, 54, 255))
+    d.rectangle((90, y, 99, y + 6), fill=(32, 24, 22, 255))
+    d.line((76, y + 12, 108, y + 13), fill=(230, 210, 164, 255), width=3)
+
+    if pose == "enemy_claw":
+        for c in range(3):
+            sx = 101 + c * 5 + int(10 * t)
+            d.line((sx, y - 11, sx - 16, y + 26), fill=(255, 196, 132, 230), width=3)
+    elif pose == "bear_charge":
+        for c in range(4):
+            d.line((8, y - 20 + c * 8, 55 - c * 5, y - 24 + c * 8), fill=(182, 210, 206, 120), width=3)
+    elif pose == "bear_shockwave":
+        d.arc((74, y - 12 - frame, 122 + frame * 8, y + 38 + frame), 205, 335, fill=(94, 228, 255, 190), width=4)
+    elif pose == "hit":
+        d.line((47, y - 25, 37, y - 37), fill=(255, 230, 140, 220), width=3)
+    return upscale(image)
 
 
-def small_claw_beast() -> Image.Image:
-    image, d = alpha_canvas((80, 72))
-    d.ellipse((15, 30, 62, 58), fill=(73, 82, 78, 255))
-    d.ellipse((36, 18, 72, 48), fill=(92, 112, 108, 255))
-    d.polygon([(42, 18), (49, 6), (56, 21)], fill=(54, 65, 66, 255))
-    d.polygon([(62, 20), (72, 10), (70, 28)], fill=(54, 65, 66, 255))
-    d.ellipse((51, 31, 56, 36), fill=(96, 233, 255, 255))
-    d.ellipse((65, 31, 70, 36), fill=(96, 233, 255, 255))
-    d.rectangle((22, 54, 31, 67), fill=(45, 50, 50, 255))
-    d.rectangle((49, 53, 58, 67), fill=(45, 50, 50, 255))
-    d.line((9, 45, 0, 51), fill=(230, 228, 197, 255), width=2)
-    return upscale(image, 3)
+def draw_claw_beast_pose(pose: str, frame: int, frame_count: int) -> Image.Image:
+    image, d = alpha_canvas((84, 76))
+    t = 0.0 if frame_count <= 1 else (frame - 1) / (frame_count - 1)
+    bob = int(round(math.sin((frame - 1) * math.pi * 2.0 / max(1, frame_count)) * 2))
+    x = 40 + (bob if pose == "run" else 0)
+    y = 38 + (abs(bob) if pose == "run" else 0)
+    if pose == "hit":
+        x -= 2 + frame
+    if pose == "fall":
+        y -= 3
+    if pose == "dead":
+        y += 12
+
+    d.ellipse((13, 63, 67, 71), fill=(0, 0, 0, 64))
+    if pose == "dead":
+        d.ellipse((13, y + 5, 63, y + 25), fill=(73, 82, 78, 255))
+        d.ellipse((37, y - 1, 75, y + 22), fill=(92, 112, 108, 255))
+        return upscale(image)
+
+    d.ellipse((x - 28, y - 7, x + 18, y + 21), fill=(73, 82, 78, 255))
+    d.ellipse((x - 5, y - 20, x + 33, y + 10), fill=(92, 112, 108, 255))
+    d.polygon([(x + 1, y - 20), (x + 9, y - 33), (x + 15, y - 17)], fill=(54, 65, 66, 255))
+    d.polygon([(x + 20, y - 18), (x + 31, y - 30), (x + 28, y - 11)], fill=(54, 65, 66, 255))
+    d.ellipse((x + 10, y - 6, x + 15, y - 1), fill=(96, 233, 255, 255))
+    d.ellipse((x + 25, y - 6, x + 30, y - 1), fill=(96, 233, 255, 255))
+    leg_shift = 4 if frame % 2 else -2
+    d.rectangle((x - 19 + leg_shift, y + 17, x - 10 + leg_shift, y + 31), fill=(45, 50, 50, 255))
+    d.rectangle((x + 5 - leg_shift, y + 16, x + 14 - leg_shift, y + 31), fill=(45, 50, 50, 255))
+    d.line((x - 32, y + 8, x - 42, y + 15), fill=(230, 228, 197, 255), width=2)
+
+    if pose == "enemy_claw":
+        for c in range(2):
+            sx = x + 31 + c * 7 + int(9 * t)
+            d.line((sx, y - 12, sx - 18, y + 22), fill=(255, 190, 126, 230), width=3)
+    elif pose == "hit":
+        d.line((x - 10, y - 22, x - 24, y - 31), fill=(255, 230, 140, 220), width=3)
+    return upscale(image)
 
 
 def slash_frame(frame: int) -> Image.Image:
@@ -202,7 +339,7 @@ def shockwave_frame(frame: int) -> Image.Image:
     return upscale(image, 2)
 
 
-def save_sequence(prefix: str, frame_count: int, factory) -> None:
+def save_effect_sequence(prefix: str, frame_count: int, factory: Callable[[int], Image.Image]) -> None:
     first = None
     for frame in range(1, frame_count + 1):
         image = factory(frame)
@@ -222,20 +359,124 @@ def save_sequence(prefix: str, frame_count: int, factory) -> None:
             save(first, SC_ROOT / "effects" / alias)
 
 
+def save_character_sequence(
+    folder: str,
+    prefix: str,
+    pose: str,
+    frame_count: int,
+    factory: Callable[[str, int, int], Image.Image],
+    alias: str | None = None,
+) -> None:
+    first = None
+    for frame in range(1, frame_count + 1):
+        image = factory(pose, frame, frame_count)
+        if first is None:
+            first = image
+        save(image, SC_ROOT / folder / f"{prefix}_{frame:02}.png")
+    if alias and first:
+        save(first, SC_ROOT / folder / alias)
+
+
+def write_wav(path: Path, duration: float, generator: Callable[[float], float], sample_rate: int = 44100) -> None:
+    ensure(path)
+    sample_count = int(duration * sample_rate)
+    with wave.open(str(path), "wb") as wav:
+        wav.setnchannels(1)
+        wav.setsampwidth(2)
+        wav.setframerate(sample_rate)
+        frames = bytearray()
+        for i in range(sample_count):
+            t = i / sample_rate
+            env = max(0.0, 1.0 - t / max(0.001, duration))
+            sample = max(-1.0, min(1.0, generator(t) * env))
+            frames += struct.pack("<h", int(sample * 32767))
+        wav.writeframes(frames)
+
+
+def sine(freq: float, t: float) -> float:
+    return math.sin(2.0 * math.pi * freq * t)
+
+
+def make_audio() -> None:
+    random.seed(7)
+    audio = SC_ROOT / "audio"
+    write_wav(audio / "swing_light.wav", 0.12, lambda t: 0.32 * sine(880 - 2600 * t, t) + random.uniform(-0.18, 0.18))
+    write_wav(audio / "swing_heavy.wav", 0.16, lambda t: 0.42 * sine(620 - 2100 * t, t) + random.uniform(-0.22, 0.22))
+    write_wav(audio / "swing_air.wav", 0.11, lambda t: 0.28 * sine(1180 - 3200 * t, t) + random.uniform(-0.14, 0.14))
+    write_wav(audio / "swing_upper.wav", 0.18, lambda t: 0.38 * sine(520 + 2500 * t, t) + random.uniform(-0.16, 0.16))
+    write_wav(audio / "hit_light.wav", 0.13, lambda t: 0.50 * sine(170, t) + random.uniform(-0.45, 0.45))
+    write_wav(audio / "hit_heavy.wav", 0.18, lambda t: 0.62 * sine(105, t) + random.uniform(-0.48, 0.48))
+    write_wav(audio / "hit_air.wav", 0.12, lambda t: 0.42 * sine(260, t) + random.uniform(-0.34, 0.34))
+    write_wav(audio / "hit_launcher.wav", 0.20, lambda t: 0.54 * sine(130 + 520 * t, t) + random.uniform(-0.38, 0.38))
+    write_wav(audio / "player_hit.wav", 0.16, lambda t: 0.46 * sine(120, t) + random.uniform(-0.40, 0.40))
+    write_wav(audio / "magic_cast.wav", 0.20, lambda t: 0.30 * sine(740 + 1100 * t, t) + 0.22 * sine(1480 + 1400 * t, t))
+    write_wav(audio / "magic_hit.wav", 0.20, lambda t: 0.38 * sine(220, t) + 0.24 * sine(920 - 1300 * t, t) + random.uniform(-0.18, 0.18))
+    write_wav(audio / "support_cast.wav", 0.24, lambda t: 0.26 * sine(520, t) + 0.22 * sine(1040 + 400 * t, t))
+    write_wav(audio / "support_hit.wav", 0.20, lambda t: 0.34 * sine(360, t) + random.uniform(-0.28, 0.28))
+    write_wav(audio / "break_limit.wav", 0.30, lambda t: 0.42 * sine(180 + 820 * t, t) + 0.22 * sine(1460, t) + random.uniform(-0.18, 0.18))
+    write_wav(audio / "enemy_swing.wav", 0.14, lambda t: 0.36 * sine(360 - 1200 * t, t) + random.uniform(-0.24, 0.24))
+    write_wav(audio / "bear_charge.wav", 0.24, lambda t: 0.50 * sine(80, t) + random.uniform(-0.34, 0.34))
+    write_wav(audio / "shockwave_cast.wav", 0.24, lambda t: 0.40 * sine(90 + 280 * t, t) + 0.18 * sine(760, t))
+    write_wav(audio / "jump.wav", 0.14, lambda t: 0.25 * sine(420 + 1200 * t, t))
+    write_wav(audio / "land.wav", 0.14, lambda t: 0.40 * sine(95, t) + random.uniform(-0.25, 0.25))
+
+
 def main() -> None:
     save(stage_background(), SC_ROOT / "backgrounds" / "black_forest_stage.png")
-    save(player_magic_swordsman(), SC_ROOT / "characters" / "player_magic_swordsman.png")
-    save(bear_husband(), SC_ROOT / "enemies" / "bear_husband.png")
-    save(small_claw_beast(), SC_ROOT / "enemies" / "small_claw_beast.png")
     save(blob_shadow(), SC_ROOT / "ui" / "blob_shadow.png")
 
-    save_sequence("slash_basic", 4, slash_frame)
-    save_sequence("slash_launcher", 5, launcher_frame)
-    save_sequence("magic_bolt", 4, magic_bolt_frame)
-    save_sequence("ally_support", 5, support_frame)
-    save_sequence("enemy_claw", 3, enemy_claw_frame)
-    save_sequence("bear_charge", 3, bear_charge_frame)
-    save_sequence("bear_shockwave", 4, shockwave_frame)
+    player_clips = {
+        "player_idle": ("idle", 4, "player_magic_swordsman.png"),
+        "player_run": ("run", 6, None),
+        "player_jump": ("jump", 3, None),
+        "player_fall": ("fall", 3, None),
+        "player_hit": ("hit", 3, None),
+        "player_dead": ("dead", 4, None),
+        "player_basic1": ("basic1", 4, None),
+        "player_basic2": ("basic2", 4, None),
+        "player_basic3": ("basic3", 5, None),
+        "player_air_basic": ("air_basic", 4, None),
+        "player_launcher": ("launcher", 5, None),
+        "player_air_chase": ("air_chase", 4, None),
+        "player_magic": ("magic_bolt", 4, None),
+        "player_support": ("ally_support", 4, None),
+        "player_break_limit": ("break_limit", 5, None),
+    }
+    for prefix, (pose, frames, alias) in player_clips.items():
+        save_character_sequence("characters", prefix, pose, frames, draw_player_pose, alias)
+
+    bear_clips = {
+        "bear_idle": ("idle", 4, "bear_husband.png"),
+        "bear_walk": ("run", 5, None),
+        "bear_hit": ("hit", 3, None),
+        "bear_fall": ("fall", 3, None),
+        "bear_dead": ("dead", 4, None),
+        "bear_attack": ("enemy_claw", 4, None),
+        "bear_charge_anim": ("bear_charge", 4, None),
+        "bear_shockwave_anim": ("bear_shockwave", 4, None),
+    }
+    for prefix, (pose, frames, alias) in bear_clips.items():
+        save_character_sequence("enemies", prefix, pose, frames, draw_bear_pose, alias)
+
+    beast_clips = {
+        "claw_beast_idle": ("idle", 4, "small_claw_beast.png"),
+        "claw_beast_run": ("run", 5, None),
+        "claw_beast_hit": ("hit", 3, None),
+        "claw_beast_fall": ("fall", 3, None),
+        "claw_beast_dead": ("dead", 4, None),
+        "claw_beast_attack": ("enemy_claw", 4, None),
+    }
+    for prefix, (pose, frames, alias) in beast_clips.items():
+        save_character_sequence("enemies", prefix, pose, frames, draw_claw_beast_pose, alias)
+
+    save_effect_sequence("slash_basic", 4, slash_frame)
+    save_effect_sequence("slash_launcher", 5, launcher_frame)
+    save_effect_sequence("magic_bolt", 4, magic_bolt_frame)
+    save_effect_sequence("ally_support", 5, support_frame)
+    save_effect_sequence("enemy_claw", 3, enemy_claw_frame)
+    save_effect_sequence("bear_charge", 3, bear_charge_frame)
+    save_effect_sequence("bear_shockwave", 4, shockwave_frame)
+    make_audio()
 
 
 if __name__ == "__main__":

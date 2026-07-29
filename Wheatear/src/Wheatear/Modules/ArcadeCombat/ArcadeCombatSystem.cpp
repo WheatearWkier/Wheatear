@@ -4,9 +4,12 @@
 #include "Wheatear/Core/Input.h"
 #include "Wheatear/Core/KeyCodes.h"
 #include "Wheatear/Core/MouseButtonCodes.h"
+#include "Wheatear/Renderer/Texture.h"
 #include "Wheatear/Scene/Components.h"
 #include "Wheatear/Scene/Entity.h"
+#include "Wheatear/Scene/SceneQueries.h"
 #include "Wheatear/Scene/Scene.h"
+#include "Wheatear/UI/UIRuntimeTools.h"
 
 #include <algorithm>
 #include <cmath>
@@ -21,21 +24,13 @@ namespace Wheatear {
 
     namespace {
 
+        using SceneQueries::FindEntityByName;
+        using UIRuntimeTools::SetImageAlpha;
+        using UIRuntimeTools::SetProgress;
+        using UIRuntimeTools::SetText;
+        using UIRuntimeTools::SetWidgetVisible;
+
         constexpr float Pi = 3.1415926535f;
-
-        static Entity FindEntityByName(Scene* scene, const std::string& name)
-        {
-            if (!scene || name.empty())
-                return {};
-
-            auto& registry = scene->GetRegistry();
-            for (auto e : registry.view<TagComponent>())
-            {
-                if (registry.get<TagComponent>(e).Tag == name)
-                    return { e, scene };
-            }
-            return {};
-        }
 
         static glm::vec2 ToVec2(const glm::vec3& value)
         {
@@ -53,44 +48,6 @@ namespace Wheatear {
             if (glm::length2(direction) <= 0.0001f)
                 return { 1.0f, 0.0f };
             return glm::normalize(direction);
-        }
-
-        static void SetWidgetVisible(Scene* scene, const std::string& entityName, bool visible)
-        {
-            Entity entity = FindEntityByName(scene, entityName);
-            if (entity && entity.HasComponent<UIWidgetComponent>())
-                entity.GetComponent<UIWidgetComponent>().Visible = visible;
-        }
-
-        static void SetText(Scene* scene, const std::string& entityName, const std::string& text)
-        {
-            Entity entity = FindEntityByName(scene, entityName);
-            if (entity && entity.HasComponent<UITextComponent>())
-                entity.GetComponent<UITextComponent>().Text = text;
-        }
-
-        static void SetImageAlpha(Scene* scene, const std::string& entityName, float alpha)
-        {
-            Entity entity = FindEntityByName(scene, entityName);
-            if (!entity)
-                return;
-
-            alpha = std::clamp(alpha, 0.0f, 1.0f);
-            if (entity.HasComponent<UIImageComponent>())
-                entity.GetComponent<UIImageComponent>().Color.a = alpha;
-            if (entity.HasComponent<UIWidgetComponent>())
-                entity.GetComponent<UIWidgetComponent>().Visible = alpha > 0.01f;
-        }
-
-        static void SetProgress(Scene* scene, const std::string& entityName, float value, float maxValue)
-        {
-            Entity entity = FindEntityByName(scene, entityName);
-            if (!entity || !entity.HasComponent<UIProgressBarComponent>())
-                return;
-
-            auto& bar = entity.GetComponent<UIProgressBarComponent>();
-            bar.MaxValue = std::max(0.01f, maxValue);
-            bar.Value = std::clamp(value, 0.0f, bar.MaxValue);
         }
 
         static const char* WeaponName(ArcadeWeaponType weapon)

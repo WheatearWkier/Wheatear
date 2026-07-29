@@ -36,7 +36,13 @@
     <ClInclude Include="src\Editor\CoreEditorComponents.h">
       <Filter>Editor</Filter>
     </ClInclude>
+    <ClInclude Include="src\Editor\EditorCanvasTools.h">
+      <Filter>Editor</Filter>
+    </ClInclude>
     <ClInclude Include="src\Editor\EditorComponentRegistry.h">
+      <Filter>Editor</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Editor\EventScriptGraphPanel.h">
       <Filter>Editor</Filter>
     </ClInclude>
     <ClInclude Include="src\Editor\EditorLayer2D.h">
@@ -51,6 +57,9 @@
     <ClInclude Include="src\Editor\ModeSelectLayer.h">
       <Filter>Editor</Filter>
     </ClInclude>
+    <ClInclude Include="src\Editor\TextAssetEditor.h">
+      <Filter>Editor</Filter>
+    </ClInclude>
     <ClInclude Include="src\Modules\ArcadeCombat\ArcadeCombatDrawer.h">
       <Filter>Modules\ArcadeCombat</Filter>
     </ClInclude>
@@ -60,7 +69,13 @@
     <ClInclude Include="src\Modules\SideCombat\SideCombatDrawer.h">
       <Filter>Modules\SideCombat</Filter>
     </ClInclude>
+    <ClInclude Include="src\Modules\SideCombat\SideCombatTuningEditorPanel.h">
+      <Filter>Modules\SideCombat</Filter>
+    </ClInclude>
     <ClInclude Include="src\Modules\VisualNovel\VisualNovelDrawer.h">
+      <Filter>Modules\VisualNovel</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Modules\VisualNovel\VisualNovelScriptEditorPanel.h">
       <Filter>Modules\VisualNovel</Filter>
     </ClInclude>
     <ClInclude Include="src\Panels\AnimationEditorPanel.h">
@@ -111,6 +126,7 @@
     <ClInclude Include="src\Panels\SceneHierarchyPanel.h">
       <Filter>Panels</Filter>
     </ClInclude>
+    <ClInclude Include="src\wepch.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Build\PlayerPackager.cpp">
@@ -122,6 +138,9 @@
     <ClCompile Include="src\Editor\EditorComponentRegistry.cpp">
       <Filter>Editor</Filter>
     </ClCompile>
+    <ClCompile Include="src\Editor\EventScriptGraphPanel.cpp">
+      <Filter>Editor</Filter>
+    </ClCompile>
     <ClCompile Include="src\Editor\EditorLayer2D.cpp">
       <Filter>Editor</Filter>
     </ClCompile>
@@ -129,6 +148,15 @@
       <Filter>Editor</Filter>
     </ClCompile>
     <ClCompile Include="src\Editor\EditorLayerBase.cpp">
+      <Filter>Editor</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Editor\EditorLayerBaseLifecycle.cpp">
+      <Filter>Editor</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Editor\EditorLayerBaseScene.cpp">
+      <Filter>Editor</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Editor\EditorLayerBaseUI.cpp">
       <Filter>Editor</Filter>
     </ClCompile>
     <ClCompile Include="src\Editor\ModeSelectLayer.cpp">
@@ -143,7 +171,13 @@
     <ClCompile Include="src\Modules\SideCombat\SideCombatDrawer.cpp">
       <Filter>Modules\SideCombat</Filter>
     </ClCompile>
+    <ClCompile Include="src\Modules\SideCombat\SideCombatTuningEditorPanel.cpp">
+      <Filter>Modules\SideCombat</Filter>
+    </ClCompile>
     <ClCompile Include="src\Modules\VisualNovel\VisualNovelDrawer.cpp">
+      <Filter>Modules\VisualNovel</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Modules\VisualNovel\VisualNovelScriptEditorPanel.cpp">
       <Filter>Modules\VisualNovel</Filter>
     </ClCompile>
     <ClCompile Include="src\Panels\AnimationEditorPanel.cpp">
@@ -188,6 +222,13 @@
     <ClCompile Include="src\Panels\SceneHierarchyPanel.cpp">
       <Filter>Panels</Filter>
     </ClCompile>
+    <ClCompile Include="src\Panels\SceneHierarchyPanelComponents.cpp">
+      <Filter>Panels</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Panels\SceneHierarchyPanelTree.cpp">
+      <Filter>Panels</Filter>
+    </ClCompile>
     <ClCompile Include="src\WheatearEditorApp.cpp" />
+    <ClCompile Include="src\wepch.cpp" />
   </ItemGroup>
 </Project>

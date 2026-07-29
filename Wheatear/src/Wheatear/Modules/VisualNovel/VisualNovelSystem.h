@@ -35,10 +35,16 @@ namespace Wheatear {
             std::vector<bool> PreviousChoicePressed;
             bool ShowHistory = false;
             bool ShowSettings = false;
+            bool ShowSaveLoad = false;
             bool DialogueHidden = false;
             float SystemMessageTimer = 0.0f;
             std::string SystemMessage;
             int LoadedAutoLoadSlot = 0;
+            uint32_t BGMHandle = 0;
+            std::string CurrentBGMPath;
+            std::string CurrentBGMTitle;
+            float BGMNoticeTimer = 0.0f;
+            float BGMNoticeDuration = 3.4f;
         };
 
         RuntimeState& GetState(UUID id);
@@ -47,6 +53,9 @@ namespace Wheatear {
         bool ExecuteHoveredCommand(Scene* scene, VisualNovelComponent& component, RuntimeState& state);
         bool ExecuteCommand(Scene* scene, VisualNovelComponent& component, RuntimeState& state, const std::string& command);
         void UpdateSceneBindings(Scene* scene, const VisualNovelComponent& component, RuntimeState& state);
+        void StopBGM(RuntimeState& state);
+        void UpdateBGM(Scene* scene, const VisualNovelComponent& component, RuntimeState& state);
+        void UpdateMusicNotice(Scene* scene, const VisualNovelComponent& component, RuntimeState& state, float deltaSeconds);
 
     private:
         std::unordered_map<UUID, RuntimeState> m_RuntimeStates;

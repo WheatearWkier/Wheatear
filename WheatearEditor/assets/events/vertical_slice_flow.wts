@@ -1,0 +1,162 @@
+# Wheatear vertical slice flow controller.
+# This script is attached to FlowController entities in vertical-slice scenes.
+
+event on_start:
+end
+
+event menu_new_game:
+    newgame:assets/scenes/VerticalSliceIntro.wt
+end
+
+event menu_load_game:
+    loadgame:assets/scenes/VerticalSliceIntro.wt:1
+end
+
+event menu_quit:
+    quit
+end
+
+event go_main_menu:
+    scene:assets/scenes/VisualNovelMainMenu.wt
+end
+
+event go_intro:
+    scene:assets/scenes/VerticalSliceIntro.wt
+end
+
+event go_fake_combat:
+    progression:set_flag:FLAG_CH01_FAKE_COMBAT_STARTED
+    scene:assets/scenes/VisualNovelBattle.wt
+end
+
+event fake_combat_victory:
+    progression:set_flag:FLAG_CH01_FAKE_COMBAT_CLEARED
+    progression:save_1
+    wait 0.10
+    scene:assets/scenes/VerticalSlicePostFake.wt
+end
+
+event go_side_combat:
+    scene:assets/scenes/SideCombatVerticalSlice.wt
+end
+
+event tutorial_side_combat_start:
+    progression:set_flag:FLAG_CH02_TUTORIAL_STARTED
+    progression:save_1
+    scene:assets/scenes/SideCombatVerticalSlice.wt
+end
+
+event go_beast_path:
+    scene:assets/scenes/SideCombatBeastPath.wt
+end
+
+event side_combat_victory:
+    progression:set_flag:FLAG_CH02_TUTORIAL_CLEARED
+    progression:save_1
+    wait 0.10
+    scene:assets/scenes/VerticalSliceResult.wt
+end
+
+event side_combat_retry:
+    scene:assets/scenes/SideCombatVerticalSlice.wt
+end
+
+event beast_path_victory:
+    progression:save_1
+    wait 0.10
+    scene:assets/scenes/VerticalSliceResult.wt
+end
+
+event beast_path_retry:
+    scene:assets/scenes/SideCombatBeastPath.wt
+end
+
+event go_hub:
+    scene:assets/scenes/VerticalSliceHub.wt
+end
+
+event go_hub_save:
+    progression:save_1
+    wait 0.05
+    scene:assets/scenes/VerticalSliceHub.wt
+end
+
+event result_go_hub:
+    progression:save_1
+    wait 0.05
+    scene:assets/scenes/VerticalSliceHub.wt
+end
+
+event result_retry_last_dungeon:
+    if last_dungeon CH02_MAIN_BearAwakening
+        scene:assets/scenes/SideCombatVerticalSlice.wt
+    endif
+    if last_dungeon CH02_MAT_BeastPath
+        scene:assets/scenes/SideCombatBeastPath.wt
+    endif
+end
+
+event go_dungeon_select:
+    scene:assets/scenes/VerticalSliceDungeonSelect.wt
+end
+
+event go_skill_tree:
+    scene:assets/scenes/VerticalSliceSkillTree.wt
+end
+
+event go_equipment:
+    scene:assets/scenes/VerticalSliceEquipment.wt
+end
+
+event go_relationship:
+    scene:assets/scenes/VerticalSliceRelationship.wt
+end
+
+event go_support:
+    scene:assets/scenes/VerticalSliceSupport.wt
+end
+
+event go_save_load:
+    scene:assets/scenes/VerticalSliceSaveLoad.wt
+end
+
+event go_settings:
+    scene:assets/scenes/VerticalSliceSettings.wt
+end
+
+event go_chapter3_preview:
+    scene:assets/scenes/VerticalSliceChapter3Preview.wt
+end
+
+event go_next_story:
+    if flag FLAG_CH02_BOSS_DEFEATED
+        progression:set_flag:FLAG_CH03_PREVIEW_STARTED
+        progression:set_chapter:3
+        progression:save_1
+        scene:assets/scenes/VerticalSliceChapter3Preview.wt
+    endif
+end
+
+event route_after_result:
+    if flag FLAG_HUB_UNLOCKED
+        event:FlowController:result_go_hub
+    endif
+end
+
+event save_slot_1:
+    progression:save_1
+end
+
+event load_slot_1:
+    progression:load_1
+end
+
+event save_slot_1_then_hub:
+    progression:save_1
+    wait 0.05
+    scene:assets/scenes/VerticalSliceHub.wt
+end
+
+event load_slot_1_then_intro:
+    loadgame:assets/scenes/VerticalSliceIntro.wt:1
+end

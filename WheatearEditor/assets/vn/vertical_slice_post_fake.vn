@@ -1,7 +1,8 @@
-# 第一章假玩法结束后，进入正式横板战斗前的 VN。
+﻿# 第一章假玩法结束后，进入正式横板战斗前的 VN。
 
 @label start
 @background assets/vertical_slice/vn/backgrounds/isekai_forest.png
+@music assets/vertical_slice/audio/bgm/vn_tutorial_resolve.wav "魔剑士训导"
 @speed 44
 @character Mira 魔剑士导师 assets/vertical_slice/vn/portraits/mentor_{expression}.png
 @character Leo 主角 assets/vertical_slice/vn/portraits/hero_{expression}.png
@@ -20,7 +21,8 @@ Leo: 所以装备掉落、材料升级、技能树，终于都要登场了？
 Mira: 先别高兴。你刚才打倒的是母熊。她的丈夫来了。
 Leo: 为什么连黑熊都有家庭伦理线？
 @expression Mira serious
+@music assets/vertical_slice/audio/bgm/vn_abduction.wav "黑熊丈夫"
 Mira: 握紧剑柄。这一次不是假玩法。移动、跳跃、上挑、魔法、支援，都要用上。
 Leo: 好。真正的战斗，现在开始。
 
-@choice 进入正式横板战斗 -> scene:assets/scenes/SideCombatVerticalSlice.wt
+@choice 进入正式横板战斗 -> event:FlowController:tutorial_side_combat_start

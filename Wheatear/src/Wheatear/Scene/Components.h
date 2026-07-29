@@ -1,6 +1,6 @@
 #pragma once
 
-// GLM_ENABLE_EXPERIMENTAL ±ØĞëÔÚ°üº¬ gtx Í·ÎÄ¼şÖ®Ç°¶¨Òå
+// GLM_ENABLE_EXPERIMENTAL è¹‡å‘´ã€é¦ã„¥å¯˜éš?gtx æ¾¶å­˜æƒæµ æœµç®£é“å¶…ç•¾æ¶”?
 #define GLM_ENABLE_EXPERIMENTAL
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
@@ -18,15 +18,17 @@
 #include "Wheatear/Modules/ArcadeCombat/ArcadeCombatComponents.h"
 #include "Wheatear/Modules/SideCombat/SideCombatComponents.h"
 
+#include <algorithm>
 #include <cstdint>
 #include <string>
 #include <unordered_map>
+#include <vector>
 
 namespace Wheatear {
 
-    // ¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T
-    //  »ù´¡×é¼ş
-    // ¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T
+    // éˆºæ„¨æ™²éˆºæ„¨æ™²éˆºæ„¨æ™²éˆºæ„¨æ™²éˆºæ„¨æ™²éˆºæ„¨æ™²éˆºæ„¨æ™²éˆºæ„¨æ™²éˆºæ„¨æ™²éˆºæ„¨æ™²éˆºæ„¨æ™²éˆºæ„¨æ™²éˆºæ„¨æ™²éˆºæ„¨æ™²éˆºæ„¨æ™²éˆºæ„¨æ™²éˆºæ„¨æ™²éˆºæ„¨æ™²éˆºæ„¨æ™²éˆºæ„¨æ™²éˆºæ„¨æ™²éˆºæ„¨æ™²éˆºæ„¨æ™²éˆºæ„¨æ™²éˆºæ„¨æ™²éˆºæ„¨æ™²éˆºæ„¨æ™²éˆº?
+    //  é©è™¹î”…ç¼å‹ªæ¬¢
+    // éˆºæ„¨æ™²éˆºæ„¨æ™²éˆºæ„¨æ™²éˆºæ„¨æ™²éˆºæ„¨æ™²éˆºæ„¨æ™²éˆºæ„¨æ™²éˆºæ„¨æ™²éˆºæ„¨æ™²éˆºæ„¨æ™²éˆºæ„¨æ™²éˆºæ„¨æ™²éˆºæ„¨æ™²éˆºæ„¨æ™²éˆºæ„¨æ™²éˆºæ„¨æ™²éˆºæ„¨æ™²éˆºæ„¨æ™²éˆºæ„¨æ™²éˆºæ„¨æ™²éˆºæ„¨æ™²éˆºæ„¨æ™²éˆºæ„¨æ™²éˆºæ„¨æ™²éˆºæ„¨æ™²éˆºæ„¨æ™²éˆºæ„¨æ™²éˆº?
 
     struct IDComponent
     {
@@ -34,7 +36,7 @@ namespace Wheatear {
 
         IDComponent() = default;
         IDComponent(const IDComponent&) = default;
-        IDComponent(const UUID& id) : ID(id) {}  // ĞŞ¸´£ºScene.cpp ±àÒë´íÎóµÄ¸ùÔ´
+        IDComponent(const UUID& id) : ID(id) {}  // æ·‡î†¼î˜²é”›æ­‹cene.cpp ç¼‚æ ¬ç˜§é–¿æ¬’î‡¤é¨å‹¬ç‰´å©§?
     };
 
     struct TagComponent
@@ -64,9 +66,9 @@ namespace Wheatear {
         }
     };
 
-    // ¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T
-    //  äÖÈ¾×é¼ş
-    // ¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T
+    // éˆºæ„¨æ™²éˆºæ„¨æ™²éˆºæ„¨æ™²éˆºæ„¨æ™²éˆºæ„¨æ™²éˆºæ„¨æ™²éˆºæ„¨æ™²éˆºæ„¨æ™²éˆºæ„¨æ™²éˆºæ„¨æ™²éˆºæ„¨æ™²éˆºæ„¨æ™²éˆºæ„¨æ™²éˆºæ„¨æ™²éˆºæ„¨æ™²éˆºæ„¨æ™²éˆºæ„¨æ™²éˆºæ„¨æ™²éˆºæ„¨æ™²éˆºæ„¨æ™²éˆºæ„¨æ™²éˆºæ„¨æ™²éˆºæ„¨æ™²éˆºæ„¨æ™²éˆºæ„¨æ™²éˆºæ„¨æ™²éˆºæ„¨æ™²éˆº?
+    //  å¨“å‰ç…‹ç¼å‹ªæ¬¢
+    // éˆºæ„¨æ™²éˆºæ„¨æ™²éˆºæ„¨æ™²éˆºæ„¨æ™²éˆºæ„¨æ™²éˆºæ„¨æ™²éˆºæ„¨æ™²éˆºæ„¨æ™²éˆºæ„¨æ™²éˆºæ„¨æ™²éˆºæ„¨æ™²éˆºæ„¨æ™²éˆºæ„¨æ™²éˆºæ„¨æ™²éˆºæ„¨æ™²éˆºæ„¨æ™²éˆºæ„¨æ™²éˆºæ„¨æ™²éˆºæ„¨æ™²éˆºæ„¨æ™²éˆºæ„¨æ™²éˆºæ„¨æ™²éˆºæ„¨æ™²éˆºæ„¨æ™²éˆºæ„¨æ™²éˆºæ„¨æ™²éˆºæ„¨æ™²éˆº?
 
     struct SpriteRendererComponent
     {
@@ -74,7 +76,7 @@ namespace Wheatear {
         Ref<Texture2D> Texture;
         float          TilingFactor = 1.0f;
 
-        // ¶¯»­ÏµÍ³Ğ´ÈëÕâÁ½¸ö×Ö¶Î£¬Ä¬ÈÏÊÇÕûÕÅÌùÍ¼
+        // é”ã„§æ•¾ç»¯è¤ç²ºéæ¬å†æ©æ¬è¢±æ¶“î„ç“§å¨ˆç¢‰ç´æ¦›æ¨¿î…»é„îˆ›æš£å¯®çŠºåˆ›é¥?
         glm::vec2      UVMin = { 0.0f, 0.0f };
         glm::vec2      UVMax = { 1.0f, 1.0f };
         bool           FlipX = false;
@@ -94,9 +96,9 @@ namespace Wheatear {
         CircleRendererComponent(const CircleRendererComponent&) = default;
     };
 
-    // ¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T
-    //  Ïà»ú×é¼ş
-    // ¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T
+    // éˆºæ„¨æ™²éˆºæ„¨æ™²éˆºæ„¨æ™²éˆºæ„¨æ™²éˆºæ„¨æ™²éˆºæ„¨æ™²éˆºæ„¨æ™²éˆºæ„¨æ™²éˆºæ„¨æ™²éˆºæ„¨æ™²éˆºæ„¨æ™²éˆºæ„¨æ™²éˆºæ„¨æ™²éˆºæ„¨æ™²éˆºæ„¨æ™²éˆºæ„¨æ™²éˆºæ„¨æ™²éˆºæ„¨æ™²éˆºæ„¨æ™²éˆºæ„¨æ™²éˆºæ„¨æ™²éˆºæ„¨æ™²éˆºæ„¨æ™²éˆºæ„¨æ™²éˆºæ„¨æ™²éˆºæ„¨æ™²éˆºæ„¨æ™²éˆº?
+    //  é©å‘Šæº€ç¼å‹ªæ¬¢
+    // éˆºæ„¨æ™²éˆºæ„¨æ™²éˆºæ„¨æ™²éˆºæ„¨æ™²éˆºæ„¨æ™²éˆºæ„¨æ™²éˆºæ„¨æ™²éˆºæ„¨æ™²éˆºæ„¨æ™²éˆºæ„¨æ™²éˆºæ„¨æ™²éˆºæ„¨æ™²éˆºæ„¨æ™²éˆºæ„¨æ™²éˆºæ„¨æ™²éˆºæ„¨æ™²éˆºæ„¨æ™²éˆºæ„¨æ™²éˆºæ„¨æ™²éˆºæ„¨æ™²éˆºæ„¨æ™²éˆºæ„¨æ™²éˆºæ„¨æ™²éˆºæ„¨æ™²éˆºæ„¨æ™²éˆºæ„¨æ™²éˆºæ„¨æ™²éˆº?
 
     struct CameraComponent
     {
@@ -108,18 +110,18 @@ namespace Wheatear {
         CameraComponent(const CameraComponent&) = default;
     };
 
-    // ¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T
-    //  ½Å±¾×é¼ş
-    // ¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T
+    // éˆºæ„¨æ™²éˆºæ„¨æ™²éˆºæ„¨æ™²éˆºæ„¨æ™²éˆºæ„¨æ™²éˆºæ„¨æ™²éˆºæ„¨æ™²éˆºæ„¨æ™²éˆºæ„¨æ™²éˆºæ„¨æ™²éˆºæ„¨æ™²éˆºæ„¨æ™²éˆºæ„¨æ™²éˆºæ„¨æ™²éˆºæ„¨æ™²éˆºæ„¨æ™²éˆºæ„¨æ™²éˆºæ„¨æ™²éˆºæ„¨æ™²éˆºæ„¨æ™²éˆºæ„¨æ™²éˆºæ„¨æ™²éˆºæ„¨æ™²éˆºæ„¨æ™²éˆºæ„¨æ™²éˆºæ„¨æ™²éˆºæ„¨æ™²éˆº?
+    //  é‘´æ°­æ¹°ç¼å‹ªæ¬¢
+    // éˆºæ„¨æ™²éˆºæ„¨æ™²éˆºæ„¨æ™²éˆºæ„¨æ™²éˆºæ„¨æ™²éˆºæ„¨æ™²éˆºæ„¨æ™²éˆºæ„¨æ™²éˆºæ„¨æ™²éˆºæ„¨æ™²éˆºæ„¨æ™²éˆºæ„¨æ™²éˆºæ„¨æ™²éˆºæ„¨æ™²éˆºæ„¨æ™²éˆºæ„¨æ™²éˆºæ„¨æ™²éˆºæ„¨æ™²éˆºæ„¨æ™²éˆºæ„¨æ™²éˆºæ„¨æ™²éˆºæ„¨æ™²éˆºæ„¨æ™²éˆºæ„¨æ™²éˆºæ„¨æ™²éˆºæ„¨æ™²éˆºæ„¨æ™²éˆº?
 
     class ScriptableEntity;
 
-    // C++Ô­Éú½Å±¾×é¼ş
+    // C++é˜ç†ºæ•“é‘´æ°­æ¹°ç¼å‹ªæ¬¢
     struct NativeScriptComponent
     {
         ScriptableEntity* Instance = nullptr;
 
-        // º¯ÊıÖ¸Õë³õÊ¼»¯Îª nullptr£¬·ÀÖ¹Î´°ó¶¨Ê±µ÷ÓÃ±ÀÀ£
+        // é‘èŠ¥æšŸé¸å›¬æ‹¡é’æ¿†îé–æ ¦è´Ÿ nullptré”›å²„æ§»å§ãˆ¡æ¹­ç¼æˆç•¾éƒæƒ°çšŸé¢ã„¥ç©¿å©§?
         ScriptableEntity* (*InstantiateScript)() = nullptr;
         void              (*DestroyScript)(NativeScriptComponent*) = nullptr;
 
@@ -138,7 +140,7 @@ namespace Wheatear {
         }
     };
 
-    // C#½Å±¾×é¼ş
+    // C#é‘´æ°­æ¹°ç¼å‹ªæ¬¢
     struct ScriptComponent
     {
         std::string ClassName;
@@ -147,9 +149,30 @@ namespace Wheatear {
         ScriptComponent(const ScriptComponent&) = default;
     };
 
-    // ¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T
-    //  ÎïÀí×é¼ş
-    // ¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T
+    // Wheatear event script (.wts). This is a lightweight native event sequencer,
+    // separate from optional C#/Mono scripting.
+    struct EventScriptComponent
+    {
+        std::string ScriptPath = "";
+        std::string StartEvent = "on_start";
+        bool RunOnStart = true;
+        bool RunOnce = true;
+        bool Enabled = true;
+
+        bool RuntimeActive = false;
+        bool RuntimeCompleted = false;
+        bool RuntimeStarted = false;
+        std::string RuntimeEventName;
+        size_t RuntimeInstructionIndex = 0;
+        float RuntimeWaitRemaining = 0.0f;
+
+        EventScriptComponent() = default;
+        EventScriptComponent(const EventScriptComponent&) = default;
+    };
+
+    // éˆºæ„¨æ™²éˆºæ„¨æ™²éˆºæ„¨æ™²éˆºæ„¨æ™²éˆºæ„¨æ™²éˆºæ„¨æ™²éˆºæ„¨æ™²éˆºæ„¨æ™²éˆºæ„¨æ™²éˆºæ„¨æ™²éˆºæ„¨æ™²éˆºæ„¨æ™²éˆºæ„¨æ™²éˆºæ„¨æ™²éˆºæ„¨æ™²éˆºæ„¨æ™²éˆºæ„¨æ™²éˆºæ„¨æ™²éˆºæ„¨æ™²éˆºæ„¨æ™²éˆºæ„¨æ™²éˆºæ„¨æ™²éˆºæ„¨æ™²éˆºæ„¨æ™²éˆºæ„¨æ™²éˆºæ„¨æ™²éˆºæ„¨æ™²éˆº?
+    //  é—â•ƒæ‚Šç¼å‹ªæ¬¢
+    // éˆºæ„¨æ™²éˆºæ„¨æ™²éˆºæ„¨æ™²éˆºæ„¨æ™²éˆºæ„¨æ™²éˆºæ„¨æ™²éˆºæ„¨æ™²éˆºæ„¨æ™²éˆºæ„¨æ™²éˆºæ„¨æ™²éˆºæ„¨æ™²éˆºæ„¨æ™²éˆºæ„¨æ™²éˆºæ„¨æ™²éˆºæ„¨æ™²éˆºæ„¨æ™²éˆºæ„¨æ™²éˆºæ„¨æ™²éˆºæ„¨æ™²éˆºæ„¨æ™²éˆºæ„¨æ™²éˆºæ„¨æ™²éˆºæ„¨æ™²éˆºæ„¨æ™²éˆºæ„¨æ™²éˆºæ„¨æ™²éˆºæ„¨æ™²éˆº?
 
     struct Rigidbody2DComponent
     {
@@ -158,7 +181,7 @@ namespace Wheatear {
         BodyType Type = BodyType::Static;
         bool     FixedRotation = false;
         float    GravityScale = 1.0f;
-        void*    RuntimeBody = nullptr;   // ÔËĞĞÊ±ÓÉ Box2D Ìî³ä£¬²»²ÎÓëĞòÁĞ»¯
+        void*    RuntimeBody = nullptr;   // æ©æ„¯î”‘éƒå‰æ•± Box2D æ¿‰î‚¢å–é”›å±¼ç¬‰é™å‚™ç¬Œæ´å¿“åªé–?
 
         Rigidbody2DComponent() = default;
         Rigidbody2DComponent(const Rigidbody2DComponent&) = default;
@@ -172,7 +195,7 @@ namespace Wheatear {
         float     Friction = 0.5f;
         float     Restitution = 0.0f;
         float     RestitutionThreshold = 0.5f;
-        void* RuntimeFixture = nullptr;   // ÔËĞĞÊ±ÓÉ Box2D Ìî³ä
+        void* RuntimeFixture = nullptr;   // æ©æ„¯î”‘éƒå‰æ•± Box2D æ¿‰î‚¢å–
 
         BoxCollider2DComponent() = default;
         BoxCollider2DComponent(const BoxCollider2DComponent&) = default;
@@ -186,26 +209,26 @@ namespace Wheatear {
         float     Friction = 0.5f;
         float     Restitution = 0.0f;
         float     RestitutionThreshold = 0.5f;
-        void* RuntimeFixture = nullptr;   // ÔËĞĞÊ±ÓÉ Box2D Ìî³ä
+        void* RuntimeFixture = nullptr;   // æ©æ„¯î”‘éƒå‰æ•± Box2D æ¿‰î‚¢å–
 
         CircleCollider2DComponent() = default;
         CircleCollider2DComponent(const CircleCollider2DComponent&) = default;
     };
 
-    // 3D Mesh äÖÈ¾×é¼ş
+    // 3D Mesh å¨“å‰ç…‹ç¼å‹ªæ¬¢
     struct MeshRendererComponent
     {
         Ref<Mesh>     Mesh;
-        Ref<Material> Material;   // ¡û ´Ó MeshMaterial »»³É Ref<Material>
+        Ref<Material> Material;   // éˆ«?æµ ?MeshMaterial é¹ãˆ¡åš Ref<Material>
 
         MeshRendererComponent()
         {
-            Material = Material::Create();  // Ä¬ÈÏ´´½¨Ò»¸ö¿Õ²ÄÖÊ
+            Material = Material::Create();  // æ¦›æ¨¿î…»é’æ¶˜ç¼“æ¶“â‚¬æ¶“î†â”–é‰æ„¯å·
         }
         MeshRendererComponent(const MeshRendererComponent&) = default;
     };
 
-    // Æ½ĞĞ¹â£ºÄ£ÄâÌ«Ñô£¬·½ÏòÓÉ Entity µÄ Rotation ¾ö¶¨£¬²»Ë¥¼õ
+    // éªå® î”‘éå¤›ç´°å¦¯â„ƒå«™æ¾¶îˆæ§¼é”›å±¾æŸŸéšæˆ æ•± Entity é¨?Rotation éå†²ç•¾é”›å±¼ç¬‰ç›æ¿å™º
     struct DirectionalLightComponent
     {
         glm::vec3 Color = { 1.0f, 1.0f, 1.0f };
@@ -215,7 +238,7 @@ namespace Wheatear {
         DirectionalLightComponent(const DirectionalLightComponent&) = default;
     };
 
-    // µã¹âÔ´£ºÓĞÎ»ÖÃ£¬Ç¿¶ÈËæ¾àÀëË¥¼õ
+    // éç‘°åœå©§æ„¶ç´°éˆå¤‰ç¶…ç¼ƒî‡†ç´å¯®å“„å®³é—…å¿šçª›ç»‚æ˜â€œé‘?
     struct PointLightComponent
     {
         glm::vec3 Color = { 1.0f, 1.0f, 1.0f };
@@ -228,33 +251,33 @@ namespace Wheatear {
         PointLightComponent(const PointLightComponent&) = default;
     };
 
-    // ¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T
-    //  ¶¯»­¿ØÖÆÆ÷×é¼ş£¬¹ÜÀí¶à¸öAnimationClip
-    // ¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T
+    // éˆºæ„¨æ™²éˆºæ„¨æ™²éˆºæ„¨æ™²éˆºæ„¨æ™²éˆºæ„¨æ™²éˆºæ„¨æ™²éˆºæ„¨æ™²éˆºæ„¨æ™²éˆºæ„¨æ™²éˆºæ„¨æ™²éˆºæ„¨æ™²éˆºæ„¨æ™²éˆºæ„¨æ™²éˆºæ„¨æ™²éˆºæ„¨æ™²éˆºæ„¨æ™²éˆºæ„¨æ™²éˆºæ„¨æ™²éˆºæ„¨æ™²éˆºæ„¨æ™²éˆºæ„¨æ™²éˆºæ„¨æ™²éˆºæ„¨æ™²éˆºæ„¨æ™²éˆºæ„¨æ™²éˆºæ„¨æ™²éˆºæ„¨æ™²éˆº?
+    //  é”ã„§æ•¾éºÑƒåŸ—é£ã„§ç²æµ è®¹ç´ç» ï¼„æ‚Šæ¾¶æ°«é‡œAnimationClip
+    // éˆºæ„¨æ™²éˆºæ„¨æ™²éˆºæ„¨æ™²éˆºæ„¨æ™²éˆºæ„¨æ™²éˆºæ„¨æ™²éˆºæ„¨æ™²éˆºæ„¨æ™²éˆºæ„¨æ™²éˆºæ„¨æ™²éˆºæ„¨æ™²éˆºæ„¨æ™²éˆºæ„¨æ™²éˆºæ„¨æ™²éˆºæ„¨æ™²éˆºæ„¨æ™²éˆºæ„¨æ™²éˆºæ„¨æ™²éˆºæ„¨æ™²éˆºæ„¨æ™²éˆºæ„¨æ™²éˆºæ„¨æ™²éˆºæ„¨æ™²éˆºæ„¨æ™²éˆºæ„¨æ™²éˆºæ„¨æ™²éˆºæ„¨æ™²éˆº?
     struct SpriteAnimatorComponent
     {
-        // ÒÑ×¢²áµÄËùÓĞ clip£¬key ÊÇ clip Ãû×Ö
+        // å®¸å‰æ•éå²€æ®‘éµâ‚¬éˆ?clipé”›å®¬ey é„?clip éšå¶…ç“§
         std::unordered_map<std::string, Ref<AnimationClip>> Clips;
         std::string DefaultClipName;
         bool PlayOnStart = true;
 
-        // --- ÔËĞĞÊ±×´Ì¬£¨²»ĞèÒªĞòÁĞ»¯£©---
+        // --- æ©æ„¯î”‘éƒå‰å§¸é¬ä¾Šç´™æ¶“å¶‰æ¸¶ç‘•ä½¸ç°­é’æ¥€å¯²é”›?--
         std::string  CurrentClipName;
         int          CurrentFrameIndex = 0;
-        float        ElapsedTime = 0.0f;   // µ±Ç°Ö¡ÒÑ¹ıÊ±¼ä
+        float        ElapsedTime = 0.0f;   // è¤°æ’³å¢ ç”¯Ñƒå‡¡æ©å›¨æ¤‚é—‚?
         bool         IsPlaying = false;
-        bool         IsFinished = false;  // ·ÇÑ­»·¶¯»­²¥ÍêºóÎª true
+        bool         IsFinished = false;  // é—ˆç‚²æƒŠéœîˆšå§©é¢ç»˜æŒ±ç€¹å±½æ‚—æ¶“?true
 
         SpriteAnimatorComponent() = default;
         SpriteAnimatorComponent(const SpriteAnimatorComponent&) = default;
 
-        // ×¢²áÒ»¸ö clip
+        // å¨‰ã„¥å”½æ¶“â‚¬æ¶“?clip
         void AddClip(const Ref<AnimationClip>& clip)
         {
             Clips[clip->GetName()] = clip;
         }
 
-        // ÇĞ»»µ½Ö¸¶¨ clip£¨Ãû×ÖÏàÍ¬Ê±²»ÖØÖÃ£¬±ÜÃâÍ¬Ö¡¶à´Îµ÷ÓÃ¶¶¶¯£©
+        // é’å›¨å´²é’ç‰ˆå¯šç€¹?clipé”›å æ‚•ç€›æ¥ƒæµ‰éšå±¾æ¤‚æ¶“å¶‰å™¸ç¼ƒî‡†ç´é–¬å®å¤éšå±½æŠšæ¾¶æ°­î‚¼ç’‹å†ªæ•¤é¶æ §å§©é”›?
         void Play(const std::string& clipName)
         {
             if (CurrentClipName == clipName) return;
@@ -268,14 +291,14 @@ namespace Wheatear {
             IsFinished = false;
         }
 
-        // »ñÈ¡µ±Ç°ÕıÔÚ²¥·ÅµÄ Clip£¨¿ÉÄÜÎª nullptr£©
+        // é‘¾å³°å½‡è¤°æ’³å¢ å§ï½…æ¹ªé¾î…Ÿæ–é¨?Clipé”›å å½²é‘³æˆ’è´Ÿ nullptré”›?
         Ref<AnimationClip> GetCurrentClip() const
         {
             auto it = Clips.find(CurrentClipName);
             return (it != Clips.end()) ? it->second : nullptr;
         }
 
-        // »ñÈ¡µ±Ç°Ö¡£¨¿ÉÄÜÎª nullptr£©
+        // é‘¾å³°å½‡è¤°æ’³å¢ ç”¯Ñç´™é™îˆå…˜æ¶“?nullptré”›?
         const AnimationFrame* GetCurrentFrame() const
         {
             auto clip = GetCurrentClip();
@@ -284,11 +307,11 @@ namespace Wheatear {
         }
     };
 
-    // ©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤
+    // éˆ¹â‚¬éˆ¹â‚¬éˆ¹â‚¬éˆ¹â‚¬éˆ¹â‚¬éˆ¹â‚¬éˆ¹â‚¬éˆ¹â‚¬éˆ¹â‚¬éˆ¹â‚¬éˆ¹â‚¬éˆ¹â‚¬éˆ¹â‚¬éˆ¹â‚¬éˆ¹â‚¬éˆ¹â‚¬éˆ¹â‚¬éˆ¹â‚¬éˆ¹â‚¬éˆ¹â‚¬éˆ¹â‚¬éˆ¹â‚¬éˆ¹â‚¬éˆ¹â‚¬éˆ¹â‚¬éˆ¹â‚¬éˆ¹â‚¬éˆ¹â‚¬éˆ¹â‚¬éˆ¹â‚¬éˆ¹â‚¬éˆ¹â‚¬éˆ¹â‚¬éˆ¹â‚¬éˆ¹â‚¬éˆ¹â‚¬éˆ¹â‚¬éˆ¹â‚¬éˆ¹â‚¬éˆ¹â‚¬éˆ¹â‚¬éˆ¹â‚¬éˆ¹â‚¬éˆ¹â‚¬éˆ¹â‚¬
     //  UI System Components
-    // ©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤
+    // éˆ¹â‚¬éˆ¹â‚¬éˆ¹â‚¬éˆ¹â‚¬éˆ¹â‚¬éˆ¹â‚¬éˆ¹â‚¬éˆ¹â‚¬éˆ¹â‚¬éˆ¹â‚¬éˆ¹â‚¬éˆ¹â‚¬éˆ¹â‚¬éˆ¹â‚¬éˆ¹â‚¬éˆ¹â‚¬éˆ¹â‚¬éˆ¹â‚¬éˆ¹â‚¬éˆ¹â‚¬éˆ¹â‚¬éˆ¹â‚¬éˆ¹â‚¬éˆ¹â‚¬éˆ¹â‚¬éˆ¹â‚¬éˆ¹â‚¬éˆ¹â‚¬éˆ¹â‚¬éˆ¹â‚¬éˆ¹â‚¬éˆ¹â‚¬éˆ¹â‚¬éˆ¹â‚¬éˆ¹â‚¬éˆ¹â‚¬éˆ¹â‚¬éˆ¹â‚¬éˆ¹â‚¬éˆ¹â‚¬éˆ¹â‚¬éˆ¹â‚¬éˆ¹â‚¬éˆ¹â‚¬éˆ¹â‚¬
 
-    // UIÃªµãÃ¶¾Ù£¬¾ö¶¨UIÔªËØÏà¶ÔÆÁÄ»µÄ¶ÔÆë·½Ê½
+    // UIé–¿æ°±å£é‹æ°«å¦‡é”›å±½å–…ç€¹æ­Iéå†ªç¤Œé©ç¨¿î‡®çå¿“ç®·é¨å‹«î‡®æ¦»æ„­æŸŸå¯®?
     enum class UIAnchor
     {
         TopLeft, TopCenter, TopRight,
@@ -296,11 +319,11 @@ namespace Wheatear {
         BottomLeft, BottomCenter, BottomRight
     };
 
-    // ©¤©¤ Canvas£º¹ÒÔÚÒ»¸ö¸ùEntityÉÏ£¬´ú±íÕû¸öUI²ã ©¤©¤
+    // éˆ¹â‚¬éˆ¹â‚¬ Canvasé”›æ°­å¯•é¦ã„¤ç«´æ¶“î…ç‰´Entityæ¶“å©ç´æµ ï½ˆã€ƒéç¿ é‡œUIç?éˆ¹â‚¬éˆ¹â‚¬
     struct UICanvasComponent
     {
         bool  Visible = true;
-        // ²Î¿¼·Ö±æÂÊ£¬ÓÃÓÚ°Ñ¹éÒ»»¯×ø±êËõ·Åµ½Êµ¼ÊÏñËØ
+        // é™å‚â‚¬å†¨åæˆã„§å·¼é”›å²€æ•¤æµœåº¢å¦¸è¤°æç«´é–æ §æ½—éå›©ç¼‰é€æƒ§åŸŒç€¹ç‚ºæª¯éå¿•ç¤Œ
         float ReferenceWidth = 1920.0f;
         float ReferenceHeight = 1080.0f;
 
@@ -308,23 +331,57 @@ namespace Wheatear {
         UICanvasComponent(const UICanvasComponent&) = default;
     };
 
-    // ©¤©¤ UIWidget£ºËùÓĞUIÔªËØ¹²ÓÃµÄTransformĞÅÏ¢ ©¤©¤
-    // ×ø±êº¬Òå£ºÏà¶ÔÓÚCanvasµÄ¹éÒ»»¯×ø±ê (0~1)
-    // ÀıÈç Position={0.5, 0.5} = ÆÁÄ»ÕıÖĞĞÄ
+    // éˆ¹â‚¬éˆ¹â‚¬ UIWidgeté”›æ°­å¢éˆå¡™Iéå†ªç¤Œéè¾©æ•¤é¨å‡¾ransformæ·‡â„ƒä¼… éˆ¹â‚¬éˆ¹â‚¬
+    // é§æ„­çˆ£éšî‚¡ç®Ÿé”›æ°±æµ‰ç€µé€›ç°¬Canvasé¨å‹«ç¶Šæ¶“â‚¬é–æ §æ½—é?(0~1)
+    // æ¸šå¬ªî›§ Position={0.5, 0.5} = çå¿“ç®·å§ï½„è…‘è¹‡?
     struct UIWidgetComponent
     {
         bool      Visible = true;
-        glm::vec2 Position = { 0.5f, 0.5f };  // ¹éÒ»»¯ÆÁÄ»×ø±ê
-        glm::vec2 Size = { 0.1f, 0.05f }; // ¹éÒ»»¯³ß´ç
+        glm::vec2 Position = { 0.5f, 0.5f };
+        glm::vec2 Size = { 0.1f, 0.05f };
         float     Rotation = 0.0f;
         UIAnchor  Anchor = UIAnchor::MiddleCenter;
-        int       SortOrder = 0; // Ô½´óÔ½¿¿Ç°
+        int       SortOrder = 0;
+        UUID      ParentEntity = 0;
+        std::string ParentTag;
 
         UIWidgetComponent() = default;
         UIWidgetComponent(const UIWidgetComponent&) = default;
     };
 
-    // ©¤©¤ UIImage£º´¿É«¾ØĞÎ »ò ÌùÍ¼ ©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤
+    // -- UIAnimator: declarative runtime motion for panels, buttons, text, and icons.
+    struct UIAnimatorComponent
+    {
+        std::string Preset = "fade_in"; // fade_in, slide_fade_in, result_pop, pulse, hover_pulse
+        bool PlayOnStart = true;
+        bool Loop = false;
+        float Delay = 0.0f;
+        float Duration = 0.35f;
+        float Amplitude = 0.035f;
+        float Speed = 1.0f;
+        glm::vec2 FromOffset = { 0.0f, 0.0f };
+
+        // Runtime cache. Stored on the component so UI animations survive system-only updates.
+        bool RuntimeInitialized = false;
+        bool RuntimeWasVisible = false;
+        float RuntimeTime = 0.0f;
+        glm::vec2 RuntimeBasePosition = { 0.5f, 0.5f };
+        glm::vec2 RuntimeBaseSize = { 0.1f, 0.05f };
+        glm::vec4 RuntimeBaseImageColor = { 1.0f, 1.0f, 1.0f, 1.0f };
+        glm::vec4 RuntimeBasePanelBackground = { 0.06f, 0.07f, 0.09f, 0.85f };
+        glm::vec4 RuntimeBasePanelBorder = { 0.28f, 0.44f, 0.52f, 0.85f };
+        glm::vec4 RuntimeBaseTextColor = { 1.0f, 1.0f, 1.0f, 1.0f };
+        glm::vec4 RuntimeBaseButtonNormal = { 0.3f, 0.3f, 0.8f, 1.0f };
+        glm::vec4 RuntimeBaseButtonHover = { 0.4f, 0.4f, 1.0f, 1.0f };
+        glm::vec4 RuntimeBaseButtonPressed = { 0.2f, 0.2f, 0.6f, 1.0f };
+        glm::vec4 RuntimeBaseProgressForeground = { 0.2f, 0.8f, 0.2f, 1.0f };
+        glm::vec4 RuntimeBaseProgressBackground = { 0.2f, 0.2f, 0.2f, 1.0f };
+
+        UIAnimatorComponent() = default;
+        UIAnimatorComponent(const UIAnimatorComponent&) = default;
+    };
+
+    // éˆ¹â‚¬éˆ¹â‚¬ UIImageé”›æ°±å‡½é‘¹èŒ¬ç…©è¤°?é´?ç’æ‘æµ˜ éˆ¹â‚¬éˆ¹â‚¬éˆ¹â‚¬éˆ¹â‚¬éˆ¹â‚¬éˆ¹â‚¬éˆ¹â‚¬éˆ¹â‚¬éˆ¹â‚¬éˆ¹â‚¬éˆ¹â‚¬éˆ¹â‚¬éˆ¹â‚¬éˆ¹â‚¬éˆ¹â‚¬éˆ¹â‚¬éˆ¹â‚¬éˆ¹â‚¬
     struct UIImageComponent
     {
         glm::vec4      Color = { 1.0f, 1.0f, 1.0f, 1.0f };
@@ -340,51 +397,62 @@ namespace Wheatear {
         glm::vec4 BackgroundColor = { 0.06f, 0.07f, 0.09f, 0.85f };
         glm::vec4 BorderColor = { 0.28f, 0.44f, 0.52f, 0.85f };
         float     BorderThickness = 0.0f;
+        bool      ClipChildren = false;
+        bool      Draggable = false;
+        bool      ConstrainDragToParent = true;
+        float     DragHandleHeight = 0.12f; // 0 means the whole panel can start a drag.
+
+        bool      RuntimeIsDragging = false;
+        glm::vec2 RuntimeDragPointerOffset = { 0.0f, 0.0f };
 
         UIPanelComponent() = default;
         UIPanelComponent(const UIPanelComponent&) = default;
     };
 
-    // ©¤©¤ UIText£ºÆÁÄ»ÎÄ×Ö ©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤
-    // ×¢Òâ£ºÕâÀïÏÈÓÃÒ»¸ö¼òµ¥µÄÕ¼Î»ÊµÏÖ
-    // ºóĞøStep 2»á½ÓÈëÕæÕıµÄ×ÖÌåäÖÈ¾
+    // éˆ¹â‚¬éˆ¹â‚¬ UITexté”›æ°¬ç†éªæ›Ÿæƒç€›?éˆ¹â‚¬éˆ¹â‚¬éˆ¹â‚¬éˆ¹â‚¬éˆ¹â‚¬éˆ¹â‚¬éˆ¹â‚¬éˆ¹â‚¬éˆ¹â‚¬éˆ¹â‚¬éˆ¹â‚¬éˆ¹â‚¬éˆ¹â‚¬éˆ¹â‚¬éˆ¹â‚¬éˆ¹â‚¬éˆ¹â‚¬éˆ¹â‚¬éˆ¹â‚¬éˆ¹â‚¬éˆ¹â‚¬éˆ¹â‚¬éˆ¹â‚¬éˆ¹â‚¬éˆ¹â‚¬éˆ¹â‚¬éˆ¹â‚¬éˆ¹â‚¬
+    // å¨‰ã„¦å‰°é”›æ°³ç¹–é–²å±½å›é¢ã„¤ç«´æ¶“î†ç•é—æ› æ®‘é—çŠ±ç¶…ç€¹ç‚µå¹‡
+    // éšåº£ç”»Step 2æµ¼æ°­å¸´éãƒ§æ¹¡å§ï½‡æ®‘ç€›æ¤¾ç¶‹å¨“å‰ç…‹
     struct UITextComponent
     {
         std::string Text = "Text";
         glm::vec4   Color = { 1.0f, 1.0f, 1.0f, 1.0f };
         float       FontSize = 24.0f;
-        std::string FontPath = "assets/fonts/NotoSansSC-VF.ttf";
+        std::string FontPath = "assets/fonts/wqy-microhei.ttc";
+        glm::vec4   ShadowColor = { 0.02f, 0.03f, 0.04f, 0.78f };
+        glm::vec2   ShadowOffset = { 2.0f, 2.0f };
+        glm::vec4   OutlineColor = { 0.02f, 0.02f, 0.025f, 0.86f };
+        float       OutlineThickness = 1.25f;
 
         UITextComponent() = default;
         UITextComponent(const UITextComponent&) = default;
         explicit UITextComponent(const std::string& text) : Text(text) {}
     };
 
-    // ©¤©¤ UIButton£º¿Éµã»÷µÄÇøÓò + ÑÕÉ«×´Ì¬ ©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤
+    // éˆ¹â‚¬éˆ¹â‚¬ UIButtoné”›æ°¬å½²éç‘°åš®é¨å‹«å°¯é©?+ æ£°æ»†å£Šé˜èˆµâ‚¬?éˆ¹â‚¬éˆ¹â‚¬éˆ¹â‚¬éˆ¹â‚¬éˆ¹â‚¬éˆ¹â‚¬éˆ¹â‚¬éˆ¹â‚¬éˆ¹â‚¬éˆ¹â‚¬éˆ¹â‚¬
     struct UIButtonComponent
     {
         glm::vec4 NormalColor = { 0.3f, 0.3f, 0.8f, 1.0f };
         glm::vec4 HoverColor = { 0.4f, 0.4f, 1.0f, 1.0f };
         glm::vec4 PressedColor = { 0.2f, 0.2f, 0.6f, 1.0f };
 
-        // ÔËĞĞÊ±×´Ì¬£¨²»ĞòÁĞ»¯£©
+        // æ©æ„¯î”‘éƒå‰å§¸é¬ä¾Šç´™æ¶“å¶…ç°­é’æ¥€å¯²é”›?
         bool IsHovered = false;
         bool IsPressed = false;
 
-        // C#»Øµ÷º¯ÊıÃû£¨ScriptEngine»áÓÃµ½£©
+        // C#é¥ç‚¶çšŸé‘èŠ¥æšŸéšå¶ç´™ScriptEngineæµ¼æ°±æ•¤é’å¸®ç´š
         std::string OnClickFunction = "";
 
         UIButtonComponent() = default;
         UIButtonComponent(const UIButtonComponent&) = default;
     };
 
-    // ©¤©¤ UIProgressBar£ºÑªÌõ/½ø¶ÈÌõ ©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤
+    // éˆ¹â‚¬éˆ¹â‚¬ UIProgressBaré”›æ°³î”…é‰?æ©æ¶˜å®³é‰?éˆ¹â‚¬éˆ¹â‚¬éˆ¹â‚¬éˆ¹â‚¬éˆ¹â‚¬éˆ¹â‚¬éˆ¹â‚¬éˆ¹â‚¬éˆ¹â‚¬éˆ¹â‚¬éˆ¹â‚¬éˆ¹â‚¬éˆ¹â‚¬éˆ¹â‚¬éˆ¹â‚¬éˆ¹â‚¬éˆ¹â‚¬éˆ¹â‚¬
     struct UIProgressBarComponent
     {
         float     Value = 1.0f;  // 0.0 ~ 1.0
         float     MaxValue = 1.0f;
-        glm::vec4 ForegroundColor = { 0.2f, 0.8f, 0.2f, 1.0f }; // ÂÌÉ«ÑªÌõ
-        glm::vec4 BackgroundColor = { 0.2f, 0.2f, 0.2f, 1.0f }; // Éî»Ò±³¾°
+        glm::vec4 ForegroundColor = { 0.2f, 0.8f, 0.2f, 1.0f }; // ç¼èƒ¯å£Šç›â‚¬é‰?
+        glm::vec4 BackgroundColor = { 0.2f, 0.2f, 0.2f, 1.0f }; // å¨£è¾©ä¼†é‘³å±¾æ«™
 
         float GetNormalized() const
         {
@@ -427,6 +495,162 @@ namespace Wheatear {
         UISliderComponent(const UISliderComponent&) = default;
     };
 
+    // -- UIPager: known-length page switching controller.
+    struct UIPagerComponent
+    {
+        int CurrentPage = 1;
+        int PageCount = 1;
+        bool Wrap = false;
+
+        int GetClampedCurrentPage() const
+        {
+            return std::clamp(CurrentPage, 1, std::max(PageCount, 1));
+        }
+
+        UIPagerComponent() = default;
+        UIPagerComponent(const UIPagerComponent&) = default;
+    };
+
+    // -- UIScrollView: continuous scrolling for clipped UI panels.
+    struct UIScrollViewComponent
+    {
+        float OffsetY = 0.0f;       // Normalized to the viewport height of this widget.
+        float ContentHeight = 1.0f; // 1.0 means no vertical overflow.
+        float WheelStep = 0.08f;
+        float ScrollbarWidth = 0.018f;
+        bool EnableWheel = true;
+        bool ShowScrollbar = true;
+        bool DragScrollbar = true;
+        bool ClampToContent = true;
+
+        bool RuntimeThumbHovered = false;
+        bool RuntimeThumbDragging = false;
+        glm::vec2 RuntimeDragStartMouse = { 0.0f, 0.0f };
+        float RuntimeDragStartOffsetY = 0.0f;
+
+        float GetMaxOffset() const
+        {
+            return std::max(ContentHeight - 1.0f, 0.0f);
+        }
+
+        float GetNormalized() const
+        {
+            const float maxOffset = GetMaxOffset();
+            if (maxOffset <= 0.0f)
+                return 0.0f;
+            return glm::clamp(OffsetY / maxOffset, 0.0f, 1.0f);
+        }
+
+        void ClampOffset()
+        {
+            ContentHeight = std::max(ContentHeight, 1.0f);
+            if (ClampToContent)
+                OffsetY = glm::clamp(OffsetY, 0.0f, GetMaxOffset());
+        }
+
+        UIScrollViewComponent() = default;
+        UIScrollViewComponent(const UIScrollViewComponent&) = default;
+    };
+
+    struct UISkillTreeNodeView
+    {
+        std::string Id;
+        std::string ParentId;
+        glm::vec2 Position = { 0.5f, 0.5f };
+        std::string IconPath;
+        std::string Branch;
+        int UnlockChapter = 1;
+        bool Learned = false;
+        bool Available = true;
+        bool Selected = false;
+        bool Locked = false;
+    };
+
+    enum class UIPathMode : int
+    {
+        Polyline = 0,
+        QuadraticBezier = 1,
+        CubicBezier = 2
+    };
+
+    // -- UIPath: reusable local-space UI lines for skill trees, maps, and route previews.
+    struct UIPathComponent
+    {
+        UIPathMode Mode = UIPathMode::QuadraticBezier;
+        std::vector<glm::vec2> Points = {
+            { 0.10f, 0.62f },
+            { 0.50f, 0.18f },
+            { 0.90f, 0.62f }
+        };
+        glm::vec4 Color = { 0.36f, 0.90f, 0.68f, 0.86f };
+        glm::vec4 GlowColor = { 0.20f, 0.72f, 0.56f, 0.24f };
+        float Thickness = 0.006f;
+        float GlowThicknessMultiplier = 2.6f;
+        int Segments = 24;
+        bool Closed = false;
+        bool DrawGlow = true;
+
+        UIPathComponent() = default;
+        UIPathComponent(const UIPathComponent&) = default;
+    };
+
+    // -- UISkillTreeView: virtualized node graph for skill, map, and route UIs.
+    struct UISkillTreeViewComponent
+    {
+        std::vector<UISkillTreeNodeView> Nodes;
+        glm::vec2 Pan = { 0.0f, 0.0f };
+        glm::vec2 MinPan = { -0.46f, -0.46f };
+        glm::vec2 MaxPan = { 0.46f, 0.46f };
+        glm::vec2 NodeSize = { 0.076f, 0.104f };
+        float NodeEdgeInset = 0.050f;
+        float LineThickness = 0.0095f;
+        float CurveAmount = 0.045f;
+        float VirtualizationMargin = 0.12f;
+        int LineSegments = 24;
+        int BackgroundRingCount = 4;
+        bool DrawLineGlow = true;
+        std::string CommandPrefix = "progression:select_skill_node:";
+
+        glm::vec4 BackgroundColor = { 0.010f, 0.018f, 0.020f, 0.22f };
+        glm::vec4 GridColor = { 0.13f, 0.27f, 0.24f, 0.22f };
+        glm::vec4 LineColor = { 0.18f, 0.34f, 0.30f, 0.58f };
+        glm::vec4 ActiveLineColor = { 0.38f, 0.96f, 0.72f, 0.82f };
+        glm::vec4 LineGlowColor = { 0.28f, 0.88f, 0.64f, 0.18f };
+        glm::vec4 NodeColor = { 0.08f, 0.12f, 0.12f, 0.95f };
+        glm::vec4 LockedNodeColor = { 0.05f, 0.06f, 0.065f, 0.90f };
+        glm::vec4 HoverNodeColor = { 0.42f, 0.86f, 0.72f, 0.96f };
+        glm::vec4 SelectedNodeColor = { 1.00f, 0.82f, 0.38f, 0.98f };
+        glm::vec4 CoreNodeColor = { 0.18f, 0.42f, 0.40f, 0.98f };
+        glm::vec4 LockColor = { 0.0f, 0.0f, 0.0f, 0.54f };
+
+        std::string SelectedNodeId;
+        std::string RuntimeHoveredNodeId;
+        bool RuntimeDragging = false;
+        glm::vec2 RuntimeDragStartMouse = { 0.0f, 0.0f };
+        glm::vec2 RuntimeDragStartPan = { 0.0f, 0.0f };
+        float RuntimeDragDistance = 0.0f;
+
+        void ClampPan()
+        {
+            Pan.x = glm::clamp(Pan.x, MinPan.x, MaxPan.x);
+            Pan.y = glm::clamp(Pan.y, MinPan.y, MaxPan.y);
+        }
+
+        UISkillTreeViewComponent() = default;
+        UISkillTreeViewComponent(const UISkillTreeViewComponent&) = default;
+    };
+
+    // -- UIPageItem: shows this widget only while its pager is on Page.
+    struct UIPageItemComponent
+    {
+        UUID PagerEntity = 0;
+        std::string PagerTag;
+        int Page = 1;
+
+        UIPageItemComponent() = default;
+        UIPageItemComponent(const UIPageItemComponent&) = default;
+    };
+
     // -- UICheckbox: boolean option/toggle state.
     struct UICheckboxComponent
     {
@@ -444,15 +668,15 @@ namespace Wheatear {
         UICheckboxComponent(const UICheckboxComponent&) = default;
     };
 
-    // ©¤©¤ miniaudioÒôÆµÏµÍ³ ©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤
+    // éˆ¹â‚¬éˆ¹â‚¬ miniaudioé—ŠæŠ½î•¶ç»¯è¤ç²º éˆ¹â‚¬éˆ¹â‚¬éˆ¹â‚¬éˆ¹â‚¬éˆ¹â‚¬éˆ¹â‚¬éˆ¹â‚¬éˆ¹â‚¬éˆ¹â‚¬éˆ¹â‚¬éˆ¹â‚¬éˆ¹â‚¬éˆ¹â‚¬éˆ¹â‚¬éˆ¹â‚¬éˆ¹â‚¬éˆ¹â‚¬éˆ¹â‚¬éˆ¹â‚¬éˆ¹â‚¬éˆ¹â‚¬éˆ¹â‚¬éˆ¹â‚¬éˆ¹â‚¬éˆ¹â‚¬éˆ¹â‚¬
     struct AudioSourceComponent
     {
-        std::string AudioFilePath = "";   // ÒôÆµÎÄ¼şÂ·¾¶£¬Ïà¶ÔÓÚ assets/
+        std::string AudioFilePath = "";   // é—ŠæŠ½î•¶é‚å›¦æ¬¢ç’ºîˆšç·é”›å²€æµ‰ç€µé€›ç°¬ assets/
         float       Volume = 1.0f;
         bool        Loop = false;
-        bool        PlayOnStart = false; // Scene Æô¶¯Ê±×Ô¶¯²¥·Å
+        bool        PlayOnStart = false; // Scene éšîˆšå§©éƒæƒ°åšœé”ã„¦æŒ±é€?
 
-        // ÔËĞĞÊ±¾ä±ú£¬²»²ÎÓëĞòÁĞ»¯
+        // æ©æ„¯î”‘éƒè·ºå½éŒå‹¶ç´æ¶“å¶…å¼¬æ¶“åº¡ç°­é’æ¥€å¯²
         uint32_t    RuntimeHandle = 0;
 
         AudioSourceComponent() = default;

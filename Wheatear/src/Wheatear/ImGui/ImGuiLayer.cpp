@@ -2,8 +2,8 @@
 #include "ImGuiLayer.h"
 
 #include "imgui.h"
-#include "examples/imgui_impl_opengl3.h"
-#include "examples/imgui_impl_glfw.h"
+#include "backends/imgui_impl_opengl3.h"
+#include "backends/imgui_impl_glfw.h"
 
 #include "Wheatear/Core/Application.h"
 #include "Wheatear/Core/AssetPath.h"
@@ -17,6 +17,8 @@
 
 #include <cstdlib>
 #include <filesystem>
+#include <string>
+#include <system_error>
 #include <vector>
 
 namespace Wheatear {
@@ -25,16 +27,20 @@ namespace Wheatear {
 
 		std::filesystem::path ResolveImGuiFontPath()
 		{
-			std::vector<std::filesystem::path> candidates = {
-				AssetPath::Resolve("assets/fonts/Open-Sans-2.ttf")
-			};
+			std::vector<std::filesystem::path> candidates;
 
 			if (const char* windowsDir = std::getenv("WINDIR"))
 			{
 				const std::filesystem::path fonts = std::filesystem::path(windowsDir) / "Fonts";
 				candidates.push_back(fonts / "msyh.ttc");
+				candidates.push_back(fonts / "msyhbd.ttc");
+				candidates.push_back(fonts / "msyhl.ttc");
 				candidates.push_back(fonts / "arial.ttf");
 			}
+
+			candidates.push_back(AssetPath::Resolve("assets/fonts/wqy-microhei.ttc"));
+			candidates.push_back(AssetPath::Resolve("assets/fonts/NotoSansSC-VF.ttf"));
+			candidates.push_back(AssetPath::Resolve("assets/fonts/Open-Sans-2.ttf"));
 
 			for (const auto& candidate : candidates)
 			{
@@ -43,6 +49,25 @@ namespace Wheatear {
 			}
 
 			return {};
+		}
+
+		const char* ResolveImGuiIniPath()
+		{
+			static std::string s_IniPath;
+
+			std::filesystem::path basePath;
+			if (const char* localAppData = std::getenv("LOCALAPPDATA"))
+				basePath = localAppData;
+			else
+				basePath = std::filesystem::current_path();
+
+			const std::filesystem::path settingsDirectory =
+				basePath / "Wheatear" / Application::Get().GetSpecification().Name;
+
+			std::error_code error;
+			std::filesystem::create_directories(settingsDirectory, error);
+			s_IniPath = (settingsDirectory / "imgui.ini").string();
+			return s_IniPath.c_str();
 		}
 
 	}
@@ -64,6 +89,7 @@ namespace Wheatear {
 		IMGUI_CHECKVERSION();
 		ImGui::CreateContext();
 		ImGuiIO& io = ImGui::GetIO(); (void)io;
+		io.IniFilename = ResolveImGuiIniPath();
 
 		io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;  // Enable Keyboard controls
 		//io.configFlags |=ImGuiconfigFlags_NavEnableGamepad;  // Enable Gamepad controls
@@ -75,7 +101,11 @@ namespace Wheatear {
 		float fontSize = 30.0f;
 		std::filesystem::path fontPath = ResolveImGuiFontPath();
 		if (!fontPath.empty())
-			io.FontDefault = io.Fonts->AddFontFromFileTTF(fontPath.string().c_str(), fontSize);
+			io.FontDefault = io.Fonts->AddFontFromFileTTF(
+				fontPath.string().c_str(),
+				fontSize,
+				nullptr,
+				io.Fonts->GetGlyphRangesChineseFull());
 		else
 			io.FontDefault = io.Fonts->AddFontDefault();
 

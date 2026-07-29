@@ -16,9 +16,17 @@ namespace Wheatear {
     struct TextRenderParams
     {
         float Scale = 1.0f;
+        float ScaleX = 0.0f;
+        float ScaleY = 0.0f;
         float LineSpacing = 1.0f;
         float LetterSpacing = 0.0f;
         float WrapWidth = 0.0f;
+        float MaxHeight = 0.0f;
+        glm::vec4 ClipRect = { -1.0f, -1.0f, 1.0f, 1.0f };
+        bool Clip = false;
+        glm::vec4 OutlineColor = { 0.0f, 0.0f, 0.0f, 0.0f };
+        float OutlineWidth = 0.0f;
+        float EdgeSoftness = 0.0f;
         int   EntityID = -1;
     };
 

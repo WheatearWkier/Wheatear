@@ -67,20 +67,8 @@ namespace Wheatear {
         Renderer2D::EndScene();
     }
 
-    // =========================================================================
-    // OnImGuiExtra：2D 专属设置面板
-    // =========================================================================
-
     void EditorLayer2D::OnImGuiExtra()
     {
-        ImGui::Begin("Settings (2D)");
-
-        ImGui::Checkbox("Show physics colliders", &m_ShowPhysicsColliders);
-
-        // 预留：未来可在此添加 2D 专属选项
-        // ImGui::Checkbox("Show sprite bounds", &m_ShowSpriteBounds);
-
-        ImGui::End();
     }
 
 } // namespace Wheatear

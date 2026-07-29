@@ -19,6 +19,9 @@ namespace Wheatear {
 
         virtual void SetLineWidth(float width) override;
 
+        virtual void SetScissor(uint32_t x, uint32_t y, uint32_t width, uint32_t height) override;
+        virtual void SetScissorTest(bool enabled) override;
+
         virtual void EnableDepthTest()  override;
         virtual void DisableDepthTest() override;
         virtual void SetDepthWrite(bool enabled) override;

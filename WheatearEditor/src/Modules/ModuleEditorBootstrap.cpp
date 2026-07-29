@@ -2,6 +2,7 @@
 #include "ModuleEditorBootstrap.h"
 
 #include "Editor/EditorComponentRegistry.h"
+#include "Panels/EditorCommands.h"
 #include "Modules/ArcadeCombat/ArcadeCombatDrawer.h"
 #include "Modules/SideCombat/SideCombatDrawer.h"
 #include "Modules/VisualNovel/VisualNovelDrawer.h"
@@ -28,7 +29,11 @@ namespace Wheatear {
                 [](Entity entity)
                 {
                     if (entity)
-                        entity.AddComponent<T>();
+                    {
+                        auto command = std::make_unique<AddComponentCommand<T>>(entity);
+                        command->Execute();
+                        CommandHistory::Get().Push(std::move(command));
+                    }
                 },
                 [draw](Entity entity)
                 {

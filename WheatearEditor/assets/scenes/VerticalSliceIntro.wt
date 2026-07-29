@@ -1,5 +1,37 @@
 ﻿Scene: VerticalSliceIntro
 Entities:
+  - Entity: 930023402
+    TagComponent:
+      Tag: FlowController
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    EventScriptComponent:
+      ScriptPath: "assets/events/vertical_slice_flow.wts"
+      StartEvent: "on_start"
+      RunOnStart: false
+      RunOnce: false
+      Enabled: true
+  - Entity: 930023401
+    TagComponent:
+      Tag: WT_UI_Canvas
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    UICanvasComponent:
+      Visible: true
+      ReferenceWidth: 1920
+      ReferenceHeight: 1080
+    UIWidgetComponent:
+      Visible: true
+      Position: [0, 0]
+      Size: [1, 1]
+      Rotation: 0
+      Anchor: 0
+      SortOrder: 0
+      ParentTag: ""
   - Entity: 910000001
     TagComponent:
       Tag: VN_Camera
@@ -85,6 +117,7 @@ Entities:
       Rotation: 0
       Anchor: 4
       SortOrder: 10
+      ParentTag: WT_UI_Canvas
     UIImageComponent:
       Color: [0.06, 0.07, 0.09, 0.88]
       TexturePath: ""
@@ -102,11 +135,16 @@ Entities:
       Rotation: 0
       Anchor: 0
       SortOrder: 20
+      ParentTag: WT_UI_Canvas
     UITextComponent:
       Text: "角色"
       Color: [0.62, 0.92, 0.86, 1]
-      FontSize: 32
-      FontPath: assets/fonts/NotoSansSC-VF.ttf
+      FontSize: 34
+      FontPath: assets/fonts/wqy-microhei.ttc
+      ShadowColor: [0.02, 0.02, 0.025, 0.78]
+      ShadowOffset: [2.0, 2.0]
+      OutlineColor: [0.01, 0.01, 0.012, 0.86]
+      OutlineThickness: 1.25
   - Entity: 910000009
     TagComponent:
       Tag: VN_BodyText
@@ -121,11 +159,16 @@ Entities:
       Rotation: 0
       Anchor: 0
       SortOrder: 21
+      ParentTag: WT_UI_Canvas
     UITextComponent:
       Text: "对白文本"
       Color: [0.94, 0.92, 0.84, 1]
-      FontSize: 26
-      FontPath: assets/fonts/NotoSansSC-VF.ttf
+      FontSize: 30
+      FontPath: assets/fonts/wqy-microhei.ttc
+      ShadowColor: [0.02, 0.02, 0.025, 0.90]
+      ShadowOffset: [2.2, 2.2]
+      OutlineColor: [0.01, 0.01, 0.012, 0.94]
+      OutlineThickness: 1.8
   - Entity: 910000010
     TagComponent:
       Tag: VN_AdvanceHint
@@ -140,11 +183,16 @@ Entities:
       Rotation: 0
       Anchor: 0
       SortOrder: 22
+      ParentTag: WT_UI_Canvas
     UITextComponent:
       Text: "点击 / 空格"
       Color: [0.88, 0.74, 0.42, 1]
-      FontSize: 17
-      FontPath: assets/fonts/NotoSansSC-VF.ttf
+      FontSize: 18
+      FontPath: assets/fonts/wqy-microhei.ttc
+      ShadowColor: [0.02, 0.02, 0.025, 0.78]
+      ShadowOffset: [2.0, 2.0]
+      OutlineColor: [0.01, 0.01, 0.012, 0.86]
+      OutlineThickness: 1.25
   - Entity: 910000011
     TagComponent:
       Tag: VN_Controller
@@ -190,6 +238,7 @@ Entities:
       Rotation: 0
       Anchor: 4
       SortOrder: 30
+      ParentTag: WT_UI_Canvas
     UIButtonComponent:
       NormalColor: [0.1, 0.2, 0.22, 0.9]
       HoverColor: [0.16, 0.35, 0.34, 0.95]
@@ -199,7 +248,11 @@ Entities:
       Text: "选项 1"
       Color: [0.94, 0.92, 0.84, 1]
       FontSize: 22
-      FontPath: assets/fonts/NotoSansSC-VF.ttf
+      FontPath: assets/fonts/wqy-microhei.ttc
+      ShadowColor: [0.02, 0.02, 0.025, 0.78]
+      ShadowOffset: [2.0, 2.0]
+      OutlineColor: [0.01, 0.01, 0.012, 0.86]
+      OutlineThickness: 1.25
   - Entity: 910000013
     TagComponent:
       Tag: VN_Choice_2
@@ -214,6 +267,7 @@ Entities:
       Rotation: 0
       Anchor: 4
       SortOrder: 31
+      ParentTag: WT_UI_Canvas
     UIButtonComponent:
       NormalColor: [0.1, 0.2, 0.22, 0.9]
       HoverColor: [0.16, 0.35, 0.34, 0.95]
@@ -223,7 +277,11 @@ Entities:
       Text: "选项 2"
       Color: [0.94, 0.92, 0.84, 1]
       FontSize: 22
-      FontPath: assets/fonts/NotoSansSC-VF.ttf
+      FontPath: assets/fonts/wqy-microhei.ttc
+      ShadowColor: [0.02, 0.02, 0.025, 0.78]
+      ShadowOffset: [2.0, 2.0]
+      OutlineColor: [0.01, 0.01, 0.012, 0.86]
+      OutlineThickness: 1.25
   - Entity: 910000014
     TagComponent:
       Tag: VN_Choice_3
@@ -238,6 +296,7 @@ Entities:
       Rotation: 0
       Anchor: 4
       SortOrder: 32
+      ParentTag: WT_UI_Canvas
     UIButtonComponent:
       NormalColor: [0.1, 0.2, 0.22, 0.9]
       HoverColor: [0.16, 0.35, 0.34, 0.95]
@@ -247,7 +306,11 @@ Entities:
       Text: "选项 3"
       Color: [0.94, 0.92, 0.84, 1]
       FontSize: 22
-      FontPath: assets/fonts/NotoSansSC-VF.ttf
+      FontPath: assets/fonts/wqy-microhei.ttc
+      ShadowColor: [0.02, 0.02, 0.025, 0.78]
+      ShadowOffset: [2.0, 2.0]
+      OutlineColor: [0.01, 0.01, 0.012, 0.86]
+      OutlineThickness: 1.25
   - Entity: 910000015
     TagComponent:
       Tag: VN_HistoryText
@@ -262,11 +325,16 @@ Entities:
       Rotation: 0
       Anchor: 0
       SortOrder: 71
+      ParentTag: WT_UI_Canvas
     UITextComponent:
       Text: "历史记录"
       Color: [0.88, 0.94, 0.95, 1]
       FontSize: 20
-      FontPath: assets/fonts/NotoSansSC-VF.ttf
+      FontPath: assets/fonts/wqy-microhei.ttc
+      ShadowColor: [0.02, 0.02, 0.025, 0.78]
+      ShadowOffset: [2.0, 2.0]
+      OutlineColor: [0.01, 0.01, 0.012, 0.86]
+      OutlineThickness: 1.25
   - Entity: 910000016
     TagComponent:
       Tag: VN_AutoPlayIndicator
@@ -281,11 +349,16 @@ Entities:
       Rotation: 0
       Anchor: 0
       SortOrder: 41
+      ParentTag: WT_UI_Canvas
     UITextComponent:
       Text: "自动"
       Color: [0.72, 0.96, 0.74, 1]
       FontSize: 20
-      FontPath: assets/fonts/NotoSansSC-VF.ttf
+      FontPath: assets/fonts/wqy-microhei.ttc
+      ShadowColor: [0.02, 0.02, 0.025, 0.78]
+      ShadowOffset: [2.0, 2.0]
+      OutlineColor: [0.01, 0.01, 0.012, 0.86]
+      OutlineThickness: 1.25
   - Entity: 910000017
     TagComponent:
       Tag: VN_CommandBar
@@ -300,6 +373,16 @@ Entities:
       Rotation: 0
       Anchor: 4
       SortOrder: 45
+      ParentTag: WT_UI_Canvas
+    UIAnimatorComponent:
+      Preset: "slide_fade_in"
+      PlayOnStart: true
+      Loop: false
+      Delay: 0.10
+      Duration: 0.30
+      Amplitude: 0.035
+      Speed: 1.00
+      FromOffset: [0.000, 0.035]
     UIImageComponent:
       Color: [0.05, 0.07, 0.1, 0.68]
       TexturePath: ""
@@ -317,6 +400,16 @@ Entities:
       Rotation: 0
       Anchor: 4
       SortOrder: 50
+      ParentTag: WT_UI_Canvas
+    UIAnimatorComponent:
+      Preset: "hover_pulse"
+      PlayOnStart: true
+      Loop: false
+      Delay: 0.00
+      Duration: 0.18
+      Amplitude: 0.035
+      Speed: 1.00
+      FromOffset: [0.000, 0.000]
     UIButtonComponent:
       NormalColor: [0.12, 0.18, 0.24, 0.55]
       HoverColor: [0.2, 0.36, 0.46, 0.86]
@@ -326,7 +419,11 @@ Entities:
       Text: "跳过"
       Color: [0.78, 0.84, 0.96, 1]
       FontSize: 15
-      FontPath: assets/fonts/NotoSansSC-VF.ttf
+      FontPath: assets/fonts/wqy-microhei.ttc
+      ShadowColor: [0.02, 0.02, 0.025, 0.78]
+      ShadowOffset: [2.0, 2.0]
+      OutlineColor: [0.01, 0.01, 0.012, 0.86]
+      OutlineThickness: 1.25
   - Entity: 910000019
     TagComponent:
       Tag: VN_Command_Auto
@@ -341,6 +438,16 @@ Entities:
       Rotation: 0
       Anchor: 4
       SortOrder: 51
+      ParentTag: WT_UI_Canvas
+    UIAnimatorComponent:
+      Preset: "hover_pulse"
+      PlayOnStart: true
+      Loop: false
+      Delay: 0.00
+      Duration: 0.18
+      Amplitude: 0.035
+      Speed: 1.00
+      FromOffset: [0.000, 0.000]
     UIButtonComponent:
       NormalColor: [0.12, 0.18, 0.24, 0.55]
       HoverColor: [0.2, 0.36, 0.46, 0.86]
@@ -350,7 +457,11 @@ Entities:
       Text: "自动"
       Color: [0.78, 0.84, 0.96, 1]
       FontSize: 15
-      FontPath: assets/fonts/NotoSansSC-VF.ttf
+      FontPath: assets/fonts/wqy-microhei.ttc
+      ShadowColor: [0.02, 0.02, 0.025, 0.78]
+      ShadowOffset: [2.0, 2.0]
+      OutlineColor: [0.01, 0.01, 0.012, 0.86]
+      OutlineThickness: 1.25
   - Entity: 910000020
     TagComponent:
       Tag: VN_Command_Save
@@ -365,16 +476,30 @@ Entities:
       Rotation: 0
       Anchor: 4
       SortOrder: 52
+      ParentTag: WT_UI_Canvas
+    UIAnimatorComponent:
+      Preset: "hover_pulse"
+      PlayOnStart: true
+      Loop: false
+      Delay: 0.00
+      Duration: 0.18
+      Amplitude: 0.035
+      Speed: 1.00
+      FromOffset: [0.000, 0.000]
     UIButtonComponent:
       NormalColor: [0.12, 0.18, 0.24, 0.55]
       HoverColor: [0.2, 0.36, 0.46, 0.86]
       PressedColor: [0.08, 0.14, 0.2, 0.95]
-      OnClickFunction: vn:save
+      OnClickFunction: vn:savemenu
     UITextComponent:
       Text: "快存"
       Color: [0.78, 0.84, 0.96, 1]
       FontSize: 15
-      FontPath: assets/fonts/NotoSansSC-VF.ttf
+      FontPath: assets/fonts/wqy-microhei.ttc
+      ShadowColor: [0.02, 0.02, 0.025, 0.78]
+      ShadowOffset: [2.0, 2.0]
+      OutlineColor: [0.01, 0.01, 0.012, 0.86]
+      OutlineThickness: 1.25
   - Entity: 910000021
     TagComponent:
       Tag: VN_Command_Load
@@ -389,16 +514,30 @@ Entities:
       Rotation: 0
       Anchor: 4
       SortOrder: 53
+      ParentTag: WT_UI_Canvas
+    UIAnimatorComponent:
+      Preset: "hover_pulse"
+      PlayOnStart: true
+      Loop: false
+      Delay: 0.00
+      Duration: 0.18
+      Amplitude: 0.035
+      Speed: 1.00
+      FromOffset: [0.000, 0.000]
     UIButtonComponent:
       NormalColor: [0.12, 0.18, 0.24, 0.55]
       HoverColor: [0.2, 0.36, 0.46, 0.86]
       PressedColor: [0.08, 0.14, 0.2, 0.95]
-      OnClickFunction: vn:load
+      OnClickFunction: vn:loadmenu
     UITextComponent:
       Text: "快读"
       Color: [0.78, 0.84, 0.96, 1]
       FontSize: 15
-      FontPath: assets/fonts/NotoSansSC-VF.ttf
+      FontPath: assets/fonts/wqy-microhei.ttc
+      ShadowColor: [0.02, 0.02, 0.025, 0.78]
+      ShadowOffset: [2.0, 2.0]
+      OutlineColor: [0.01, 0.01, 0.012, 0.86]
+      OutlineThickness: 1.25
   - Entity: 910000022
     TagComponent:
       Tag: VN_Command_History
@@ -413,6 +552,16 @@ Entities:
       Rotation: 0
       Anchor: 4
       SortOrder: 54
+      ParentTag: WT_UI_Canvas
+    UIAnimatorComponent:
+      Preset: "hover_pulse"
+      PlayOnStart: true
+      Loop: false
+      Delay: 0.00
+      Duration: 0.18
+      Amplitude: 0.035
+      Speed: 1.00
+      FromOffset: [0.000, 0.000]
     UIButtonComponent:
       NormalColor: [0.12, 0.18, 0.24, 0.55]
       HoverColor: [0.2, 0.36, 0.46, 0.86]
@@ -422,7 +571,11 @@ Entities:
       Text: "历史"
       Color: [0.78, 0.84, 0.96, 1]
       FontSize: 14
-      FontPath: assets/fonts/NotoSansSC-VF.ttf
+      FontPath: assets/fonts/wqy-microhei.ttc
+      ShadowColor: [0.02, 0.02, 0.025, 0.78]
+      ShadowOffset: [2.0, 2.0]
+      OutlineColor: [0.01, 0.01, 0.012, 0.86]
+      OutlineThickness: 1.25
   - Entity: 910000023
     TagComponent:
       Tag: VN_Command_Settings
@@ -437,6 +590,16 @@ Entities:
       Rotation: 0
       Anchor: 4
       SortOrder: 55
+      ParentTag: WT_UI_Canvas
+    UIAnimatorComponent:
+      Preset: "hover_pulse"
+      PlayOnStart: true
+      Loop: false
+      Delay: 0.00
+      Duration: 0.18
+      Amplitude: 0.035
+      Speed: 1.00
+      FromOffset: [0.000, 0.000]
     UIButtonComponent:
       NormalColor: [0.12, 0.18, 0.24, 0.55]
       HoverColor: [0.2, 0.36, 0.46, 0.86]
@@ -446,7 +609,11 @@ Entities:
       Text: "设置"
       Color: [0.78, 0.84, 0.96, 1]
       FontSize: 15
-      FontPath: assets/fonts/NotoSansSC-VF.ttf
+      FontPath: assets/fonts/wqy-microhei.ttc
+      ShadowColor: [0.02, 0.02, 0.025, 0.78]
+      ShadowOffset: [2.0, 2.0]
+      OutlineColor: [0.01, 0.01, 0.012, 0.86]
+      OutlineThickness: 1.25
   - Entity: 910000024
     TagComponent:
       Tag: VN_Command_Hide
@@ -461,6 +628,16 @@ Entities:
       Rotation: 0
       Anchor: 4
       SortOrder: 56
+      ParentTag: WT_UI_Canvas
+    UIAnimatorComponent:
+      Preset: "hover_pulse"
+      PlayOnStart: true
+      Loop: false
+      Delay: 0.00
+      Duration: 0.18
+      Amplitude: 0.035
+      Speed: 1.00
+      FromOffset: [0.000, 0.000]
     UIButtonComponent:
       NormalColor: [0.12, 0.18, 0.24, 0.55]
       HoverColor: [0.2, 0.36, 0.46, 0.86]
@@ -470,7 +647,11 @@ Entities:
       Text: "隐藏"
       Color: [0.78, 0.84, 0.96, 1]
       FontSize: 15
-      FontPath: assets/fonts/NotoSansSC-VF.ttf
+      FontPath: assets/fonts/wqy-microhei.ttc
+      ShadowColor: [0.02, 0.02, 0.025, 0.78]
+      ShadowOffset: [2.0, 2.0]
+      OutlineColor: [0.01, 0.01, 0.012, 0.86]
+      OutlineThickness: 1.25
   - Entity: 910000025
     TagComponent:
       Tag: VN_HistoryPanel
@@ -485,6 +666,16 @@ Entities:
       Rotation: 0
       Anchor: 4
       SortOrder: 70
+      ParentTag: WT_UI_Canvas
+    UIAnimatorComponent:
+      Preset: "slide_fade_in"
+      PlayOnStart: true
+      Loop: false
+      Delay: 0.00
+      Duration: 0.24
+      Amplitude: 0.035
+      Speed: 1.00
+      FromOffset: [0.000, 0.035]
     UIImageComponent:
       Color: [0.04, 0.055, 0.075, 0.93]
       TexturePath: ""
@@ -502,6 +693,16 @@ Entities:
       Rotation: 0
       Anchor: 4
       SortOrder: 72
+      ParentTag: WT_UI_Canvas
+    UIAnimatorComponent:
+      Preset: "hover_pulse"
+      PlayOnStart: true
+      Loop: false
+      Delay: 0.00
+      Duration: 0.18
+      Amplitude: 0.035
+      Speed: 1.00
+      FromOffset: [0.000, 0.000]
     UIButtonComponent:
       NormalColor: [0.18, 0.27, 0.33, 0.85]
       HoverColor: [0.26, 0.42, 0.5, 0.95]
@@ -511,7 +712,11 @@ Entities:
       Text: "关闭"
       Color: [0.9, 0.95, 0.96, 1]
       FontSize: 17
-      FontPath: assets/fonts/NotoSansSC-VF.ttf
+      FontPath: assets/fonts/wqy-microhei.ttc
+      ShadowColor: [0.02, 0.02, 0.025, 0.78]
+      ShadowOffset: [2.0, 2.0]
+      OutlineColor: [0.01, 0.01, 0.012, 0.86]
+      OutlineThickness: 1.25
   - Entity: 910000027
     TagComponent:
       Tag: VN_SettingsPanel
@@ -526,6 +731,16 @@ Entities:
       Rotation: 0
       Anchor: 4
       SortOrder: 80
+      ParentTag: WT_UI_Canvas
+    UIAnimatorComponent:
+      Preset: "slide_fade_in"
+      PlayOnStart: true
+      Loop: false
+      Delay: 0.00
+      Duration: 0.24
+      Amplitude: 0.035
+      Speed: 1.00
+      FromOffset: [0.000, 0.035]
     UIImageComponent:
       Color: [0.04, 0.055, 0.075, 0.94]
       TexturePath: ""
@@ -543,11 +758,16 @@ Entities:
       Rotation: 0
       Anchor: 0
       SortOrder: 81
+      ParentTag: WT_UI_Canvas
     UITextComponent:
       Text: "系统设置"
       Color: [0.9, 0.95, 0.96, 1]
       FontSize: 20
-      FontPath: assets/fonts/NotoSansSC-VF.ttf
+      FontPath: assets/fonts/wqy-microhei.ttc
+      ShadowColor: [0.02, 0.02, 0.025, 0.78]
+      ShadowOffset: [2.0, 2.0]
+      OutlineColor: [0.01, 0.01, 0.012, 0.86]
+      OutlineThickness: 1.25
   - Entity: 910000029
     TagComponent:
       Tag: VN_Settings_TextMinus
@@ -562,6 +782,7 @@ Entities:
       Rotation: 0
       Anchor: 4
       SortOrder: 82
+      ParentTag: WT_UI_Canvas
     UIButtonComponent:
       NormalColor: [0.16, 0.24, 0.31, 0.88]
       HoverColor: [0.24, 0.38, 0.47, 0.96]
@@ -571,7 +792,11 @@ Entities:
       Text: "文字 -"
       Color: [0.9, 0.95, 0.96, 1]
       FontSize: 16
-      FontPath: assets/fonts/NotoSansSC-VF.ttf
+      FontPath: assets/fonts/wqy-microhei.ttc
+      ShadowColor: [0.02, 0.02, 0.025, 0.78]
+      ShadowOffset: [2.0, 2.0]
+      OutlineColor: [0.01, 0.01, 0.012, 0.86]
+      OutlineThickness: 1.25
   - Entity: 910000030
     TagComponent:
       Tag: VN_Settings_TextPlus
@@ -586,6 +811,7 @@ Entities:
       Rotation: 0
       Anchor: 4
       SortOrder: 83
+      ParentTag: WT_UI_Canvas
     UIButtonComponent:
       NormalColor: [0.16, 0.24, 0.31, 0.88]
       HoverColor: [0.24, 0.38, 0.47, 0.96]
@@ -595,7 +821,11 @@ Entities:
       Text: "文字 +"
       Color: [0.9, 0.95, 0.96, 1]
       FontSize: 16
-      FontPath: assets/fonts/NotoSansSC-VF.ttf
+      FontPath: assets/fonts/wqy-microhei.ttc
+      ShadowColor: [0.02, 0.02, 0.025, 0.78]
+      ShadowOffset: [2.0, 2.0]
+      OutlineColor: [0.01, 0.01, 0.012, 0.86]
+      OutlineThickness: 1.25
   - Entity: 910000031
     TagComponent:
       Tag: VN_Settings_AutoMinus
@@ -610,6 +840,7 @@ Entities:
       Rotation: 0
       Anchor: 4
       SortOrder: 84
+      ParentTag: WT_UI_Canvas
     UIButtonComponent:
       NormalColor: [0.16, 0.24, 0.31, 0.88]
       HoverColor: [0.24, 0.38, 0.47, 0.96]
@@ -619,7 +850,11 @@ Entities:
       Text: "自动 -"
       Color: [0.9, 0.95, 0.96, 1]
       FontSize: 16
-      FontPath: assets/fonts/NotoSansSC-VF.ttf
+      FontPath: assets/fonts/wqy-microhei.ttc
+      ShadowColor: [0.02, 0.02, 0.025, 0.78]
+      ShadowOffset: [2.0, 2.0]
+      OutlineColor: [0.01, 0.01, 0.012, 0.86]
+      OutlineThickness: 1.25
   - Entity: 910000032
     TagComponent:
       Tag: VN_Settings_AutoPlus
@@ -634,6 +869,7 @@ Entities:
       Rotation: 0
       Anchor: 4
       SortOrder: 85
+      ParentTag: WT_UI_Canvas
     UIButtonComponent:
       NormalColor: [0.16, 0.24, 0.31, 0.88]
       HoverColor: [0.24, 0.38, 0.47, 0.96]
@@ -643,7 +879,11 @@ Entities:
       Text: "自动 +"
       Color: [0.9, 0.95, 0.96, 1]
       FontSize: 16
-      FontPath: assets/fonts/NotoSansSC-VF.ttf
+      FontPath: assets/fonts/wqy-microhei.ttc
+      ShadowColor: [0.02, 0.02, 0.025, 0.78]
+      ShadowOffset: [2.0, 2.0]
+      OutlineColor: [0.01, 0.01, 0.012, 0.86]
+      OutlineThickness: 1.25
   - Entity: 910000033
     TagComponent:
       Tag: VN_SettingsClose
@@ -658,6 +898,16 @@ Entities:
       Rotation: 0
       Anchor: 4
       SortOrder: 86
+      ParentTag: WT_UI_Canvas
+    UIAnimatorComponent:
+      Preset: "hover_pulse"
+      PlayOnStart: true
+      Loop: false
+      Delay: 0.00
+      Duration: 0.18
+      Amplitude: 0.035
+      Speed: 1.00
+      FromOffset: [0.000, 0.000]
     UIButtonComponent:
       NormalColor: [0.18, 0.27, 0.33, 0.88]
       HoverColor: [0.28, 0.42, 0.5, 0.96]
@@ -667,7 +917,11 @@ Entities:
       Text: "关闭"
       Color: [0.9, 0.95, 0.96, 1]
       FontSize: 17
-      FontPath: assets/fonts/NotoSansSC-VF.ttf
+      FontPath: assets/fonts/wqy-microhei.ttc
+      ShadowColor: [0.02, 0.02, 0.025, 0.78]
+      ShadowOffset: [2.0, 2.0]
+      OutlineColor: [0.01, 0.01, 0.012, 0.86]
+      OutlineThickness: 1.25
   - Entity: 910000034
     TagComponent:
       Tag: VN_SystemMessage
@@ -682,9 +936,212 @@ Entities:
       Rotation: 0
       Anchor: 4
       SortOrder: 90
+      ParentTag: WT_UI_Canvas
     UITextComponent:
       Text: "已保存"
       Color: [0.92, 0.98, 0.86, 1]
       FontSize: 18
-      FontPath: assets/fonts/NotoSansSC-VF.ttf
-
+      FontPath: assets/fonts/wqy-microhei.ttc
+      ShadowColor: [0.02, 0.02, 0.025, 0.78]
+      ShadowOffset: [2.0, 2.0]
+      OutlineColor: [0.01, 0.01, 0.012, 0.86]
+      OutlineThickness: 1.25
+  - Entity: 930023394
+    TagComponent:
+      Tag: VN_SaveLoadPanel
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    UIWidgetComponent:
+      Visible: false
+      Position: [0.18, 0.15]
+      Size: [0.64, 0.56]
+      Rotation: 0.0
+      Anchor: 0
+      SortOrder: 80
+      ParentTag: WT_UI_Canvas
+    UIPanelComponent:
+      BackgroundColor: [0.04, 0.045, 0.055, 0.88]
+      BorderColor: [0.8, 0.64, 0.36, 0.9]
+      BorderThickness: 2
+  - Entity: 930023395
+    TagComponent:
+      Tag: VN_SaveLoadIcon
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    UIWidgetComponent:
+      Visible: false
+      Position: [0.22, 0.2]
+      Size: [0.075, 0.105]
+      Rotation: 0.0
+      Anchor: 0
+      SortOrder: 86
+      ParentTag: WT_UI_Canvas
+    UIImageComponent:
+      Color: [1, 1, 1, 1.0]
+      TexturePath: assets/vertical_slice/ui/icons/icon_save.png
+  - Entity: 930023396
+    TagComponent:
+      Tag: VN_SaveLoadTitle
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    UIWidgetComponent:
+      Visible: false
+      Position: [0.31, 0.205]
+      Size: [0.3, 0.06]
+      Rotation: 0.0
+      Anchor: 0
+      SortOrder: 86
+      ParentTag: WT_UI_Canvas
+    UITextComponent:
+      Text: "存档 / 读取"
+      Color: [1.0, 0.94, 0.78, 1]
+      FontSize: 34
+      FontPath: assets/fonts/wqy-microhei.ttc
+      ShadowColor: [0.01, 0.015, 0.018, 0.88]
+      ShadowOffset: [2.4, 2.4]
+      OutlineColor: [0.0, 0.0, 0.0, 0.94]
+      OutlineThickness: 1.8
+  - Entity: 930023397
+    TagComponent:
+      Tag: VN_SaveLoadText
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    UIWidgetComponent:
+      Visible: false
+      Position: [0.23, 0.31]
+      Size: [0.52, 0.2]
+      Rotation: 0.0
+      Anchor: 0
+      SortOrder: 86
+      ParentTag: WT_UI_Canvas
+    UITextComponent:
+      Text: "存档 / 读取"
+      Color: [0.94, 0.96, 0.88, 1]
+      FontSize: 21
+      FontPath: assets/fonts/wqy-microhei.ttc
+      ShadowColor: [0.01, 0.015, 0.018, 0.82]
+      ShadowOffset: [2.0, 2.0]
+      OutlineColor: [0.0, 0.0, 0.0, 0.88]
+      OutlineThickness: 1.35
+  - Entity: 930023398
+    TagComponent:
+      Tag: VN_SaveLoad_SaveSlot1
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    UIWidgetComponent:
+      Visible: true
+      Position: [0.25, 0.56]
+      Size: [0.15, 0.055]
+      Rotation: 0.0
+      Anchor: 0
+      SortOrder: 90
+      ParentTag: WT_UI_Canvas
+    UIAnimatorComponent:
+      Preset: "hover_pulse"
+      PlayOnStart: true
+      Loop: false
+      Delay: 0
+      Duration: 0.16
+      Amplitude: 0.035
+      Speed: 1
+      FromOffset: [0, 0.03]
+    UIButtonComponent:
+      NormalColor: [0.35, 0.25, 0.12, 0.92]
+      HoverColor: [0.53, 0.39, 0.18, 0.98]
+      PressedColor: [0.22, 0.15, 0.08, 1]
+      OnClickFunction: vn:save
+    UITextComponent:
+      Text: "保存槽 1"
+      Color: [1.0, 0.95, 0.78, 1]
+      FontSize: 20
+      FontPath: assets/fonts/wqy-microhei.ttc
+      ShadowColor: [0.01, 0.015, 0.018, 0.76]
+      ShadowOffset: [1.6, 1.6]
+      OutlineColor: [0.0, 0.0, 0.0, 0.82]
+      OutlineThickness: 1.1
+  - Entity: 930023399
+    TagComponent:
+      Tag: VN_SaveLoad_LoadSlot1
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    UIWidgetComponent:
+      Visible: true
+      Position: [0.43, 0.56]
+      Size: [0.15, 0.055]
+      Rotation: 0.0
+      Anchor: 0
+      SortOrder: 90
+      ParentTag: WT_UI_Canvas
+    UIAnimatorComponent:
+      Preset: "hover_pulse"
+      PlayOnStart: true
+      Loop: false
+      Delay: 0
+      Duration: 0.16
+      Amplitude: 0.035
+      Speed: 1
+      FromOffset: [0, 0.03]
+    UIButtonComponent:
+      NormalColor: [0.1, 0.29, 0.28, 0.92]
+      HoverColor: [0.17, 0.45, 0.42, 0.98]
+      PressedColor: [0.07, 0.18, 0.18, 1]
+      OnClickFunction: vn:load
+    UITextComponent:
+      Text: "读取槽 1"
+      Color: [0.93, 1.0, 0.92, 1]
+      FontSize: 20
+      FontPath: assets/fonts/wqy-microhei.ttc
+      ShadowColor: [0.01, 0.015, 0.018, 0.76]
+      ShadowOffset: [1.6, 1.6]
+      OutlineColor: [0.0, 0.0, 0.0, 0.82]
+      OutlineThickness: 1.1
+  - Entity: 930023400
+    TagComponent:
+      Tag: VN_SaveLoad_Close
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    UIWidgetComponent:
+      Visible: true
+      Position: [0.61, 0.56]
+      Size: [0.12, 0.055]
+      Rotation: 0.0
+      Anchor: 0
+      SortOrder: 90
+      ParentTag: WT_UI_Canvas
+    UIAnimatorComponent:
+      Preset: "hover_pulse"
+      PlayOnStart: true
+      Loop: false
+      Delay: 0
+      Duration: 0.16
+      Amplitude: 0.035
+      Speed: 1
+      FromOffset: [0, 0.03]
+    UIButtonComponent:
+      NormalColor: [0.08, 0.1, 0.12, 0.7]
+      HoverColor: [0.16, 0.22, 0.25, 0.92]
+      PressedColor: [0.04, 0.05, 0.06, 0.92]
+      OnClickFunction: vn:close
+    UITextComponent:
+      Text: "关闭"
+      Color: [0.9, 0.96, 0.92, 1]
+      FontSize: 20
+      FontPath: assets/fonts/wqy-microhei.ttc
+      ShadowColor: [0.01, 0.015, 0.018, 0.76]
+      ShadowOffset: [1.6, 1.6]
+      OutlineColor: [0.0, 0.0, 0.0, 0.82]
+      OutlineThickness: 1.1

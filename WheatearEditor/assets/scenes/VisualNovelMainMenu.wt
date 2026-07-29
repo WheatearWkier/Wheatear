@@ -1,5 +1,64 @@
-Scene: Untitled
+﻿Scene: Untitled
 Entities:
+  - Entity: 920000013
+    TagComponent:
+      Tag: FlowController
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    EventScriptComponent:
+      ScriptPath: "assets/events/vertical_slice_flow.wts"
+      StartEvent: "on_start"
+      RunOnStart: false
+      RunOnce: false
+      Enabled: true
+  - Entity: 920000012
+    TagComponent:
+      Tag: WT_UI_Canvas
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    UICanvasComponent:
+      Visible: true
+      ReferenceWidth: 1920
+      ReferenceHeight: 1080
+    UIWidgetComponent:
+      Visible: true
+      Position: [0, 0]
+      Size: [1, 1]
+      Rotation: 0
+      Anchor: 0
+      SortOrder: 0
+      ParentTag: ""
+  - Entity: 920000011
+    TagComponent:
+      Tag: Menu_MainPanel
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    UIWidgetComponent:
+      Visible: true
+      Position: [0.085, 0.125]
+      Size: [0.38, 0.62]
+      Rotation: 0
+      Anchor: 0
+      SortOrder: 18
+      ParentTag: WT_UI_Canvas
+    UIAnimatorComponent:
+      Preset: "slide_fade_in"
+      PlayOnStart: true
+      Loop: false
+      Delay: 0.00
+      Duration: 0.34
+      Amplitude: 0.035
+      Speed: 1.00
+      FromOffset: [0.000, 0.035]
+    UIImageComponent:
+      Color: [1, 1, 1, 0.92]
+      TexturePath: assets/vertical_slice/ui/panels/panel_hub.png
   - Entity: 920000010
     TagComponent:
       Tag: Menu_Footer
@@ -14,11 +73,16 @@ Entities:
       Rotation: 0
       Anchor: 0
       SortOrder: 22
+      ParentTag: WT_UI_Canvas
     UITextComponent:
       Text: "演示版本 0.1"
       Color: [0.680000007, 0.75999999, 0.74000001, 1]
       FontSize: 18
-      FontPath: assets/fonts/NotoSansSC-VF.ttf
+      FontPath: assets/fonts/wqy-microhei.ttc
+      ShadowColor: [0.02, 0.02, 0.025, 0.78]
+      ShadowOffset: [2.0, 2.0]
+      OutlineColor: [0.01, 0.01, 0.012, 0.86]
+      OutlineThickness: 1.25
   - Entity: 920000009
     TagComponent:
       Tag: Menu_Quit
@@ -33,16 +97,30 @@ Entities:
       Rotation: 0
       Anchor: 0
       SortOrder: 32
+      ParentTag: WT_UI_Canvas
+    UIAnimatorComponent:
+      Preset: "hover_pulse"
+      PlayOnStart: true
+      Loop: false
+      Delay: 0.00
+      Duration: 0.18
+      Amplitude: 0.040
+      Speed: 1.00
+      FromOffset: [0.000, 0.000]
     UITextComponent:
       Text: "退出"
       Color: [0.939999998, 0.959999979, 0.899999976, 1]
       FontSize: 28
-      FontPath: assets/fonts/NotoSansSC-VF.ttf
+      FontPath: assets/fonts/wqy-microhei.ttc
+      ShadowColor: [0.02, 0.02, 0.025, 0.78]
+      ShadowOffset: [2.0, 2.0]
+      OutlineColor: [0.01, 0.01, 0.012, 0.86]
+      OutlineThickness: 1.25
     UIButtonComponent:
       NormalColor: [0.319999993, 0.180000007, 0.219999999, 0.920000017]
       HoverColor: [0.460000008, 0.239999995, 0.289999992, 0.980000019]
       PressedColor: [0.239999995, 0.109999999, 0.150000006, 1]
-      OnClickFunction: quit
+      OnClickFunction: event:FlowController:menu_quit
   - Entity: 920000008
     TagComponent:
       Tag: Menu_LoadGame
@@ -57,16 +135,30 @@ Entities:
       Rotation: 0
       Anchor: 0
       SortOrder: 31
+      ParentTag: WT_UI_Canvas
+    UIAnimatorComponent:
+      Preset: "hover_pulse"
+      PlayOnStart: true
+      Loop: false
+      Delay: 0.00
+      Duration: 0.18
+      Amplitude: 0.040
+      Speed: 1.00
+      FromOffset: [0.000, 0.000]
     UITextComponent:
       Text: "读取存档"
       Color: [0.939999998, 0.959999979, 0.899999976, 1]
       FontSize: 28
-      FontPath: assets/fonts/NotoSansSC-VF.ttf
+      FontPath: assets/fonts/wqy-microhei.ttc
+      ShadowColor: [0.02, 0.02, 0.025, 0.78]
+      ShadowOffset: [2.0, 2.0]
+      OutlineColor: [0.01, 0.01, 0.012, 0.86]
+      OutlineThickness: 1.25
     UIButtonComponent:
       NormalColor: [0.180000007, 0.25, 0.349999994, 0.920000017]
       HoverColor: [0.25, 0.360000014, 0.5, 0.980000019]
       PressedColor: [0.119999997, 0.180000007, 0.280000001, 1]
-      OnClickFunction: loadgame:assets/scenes/VerticalSliceIntro.wt:1
+      OnClickFunction: event:FlowController:menu_load_game
   - Entity: 920000007
     TagComponent:
       Tag: Menu_NewGame
@@ -81,16 +173,30 @@ Entities:
       Rotation: 0
       Anchor: 0
       SortOrder: 30
+      ParentTag: WT_UI_Canvas
+    UIAnimatorComponent:
+      Preset: "hover_pulse"
+      PlayOnStart: true
+      Loop: false
+      Delay: 0.00
+      Duration: 0.18
+      Amplitude: 0.040
+      Speed: 1.00
+      FromOffset: [0.000, 0.000]
     UITextComponent:
       Text: "开始游戏"
       Color: [0.939999998, 0.959999979, 0.899999976, 1]
       FontSize: 28
-      FontPath: assets/fonts/NotoSansSC-VF.ttf
+      FontPath: assets/fonts/wqy-microhei.ttc
+      ShadowColor: [0.02, 0.02, 0.025, 0.78]
+      ShadowOffset: [2.0, 2.0]
+      OutlineColor: [0.01, 0.01, 0.012, 0.86]
+      OutlineThickness: 1.25
     UIButtonComponent:
       NormalColor: [0.129999995, 0.330000013, 0.340000004, 0.920000017]
       HoverColor: [0.180000007, 0.479999989, 0.439999998, 0.980000019]
       PressedColor: [0.0799999982, 0.239999995, 0.25, 1]
-      OnClickFunction: newgame:assets/scenes/VerticalSliceIntro.wt
+      OnClickFunction: event:FlowController:menu_new_game
   - Entity: 920000006
     TagComponent:
       Tag: Menu_Subtitle
@@ -105,11 +211,25 @@ Entities:
       Rotation: 0
       Anchor: 0
       SortOrder: 21
+      ParentTag: WT_UI_Canvas
+    UIAnimatorComponent:
+      Preset: "fade_in"
+      PlayOnStart: true
+      Loop: false
+      Delay: 0.12
+      Duration: 0.28
+      Amplitude: 0.035
+      Speed: 1.00
+      FromOffset: [0.000, 0.000]
     UITextComponent:
       Text: "异世界魔剑竖切版"
       Color: [0.720000029, 0.829999983, 0.819999993, 1]
       FontSize: 22
-      FontPath: assets/fonts/NotoSansSC-VF.ttf
+      FontPath: assets/fonts/wqy-microhei.ttc
+      ShadowColor: [0.02, 0.02, 0.025, 0.78]
+      ShadowOffset: [2.0, 2.0]
+      OutlineColor: [0.01, 0.01, 0.012, 0.86]
+      OutlineThickness: 1.25
   - Entity: 920000005
     TagComponent:
       Tag: Menu_Title
@@ -124,11 +244,25 @@ Entities:
       Rotation: 0
       Anchor: 0
       SortOrder: 20
+      ParentTag: WT_UI_Canvas
+    UIAnimatorComponent:
+      Preset: "fade_in"
+      PlayOnStart: true
+      Loop: false
+      Delay: 0.06
+      Duration: 0.28
+      Amplitude: 0.035
+      Speed: 1.00
+      FromOffset: [0.000, 0.000]
     UITextComponent:
       Text: "Wheatear 异世界项目"
       Color: [0.899999976, 0.959999979, 0.920000017, 1]
       FontSize: 46
-      FontPath: assets/fonts/NotoSansSC-VF.ttf
+      FontPath: assets/fonts/wqy-microhei.ttc
+      ShadowColor: [0.02, 0.02, 0.025, 0.86]
+      ShadowOffset: [2.5, 2.5]
+      OutlineColor: [0.01, 0.01, 0.012, 0.92]
+      OutlineThickness: 1.7
   - Entity: 920000004
     TagComponent:
       Tag: Menu_Light

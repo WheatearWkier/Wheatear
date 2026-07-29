@@ -47,6 +47,16 @@ namespace Wheatear {
             s_RendererAPI->SetLineWidth(width);
         }
 
+        static void SetScissor(uint32_t x, uint32_t y, uint32_t width, uint32_t height)
+        {
+            s_RendererAPI->SetScissor(x, y, width, height);
+        }
+
+        static void SetScissorTest(bool enabled)
+        {
+            s_RendererAPI->SetScissorTest(enabled);
+        }
+
         static void EnableDepthTest()
         {
             s_RendererAPI->EnableDepthTest();

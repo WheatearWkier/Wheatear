@@ -1,0 +1,534 @@
+﻿Scene: VerticalSliceSettings
+Entities:
+  - Entity: 840000027
+    TagComponent:
+      Tag: FlowController
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    EventScriptComponent:
+      ScriptPath: "assets/events/vertical_slice_flow.wts"
+      StartEvent: "on_start"
+      RunOnStart: false
+      RunOnce: false
+      Enabled: true
+  - Entity: 840000026
+    TagComponent:
+      Tag: WT_UI_Canvas
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    UICanvasComponent:
+      Visible: true
+      ReferenceWidth: 1920
+      ReferenceHeight: 1080
+    UIWidgetComponent:
+      Visible: true
+      Position: [0, 0]
+      Size: [1, 1]
+      Rotation: 0
+      Anchor: 0
+      SortOrder: 0
+      ParentTag: ""
+  - Entity: 840000001
+    TagComponent:
+      Tag: Settings_Camera
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    CameraComponent:
+      Camera:
+        ProjectionType: 1
+        PerspectiveFOV: 0.785398185
+        PerspectiveNear: 0.00999999978
+        PerspectiveFar: 1000
+        OrthographicSize: 10
+        OrthographicNear: -1
+        OrthographicFar: 1
+      Primary: true
+      FixedAspectRatio: false
+  - Entity: 840000002
+    TagComponent:
+      Tag: Settings_Background
+    TransformComponent:
+      Translation: [0, 0.35, -0.8]
+      Rotation: [0, 0, 0]
+      Scale: [20, 11.25, 1]
+    SpriteRendererComponent:
+      Color: [0.76, 0.88, 0.82, 1]
+      Texture: assets/vertical_slice/vn/backgrounds/forest_camp.png
+      TilingFactor: 1
+  - Entity: 840000010
+    TagComponent:
+      Tag: Settings_MainPanel
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    UIWidgetComponent:
+      Visible: true
+      Position: [0.055, 0.08]
+      Size: [0.89, 0.78]
+      Rotation: 0.0
+      Anchor: 0
+      SortOrder: 10
+      ParentTag: WT_UI_Canvas
+    UIImageComponent:
+      Color: [1, 1, 1, 0.97]
+      TexturePath: assets/vertical_slice/ui/panels/panel_settings.png
+  - Entity: 840000011
+    TagComponent:
+      Tag: Settings_Title
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    UIWidgetComponent:
+      Visible: true
+      Position: [0.09, 0.115]
+      Size: [0.44, 0.06]
+      Rotation: 0.0
+      Anchor: 0
+      SortOrder: 42
+      ParentTag: WT_UI_Canvas
+    UITextComponent:
+      Text: "系统设置"
+      Color: [0.88, 1.0, 0.92, 1]
+      FontSize: 42
+      FontPath: assets/fonts/wqy-microhei.ttc
+      ShadowColor: [0.01, 0.015, 0.018, 0.88]
+      ShadowOffset: [2.4, 2.4]
+      OutlineColor: [0.0, 0.0, 0.0, 0.94]
+      OutlineThickness: 1.8
+  - Entity: 840000012
+    TagComponent:
+      Tag: Settings_Subtitle
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    UIWidgetComponent:
+      Visible: true
+      Position: [0.09, 0.18]
+      Size: [0.72, 0.035]
+      Rotation: 0.0
+      Anchor: 0
+      SortOrder: 42
+      ParentTag: WT_UI_Canvas
+    UITextComponent:
+      Text: "第2章 / 魔剑 Lv1 / 主角 Lv1"
+      Color: [0.7, 0.9, 0.78, 1]
+      FontSize: 18
+      FontPath: assets/fonts/wqy-microhei.ttc
+      ShadowColor: [0.01, 0.015, 0.018, 0.76]
+      ShadowOffset: [1.6, 1.6]
+      OutlineColor: [0.0, 0.0, 0.0, 0.82]
+      OutlineThickness: 1.1
+  - Entity: 840000013
+    TagComponent:
+      Tag: Settings_ControlPanel
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    UIWidgetComponent:
+      Visible: true
+      Position: [0.1, 0.26]
+      Size: [0.54, 0.42]
+      Rotation: 0.0
+      Anchor: 0
+      SortOrder: 18
+      ParentTag: WT_UI_Canvas
+    UIPanelComponent:
+      BackgroundColor: [0.04, 0.07, 0.06, 0.65]
+      BorderColor: [0.4, 0.8, 0.6, 0.85]
+      BorderThickness: 2
+  - Entity: 840000014
+    TagComponent:
+      Tag: Settings_TextSpeedLabel
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    UIWidgetComponent:
+      Visible: true
+      Position: [0.13, 0.31]
+      Size: [0.18, 0.035]
+      Rotation: 0.0
+      Anchor: 0
+      SortOrder: 42
+      ParentTag: WT_UI_Canvas
+    UITextComponent:
+      Text: "文字速度"
+      Color: [0.88, 1.0, 0.9, 1]
+      FontSize: 20
+      FontPath: assets/fonts/wqy-microhei.ttc
+      ShadowColor: [0.01, 0.015, 0.018, 0.76]
+      ShadowOffset: [1.6, 1.6]
+      OutlineColor: [0.0, 0.0, 0.0, 0.82]
+      OutlineThickness: 1.1
+  - Entity: 840000015
+    TagComponent:
+      Tag: Settings_TextSpeedSlider
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    UIWidgetComponent:
+      Visible: true
+      Position: [0.31, 0.315]
+      Size: [0.25, 0.035]
+      Rotation: 0.0
+      Anchor: 0
+      SortOrder: 44
+      ParentTag: WT_UI_Canvas
+    UISliderComponent:
+      Value: 48
+      MinValue: 12
+      MaxValue: 180
+      TrackColor: [0.08, 0.10, 0.12, 0.92]
+      FillColor: [0.30, 0.78, 0.72, 0.96]
+      HandleColor: [0.92, 0.98, 0.92, 1]
+      HoverColor: [1, 0.92, 0.50, 1]
+      OnValueChangedFunction: "progression:set_text_speed"
+  - Entity: 840000016
+    TagComponent:
+      Tag: Settings_Button_TextDown
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    UIWidgetComponent:
+      Visible: true
+      Position: [0.58, 0.3]
+      Size: [0.045, 0.045]
+      Rotation: 0.0
+      Anchor: 0
+      SortOrder: 55
+      ParentTag: WT_UI_Canvas
+    UIAnimatorComponent:
+      Preset: "hover_pulse"
+      PlayOnStart: true
+      Loop: false
+      Delay: 0
+      Duration: 0.16
+      Amplitude: 0.035
+      Speed: 1
+      FromOffset: [0, 0.03]
+    UIButtonComponent:
+      NormalColor: [0.08, 0.1, 0.12, 0.7]
+      HoverColor: [0.16, 0.22, 0.25, 0.92]
+      PressedColor: [0.04, 0.05, 0.06, 0.92]
+      OnClickFunction: progression:text_speed_down
+    UITextComponent:
+      Text: "-"
+      Color: [0.9, 0.96, 0.92, 1]
+      FontSize: 20
+      FontPath: assets/fonts/wqy-microhei.ttc
+      ShadowColor: [0.01, 0.015, 0.018, 0.76]
+      ShadowOffset: [1.6, 1.6]
+      OutlineColor: [0.0, 0.0, 0.0, 0.82]
+      OutlineThickness: 1.1
+  - Entity: 840000017
+    TagComponent:
+      Tag: Settings_Button_TextUp
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    UIWidgetComponent:
+      Visible: true
+      Position: [0.635, 0.3]
+      Size: [0.045, 0.045]
+      Rotation: 0.0
+      Anchor: 0
+      SortOrder: 55
+      ParentTag: WT_UI_Canvas
+    UIAnimatorComponent:
+      Preset: "hover_pulse"
+      PlayOnStart: true
+      Loop: false
+      Delay: 0
+      Duration: 0.16
+      Amplitude: 0.035
+      Speed: 1
+      FromOffset: [0, 0.03]
+    UIButtonComponent:
+      NormalColor: [0.1, 0.29, 0.28, 0.92]
+      HoverColor: [0.17, 0.45, 0.42, 0.98]
+      PressedColor: [0.07, 0.18, 0.18, 1]
+      OnClickFunction: progression:text_speed_up
+    UITextComponent:
+      Text: "+"
+      Color: [0.93, 1.0, 0.92, 1]
+      FontSize: 20
+      FontPath: assets/fonts/wqy-microhei.ttc
+      ShadowColor: [0.01, 0.015, 0.018, 0.76]
+      ShadowOffset: [1.6, 1.6]
+      OutlineColor: [0.0, 0.0, 0.0, 0.82]
+      OutlineThickness: 1.1
+  - Entity: 840000018
+    TagComponent:
+      Tag: Settings_MasterVolumeLabel
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    UIWidgetComponent:
+      Visible: true
+      Position: [0.13, 0.39]
+      Size: [0.18, 0.035]
+      Rotation: 0.0
+      Anchor: 0
+      SortOrder: 42
+      ParentTag: WT_UI_Canvas
+    UITextComponent:
+      Text: "主音量"
+      Color: [0.88, 1.0, 0.9, 1]
+      FontSize: 20
+      FontPath: assets/fonts/wqy-microhei.ttc
+      ShadowColor: [0.01, 0.015, 0.018, 0.76]
+      ShadowOffset: [1.6, 1.6]
+      OutlineColor: [0.0, 0.0, 0.0, 0.82]
+      OutlineThickness: 1.1
+  - Entity: 840000019
+    TagComponent:
+      Tag: Settings_MasterVolumeSlider
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    UIWidgetComponent:
+      Visible: true
+      Position: [0.31, 0.395]
+      Size: [0.25, 0.035]
+      Rotation: 0.0
+      Anchor: 0
+      SortOrder: 44
+      ParentTag: WT_UI_Canvas
+    UISliderComponent:
+      Value: 80
+      MinValue: 0
+      MaxValue: 100
+      TrackColor: [0.08, 0.10, 0.12, 0.92]
+      FillColor: [0.30, 0.78, 0.72, 0.96]
+      HandleColor: [0.92, 0.98, 0.92, 1]
+      HoverColor: [1, 0.92, 0.50, 1]
+      OnValueChangedFunction: "progression:set_master_volume"
+  - Entity: 840000020
+    TagComponent:
+      Tag: Settings_Button_VolumeDown
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    UIWidgetComponent:
+      Visible: true
+      Position: [0.58, 0.38]
+      Size: [0.045, 0.045]
+      Rotation: 0.0
+      Anchor: 0
+      SortOrder: 55
+      ParentTag: WT_UI_Canvas
+    UIAnimatorComponent:
+      Preset: "hover_pulse"
+      PlayOnStart: true
+      Loop: false
+      Delay: 0
+      Duration: 0.16
+      Amplitude: 0.035
+      Speed: 1
+      FromOffset: [0, 0.03]
+    UIButtonComponent:
+      NormalColor: [0.08, 0.1, 0.12, 0.7]
+      HoverColor: [0.16, 0.22, 0.25, 0.92]
+      PressedColor: [0.04, 0.05, 0.06, 0.92]
+      OnClickFunction: progression:master_volume_down
+    UITextComponent:
+      Text: "-"
+      Color: [0.9, 0.96, 0.92, 1]
+      FontSize: 20
+      FontPath: assets/fonts/wqy-microhei.ttc
+      ShadowColor: [0.01, 0.015, 0.018, 0.76]
+      ShadowOffset: [1.6, 1.6]
+      OutlineColor: [0.0, 0.0, 0.0, 0.82]
+      OutlineThickness: 1.1
+  - Entity: 840000021
+    TagComponent:
+      Tag: Settings_Button_VolumeUp
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    UIWidgetComponent:
+      Visible: true
+      Position: [0.635, 0.38]
+      Size: [0.045, 0.045]
+      Rotation: 0.0
+      Anchor: 0
+      SortOrder: 55
+      ParentTag: WT_UI_Canvas
+    UIAnimatorComponent:
+      Preset: "hover_pulse"
+      PlayOnStart: true
+      Loop: false
+      Delay: 0
+      Duration: 0.16
+      Amplitude: 0.035
+      Speed: 1
+      FromOffset: [0, 0.03]
+    UIButtonComponent:
+      NormalColor: [0.1, 0.29, 0.28, 0.92]
+      HoverColor: [0.17, 0.45, 0.42, 0.98]
+      PressedColor: [0.07, 0.18, 0.18, 1]
+      OnClickFunction: progression:master_volume_up
+    UITextComponent:
+      Text: "+"
+      Color: [0.93, 1.0, 0.92, 1]
+      FontSize: 20
+      FontPath: assets/fonts/wqy-microhei.ttc
+      ShadowColor: [0.01, 0.015, 0.018, 0.76]
+      ShadowOffset: [1.6, 1.6]
+      OutlineColor: [0.0, 0.0, 0.0, 0.82]
+      OutlineThickness: 1.1
+  - Entity: 840000022
+    TagComponent:
+      Tag: Settings_Button_Shake
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    UIWidgetComponent:
+      Visible: true
+      Position: [0.13, 0.49]
+      Size: [0.22, 0.052]
+      Rotation: 0.0
+      Anchor: 0
+      SortOrder: 55
+      ParentTag: WT_UI_Canvas
+    UIAnimatorComponent:
+      Preset: "hover_pulse"
+      PlayOnStart: true
+      Loop: false
+      Delay: 0
+      Duration: 0.16
+      Amplitude: 0.035
+      Speed: 1
+      FromOffset: [0, 0.03]
+    UIButtonComponent:
+      NormalColor: [0.15, 0.25, 0.44, 0.92]
+      HoverColor: [0.24, 0.38, 0.65, 0.98]
+      PressedColor: [0.1, 0.16, 0.3, 1]
+      OnClickFunction: progression:toggle_screen_shake
+    UITextComponent:
+      Text: "屏幕震动"
+      Color: [0.92, 0.97, 1.0, 1]
+      FontSize: 20
+      FontPath: assets/fonts/wqy-microhei.ttc
+      ShadowColor: [0.01, 0.015, 0.018, 0.76]
+      ShadowOffset: [1.6, 1.6]
+      OutlineColor: [0.0, 0.0, 0.0, 0.82]
+      OutlineThickness: 1.1
+  - Entity: 840000023
+    TagComponent:
+      Tag: Settings_Button_Fullscreen
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    UIWidgetComponent:
+      Visible: true
+      Position: [0.38, 0.49]
+      Size: [0.22, 0.052]
+      Rotation: 0.0
+      Anchor: 0
+      SortOrder: 55
+      ParentTag: WT_UI_Canvas
+    UIAnimatorComponent:
+      Preset: "hover_pulse"
+      PlayOnStart: true
+      Loop: false
+      Delay: 0
+      Duration: 0.16
+      Amplitude: 0.035
+      Speed: 1
+      FromOffset: [0, 0.03]
+    UIButtonComponent:
+      NormalColor: [0.15, 0.25, 0.44, 0.92]
+      HoverColor: [0.24, 0.38, 0.65, 0.98]
+      PressedColor: [0.1, 0.16, 0.3, 1]
+      OnClickFunction: progression:toggle_fullscreen
+    UITextComponent:
+      Text: "全屏偏好"
+      Color: [0.92, 0.97, 1.0, 1]
+      FontSize: 20
+      FontPath: assets/fonts/wqy-microhei.ttc
+      ShadowColor: [0.01, 0.015, 0.018, 0.76]
+      ShadowOffset: [1.6, 1.6]
+      OutlineColor: [0.0, 0.0, 0.0, 0.82]
+      OutlineThickness: 1.1
+  - Entity: 840000024
+    TagComponent:
+      Tag: Settings_Status
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    UIWidgetComponent:
+      Visible: true
+      Position: [0.68, 0.27]
+      Size: [0.2, 0.32]
+      Rotation: 0.0
+      Anchor: 0
+      SortOrder: 42
+      ParentTag: WT_UI_Canvas
+    UITextComponent:
+      Text: "设置状态"
+      Color: [0.94, 0.98, 0.9, 1]
+      FontSize: 19
+      FontPath: assets/fonts/wqy-microhei.ttc
+      ShadowColor: [0.01, 0.015, 0.018, 0.82]
+      ShadowOffset: [2.0, 2.0]
+      OutlineColor: [0.0, 0.0, 0.0, 0.88]
+      OutlineThickness: 1.35
+  - Entity: 840000025
+    TagComponent:
+      Tag: Settings_Button_Back
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    UIWidgetComponent:
+      Visible: true
+      Position: [0.1, 0.765]
+      Size: [0.15, 0.05]
+      Rotation: 0.0
+      Anchor: 0
+      SortOrder: 55
+      ParentTag: WT_UI_Canvas
+    UIAnimatorComponent:
+      Preset: "hover_pulse"
+      PlayOnStart: true
+      Loop: false
+      Delay: 0
+      Duration: 0.16
+      Amplitude: 0.035
+      Speed: 1
+      FromOffset: [0, 0.03]
+    UIButtonComponent:
+      NormalColor: [0.08, 0.1, 0.12, 0.7]
+      HoverColor: [0.16, 0.22, 0.25, 0.92]
+      PressedColor: [0.04, 0.05, 0.06, 0.92]
+      OnClickFunction: event:FlowController:go_hub
+    UITextComponent:
+      Text: "返回据点"
+      Color: [0.9, 0.96, 0.92, 1]
+      FontSize: 20
+      FontPath: assets/fonts/wqy-microhei.ttc
+      ShadowColor: [0.01, 0.015, 0.018, 0.76]
+      ShadowOffset: [1.6, 1.6]
+      OutlineColor: [0.0, 0.0, 0.0, 0.82]
+      OutlineThickness: 1.1

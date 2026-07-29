@@ -1,14 +1,20 @@
 #include "wtpch.h"
 #include "VisualNovelSystem.h"
 
+#include "Wheatear/Audio/AudioEngine.h"
 #include "Wheatear/Core/AssetPath.h"
 #include "Wheatear/Core/Input.h"
 #include "Wheatear/Core/KeyCodes.h"
 #include "Wheatear/Core/Log.h"
 #include "Wheatear/Core/MouseButtonCodes.h"
+#include "Wheatear/Modules/Progression/GameProgress.h"
+#include "Wheatear/Renderer/Texture.h"
 #include "Wheatear/Scene/Components.h"
 #include "Wheatear/Scene/Entity.h"
+#include "Wheatear/Scene/SceneQueries.h"
 #include "Wheatear/Scene/Scene.h"
+#include "Wheatear/UI/UIRenderer.h"
+#include "Wheatear/UI/UIRuntimeTools.h"
 
 #include <algorithm>
 #include <cctype>
@@ -24,16 +30,21 @@ namespace Wheatear {
 
     namespace {
 
+        using SceneQueries::FindEntityByName;
+        using UIRuntimeTools::SetText;
+        using UIRuntimeTools::SetWidgetVisible;
+
         static bool StartsWith(const std::string& value, const std::string& prefix)
         {
             return value.rfind(prefix, 0) == 0;
         }
 
-        static bool IsSceneChoiceCommand(const std::string& command)
+        static bool IsExternalChoiceCommand(const std::string& command)
         {
             return StartsWith(command, "scene:")
                 || StartsWith(command, "newgame:")
-                || StartsWith(command, "loadgame:");
+                || StartsWith(command, "loadgame:")
+                || StartsWith(command, "event:");
         }
 
         static std::string ToLower(std::string value)
@@ -41,27 +52,6 @@ namespace Wheatear {
             std::transform(value.begin(), value.end(), value.begin(),
                 [](unsigned char c) { return static_cast<char>(std::tolower(c)); });
             return value;
-        }
-
-        static Entity FindEntityByName(Scene* scene, const std::string& name)
-        {
-            if (!scene || name.empty())
-                return {};
-
-            auto& registry = scene->GetRegistry();
-            for (auto e : registry.view<TagComponent>())
-            {
-                if (registry.get<TagComponent>(e).Tag == name)
-                    return { e, scene };
-            }
-            return {};
-        }
-
-        static void SetWidgetVisible(Scene* scene, const std::string& entityName, bool visible)
-        {
-            Entity entity = FindEntityByName(scene, entityName);
-            if (entity && entity.HasComponent<UIWidgetComponent>())
-                entity.GetComponent<UIWidgetComponent>().Visible = visible;
         }
 
         static void SetWidgetsWithPrefixVisible(Scene* scene, const std::string& prefix, bool visible)
@@ -78,11 +68,92 @@ namespace Wheatear {
             }
         }
 
-        static void SetText(Scene* scene, const std::string& entityName, const std::string& value)
+        static std::string FindFirstCanvasTag(Scene* scene)
+        {
+            if (!scene)
+                return {};
+
+            auto& registry = scene->GetRegistry();
+            for (auto e : registry.view<TagComponent, UICanvasComponent>())
+                return registry.get<TagComponent>(e).Tag;
+            return {};
+        }
+
+        static Entity EnsureNoticePanel(Scene* scene,
+            const std::string& entityName,
+            const std::string& parentTag,
+            const glm::vec2& position,
+            const glm::vec2& size)
+        {
+            if (!scene || entityName.empty())
+                return {};
+
+            Entity entity = FindEntityByName(scene, entityName);
+            if (!entity)
+                entity = scene->CreateEntity(entityName);
+
+            auto& widget = entity.HasComponent<UIWidgetComponent>()
+                ? entity.GetComponent<UIWidgetComponent>()
+                : entity.AddComponent<UIWidgetComponent>();
+            widget.Visible = true;
+            widget.Anchor = UIAnchor::TopLeft;
+            widget.Position = position;
+            widget.Size = size;
+            widget.SortOrder = 5200;
+            widget.ParentTag = parentTag;
+
+            auto& panel = entity.HasComponent<UIPanelComponent>()
+                ? entity.GetComponent<UIPanelComponent>()
+                : entity.AddComponent<UIPanelComponent>();
+            panel.BackgroundColor = { 0.03f, 0.06f, 0.08f, 0.82f };
+            panel.BorderColor = { 0.45f, 0.86f, 0.92f, 0.82f };
+            panel.BorderThickness = 1.5f;
+            panel.ClipChildren = true;
+            return entity;
+        }
+
+        static Entity EnsureNoticeText(Scene* scene,
+            const std::string& entityName,
+            const std::string& parentTag,
+            const glm::vec2& position,
+            const glm::vec2& size)
+        {
+            if (!scene || entityName.empty())
+                return {};
+
+            Entity entity = FindEntityByName(scene, entityName);
+            if (!entity)
+                entity = scene->CreateEntity(entityName);
+
+            auto& widget = entity.HasComponent<UIWidgetComponent>()
+                ? entity.GetComponent<UIWidgetComponent>()
+                : entity.AddComponent<UIWidgetComponent>();
+            widget.Visible = true;
+            widget.Anchor = UIAnchor::TopLeft;
+            widget.Position = position;
+            widget.Size = size;
+            widget.SortOrder = 5201;
+            widget.ParentTag = parentTag;
+
+            auto& text = entity.HasComponent<UITextComponent>()
+                ? entity.GetComponent<UITextComponent>()
+                : entity.AddComponent<UITextComponent>();
+            text.FontSize = 24.0f;
+            text.FontPath = "assets/fonts/wqy-microhei.ttc";
+            text.OutlineThickness = 0.85f;
+            text.ShadowOffset = { 1.0f, 1.0f };
+            return entity;
+        }
+
+        static void PreloadTextForEntity(Scene* scene, const std::string& entityName, const std::string& value)
         {
             Entity entity = FindEntityByName(scene, entityName);
-            if (entity && entity.HasComponent<UITextComponent>())
-                entity.GetComponent<UITextComponent>().Text = value;
+            if (!entity || !entity.HasComponent<UITextComponent>() || value.empty())
+                return;
+
+            UITextComponent text = entity.GetComponent<UITextComponent>();
+            text.Text = value;
+            UIRenderer::PreloadUIText(text);
         }
 
         static void SetButtonCommand(Scene* scene, const std::string& entityName, const std::string& command)
@@ -112,6 +183,24 @@ namespace Wheatear {
         {
             std::replace(path.begin(), path.end(), '\\', '/');
             return path;
+        }
+
+        static float GetBGMVolume(float volume)
+        {
+            const auto& settings = GameProgress::GetState().Settings;
+            const float master = AudioEngine::PercentToGain(static_cast<float>(settings.MasterVolume));
+            const float bgm = AudioEngine::PercentToGain(static_cast<float>(settings.BGMVolume));
+            return std::clamp(volume, 0.0f, 2.0f) * master * bgm;
+        }
+
+        static std::string ResolveMusicTitle(const std::string& musicPath, const std::string& explicitTitle)
+        {
+            if (!explicitTitle.empty())
+                return explicitTitle;
+
+            std::string stem = std::filesystem::path(musicPath).stem().generic_string();
+            std::replace(stem.begin(), stem.end(), '_', ' ');
+            return stem.empty() ? musicPath : stem;
         }
 
         static std::string ReplaceAll(std::string value,
@@ -344,6 +433,20 @@ namespace Wheatear {
             return stream.str();
         }
 
+        static std::string BuildSaveLoadText(const VisualNovelComponent& component,
+            const VisualNovelRuntime& runtime)
+        {
+            const std::filesystem::path savePath = BuildSavePath(component, 1);
+            std::ostringstream stream;
+            stream << "存档 / 读取\n\n";
+            stream << "槽位 1: " << (std::filesystem::exists(savePath) ? "已有 VN 存档" : "空槽") << "\n";
+            stream << "当前脚本: " << runtime.GetScript().GetSourcePath().filename().generic_string() << "\n";
+            stream << "进度槽: 与据点/战斗结算共用 1 号成长进度\n\n";
+            stream << "保存会同时写入 VN 行进状态和成长进度。\n";
+            stream << "读取会回到 VN 存档所在台词，并同步读取成长进度。";
+            return stream.str();
+        }
+
     } // namespace
 
     void VisualNovelSystem::OnRuntimeStart(Scene* scene)
@@ -360,6 +463,8 @@ namespace Wheatear {
 
     void VisualNovelSystem::OnRuntimeStop(Scene* scene)
     {
+        for (auto& [id, state] : m_RuntimeStates)
+            StopBGM(state);
         m_RuntimeStates.clear();
     }
 
@@ -379,17 +484,22 @@ namespace Wheatear {
                 LoadRuntime(state, component);
             }
 
+            component.CharactersPerSecond = static_cast<float>(GameProgress::GetState().Settings.TextSpeed);
             state.Runtime.SetCharactersPerSecond(component.CharactersPerSecond);
             state.Runtime.SetAutoPlayDelay(component.AutoPlayDelay);
-            state.SystemMessageTimer = std::max(0.0f, state.SystemMessageTimer - ts.GetSeconds());
+            const float deltaSeconds = ts.GetSeconds();
+            state.SystemMessageTimer = std::max(0.0f, state.SystemMessageTimer - deltaSeconds);
+            state.BGMNoticeTimer = std::max(0.0f, state.BGMNoticeTimer - deltaSeconds);
 
             UpdateInput(scene, component, state);
 
-            const bool uiBlocksStory = state.ShowHistory || state.ShowSettings || state.DialogueHidden;
+            const bool uiBlocksStory = state.ShowHistory || state.ShowSettings || state.ShowSaveLoad || state.DialogueHidden;
             if (!uiBlocksStory)
-                state.Runtime.Update(ts.GetSeconds());
+                state.Runtime.Update(deltaSeconds);
 
+            UpdateBGM(scene, component, state);
             UpdateSceneBindings(scene, component, state);
+            UpdateMusicNotice(scene, component, state, deltaSeconds);
         }
     }
 
@@ -398,8 +508,131 @@ namespace Wheatear {
         return m_RuntimeStates[id];
     }
 
+    void VisualNovelSystem::StopBGM(RuntimeState& state)
+    {
+        if (state.BGMHandle != 0)
+            AudioEngine::StopSound(state.BGMHandle);
+
+        state.BGMHandle = 0;
+        state.CurrentBGMPath.clear();
+        state.CurrentBGMTitle.clear();
+        state.BGMNoticeTimer = 0.0f;
+    }
+
+    void VisualNovelSystem::UpdateBGM(Scene* scene,
+        const VisualNovelComponent& component,
+        RuntimeState& state)
+    {
+        if (!state.Loaded)
+            return;
+
+        const std::string desiredPath = NormalizeAssetPath(state.Runtime.GetCurrentMusic());
+        const std::string desiredTitle = ResolveMusicTitle(
+            desiredPath,
+            state.Runtime.GetCurrentMusicTitle());
+
+        if (desiredPath == state.CurrentBGMPath)
+        {
+            if (state.BGMHandle != 0)
+                AudioEngine::SetVolume(state.BGMHandle, GetBGMVolume(0.82f));
+            return;
+        }
+
+        if (state.BGMHandle != 0)
+        {
+            AudioEngine::StopSound(state.BGMHandle);
+            state.BGMHandle = 0;
+        }
+
+        state.CurrentBGMPath = desiredPath;
+        state.CurrentBGMTitle = desiredTitle;
+
+        if (state.CurrentBGMPath.empty())
+        {
+            state.CurrentBGMTitle.clear();
+            state.BGMNoticeTimer = 0.0f;
+            return;
+        }
+
+        state.BGMHandle = AudioEngine::PlaySoundWithHandle(
+            state.CurrentBGMPath,
+            GetBGMVolume(0.82f),
+            true);
+
+        if (state.BGMHandle != 0)
+            state.BGMNoticeTimer = state.BGMNoticeDuration;
+        else
+            state.BGMNoticeTimer = 0.0f;
+    }
+
+    void VisualNovelSystem::UpdateMusicNotice(Scene* scene,
+        const VisualNovelComponent& component,
+        RuntimeState& state,
+        float deltaSeconds)
+    {
+        const bool visible = state.BGMNoticeTimer > 0.0f && !state.CurrentBGMTitle.empty();
+        if (!visible)
+        {
+            SetWidgetVisible(scene, component.MusicNoticePanelEntityName, false);
+            SetWidgetVisible(scene, component.MusicNoticeTextEntityName, false);
+            return;
+        }
+
+        const float duration = std::max(0.01f, state.BGMNoticeDuration);
+        const float elapsed = std::clamp(duration - state.BGMNoticeTimer, 0.0f, duration);
+        const float normalized = elapsed / duration;
+        float alpha = 1.0f;
+        if (normalized < 0.14f)
+            alpha = normalized / 0.14f;
+        else if (normalized > 0.76f)
+            alpha = std::max(0.0f, (1.0f - normalized) / 0.24f);
+
+        const float slide = (1.0f - alpha) * 0.045f;
+        const glm::vec2 panelPosition = { 0.030f - slide, 0.047f };
+        const glm::vec2 panelSize = { 0.300f, 0.058f };
+        const std::string parentTag = FindFirstCanvasTag(scene);
+
+        Entity panelEntity = EnsureNoticePanel(
+            scene,
+            component.MusicNoticePanelEntityName,
+            parentTag,
+            panelPosition,
+            panelSize);
+        Entity textEntity = EnsureNoticeText(
+            scene,
+            component.MusicNoticeTextEntityName,
+            parentTag,
+            { panelPosition.x + 0.014f, panelPosition.y + 0.012f },
+            { panelSize.x - 0.026f, panelSize.y - 0.016f });
+
+        if (panelEntity && panelEntity.HasComponent<UIPanelComponent>())
+        {
+            auto& panel = panelEntity.GetComponent<UIPanelComponent>();
+            panel.BackgroundColor = { 0.025f, 0.052f, 0.070f, 0.80f * alpha };
+            panel.BorderColor = { 0.45f, 0.88f, 0.94f, 0.86f * alpha };
+        }
+
+        if (textEntity && textEntity.HasComponent<UITextComponent>())
+        {
+            auto& text = textEntity.GetComponent<UITextComponent>();
+            const std::string notice = "BGM  " + state.CurrentBGMTitle;
+            if (text.Text != notice)
+            {
+                text.Text = notice;
+                UIRenderer::PreloadUIText(text);
+            }
+            text.Color = { 0.84f, 0.96f, 1.0f, alpha };
+            text.OutlineColor = { 0.01f, 0.02f, 0.025f, 0.88f * alpha };
+            text.ShadowColor = { 0.0f, 0.0f, 0.0f, 0.62f * alpha };
+        }
+
+        SetWidgetVisible(scene, component.MusicNoticePanelEntityName, alpha > 0.02f);
+        SetWidgetVisible(scene, component.MusicNoticeTextEntityName, alpha > 0.02f);
+    }
+
     bool VisualNovelSystem::LoadRuntime(RuntimeState& state, const VisualNovelComponent& component)
     {
+        StopBGM(state);
         state.LoadedPath = AssetPath::Resolve(component.ScriptPath);
         state.Runtime.SetCharactersPerSecond(component.CharactersPerSecond);
         state.Runtime.SetAutoPlayDelay(component.AutoPlayDelay);
@@ -407,6 +640,7 @@ namespace Wheatear {
         state.LoadedAutoLoadSlot = component.AutoLoadSlot;
         state.ShowHistory = false;
         state.ShowSettings = false;
+        state.ShowSaveLoad = false;
         state.DialogueHidden = false;
         state.PreviousChoicePressed.assign(9, false);
 
@@ -476,6 +710,7 @@ namespace Wheatear {
             state.DialogueHidden = false;
             state.ShowHistory = false;
             state.ShowSettings = false;
+            state.ShowSaveLoad = false;
             pushMessage(state.Runtime.IsAutoPlay() ? "自动播放已开启" : "自动播放已关闭");
             return true;
         }
@@ -484,6 +719,7 @@ namespace Wheatear {
         {
             state.ShowHistory = !state.ShowHistory;
             state.ShowSettings = false;
+            state.ShowSaveLoad = false;
             state.DialogueHidden = false;
             return true;
         }
@@ -492,6 +728,7 @@ namespace Wheatear {
         {
             state.ShowSettings = !state.ShowSettings;
             state.ShowHistory = false;
+            state.ShowSaveLoad = false;
             state.DialogueHidden = false;
             return true;
         }
@@ -500,6 +737,7 @@ namespace Wheatear {
         {
             state.ShowHistory = false;
             state.ShowSettings = false;
+            state.ShowSaveLoad = false;
             return true;
         }
 
@@ -508,14 +746,28 @@ namespace Wheatear {
             state.DialogueHidden = true;
             state.ShowHistory = false;
             state.ShowSettings = false;
+            state.ShowSaveLoad = false;
+            return true;
+        }
+
+        if (action == "savemenu" || action == "loadmenu")
+        {
+            state.ShowSaveLoad = true;
+            state.ShowHistory = false;
+            state.ShowSettings = false;
+            state.DialogueHidden = false;
             return true;
         }
 
         if (action == "save" || action == "quicksave")
         {
             const std::filesystem::path savePath = BuildSavePath(component, 1);
-            if (state.Runtime.SaveState(savePath))
+            const bool vnSaved = state.Runtime.SaveState(savePath);
+            const bool progressSaved = GameProgress::SaveSlot(1);
+            if (vnSaved && progressSaved)
                 pushMessage("已保存到 1 号槽");
+            else if (vnSaved)
+                pushMessage("VN 已保存，成长进度保存失败");
             return true;
         }
 
@@ -523,7 +775,10 @@ namespace Wheatear {
         {
             const std::filesystem::path savePath = BuildSavePath(component, 1);
             if (state.Runtime.LoadState(savePath))
+            {
+                GameProgress::LoadSlot(1);
                 pushMessage("已读取 1 号槽");
+            }
             else
                 pushMessage("1 号槽没有存档");
             return true;
@@ -531,14 +786,18 @@ namespace Wheatear {
 
         if (action == "textspeed+" || action == "speed+")
         {
-            component.CharactersPerSecond = std::min(180.0f, component.CharactersPerSecond + 12.0f);
+            auto& settings = GameProgress::GetState().Settings;
+            settings.TextSpeed = std::min(180, settings.TextSpeed + 12);
+            component.CharactersPerSecond = static_cast<float>(settings.TextSpeed);
             pushMessage("文字速度提高");
             return true;
         }
 
         if (action == "textspeed-" || action == "speed-")
         {
-            component.CharactersPerSecond = std::max(12.0f, component.CharactersPerSecond - 12.0f);
+            auto& settings = GameProgress::GetState().Settings;
+            settings.TextSpeed = std::max(12, settings.TextSpeed - 12);
+            component.CharactersPerSecond = static_cast<float>(settings.TextSpeed);
             pushMessage("文字速度降低");
             return true;
         }
@@ -618,7 +877,7 @@ namespace Wheatear {
             ExecuteCommand(scene, component, state, "vn:load");
         state.PreviousLoadPressed = loadPressed;
 
-        if (state.ShowHistory || state.ShowSettings)
+        if (state.ShowHistory || state.ShowSettings || state.ShowSaveLoad)
         {
             state.PreviousAdvancePressed = AdvancePressed();
             return;
@@ -634,7 +893,7 @@ namespace Wheatear {
                 const bool pressed = Input::IsKeyPressed(WT_KEY_1 + static_cast<int>(i));
                 if (pressed && !state.PreviousChoicePressed[i])
                 {
-                    if (IsSceneChoiceCommand(choices[i].TargetLabel))
+                    if (IsExternalChoiceCommand(choices[i].TargetLabel))
                         component.RuntimeRequestedCommand = choices[i].TargetLabel;
                     else
                         state.Runtime.Choose(i);
@@ -650,7 +909,9 @@ namespace Wheatear {
                 {
                     if (IsEntityHoveredButton(scene, component.ChoiceEntityPrefix + std::to_string(i + 1)))
                     {
-                        if (!IsSceneChoiceCommand(choices[i].TargetLabel))
+                        if (IsExternalChoiceCommand(choices[i].TargetLabel))
+                            component.RuntimeRequestedCommand = choices[i].TargetLabel;
+                        else
                             state.Runtime.Choose(i);
                         break;
                     }
@@ -675,16 +936,18 @@ namespace Wheatear {
         RuntimeState& state)
     {
         const VisualNovelLine* line = state.Runtime.GetCurrentLine();
-        const bool showStoryUi = !state.DialogueHidden && !state.ShowHistory && !state.ShowSettings;
+        const bool showStoryUi = !state.DialogueHidden && !state.ShowHistory && !state.ShowSettings && !state.ShowSaveLoad;
         const bool waitingForChoice = showStoryUi && state.Runtime.IsWaitingForChoice();
 
         SetWidgetsWithPrefixVisible(scene, "VN_Command", showStoryUi);
         SetWidgetsWithPrefixVisible(scene, "VN_History", state.ShowHistory);
         SetWidgetsWithPrefixVisible(scene, "VN_Settings", state.ShowSettings);
+        SetWidgetsWithPrefixVisible(scene, "VN_SaveLoad", state.ShowSaveLoad);
 
         SetWidgetVisible(scene, component.CommandBarEntityName, showStoryUi);
         SetWidgetVisible(scene, component.HistoryPanelEntityName, state.ShowHistory);
         SetWidgetVisible(scene, component.SettingsPanelEntityName, state.ShowSettings);
+        SetWidgetVisible(scene, component.SaveLoadPanelEntityName, state.ShowSaveLoad);
         SetText(scene, "VN_Command_Auto", state.Runtime.IsAutoPlay() ? "自动中" : "自动");
 
         SetTextVisible(scene, component.HistoryTextEntityName,
@@ -693,6 +956,9 @@ namespace Wheatear {
         SetTextVisible(scene, component.SettingsTextEntityName,
             BuildSettingsText(component, state.Runtime),
             state.ShowSettings);
+        SetTextVisible(scene, component.SaveLoadTextEntityName,
+            BuildSaveLoadText(component, state.Runtime),
+            state.ShowSaveLoad);
 
         SetTextVisible(scene,
             component.SystemMessageEntityName,
@@ -716,8 +982,10 @@ namespace Wheatear {
         SetWidgetVisible(scene, component.BodyTextEntityName, showStoryUi);
         SetWidgetVisible(scene, component.AdvanceHintEntityName, showStoryUi);
 
-        SetText(scene, component.SpeakerTextEntityName,
-            waitingForChoice ? "" : ResolveSpeakerDisplayName(state.Runtime, line->Speaker));
+        const std::string speakerText = waitingForChoice ? "" : ResolveSpeakerDisplayName(state.Runtime, line->Speaker);
+        PreloadTextForEntity(scene, component.SpeakerTextEntityName, speakerText);
+        PreloadTextForEntity(scene, component.BodyTextEntityName, line->Text);
+        SetText(scene, component.SpeakerTextEntityName, speakerText);
         SetText(scene, component.BodyTextEntityName, state.Runtime.GetVisibleText());
 
         std::string hint;
@@ -739,9 +1007,11 @@ namespace Wheatear {
             SetWidgetVisible(scene, entityName, visible);
             if (visible)
             {
-                SetText(scene, entityName, std::to_string(i + 1) + ". " + choices[i].Text);
+                const std::string choiceText = std::to_string(i + 1) + ". " + choices[i].Text;
+                PreloadTextForEntity(scene, entityName, choiceText);
+                SetText(scene, entityName, choiceText);
                 SetButtonCommand(scene, entityName,
-                    IsSceneChoiceCommand(choices[i].TargetLabel) ? choices[i].TargetLabel : "");
+                    IsExternalChoiceCommand(choices[i].TargetLabel) ? choices[i].TargetLabel : "");
             }
             else
             {

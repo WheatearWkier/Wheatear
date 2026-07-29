@@ -1,5 +1,6 @@
 #pragma once
 
+#include <cstdint>
 #include <string>
 
 #include <glm/glm.hpp>
@@ -92,6 +93,18 @@ namespace Wheatear {
         float       RuntimeComboTimer = 0.0f;
         int         RuntimeCollectedPickups = 0;
         bool        RuntimeRewardsSpawned = false;
+        int         RuntimePlayerHitsTaken = 0;
+        int         RuntimeResultExperience = 0;
+        int         RuntimeResultRepeatExperience = 0;
+        bool        RuntimeResultFirstClear = false;
+        std::string RuntimeResultGrade = "";
+        std::string RuntimeResultSummary = "";
+        float       RuntimeHitPauseTimer = 0.0f;
+        float       RuntimeCameraShakeTimer = 0.0f;
+        float       RuntimeCameraShakeDuration = 0.0f;
+        float       RuntimeCameraShakeStrength = 0.0f;
+        glm::vec3   RuntimeCameraBaseTranslation = { 0.0f, 0.0f, 0.0f };
+        bool        RuntimeCameraBaseCaptured = false;
 
         SideCombatLevelComponent() = default;
         SideCombatLevelComponent(const SideCombatLevelComponent&) = default;
@@ -126,6 +139,8 @@ namespace Wheatear {
         glm::vec2 RuntimeGroundPosition = { 0.0f, 0.0f };
         float     RuntimeAirHeight = 0.0f;
         float     RuntimeAirVelocity = 0.0f;
+        std::string RuntimeVisualClipKey = "";
+        float     RuntimeVisualTimer = 0.0f;
 
         SideCombatantComponent() = default;
         SideCombatantComponent(const SideCombatantComponent&) = default;
@@ -137,6 +152,8 @@ namespace Wheatear {
         float JumpImpulse = 8.1f;
         float Gravity = 22.0f;
         float AirControl = 16.0f;
+        float JumpBufferTime = 0.12f;
+        float CoyoteTime = 0.08f;
         float LaneSpeedScale = 0.72f;
         float LaneAcceleration = 28.0f;
         float GroundFriction = 18.0f;
@@ -154,9 +171,21 @@ namespace Wheatear {
         float RuntimeMagicSwordGauge = 3.0f;
         float RuntimeMagicSwordGaugeMax = 3.0f;
         int   RuntimeJumpsRemaining = 1;
+        float RuntimeJumpBufferTimer = 0.0f;
+        float RuntimeCoyoteTimer = 0.0f;
         int   RuntimeAttackChain = 0;
         float RuntimeAttackChainTimer = 0.0f;
         int   RuntimeAirActionsRemaining = 0;
+        std::string RuntimeActionAttackId = "";
+        std::string RuntimeActionEntityName = "";
+        SideAttackKind RuntimeActionKind = SideAttackKind::Basic;
+        float RuntimeActionTimer = 0.0f;
+        float RuntimeActionDuration = 0.0f;
+        float RuntimeActionHitboxTime = 0.0f;
+        float RuntimeActionCancelStart = 0.0f;
+        float RuntimeActionCancelEnd = 0.0f;
+        float RuntimeActionMovementScale = 1.0f;
+        bool  RuntimeActionHitboxSpawned = false;
 
         SidePlayerControllerComponent() = default;
         SidePlayerControllerComponent(const SidePlayerControllerComponent&) = default;
@@ -176,6 +205,15 @@ namespace Wheatear {
         float RuntimeAttackTimer = 0.0f;
         float RuntimeDecisionTimer = 0.0f;
         bool  RuntimeAwake = true;
+        std::string RuntimeActionAttackId = "";
+        std::string RuntimeActionEntityName = "";
+        SideAttackKind RuntimeActionKind = SideAttackKind::EnemyMelee;
+        float RuntimeActionTimer = 0.0f;
+        float RuntimeActionDuration = 0.0f;
+        float RuntimeActionHitboxTime = 0.0f;
+        float RuntimeActionMovementScale = 1.0f;
+        float RuntimeActionFacing = 1.0f;
+        bool  RuntimeActionHitboxSpawned = false;
 
         SideEnemyAIComponent() = default;
         SideEnemyAIComponent(const SideEnemyAIComponent&) = default;
@@ -201,9 +239,15 @@ namespace Wheatear {
         std::string    TextureFramePattern;
         int            TextureFrameCount = 1;
         float          TextureFrameRate = 16.0f;
+        std::string    HitSound;
+        float          HitSoundVolume = 1.0f;
+        float          HitPause = 0.0f;
+        float          CameraShake = 0.0f;
+        float          CameraShakeDuration = 0.0f;
         float          RuntimeAge = 0.0f;
         bool           RuntimeHitSomething = false;
         glm::vec2      RuntimeGroundPosition = { 0.0f, 0.0f };
+        uint32_t       RuntimeOwnerEntity = 0;
 
         SideHitboxComponent() = default;
         SideHitboxComponent(const SideHitboxComponent&) = default;

@@ -36,6 +36,10 @@ namespace Wheatear {
         static void SetVolume(uint32_t handle, float volume);
         static bool IsPlaying(uint32_t handle);
 
+        // Converts a 0-100 UI volume value into a perceptual gain. A midpoint
+        // slider should feel comfortable, not like half of a raw waveform.
+        static float PercentToGain(float percent);
+
         // 给 AudioSourceComponent 在 Scene 运行时调用
         static void OnSceneStop();
 

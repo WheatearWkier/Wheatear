@@ -1,0 +1,23 @@
+# Wheatear Event Script sample.
+# Attach this file to an entity with EventScriptComponent.
+
+event on_start:
+    wait 0.15
+    progression:select_skill_node:magic_sword_core
+end
+
+event go_hub:
+    scene:assets/scenes/VerticalSliceHub.wt
+end
+
+event open_skill_tree:
+    scene:assets/scenes/VerticalSliceSkillTree.wt
+end
+
+event save_slot_1:
+    progression:save_1
+end
+
+event load_slot_1:
+    progression:load_1
+end

@@ -216,6 +216,22 @@ namespace Wheatear {
         return m_Script.GetBackground().empty() ? empty : m_Script.GetBackground();
     }
 
+    const std::string& VisualNovelRuntime::GetCurrentMusic() const
+    {
+        static const std::string empty;
+        if (const VisualNovelLine* line = GetCurrentLine())
+            return line->Music;
+        return empty;
+    }
+
+    const std::string& VisualNovelRuntime::GetCurrentMusicTitle() const
+    {
+        static const std::string empty;
+        if (const VisualNovelLine* line = GetCurrentLine())
+            return line->MusicTitle;
+        return empty;
+    }
+
     const std::vector<std::string>& VisualNovelRuntime::GetCurrentVisibleCharacters() const
     {
         static const std::vector<std::string> empty;

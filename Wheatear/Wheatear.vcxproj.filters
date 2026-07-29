@@ -44,7 +44,7 @@
       <UniqueIdentifier>{5A0022E3-C66E-7762-0F58-32627B056DFE}</UniqueIdentifier>
     </Filter>
     <Filter Include="src\Wheatear\Modules\Progression">
-      <UniqueIdentifier>{4B726FE2-3B8E-4C79-93E7-6B8C2C7341E1}</UniqueIdentifier>
+      <UniqueIdentifier>{3F9033C2-2BE1-1E04-5445-0DC640F5B16D}</UniqueIdentifier>
     </Filter>
     <Filter Include="src\Wheatear\Modules\SideCombat">
       <UniqueIdentifier>{BF602EE3-2B44-3D23-3447-6B5FA0A90374}</UniqueIdentifier>
@@ -57,6 +57,9 @@
     </Filter>
     <Filter Include="src\Wheatear\Renderer">
       <UniqueIdentifier>{13B5E59A-7F21-A195-4815-39F3B440C3FD}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\Wheatear\Runtime">
+      <UniqueIdentifier>{00851C68-EC13-A631-9532-BA2C81A0B6D7}</UniqueIdentifier>
     </Filter>
     <Filter Include="src\Wheatear\Scene">
       <UniqueIdentifier>{AA8DD9AD-9671-9A03-FFD1-9456EBD48485}</UniqueIdentifier>
@@ -321,6 +324,12 @@
     <ClInclude Include="src\Wheatear\Renderer\VertexArray.h">
       <Filter>src\Wheatear\Renderer</Filter>
     </ClInclude>
+    <ClInclude Include="src\Wheatear\Runtime\CommandBus.h">
+      <Filter>src\Wheatear\Runtime</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Wheatear\Runtime\SceneTransitionService.h">
+      <Filter>src\Wheatear\Runtime</Filter>
+    </ClInclude>
     <ClInclude Include="src\Wheatear\Scene\ComponentGroup.h">
       <Filter>src\Wheatear\Scene</Filter>
     </ClInclude>
@@ -336,11 +345,26 @@
     <ClInclude Include="src\Wheatear\Scene\SceneSerializer.h">
       <Filter>src\Wheatear\Scene</Filter>
     </ClInclude>
+    <ClInclude Include="src\Wheatear\Scene\SceneSerializerComponentGroups.h">
+      <Filter>src\Wheatear\Scene</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Wheatear\Scene\SceneSerializerComponentSupport.h">
+      <Filter>src\Wheatear\Scene</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Wheatear\Scene\SceneQueries.h">
+      <Filter>src\Wheatear\Scene</Filter>
+    </ClInclude>
     <ClInclude Include="src\Wheatear\Scene\SceneSystemRegistry.h">
       <Filter>src\Wheatear\Scene</Filter>
     </ClInclude>
     <ClInclude Include="src\Wheatear\Scene\ScriptableEntity.h">
       <Filter>src\Wheatear\Scene</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Wheatear\Scripting\EventScript.h">
+      <Filter>src\Wheatear\Scripting</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Wheatear\Scripting\EventScriptSystem.h">
+      <Filter>src\Wheatear\Scripting</Filter>
     </ClInclude>
     <ClInclude Include="src\Wheatear\Scripting\ScriptEngine.h">
       <Filter>src\Wheatear\Scripting</Filter>
@@ -373,6 +397,12 @@
       <Filter>src\Wheatear\UI</Filter>
     </ClInclude>
     <ClInclude Include="src\Wheatear\UI\UIRenderer.h">
+      <Filter>src\Wheatear\UI</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Wheatear\UI\UIRuntimeTools.h">
+      <Filter>src\Wheatear\UI</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Wheatear\UI\UIWidgetLayout.h">
       <Filter>src\Wheatear\UI</Filter>
     </ClInclude>
     <ClInclude Include="src\Wheatear\Utils\PlatformUtils.h">
@@ -1634,6 +1664,12 @@
     <ClCompile Include="src\Wheatear\Renderer\VertexArray.cpp">
       <Filter>src\Wheatear\Renderer</Filter>
     </ClCompile>
+    <ClCompile Include="src\Wheatear\Runtime\CommandBus.cpp">
+      <Filter>src\Wheatear\Runtime</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Wheatear\Runtime\SceneTransitionService.cpp">
+      <Filter>src\Wheatear\Runtime</Filter>
+    </ClCompile>
     <ClCompile Include="src\Wheatear\Scene\Entity.cpp">
       <Filter>src\Wheatear\Scene</Filter>
     </ClCompile>
@@ -1643,8 +1679,32 @@
     <ClCompile Include="src\Wheatear\Scene\SceneSerializer.cpp">
       <Filter>src\Wheatear\Scene</Filter>
     </ClCompile>
+    <ClCompile Include="src\Wheatear\Scene\SceneSerializerAnimationComponents.cpp">
+      <Filter>src\Wheatear\Scene</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Wheatear\Scene\SceneSerializerCoreComponents.cpp">
+      <Filter>src\Wheatear\Scene</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Wheatear\Scene\SceneSerializerModuleComponents.cpp">
+      <Filter>src\Wheatear\Scene</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Wheatear\Scene\SceneSerializerScriptingComponents.cpp">
+      <Filter>src\Wheatear\Scene</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Wheatear\Scene\SceneSerializerUIComponents.cpp">
+      <Filter>src\Wheatear\Scene</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Wheatear\Scene\SceneQueries.cpp">
+      <Filter>src\Wheatear\Scene</Filter>
+    </ClCompile>
     <ClCompile Include="src\Wheatear\Scene\SceneSystemRegistry.cpp">
       <Filter>src\Wheatear\Scene</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Wheatear\Scripting\EventScript.cpp">
+      <Filter>src\Wheatear\Scripting</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Wheatear\Scripting\EventScriptSystem.cpp">
+      <Filter>src\Wheatear\Scripting</Filter>
     </ClCompile>
     <ClCompile Include="src\Wheatear\Scripting\ScriptEngine.cpp">
       <Filter>src\Wheatear\Scripting</Filter>
@@ -1674,6 +1734,9 @@
       <Filter>src\Wheatear\UI</Filter>
     </ClCompile>
     <ClCompile Include="src\Wheatear\UI\UIRenderer.cpp">
+      <Filter>src\Wheatear\UI</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Wheatear\UI\UIRuntimeTools.cpp">
       <Filter>src\Wheatear\UI</Filter>
     </ClCompile>
     <ClCompile Include="src\wtpch.cpp">

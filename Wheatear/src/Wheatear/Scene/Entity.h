@@ -1,4 +1,4 @@
-#pragma once
+ï»¿#pragma once
 
 #include "entt.hpp"
 
@@ -16,7 +16,7 @@ namespace Wheatear {
         Entity(entt::entity handle, Scene* scene);
         Entity(const Entity&) = default;
 
-        // ©¤©¤ ×é¼ş²Ù×÷ ©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤
+        // â”€â”€ ç»„ä»¶æ“ä½œ â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
         template<typename T, typename... Args>
         T& AddComponent(Args&&... args)
@@ -54,10 +54,7 @@ namespace Wheatear {
         template<typename T>
         bool HasComponent() const
         {
-            // entt 3.x ÓÃ all_of Ìæ´úÒÑ·ÏÆúµÄ has
-            //return m_Scene->m_Registry.all_of<T>(m_EntityHandle);
-
-            return m_Scene->m_Registry.has<T>(m_EntityHandle);
+            return m_Scene->m_Registry.all_of<T>(m_EntityHandle);
         }
 
         template<typename T>
@@ -67,23 +64,24 @@ namespace Wheatear {
             m_Scene->m_Registry.remove<T>(m_EntityHandle);
         }
 
-        // ©¤©¤ ¿ì½İ·ÃÎÊ ©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤
+        // â”€â”€ å¿«æ·è®¿é—® â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
         UUID               GetUUID() const { return GetComponent<IDComponent>().ID; }
         const std::string& GetName() const { return GetComponent<TagComponent>().Tag; }
+        Scene*             GetScene() const { return m_Scene; }
 
-        // ©¤©¤ ÀàĞÍ×ª»» ©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤
+        // â”€â”€ ç±»å‹è½¬æ¢ â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
         operator bool()          const { return m_EntityHandle != entt::null; }
         operator entt::entity()  const { return m_EntityHandle; }
 
-        // explicit ·ÀÖ¹ Entity ±»ÒâÍâµ±³ÉÕûÊıÊ¹ÓÃ
+        // explicit é˜²æ­¢ Entity è¢«æ„å¤–å½“æˆæ•´æ•°ä½¿ç”¨
         explicit operator uint32_t() const
         {
             return static_cast<uint32_t>(m_EntityHandle);
         }
 
-        // ©¤©¤ ±È½Ï ©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤
+        // â”€â”€ æ¯”è¾ƒ â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
         bool operator==(const Entity& other) const
         {
