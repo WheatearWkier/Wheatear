@@ -32,9 +32,9 @@ namespace Wheatear::GameProgress {
     struct PlayerSettings
     {
         int TextSpeed = 48;
-        int MasterVolume = 50;
-        int BGMVolume = 50;
-        int SFXVolume = 50;
+        int MasterVolume = 85;
+        int BGMVolume = 90;
+        int SFXVolume = 85;
         bool Fullscreen = false;
         bool ScreenShake = true;
     };

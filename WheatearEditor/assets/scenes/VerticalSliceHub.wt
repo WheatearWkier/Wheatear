@@ -1,4 +1,4 @@
-﻿Scene: VerticalSliceHub
+Scene: VerticalSliceHub
 Entities:
   - Entity: 950000129
     TagComponent:
@@ -59,7 +59,7 @@ Entities:
       Scale: [20, 11.25, 1]
     SpriteRendererComponent:
       Color: [0.88, 0.94, 0.98, 1]
-      Texture: assets/vertical_slice/vn/backgrounds/forest_camp.png
+      Texture: assets/vertical_slice/vn/backgrounds/bg_forest_camp_night.png
       TilingFactor: 1
   - Entity: 950000003
     TagComponent:
@@ -70,7 +70,7 @@ Entities:
       Scale: [2.75, 4.45, 1]
     SpriteRendererComponent:
       Color: [1, 1, 1, 0.95]
-      Texture: assets/vertical_slice/vn/portraits/mentor_happy.png
+      Texture: assets/vertical_slice/vn/portraits/mentor_slight_smile.png
       TilingFactor: 1
   - Entity: 950000004
     TagComponent:
@@ -109,7 +109,7 @@ Entities:
     UIWidgetComponent:
       Visible: true
       Position: [0.065, 0.5]
-      Size: [0.43, 0.435]
+      Size: [0.43, 0.485]
       Rotation: 0
       Anchor: 0
       SortOrder: 8
@@ -739,6 +739,71 @@ Entities:
     UITextComponent:
       Text: "继续剧情"
       Color: [1, 0.92, 0.96, 1]
+      FontSize: 23
+      FontPath: assets/fonts/wqy-microhei.ttc
+      ShadowColor: [0.02, 0.02, 0.025, 0.72]
+      ShadowOffset: [1.8, 1.8]
+      OutlineColor: [0.01, 0.01, 0.012, 0.82]
+      OutlineThickness: 1.2
+  - Entity: 950000130
+    TagComponent:
+      Tag: Hub_Icon_Tactical
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    UIWidgetComponent:
+      Visible: true
+      Position: [0.085, 0.9130000000000003]
+      Size: [0.03, 0.046]
+      Rotation: 0
+      Anchor: 0
+      SortOrder: 35
+      ParentTag: WT_UI_Canvas
+    UIAnimatorComponent:
+      Preset: "slide_fade_in"
+      PlayOnStart: true
+      Loop: false
+      Delay: 0.28
+      Duration: 0.34
+      Amplitude: 0.035
+      Speed: 1
+      FromOffset: [0, 0.035]
+    UIImageComponent:
+      Color: [1, 1, 1, 1.0]
+      TexturePath: assets/vertical_slice/tactical_combat/ui/icons/cmd_tac_attack.png
+  - Entity: 950000131
+    TagComponent:
+      Tag: Hub_Button_Tactical
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    UIWidgetComponent:
+      Visible: true
+      Position: [0.128, 0.9070000000000003]
+      Size: [0.3, 0.044]
+      Rotation: 0
+      Anchor: 0
+      SortOrder: 40
+      ParentTag: WT_UI_Canvas
+    UIAnimatorComponent:
+      Preset: "hover_pulse"
+      PlayOnStart: true
+      Loop: false
+      Delay: 0.0
+      Duration: 0.18
+      Amplitude: 0.035
+      Speed: 1
+      FromOffset: [0, 0.035]
+    UIButtonComponent:
+      NormalColor: [0.12, 0.25, 0.42, 0.94]
+      HoverColor: [0.18, 0.38, 0.62, 0.98]
+      PressedColor: [0.08, 0.16, 0.28, 1]
+      OnClickFunction: event:FlowController:go_tactical_combat
+    UITextComponent:
+      Text: "战旗试炼"
+      Color: [0.9, 0.96, 1, 1]
       FontSize: 23
       FontPath: assets/fonts/wqy-microhei.ttc
       ShadowColor: [0.02, 0.02, 0.025, 0.72]

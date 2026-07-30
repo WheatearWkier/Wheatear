@@ -2,17 +2,36 @@
 #include "ModuleEditorBootstrap.h"
 
 #include "Editor/EditorComponentRegistry.h"
+#include "Editor/EditorToolRegistry.h"
 #include "Panels/EditorCommands.h"
 #include "Modules/ArcadeCombat/ArcadeCombatDrawer.h"
 #include "Modules/SideCombat/SideCombatDrawer.h"
+#include "Modules/SideCombat/SideCombatTuningEditorPanel.h"
+#include "Modules/TacticalCombat/TacticalCombatDrawer.h"
+#include "Modules/TurnCombat/TurnCombatDrawer.h"
 #include "Modules/VisualNovel/VisualNovelDrawer.h"
+#include "Modules/VisualNovel/VisualNovelScriptEditorPanel.h"
 #include "Wheatear/Modules/ArcadeCombat/ArcadeCombatComponents.h"
 #include "Wheatear/Modules/SideCombat/SideCombatComponents.h"
+#include "Wheatear/Modules/TacticalCombat/TacticalCombatComponents.h"
+#include "Wheatear/Modules/TurnCombat/TurnCombatComponents.h"
 #include "Wheatear/Modules/VisualNovel/VisualNovelComponents.h"
 
 namespace Wheatear {
 
     namespace {
+
+        static VisualNovelScriptEditorPanel& GetVisualNovelScriptEditorPanel()
+        {
+            static VisualNovelScriptEditorPanel panel;
+            return panel;
+        }
+
+        static SideCombatTuningEditorPanel& GetSideCombatTuningEditorPanel()
+        {
+            static SideCombatTuningEditorPanel panel;
+            return panel;
+        }
 
         template<typename T>
         void RegisterEditorComponent(const char* category,
@@ -42,6 +61,41 @@ namespace Wheatear {
             });
         }
 
+        static void RegisterEditorTools()
+        {
+            EditorToolRegistry::Register({
+                "VN Script Editor",
+                [](const EditorToolContext& context)
+                {
+                    std::string scriptPath = "assets/vn/vertical_slice_intro.vn";
+                    if (context.SelectedEntity && context.SelectedEntity.HasComponent<VisualNovelComponent>())
+                        scriptPath = context.SelectedEntity.GetComponent<VisualNovelComponent>().ScriptPath;
+
+                    GetVisualNovelScriptEditorPanel().Open(scriptPath);
+                },
+                []()
+                {
+                    GetVisualNovelScriptEditorPanel().OnImGuiRender();
+                }
+            });
+
+            EditorToolRegistry::Register({
+                "Side Combat Tuning Editor",
+                [](const EditorToolContext& context)
+                {
+                    std::string tuningPath = "assets/vertical_slice/data/side_combat_tuning.yaml";
+                    if (context.SelectedEntity && context.SelectedEntity.HasComponent<SideCombatLevelComponent>())
+                        tuningPath = context.SelectedEntity.GetComponent<SideCombatLevelComponent>().TuningPath;
+
+                    GetSideCombatTuningEditorPanel().Open(tuningPath);
+                },
+                []()
+                {
+                    GetSideCombatTuningEditorPanel().OnImGuiRender();
+                }
+            });
+        }
+
     } // namespace
 
     void RegisterDefaultGameplayEditorModules()
@@ -50,6 +104,8 @@ namespace Wheatear {
         if (registered)
             return;
         registered = true;
+
+        RegisterEditorTools();
 
         RegisterEditorComponent<VisualNovelComponent>(
             "Visual Novel",
@@ -109,6 +165,24 @@ namespace Wheatear {
             "Side Combat",
             "Side Pickup",
             DrawSidePickupComponent);
+
+        RegisterEditorComponent<TurnCombatLevelComponent>(
+            "Turn Combat",
+            "Turn Combat Level",
+            DrawTurnCombatLevelComponent);
+        RegisterEditorComponent<TurnCombatantComponent>(
+            "Turn Combat",
+            "Turn Combatant",
+            DrawTurnCombatantComponent);
+
+        RegisterEditorComponent<TacticalCombatLevelComponent>(
+            "Tactical Combat",
+            "Tactical Combat Level",
+            DrawTacticalCombatLevelComponent);
+        RegisterEditorComponent<TacticalUnitComponent>(
+            "Tactical Combat",
+            "Tactical Unit",
+            DrawTacticalUnitComponent);
     }
 
 } // namespace Wheatear

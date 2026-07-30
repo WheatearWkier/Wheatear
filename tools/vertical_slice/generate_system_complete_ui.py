@@ -161,7 +161,7 @@ def camera(entity_id: int, tag: str) -> str:
 """
 
 
-def background(entity_id: int, tag: str, texture: str = "assets/vertical_slice/vn/backgrounds/forest_camp.png") -> str:
+def background(entity_id: int, tag: str, texture: str = "assets/vertical_slice/vn/backgrounds/bg_forest_camp_night.png") -> str:
     return entity_header(entity_id, tag) + f"""    TransformComponent:
       Translation: [0, 0.35, -0.8]
       Rotation: [0, 0, 0]
@@ -275,7 +275,7 @@ def generate_hub() -> str:
       Scale: [2.75, 4.45, 1]
     SpriteRendererComponent:
       Color: [1, 1, 1, 0.95]
-      Texture: assets/vertical_slice/vn/portraits/mentor_happy.png
+      Texture: assets/vertical_slice/vn/portraits/mentor_slight_smile.png
       TilingFactor: 1
 """
     out += image(base + 4, "Hub_MainPanel", (0.045, 0.075), (0.61, 0.41), "assets/vertical_slice/ui/panels/panel_hub.png", 8, 0.95)

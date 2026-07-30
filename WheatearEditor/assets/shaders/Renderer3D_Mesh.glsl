@@ -205,10 +205,10 @@ void main()
                  ? CalcShadow(v_LightSpacePos, N, dirL)
                  : 0.0;
 
-    // ÔÚ fragment shader ÀïÌæ»»µô¹Ì¶¨µÄ k_AmbientStrength
+    // åœ¨ fragment shader é‡Œæ›¿æ¢æ‰å›ºå®šçš„ k_AmbientStrength
     vec3 ambientUp   = u_TopColor.rgb * 0.3;
     vec3 ambientDown = u_BottomColor.rgb * 0.1;
-    float upFactor   = N.y * 0.5 + 0.5; // °Ñ [-1,1] Ó³Éäµ½ [0,1]
+    float upFactor   = N.y * 0.5 + 0.5; // æŠŠ [-1,1] æ˜ å°„åˆ° [0,1]
     vec3 ambient     = mix(ambientDown, ambientUp, upFactor);
     vec3 result      = ambient * albedo;
     

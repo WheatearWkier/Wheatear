@@ -2,6 +2,7 @@
 #include "Wheatear/Core/Core.h"
 #include "Wheatear/Renderer/Texture.h"
 #include <glm/glm.hpp>
+#include <algorithm>
 #include <string>
 #include <vector>
 #include <functional>
@@ -9,7 +10,6 @@
 namespace Wheatear {
 
     // =========================================================
-    //  序列帧数据
     // =========================================================
     struct AnimationFrame
     {
@@ -40,10 +40,14 @@ namespace Wheatear {
         }
     };
 
+    struct AnimationEvent
+    {
+        float Time = 0.0f;
+        std::string Name;
+        std::string Command;
+    };
+
     // =========================================================
-    //  属性动画 目标属性枚举
-    //  新增属性时只需在这里加枚举值，
-    //  并在 Scene::UpdateAnimations 里加对应写回逻辑
     // =========================================================
     enum class AnimatedProperty
     {
@@ -52,19 +56,18 @@ namespace Wheatear {
         SpriteColorR,   // float
         SpriteColorG,   // float
         SpriteColorB,   // float
-        SpriteColorA,   // float （最常用：淡入淡出）
+        SpriteColorA,
 
         // TransformComponent
         PositionX,      // float
         PositionY,      // float
         PositionZ,      // float
-        RotationZ,      // float （2D旋转）
+        RotationZ,
         ScaleX,         // float
         ScaleY,         // float
-        ScaleUniform,   // float （同时写X和Y）
+        ScaleUniform,
     };
 
-    // 属性名字，编辑器显示用
     inline const char* AnimatedPropertyName(AnimatedProperty p)
     {
         switch (p)
@@ -86,7 +89,6 @@ namespace Wheatear {
     }
 
     // =========================================================
-    //  插值模式
     // =========================================================
     enum class InterpolationMode
     {
@@ -111,7 +113,6 @@ namespace Wheatear {
     }
 
     // =========================================================
-    //  单个关键帧
     // =========================================================
     template<typename T>
     struct Keyframe
@@ -121,7 +122,6 @@ namespace Wheatear {
         InterpolationMode Mode = InterpolationMode::Linear;
     };
 
-    //  新增：轨道数据类型枚举（专为编辑器 UI 识别设计）
     // =========================================================
     enum class TrackDataType
     {
@@ -129,11 +129,9 @@ namespace Wheatear {
         Vec2,
         Vec3,
         Vec4
-        // 后续如果支持 Quaternion 等可以继续加
     };
 
     // =========================================================
-    //  PropertyTrackBase：强化编辑器的访问接口
     // =========================================================
     struct PropertyTrackBase
     {
@@ -144,12 +142,10 @@ namespace Wheatear {
         virtual float GetDuration()      const = 0;
         virtual int   GetKeyframeCount() const = 0;
 
-        // 核心补全：让编辑器明确知道这条轨道的数据类型，避免通过枚举名猜类型
         virtual TrackDataType GetDataType() const = 0;
     };
 
     // =========================================================
-    //  PropertyTrack<T>：具体类型轨道 (修复插值 & 暴露数据给编辑器)
     // =========================================================
     template<typename T>
     struct PropertyTrack : public PropertyTrackBase
@@ -157,10 +153,8 @@ namespace Wheatear {
         std::vector<Keyframe<T>>  Keyframes;
         std::function<void(const T&)> Writer;
 
-        // 核心补全：让编辑器获取底层数据类型
         TrackDataType GetDataType() const override;
 
-        // 核心补全：暴露给编辑器的可变引用，编辑器可以直接修改 Keyframes[i].Value / Time
         std::vector<Keyframe<T>>& GetKeyframesForEditor() { return Keyframes; }
 
         void AddKeyframe(float time, const T& value,
@@ -208,7 +202,6 @@ namespace Wheatear {
             float span = next.Time - prev.Time;
             float t = (span > 0.0f) ? (time - prev.Time) / span : 0.0f;
 
-            // 修复 BUG：插值曲线应该由【前一个关键帧】的模式决定！
             t = ApplyCurve(t, prev.Mode);
             Writer(Lerp(prev.Value, next.Value, t));
         }
@@ -218,7 +211,6 @@ namespace Wheatear {
         {
             switch (mode)
             {
-                // Step 模式下，t 强制为 0，直到真正跨入下一帧（Sample外层逻辑保证了跨帧切换）
             case InterpolationMode::Step:      return 0.0f;
             case InterpolationMode::Linear:    return t;
             case InterpolationMode::EaseIn:    return t * t;
@@ -233,14 +225,12 @@ namespace Wheatear {
         static T Lerp(const T& a, const T& b, float t) { return a + (b - a) * t; }
     };
 
-    // 特化 GetDataType，编译器会在实例化时搞定这一切
     template<> inline TrackDataType PropertyTrack<float>::GetDataType() const { return TrackDataType::Float; }
     template<> inline TrackDataType PropertyTrack<glm::vec2>::GetDataType() const { return TrackDataType::Vec2; }
     template<> inline TrackDataType PropertyTrack<glm::vec3>::GetDataType() const { return TrackDataType::Vec3; }
     template<> inline TrackDataType PropertyTrack<glm::vec4>::GetDataType() const { return TrackDataType::Vec4; }
 
     // =========================================================
-    //  AnimationClip：序列帧 + 属性轨道
     // =========================================================
     class AnimationClip
     {
@@ -250,7 +240,6 @@ namespace Wheatear {
             : m_Name(name), m_Looping(looping) {
         }
 
-        // ---- 序列帧 ----
         void AddFrame(const AnimationFrame& frame) { m_Frames.push_back(frame); }
         void ClearFrames() { m_Frames.clear(); }
 
@@ -273,7 +262,6 @@ namespace Wheatear {
             }
         }
 
-        // ---- 属性轨道 ----
         Ref<PropertyTrack<float>> AddFloatTrack(AnimatedProperty property)
         {
             auto track = CreateRef<PropertyTrack<float>>();
@@ -298,7 +286,28 @@ namespace Wheatear {
 
         void ClearPropertyTracks() { m_PropertyTracks.clear(); }
 
-        // ---- 总时长 ----
+        void AddEvent(const AnimationEvent& event)
+        {
+            auto it = std::lower_bound(m_Events.begin(), m_Events.end(), event.Time,
+                [](const AnimationEvent& current, float time) { return current.Time < time; });
+            m_Events.insert(it, event);
+        }
+
+        void RemoveEvent(int index)
+        {
+            if (index >= 0 && index < (int)m_Events.size())
+                m_Events.erase(m_Events.begin() + index);
+        }
+
+        void SortEvents()
+        {
+            std::sort(m_Events.begin(), m_Events.end(),
+                [](const AnimationEvent& a, const AnimationEvent& b)
+                {
+                    return a.Time < b.Time;
+                });
+        }
+
         float GetTotalDuration() const
         {
             float frameDur = 0.0f;
@@ -306,10 +315,12 @@ namespace Wheatear {
             float trackDur = 0.0f;
             for (const auto& t : m_PropertyTracks)
                 trackDur = std::max(trackDur, t->GetDuration());
-            return std::max(frameDur, trackDur);
+            float eventDur = 0.0f;
+            for (const auto& event : m_Events)
+                eventDur = std::max(eventDur, event.Time);
+            return std::max(std::max(frameDur, trackDur), eventDur);
         }
 
-        // ---- 访问器 ----
         const std::string& GetName()           const { return m_Name; }
         bool                                       IsLooping()         const { return m_Looping; }
         const std::vector<AnimationFrame>& GetFrames()         const { return m_Frames; }
@@ -317,6 +328,8 @@ namespace Wheatear {
         int                                        GetFrameCount()     const { return (int)m_Frames.size(); }
         const std::vector<Ref<PropertyTrackBase>>& GetPropertyTracks() const { return m_PropertyTracks; }
         std::vector<Ref<PropertyTrackBase>>& GetPropertyTracks() { return m_PropertyTracks; }
+        const std::vector<AnimationEvent>& GetEvents() const { return m_Events; }
+        std::vector<AnimationEvent>& GetEvents() { return m_Events; }
 
         void SetName(const std::string& name) { m_Name = name; }
         void SetLooping(bool looping) { m_Looping = looping; }
@@ -331,6 +344,7 @@ namespace Wheatear {
         bool                                m_Looping = true;
         std::vector<AnimationFrame>         m_Frames;
         std::vector<Ref<PropertyTrackBase>> m_PropertyTracks;
+        std::vector<AnimationEvent>         m_Events;
     };
 
 } // namespace Wheatear

@@ -71,8 +71,6 @@ namespace Wheatear {
 
 	void EventBus::Dispatch(Event& event)
 	{
-		// 先生成一次调用快照，再执行 handler。
-		// 这样 handler 里即使订阅/取消订阅，也不会破坏当前正在遍历的容器。
 		std::vector<HandlerCall> calls;
 		AppendCallsForType(event.GetEventType(), calls);
 		AppendCallsForType(EventType::None, calls);
@@ -142,7 +140,6 @@ namespace Wheatear {
 		if (it == m_Handlers.end())
 			return;
 
-		// 派发过程中不直接 erase，先标记 inactive，等最外层 Dispatch 结束后统一压缩。
 		for (HandlerEntry& entry : it->second)
 		{
 			if (entry.ID == id)

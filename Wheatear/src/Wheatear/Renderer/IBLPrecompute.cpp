@@ -1,7 +1,7 @@
 #include "wtpch.h"
 #include "IBLPrecompute.h"
 #include "Renderer.h"
-#include "Platform/OpenGL/OpenGLIBL.h"  // 唯一知道OpenGL存在的地方
+#include "Platform/OpenGL/OpenGLIBL.h"
 
 namespace Wheatear {
 

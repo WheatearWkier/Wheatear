@@ -50,7 +50,6 @@ namespace Wheatear::Math {
 		outScale.z = length(Row[2]);
 		Row[2] = detail::scale(Row[2], static_cast<T>(1));
 
-		//Pdum3 = cross(Row[1], Row[2]);// v3Cross(row[1],row[2]£¬Pdum3);
 		//if (dot(Row[0], Pdum3) < 0)
 		//{
 		//	for (length_t i = 0; i < 3; i++) {

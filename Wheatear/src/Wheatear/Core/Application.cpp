@@ -1,4 +1,4 @@
-﻿#include "wtpch.h"
+#include "wtpch.h"
 #include "Application.h"
 
 #include "Wheatear/Audio/AudioEngine.h"
@@ -78,14 +78,11 @@ namespace Wheatear {
 	{
 		WT_PROFILE_FUNCTION();
 
-		// 先断开事件路由，再释放 Layer。这样 Layer::OnDetach() 内部即使触发事件，
-		// 也不会再进入已经准备销毁的 LayerStack。
 		m_LayerEventSubscriptions.clear();
 		m_ApplicationEventSubscriptions.clear();
 		m_LayerStack.Clear();
 		m_EventBus.Clear();
 
-		// Renderer 持有 OpenGL 资源，必须在 Window/GL context 析构前释放。
 		Renderer::Shutdown();
 		if (m_Specification.EnableScripting)
 			ScriptEngine::Shutdown();
@@ -124,8 +121,6 @@ namespace Wheatear {
 	{
 		WT_PROFILE_FUNCTION();
 
-		// 平台回调只提交事件，不直接深入业务层。
-		// 统一在主循环 Flush，可以避免 GLFW 回调里发生复杂的重入调用。
 		m_EventBus.Queue(e);
 	}
 
@@ -152,7 +147,6 @@ namespace Wheatear {
 			WT_PROFILE_SCOPE("RunLoop");
 
 			glfwPollEvents();
-			// 所有窗口/输入事件在帧开始统一派发，保持 FIFO 顺序。
 			FlushEventQueue();
 
 			if (!m_Running)
@@ -224,8 +218,6 @@ namespace Wheatear {
 	{
 		m_LayerEventSubscriptions.clear();
 
-		// LayerStack 仍保留“后加入的层优先处理事件”的语义；
-		// 只是实现方式从手写逆序遍历，变成 EventBus 的优先级订阅。
 		int priority = EventPriority::Layer;
 		for (Layer* layer : m_LayerStack)
 		{

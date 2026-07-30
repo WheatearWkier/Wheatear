@@ -34,14 +34,12 @@ namespace Wheatear {
     };
 
     // =========================================================================
-    //  IBLResult 移动 / 析构（定义在这里，因为 glDeleteTextures 需要 glad）
     // =========================================================================
 
     void IBLResult::Release()
     {
         if (IrradianceMap) { glDeleteTextures(1, &IrradianceMap); IrradianceMap = 0; }
         if (PrefilterMap) { glDeleteTextures(1, &PrefilterMap);  PrefilterMap = 0; }
-        // BrdfLUT 是共享资源，由 OpenGLIBL::s_BrdfLUT 持有，这里不删除
         BrdfLUT = 0;
     }
 
@@ -69,7 +67,6 @@ namespace Wheatear {
     //  Private helpers
     // =========================================================================
 
-    // 单位正方体 VAO，给六面渲染pass用
     static Ref<VertexArray> CreateCubeVAO()
     {
         float verts[] = {
@@ -87,7 +84,6 @@ namespace Wheatear {
         return vao;
     }
 
-    // CaptureCamera UBO（对应 IBL shader 里 binding = 1）
     struct CaptureCameraUBO { glm::mat4 ViewProjection; };
 
     uint32_t OpenGLIBL::LoadEquirect(const std::string& path)
@@ -141,7 +137,6 @@ namespace Wheatear {
         int      resolution,
         int      mip)
     {
-        // binding = 1：六面渲染共用的 CaptureCamera UBO
         static Ref<UniformBuffer> s_CaptureUBO =
             UniformBuffer::Create(sizeof(CaptureCameraUBO), 1);
 
@@ -193,7 +188,7 @@ namespace Wheatear {
         glBindFramebuffer(GL_FRAMEBUFFER, fbo);
         glViewport(0, 0, k_BrdfLUTSize, k_BrdfLUTSize);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-        glDrawArrays(GL_TRIANGLES, 0, 3); // fullscreen triangle，shader 用 gl_VertexID
+        glDrawArrays(GL_TRIANGLES, 0, 3);
 
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
         glDeleteFramebuffers(1, &fbo);
@@ -211,16 +206,12 @@ namespace Wheatear {
     }
 
     // =========================================================================
-    //  Cache 文件格式
     //  [4]  magic   0x4C424948 ("HIBL")
     //  [4]  version 1
     //  [4]  irradianceSize
     //  [4]  prefilterSize
     //  [4]  prefilterMips
     //  [4]  brdfLUTSize
-    //  [...]  IrradianceMap 像素（6 face × 1 mip，RGB16F）
-    //  [...]  PrefilterMap  像素（6 face × k_PrefilterMips mip，RGB16F）
-    //  [...]  BrdfLUT       像素（RG16F，2D）
     // =========================================================================
 
     static constexpr uint32_t k_CacheMagic = 0x4C424948u;
@@ -292,7 +283,6 @@ namespace Wheatear {
         uint32_t equirectTex = LoadEquirect(resolvedHDRPath.string());
         if (!equirectTex) return nullptr;
 
-        // 共享 FBO + RBO，每个 pass 前 resize RBO
         GLuint captureFBO, captureRBO;
         glCreateFramebuffers(1, &captureFBO);
         glCreateRenderbuffers(1, &captureRBO);
@@ -303,7 +293,6 @@ namespace Wheatear {
 
         auto result = CreateRef<IBLResult>();
 
-        // ── Pass 1: Equirect → Environment Cubemap ─────────────────────────
         uint32_t envCubemap = CreateCubemap(k_CubemapSize, GL_RGB16F, true);
         auto equirectShader = Shader::Create("assets/shaders/IBL_EquirectToCubemap.glsl");
         glBindTextureUnit(0, static_cast<GLuint>(equirectTex));
@@ -314,7 +303,6 @@ namespace Wheatear {
         glGenerateTextureMipmap(static_cast<GLuint>(envCubemap));
         glDeleteTextures(1, reinterpret_cast<GLuint*>(&equirectTex));
 
-        // ── Pass 2: Irradiance convolution ─────────────────────────────────
         result->IrradianceMap = CreateCubemap(k_IrradianceSize, GL_RGB16F, false);
         auto irradianceShader = Shader::Create("assets/shaders/IBL_Irradiance.glsl");
         glBindTextureUnit(0, static_cast<GLuint>(envCubemap));
@@ -323,7 +311,6 @@ namespace Wheatear {
         RenderCubeFaces(irradianceShader, captureFBO, captureRBO,
             result->IrradianceMap, k_IrradianceSize, 0);
 
-        // ── Pass 3: Specular prefilter（每个粗糙度一个 mip）───────────────
         result->PrefilterMap = CreateCubemap(k_PrefilterSize, GL_RGB16F, true);
         auto prefilterShader = Shader::Create("assets/shaders/IBL_Prefilter.glsl");
         glBindTextureUnit(0, static_cast<GLuint>(envCubemap));
@@ -347,12 +334,10 @@ namespace Wheatear {
                 result->PrefilterMap, mipSize, mip);
         }
 
-        // ── Pass 4: BRDF LUT（全局共享，只算一次）─────────────────────────
         if (!s_BrdfLUT)
             s_BrdfLUT = CreateBrdfLUT();
         result->BrdfLUT = s_BrdfLUT;
 
-        // 清理临时资源
         glDeleteTextures(1, reinterpret_cast<GLuint*>(&envCubemap));
         glDeleteFramebuffers(1, &captureFBO);
         glDeleteRenderbuffers(1, &captureRBO);
@@ -384,7 +369,6 @@ namespace Wheatear {
         WriteCubemap(f, ibl->IrradianceMap, k_IrradianceSize, 1);
         WriteCubemap(f, ibl->PrefilterMap, k_PrefilterSize, k_PrefilterMips);
 
-        // BRDF LUT（RG16F，2D）
         size_t lutBytes = static_cast<size_t>(k_BrdfLUTSize * k_BrdfLUTSize)
             * 2 * sizeof(uint16_t);
         std::vector<uint8_t> lutBuf(lutBytes);
@@ -428,7 +412,6 @@ namespace Wheatear {
         result->PrefilterMap = CreateCubemap(k_PrefilterSize, GL_RGB16F, true);
         ReadCubemap(f, result->PrefilterMap, k_PrefilterSize, k_PrefilterMips);
 
-        // BRDF LUT — 共享，只建一次
         if (!s_BrdfLUT)
         {
             GLuint lut;

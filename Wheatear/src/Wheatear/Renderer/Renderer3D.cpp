@@ -93,19 +93,15 @@ namespace Wheatear {
         float _pad = 0.0f;
     };
 
-    // SSAO 参数 UBO（binding=15）
-    // 与 SSAO.glsl 中 SSAOParams UBO 的 std140 布局完全一致
     struct SSAOParamsUBO      // 32 bytes
     {
-        glm::vec4 NoiseScale = { 0, 0, 0, 0 }; // xy=(w/4, h/4)，zw 填充
+        glm::vec4 NoiseScale = { 0, 0, 0, 0 };
         float     Radius = 0.5f;
         float     Bias = 0.025f;
         float     Power = 1.5f;
         float     _pad = 0.0f;
     };
 
-    // SSAO 采样核 UBO（binding=16）
-    // std140 中 vec3 数组每个元素对齐到 vec4，所以直接用 vec4
     struct SSAOKernelUBO      // 64 * 16 = 1024 bytes
     {
         glm::vec4 Samples[64] = {};
@@ -199,7 +195,6 @@ namespace Wheatear {
 
     void Renderer3D::Init()
     {
-        // 1×1 white fallback texture
         s_Data.WhiteTexture = Texture2D::Create(1, 1);
         constexpr uint32_t white = 0xffffffff;
         s_Data.WhiteTexture->SetData(const_cast<uint32_t*>(&white), sizeof(uint32_t));
@@ -390,7 +385,6 @@ namespace Wheatear {
 
     void Renderer3D::InitSSAO(uint32_t width, uint32_t height)
     {
-        // ── 生成 64 个半球采样核 ──────────────────────────────────────────────
         std::default_random_engine            engine(42u);
         std::uniform_real_distribution<float> rnd(0.0f, 1.0f);
 
@@ -399,11 +393,10 @@ namespace Wheatear {
             glm::vec3 sample(
                 rnd(engine) * 2.0f - 1.0f,  // x: [-1, 1]
                 rnd(engine) * 2.0f - 1.0f,  // y: [-1, 1]
-                rnd(engine)                  // z: [ 0, 1] 保证在法线半球内
+                rnd(engine)
             );
             sample = glm::normalize(sample) * rnd(engine);
 
-            // 加速插值：让采样点集中在原点附近（近处遮蔽更重要）
             float scale = float(i) / 64.0f;
             scale = glm::mix(0.1f, 1.0f, scale * scale);
             sample *= scale;
@@ -411,12 +404,8 @@ namespace Wheatear {
             s_Data.SSAO.KernelBuffer.Samples[i] = glm::vec4(sample, 0.0f);
         }
 
-        // ── 生成 4x4 随机旋转噪声纹理 ─────────────────────────────────────────
-        // 用 Texture2D::Create(4, 4) + SetData(uint8*, size)
-        // 将 [-1,1] 的 float 映射到 [0,255] 的 uint8
-        // z 分量固定为 128（对应 float 0，旋转只在 xy 平面）
         {
-            uint8_t noiseData[16 * 4]; // 16 像素 × RGBA
+            uint8_t noiseData[16 * 4];
             for (int p = 0; p < 16; ++p)
             {
                 float nx = rnd(engine) * 2.0f - 1.0f;
@@ -430,14 +419,8 @@ namespace Wheatear {
             s_Data.SSAO.NoiseTex = Texture2D::Create(4, 4);
             s_Data.SSAO.NoiseTex->SetData(noiseData, sizeof(noiseData));
 
-            // 注意：Texture2D::Create(w,h) 默认可能是 CLAMP_TO_EDGE。
-            // 噪声纹理需要 REPEAT 平铺才能正确工作。
-            // 如果你的 OpenGLTexture2D::Create(w,h) 没有 REPEAT，
-            // 可以在 OpenGLTexture2D 里加一个带 WrapMode 参数的重载，
-            // 或者临时调大 NoiseScale 的比例来近似平铺效果。
         }
 
-        // ── SSAO 专用 FBO（R8 单通道，不需要深度）────────────────────────────
         FramebufferSpecification ssaoSpec;
         ssaoSpec.Width = width;
         ssaoSpec.Height = height;
@@ -446,22 +429,17 @@ namespace Wheatear {
         s_Data.SSAO.RawFBO = Framebuffer::Create(ssaoSpec);
         s_Data.SSAO.BlurFBO = Framebuffer::Create(ssaoSpec);
 
-        // ── 空 VAO（gl_VertexID 方式，和 EditorGrid 一样）────────────────────
         s_Data.SSAO.QuadVAO = VertexArray::Create();
 
-        // ── UBO ──────────────────────────────────────────────────────────────
         s_Data.SSAO.ParamsUBO = UniformBuffer::Create(sizeof(SSAOParamsUBO), 15);
         s_Data.SSAO.KernelUBO = UniformBuffer::Create(sizeof(SSAOKernelUBO), 16);
 
-        // 采样核上传一次即可，运行中不变
         s_Data.SSAO.KernelUBO->SetData(&s_Data.SSAO.KernelBuffer,
             sizeof(SSAOKernelUBO));
 
-        // ── Shader ───────────────────────────────────────────────────────────
         s_Data.SSAO.SSAOShader = Shader::Create("assets/shaders/SSAO.glsl");
         s_Data.SSAO.BlurShader = Shader::Create("assets/shaders/SSAO_Blur.glsl");
 
-        // 初始化设置
         s_Data.SSAO.Radius = 0.5f;
         s_Data.SSAO.Bias = 0.025f;
         s_Data.SSAO.Power = 1.5f;
@@ -490,7 +468,6 @@ namespace Wheatear {
 
         const auto& spec = s_Data.SSAO.RawFBO->GetSpecification();
 
-        // 更新参数 UBO
         s_Data.SSAO.ParamsBuffer.NoiseScale = glm::vec4(
             float(spec.Width) / 4.0f,
             float(spec.Height) / 4.0f,
@@ -502,25 +479,19 @@ namespace Wheatear {
         s_Data.SSAO.ParamsUBO->SetData(&s_Data.SSAO.ParamsBuffer,
             sizeof(SSAOParamsUBO));
 
-        // Camera UBO（binding=1）已由 BeginScene 上传，SSAO shader 直接复用
 
-        // ── Pass 1：原始 AO ──────────────────────────────────────────────────
         {
             uint32_t prevFBO = RenderCommand::GetBoundFramebuffer();
 
             s_Data.SSAO.RawFBO->Bind();
-            RenderCommand::SetClearColor({ 1.0f, 1.0f, 1.0f, 1.0f }); // AO 默认 1.0
+            RenderCommand::SetClearColor({ 1.0f, 1.0f, 1.0f, 1.0f });
             RenderCommand::Clear();
 
-            // 绑定输入纹理（平台抽象 API）
             RenderCommand::BindTextureUnit(20, normalTex);
             RenderCommand::BindTextureUnit(21, depthTex);
             RenderCommand::BindTextureUnit(22, s_Data.SSAO.NoiseTex->GetRendererID());
 
             s_Data.SSAO.SSAOShader->Bind();
-            // SSAO.glsl 用 layout(binding=N) 声明纹理，SPIR-V 路径下
-            // binding 由 shader 自身指定，不需要 SetInt 传 slot
-            // 如果你的 shader 编译后 binding 失效，再加：
             // s_Data.SSAO.SSAOShader->SetInt("u_NormalTex", 20);
             // s_Data.SSAO.SSAOShader->SetInt("u_DepthTex",  21);
             // s_Data.SSAO.SSAOShader->SetInt("u_NoiseTex",  22);
@@ -531,7 +502,6 @@ namespace Wheatear {
             RenderCommand::BindFramebuffer(prevFBO);
         }
 
-        // ── Pass 2：Blur ─────────────────────────────────────────────────────
         {
             uint32_t prevFBO = RenderCommand::GetBoundFramebuffer();
 
@@ -550,13 +520,11 @@ namespace Wheatear {
             RenderCommand::BindFramebuffer(prevFBO);
         }
 
-        // 更新 IBL UBO 的 HasSSAO 标志，让 PBR shader 知道要采样
         s_Data.IBLBuffer.HasSSAO = 1;
         s_Data.IBLUBO->SetData(&s_Data.IBLBuffer, sizeof(IBLDataUBO));
     }
 
     // =========================================================================
-    //  BindSSAOResult（在 DrawMesh 内、Shader::Bind() 之前调用）
     // =========================================================================
 
     void Renderer3D::BindSSAOResult()
@@ -568,13 +536,11 @@ namespace Wheatear {
         }
         else
         {
-            // 禁用时绑定白色纹理（AO=1，无遮蔽）
             s_Data.WhiteTexture->Bind(14);
         }
     }
 
     // =========================================================================
-    //  设置接口（EditorLayer3D::OnImGuiExtra 直接引用）
     // =========================================================================
 
     bool& Renderer3D::SSAOEnabled() { return s_Data.SSAO.Enabled; }
@@ -647,7 +613,6 @@ namespace Wheatear {
         (mat.MetallicMap  ? mat.MetallicMap  : s_Data.WhiteTexture)->Bind(8);
         s_Data.ShadowMapFB->BindDepthAttachment(9);
 
-        // IBL textures (slots 11, 12, 13) — bind fallbacks when no IBL
         if (s_Data.CurrentIBL && s_Data.CurrentIBL->IsValid())
         {
             RenderCommand::BindTextureUnit(11, s_Data.CurrentIBL->IrradianceMap);
@@ -655,7 +620,6 @@ namespace Wheatear {
             RenderCommand::BindTextureUnit(13, s_Data.CurrentIBL->BrdfLUT);
         }
         // When HasIBL == 0 the shader uses the hemisphere fallback,
-        // so we don't need to bind real textures — they'll just be ignored.
 
         BindSSAOResult();
 

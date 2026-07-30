@@ -1,4 +1,4 @@
-﻿#pragma once
+#pragma once
 #include <functional>
 #include <memory>
 #include <optional>
@@ -12,16 +12,12 @@
 
 namespace Wheatear {
 
-    // ─────────────────────────────────────────────
-    //  抽象命令接口
-    // ─────────────────────────────────────────────
     struct ICommand
     {
         virtual ~ICommand() = default;
         virtual void Execute() = 0;
         virtual void Undo() = 0;
 
-        // 供属性修改命令合并用：同一次拖拽只保留一条历史
         virtual bool TryMerge(ICommand*) { return false; }
     };
 
@@ -52,9 +48,6 @@ namespace Wheatear {
         std::vector<std::unique_ptr<ICommand>> m_Commands;
     };
 
-    // ─────────────────────────────────────────────
-    //  历史管理器（单例）
-    // ─────────────────────────────────────────────
     class CommandHistory
     {
     public:
@@ -64,9 +57,6 @@ namespace Wheatear {
             return s_Instance;
         }
 
-        // BUG FIX: Push 只负责入栈，不调用 Execute。
-        // 调用方必须先手动调用 cmd->Execute()，再 Push。
-        // 这样 Redo 重新调用 Execute() 时不会造成二重执行。
         void Push(std::unique_ptr<ICommand> cmd, bool tryMerge = false)
         {
             if (tryMerge && !m_UndoStack.empty())
@@ -75,7 +65,6 @@ namespace Wheatear {
                     return;
             }
             m_UndoStack.push(std::move(cmd));
-            // 新操作清空 redo
             while (!m_RedoStack.empty())
                 m_RedoStack.pop();
         }
@@ -98,8 +87,6 @@ namespace Wheatear {
             m_UndoStack.push(std::move(cmd));
         }
 
-        // BUG FIX: Clear は Scene 切り替え前に必ず呼ぶこと。
-        // 古い Scene* を持つコマンドが残るとダングリングポインタになる。
         void Clear()
         {
             while (!m_RedoStack.empty()) m_RedoStack.pop();
@@ -216,23 +203,19 @@ namespace Wheatear {
         SidePlayerControllerComponent,
         SideEnemyAIComponent,
         SideHitboxComponent,
-        SidePickupComponent
+        SidePickupComponent,
+        TacticalCombatLevelComponent,
+        TacticalUnitComponent
     >;
 
-    // ─────────────────────────────────────────────
-    //  命令1：实体创建 / 删除
-    // ─────────────────────────────────────────────
     class EntityCreateCommand : public ICommand
     {
     public:
-        // 创建新实体
         EntityCreateCommand(Scene* scene, const std::string& name)
             : m_Scene(scene), m_Name(name), m_IsCreate(true)
         {
         }
 
-        // 删除已有实体（isCreate=false）
-        // BUG FIX: 删除时立即快照全部组件数据，Undo 时才能完整恢复
         EntityCreateCommand(Scene* scene, Entity existingEntity, bool /*isCreate_false*/)
             : m_Scene(scene)
             , m_Name(existingEntity.GetName())
@@ -333,9 +316,6 @@ namespace Wheatear {
         Entity m_Duplicate;
     };
 
-    // ─────────────────────────────────────────────
-    //  命令2：组件属性修改（模板，支持任意组件）
-    // ─────────────────────────────────────────────
     template<typename T>
     class ComponentValueCommand : public ICommand
     {
@@ -357,7 +337,6 @@ namespace Wheatear {
                 m_Entity.GetComponent<T>() = m_Before;
         }
 
-        // 同一实体同一组件连续修改合并：只更新终态，丢弃中间值
         bool TryMerge(ICommand* other) override
         {
             auto* o = dynamic_cast<ComponentValueCommand<T>*>(other);
@@ -378,9 +357,6 @@ namespace Wheatear {
         return std::make_unique<ComponentValueCommand<T>>(e, before, after);
     }
 
-    // ─────────────────────────────────────────────
-    //  命令3：添加 / 移除组件
-    // ─────────────────────────────────────────────
     template<typename T>
     class AddComponentCommand : public ICommand
     {

@@ -1,4 +1,4 @@
-﻿#include "Mesh3DDrawers.h"
+#include "Mesh3DDrawers.h"
 #include "../ComponentDrawers.h"
 #include "Wheatear/Core/AssetPath.h"
 #include "Wheatear/Core/EngineInfo.h"
@@ -17,7 +17,6 @@ namespace Wheatear {
     {
         DrawComponent<MeshRendererComponent>("Mesh Renderer", entity, [](auto& c)
             {
-                // ---- Mesh 部分不变 ----
                 std::string meshName = "None";
                 if (c.Mesh)
                 {
@@ -47,7 +46,6 @@ namespace Wheatear {
                 if (ImGui::Button("Sphere")) c.Mesh = Mesh::CreateSphere();
                 ImGui::Separator();
 
-                // ---- Material 部分 ----
                 ImGui::Text("Material");
                 ImGui::SameLine();
 
@@ -57,7 +55,6 @@ namespace Wheatear {
 
                 ImGui::Button(matName.c_str(), ImVec2(-1, 0));
 
-                // 拖拽 .wtmaterial 文件替换材质
                 if (ImGui::BeginDragDropTarget())
                 {
                     if (const ImGuiPayload* payload =
@@ -72,7 +69,6 @@ namespace Wheatear {
                     ImGui::EndDragDropTarget();
                 }
 
-                // 新建材质 / 保存材质
                 if (ImGui::Button("New Material"))
                     c.Material = Material::Create();
 
@@ -84,7 +80,6 @@ namespace Wheatear {
                     {
                         if (c.Material->GetPath().empty())
                         {
-                            // 还没有路径，弹出保存对话框
                             std::string savePath = std::string("assets/materials/NewMaterial") + AssetFileType::MaterialExtension;
                             c.Material->Save(savePath);
                         }
@@ -95,7 +90,6 @@ namespace Wheatear {
                     }
                 }
 
-                // 材质内容编辑（折叠）
                 if (c.Material && ImGui::TreeNode("Edit Material"))
                 {
                     auto& mat = *c.Material;
@@ -106,7 +100,6 @@ namespace Wheatear {
                     ImGui::Checkbox("Flip Normals", &mat.FlipNormals);
                     ImGui::Separator();
 
-                    // 贴图拖拽，和之前一样，复用原来那套代码
                     // AlbedoMap
                     const ImVec2 thumbSize = { 64.0f, 64.0f };
                     auto drawTexSlot = [&](const char* label, Ref<Texture2D>& tex,
@@ -188,14 +181,11 @@ namespace Wheatear {
                 ImGui::DragFloat("Linear", &c.Linear, 0.001f, 0.0f, 1.0f);
                 ImGui::DragFloat("Quadratic", &c.Quadratic, 0.001f, 0.0f, 1.0f);
 
-                // 衰减预览：显示有效照射半径估算值
-                // 解方程 att < 0.05 → 有效范围约为这个距离
                 if (c.Constant > 0.0f)
                 {
-                    // 用二次公式估算亮度降到 5% 时的距离
                     float a = c.Quadratic;
                     float b = c.Linear;
-                    float cc = c.Constant - 20.0f * c.Intensity; // 1/att = 20 时
+                    float cc = c.Constant - 20.0f * c.Intensity;
                     float disc = b * b - 4.0f * a * cc;
                     if (a > 0.0f && disc >= 0.0f)
                     {

@@ -43,7 +43,6 @@ namespace Wheatear {
             return;
         }
 
-        // 只负责通知脚本（Unity）
         ScriptEngine::OnCollisionBegin(entityA, entityB);
         ScriptEngine::OnCollisionBegin(entityB, entityA);
     }

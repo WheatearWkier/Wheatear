@@ -8,16 +8,12 @@
 
 namespace Wheatear {
 
-    // 静态成员初始化
     Renderer::SceneData* Renderer::m_SceneData =
         new Renderer::SceneData;
 
     std::chrono::high_resolution_clock::time_point Renderer::s_StartTime =
         std::chrono::high_resolution_clock::now();
 
-    // ═══════════════════════════════════════════════════════
-    //  初始化 / 关闭
-    // ═══════════════════════════════════════════════════════
 
     void Renderer::Init()
     {
@@ -40,34 +36,25 @@ namespace Wheatear {
         RenderCommand::SetViewport(0, 0, width, height);
     }
 
-    // ═══════════════════════════════════════════════════════
-    //  场景
-    // ═══════════════════════════════════════════════════════
 
     void Renderer::BeginScene(const glm::mat4& viewProjection)
     {
         m_SceneData->ViewProjectionMatrix = viewProjection;
 
-        // 记录当前帧时间（秒）
         const auto now = std::chrono::high_resolution_clock::now();
         m_SceneData->Time = std::chrono::duration<float>(now - s_StartTime).count();
     }
 
     void Renderer::EndScene()
     {
-        // 预留扩展
     }
 
-    // ═══════════════════════════════════════════════════════
-    //  提交绘制
-    // ═══════════════════════════════════════════════════════
 
     void Renderer::Submit(
         const std::shared_ptr<Shader>& shader,
         const std::shared_ptr<VertexArray>& vertexArray,
         const glm::mat4& transform)
     {
-        // 直接上传 uniform，不依赖具体相机类型
         auto glShader = std::dynamic_pointer_cast<OpenGLShader>(shader);
         glShader->Bind();
         glShader->UploadUniformMat4("u_ViewProjection", m_SceneData->ViewProjectionMatrix);

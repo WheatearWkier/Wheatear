@@ -6,9 +6,6 @@
 
 namespace Wheatear {
 
-    // ═══════════════════════════════════════════════════════
-    //  Shader 工厂
-    // ═══════════════════════════════════════════════════════
 
     Ref<Shader> Shader::Create(const std::string& filepath)
     {
@@ -40,9 +37,7 @@ namespace Wheatear {
         return nullptr;
     }
 
-    // ═══════════════════════════════════════════════════════
     //  ShaderLibrary
-    // ═══════════════════════════════════════════════════════
 
     void ShaderLibrary::Add(const Ref<Shader>& shader)
     {
@@ -53,8 +48,6 @@ namespace Wheatear {
     {
         WT_CORE_ASSERT(!Exists(name), "Shader '{0}' already exists in library", name);
 
-        // 修复：统一 shader 内部的 name 和库里注册的 key
-        // 避免 filepath 创建后 GetName() 和库的 key 不一致
         shader->SetName(name);
         m_Shaders[name] = shader;
     }
@@ -62,7 +55,7 @@ namespace Wheatear {
     Ref<Shader> ShaderLibrary::Load(const std::string& filepath)
     {
         auto shader = Shader::Create(filepath);
-        Add(shader); // 用 shader 自身从路径解析的 name
+        Add(shader);
         return shader;
     }
 
@@ -70,14 +63,14 @@ namespace Wheatear {
         const std::string& filepath)
     {
         auto shader = Shader::Create(filepath);
-        Add(name, shader); // 用指定 name，同时会更新 shader->m_Name
+        Add(name, shader);
         return shader;
     }
 
     Ref<Shader> ShaderLibrary::Get(const std::string& name) const
     {
         WT_CORE_ASSERT(Exists(name), "Shader '{0}' not found in library", name);
-        return m_Shaders.at(name); // 用 at() 而非 [] 保持 const 正确性
+        return m_Shaders.at(name);
     }
 
     bool ShaderLibrary::Exists(const std::string& name) const

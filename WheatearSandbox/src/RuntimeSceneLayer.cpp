@@ -9,11 +9,11 @@
 #include "Wheatear/Core/Window.h"
 #include "Wheatear/Events/Event.h"
 #include "Wheatear/Events/MouseEvent.h"
+#include "Wheatear/Modules/GameplayModuleRuntime.h"
 #include "Wheatear/Modules/Progression/GameProgress.h"
 #include "Wheatear/Renderer/RenderCommand.h"
 #include "Wheatear/Runtime/CommandBus.h"
 #include "Wheatear/Runtime/SceneTransitionService.h"
-#include "Wheatear/Scene/Components.h"
 #include "Wheatear/Scene/Scene.h"
 #include "Wheatear/Scene/SceneSerializer.h"
 #include "Wheatear/UI/UIInputSystem.h"
@@ -136,10 +136,7 @@ void RuntimeSceneLayer::ApplyPendingVisualNovelLoad()
     if (!m_ActiveScene || m_PendingVisualNovelLoadSlot <= 0)
         return;
 
-    auto& registry = m_ActiveScene->GetRegistry();
-    for (auto e : registry.view<Wheatear::VisualNovelComponent>())
-        registry.get<Wheatear::VisualNovelComponent>(e).AutoLoadSlot = m_PendingVisualNovelLoadSlot;
-
+    Wheatear::ApplyVisualNovelAutoLoadSlot(m_ActiveScene.get(), m_PendingVisualNovelLoadSlot);
     m_PendingVisualNovelLoadSlot = 0;
 }
 
@@ -169,34 +166,7 @@ bool RuntimeSceneLayer::ConsumeRuntimeSceneCommands()
         return false;
 
     std::vector<std::string> commands;
-    auto& registry = m_ActiveScene->GetRegistry();
-    for (auto e : registry.view<Wheatear::VisualNovelComponent>())
-    {
-        auto& component = registry.get<Wheatear::VisualNovelComponent>(e);
-        if (!component.RuntimeRequestedCommand.empty())
-        {
-            commands.push_back(component.RuntimeRequestedCommand);
-            component.RuntimeRequestedCommand.clear();
-        }
-    }
-    for (auto e : registry.view<Wheatear::ArcadeCombatLevelComponent>())
-    {
-        auto& component = registry.get<Wheatear::ArcadeCombatLevelComponent>(e);
-        if (!component.RuntimeRequestedCommand.empty())
-        {
-            commands.push_back(component.RuntimeRequestedCommand);
-            component.RuntimeRequestedCommand.clear();
-        }
-    }
-    for (auto e : registry.view<Wheatear::SideCombatLevelComponent>())
-    {
-        auto& component = registry.get<Wheatear::SideCombatLevelComponent>(e);
-        if (!component.RuntimeRequestedCommand.empty())
-        {
-            commands.push_back(component.RuntimeRequestedCommand);
-            component.RuntimeRequestedCommand.clear();
-        }
-    }
+    Wheatear::DrainGameplayRuntimeCommands(m_ActiveScene.get(), commands);
     for (const std::string& command : Wheatear::CommandBus::DrainRuntimeCommands())
         commands.push_back(command);
 

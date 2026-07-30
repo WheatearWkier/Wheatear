@@ -1,4 +1,4 @@
-﻿Scene: VerticalSliceChapter3Preview
+Scene: VerticalSliceChapter3Preview
 Entities:
   - Entity: 930049605
     TagComponent:
@@ -59,7 +59,7 @@ Entities:
       Scale: [20, 11.25, 1]
     SpriteRendererComponent:
       Color: [1, 1, 1, 1]
-      Texture: assets\vertical_slice\vn\backgrounds\chapter3_road.png
+      Texture: assets\vertical_slice\vn\backgrounds\bg_chapter3_road.png
       TilingFactor: 1
   - Entity: 910000003
     TagComponent:
@@ -101,7 +101,7 @@ Entities:
       Scale: [2.85, 5.35, 1]
     SpriteRendererComponent:
       Color: [1, 1, 1, 0.58]
-      Texture: assets\vertical_slice\vn\portraits\hero_happy.png
+      Texture: assets\vertical_slice\vn\portraits\protag_school_relieved.png
       TilingFactor: 1
   - Entity: 910000007
     TagComponent:

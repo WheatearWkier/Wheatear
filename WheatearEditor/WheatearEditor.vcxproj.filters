@@ -16,6 +16,12 @@
     <Filter Include="Modules\SideCombat">
       <UniqueIdentifier>{68116838-54F5-288E-BD55-23E1A9581310}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Modules\TacticalCombat">
+      <UniqueIdentifier>{6F97B2A7-3F5D-4EF3-8EAB-9FB4EBC59F19}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Modules\TurnCombat">
+      <UniqueIdentifier>{9192085C-3B56-43BB-9854-5D30A19AF407}</UniqueIdentifier>
+    </Filter>
     <Filter Include="Modules\VisualNovel">
       <UniqueIdentifier>{25711269-91D2-EF76-1A40-362986A02636}</UniqueIdentifier>
     </Filter>
@@ -40,6 +46,9 @@
       <Filter>Editor</Filter>
     </ClInclude>
     <ClInclude Include="src\Editor\EditorComponentRegistry.h">
+      <Filter>Editor</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Editor\EditorToolRegistry.h">
       <Filter>Editor</Filter>
     </ClInclude>
     <ClInclude Include="src\Editor\EventScriptGraphPanel.h">
@@ -72,6 +81,12 @@
     <ClInclude Include="src\Modules\SideCombat\SideCombatTuningEditorPanel.h">
       <Filter>Modules\SideCombat</Filter>
     </ClInclude>
+    <ClInclude Include="src\Modules\TacticalCombat\TacticalCombatDrawer.h">
+      <Filter>Modules\TacticalCombat</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Modules\TurnCombat\TurnCombatDrawer.h">
+      <Filter>Modules\TurnCombat</Filter>
+    </ClInclude>
     <ClInclude Include="src\Modules\VisualNovel\VisualNovelDrawer.h">
       <Filter>Modules\VisualNovel</Filter>
     </ClInclude>
@@ -85,6 +100,9 @@
       <Filter>Panels</Filter>
     </ClInclude>
     <ClInclude Include="src\Panels\EditorCommands.h">
+      <Filter>Panels</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Panels\SpriteSheetPickerPanel.h">
       <Filter>Panels</Filter>
     </ClInclude>
     <ClInclude Include="src\Panels\SceneHierarchy\ComponentDrawers.h">
@@ -174,6 +192,12 @@
     <ClCompile Include="src\Modules\SideCombat\SideCombatTuningEditorPanel.cpp">
       <Filter>Modules\SideCombat</Filter>
     </ClCompile>
+    <ClCompile Include="src\Modules\TacticalCombat\TacticalCombatDrawer.cpp">
+      <Filter>Modules\TacticalCombat</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Modules\TurnCombat\TurnCombatDrawer.cpp">
+      <Filter>Modules\TurnCombat</Filter>
+    </ClCompile>
     <ClCompile Include="src\Modules\VisualNovel\VisualNovelDrawer.cpp">
       <Filter>Modules\VisualNovel</Filter>
     </ClCompile>
@@ -184,6 +208,9 @@
       <Filter>Panels</Filter>
     </ClCompile>
     <ClCompile Include="src\Panels\ContentBrowserPanel.cpp">
+      <Filter>Panels</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Panels\SpriteSheetPickerPanel.cpp">
       <Filter>Panels</Filter>
     </ClCompile>
     <ClCompile Include="src\Panels\SceneHierarchy\Drawers\AudioDrawer.cpp">

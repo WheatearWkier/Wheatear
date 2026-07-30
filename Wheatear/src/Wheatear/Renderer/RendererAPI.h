@@ -20,7 +20,6 @@ namespace Wheatear {
         {
             None = 0,
             OpenGL = 1
-            // 预留: Vulkan = 2, DirectX12 = 3
         };
 
         virtual ~RendererAPI() = default;
@@ -36,7 +35,6 @@ namespace Wheatear {
             uint32_t indexCount = 0) = 0;
         virtual void DrawLines(const Ref<VertexArray>& vertexArray,
             uint32_t vertexCount) = 0;
-        // 非索引三角形绘制（天空盒、Grid 等）
         virtual void DrawArrays(const Ref<VertexArray>& vertexArray,
             uint32_t vertexCount) = 0;
 
@@ -51,10 +49,8 @@ namespace Wheatear {
         virtual void SetDepthWrite(bool enabled) = 0;
         virtual void SetDepthFunc(DepthFunc func) = 0;
 
-        // 开/关 alpha 混合（引擎默认开启，局部 pass 可临时修改）
         virtual void SetBlend(bool enabled) = 0;
 
-        // 保存/恢复 FBO 绑定，用于 shadow pass 前后切换
         virtual uint32_t GetBoundFramebuffer() = 0;
         virtual void     BindFramebuffer(uint32_t id) = 0;
 
@@ -62,7 +58,6 @@ namespace Wheatear {
 
         static API GetAPI() { return s_API; }
 
-        // 工厂方法：根据当前 API 创建具体实现
         static Scope<RendererAPI> Create();
 
     private:

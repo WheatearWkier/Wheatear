@@ -105,9 +105,6 @@ namespace Wheatear {
         void FlushDestroyQueue();
         void FlushDestroyQueueEditor();
 
-        template<typename T>
-        void OnComponentAdded(Entity entity, T& component);
-
     private:
         entt::registry m_Registry;
 

@@ -35,7 +35,6 @@ namespace Wheatear {
         auto& registry = scene->GetRegistry();
         ScriptEngine::OnRuntimeUpdate(ts);
 
-        //// NativeScript£¨C++ ÄÚÇ¶½Å±¾£©
         //registry.view<NativeScriptComponent>().each([=](auto e, auto& nsc)
         //    {
         //        if (!nsc.Instance)
@@ -47,7 +46,6 @@ namespace Wheatear {
         //        nsc.Instance->OnUpdate(ts);
         //    });
 
-        // C# ½Å±¾
         for (auto e : registry.view<ScriptComponent>())
             ScriptEngine::OnUpdateEntity({ e, scene }, ts);
     }

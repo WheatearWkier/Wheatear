@@ -6,7 +6,7 @@
 
 ## 2026-07-29 音量设置补丁
 
-- 默认音量下调为 `Master 50 / BGM 50 / SFX 50`，避免新开游戏时战斗音效过响。
+- 默认音量当时下调为 `Master 50 / BGM 50 / SFX 50`，避免新开游戏时战斗音效过响；该结论已被 2026-07-30 的 VN 音量补丁替换，新默认值改为 `Master 85 / BGM 90 / SFX 85`。
 - `AudioEngine::PercentToGain()` 新增听感曲线，设置页滑条在中间时会映射为更舒适的实际增益，而不是线性 50% 振幅。
 - 设置页运行时补齐 `Master / BGM / SFX` 三条滑杆和对应加减按钮，滑动后会写入 `GameProgress::State.Settings`。
 - 战斗调参表 `side_combat_tuning.yaml` 的跳跃、落地、攻击、受击音效基准音量整体下调，后续仍可在表中继续精调。
@@ -39,30 +39,30 @@ tools/vertical_slice/generate_interactive_skill_ui.py
 - `WheatearEditor/assets/vertical_slice/ui/skill_tree/*.png`
 - `WheatearEditor/assets/vertical_slice/side_combat/ui/skill_*.png`
 
-临时图标仍然是程序化像素资源，目标是保证可运行、可识别、可替换。后续正式美术替换时优先保持同名路径，减少场景引用变更。
+临时图标仍然是程序化像素资源，目标是保证可运行、可识别、可替换。后续正式美术替换必须沿用当前正式命名；若需要调整命名，必须同步迁移场景、脚本、调参表、生成脚本和打包清单，不再用旧路径做长期兼容。
 
 ## 3. 资源命名
 
 战斗技能栏图标：
 
 ```text
-assets/vertical_slice/side_combat/ui/skill_j_slash.png
-assets/vertical_slice/side_combat/ui/skill_k_launcher.png
-assets/vertical_slice/side_combat/ui/skill_sj_uppercut.png
-assets/vertical_slice/side_combat/ui/skill_u_magic.png
-assets/vertical_slice/side_combat/ui/skill_i_support.png
-assets/vertical_slice/side_combat/ui/skill_l_break.png
+assets/vertical_slice/side_combat/ui/icon_skill_basic_slash.png
+assets/vertical_slice/side_combat/ui/icon_skill_launcher_slash.png
+assets/vertical_slice/side_combat/ui/icon_skill_uppercut.png
+assets/vertical_slice/side_combat/ui/icon_skill_magic_bolt.png
+assets/vertical_slice/side_combat/ui/icon_skill_ally_support.png
+assets/vertical_slice/side_combat/ui/icon_skill_break_limit.png
 ```
 
-其中 `skill_j_slash.png` 与 `skill_k_launcher.png` 作为历史/兼容占位资源保留；当前战斗 HUD 使用 `skill_sj_uppercut.png` 表示 `S+J` 裂空挑斩指令。
+这些文件已按正式图标命名迁移，不再使用 `skill_j_*`、`skill_k_*` 这类键位型旧名；当前战斗 HUD 使用 `icon_skill_uppercut.png` 表示 `S+J` 裂空挑斩指令。
 
 技能树图标：
 
 ```text
 assets/vertical_slice/ui/skill_tree/skill_magic_sword_core.png
-assets/vertical_slice/ui/skill_tree/skill_ME_01.png
+assets/vertical_slice/ui/skill_tree/skill_me_01.png
 ...
-assets/vertical_slice/ui/skill_tree/skill_LI_12.png
+assets/vertical_slice/ui/skill_tree/skill_li_12.png
 ```
 
 技能树辅助图：
@@ -272,3 +272,35 @@ progression:set_master_volume:<value>
 - 技能树连线边缘缩进改为按节点半径约束，避免线段与圆形节点之间出现明显断开。
 - `VerticalSliceSkillTree.wt` 默认参数已更新：更小的节点边缘缩进、更强的曲线弯曲、更多采样段和线条发光，用于当前竖切技能树页。
 - 当前仍然使用 Renderer2D line batch 绘制曲线采样段；如果以后需要更宽的发光带、箭头流动、描边贴图，再升级到 ribbon mesh 或专门 path 材质。
+
+## 21. 2026-07-30 运行时中文文本编码修复
+
+- 修复新打包版主菜单、右下角菜单按钮、Panel 文本和 VN UI 中文显示乱码的问题：`VisualNovelMainMenu.wt` 与 12 个竖切 UI 场景曾以 GBK/ANSI 字节保存，运行时按 UTF-8 读取后会显示为乱码。
+- 已将这些 `.wt` 场景统一转换为 UTF-8；`assets/scenes`、`assets/vn`、`assets/events` 和 `assets/vertical_slice/data` 下的运行时文本资产已通过 UTF-8 校验。
+- 后续规则：`.wt`、`.vn`、`.wts`、`.json`、`.yaml` 等运行时文本资产必须保存为 UTF-8；打包器只收集和写包，不负责把 GBK/ANSI 自动转码。
+- 最新玩家包已重新生成：`Builds/Windows/Player/WheatearSandbox.exe`，`content.wtpack` 本轮收集 450 个引用资源；包内确认包含 `VisualNovelMainMenu.wt`、`VerticalSliceTurnCombat.wt` 和 `vertical_slice_flow.wts`。
+- 打包版 `WheatearSandbox.exe` 通过 8 秒隐藏窗口启动烟测。
+
+## 22. 2026-07-30 回合制中文化与旧编码清理
+
+- 项目自有文本文件完成一次性编码清理：源码、编辑器面板、着色器、脚本、文档和运行时资产已统一为 UTF-8；旧 GBK/ANSI 文件和局部损坏注释已处理，后续 `apply_patch` 不应再被这类文件反复绊住。
+- 回合制战斗玩家可见文本中文化：技能名、技能说明、行动提示、目标提示、状态栏、行动顺序、胜利/失败文本和场景初始 UI 文本均改为中文。
+- 修复回合制目标点击无效：场景目标按钮现在直接发送真实战斗实体 Tag；`TurnCombatSystem` 也新增目标解析兜底，可从目标按钮名反查战斗单位。
+- 静态检查确认 `VerticalSliceTurnCombat.wt` 内 6 个 `turn:target:*` 命令均能匹配到战斗实体，玩家可见文本无英文残留。
+- 最新编辑器、运行时和玩家包已重新构建；打包版主入口与打包版回合制场景均通过 8 秒隐藏窗口启动烟测。
+
+## 23. 2026-07-30 Batch01 VN 美术实装
+
+- 已将 `vn/backgrounds` 与 `vn/portraits` 中的 Batch01A/Batch01B 共 21 张 PNG 复制到正式工程目录 `WheatearEditor/assets/vertical_slice/vn/`，覆盖旧占位 VN 图。
+- 资源规格校验通过：6 张背景为 1920x1080，15 张立绘为 1024x1536 透明 PNG；源文件与工程目标文件哈希一致。
+- `vertical_slice_intro.vn` 在路口异常段切换到 `bg_modern_schoolroad_unease.png`；`vertical_slice_post_fake.vn` 和 `VerticalSlicePostFake.wt` 起始背景改为 `bg_forest_after_bear.png`。
+- 精确旧名扫描确认运行时场景、VN 脚本和事件脚本中不再引用旧 demo VN 背景/立绘路径。
+- 最新玩家包已重新生成：`Builds/Windows/Player/WheatearSandbox.exe`，`content.wtpack` 本轮收集 452 个引用资源；打包版主入口、序章 VN 和假玩法后 VN 均通过 8 秒隐藏窗口启动烟测。
+
+## 24. 2026-07-30 VN 音量设置与默认音量回调
+
+- 默认设置从 `Master 50 / BGM 50 / SFX 50` 调整为 `Master 85 / BGM 90 / SFX 85`，避免 `PercentToGain()` 听感曲线叠乘后新游戏 BGM 过小。
+- VN 设置覆盖层运行时补齐主音量、BGM 音量和音效音量三条滑条，并带对应 `- / +` 微调按钮。
+- VN BGM 每帧根据 `GameProgress::State.Settings` 重算增益，玩家在 VN 设置页调整主音量或 BGM 音量后，正在播放的 BGM 会立即跟随变化。
+- 据点系统设置页的 Master / BGM / SFX 标签改为中文，并确认设置状态文案不再描述为“未来才接入 AudioEngine”。
+- 最新玩家包已重新生成：`Builds/Windows/Player/WheatearSandbox.exe`，`content.wtpack` 本轮收集 452 个引用资源；打包版主入口和序章 VN 均通过 8 秒隐藏窗口启动烟测。

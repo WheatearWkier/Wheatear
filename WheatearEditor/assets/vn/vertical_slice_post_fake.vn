@@ -1,12 +1,12 @@
 ﻿# 第一章假玩法结束后，进入正式横板战斗前的 VN。
 
 @label start
-@background assets/vertical_slice/vn/backgrounds/isekai_forest.png
+@background assets/vertical_slice/vn/backgrounds/bg_forest_after_bear.png
 @music assets/vertical_slice/audio/bgm/vn_tutorial_resolve.wav "魔剑士训导"
 @speed 44
 @character Mira 魔剑士导师 assets/vertical_slice/vn/portraits/mentor_{expression}.png
-@character Leo 主角 assets/vertical_slice/vn/portraits/hero_{expression}.png
-@show Mira:serious Leo:surprised
+@character Leo 主角 assets/vertical_slice/vn/portraits/protag_school_{expression}.png
+@show Mira:serious Leo:shocked
 Leo: 我赢了，但我必须郑重声明，刚才那个玩法非常可疑。
 Mira: 你说的是会飘的黑熊、突然切换的武器、还有像训练靶一样的弹幕？
 Leo: 对。尤其是那个“太刀”按起来像临时赶工。
@@ -16,7 +16,7 @@ Leo: 你是谁？为什么你长得有点像她？
 Mira: 王国骑士团所属，魔剑士。你可以暂时叫我导师。
 Leo: 导师小姐，你出现得非常像主线 NPC。
 Mira: 这把魔剑本来就该交到你手里。它会吸收靠近的魔法材料，也会记录你和同伴的羁绊。
-@expression Leo thinking
+@expression Leo skeptical
 Leo: 所以装备掉落、材料升级、技能树，终于都要登场了？
 Mira: 先别高兴。你刚才打倒的是母熊。她的丈夫来了。
 Leo: 为什么连黑熊都有家庭伦理线？

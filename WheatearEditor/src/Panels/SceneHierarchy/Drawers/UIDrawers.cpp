@@ -1,6 +1,7 @@
 #include "UIDrawers.h"
 #include "../ComponentDrawers.h"
 #include "Editor/EditorCanvasTools.h"
+#include "Panels/SpriteSheetPickerPanel.h"
 #include <imgui/imgui.h>
 #include <glm/gtc/type_ptr.hpp>
 #include <algorithm>
@@ -210,7 +211,6 @@ namespace Wheatear {
 
     } // namespace
 
-    // 鈹€鈹€ UICanvas 鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€
     void DrawUICanvasComponent(Entity entity)
     {
         DrawComponent<UICanvasComponent>("UI Canvas", entity, [entity](auto& canvas)
@@ -222,7 +222,6 @@ namespace Wheatear {
             });
     }
 
-    // 鈹€鈹€ UIWidget 鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€
     void DrawUIWidgetComponent(Entity entity)
     {
         DrawComponent<UIWidgetComponent>("UI Widget", entity, [entity](auto& widget)
@@ -321,21 +320,21 @@ namespace Wheatear {
             });
     }
 
-    // 鈹€鈹€ UIImage 鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€
     void DrawUIImageComponent(Entity entity)
     {
-        DrawComponent<UIImageComponent>("UI Image", entity, [](auto& image)
+        DrawComponent<UIImageComponent>("UI Image", entity, [entity](auto& image)
             {
                 ImGui::ColorEdit4("Color", glm::value_ptr(image.Color));
 
-                // 鍥炬爣棰勮 + 鎷栨斁鍖哄煙锛堜笌 SpriteRenderer 淇濇寔涓€鑷达級
                 const ImVec2      buttonSize = { 80.0f, 80.0f };
                 const ImTextureID textureID = image.Texture
                     ? static_cast<ImTextureID>(static_cast<uintptr_t>(image.Texture->GetRendererID()))
                     : static_cast<ImTextureID>(0);
 
                 ImGui::PushID(&image);
-                ImGui::ImageButton("##UIImageTexture", textureID, buttonSize);
+                ImGui::ImageButton("##UIImageTexture", textureID, buttonSize,
+                    ImVec2(image.UVMin.x, image.UVMax.y),
+                    ImVec2(image.UVMax.x, image.UVMin.y));
 
                 if (ImGui::BeginDragDropTarget())
                 {
@@ -370,16 +369,23 @@ namespace Wheatear {
                     if (ImGui::Button("Clear"))
                         image.Texture = nullptr;
                 }
+                if (ImGui::Button("Open Sprite Sheet Picker"))
+                    SpriteSheetPickerPanel::RequestOpen(entity);
+                if (ImGui::IsItemHovered(ImGuiHoveredFlags_DelayShort))
+                    ImGui::SetTooltip("Pick a cell from an icon atlas for this UI image.");
+                if (ImGui::TreeNode("Advanced UV"))
+                {
+                    ImGui::DragFloat2("UV Min", glm::value_ptr(image.UVMin), 0.001f, 0.0f, 1.0f, "%.3f");
+                    ImGui::DragFloat2("UV Max", glm::value_ptr(image.UVMax), 0.001f, 0.0f, 1.0f, "%.3f");
+                    ImGui::TreePop();
+                }
             });
     }
 
-    // 鈹€鈹€ UIText 鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€
     void DrawUITextComponent(Entity entity)
     {
         DrawComponent<UITextComponent>("UI Text", entity, [entity](auto& text)
             {
-                // BUG FIX: 鍘熸潵鐢?static buffer锛屽涓?UIText 鍏变韩缂撳啿锛?
-                // 瀵艰嚧杈撳叆鐒︾偣娣蜂贡銆傛敼涓哄眬閮?buffer + entity PushID銆?
                 char buffer[1024];
                 memset(buffer, 0, sizeof(buffer));
                 strncpy_s(buffer, sizeof(buffer), text.Text.c_str(), _TRUNCATE);
@@ -418,7 +424,6 @@ namespace Wheatear {
             });
     }
 
-    // 鈹€鈹€ UIButton 鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€
     void DrawUIButtonComponent(Entity entity)
     {
         DrawComponent<UIButtonComponent>("UI Button", entity, [entity](auto& button)
@@ -427,7 +432,6 @@ namespace Wheatear {
                 ImGui::ColorEdit4("Hover Color", glm::value_ptr(button.HoverColor));
                 ImGui::ColorEdit4("Pressed Color", glm::value_ptr(button.PressedColor));
 
-                // BUG FIX: 鍚屼笂锛屾敼涓哄眬閮?buffer + entity PushID
                 char funcBuffer[64];
                 memset(funcBuffer, 0, sizeof(funcBuffer));
                 strncpy_s(funcBuffer, sizeof(funcBuffer), button.OnClickFunction.c_str(), _TRUNCATE);
@@ -437,7 +441,6 @@ namespace Wheatear {
                     button.OnClickFunction = funcBuffer;
                 ImGui::PopID();
 
-                // 鍙杩愯鏃剁姸鎬?
                 ImGui::PushItemFlag(ImGuiItemFlags_Disabled, true);
                 ImGui::PushStyleVar(ImGuiStyleVar_Alpha, ImGui::GetStyle().Alpha * 0.5f);
                 bool hovered = button.IsHovered;
@@ -450,7 +453,6 @@ namespace Wheatear {
             });
     }
 
-    // 鈹€鈹€ UIProgressBar 鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€
     void DrawUIProgressBarComponent(Entity entity)
     {
         DrawComponent<UIProgressBarComponent>("UI Progress Bar", entity, [](auto& bar)
@@ -458,7 +460,6 @@ namespace Wheatear {
                 ImGui::DragFloat("Value", &bar.Value, 0.1f, 0.0f, bar.MaxValue);
                 ImGui::DragFloat("Max Value", &bar.MaxValue, 0.1f, 0.1f, 99999.0f);
 
-                // 棰勮杩涘害鏉?
                 float normalized = bar.GetNormalized();
                 char overlay[32];
                 sprintf_s(overlay, "%.0f / %.0f", bar.Value, bar.MaxValue);

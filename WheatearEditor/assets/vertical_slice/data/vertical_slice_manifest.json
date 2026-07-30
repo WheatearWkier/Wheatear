@@ -1,10 +1,11 @@
 {
   "assetSchema": "wheatear.vertical_slice.manifest.v1",
-  "version": "0.6.0",
+  "version": "0.6.1",
   "entryScene": "assets/scenes/VisualNovelMainMenu.wt",
   "flow": [
     "assets/scenes/VerticalSliceIntro.wt",
     "assets/scenes/VisualNovelBattle.wt",
+    "assets/scenes/VerticalSliceTurnCombat.wt",
     "assets/scenes/VerticalSlicePostFake.wt",
     "assets/scenes/SideCombatVerticalSlice.wt",
     "assets/scenes/VerticalSliceResult.wt",
@@ -26,66 +27,116 @@
   ],
   "portraitSets": [
     {
-      "id": "CHAR_OS_REAL",
+      "id": "CHAR_AOBA_REAL",
+      "identityGroup": "CHAR_AOBA_MENTOR_SAME_PERSON",
       "displayName": "青梅",
       "slot": "VN_Character_Mira",
       "template": "assets/vertical_slice/vn/portraits/aoba_{expression}.png",
       "expressions": [
         "neutral",
-        "happy",
-        "serious",
+        "smile",
+        "worried",
         "surprised",
-        "thinking"
+        "hesitate"
       ]
     },
     {
-      "id": "CHAR_MENTOR",
+      "id": "CHAR_MENTOR_DISGUISE",
+      "identityGroup": "CHAR_AOBA_MENTOR_SAME_PERSON",
       "displayName": "魔剑士导师",
       "slot": "VN_Character_Mira",
       "template": "assets/vertical_slice/vn/portraits/mentor_{expression}.png",
       "expressions": [
         "neutral",
-        "happy",
+        "slight_smile",
         "serious",
-        "surprised",
-        "thinking"
-      ]
+        "alert",
+        "calm"
+      ],
+      "identityNote": "Same person as CHAR_AOBA_REAL; differences are clothing, accessories, posture, and presentation only."
     },
     {
       "id": "CHAR_PROTAG",
       "displayName": "主角",
       "slot": "VN_Character_Leo",
-      "template": "assets/vertical_slice/vn/portraits/hero_{expression}.png",
+      "template": "assets/vertical_slice/vn/portraits/protag_school_{expression}.png",
       "expressions": [
         "neutral",
-        "happy",
-        "serious",
-        "surprised",
-        "thinking"
+        "relieved",
+        "alert",
+        "shocked",
+        "skeptical"
       ]
     }
   ],
   "sideCombat": {
     "levelScene": "assets/scenes/SideCombatVerticalSlice.wt",
     "tuning": "assets/vertical_slice/data/side_combat_tuning.yaml",
-    "background": "assets/vertical_slice/side_combat/backgrounds/black_forest_stage.png",
-    "player": "assets/vertical_slice/side_combat/characters/player_magic_swordsman.png",
-    "boss": "assets/vertical_slice/side_combat/enemies/bear_husband.png",
-    "shadow": "assets/vertical_slice/side_combat/ui/blob_shadow.png",
+    "background": "assets/vertical_slice/side_combat/backgrounds/bg_black_forest_stage.png",
+    "player": "assets/vertical_slice/side_combat/characters/protag_magic_swordsman.png",
+    "boss": "assets/vertical_slice/side_combat/enemies/boss_bear_husband.png",
+    "shadow": "assets/vertical_slice/side_combat/ui/blob_shadow_soft.png",
     "effects": [
-      "assets/vertical_slice/side_combat/effects/slash_basic_{frame}.png",
-      "assets/vertical_slice/side_combat/effects/slash_launcher_{frame}.png",
-      "assets/vertical_slice/side_combat/effects/magic_bolt_{frame}.png",
-      "assets/vertical_slice/side_combat/effects/ally_support_{frame}.png",
-      "assets/vertical_slice/side_combat/effects/enemy_claw_{frame}.png",
-      "assets/vertical_slice/side_combat/effects/bear_charge_{frame}.png",
-      "assets/vertical_slice/side_combat/effects/bear_shockwave_{frame}.png"
+      "assets/vertical_slice/side_combat/effects/vfx_basic_slash_{frame}.png",
+      "assets/vertical_slice/side_combat/effects/vfx_launcher_slash_{frame}.png",
+      "assets/vertical_slice/side_combat/effects/vfx_magic_bolt_{frame}.png",
+      "assets/vertical_slice/side_combat/effects/vfx_ally_support_{frame}.png",
+      "assets/vertical_slice/side_combat/effects/vfx_enemy_claw_{frame}.png",
+      "assets/vertical_slice/side_combat/effects/vfx_boss_bear_charge_{frame}.png",
+      "assets/vertical_slice/side_combat/effects/vfx_boss_bear_shockwave_{frame}.png"
     ],
     "drops": [
-      "assets/vertical_slice/side_combat/ui/mat_magic_core.png",
-      "assets/vertical_slice/side_combat/ui/mat_beast_sinew.png",
-      "assets/vertical_slice/side_combat/ui/mat_beast_claw.png"
+      "assets/vertical_slice/side_combat/ui/icon_drop_magic_core.png",
+      "assets/vertical_slice/side_combat/ui/icon_drop_beast_sinew.png",
+      "assets/vertical_slice/side_combat/ui/icon_drop_beast_claw.png"
     ]
+  },
+  "turnCombat": {
+    "levelScene": "assets/scenes/VerticalSliceTurnCombat.wt",
+    "background": "assets/vertical_slice/turn_combat/backgrounds/bg_turn_ruins_arena.png",
+    "bgm": "assets/vertical_slice/turn_combat/audio/turn_battle_bgm.wav",
+    "units": [
+      "assets/vertical_slice/turn_combat/characters/protag_magic_swordsman.png",
+      "assets/vertical_slice/turn_combat/characters/ally_white_mage.png",
+      "assets/vertical_slice/turn_combat/characters/ally_guardian.png",
+      "assets/vertical_slice/turn_combat/characters/en_bearling.png",
+      "assets/vertical_slice/turn_combat/characters/en_wolf.png",
+      "assets/vertical_slice/turn_combat/characters/en_apprentice_mage.png"
+    ],
+    "effects": [
+      "assets/vertical_slice/turn_combat/effects/vfx_turn_slash.png",
+      "assets/vertical_slice/turn_combat/effects/vfx_turn_magic_sword.png",
+      "assets/vertical_slice/turn_combat/effects/vfx_turn_heal.png",
+      "assets/vertical_slice/turn_combat/effects/vfx_turn_guard.png",
+      "assets/vertical_slice/turn_combat/effects/vfx_turn_dark.png",
+      "assets/vertical_slice/turn_combat/effects/vfx_turn_focus.png",
+      "assets/vertical_slice/turn_combat/effects/vfx_turn_claw.png"
+    ],
+    "ui": {
+      "panels": [
+        "assets/vertical_slice/turn_combat/ui/panels/panel_turn_order.png",
+        "assets/vertical_slice/turn_combat/ui/panels/panel_turn_command.png"
+      ],
+      "icons": [
+        "assets/vertical_slice/turn_combat/ui/icons/cmd_attack.png",
+        "assets/vertical_slice/turn_combat/ui/icons/cmd_magic_sword.png",
+        "assets/vertical_slice/turn_combat/ui/icons/cmd_heal.png",
+        "assets/vertical_slice/turn_combat/ui/icons/cmd_guard.png",
+        "assets/vertical_slice/turn_combat/ui/icons/cmd_wait.png",
+        "assets/vertical_slice/turn_combat/ui/icons/cmd_dark.png",
+        "assets/vertical_slice/turn_combat/ui/icons/cmd_enemy_claw.png",
+        "assets/vertical_slice/turn_combat/ui/icons/cmd_enemy_orb.png",
+        "assets/vertical_slice/turn_combat/ui/icons/target_marker.png"
+      ]
+    }
+  },
+  "arcadeCombat": {
+    "levelScene": "assets/scenes/VisualNovelBattle.wt",
+    "background": "assets/vertical_slice/arcade_combat/backgrounds/bg_arcade_arena_grid.png",
+    "player": "assets/vertical_slice/arcade_combat/characters/protag_arcade_mage.png",
+    "boss": "assets/vertical_slice/arcade_combat/characters/boss_arcade_mage.png",
+    "dangerBar": "assets/vertical_slice/arcade_combat/ui/ui_arcade_danger_bar.png",
+    "cover": "assets/vertical_slice/arcade_combat/props/prop_arcade_cover_block.png"
   },
   "ui": {
     "panels": [
@@ -124,10 +175,11 @@
     ]
   },
   "replacementPolicy": {
-    "keepPathsStable": true,
+    "keepFormalPathsStable": true,
     "replaceGeneratedPngInPlace": true,
     "sourceGenerator": "tools/vertical_slice/generate_vertical_slice_assets.py",
     "sideCombatGenerator": "tools/vertical_slice/generate_side_combat_assets.py",
+    "turnCombatGenerator": "tools/vertical_slice/generate_turn_combat_assets.py",
     "uiGenerator": "tools/vertical_slice/generate_vertical_slice_ui_assets.py"
   },
   "assets": [
@@ -154,12 +206,15 @@
   "generated_assets": [
     "assets/scenes/VerticalSliceEquipment.wt",
     "assets/scenes/VerticalSliceSkillTree.wt",
-    "assets/vertical_slice/side_combat/ui/skill_i_support.png",
-    "assets/vertical_slice/side_combat/ui/skill_j_slash.png",
-    "assets/vertical_slice/side_combat/ui/skill_k_launcher.png",
-    "assets/vertical_slice/side_combat/ui/skill_l_break.png",
-    "assets/vertical_slice/side_combat/ui/skill_sj_uppercut.png",
-    "assets/vertical_slice/side_combat/ui/skill_u_magic.png",
+    "assets/scenes/VerticalSliceTurnCombat.wt",
+    "assets/vertical_slice/side_combat/ui/icon_skill_ally_support.png",
+    "assets/vertical_slice/side_combat/ui/icon_skill_basic_slash.png",
+    "assets/vertical_slice/side_combat/ui/icon_skill_launcher_slash.png",
+    "assets/vertical_slice/side_combat/ui/icon_skill_break_limit.png",
+    "assets/vertical_slice/side_combat/ui/icon_skill_uppercut.png",
+    "assets/vertical_slice/side_combat/ui/icon_skill_magic_bolt.png",
+    "assets/vertical_slice/turn_combat/backgrounds/bg_turn_ruins_arena.png",
+    "assets/vertical_slice/turn_combat/effects/vfx_turn_slash.png",
     "assets/vertical_slice/ui/skill_tree/skill_magic_sword_core.png"
   ]
 }

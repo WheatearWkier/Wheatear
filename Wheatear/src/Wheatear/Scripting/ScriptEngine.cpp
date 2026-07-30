@@ -22,23 +22,16 @@
 
 namespace Wheatear {
 
-    // ════════════════════════════════════════════════════════════
-    //  内部数据结构
-    // ════════════════════════════════════════════════════════════
 
     struct ScriptEngineData
     {
-        // ── Mono 运行时 ──────────────────────────────────────────
         MonoDomain* RootDomain = nullptr;
         MonoDomain* AppDomain = nullptr;
         MonoAssembly* CoreAssembly = nullptr;
         MonoImage* CoreAssemblyImage = nullptr;
 
-        // ── 脚本类注册表 ─────────────────────────────────────────
-        // key = 完整类名（如 "MyGame.PlayerController"）
         std::unordered_map<std::string, Ref<ScriptClass>> EntityClasses;
 
-        // ── 运行时状态 ───────────────────────────────────────────
         Scene* SceneContext = nullptr;
         std::unordered_map<UUID, Ref<ScriptInstance>> EntityInstances;
         float LastDeltaTime = 0.0f;
@@ -48,12 +41,7 @@ namespace Wheatear {
 
     static ScriptEngineData* s_Data = nullptr;
 
-    // 编辑态字段暂存表（运行时也保留，Stop 后继续显示上次的值）
-    // key = 实体 UUID，value = { 字段名 → ScriptFieldInstance }
     static std::unordered_map<UUID, ScriptFieldMap> s_EntityScriptFields;
-    // ════════════════════════════════════════════════════════════
-    //  内部工具函数
-    // ════════════════════════════════════════════════════════════
 
     static MonoAssembly* LoadMonoAssembly(const std::filesystem::path& filepath)
     {
@@ -79,9 +67,6 @@ namespace Wheatear {
         return assembly;
     }
 
-    // 在继承链上精确查找"第一个参数类型为 ulong (MONO_TYPE_U8)"的方法。
-    // 用于区分 Entity 基类里的 OnCollisionEnter(ulong id) 和用户可能重写的
-    // OnCollisionEnter(Entity e) 两个重载，避免错误调用。
     static MonoMethod* FindMethodWithULongParam(MonoClass* klass, const char* methodName)
     {
         for (MonoClass* current = klass; current; current = mono_class_get_parent(current))
@@ -106,7 +91,6 @@ namespace Wheatear {
         return nullptr;
     }
 
-    // MonoType 名称 → ScriptFieldType 的映射
     static ScriptFieldType MonoTypeToScriptFieldType(MonoType* monoType)
     {
         static const std::unordered_map<std::string, ScriptFieldType> s_TypeMap =
@@ -131,9 +115,6 @@ namespace Wheatear {
         return it != s_TypeMap.end() ? it->second : ScriptFieldType::None;
     }
 
-    // ════════════════════════════════════════════════════════════
-    //  ScriptEngine：引擎初始化 / 关闭
-    // ════════════════════════════════════════════════════════════
 
     void ScriptEngine::Init()
     {
@@ -199,9 +180,6 @@ namespace Wheatear {
         LoadEntityClasses();
     }
 
-    // ════════════════════════════════════════════════════════════
-    //  ScriptEngine：场景生命周期
-    // ════════════════════════════════════════════════════════════
 
     void ScriptEngine::OnRuntimeStart(Scene* scene)
     {
@@ -222,13 +200,8 @@ namespace Wheatear {
     {
         s_Data->SceneContext = nullptr;
         s_Data->EntityInstances.clear();
-        // 注意：不清除 s_EntityScriptFields。
-        // Stop 后回到编辑态，Inspector 里的值应该还在。
     }
 
-    // ════════════════════════════════════════════════════════════
-    //  ScriptEngine：Entity 生命周期
-    // ════════════════════════════════════════════════════════════
 
     void ScriptEngine::OnCreateEntity(Entity entity)
     {
@@ -238,13 +211,10 @@ namespace Wheatear {
 
         UUID entityID = entity.GetUUID();
 
-        // 1. 创建实例
         Ref<ScriptClass>    scriptClass = GetEntityClass(sc.ClassName);
         Ref<ScriptInstance> instance = CreateRef<ScriptInstance>(scriptClass, entity);
         s_Data->EntityInstances[entityID] = instance;
 
-        // 2. 将编辑器/场景文件里保存的字段值注入到实例。
-        //    字段类型以当前 C# 程序集为准，避免脚本改名或改类型后使用旧元数据。
         auto fieldsIt = s_EntityScriptFields.find(entityID);
         if (fieldsIt != s_EntityScriptFields.end())
         {
@@ -297,7 +267,6 @@ namespace Wheatear {
             }
         }
 
-        // 3. 调用脚本的 OnCreate
         instance->InvokeOnCreate();
     }
 
@@ -318,9 +287,6 @@ namespace Wheatear {
         s_Data->EntityInstances.erase(entity.GetUUID());
     }
 
-    // ════════════════════════════════════════════════════════════
-    //  ScriptEngine：碰撞事件
-    // ════════════════════════════════════════════════════════════
 
     void ScriptEngine::OnCollisionBegin(Entity entity, Entity other)
     {
@@ -342,9 +308,6 @@ namespace Wheatear {
         it->second->InvokeOnCollisionExit(other);
     }
 
-    // ════════════════════════════════════════════════════════════
-    //  ScriptEngine：手动调用脚本方法（供 UIButton 等使用）
-    // ════════════════════════════════════════════════════════════
 
     void ScriptEngine::InvokeMethod(Entity entity, const std::string& methodName)
     {
@@ -368,13 +331,9 @@ namespace Wheatear {
             WT_CORE_ERROR("ScriptEngine::InvokeMethod - exception in '{}'", methodName);
     }
 
-    // ════════════════════════════════════════════════════════════
-    //  ScriptEngine：编辑态字段暂存
-    // ════════════════════════════════════════════════════════════
 
     ScriptFieldMap& ScriptEngine::GetScriptFieldMap(Entity entity)
     {
-        // operator[] 在 key 不存在时会自动插入一个空 map，正好是我们想要的行为
         return s_EntityScriptFields[entity.GetUUID()];
     }
 
@@ -453,9 +412,6 @@ namespace Wheatear {
             }
         }
     }
-    // ════════════════════════════════════════════════════════════
-    //  ScriptEngine：查询接口
-    // ════════════════════════════════════════════════════════════
 
     bool ScriptEngine::EntityClassExists(const std::string& fullClassName)
     {
@@ -498,9 +454,6 @@ namespace Wheatear {
     float ScriptEngine::GetElapsedTime() { return s_Data ? s_Data->ElapsedTime : 0.0f; }
     uint64_t ScriptEngine::GetFrameCount() { return s_Data ? s_Data->FrameCount : 0; }
 
-    // ════════════════════════════════════════════════════════════
-    //  ScriptEngine：程序集扫描
-    // ════════════════════════════════════════════════════════════
 
     void ScriptEngine::LoadEntityClasses()
     {
@@ -535,9 +488,6 @@ namespace Wheatear {
         }
     }
 
-    // ════════════════════════════════════════════════════════════
-    //  ScriptClass 实现
-    // ════════════════════════════════════════════════════════════
 
     ScriptClass::ScriptClass(const std::string& classNamespace, const std::string& className)
         : m_ClassNamespace(classNamespace), m_ClassName(className)
@@ -547,7 +497,6 @@ namespace Wheatear {
             classNamespace.c_str(),
             className.c_str());
 
-        // 扫描所有 public 实例字段
         void* iter = nullptr;
         while (MonoClassField* field = mono_class_get_fields(m_MonoClass, &iter))
         {
@@ -559,7 +508,7 @@ namespace Wheatear {
 
             ScriptFieldType type = MonoTypeToScriptFieldType(fieldType);
             if (type == ScriptFieldType::None)
-                continue;  // 忽略不支持的类型（如 string、自定义类等）
+                continue;
 
             m_Fields[fieldName] = { type, fieldName, field };
         }
@@ -567,13 +516,11 @@ namespace Wheatear {
 
     MonoObject* ScriptClass::Instantiate()
     {
-        // 只分配内存，不调用 C# 构造函数（由 ScriptInstance 手动调用基类 .ctor）
         return mono_object_new(s_Data->AppDomain, m_MonoClass);
     }
 
     MonoMethod* ScriptClass::GetMethod(const std::string& name, int parameterCount)
     {
-        // 沿继承链向上查找，确保能找到定义在基类里的方法
         for (MonoClass* klass = m_MonoClass; klass; klass = mono_class_get_parent(klass))
         {
             MonoMethod* method = mono_class_get_method_from_name(
@@ -597,21 +544,15 @@ namespace Wheatear {
         return result;
     }
 
-    // ════════════════════════════════════════════════════════════
-    //  ScriptInstance 实现
-    // ════════════════════════════════════════════════════════════
 
     ScriptInstance::ScriptInstance(Ref<ScriptClass> scriptClass, Entity entity)
         : m_ScriptClass(scriptClass)
     {
         m_Instance = scriptClass->Instantiate();
 
-        // 查找生命周期方法
         m_OnCreateMethod = scriptClass->GetMethod("OnCreate", 0);
         m_OnUpdateMethod = scriptClass->GetMethod("OnUpdate", 1);
 
-        // 精确查找接收 ulong 的碰撞回调（定义在 Entity 基类里）
-        // 避免与用户可能重写的 OnCollisionEnter(Entity) 混淆
         m_OnCollisionEnterMethod = FindMethodWithULongParam(
             scriptClass->GetMonoClass(), "OnCollisionEnter");
         m_OnCollisionExitMethod = FindMethodWithULongParam(
@@ -621,8 +562,6 @@ namespace Wheatear {
             WT_CORE_WARN("ScriptInstance: OnCollisionEnter(ulong) not found in '{}'",
                 scriptClass->GetName());
 
-        // 先调用脚本子类默认构造，让 C# 字段初始化器正常执行；
-        // 然后再把真实 Entity ID 写回基类。
         MonoMethod* scriptConstructor = mono_class_get_method_from_name(scriptClass->GetMonoClass(), ".ctor", 0);
         if (scriptConstructor)
         {

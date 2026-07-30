@@ -1,0 +1,288 @@
+{
+  "global_style": "original anime fantasy game art, clean cel shading, expressive design, polished visual novel and action RPG asset quality, vibrant but readable colors, sharp silhouette, consistent lighting, high detail, game-ready asset",
+  "global_negative": "text, logo, watermark, signature, UI letters, copyright character, recognizable franchise design, blurry, low resolution, jpeg artifacts, bad anatomy, malformed hands, extra fingers, duplicate face, cropped head, cropped body, overexposed, underexposed, photorealistic, 3d render, western comic style",
+  "groups": {
+    "vn_backgrounds": [
+      {
+        "id": "bg_modern_schoolroad_morning",
+        "filename_prefix": "wheatear/vn/backgrounds/bg_modern_schoolroad_morning",
+        "width": 1920,
+        "height": 1088,
+        "batch_size": 2,
+        "steps": 30,
+        "cfg": 7.0,
+        "positive": "quiet Japanese-style school road in the early morning, soft sunlight, clean sidewalk, trees along the street, subtle convenience store sign without readable text, peaceful atmosphere before tragedy, detailed but not cluttered, 16:9 composition, no characters, no text, polished game background"
+      },
+      {
+        "id": "bg_otherworld_forest_wake",
+        "filename_prefix": "wheatear/vn/backgrounds/bg_otherworld_forest_wake",
+        "width": 1920,
+        "height": 1088,
+        "batch_size": 2,
+        "steps": 32,
+        "cfg": 7.0,
+        "positive": "dark otherworld forest where the protagonist wakes up, tall twisted trees, damp moss, faint blue magical particles in the air, uneven ground, mysterious and dangerous mood, readable path through the woods, 16:9 composition, no characters, no text, polished visual novel background"
+      },
+      {
+        "id": "bg_forest_cliff_dusk",
+        "filename_prefix": "wheatear/vn/backgrounds/bg_forest_cliff_dusk",
+        "width": 1920,
+        "height": 1088,
+        "batch_size": 2,
+        "steps": 32,
+        "cfg": 7.2,
+        "positive": "forest cliff edge at dusk, broken rocks, deep ravine behind, dark trees surrounding the scene, dramatic lighting, sense of being cornered, faint magical glow in the mist, 16:9 composition, no characters, no text, polished visual novel background"
+      },
+      {
+        "id": "bg_forest_after_bear",
+        "filename_prefix": "wheatear/vn/backgrounds/bg_forest_after_bear",
+        "width": 1920,
+        "height": 1088,
+        "batch_size": 2,
+        "steps": 32,
+        "cfg": 7.0,
+        "positive": "same dark forest after battle, broken branches, scattered glowing magic fragments, calmer atmosphere, moonlight through trees, faint blue light around the ground, 16:9 composition, no characters, no text, polished visual novel background"
+      },
+      {
+        "id": "bg_forest_camp_night",
+        "filename_prefix": "wheatear/vn/backgrounds/bg_forest_camp_night",
+        "width": 1920,
+        "height": 1088,
+        "batch_size": 2,
+        "steps": 32,
+        "cfg": 7.0,
+        "positive": "small forest camp at night, warm campfire, simple cloth tent, wooden crates, sword maintenance table, dark green forest around, cozy but still adventurous, strong contrast between orange firelight and blue night shadows, 16:9 composition, no characters, no text"
+      },
+      {
+        "id": "bg_chapter3_road",
+        "filename_prefix": "wheatear/vn/backgrounds/bg_chapter3_road",
+        "width": 1920,
+        "height": 1088,
+        "batch_size": 2,
+        "steps": 32,
+        "cfg": 7.0,
+        "positive": "distant border village beyond a forest road, thin smoke rising from rooftops, damaged wooden fence, cloudy sky, tense but hopeful mood, fantasy rural architecture, 16:9 composition, no characters, no text, polished visual novel background"
+      }
+    ],
+    "vn_portraits": [
+      {
+        "id": "protag_isekai_battle_determined",
+        "filename_prefix": "wheatear/vn/portraits/protag_isekai_battle_determined",
+        "width": 1024,
+        "height": 1536,
+        "batch_size": 2,
+        "steps": 34,
+        "cfg": 7.2,
+        "positive": "young adult male protagonist, black short hair, damaged modern school uniform with dirt and tears, holding a black-silver magic sword awkwardly but bravely, nervous but determined expression, visual novel half-body portrait, transparent background, front three-quarter view, clean cel shading, no text"
+      },
+      {
+        "id": "protag_isekai_confused",
+        "filename_prefix": "wheatear/vn/portraits/protag_isekai_confused",
+        "width": 1024,
+        "height": 1536,
+        "batch_size": 2,
+        "steps": 34,
+        "cfg": 7.2,
+        "positive": "young adult male protagonist, black short hair, damaged modern school uniform, black-silver magic sword lowered, confused expression after waking in another world, visual novel half-body portrait, transparent background, front three-quarter view, clean cel shading, no text"
+      },
+      {
+        "id": "aoba_school_smile",
+        "filename_prefix": "wheatear/vn/portraits/aoba_school_smile",
+        "width": 1024,
+        "height": 1536,
+        "batch_size": 2,
+        "steps": 34,
+        "cfg": 7.0,
+        "positive": "young adult heroine with childhood friend feeling, long dark brown hair, warm eyes, modern school uniform, gentle smile with subtle possessive undertone, visual novel half-body portrait, transparent background, front three-quarter view, clean cel shading, no text"
+      },
+      {
+        "id": "fake_aoba_empty_smile",
+        "filename_prefix": "wheatear/vn/portraits/fake_aoba_empty_smile",
+        "width": 1024,
+        "height": 1536,
+        "batch_size": 2,
+        "steps": 34,
+        "cfg": 7.0,
+        "positive": "young adult heroine resembling a childhood friend, long dark brown hair, modern school uniform damaged by otherworld transfer, beautiful but slightly empty smile, faint magical puppet glow in the eyes, visual novel half-body portrait, transparent background, clean cel shading, no text"
+      },
+      {
+        "id": "mentor_magic_swordswoman_serious",
+        "filename_prefix": "wheatear/vn/portraits/mentor_magic_swordswoman_serious",
+        "width": 1024,
+        "height": 1536,
+        "batch_size": 2,
+        "steps": 34,
+        "cfg": 7.0,
+        "positive": "young adult female magic swordswoman mentor, long dark hair partly hidden under a dark cloak, royal knight order uniform mixed with practical fantasy armor, black-silver sword, calm professional serious expression, elegant but practical design, visual novel half-body portrait, transparent background, clean cel shading, no text"
+      },
+      {
+        "id": "grand_mage_fake_calm",
+        "filename_prefix": "wheatear/vn/portraits/grand_mage_fake_calm",
+        "width": 1024,
+        "height": 1536,
+        "batch_size": 2,
+        "steps": 34,
+        "cfg": 7.0,
+        "positive": "tall slender male fantasy grand mage villain, ornate dark robe, silver and violet magical patterns, calm manipulative smile, floating magic circle, mysterious and powerful but pretending to be weaker, visual novel half-body portrait, transparent background, clean cel shading, no text"
+      }
+    ],
+    "side_combat_strips": [
+      {
+        "id": "protag_idle_strip",
+        "filename_prefix": "wheatear/side_combat/sheets/protag_idle_strip",
+        "width": 3072,
+        "height": 384,
+        "batch_size": 1,
+        "steps": 34,
+        "cfg": 7.2,
+        "positive": "original anime 2D side-scrolling action game sprite strip, young male magic swordsman, damaged modern school uniform mixed with fantasy black-silver magic sword, idle breathing loop, bright stylish anime action style, readable side-view proportions, transparent background, exactly 8 frames, equal 384x384 cells, one horizontal row, feet aligned to same baseline, clean silhouette, no text"
+      },
+      {
+        "id": "protag_run_strip",
+        "filename_prefix": "wheatear/side_combat/sheets/protag_run_strip",
+        "width": 3840,
+        "height": 384,
+        "batch_size": 1,
+        "steps": 34,
+        "cfg": 7.2,
+        "positive": "original anime 2D side-scrolling action game sprite strip, young male magic swordsman, damaged modern school uniform, black-silver magic sword trailing behind, fast horizontal run cycle, bright stylish anime action style, readable side-view proportions, transparent background, exactly 10 frames, equal 384x384 cells, one horizontal row, feet aligned to same baseline, clean silhouette, no text"
+      },
+      {
+        "id": "protag_basic1_strip",
+        "filename_prefix": "wheatear/side_combat/sheets/protag_basic1_strip",
+        "width": 2688,
+        "height": 384,
+        "batch_size": 1,
+        "steps": 36,
+        "cfg": 7.4,
+        "positive": "original anime 2D side-scrolling action game sprite strip, young male magic swordsman, damaged modern school uniform, first basic horizontal sword slash combo hit, black-silver sword energy with cyan glow, bright stylish anime action style, transparent background, exactly 7 frames, equal 384x384 cells, one horizontal row, feet aligned to same baseline, clean readable attack silhouette, no text"
+      },
+      {
+        "id": "vfx_basic_slash_strip",
+        "filename_prefix": "wheatear/side_combat/vfx_sheets/vfx_basic_slash_strip",
+        "width": 4096,
+        "height": 512,
+        "batch_size": 1,
+        "steps": 30,
+        "cfg": 7.0,
+        "positive": "original anime 2D action game visual effect sprite strip, fast black-silver sword slash arc, cyan blue magical glow, impact spark, transparent background, exactly 8 frames, equal 512x512 cells, one horizontal row, clean additive-looking shapes, no text"
+      },
+      {
+        "id": "boss_bear_husband_idle_strip",
+        "filename_prefix": "wheatear/side_combat/sheets/boss_bear_husband_idle_strip",
+        "width": 6400,
+        "height": 448,
+        "batch_size": 1,
+        "steps": 36,
+        "cfg": 7.2,
+        "positive": "original anime fantasy side-scrolling boss sprite strip, massive corrupted black bear husband, blue magical veins, huge claws, powerful readable silhouette, heavy idle breathing loop, bright polished action game style, transparent background, exactly 10 frames, equal 640x448 cells, one horizontal row, consistent ground baseline, no text"
+      }
+    ],
+    "ui_icons": [
+      {
+        "id": "battle_skill_icons_128",
+        "filename_prefix": "wheatear/ui/atlases/battle_skill_icons_128",
+        "width": 1024,
+        "height": 512,
+        "batch_size": 2,
+        "steps": 30,
+        "cfg": 7.0,
+        "positive": "original anime fantasy action RPG UI icon atlas, bright polished game UI, 8 by 4 grid of sharp readable icons, black-silver magic sword theme with cyan glow and warm gold accents, transparent background, no text, no letters, no numbers, consistent icon perspective, 128x128 cells, skills include slash combo, upward slash, aerial slash, dash slash, fireball, dodge, landing spark, lock icon"
+      },
+      {
+        "id": "battle_drop_icons_128",
+        "filename_prefix": "wheatear/ui/atlases/battle_drop_icons_128",
+        "width": 768,
+        "height": 256,
+        "batch_size": 2,
+        "steps": 30,
+        "cfg": 7.0,
+        "positive": "original anime fantasy game material icon atlas, 6 by 2 grid, sharp readable item icons, transparent background, no text, no letters, no numbers, 128x128 cells, beast claw, monster sinew, blue magic core crystal, rough iron fragment, coins, equipment chest, consistent RPG inventory style"
+      },
+      {
+        "id": "common_panels",
+        "filename_prefix": "wheatear/ui/atlases/common_panels",
+        "width": 2048,
+        "height": 2048,
+        "batch_size": 1,
+        "steps": 32,
+        "cfg": 7.0,
+        "positive": "original anime fantasy RPG system UI atlas, elegant dark glass panels with cyan magic sword glow and warm gold trims, large panel, small panel, tooltip, modal window, title bar, item slot frame, transparent background where possible, no text, no logo, consistent style, game-ready interface assets"
+      },
+      {
+        "id": "vn_textbox_panel",
+        "filename_prefix": "wheatear/ui/atlases/vn_textbox_panel",
+        "width": 1600,
+        "height": 320,
+        "batch_size": 2,
+        "steps": 30,
+        "cfg": 7.0,
+        "positive": "original anime fantasy visual novel UI asset, elegant translucent rose-gold and dark glass dialogue textbox panel, clean decorative edges, readable over bright and dark backgrounds, game-ready PNG, no text, no icons, no logo"
+      }
+    ],
+    "turn_combat_pixel": [
+      {
+        "id": "px_protag_magic_swordsman_idle_strip",
+        "filename_prefix": "wheatear/turn_combat/sheets/px_protag_magic_swordsman_idle_strip",
+        "width": 512,
+        "height": 128,
+        "batch_size": 2,
+        "steps": 26,
+        "cfg": 6.5,
+        "positive": "original pixel art JRPG turn-based battle sprite strip, young male magic swordsman with black-silver sword, idle breathing animation, transparent background, exactly 4 frames, equal 128x128 cells, one horizontal row, clean readable 32-bit pixel style, no text"
+      },
+      {
+        "id": "px_protag_magic_swordsman_attack_strip",
+        "filename_prefix": "wheatear/turn_combat/sheets/px_protag_magic_swordsman_attack_strip",
+        "width": 768,
+        "height": 128,
+        "batch_size": 2,
+        "steps": 26,
+        "cfg": 6.5,
+        "positive": "original pixel art JRPG turn-based battle sprite strip, young male magic swordsman attack animation with cyan sword slash, transparent background, exactly 6 frames, equal 128x128 cells, one horizontal row, clean readable 32-bit pixel style, no text"
+      },
+      {
+        "id": "px_white_mage_idle_strip",
+        "filename_prefix": "wheatear/turn_combat/sheets/px_white_mage_idle_strip",
+        "width": 512,
+        "height": 128,
+        "batch_size": 2,
+        "steps": 26,
+        "cfg": 6.5,
+        "positive": "original pixel art JRPG turn-based battle sprite strip, white mage ally, gentle robe, healing staff, idle animation, transparent background, exactly 4 frames, equal 128x128 cells, one horizontal row, clean readable 32-bit pixel style, no text"
+      },
+      {
+        "id": "px_vfx_heal_strip",
+        "filename_prefix": "wheatear/turn_combat/sheets/px_vfx_heal_strip",
+        "width": 1024,
+        "height": 128,
+        "batch_size": 2,
+        "steps": 24,
+        "cfg": 6.3,
+        "positive": "original pixel art JRPG turn-based battle visual effect strip, soft green and cyan healing magic circle with sparkles, transparent background, exactly 8 frames, equal 128x128 cells, one horizontal row, clean readable pixel style, no text"
+      }
+    ],
+    "arcade_combat_pixel": [
+      {
+        "id": "px_fake_player_idle_strip",
+        "filename_prefix": "wheatear/arcade_combat/sheets/px_fake_player_idle_strip",
+        "width": 256,
+        "height": 64,
+        "batch_size": 2,
+        "steps": 24,
+        "cfg": 6.0,
+        "positive": "original cute pixel art fantasy mini-game sprite strip, intentionally simple but charming fake player, idle animation, transparent background, exactly 4 frames, equal 64x64 cells, one horizontal row, no text"
+      },
+      {
+        "id": "px_fake_bear_attack_strip",
+        "filename_prefix": "wheatear/arcade_combat/sheets/px_fake_bear_attack_strip",
+        "width": 384,
+        "height": 96,
+        "batch_size": 2,
+        "steps": 24,
+        "cfg": 6.0,
+        "positive": "original cute pixel art fantasy mini-game sprite strip, intentionally simple but charming black bear attack animation, transparent background, exactly 4 frames, equal 96x96 cells, one horizontal row, no text"
+      }
+    ]
+  }
+}

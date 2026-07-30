@@ -1,4 +1,4 @@
-﻿#include "wtpch.h"
+#include "wtpch.h"
 #include "EditorLayerBase.h"
 
 #include "Wheatear/Core/Application.h"
@@ -11,10 +11,14 @@
 #include "Wheatear/Events/KeyEvent.h"
 #include "Wheatear/Events/MouseEvent.h"
 #include "Wheatear/ImGui/ImGuiLayer.h"
+#include "Wheatear/Modules/GameplayModuleRuntime.h"
+#include "Wheatear/Modules/Progression/GameProgress.h"
 #include "Wheatear/Renderer/Framebuffer.h"
 #include "Wheatear/Renderer/RenderCommand.h"
 #include "Wheatear/Renderer/Renderer2D.h"
 #include "Wheatear/Renderer/Texture.h"
+#include "Wheatear/Runtime/CommandBus.h"
+#include "Wheatear/Runtime/SceneTransitionService.h"
 #include "Wheatear/Scene/Components.h"
 #include "Wheatear/Scene/Scene.h"
 #include "Wheatear/Scene/SceneSerializer.h"
@@ -23,9 +27,9 @@
 #include "Wheatear/UI/UIWidgetLayout.h"
 #include "Wheatear/Math/Math.h"
 #include "Editor/EditorCanvasTools.h"
-#include "Modules/SideCombat/SideCombatTuningEditorPanel.h"
-#include "Modules/VisualNovel/VisualNovelScriptEditorPanel.h"
+#include "Panels/AnimationEditorPanel.h"
 #include "Panels/EditorCommands.h"
+#include "Panels/SceneHierarchyPanel.h"
 
 #include <imgui/imgui.h>
 #include <imgui/imgui_internal.h>
@@ -45,6 +49,15 @@
 
 
 namespace Wheatear {
+
+    namespace {
+
+        static bool StartsWith(const std::string& value, const std::string& prefix)
+        {
+            return value.rfind(prefix, 0) == 0;
+        }
+
+    } // namespace
 
     void EditorLayerBase::TransitionToEditScene(Ref<Scene> newScene,
                                                 const std::filesystem::path& scenePath)
@@ -79,6 +92,10 @@ namespace Wheatear {
         WT_CORE_ASSERT(m_SceneState == SceneState::Edit, "TransitionToPlay called from non-Edit state");
 
         ClearEntitySelection();
+        m_PendingVisualNovelLoadSlot = 0;
+        CommandBus::DrainRuntimeCommands();
+        CommandBus::DrainGameplayCommands();
+        SceneTransitionService::DrainRequests();
         m_SceneState  = SceneState::Play;
         m_ActiveScene = Scene::Copy(m_EditorScene);
         m_EditorScene->OnEditorStop();
@@ -91,6 +108,10 @@ namespace Wheatear {
     {
         WT_CORE_ASSERT(m_SceneState == SceneState::Play, "TransitionToStop called from non-Play state");
 
+        m_PendingVisualNovelLoadSlot = 0;
+        CommandBus::DrainRuntimeCommands();
+        CommandBus::DrainGameplayCommands();
+        SceneTransitionService::DrainRequests();
         m_ActiveScene->OnRuntimeStop();
         Renderer2D::EndScene();
         ClearEntitySelection();
@@ -102,42 +123,150 @@ namespace Wheatear {
         SyncPanels();
     }
 
+    void EditorLayerBase::LoadPlayScene(const std::filesystem::path& scenePath)
+    {
+        if (m_SceneState != SceneState::Play)
+            return;
+
+        const std::filesystem::path resolvedPath = AssetPath::Resolve(scenePath);
+        Ref<Scene> newScene = CreateRef<Scene>();
+        SceneSerializer serializer(newScene);
+        if (!serializer.DeserializeYaml(resolvedPath))
+        {
+            WT_CORE_ERROR("Play Mode failed to load scene: {}", resolvedPath.string());
+            return;
+        }
+
+        if (m_ActiveScene)
+        {
+            m_ActiveScene->OnRuntimeStop();
+            Renderer2D::EndScene();
+        }
+
+        m_ActiveScene = newScene;
+        ApplyPendingVisualNovelLoad();
+
+        if (m_ViewportSize.x > 0.0f && m_ViewportSize.y > 0.0f)
+        {
+            m_ActiveScene->OnViewportResize(
+                static_cast<uint32_t>(m_ViewportSize.x),
+                static_cast<uint32_t>(m_ViewportSize.y));
+        }
+
+        m_ActiveScene->OnRuntimeStart();
+        SyncPanels();
+    }
+
+    void EditorLayerBase::ApplyPendingVisualNovelLoad()
+    {
+        if (!m_ActiveScene || m_PendingVisualNovelLoadSlot <= 0)
+            return;
+
+        ApplyVisualNovelAutoLoadSlot(m_ActiveScene.get(), m_PendingVisualNovelLoadSlot);
+        m_PendingVisualNovelLoadSlot = 0;
+    }
+
+    bool EditorLayerBase::ConsumePlayModeRuntimeCommands()
+    {
+        if (m_SceneState != SceneState::Play || !m_ActiveScene)
+            return false;
+
+        std::vector<std::string> commands;
+        DrainGameplayRuntimeCommands(m_ActiveScene.get(), commands);
+        for (const std::string& command : CommandBus::DrainRuntimeCommands())
+            commands.push_back(command);
+
+        bool consumed = false;
+        for (const std::string& command : commands)
+        {
+            if (command.empty() || StartsWith(command, "script:"))
+                continue;
+
+            if (command == "quit")
+            {
+                TransitionToStop();
+                return true;
+            }
+
+            consumed |= CommandBus::Execute(m_ActiveScene.get(), command).Handled;
+            if (m_SceneState != SceneState::Play || !m_ActiveScene)
+                break;
+        }
+
+        consumed |= ConsumePlayModeSceneTransitionRequests();
+        return consumed;
+    }
+
+    bool EditorLayerBase::ConsumePlayModeSceneTransitionRequests()
+    {
+        std::vector<SceneTransitionRequest> requests = SceneTransitionService::DrainRequests();
+        if (requests.empty())
+            return false;
+
+        ExecutePlayModeSceneTransitionRequest(requests.back());
+        return true;
+    }
+
+    void EditorLayerBase::ExecutePlayModeSceneTransitionRequest(const SceneTransitionRequest& request)
+    {
+        if (m_SceneState != SceneState::Play)
+            return;
+
+        switch (request.Mode)
+        {
+        case SceneTransitionMode::LoadScene:
+            LoadPlayScene(request.ScenePath);
+            break;
+        case SceneTransitionMode::NewGame:
+            GameProgress::ResetForNewGame();
+            m_PendingVisualNovelLoadSlot = 0;
+            LoadPlayScene(request.ScenePath);
+            break;
+        case SceneTransitionMode::LoadGame:
+            m_PendingVisualNovelLoadSlot = request.Slot;
+            GameProgress::LoadSlot(request.Slot);
+            LoadPlayScene(request.ScenePath);
+            break;
+        }
+    }
+
     void EditorLayerBase::SyncPanels()
     {
-        m_SceneHierarchyPanel.SetContext(m_ActiveScene);
-        m_AnimationEditorPanel.SetScene(m_ActiveScene);
+        m_SceneHierarchyPanel->SetContext(m_ActiveScene);
+        m_AnimationEditorPanel->SetScene(m_ActiveScene);
     }
 
     void EditorLayerBase::ClearEntitySelection()
     {
         m_HoveredEntity = {};
-        m_SceneHierarchyPanel.SetSelectedEntity({});
+        m_SceneHierarchyPanel->SetSelectedEntity({});
     }
 
     void EditorLayerBase::CommitPendingGizmoEdit()
     {
-        if (m_GizmoEditEntity && m_GizmoEditEntity.HasComponent<TransformComponent>())
+        if (m_GizmoEditEntity && m_GizmoStartTransform && m_GizmoEditEntity.HasComponent<TransformComponent>())
         {
             const TransformComponent after = m_GizmoEditEntity.GetComponent<TransformComponent>();
             CommandHistory::Get().Push(
-                MakeComponentValueCommand(m_GizmoEditEntity, m_GizmoStartTransform, after));
+                MakeComponentValueCommand(m_GizmoEditEntity, *m_GizmoStartTransform, after));
         }
 
         m_GizmoWasUsing = false;
         m_GizmoEditEntity = {};
+        m_GizmoStartTransform.reset();
     }
 
     void EditorLayerBase::CommitPendingUIEdit()
     {
-        if (m_UIEditEntity && m_UIEditEntity.HasComponent<UIWidgetComponent>())
+        if (m_UIEditEntity && m_UIEditStartWidget && m_UIEditEntity.HasComponent<UIWidgetComponent>())
         {
             const UIWidgetComponent after = m_UIEditEntity.GetComponent<UIWidgetComponent>();
             auto command = std::make_unique<CompositeCommand>();
-            command->Add(MakeComponentValueCommand(m_UIEditEntity, m_UIEditStartWidget, after));
-            if (m_UIEditStartHadText && m_UIEditEntity.HasComponent<UITextComponent>())
+            command->Add(MakeComponentValueCommand(m_UIEditEntity, *m_UIEditStartWidget, after));
+            if (m_UIEditStartHadText && m_UIEditStartText && m_UIEditEntity.HasComponent<UITextComponent>())
             {
                 const UITextComponent afterText = m_UIEditEntity.GetComponent<UITextComponent>();
-                command->Add(MakeComponentValueCommand(m_UIEditEntity, m_UIEditStartText, afterText));
+                command->Add(MakeComponentValueCommand(m_UIEditEntity, *m_UIEditStartText, afterText));
             }
             CommandHistory::Get().Push(std::move(command));
         }
@@ -146,11 +275,13 @@ namespace Wheatear {
         m_UIEditSurface = 0;
         m_UIEditEntity = {};
         m_UIEditStartHadText = false;
+        m_UIEditStartWidget.reset();
+        m_UIEditStartText.reset();
     }
 
     void EditorLayerBase::UpdateUITextFontDuringUIResize(Entity entity)
     {
-        if (m_UIEditHandle == UIEdit_Move || !m_UIEditStartHadText)
+        if (m_UIEditHandle == UIEdit_Move || !m_UIEditStartHadText || !m_UIEditStartWidget || !m_UIEditStartText)
             return;
         if (!entity || !entity.HasComponent<UIWidgetComponent>() || !entity.HasComponent<UITextComponent>())
             return;
@@ -158,14 +289,13 @@ namespace Wheatear {
         const auto& widget = entity.GetComponent<UIWidgetComponent>();
         auto& text = entity.GetComponent<UITextComponent>();
 
-        const float startArea = std::max(0.000001f, m_UIEditStartWidget.Size.x * m_UIEditStartWidget.Size.y);
+        const float startArea = std::max(0.000001f, m_UIEditStartWidget->Size.x * m_UIEditStartWidget->Size.y);
         const float currentArea = std::max(0.000001f, widget.Size.x * widget.Size.y);
         const float scale = std::clamp(std::sqrt(currentArea / startArea), 0.2f, 5.0f);
-        text.FontSize = std::clamp(m_UIEditStartText.FontSize * scale, 1.0f, 256.0f);
+        text.FontSize = std::clamp(m_UIEditStartText->FontSize * scale, 1.0f, 256.0f);
     }
 
     // =========================================================================
-    // 鍦烘櫙鏂囦欢鎿嶄綔
     // =========================================================================
 
     void EditorLayerBase::NewScene()
@@ -248,23 +378,22 @@ namespace Wheatear {
         if (Entity found = m_EditorScene->GetEntityByName(finalName))
             found.GetComponent<TagComponent>().Tag = finalName;
 
-        m_SceneHierarchyPanel.SetSelectedEntity(e);
+        m_SceneHierarchyPanel->SetSelectedEntity(e);
     }
 
     void EditorLayerBase::OnDuplicateEntity()
     {
         if (m_SceneState != SceneState::Edit) return;
-        if (Entity selected = m_SceneHierarchyPanel.GetSelectedEntity())
+        if (Entity selected = m_SceneHierarchyPanel->GetSelectedEntity())
         {
             auto command = std::make_unique<EntityDuplicateCommand>(m_EditorScene.get(), selected);
             command->Execute();
-            m_SceneHierarchyPanel.SetSelectedEntity(command->GetEntity());
+            m_SceneHierarchyPanel->SetSelectedEntity(command->GetEntity());
             CommandHistory::Get().Push(std::move(command));
         }
     }
 
     // =========================================================================
-    // 鍏叡 UI
     // =========================================================================
 
     void EditorLayerBase::StartPlayerPackageBuild(bool enableScripts)

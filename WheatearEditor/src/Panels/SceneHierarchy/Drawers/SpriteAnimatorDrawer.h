@@ -8,8 +8,6 @@
 
 namespace Wheatear {
 
-    // Atlas 生成器的配置，每个 AnimationClip 独立一份
-    // key = clip 名字，由 SceneHierarchyPanel 持有并传入
     struct AtlasConfig
     {
         Ref<Texture2D> Texture;

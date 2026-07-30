@@ -49,6 +49,12 @@
     <Filter Include="src\Wheatear\Modules\SideCombat">
       <UniqueIdentifier>{BF602EE3-2B44-3D23-3447-6B5FA0A90374}</UniqueIdentifier>
     </Filter>
+    <Filter Include="src\Wheatear\Modules\TacticalCombat">
+      <UniqueIdentifier>{949C4B1B-B734-4E3E-8CC9-5D84C1907E3D}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\Wheatear\Modules\TurnCombat">
+      <UniqueIdentifier>{EAFDE560-979A-4F67-8892-4DFE2E97C049}</UniqueIdentifier>
+    </Filter>
     <Filter Include="src\Wheatear\Modules\VisualNovel">
       <UniqueIdentifier>{5CABA26C-48FC-8DAE-7160-7C705D102118}</UniqueIdentifier>
     </Filter>
@@ -219,6 +225,12 @@
     <ClInclude Include="src\Wheatear\Math\Math.h">
       <Filter>src\Wheatear\Math</Filter>
     </ClInclude>
+    <ClInclude Include="src\Wheatear\Modules\GameplayModuleComponents.h">
+      <Filter>src\Wheatear\Modules</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Wheatear\Modules\GameplayModuleRuntime.h">
+      <Filter>src\Wheatear\Modules</Filter>
+    </ClInclude>
     <ClInclude Include="src\Wheatear\Modules\ArcadeCombat\ArcadeCombatComponents.h">
       <Filter>src\Wheatear\Modules\ArcadeCombat</Filter>
     </ClInclude>
@@ -239,6 +251,18 @@
     </ClInclude>
     <ClInclude Include="src\Wheatear\Modules\SideCombat\SideCombatSystem.h">
       <Filter>src\Wheatear\Modules\SideCombat</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Wheatear\Modules\TacticalCombat\TacticalCombatComponents.h">
+      <Filter>src\Wheatear\Modules\TacticalCombat</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Wheatear\Modules\TacticalCombat\TacticalCombatSystem.h">
+      <Filter>src\Wheatear\Modules\TacticalCombat</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Wheatear\Modules\TurnCombat\TurnCombatComponents.h">
+      <Filter>src\Wheatear\Modules\TurnCombat</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Wheatear\Modules\TurnCombat\TurnCombatSystem.h">
+      <Filter>src\Wheatear\Modules\TurnCombat</Filter>
     </ClInclude>
     <ClInclude Include="src\Wheatear\Modules\VisualNovel\VisualNovelComponents.h">
       <Filter>src\Wheatear\Modules\VisualNovel</Filter>
@@ -336,10 +360,19 @@
     <ClInclude Include="src\Wheatear\Scene\Components.h">
       <Filter>src\Wheatear\Scene</Filter>
     </ClInclude>
+    <ClInclude Include="src\Wheatear\Scene\ComponentLifecycleRegistry.h">
+      <Filter>src\Wheatear\Scene</Filter>
+    </ClInclude>
     <ClInclude Include="src\Wheatear\Scene\Entity.h">
       <Filter>src\Wheatear\Scene</Filter>
     </ClInclude>
+    <ClInclude Include="src\Wheatear\Scene\Entity.inl">
+      <Filter>src\Wheatear\Scene</Filter>
+    </ClInclude>
     <ClInclude Include="src\Wheatear\Scene\Scene.h">
+      <Filter>src\Wheatear\Scene</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Wheatear\Scene\SceneComponentGroups.h">
       <Filter>src\Wheatear\Scene</Filter>
     </ClInclude>
     <ClInclude Include="src\Wheatear\Scene\SceneSerializer.h">
@@ -1595,6 +1628,12 @@
     <ClCompile Include="src\Wheatear\Modules\SideCombat\SideCombatSystem.cpp">
       <Filter>src\Wheatear\Modules\SideCombat</Filter>
     </ClCompile>
+    <ClCompile Include="src\Wheatear\Modules\TacticalCombat\TacticalCombatSystem.cpp">
+      <Filter>src\Wheatear\Modules\TacticalCombat</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Wheatear\Modules\TurnCombat\TurnCombatSystem.cpp">
+      <Filter>src\Wheatear\Modules\TurnCombat</Filter>
+    </ClCompile>
     <ClCompile Include="src\Wheatear\Modules\VisualNovel\VisualNovelRuntime.cpp">
       <Filter>src\Wheatear\Modules\VisualNovel</Filter>
     </ClCompile>
@@ -1670,10 +1709,16 @@
     <ClCompile Include="src\Wheatear\Runtime\SceneTransitionService.cpp">
       <Filter>src\Wheatear\Runtime</Filter>
     </ClCompile>
+    <ClCompile Include="src\Wheatear\Scene\ComponentLifecycleRegistry.cpp">
+      <Filter>src\Wheatear\Scene</Filter>
+    </ClCompile>
     <ClCompile Include="src\Wheatear\Scene\Entity.cpp">
       <Filter>src\Wheatear\Scene</Filter>
     </ClCompile>
     <ClCompile Include="src\Wheatear\Scene\Scene.cpp">
+      <Filter>src\Wheatear\Scene</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Wheatear\Scene\SceneCopy.cpp">
       <Filter>src\Wheatear\Scene</Filter>
     </ClCompile>
     <ClCompile Include="src\Wheatear\Scene\SceneSerializer.cpp">

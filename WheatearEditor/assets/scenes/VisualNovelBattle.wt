@@ -59,7 +59,7 @@ Entities:
       Scale: [20, 11, 1]
     SpriteRendererComponent:
       Color: [1, 1, 1, 1]
-      Texture: assets\textures\battle\arena_background.png
+      Texture: assets/vertical_slice/arcade_combat/backgrounds/bg_arcade_arena_grid.png
       TilingFactor: 1
   - Entity: 930000003
     TagComponent:
@@ -81,7 +81,7 @@ Entities:
       Scale: [15.5, 0.22, 1]
     SpriteRendererComponent:
       Color: [1, 1, 1, 1]
-      Texture: assets\textures\battle\danger_bar.png
+      Texture: assets/vertical_slice/arcade_combat/ui/ui_arcade_danger_bar.png
       TilingFactor: 1
   - Entity: 930000005
     TagComponent:
@@ -107,7 +107,7 @@ Entities:
       Scale: [0.58, 0.78, 1]
     SpriteRendererComponent:
       Color: [1, 1, 1, 1]
-      Texture: assets\textures\battle\player.png
+      Texture: assets/vertical_slice/arcade_combat/characters/protag_arcade_mage.png
       TilingFactor: 1
     ArcadeCombatantComponent:
       Team: 1
@@ -128,7 +128,7 @@ Entities:
       Scale: [1.28, 1.28, 1]
     SpriteRendererComponent:
       Color: [1, 1, 1, 0]
-      Texture: assets\textures\battle\boss.png
+      Texture: assets/vertical_slice/arcade_combat/characters/boss_arcade_mage.png
       TilingFactor: 1
     ArcadeCombatantComponent:
       Team: 2
@@ -154,7 +154,7 @@ Entities:
       Scale: [1.35, 0.70, 1]
     SpriteRendererComponent:
       Color: [1, 1, 1, 0.96]
-      Texture: assets\textures\battle\cover.png
+      Texture: assets/vertical_slice/arcade_combat/props/prop_arcade_cover_block.png
       TilingFactor: 1
     ArcadeCoverComponent:
       Radius: 0.78
@@ -170,7 +170,7 @@ Entities:
       Scale: [1.45, 0.75, 1]
     SpriteRendererComponent:
       Color: [1, 1, 1, 0.96]
-      Texture: assets\textures\battle\cover.png
+      Texture: assets/vertical_slice/arcade_combat/props/prop_arcade_cover_block.png
       TilingFactor: 1
     ArcadeCoverComponent:
       Radius: 0.82
@@ -186,7 +186,7 @@ Entities:
       Scale: [1.25, 0.62, 1]
     SpriteRendererComponent:
       Color: [1, 1, 1, 0.88]
-      Texture: assets\textures\battle\cover.png
+      Texture: assets/vertical_slice/arcade_combat/props/prop_arcade_cover_block.png
       TilingFactor: 1
     ArcadeCoverComponent:
       Radius: 0.68

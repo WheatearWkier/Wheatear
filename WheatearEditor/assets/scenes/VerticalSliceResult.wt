@@ -1,4 +1,4 @@
-﻿Scene: VerticalSliceResult
+Scene: VerticalSliceResult
 Entities:
   - Entity: 960000192
     TagComponent:
@@ -59,7 +59,7 @@ Entities:
       Scale: [20, 11.25, 1]
     SpriteRendererComponent:
       Color: [0.82, 0.92, 0.96, 1]
-      Texture: assets/vertical_slice/vn/backgrounds/forest_camp.png
+      Texture: assets/vertical_slice/vn/backgrounds/bg_forest_camp_night.png
       TilingFactor: 1
   - Entity: 960000003
     TagComponent:
@@ -70,7 +70,7 @@ Entities:
       Scale: [2.85, 4.55, 1]
     SpriteRendererComponent:
       Color: [1, 1, 1, 0.88]
-      Texture: assets/vertical_slice/vn/portraits/mentor_happy.png
+      Texture: assets/vertical_slice/vn/portraits/mentor_slight_smile.png
       TilingFactor: 1
   - Entity: 960000010
     TagComponent:
@@ -455,7 +455,7 @@ Entities:
       ParentTag: WT_UI_Canvas
     UIImageComponent:
       Color: [1, 1, 1, 1.0]
-      TexturePath: assets/vertical_slice/side_combat/ui/mat_magic_core.png
+      TexturePath: assets/vertical_slice/side_combat/ui/icon_drop_magic_core.png
   - Entity: 960000102
     TagComponent:
       Tag: Result_Drop_Core_Button
@@ -536,7 +536,7 @@ Entities:
       ParentTag: WT_UI_Canvas
     UIImageComponent:
       Color: [1, 1, 1, 1.0]
-      TexturePath: assets/vertical_slice/side_combat/ui/mat_beast_sinew.png
+      TexturePath: assets/vertical_slice/side_combat/ui/icon_drop_beast_sinew.png
   - Entity: 960000112
     TagComponent:
       Tag: Result_Drop_Sinew_Button
@@ -617,7 +617,7 @@ Entities:
       ParentTag: WT_UI_Canvas
     UIImageComponent:
       Color: [1, 1, 1, 1.0]
-      TexturePath: assets/vertical_slice/side_combat/ui/mat_beast_claw.png
+      TexturePath: assets/vertical_slice/side_combat/ui/icon_drop_beast_claw.png
   - Entity: 960000122
     TagComponent:
       Tag: Result_Drop_Claw_Button

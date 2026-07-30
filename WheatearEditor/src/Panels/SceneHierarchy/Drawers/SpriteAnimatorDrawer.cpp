@@ -9,7 +9,6 @@ namespace Wheatear {
     {
         DrawComponent<SpriteAnimatorComponent>("Sprite Animator", entity, [](auto& c)
             {
-                // 当前播放状态
                 ImGui::Text("Clip: %s",
                     c.CurrentClipName.empty() ? "(none)" : c.CurrentClipName.c_str());
 
@@ -23,8 +22,18 @@ namespace Wheatear {
                     if (ImGui::SmallButton("Resume")) c.IsPlaying = true;
                 }
 
-                // Clip 数量提示
-                ImGui::TextDisabled("%d clip(s) — edit in Animation Editor window",
+                ImGui::Checkbox("Play On Start", &c.PlayOnStart);
+                ImGui::SameLine();
+                ImGui::Checkbox("Fire Events", &c.FireEvents);
+
+                ImGui::Text("Default: %s",
+                    c.DefaultClipName.empty() ? "(none)" : c.DefaultClipName.c_str());
+                ImGui::Text("Time: %.3fs  Frame: %d  Finished: %s",
+                    c.ElapsedTime,
+                    c.CurrentFrameIndex,
+                    c.IsFinished ? "true" : "false");
+
+                ImGui::TextDisabled("%d clip(s) - edit in Animation Editor window",
                     (int)c.Clips.size());
             });
     }

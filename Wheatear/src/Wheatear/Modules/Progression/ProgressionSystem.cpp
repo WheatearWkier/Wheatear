@@ -527,19 +527,19 @@ namespace Wheatear {
                     "Core",
                     "MAT-MAGIC-CORE-T0",
                     "魔核碎片",
-                    "assets/vertical_slice/side_combat/ui/mat_magic_core.png",
+                    "assets/vertical_slice/side_combat/ui/icon_drop_magic_core.png",
                     "魔剑觉醒、魔法分支技能和高级装备强化材料。" },
                 ResultDropIcon{
                     "Sinew",
                     "MAT-BEAST-SINEW",
                     "兽筋",
-                    "assets/vertical_slice/side_combat/ui/mat_beast_sinew.png",
+                    "assets/vertical_slice/side_combat/ui/icon_drop_beast_sinew.png",
                     "旅人护衣 +1、黑林皮甲和机动系训练材料。" },
                 ResultDropIcon{
                     "Claw",
                     "MAT-BEAST-CLAW",
                     "熊爪",
-                    "assets/vertical_slice/side_combat/ui/mat_beast_claw.png",
+                    "assets/vertical_slice/side_combat/ui/icon_drop_beast_claw.png",
                     "近战剑技、护甲强化和兽系饰品材料。" }
             };
             return icons;
@@ -685,17 +685,17 @@ namespace Wheatear {
             const glm::vec2 sliderSize = { 0.25f, 0.035f };
             const glm::vec2 buttonSize = { 0.045f, 0.045f };
 
-            EnsureText(scene, "Settings_MasterVolumeLabel", parentTag, { 0.13f, 0.39f }, labelSize, 42, "Master", 20.0f, labelColor);
+            EnsureText(scene, "Settings_MasterVolumeLabel", parentTag, { 0.13f, 0.39f }, labelSize, 42, "主音量", 20.0f, labelColor);
             EnsureSlider(scene, "Settings_MasterVolumeSlider", parentTag, { 0.31f, 0.395f }, sliderSize, 44, 0.0f, 100.0f, "progression:set_master_volume");
             EnsureButton(scene, "Settings_Button_VolumeDown", parentTag, { 0.58f, 0.38f }, buttonSize, 55, "-", "progression:master_volume_down");
             EnsureButton(scene, "Settings_Button_VolumeUp", parentTag, { 0.635f, 0.38f }, buttonSize, 55, "+", "progression:master_volume_up");
 
-            EnsureText(scene, "Settings_BGMVolumeLabel", parentTag, { 0.13f, 0.47f }, labelSize, 42, "BGM", 20.0f, labelColor);
+            EnsureText(scene, "Settings_BGMVolumeLabel", parentTag, { 0.13f, 0.47f }, labelSize, 42, "BGM 音量", 20.0f, labelColor);
             EnsureSlider(scene, "Settings_BGMVolumeSlider", parentTag, { 0.31f, 0.475f }, sliderSize, 44, 0.0f, 100.0f, "progression:set_bgm_volume");
             EnsureButton(scene, "Settings_Button_BGMDown", parentTag, { 0.58f, 0.46f }, buttonSize, 55, "-", "progression:bgm_volume_down");
             EnsureButton(scene, "Settings_Button_BGMUp", parentTag, { 0.635f, 0.46f }, buttonSize, 55, "+", "progression:bgm_volume_up");
 
-            EnsureText(scene, "Settings_SFXVolumeLabel", parentTag, { 0.13f, 0.55f }, labelSize, 42, "SFX", 20.0f, labelColor);
+            EnsureText(scene, "Settings_SFXVolumeLabel", parentTag, { 0.13f, 0.55f }, labelSize, 42, "音效音量", 20.0f, labelColor);
             EnsureSlider(scene, "Settings_SFXVolumeSlider", parentTag, { 0.31f, 0.555f }, sliderSize, 44, 0.0f, 100.0f, "progression:set_sfx_volume");
             EnsureButton(scene, "Settings_Button_SFXDown", parentTag, { 0.58f, 0.54f }, buttonSize, 55, "-", "progression:sfx_volume_down");
             EnsureButton(scene, "Settings_Button_SFXUp", parentTag, { 0.635f, 0.54f }, buttonSize, 55, "+", "progression:sfx_volume_up");

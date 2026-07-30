@@ -4,28 +4,34 @@
 #include "Wheatear/Core/Layer.h"
 #include "Wheatear/Core/Timestep.h"
 #include "Wheatear/Renderer/EditorCamera.h"
-#include "Wheatear/Scene/Components.h"
 #include "Wheatear/Scene/Entity.h"
-#include "Panels/SceneHierarchyPanel.h"
-#include "Panels/ContentBrowserPanel.h"
-#include "Panels/AnimationEditorPanel.h"
 #include "Build/PlayerPackager.h"
 
 #include <cstdint>
 #include <filesystem>
 #include <future>
+#include <memory>
 #include <string>
 
 #include <glm/glm.hpp>
 
 namespace Wheatear {
 
+    class AnimationEditorPanel;
+    class ContentBrowserPanel;
     class Framebuffer;
     class KeyPressedEvent;
     class MouseButtonPressedEvent;
     class MouseButtonReleasedEvent;
+    class MouseScrolledEvent;
     class Scene;
+    struct SceneTransitionRequest;
+    class SceneHierarchyPanel;
+    class SpriteSheetPickerPanel;
     class Texture2D;
+    struct TransformComponent;
+    struct UITextComponent;
+    struct UIWidgetComponent;
 
     enum UIEditHandle : int
     {
@@ -52,7 +58,7 @@ namespace Wheatear {
 
     public:
         explicit EditorLayerBase(const std::string& debugName);
-        virtual ~EditorLayerBase() = default;
+        ~EditorLayerBase() override;
 
         void OnAttach() override;
         void OnDetach() override;
@@ -70,6 +76,7 @@ namespace Wheatear {
             const std::filesystem::path& scenePath = {});
         void TransitionToPlay();
         void TransitionToStop();
+        bool ConsumePlayModeRuntimeCommands();
 
         void NewScene();
         void OpenScene();
@@ -87,8 +94,8 @@ namespace Wheatear {
         const glm::vec2& GetViewportSize() const { return m_ViewportSize; }
         bool IsViewportHovered() const { return m_ViewportHovered; }
 
-        SceneHierarchyPanel& GetHierarchyPanel() { return m_SceneHierarchyPanel; }
-        ContentBrowserPanel& GetContentBrowserPanel() { return m_ContentBrowserPanel; }
+        SceneHierarchyPanel& GetHierarchyPanel();
+        ContentBrowserPanel& GetContentBrowserPanel();
 
     private:
         bool OnKeyPressed(KeyPressedEvent& e);
@@ -118,6 +125,10 @@ namespace Wheatear {
         void UpdateUITextFontDuringUIResize(Entity entity);
         void StartPlayerPackageBuild(bool enableScripts = false);
         void PollPlayerPackageBuild();
+        void LoadPlayScene(const std::filesystem::path& scenePath);
+        void ApplyPendingVisualNovelLoad();
+        bool ConsumePlayModeSceneTransitionRequests();
+        void ExecutePlayModeSceneTransitionRequest(const SceneTransitionRequest& request);
 
     protected:
         Ref<Framebuffer> m_Framebuffer;
@@ -138,7 +149,7 @@ namespace Wheatear {
         int m_GizmoType = -1;
         bool m_GizmoWasUsing = false;
         Entity m_GizmoEditEntity;
-        TransformComponent m_GizmoStartTransform;
+        std::unique_ptr<TransformComponent> m_GizmoStartTransform;
 
         bool m_ShowPhysicsColliders = false;
         bool m_ShowUIOutlines = true;
@@ -152,22 +163,24 @@ namespace Wheatear {
         Entity m_UIEditEntity;
         glm::vec2 m_UIEditStartMouse = { 0.0f, 0.0f };
         glm::vec4 m_UIEditStartRect = { 0.0f, 0.0f, 0.0f, 0.0f };
-        UIWidgetComponent m_UIEditStartWidget;
+        std::unique_ptr<UIWidgetComponent> m_UIEditStartWidget;
         bool m_UIEditStartHadText = false;
-        UITextComponent m_UIEditStartText;
+        std::unique_ptr<UITextComponent> m_UIEditStartText;
 
         Ref<Texture2D> m_IconPlay;
         Ref<Texture2D> m_IconStop;
 
-        SceneHierarchyPanel m_SceneHierarchyPanel;
-        ContentBrowserPanel m_ContentBrowserPanel;
-        AnimationEditorPanel m_AnimationEditorPanel;
+        std::unique_ptr<SceneHierarchyPanel> m_SceneHierarchyPanel;
+        std::unique_ptr<ContentBrowserPanel> m_ContentBrowserPanel;
+        std::unique_ptr<AnimationEditorPanel> m_AnimationEditorPanel;
+        std::unique_ptr<SpriteSheetPickerPanel> m_SpriteSheetPickerPanel;
         Timestep m_LastTimestep;
 
         std::future<PlayerPackageResult> m_PlayerBuildFuture;
         bool m_PlayerBuildRunning = false;
         std::string m_PlayerBuildStatus;
         std::filesystem::path m_LastPlayerBuildDirectory;
+        int m_PendingVisualNovelLoadSlot = 0;
     };
 
 } // namespace Wheatear

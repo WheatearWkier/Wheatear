@@ -35,7 +35,6 @@ namespace Wheatear {
         static void BeginScene(const EditorCamera& camera);
         static void EndScene();
 
-        // ── Lights ──────────────────────────────────────────
         static void SetDirectionalLight(const glm::vec3& direction,
                                         const glm::vec3& color,
                                         float intensity);
@@ -47,7 +46,6 @@ namespace Wheatear {
                                   float quadratic);
         static void FlushLights();
 
-        // ── Shadow ──────────────────────────────────────────
         static void BeginShadowPass(const glm::mat4& lightSpaceMatrix);
         static void EndShadowPass();
         static void DrawMeshShadow(const glm::mat4& transform, const Ref<Mesh>& mesh);
@@ -56,18 +54,15 @@ namespace Wheatear {
         static const glm::mat4&  GetLightSpaceMatrix();
         static Ref<Framebuffer>& GetShadowMapFB();
 
-        // ── Mesh rendering ───────────────────────────────────
         static void DrawMesh(const glm::mat4& transform,
                              const Ref<Mesh>& mesh,
                              const Ref<Material>& material,
                              int entityID = -1);
 
-        // ── IBL ─────────────────────────────────────────────
         // Load a precomputed IBL set (call IBLPrecompute::Compute() first).
         // Binds textures to slots 11, 12, 13 and flips u_HasIBL = 1.
         static void SetIBL(const Ref<IBLResult>& ibl);
 
-        // Remove IBL — skybox falls back to gradient, mesh uses hemisphere ambient.
         static void ClearIBL();
 
         // Scale the entire indirect (ambient) contribution. Default = 1.0.
@@ -84,7 +79,6 @@ namespace Wheatear {
         static float& SSAOBias();
         static float& SSAOPower();
 
-        // ── Editor visuals ───────────────────────────────────
         static void DrawEditorSkybox();
         static void DrawEditorGrid();
 
@@ -93,7 +87,6 @@ namespace Wheatear {
                                     const glm::vec3& horizon,
                                     const glm::vec3& bottom);
 
-        // ── Stats ────────────────────────────────────────────
         struct Statistics { uint32_t DrawCalls = 0; uint32_t MeshCount = 0; };
         static Statistics GetStats();
         static void       ResetStats();

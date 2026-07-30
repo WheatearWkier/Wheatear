@@ -42,99 +42,6 @@ namespace Wheatear {
         return CommandBus::IsNativeCommand(command);
     }
 
-    static std::vector<std::string> SplitCommand(const std::string& command)
-    {
-        std::vector<std::string> parts;
-        size_t start = 0;
-        while (start <= command.size())
-        {
-            const size_t separator = command.find(':', start);
-            if (separator == std::string::npos)
-            {
-                parts.push_back(command.substr(start));
-                break;
-            }
-
-            parts.push_back(command.substr(start, separator - start));
-            start = separator + 1;
-        }
-        return parts;
-    }
-
-    static bool ExecuteUIPagerCommand(Scene* scene, const std::string& command)
-    {
-        if (!scene || !StartsWith(command, "ui:pager:"))
-            return false;
-
-        const std::vector<std::string> parts = SplitCommand(command);
-        if (parts.size() < 4 || parts[0] != "ui" || parts[1] != "pager")
-            return false;
-
-        const std::string& pagerTag = parts[2];
-        const std::string& action = parts[3];
-        if (pagerTag.empty() || action.empty())
-            return false;
-
-        UIWidgetLayout::Context layout(scene);
-        const entt::entity pagerEntity = layout.FindByTag(pagerTag);
-        auto& registry = scene->GetRegistry();
-        if (pagerEntity == entt::null || !registry.valid(pagerEntity) || !registry.all_of<UIPagerComponent>(pagerEntity))
-            return false;
-
-        auto& pager = registry.get<UIPagerComponent>(pagerEntity);
-        pager.PageCount = std::max(pager.PageCount, 1);
-        pager.CurrentPage = std::clamp(pager.CurrentPage, 1, pager.PageCount);
-
-        int nextPage = pager.CurrentPage;
-        if (action == "next")
-        {
-            nextPage = pager.CurrentPage + 1;
-            if (nextPage > pager.PageCount)
-                nextPage = pager.Wrap ? 1 : pager.PageCount;
-        }
-        else if (action == "prev" || action == "previous")
-        {
-            nextPage = pager.CurrentPage - 1;
-            if (nextPage < 1)
-                nextPage = pager.Wrap ? pager.PageCount : 1;
-        }
-        else if (action == "first")
-        {
-            nextPage = 1;
-        }
-        else if (action == "last")
-        {
-            nextPage = pager.PageCount;
-        }
-        else if ((action == "page" || action == "set") && parts.size() >= 5)
-        {
-            try
-            {
-                nextPage = std::stoi(parts[4]);
-            }
-            catch (...)
-            {
-                return false;
-            }
-        }
-        else
-        {
-            return false;
-        }
-
-        pager.CurrentPage = std::clamp(nextPage, 1, pager.PageCount);
-        return true;
-    }
-
-    static bool ExecuteProgressionCommand(const std::string& command)
-    {
-        if (!StartsWith(command, "progression:"))
-            return false;
-
-        GameProgress::ExecuteCommand(command);
-        return true;
-    }
-
     static bool ExecuteSliderNativeCommand(Scene* scene, const std::string& command, float value)
     {
         if (!CommandBus::IsNativeCommand(command))
@@ -759,7 +666,7 @@ namespace Wheatear {
                     node.Selected = node.Id == tree.SelectedNodeId;
 
                 if (!tree.CommandPrefix.empty())
-                    ExecuteProgressionCommand(tree.CommandPrefix + tree.SelectedNodeId);
+                    CommandBus::Execute(scene, tree.CommandPrefix + tree.SelectedNodeId);
             }
 
             tree.RuntimeDragging = false;

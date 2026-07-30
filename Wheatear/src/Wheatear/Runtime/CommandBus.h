@@ -26,11 +26,18 @@ namespace Wheatear {
     class WHEATEAR_API CommandBus
     {
     public:
+        static void RegisterNativeCommandPrefix(const std::string& prefix);
+        static void RegisterGameplayCommandPrefix(const std::string& prefix);
+        static void ClearRegisteredCommandPrefixes();
+
         static bool IsNativeCommand(const std::string& command);
         static CommandResult Execute(Scene* scene, const std::string& command);
 
         static void QueueRuntimeCommand(const std::string& command);
         static std::vector<std::string> DrainRuntimeCommands();
+
+        static void QueueGameplayCommand(const std::string& command);
+        static std::vector<std::string> DrainGameplayCommands(const std::string& prefix = {});
 
         static void QueueEventCommand(const EventCommandRequest& request);
         static std::vector<EventCommandRequest> DrainEventCommands(Scene* scene);

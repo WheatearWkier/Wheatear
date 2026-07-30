@@ -1,4 +1,4 @@
-﻿Scene: Untitled
+Scene: Untitled
 Entities:
   - Entity: 920000013
     TagComponent:
@@ -272,7 +272,7 @@ Entities:
       Scale: [2.85, 4.3, 1]
     SpriteRendererComponent:
       Color: [1, 1, 1, 1]
-      Texture: assets\vertical_slice\vn\portraits\mentor_happy.png
+      Texture: assets\vertical_slice\vn\portraits\mentor_slight_smile.png
       TilingFactor: 1
   - Entity: 920000003
     TagComponent:
@@ -294,7 +294,7 @@ Entities:
       Scale: [20, 11, 1]
     SpriteRendererComponent:
       Color: [1, 1, 1, 1]
-      Texture: assets\vertical_slice\vn\backgrounds\forest_camp.png
+      Texture: assets\vertical_slice\vn\backgrounds\bg_forest_camp_night.png
       TilingFactor: 1
   - Entity: 920000001
     TagComponent:

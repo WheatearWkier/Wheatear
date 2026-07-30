@@ -1,15 +1,15 @@
-﻿#include "wtpch.h"
+#include "wtpch.h"
 #include "SceneSerializerComponentSupport.h"
 
 namespace Wheatear {
 
-    // SpriteAnimatorComponent 閫昏緫澶嶆潅锛屽崟鐙壒鍖栵紝浣嗘帴鍙ｅ畬鍏ㄤ竴鑷?
     template<> struct ComponentSerializer<SpriteAnimatorComponent> {
         static constexpr const char* Key = "SpriteAnimatorComponent";
         static void Serialize(YAML::Emitter& o, const SpriteAnimatorComponent& c) {
             o << YAML::Key << Key << YAML::BeginMap;
             o << YAML::Key << "DefaultClip" << YAML::Value << c.DefaultClipName;
             o << YAML::Key << "PlayOnStart" << YAML::Value << c.PlayOnStart;
+            o << YAML::Key << "FireEvents" << YAML::Value << c.FireEvents;
             o << YAML::Key << "Clips" << YAML::Value << YAML::BeginSeq;
             for (const auto& [name, clip] : c.Clips)
             {
@@ -24,6 +24,16 @@ namespace Wheatear {
                     o << YAML::Key << "UVMin" << YAML::Value << f.TexCoordMin;
                     o << YAML::Key << "UVMax" << YAML::Value << f.TexCoordMax;
                     o << YAML::Key << "Duration" << YAML::Value << f.Duration;
+                    o << YAML::EndMap;
+                }
+                o << YAML::EndSeq;
+
+                o << YAML::Key << "Events" << YAML::Value << YAML::BeginSeq;
+                for (const auto& event : clip->GetEvents()) {
+                    o << YAML::BeginMap;
+                    o << YAML::Key << "Time" << YAML::Value << event.Time;
+                    o << YAML::Key << "Name" << YAML::Value << event.Name;
+                    o << YAML::Key << "Command" << YAML::Value << YAML::DoubleQuoted << event.Command;
                     o << YAML::EndMap;
                 }
                 o << YAML::EndSeq;
@@ -90,21 +100,24 @@ namespace Wheatear {
                                         (InterpolationMode)kf["Mode"].as<int>(0));
                             }
                         }
+                    if (auto en = cn["Events"])
+                        for (auto e : en) {
+                            AnimationEvent event;
+                            event.Time = e["Time"].as<float>(0.0f);
+                            event.Name = e["Name"].as<std::string>("");
+                            event.Command = e["Command"].as<std::string>("");
+                            clip->AddEvent(event);
+                        }
                     c.AddClip(clip);
                 }
             }
             c.DefaultClipName = n["DefaultClip"].as<std::string>("");
             c.PlayOnStart = n["PlayOnStart"].as<bool>(true);
+            c.FireEvents = n["FireEvents"].as<bool>(true);
         }
     };
 
-    // 鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺?
-    //  娉ㄥ唽琛細鍞竴闇€瑕佺淮鎶ょ殑鍦版柟
-    //  浠ュ悗鏂板缁勪欢锛?) 鍐欑壒鍖? 2) 鍦ㄨ繖閲屽姞涓€琛岀被鍨?
-    // 鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺?
 
-    // 娉ㄦ剰锛歍agComponent 鍜?TransformComponent 鏄瘡涓疄浣撳繀鏈夌殑锛?
-    // 鍗曠嫭澶勭悊锛涘叾浣欑粍浠惰蛋涓嬮潰鐨勯€氱敤寰幆銆?
 
     using AnimationSceneComponents = ComponentGroup
     <

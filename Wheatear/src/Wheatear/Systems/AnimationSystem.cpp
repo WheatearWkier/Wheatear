@@ -3,15 +3,136 @@
 
 #include "Wheatear/Scene/Scene.h"
 #include "Wheatear/Scene/Components.h"
+#include "Wheatear/Scene/Entity.h"
 #include "Wheatear/Animation/AnimationClip.h"
+#include "Wheatear/Runtime/CommandBus.h"
 
 #include <glm/glm.hpp>
 
+#include <algorithm>
+#include <cmath>
+#include <string>
+
 namespace Wheatear {
+
+    namespace {
+
+        static void ReplaceAll(std::string& value, const std::string& from, const std::string& to)
+        {
+            if (from.empty())
+                return;
+
+            size_t position = 0;
+            while ((position = value.find(from, position)) != std::string::npos)
+            {
+                value.replace(position, from.size(), to);
+                position += to.size();
+            }
+        }
+
+        static std::string ExpandAnimationEventCommand(
+            Entity entity,
+            const AnimationClip& clip,
+            const AnimationEvent& event)
+        {
+            std::string command = event.Command;
+            ReplaceAll(command, "{entity}", entity ? entity.GetName() : "");
+            ReplaceAll(command, "{clip}", clip.GetName());
+            ReplaceAll(command, "{event}", event.Name);
+            return command;
+        }
+
+        static bool IsAnimationEventInRange(float eventTime, float from, float to, bool includeStart)
+        {
+            if (includeStart && eventTime >= from && eventTime <= to)
+                return true;
+            return eventTime > from && eventTime <= to;
+        }
+
+        static void FireAnimationEventsInRange(
+            Scene* scene,
+            Entity entity,
+            const SpriteAnimatorComponent& animator,
+            const AnimationClip& clip,
+            float from,
+            float to,
+            bool includeStart)
+        {
+            if (!scene || !animator.FireEvents)
+                return;
+
+            for (const auto& event : clip.GetEvents())
+            {
+                if (event.Command.empty())
+                    continue;
+                if (!IsAnimationEventInRange(event.Time, from, to, includeStart))
+                    continue;
+
+                CommandBus::Execute(scene, ExpandAnimationEventCommand(entity, clip, event));
+            }
+        }
+
+        static void FireAnimationEvents(
+            Scene* scene,
+            Entity entity,
+            const SpriteAnimatorComponent& animator,
+            const AnimationClip& clip,
+            float previousTime,
+            float currentTime)
+        {
+            const float totalDuration = clip.GetTotalDuration();
+            if (totalDuration <= 0.0f || clip.GetEvents().empty())
+                return;
+
+            if (!clip.IsLooping())
+            {
+                FireAnimationEventsInRange(scene,
+                    entity,
+                    animator,
+                    clip,
+                    previousTime,
+                    std::min(currentTime, totalDuration),
+                    previousTime <= 0.0f);
+                return;
+            }
+
+            const float previousLoopTime = std::fmod(previousTime, totalDuration);
+            const float currentLoopTime = std::fmod(currentTime, totalDuration);
+            const int previousLoop = (int)std::floor(previousTime / totalDuration);
+            const int currentLoop = (int)std::floor(currentTime / totalDuration);
+
+            if (currentLoop == previousLoop && currentLoopTime >= previousLoopTime)
+            {
+                FireAnimationEventsInRange(scene,
+                    entity,
+                    animator,
+                    clip,
+                    previousLoopTime,
+                    currentLoopTime,
+                    previousTime <= 0.0f);
+                return;
+            }
+
+            FireAnimationEventsInRange(scene,
+                entity,
+                animator,
+                clip,
+                previousLoopTime,
+                totalDuration,
+                false);
+            FireAnimationEventsInRange(scene,
+                entity,
+                animator,
+                clip,
+                0.0f,
+                currentLoopTime,
+                true);
+        }
+
+    } // namespace
 
     void AnimationSystem::OnRuntimeStart(Scene* scene)
     {
-        // PlayOnStart 初始化
         for (auto e : scene->GetRegistry().view<SpriteAnimatorComponent>())
         {
             auto& anim = scene->GetRegistry().get<SpriteAnimatorComponent>(e);
@@ -32,7 +153,6 @@ namespace Wheatear {
             SyncEditorPreviewFrame(scene);
     }
 
-    // ── 私有实现 ──────────────────────────────────────────────────────────────
 
     void AnimationSystem::SyncEditorPreviewFrame(Scene* scene)
     {
@@ -68,10 +188,16 @@ namespace Wheatear {
             auto clip = animator.GetCurrentClip();
             if (!clip) continue;
 
+            const float previousTime = animator.ElapsedTime;
             animator.ElapsedTime += ts;
-            const float totalDur = clip->GetTotalDuration();
+            float totalDur = clip->GetTotalDuration();
 
-            // 非循环动画结束处理
+            FireAnimationEvents(scene, Entity{ e, scene }, animator, *clip, previousTime, animator.ElapsedTime);
+
+            clip = animator.GetCurrentClip();
+            if (!clip) continue;
+            totalDur = clip->GetTotalDuration();
+
             if (totalDur > 0.0f && !clip->IsLooping() && animator.ElapsedTime >= totalDur)
             {
                 animator.ElapsedTime = totalDur;
@@ -79,7 +205,6 @@ namespace Wheatear {
                 animator.IsFinished = true;
             }
 
-            // 帧采样
             if (clip->GetFrameCount() > 0)
             {
                 const auto& frames = clip->GetFrames();
@@ -102,7 +227,6 @@ namespace Wheatear {
                 sprite.UVMax = frame.TexCoordMax;
             }
 
-            // 属性轨道采样
             TransformComponent* tc = registry.try_get<TransformComponent>(e);
 
             for (auto& trackBase : clip->GetPropertyTracks())

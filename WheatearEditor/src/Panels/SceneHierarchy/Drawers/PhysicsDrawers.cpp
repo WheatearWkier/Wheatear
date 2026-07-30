@@ -9,7 +9,6 @@
 
 namespace Wheatear {
 
-    // ©¤©¤ Rigidbody 2D ©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤
 
     void DrawRigidbody2DComponent(Entity entity)
     {
@@ -35,7 +34,6 @@ namespace Wheatear {
             });
     }
 
-    // ©¤©¤ Box Collider 2D ©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤
 
     void DrawBoxCollider2DComponent(Entity entity)
     {
@@ -50,7 +48,6 @@ namespace Wheatear {
             });
     }
 
-    // ©¤©¤ Circle Collider 2D ©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤
 
     void DrawCircleCollider2DComponent(Entity entity)
     {

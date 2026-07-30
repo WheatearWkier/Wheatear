@@ -54,7 +54,7 @@ function wt_cpp_defaults()
 
     filter "system:windows"
         systemversion "latest"
-        buildoptions { "/utf-8", "/wd4828" }
+        buildoptions { "/utf-8", "/wd4828", "/MP" }
         defines { "WT_PLATFORM_WINDOWS" }
 
     filter "system:linux"

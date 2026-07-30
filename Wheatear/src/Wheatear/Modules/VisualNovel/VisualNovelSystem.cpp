@@ -32,6 +32,7 @@ namespace Wheatear {
 
         using SceneQueries::FindEntityByName;
         using UIRuntimeTools::SetText;
+        using UIRuntimeTools::SetWidgetTopLeft;
         using UIRuntimeTools::SetWidgetVisible;
 
         static bool StartsWith(const std::string& value, const std::string& prefix)
@@ -143,6 +144,281 @@ namespace Wheatear {
             text.OutlineThickness = 0.85f;
             text.ShadowOffset = { 1.0f, 1.0f };
             return entity;
+        }
+
+        static Entity EnsureVNSettingsWidget(Scene* scene,
+            const std::string& entityName,
+            const std::string& parentTag,
+            const glm::vec2& position,
+            const glm::vec2& size,
+            int sortOrder,
+            bool visible)
+        {
+            if (!scene || entityName.empty())
+                return {};
+
+            Entity entity = FindEntityByName(scene, entityName);
+            if (!entity)
+                entity = scene->CreateEntity(entityName);
+
+            auto& widget = entity.HasComponent<UIWidgetComponent>()
+                ? entity.GetComponent<UIWidgetComponent>()
+                : entity.AddComponent<UIWidgetComponent>();
+            widget.Visible = visible;
+            widget.Anchor = UIAnchor::TopLeft;
+            widget.Position = position;
+            widget.Size = size;
+            widget.Rotation = 0.0f;
+            widget.SortOrder = sortOrder;
+
+            Entity parent = parentTag.empty() ? Entity{} : FindEntityByName(scene, parentTag);
+            widget.ParentEntity = parent ? parent.GetUUID() : UUID(0);
+            widget.ParentTag = parentTag;
+            return entity;
+        }
+
+        static Entity EnsureVNSettingsText(Scene* scene,
+            const std::string& entityName,
+            const std::string& parentTag,
+            const glm::vec2& position,
+            const glm::vec2& size,
+            int sortOrder,
+            const std::string& value,
+            float fontSize,
+            const glm::vec4& color,
+            bool visible)
+        {
+            Entity entity = EnsureVNSettingsWidget(scene, entityName, parentTag, position, size, sortOrder, visible);
+            if (!entity)
+                return {};
+
+            auto& text = entity.HasComponent<UITextComponent>()
+                ? entity.GetComponent<UITextComponent>()
+                : entity.AddComponent<UITextComponent>();
+            text.Text = value;
+            text.FontSize = fontSize;
+            text.Color = color;
+            text.FontPath = "assets/fonts/wqy-microhei.ttc";
+            text.ShadowColor = { 0.02f, 0.025f, 0.030f, 0.78f };
+            text.ShadowOffset = { 1.4f, 1.4f };
+            text.OutlineColor = { 0.0f, 0.0f, 0.0f, 0.86f };
+            text.OutlineThickness = 1.05f;
+            UIRenderer::PreloadUIText(text);
+            return entity;
+        }
+
+        static Entity EnsureVNSettingsButton(Scene* scene,
+            const std::string& entityName,
+            const std::string& parentTag,
+            const glm::vec2& position,
+            const glm::vec2& size,
+            int sortOrder,
+            const std::string& label,
+            const std::string& command,
+            bool visible)
+        {
+            Entity entity = EnsureVNSettingsText(scene,
+                entityName,
+                parentTag,
+                position,
+                size,
+                sortOrder,
+                label,
+                18.0f,
+                { 0.94f, 0.96f, 0.92f, 1.0f },
+                visible);
+            if (!entity)
+                return {};
+
+            auto& button = entity.HasComponent<UIButtonComponent>()
+                ? entity.GetComponent<UIButtonComponent>()
+                : entity.AddComponent<UIButtonComponent>();
+            button.OnClickFunction = command;
+            button.NormalColor = { 0.12f, 0.18f, 0.22f, 0.90f };
+            button.HoverColor = { 0.25f, 0.42f, 0.46f, 0.96f };
+            button.PressedColor = { 0.08f, 0.12f, 0.15f, 1.0f };
+            return entity;
+        }
+
+        static Entity EnsureVNSettingsSlider(Scene* scene,
+            const std::string& entityName,
+            const std::string& parentTag,
+            const glm::vec2& position,
+            const glm::vec2& size,
+            int sortOrder,
+            const std::string& command,
+            bool visible)
+        {
+            Entity entity = EnsureVNSettingsWidget(scene, entityName, parentTag, position, size, sortOrder, visible);
+            if (!entity)
+                return {};
+
+            auto& slider = entity.HasComponent<UISliderComponent>()
+                ? entity.GetComponent<UISliderComponent>()
+                : entity.AddComponent<UISliderComponent>();
+            slider.MinValue = 0.0f;
+            slider.MaxValue = 100.0f;
+            slider.TrackColor = { 0.08f, 0.10f, 0.12f, 0.92f };
+            slider.FillColor = { 0.32f, 0.74f, 0.78f, 0.96f };
+            slider.HandleColor = { 0.92f, 0.98f, 0.94f, 1.0f };
+            slider.HoverColor = { 1.0f, 0.88f, 0.48f, 1.0f };
+            slider.OnValueChangedFunction = command;
+            return entity;
+        }
+
+        static void SetVNSettingsSliderValue(Scene* scene, const std::string& entityName, float value)
+        {
+            Entity entity = FindEntityByName(scene, entityName);
+            if (!entity || !entity.HasComponent<UISliderComponent>())
+                return;
+
+            auto& slider = entity.GetComponent<UISliderComponent>();
+            slider.MinValue = 0.0f;
+            slider.MaxValue = 100.0f;
+            if (!slider.IsDragging)
+                slider.Value = std::clamp(value, slider.MinValue, slider.MaxValue);
+        }
+
+        static void UpdateVNSettingsAudioControls(Scene* scene,
+            const VisualNovelComponent& component,
+            bool visible)
+        {
+            if (!scene || component.SettingsPanelEntityName.empty())
+                return;
+
+            Entity panel = FindEntityByName(scene, component.SettingsPanelEntityName);
+            if (!panel)
+                return;
+
+            const std::string canvasTag = FindFirstCanvasTag(scene);
+            SetWidgetTopLeft(scene, component.SettingsPanelEntityName, { 0.23f, 0.105f }, { 0.54f, 0.70f });
+            SetWidgetTopLeft(scene, component.SettingsTextEntityName, { 0.29f, 0.155f }, { 0.42f, 0.205f });
+            SetWidgetTopLeft(scene, "VN_Settings_TextMinus", { 0.34f, 0.602f }, { 0.15f, 0.048f });
+            SetWidgetTopLeft(scene, "VN_Settings_TextPlus", { 0.51f, 0.602f }, { 0.15f, 0.048f });
+            SetWidgetTopLeft(scene, "VN_Settings_AutoMinus", { 0.34f, 0.665f }, { 0.15f, 0.048f });
+            SetWidgetTopLeft(scene, "VN_Settings_AutoPlus", { 0.51f, 0.665f }, { 0.15f, 0.048f });
+            SetWidgetTopLeft(scene, "VN_SettingsClose", { 0.41f, 0.735f }, { 0.18f, 0.052f });
+
+            const auto& settings = GameProgress::GetState().Settings;
+            const glm::vec4 labelColor = { 0.88f, 0.98f, 0.93f, 1.0f };
+            const glm::vec2 labelSize = { 0.13f, 0.035f };
+            const glm::vec2 sliderSize = { 0.20f, 0.030f };
+            const glm::vec2 buttonSize = { 0.040f, 0.044f };
+
+            EnsureVNSettingsText(scene,
+                "VN_Settings_MasterVolumeLabel",
+                canvasTag,
+                { 0.30f, 0.382f },
+                labelSize,
+                88,
+                "主音量 " + std::to_string(settings.MasterVolume) + "%",
+                16.0f,
+                labelColor,
+                visible);
+            EnsureVNSettingsSlider(scene,
+                "VN_Settings_MasterVolumeSlider",
+                canvasTag,
+                { 0.43f, 0.389f },
+                sliderSize,
+                89,
+                "progression:set_master_volume",
+                visible);
+            EnsureVNSettingsButton(scene,
+                "VN_Settings_MasterVolumeDown",
+                canvasTag,
+                { 0.645f, 0.377f },
+                buttonSize,
+                90,
+                "-",
+                "progression:master_volume_down",
+                visible);
+            EnsureVNSettingsButton(scene,
+                "VN_Settings_MasterVolumeUp",
+                canvasTag,
+                { 0.695f, 0.377f },
+                buttonSize,
+                90,
+                "+",
+                "progression:master_volume_up",
+                visible);
+
+            EnsureVNSettingsText(scene,
+                "VN_Settings_BGMVolumeLabel",
+                canvasTag,
+                { 0.30f, 0.452f },
+                labelSize,
+                88,
+                "BGM " + std::to_string(settings.BGMVolume) + "%",
+                16.0f,
+                labelColor,
+                visible);
+            EnsureVNSettingsSlider(scene,
+                "VN_Settings_BGMVolumeSlider",
+                canvasTag,
+                { 0.43f, 0.459f },
+                sliderSize,
+                89,
+                "progression:set_bgm_volume",
+                visible);
+            EnsureVNSettingsButton(scene,
+                "VN_Settings_BGMVolumeDown",
+                canvasTag,
+                { 0.645f, 0.447f },
+                buttonSize,
+                90,
+                "-",
+                "progression:bgm_volume_down",
+                visible);
+            EnsureVNSettingsButton(scene,
+                "VN_Settings_BGMVolumeUp",
+                canvasTag,
+                { 0.695f, 0.447f },
+                buttonSize,
+                90,
+                "+",
+                "progression:bgm_volume_up",
+                visible);
+
+            EnsureVNSettingsText(scene,
+                "VN_Settings_SFXVolumeLabel",
+                canvasTag,
+                { 0.30f, 0.522f },
+                labelSize,
+                88,
+                "音效 " + std::to_string(settings.SFXVolume) + "%",
+                16.0f,
+                labelColor,
+                visible);
+            EnsureVNSettingsSlider(scene,
+                "VN_Settings_SFXVolumeSlider",
+                canvasTag,
+                { 0.43f, 0.529f },
+                sliderSize,
+                89,
+                "progression:set_sfx_volume",
+                visible);
+            EnsureVNSettingsButton(scene,
+                "VN_Settings_SFXVolumeDown",
+                canvasTag,
+                { 0.645f, 0.517f },
+                buttonSize,
+                90,
+                "-",
+                "progression:sfx_volume_down",
+                visible);
+            EnsureVNSettingsButton(scene,
+                "VN_Settings_SFXVolumeUp",
+                canvasTag,
+                { 0.695f, 0.517f },
+                buttonSize,
+                90,
+                "+",
+                "progression:sfx_volume_up",
+                visible);
+
+            SetVNSettingsSliderValue(scene, "VN_Settings_MasterVolumeSlider", static_cast<float>(settings.MasterVolume));
+            SetVNSettingsSliderValue(scene, "VN_Settings_BGMVolumeSlider", static_cast<float>(settings.BGMVolume));
+            SetVNSettingsSliderValue(scene, "VN_Settings_SFXVolumeSlider", static_cast<float>(settings.SFXVolume));
         }
 
         static void PreloadTextForEntity(Scene* scene, const std::string& entityName, const std::string& value)
@@ -271,6 +547,29 @@ namespace Wheatear {
                 return false;
 
             entity.GetComponent<SpriteRendererComponent>().Texture = texture;
+            return true;
+        }
+
+        static bool TryPlaySpriteAnimation(Scene* scene,
+            const std::string& entityName,
+            const std::string& clipName)
+        {
+            if (clipName.empty())
+                return false;
+
+            Entity entity = FindEntityByName(scene, entityName);
+            if (!entity || !entity.HasComponent<SpriteRendererComponent>() || !entity.HasComponent<SpriteAnimatorComponent>())
+                return false;
+
+            auto& animator = entity.GetComponent<SpriteAnimatorComponent>();
+            if (animator.Clips.find(clipName) == animator.Clips.end())
+                return false;
+
+            if (animator.CurrentClipName != clipName)
+            {
+                animator.CurrentClipName.clear();
+                animator.Play(clipName);
+            }
             return true;
         }
 
@@ -939,6 +1238,8 @@ namespace Wheatear {
         const bool showStoryUi = !state.DialogueHidden && !state.ShowHistory && !state.ShowSettings && !state.ShowSaveLoad;
         const bool waitingForChoice = showStoryUi && state.Runtime.IsWaitingForChoice();
 
+        UpdateVNSettingsAudioControls(scene, component, state.ShowSettings);
+
         SetWidgetsWithPrefixVisible(scene, "VN_Command", showStoryUi);
         SetWidgetsWithPrefixVisible(scene, "VN_History", state.ShowHistory);
         SetWidgetsWithPrefixVisible(scene, "VN_Settings", state.ShowSettings);
@@ -1056,7 +1357,11 @@ namespace Wheatear {
 
             const std::string entityName = component.CharacterEntityPrefix + character.Name;
             const std::string texturePath = ResolveCharacterTexturePath(character, expression);
-            if (!texturePath.empty() && TrySetSpriteTexture(scene, entityName, texturePath))
+            if (TryPlaySpriteAnimation(scene, entityName, expression))
+            {
+                SetSpriteColor(scene, entityName, { 1.0f, 1.0f, 1.0f, alpha });
+            }
+            else if (!texturePath.empty() && TrySetSpriteTexture(scene, entityName, texturePath))
             {
                 SetSpriteColor(scene, entityName, { 1.0f, 1.0f, 1.0f, alpha });
             }

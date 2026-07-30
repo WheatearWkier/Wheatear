@@ -1,4 +1,4 @@
-﻿#include "WidgetHelpers.h"
+#include "WidgetHelpers.h"
 
 #include <imgui/imgui.h>
 #include <imgui/imgui_internal.h>
@@ -26,7 +26,6 @@ namespace Wheatear::UI {
         const float  lineHeight = ImGui::GetFrameHeight();
         const ImVec2 buttonSize = { lineHeight + 3.0f, lineHeight };
 
-        // ── X ────────────────────────────────────────────
         ImGui::PushStyleColor(ImGuiCol_Button, ImVec4{ 0.8f, 0.1f, 0.15f, 1.0f });
         ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4{ 0.9f, 0.2f, 0.2f,  1.0f });
         ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4{ 0.8f, 0.1f, 0.15f, 1.0f });
@@ -39,7 +38,6 @@ namespace Wheatear::UI {
         ImGui::PopItemWidth();
         ImGui::SameLine();
 
-        // ── Y ────────────────────────────────────────────
         ImGui::PushStyleColor(ImGuiCol_Button, ImVec4{ 0.2f, 0.7f, 0.2f, 1.0f });
         ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4{ 0.3f, 0.8f, 0.3f, 1.0f });
         ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4{ 0.2f, 0.7f, 0.2f, 1.0f });
@@ -52,7 +50,6 @@ namespace Wheatear::UI {
         ImGui::PopItemWidth();
         ImGui::SameLine();
 
-        // ── Z ────────────────────────────────────────────
         ImGui::PushStyleColor(ImGuiCol_Button, ImVec4{ 0.1f, 0.25f, 0.8f, 1.0f });
         ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4{ 0.2f, 0.35f, 0.9f, 1.0f });
         ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4{ 0.1f, 0.25f, 0.8f, 1.0f });

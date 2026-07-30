@@ -1,4 +1,4 @@
-﻿#include "wtpch.h"
+#include "wtpch.h"
 #include "AnimationEditorPanel.h"
 
 #include <imgui/imgui.h>
@@ -6,23 +6,20 @@
 #include <glm/gtc/type_ptr.hpp>
 #include <filesystem>
 #include <cstring>
+#include <cfloat>
+#include <vector>
 
 #include "Wheatear/Core/AssetPath.h"
 #include "Wheatear/Scene/Components.h"
 #include "ContentBrowserPanel.h"   // GetEditorAssetPath
+#include "SpriteSheetPickerPanel.h"
 
 namespace Wheatear {
 
-    // 轨道行高
     static constexpr float kTrackHeight = 36.0f;
-    // 左侧标签列宽
     static constexpr float kLabelWidth = 150.0f;
-    // 时间轴标尺高度
     static constexpr float kRulerHeight = 36.0f;
 
-    // ════════════════════════════════════════════════════════
-    //  插值模式下拉
-    // ════════════════════════════════════════════════════════
 
     static void DrawInterpModeCombo(InterpolationMode& mode)
     {
@@ -44,9 +41,18 @@ namespace Wheatear {
         }
     }
 
-    // ════════════════════════════════════════════════════════
-    //  SetEntity：从 Hierarchy 选中实体时调用
-    // ════════════════════════════════════════════════════════
+    static bool InputString(const char* label, std::string& value, size_t capacity = 256)
+    {
+        std::vector<char> buffer(capacity, 0);
+        strncpy_s(buffer.data(), buffer.size(), value.c_str(), _TRUNCATE);
+        if (ImGui::InputText(label, buffer.data(), buffer.size()))
+        {
+            value = buffer.data();
+            return true;
+        }
+        return false;
+    }
+
 
     void AnimationEditorPanel::SetEntity(Entity entity)
     {
@@ -70,9 +76,6 @@ namespace Wheatear {
             m_Scene->SetAnimationEditorPreviewActive(true);
     }
 
-    // ════════════════════════════════════════════════════════
-    //  工具函数：取当前正在编辑的 Clip
-    // ════════════════════════════════════════════════════════
 
     Ref<AnimationClip> AnimationEditorPanel::GetCurrentClip() const
     {
@@ -81,13 +84,7 @@ namespace Wheatear {
         return it != m_Animator->Clips.end() ? it->second : nullptr;
     }
 
-    // ════════════════════════════════════════════════════════
-    //  采样工具函数（避免 time 变量被跨轨道污染）
-    // ════════════════════════════════════════════════════════
 
-    // BUG FIX #3: 将采样逻辑提取为独立函数，每条轨道使用独立的 localTime，
-    // 防止原代码中 float 轨道的 looping fmod 修改共享的 time 变量，
-    // 从而错误影响后续 vec4 轨道的采样。
     static float SampleFloat(
         const std::vector<Keyframe<float>>& kfs,
         float playbackTime,
@@ -162,20 +159,12 @@ namespace Wheatear {
         return prev.Value + (next.Value - prev.Value) * alpha;
     }
 
-    // ════════════════════════════════════════════════════════
     //  SyncPreviewToEntity
-    //  BUG FIX #1: 只在预览激活（m_IsPlaying 或用户主动拖动时间轴）时写回组件，
-    //  且快照必须在第一次写回之前已经拍好，否则本函数不执行。
-    //  这样可以保证：编辑器不在预览时绝不污染实体的序列化状态。
-    // ════════════════════════════════════════════════════════
 
     void AnimationEditorPanel::SyncPreviewToEntity()
     {
         if (!m_Entity || !m_Animator) return;
 
-        // BUG FIX #1 核心：没有快照就不写回，防止在非预览状态下污染组件数据。
-        // 快照只在 Play 或主动 Scrub 时才拍，确保 Sync 不会在用户没有
-        // 明确触发预览的情况下修改实体状态。
         if (!m_HasSnapshot) return;
 
         auto clip = GetCurrentClip();
@@ -184,7 +173,6 @@ namespace Wheatear {
         float duration = clip->GetTotalDuration();
         bool  looping = clip->IsLooping();
 
-        // ── 序列帧写回 SpriteRenderer ────────────────────────────
         if (clip->GetFrameCount() > 0 &&
             m_Entity.HasComponent<SpriteRendererComponent>())
         {
@@ -211,19 +199,16 @@ namespace Wheatear {
             if (frame.Texture)
             {
                 sr.Texture = frame.Texture;
-                // BUG FIX #2: 同时写回 UV，防止 Atlas 帧只换纹理不换 UV 导致显示错误
                 sr.UVMin = frame.TexCoordMin;
                 sr.UVMax = frame.TexCoordMax;
             }
         }
 
-        // ── 属性轨道写回 ─────────────────────────────────────────
         for (auto& trackBase : clip->GetPropertyTracks())
         {
             if (trackBase->GetDataType() == TrackDataType::Float)
             {
                 auto track = std::static_pointer_cast<PropertyTrack<float>>(trackBase);
-                // BUG FIX #3: 每条轨道用独立函数采样，不共享、不污染 time 变量
                 float sampledValue = SampleFloat(
                     track->Keyframes, m_PlaybackTime, duration, looping);
 
@@ -273,9 +258,7 @@ namespace Wheatear {
         }
     }
 
-    // ════════════════════════════════════════════════════════
     //  TakeSnapshot / RestoreSnapshot
-    // ════════════════════════════════════════════════════════
 
     void AnimationEditorPanel::TakeSnapshot()
     {
@@ -286,9 +269,6 @@ namespace Wheatear {
         {
             auto& sr = m_Entity.GetComponent<SpriteRendererComponent>();
             m_SnapshotColor = sr.Color;
-            // BUG FIX #2: 快照也需要保存 Texture、TexCoord，
-            // 否则 Stop 后无法恢复序列帧播放前的纹理状态，
-            // 第二次 Play 时 TakeSnapshot 会拍到上次播放残留的最后一帧纹理。
             m_SnapshotTexture = sr.Texture;
             m_SnapshotTexCoordMin = sr.UVMin;
             m_SnapshotTexCoordMax = sr.UVMax;
@@ -313,7 +293,6 @@ namespace Wheatear {
         {
             auto& sr = m_Entity.GetComponent<SpriteRendererComponent>();
             sr.Color = m_SnapshotColor;
-            // BUG FIX #2: 恢复纹理和 UV，确保预览结束后实体回到原始外观
             sr.Texture = m_SnapshotTexture;
             sr.UVMin = m_SnapshotTexCoordMin;
             sr.UVMax = m_SnapshotTexCoordMax;
@@ -340,32 +319,20 @@ namespace Wheatear {
             m_Scene->SetAnimationEditorPreviewActive(false);
     }
 
-    // ════════════════════════════════════════════════════════
-    //  Scrub（拖动时间轴）时主动触发快照 + Sync
-    //  BUG FIX #1: 提供一个专用函数，让时间轴点击/拖动也走快照保护流程
-    // ════════════════════════════════════════════════════════
 
     void AnimationEditorPanel::BeginScrub()
     {
-        // 开始拖动时间轴时拍快照（如果还没有的话）
         TakeSnapshot();
         m_IsScrubbing = true;
-        // 重新激活预览模式，防止 Scene::OnUpdateEditor 覆盖 UV
         if (m_Scene)
             m_Scene->SetAnimationEditorPreviewActive(true);
     }
 
     void AnimationEditorPanel::EndScrub()
     {
-        // 松开鼠标后停留在当前时间，不自动恢复快照
-        // （用户可能想查看某一帧的状态）
-        // 快照将在下次 StopPreview / 切换 Clip / 切换 Entity 时恢复
         m_IsScrubbing = false;
     }
 
-    // ════════════════════════════════════════════════════════
-    //  主入口
-    // ════════════════════════════════════════════════════════
 
     void AnimationEditorPanel::OnImGuiRender(Timestep ts)
     {
@@ -378,7 +345,6 @@ namespace Wheatear {
             return;
         }
 
-        // 预览播放推进时间
         if (m_IsPlaying)
         {
             auto clip = GetCurrentClip();
@@ -396,8 +362,6 @@ namespace Wheatear {
             }
         }
 
-        // BUG FIX #1: SyncPreviewToEntity 内部已做 m_HasSnapshot 守卫，
-        // 只有在快照存在（即用户已触发预览/Scrub）时才写回组件。
         SyncPreviewToEntity();
 
         DrawToolbar();
@@ -406,20 +370,18 @@ namespace Wheatear {
         ImGui::Separator();
         DrawAtlasSection();
         ImGui::Separator();
+        DrawEventsSection();
+        ImGui::Separator();
         DrawFramesSection();
 
         ImGui::End();
     }
 
-    // ════════════════════════════════════════════════════════
-    //  工具栏
-    // ════════════════════════════════════════════════════════
 
     void AnimationEditorPanel::DrawToolbar()
     {
         if (!m_Animator) return;
 
-        // ── 第一行：实体名 + Clip 管理 ────────────────────────
         ImGui::TextDisabled("Entity:");
         ImGui::SameLine();
         ImGui::Text("%s", m_Entity.GetName().c_str());
@@ -431,6 +393,13 @@ namespace Wheatear {
             m_Animator->PlayOnStart = playOnStart;
         if (ImGui::IsItemHovered())
             ImGui::SetTooltip("Auto-play default clip when scene starts");
+
+        ImGui::SameLine(0, 20);
+        bool fireEvents = m_Animator->FireEvents;
+        if (ImGui::Checkbox("Fire Events", &fireEvents))
+            m_Animator->FireEvents = fireEvents;
+        if (ImGui::IsItemHovered())
+            ImGui::SetTooltip("Animation events execute CommandBus commands at runtime");
 
         ImGui::SameLine(0, 20);
 
@@ -457,7 +426,6 @@ namespace Wheatear {
                 bool sel = (name == m_CurrentClipName);
                 if (ImGui::Selectable(name.c_str(), sel))
                 {
-                    // 切换 Clip 时恢复快照，防止跨 Clip 污染
                     StopPreview();
                     m_CurrentClipName = name;
                     //m_Animator->CurrentClipName = name;
@@ -469,7 +437,6 @@ namespace Wheatear {
             ImGui::EndCombo();
         }
 
-        // Clip 重命名
         ImGui::SameLine();
         ImGui::SetNextItemWidth(120.0f);
         static char s_RenameBuffer[64] = {};
@@ -520,7 +487,7 @@ namespace Wheatear {
             ImGui::SameLine();
             if (ImGui::Button("Delete Clip"))
             {
-                StopPreview(); // BUG FIX #1: 删除 Clip 前先恢复快照
+                StopPreview();
                 m_AtlasConfigs.erase(m_CurrentClipName);
                 m_Animator->Clips.erase(m_CurrentClipName);
                 if (m_Animator->CurrentClipName == m_CurrentClipName)
@@ -536,7 +503,6 @@ namespace Wheatear {
         auto clip = GetCurrentClip();
         if (!clip) return;
 
-        // ── 第二行：播放控制 ──────────────────────────────────
         ImGui::Spacing();
 
         if (m_IsPlaying)
@@ -547,12 +513,11 @@ namespace Wheatear {
         {
             if (ImGui::Button(">  Play"))
             {
-                TakeSnapshot(); // 没快照才拍，已有快照不覆盖
+                TakeSnapshot();
 
                 m_IsPlaying = true;
                 if (m_PlaybackTime >= clip->GetTotalDuration())
                     m_PlaybackTime = 0.0f;
-                // 重新激活预览模式，防止 Scene::OnUpdateEditor 覆盖 UV
                 if (m_Scene)
                     m_Scene->SetAnimationEditorPreviewActive(true);
             }
@@ -595,7 +560,6 @@ namespace Wheatear {
         ImGui::SetNextItemWidth(100.0f);
         ImGui::SliderFloat("##zoom", &m_PixelsPerSecond, 40.0f, 400.0f, "%.0fpx/s");
 
-        // ── 第三行：Add Track ─────────────────────────────────
         ImGui::Spacing();
 
         static const AnimatedProperty kAllProperties[] = {
@@ -636,11 +600,18 @@ namespace Wheatear {
             else
                 clip->AddFloatTrack(prop);
         }
+
+        ImGui::SameLine(0, 20);
+        if (ImGui::Button("+ Add Event"))
+        {
+            AnimationEvent event;
+            event.Time = std::max(0.0f, m_PlaybackTime);
+            event.Name = "event";
+            event.Command = "";
+            clip->AddEvent(event);
+        }
     }
 
-    // ════════════════════════════════════════════════════════
-    //  时间轴主体
-    // ════════════════════════════════════════════════════════
 
     void AnimationEditorPanel::DrawTimeline()
     {
@@ -653,10 +624,9 @@ namespace Wheatear {
 
         const float duration = std::max(clip->GetTotalDuration(), 1.0f);
         const float totalWidth = duration * m_PixelsPerSecond + 200.0f;
-        const int   trackCount = 1 + (int)clip->GetPropertyTracks().size();
+        const int   trackCount = 2 + (int)clip->GetPropertyTracks().size();
         const float totalHeight = kRulerHeight + trackCount * kTrackHeight + 4.0f;
 
-        // ── 左侧标签列 ──────────────────────────────────────
         ImGui::BeginChild("##labels",
             ImVec2(kLabelWidth, totalHeight + 20.0f), false,
             ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse);
@@ -665,6 +635,10 @@ namespace Wheatear {
 
             ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(0.9f, 0.85f, 0.5f, 1.0f));
             ImGui::Text("  Frames (%d)", clip->GetFrameCount());
+            ImGui::PopStyleColor();
+
+            ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(0.78f, 0.68f, 1.0f, 1.0f));
+            ImGui::Text("  Events (%d)", (int)clip->GetEvents().size());
             ImGui::PopStyleColor();
 
             auto& tracks = clip->GetPropertyTracks();
@@ -688,7 +662,6 @@ namespace Wheatear {
 
         ImGui::SameLine(0, 0);
 
-        // ── 右侧时间轴（可横向滚动）──────────────────────────
         ImGui::BeginChild("##timeline_scroll",
             ImVec2(0, totalHeight + 20.0f), false,
             ImGuiWindowFlags_HorizontalScrollbar);
@@ -703,7 +676,6 @@ namespace Wheatear {
 
             float trackY = origin.y;
 
-            // ── 标尺背景 ────────────────────────────────────
             dl->AddRectFilled(
                 ImVec2(origin.x, trackY),
                 ImVec2(origin.x + totalWidth, trackY + kRulerHeight),
@@ -729,13 +701,10 @@ namespace Wheatear {
                 }
             }
 
-            // 标尺点击/拖动跳转
             ImGui::SetCursorScreenPos(ImVec2(ImGui::GetWindowPos().x, origin.y));
             ImGui::InvisibleButton("##ruler_hit",
                 ImVec2(ImGui::GetWindowWidth(), kRulerHeight));
 
-            // BUG FIX #1: 拖动标尺时也需要走快照流程，
-            // 否则用户 Scrub 时会直接污染组件数据
             if (ImGui::IsItemActivated())
                 BeginScrub();
 
@@ -751,7 +720,6 @@ namespace Wheatear {
             if (ImGui::IsItemDeactivated())
                 EndScrub();
 
-            // 滚轮缩放
             if (ImGui::IsWindowHovered())
             {
                 float wheel = ImGui::GetIO().MouseWheel;
@@ -762,11 +730,12 @@ namespace Wheatear {
 
             trackY += kRulerHeight;
 
-            // ── Frames 轨道 ──────────────────────────────────
             DrawFrameTrack(ImVec2(origin.x, trackY), kTrackHeight);
             trackY += kTrackHeight;
 
-            // ── 属性轨道 ────────────────────────────────────
+            DrawEventTrack(ImVec2(origin.x, trackY), kTrackHeight);
+            trackY += kTrackHeight;
+
             auto& tracks = clip->GetPropertyTracks();
             for (int ti = 0; ti < (int)tracks.size(); ti++)
             {
@@ -774,7 +743,6 @@ namespace Wheatear {
                 trackY += kTrackHeight;
             }
 
-            // ── 时间指针红线 ──────────────────────────────────
             float cursorX = origin.x + m_PlaybackTime * m_PixelsPerSecond;
             dl->AddLine(
                 ImVec2(cursorX, origin.y),
@@ -789,9 +757,90 @@ namespace Wheatear {
         ImGui::EndChild();
     }
 
-    // ════════════════════════════════════════════════════════
-    //  帧序列轨道
-    // ════════════════════════════════════════════════════════
+
+    void AnimationEditorPanel::DrawEventTrack(ImVec2 origin, float trackHeight)
+    {
+        ImDrawList* dl = ImGui::GetWindowDrawList();
+
+        auto clip = GetCurrentClip();
+        if (!clip) return;
+
+        const float duration = std::max(clip->GetTotalDuration(), 1.0f);
+        const float width = duration * m_PixelsPerSecond + 60.0f;
+        dl->AddRectFilled(origin,
+            ImVec2(origin.x + width, origin.y + trackHeight),
+            IM_COL32(34, 30, 48, 255));
+
+        ImGui::SetCursorScreenPos(origin);
+        ImGui::InvisibleButton("##event_track_bg", ImVec2(width, trackHeight));
+        if (ImGui::IsItemHovered() && ImGui::IsMouseDoubleClicked(0))
+        {
+            float clickTime = (ImGui::GetIO().MousePos.x - origin.x) / m_PixelsPerSecond;
+            AnimationEvent event;
+            event.Time = std::clamp(clickTime, 0.0f, duration);
+            event.Name = "event";
+            event.Command = "";
+            clip->AddEvent(event);
+        }
+        if (ImGui::IsItemHovered())
+            ImGui::SetTooltip("Double-click to add an animation event.");
+
+        auto& events = clip->GetEvents();
+        int eventToDelete = -1;
+        bool sortEvents = false;
+
+        for (int i = 0; i < (int)events.size(); ++i)
+        {
+            auto& event = events[i];
+            const float x = origin.x + event.Time * m_PixelsPerSecond;
+            const float centerY = origin.y + trackHeight * 0.5f;
+
+            ImVec2 marker[3] = {
+                ImVec2(x, centerY - 9.0f),
+                ImVec2(x + 8.0f, centerY + 7.0f),
+                ImVec2(x - 8.0f, centerY + 7.0f)
+            };
+            dl->AddConvexPolyFilled(marker, 3, IM_COL32(170, 120, 255, 235));
+            dl->AddPolyline(marker, 3, IM_COL32(230, 220, 255, 255), true, 1.2f);
+
+            ImGui::SetCursorScreenPos(ImVec2(x - 8.0f, centerY - 9.0f));
+            ImGui::PushID(50000 + i);
+            ImGui::InvisibleButton("##anim_event", ImVec2(16.0f, 18.0f));
+            if (ImGui::IsItemActive() && ImGui::IsMouseDragging(0))
+            {
+                event.Time += ImGui::GetIO().MouseDelta.x / m_PixelsPerSecond;
+                event.Time = std::clamp(event.Time, 0.0f, duration);
+                sortEvents = true;
+            }
+            if (ImGui::IsItemHovered())
+                ImGui::SetTooltip("%s\n%.3fs\n%s",
+                    event.Name.empty() ? "(unnamed)" : event.Name.c_str(),
+                    event.Time,
+                    event.Command.empty() ? "(no command)" : event.Command.c_str());
+
+            if (ImGui::BeginPopupContextItem("##anim_event_ctx"))
+            {
+                ImGui::Text("Animation Event");
+                ImGui::Separator();
+                ImGui::SetNextItemWidth(90.0f);
+                if (ImGui::DragFloat("Time", &event.Time, 0.01f, 0.0f, duration, "%.3fs"))
+                    sortEvents = true;
+                InputString("Name", event.Name, 128);
+                InputString("Command", event.Command, 320);
+                ImGui::TextDisabled("Placeholders: {entity} {clip} {event}");
+                ImGui::Separator();
+                if (ImGui::MenuItem("Delete"))
+                    eventToDelete = i;
+                ImGui::EndPopup();
+            }
+            ImGui::PopID();
+        }
+
+        if (eventToDelete >= 0)
+            clip->RemoveEvent(eventToDelete);
+        else if (sortEvents)
+            clip->SortEvents();
+    }
 
     void AnimationEditorPanel::DrawFrameTrack(ImVec2 origin, float trackHeight)
     {
@@ -809,7 +858,6 @@ namespace Wheatear {
         auto& frames = clip->GetFrames();
         float x = origin.x;
 
-        // 预先算出当前帧索引，避免在内层循环重复计算
         float elapsed = 0.0f;
         int currentFrameIndex = (int)frames.size() - 1;
         {
@@ -849,7 +897,6 @@ namespace Wheatear {
                 dl->AddImageRounded(
                     static_cast<ImTextureID>(static_cast<uintptr_t>(frame.Texture->GetRendererID())),
                     cellMin, cellMax,
-                    // 注意垂直翻转显示图片
                     ImVec2(frame.TexCoordMin.x, frame.TexCoordMax.y),
                     ImVec2(frame.TexCoordMax.x, frame.TexCoordMin.y),
                     IM_COL32_WHITE, 2.0f);
@@ -875,9 +922,6 @@ namespace Wheatear {
         }
     }
 
-    // ════════════════════════════════════════════════════════
-    //  属性轨道
-    // ════════════════════════════════════════════════════════
 
     void AnimationEditorPanel::DrawPropertyTrack(ImVec2 origin, float trackHeight, int trackIndex)
     {
@@ -916,8 +960,6 @@ namespace Wheatear {
                     IM_COL32(150, 200, 255, 120), 1.5f);
             }
 
-            // BUG FIX #4: 收集待删除的关键帧索引，在循环结束后再删除，
-            // 防止在遍历时修改容器导致迭代器失效/越界崩溃。
             int kfToDelete = -1;
 
             for (int ki = 0; ki < (int)kfs.size(); ki++)
@@ -962,18 +1004,16 @@ namespace Wheatear {
                     DrawInterpModeCombo(kf.Mode);
                     ImGui::Separator();
                     if (ImGui::MenuItem("Delete"))
-                        kfToDelete = ki; // BUG FIX #4: 延迟删除
+                        kfToDelete = ki;
                     ImGui::EndPopup();
                 }
 
                 ImGui::PopID();
             }
 
-            // BUG FIX #4: 循环结束后再执行删除
             if (kfToDelete >= 0)
                 track->RemoveKeyframe(kfToDelete);
 
-            // 双击空白处添加关键帧
             ImGui::SetCursorScreenPos(origin);
             ImGui::InvisibleButton(
                 ("##track_bg" + std::to_string(trackIndex)).c_str(),
@@ -998,7 +1038,6 @@ namespace Wheatear {
                     IM_COL32(255, 200, 100, 120), 1.5f);
             }
 
-            // BUG FIX #4: 同样延迟删除
             int kfToDelete = -1;
 
             for (int ki = 0; ki < (int)kfs.size(); ki++)
@@ -1047,18 +1086,16 @@ namespace Wheatear {
                     DrawInterpModeCombo(kf.Mode);
                     ImGui::Separator();
                     if (ImGui::MenuItem("Delete"))
-                        kfToDelete = ki; // BUG FIX #4: 延迟删除
+                        kfToDelete = ki;
                     ImGui::EndPopup();
                 }
 
                 ImGui::PopID();
             }
 
-            // BUG FIX #4: 循环结束后再执行删除
             if (kfToDelete >= 0)
                 track->RemoveKeyframe(kfToDelete);
 
-            // 双击添加
             ImGui::SetCursorScreenPos(origin);
             ImGui::InvisibleButton(
                 ("##track_bg4_" + std::to_string(trackIndex)).c_str(),
@@ -1071,25 +1108,27 @@ namespace Wheatear {
         }
     }
 
-    // ════════════════════════════════════════════════════════
     //  Atlas Generator
-    // ════════════════════════════════════════════════════════
 
     void AnimationEditorPanel::DrawAtlasSection()
     {
         auto clip = GetCurrentClip();
         if (!clip) return;
 
-        if (!ImGui::CollapsingHeader("Atlas Generator"))
+        if (!ImGui::CollapsingHeader("Spritesheet / Atlas Generator"))
             return;
 
         AtlasConfig& atlas = m_AtlasConfigs[m_CurrentClipName];
+        ImGui::TextDisabled("Preferred runtime path: one spritesheet texture + UV frames for fewer texture swaps.");
+        if (ImGui::Button("Open Sprite Sheet Picker"))
+            SpriteSheetPickerPanel::RequestOpen(m_Entity);
+        if (ImGui::IsItemHovered(ImGuiHoveredFlags_DelayShort))
+            ImGui::SetTooltip("Use the visual atlas picker for cell selection and frame sequence generation.");
 
         ImTextureID atlasThumb = atlas.Texture
             ? static_cast<ImTextureID>(static_cast<uintptr_t>(atlas.Texture->GetRendererID()))
             : static_cast<ImTextureID>(0);
 
-        // 注意颠倒图片显示
         ImGui::Image(atlasThumb, ImVec2(60, 60), ImVec2(0, 1), ImVec2(1, 0));
         if (ImGui::BeginDragDropTarget())
         {
@@ -1152,9 +1191,81 @@ namespace Wheatear {
         }
     }
 
-    // ════════════════════════════════════════════════════════
-    //  Frames 列表
-    // ════════════════════════════════════════════════════════
+
+    void AnimationEditorPanel::DrawEventsSection()
+    {
+        auto clip = GetCurrentClip();
+        if (!clip) return;
+
+        if (!ImGui::CollapsingHeader("Events", ImGuiTreeNodeFlags_DefaultOpen))
+            return;
+
+        auto& events = clip->GetEvents();
+
+        if (ImGui::Button("+ Event At Cursor"))
+        {
+            AnimationEvent event;
+            event.Time = std::max(0.0f, m_PlaybackTime);
+            event.Name = "event";
+            event.Command = "";
+            clip->AddEvent(event);
+        }
+        ImGui::SameLine();
+        ImGui::TextDisabled("Use commands like anim:play:Hero:attack or event:FlowController:foo");
+
+        int eventToDelete = -1;
+        bool sortEvents = false;
+        if (ImGui::BeginTable("##animation_events", 5,
+            ImGuiTableFlags_BordersInnerV
+            | ImGuiTableFlags_RowBg
+            | ImGuiTableFlags_SizingStretchProp))
+        {
+            ImGui::TableSetupColumn("#", ImGuiTableColumnFlags_WidthFixed, 28.0f);
+            ImGui::TableSetupColumn("Time", ImGuiTableColumnFlags_WidthFixed, 92.0f);
+            ImGui::TableSetupColumn("Name", ImGuiTableColumnFlags_WidthStretch, 0.75f);
+            ImGui::TableSetupColumn("Command", ImGuiTableColumnFlags_WidthStretch, 1.7f);
+            ImGui::TableSetupColumn("", ImGuiTableColumnFlags_WidthFixed, 34.0f);
+            ImGui::TableHeadersRow();
+
+            const float duration = std::max(clip->GetTotalDuration(), 1.0f);
+            for (int i = 0; i < (int)events.size(); ++i)
+            {
+                auto& event = events[i];
+                ImGui::PushID(60000 + i);
+                ImGui::TableNextRow();
+
+                ImGui::TableSetColumnIndex(0);
+                ImGui::Text("%d", i + 1);
+
+                ImGui::TableSetColumnIndex(1);
+                ImGui::SetNextItemWidth(-FLT_MIN);
+                if (ImGui::DragFloat("##time", &event.Time, 0.01f, 0.0f, duration, "%.3fs"))
+                    sortEvents = true;
+
+                ImGui::TableSetColumnIndex(2);
+                ImGui::SetNextItemWidth(-FLT_MIN);
+                InputString("##name", event.Name, 128);
+
+                ImGui::TableSetColumnIndex(3);
+                ImGui::SetNextItemWidth(-FLT_MIN);
+                InputString("##command", event.Command, 320);
+                if (ImGui::IsItemHovered())
+                    ImGui::SetTooltip("Placeholders: {entity} {clip} {event}");
+
+                ImGui::TableSetColumnIndex(4);
+                if (ImGui::SmallButton("X"))
+                    eventToDelete = i;
+
+                ImGui::PopID();
+            }
+            ImGui::EndTable();
+        }
+
+        if (eventToDelete >= 0)
+            clip->RemoveEvent(eventToDelete);
+        else if (sortEvents)
+            clip->SortEvents();
+    }
 
     void AnimationEditorPanel::DrawFramesSection()
     {
@@ -1177,10 +1288,9 @@ namespace Wheatear {
                     static_cast<uintptr_t>(frame.Texture->GetRendererID()))
                 : static_cast<ImTextureID>(0);
 
-            // 注意颠倒图片显示
             ImGui::Image(thumbID, ImVec2(48, 48),
-                ImVec2(frame.TexCoordMin.x, frame.TexCoordMax.y), // 这里改用 Max.y
-                ImVec2(frame.TexCoordMax.x, frame.TexCoordMin.y)  // 这里改用 Min.y
+                ImVec2(frame.TexCoordMin.x, frame.TexCoordMax.y),
+                ImVec2(frame.TexCoordMax.x, frame.TexCoordMin.y)
             );
 
             if (ImGui::BeginDragDropTarget())

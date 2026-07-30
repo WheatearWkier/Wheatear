@@ -1,4 +1,4 @@
-﻿#pragma once
+#pragma once
 
 #include "Wheatear/Core/Core.h"
 
@@ -40,8 +40,6 @@ namespace Wheatear {
 		Consume
 	};
 
-	// Event 是所有引擎事件的轻量基类。
-	// Handled 在新事件系统中表示“已消费，停止继续传播”，不是“已经被某个模块看过”。
 	class WHEATEAR_API Event
 	{
 		friend class EventDispatcher;
@@ -83,7 +81,6 @@ namespace Wheatear {
 		{
 			if (!m_Event.Handled() && m_Event.GetEventType() == T::GetStaticType())
 			{
-				// 保留旧式 Layer::OnEvent 写法的兼容层，同时避免 false 覆盖之前的 consumed 状态。
 				m_Event.m_Handled |= func(static_cast<T&>(m_Event));
 				return true;
 			}

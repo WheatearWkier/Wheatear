@@ -19,7 +19,7 @@ namespace Wheatear {
         std::ifstream file(resolvedPath);
         if (!file.is_open())
         {
-            WT_CORE_ERROR("Material::Load: 无法打开文件 {0}", resolvedPath.string());
+            WT_CORE_ERROR("Material::Load: 鏃犳硶鎵撳紑鏂囦欢 {0}", resolvedPath.string());
             return CreateRef<Material>();
         }
 
@@ -27,7 +27,7 @@ namespace Wheatear {
         YAML::Node node = root["Material"];
         if (!node)
         {
-            WT_CORE_ERROR("Material::Load: 文件格式错误 {0}", resolvedPath.string());
+            WT_CORE_ERROR("Material::Load: 鏂囦欢鏍煎紡閿欒 {0}", resolvedPath.string());
             return CreateRef<Material>();
         }
 
@@ -70,11 +70,10 @@ namespace Wheatear {
     {
         if (m_Path.empty())
         {
-            WT_CORE_ERROR("Material::Save: 路径为空 ");
+            WT_CORE_ERROR("Material::Save: 璺緞涓虹┖ ");
             return;
         }
 
-        // 自动创建目录
         const std::filesystem::path resolvedPath = AssetPath::Resolve(m_Path);
         std::filesystem::create_directories(resolvedPath.parent_path());
 

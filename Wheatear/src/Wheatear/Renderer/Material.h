@@ -26,7 +26,7 @@ namespace Wheatear {
         static Ref<Material> Create();
         static Ref<Material> Load(const std::string& path);
         void Save(const std::string& path);
-        void Save(); // 保存到原路径
+        void Save();
 
     private:
         std::string m_Path;

@@ -14,7 +14,6 @@
 
 namespace Wheatear {
 
-    // ── 内部辅助 ──────────────────────────────────────────────────────────────
 
     namespace {
 
@@ -32,7 +31,6 @@ namespace Wheatear {
 
     } // anonymous namespace
 
-    // ── PhysicsSystem ─────────────────────────────────────────────────────────
 
     void PhysicsSystem::OnRuntimeStart(Scene* scene)
     {
@@ -40,7 +38,6 @@ namespace Wheatear {
         m_ContactListener = new ContactListener(scene);
         m_PhysicsWorld->SetContactListener(m_ContactListener);
 
-        // 为场景中所有已有刚体创建 Box2D body
         for (auto e : scene->GetRegistry().view<Rigidbody2DComponent>())
             InitEntityPhysics(scene, { e, scene });
     }
@@ -57,7 +54,6 @@ namespace Wheatear {
         constexpr int32_t positionIterations = 2;
         m_PhysicsWorld->Step(ts, velocityIterations, positionIterations);
 
-        // 物理结果回写到 TransformComponent
         auto& registry = scene->GetRegistry();
         for (auto e : registry.view<Rigidbody2DComponent>())
         {
@@ -93,7 +89,6 @@ namespace Wheatear {
             static_cast<uintptr_t>(static_cast<uint64_t>(entity.GetUUID()));
         rb2d.RuntimeBody = body;
 
-        // 工厂 lambda，避免重复填写 FixtureDef 字段
         auto makeFixture = [&](b2Shape& shape, float density, float friction,
             float restitution, float restitutionThreshold)
             {
@@ -129,7 +124,6 @@ namespace Wheatear {
 
     void PhysicsSystem::OnEntityCreated(Scene* scene, Entity& entity)
     {
-        // 只在运行时且实体有刚体时才初始化
         if (!m_PhysicsWorld) return;
         if (!entity.HasComponent<Rigidbody2DComponent>()) return;
         InitEntityPhysics(scene, entity);

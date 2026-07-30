@@ -243,8 +243,8 @@ namespace Wheatear::GameProgress {
             state.UnlockedSkills.insert("air_basic");
             state.UnlockedSkills.insert("launcher");
             state.UnlockedSkills.insert("air_chase");
-            state.UnlockedSkills.insert("magic_bolt");
-            state.UnlockedSkills.insert("ally_support");
+            state.UnlockedSkills.insert("vfx_magic_bolt");
+            state.UnlockedSkills.insert("vfx_ally_support");
             state.UnlockedSkills.insert("magic_sword_core");
             state.UnlockedSkills.insert("ME-01");
             state.UnlockedSkills.insert("ME-02");
@@ -427,7 +427,7 @@ namespace Wheatear::GameProgress {
                 { "triple_slash", "三段斩", "近战", "J / 鼠标左键", "地面连段、压低 Boss 保护条", "魔剑 Lv1", "基础但重要的近战连段。每一段都应能接上挑、火球或闪避取消。" },
                 { "rising_cleave", "裂空挑斩", "近战 / 浮空", "S+J", "浮空起手", "魔剑 Lv1", "把可受控目标挑起，是前期空中连击的主要入口。" },
                 { "air_chase", "空中追斩", "空连", "空中 S+J", "滞空续连、重新抬高下落目标", "魔剑 Lv1，后续可用材料强化", "空中攻击不会让角色一直悬停，而是慢慢下落；追斩负责把快掉下去的目标续住。" },
-                { "magic_bolt", "魔法弹", "魔法", "U", "远程补 hit、打断投射怪", "魔剑 Lv2", "魔法分支第一个实用节点。它让近战空连之外也能补连击和处理远程怪。" },
+                { "vfx_magic_bolt", "魔法弹", "魔法", "U", "远程补 hit、打断投射怪", "魔剑 Lv2", "魔法分支第一个实用节点。它让近战空连之外也能补连击和处理远程怪。" },
                 { "mentor_support", "导师支援", "支援", "I", "空中留敌、危急保护", "导师好感 100", "真青梅伪装导师时提供的支援。当前竖切用于展示好感会影响支援强度。" },
                 { "wind_step", "疾风步", "机动", "闪避 / 方向键", "取消后摇、调整纵深", "魔剑 Lv2", "机动分支让玩家在俯视横板战斗中控制 X 轴和纵深，不是单纯跑路。" },
                 { "break_limit", "断限追击", "高阶", "后期：上 + 技能键", "重置跳跃、滞空和 Boss 保护窗口", "第七章正式教学", "高手玩法核心。普通玩家不靠它也能通关，高手靠它打高空长连。" }
@@ -445,7 +445,7 @@ namespace Wheatear::GameProgress {
         {
             if (nodeId == "break_limit")
                 return "后期锁定";
-            if (nodeId == "magic_bolt" || nodeId == "wind_step")
+            if (nodeId == "vfx_magic_bolt" || nodeId == "wind_step")
                 return state.MagicSwordLevel >= 2 ? "已解锁" : "可通过魔剑 Lv2 解锁";
             return "已习得";
         }
@@ -456,7 +456,7 @@ namespace Wheatear::GameProgress {
             if (action == "select_skill_melee") return "triple_slash";
             if (action == "select_skill_launcher") return "rising_cleave";
             if (action == "select_skill_air") return "air_chase";
-            if (action == "select_skill_magic") return "magic_bolt";
+            if (action == "select_skill_magic") return "vfx_magic_bolt";
             if (action == "select_skill_support") return "mentor_support";
             if (action == "select_skill_mobility") return "wind_step";
             if (action == "select_skill_break") return "break_limit";
@@ -1028,7 +1028,7 @@ namespace Wheatear::GameProgress {
         else if (action == "learn_selected_skill")
         {
             const std::string selected = GetState().SelectedSkillNodeId;
-            if (selected == "magic_bolt" || selected == "wind_step")
+            if (selected == "vfx_magic_bolt" || selected == "wind_step")
             {
                 result.Changed = TryUpgradeMagicSwordToLv2();
                 result.Success = result.Changed || GetState().MagicSwordLevel >= 2;
@@ -1227,7 +1227,7 @@ namespace Wheatear::GameProgress {
         {
             auto& settings = GetState().Settings;
             settings.BGMVolume = std::clamp(static_cast<int>(ParseFloat(action.substr(15), static_cast<float>(settings.BGMVolume)) + 0.5f), 0, 100);
-            GetState().LastResultMessage = "BGM volume " + std::to_string(settings.BGMVolume) + "%.";
+            GetState().LastResultMessage = "BGM 音量设置为 " + std::to_string(settings.BGMVolume) + "%。";
             result.Changed = true;
             result.Success = true;
         }
@@ -1235,7 +1235,7 @@ namespace Wheatear::GameProgress {
         {
             auto& settings = GetState().Settings;
             settings.SFXVolume = std::clamp(static_cast<int>(ParseFloat(action.substr(15), static_cast<float>(settings.SFXVolume)) + 0.5f), 0, 100);
-            GetState().LastResultMessage = "SFX volume " + std::to_string(settings.SFXVolume) + "%.";
+            GetState().LastResultMessage = "音效音量设置为 " + std::to_string(settings.SFXVolume) + "%。";
             result.Changed = true;
             result.Success = true;
         }
@@ -1275,7 +1275,7 @@ namespace Wheatear::GameProgress {
         {
             auto& settings = GetState().Settings;
             settings.BGMVolume = std::min(100, settings.BGMVolume + 5);
-            GetState().LastResultMessage = "BGM volume " + std::to_string(settings.BGMVolume) + "%.";
+            GetState().LastResultMessage = "BGM 音量 " + std::to_string(settings.BGMVolume) + "%。";
             result.Changed = true;
             result.Success = true;
         }
@@ -1283,7 +1283,7 @@ namespace Wheatear::GameProgress {
         {
             auto& settings = GetState().Settings;
             settings.BGMVolume = std::max(0, settings.BGMVolume - 5);
-            GetState().LastResultMessage = "BGM volume " + std::to_string(settings.BGMVolume) + "%.";
+            GetState().LastResultMessage = "BGM 音量 " + std::to_string(settings.BGMVolume) + "%。";
             result.Changed = true;
             result.Success = true;
         }
@@ -1291,7 +1291,7 @@ namespace Wheatear::GameProgress {
         {
             auto& settings = GetState().Settings;
             settings.SFXVolume = std::min(100, settings.SFXVolume + 5);
-            GetState().LastResultMessage = "SFX volume " + std::to_string(settings.SFXVolume) + "%.";
+            GetState().LastResultMessage = "音效音量 " + std::to_string(settings.SFXVolume) + "%。";
             result.Changed = true;
             result.Success = true;
         }
@@ -1299,7 +1299,7 @@ namespace Wheatear::GameProgress {
         {
             auto& settings = GetState().Settings;
             settings.SFXVolume = std::max(0, settings.SFXVolume - 5);
-            GetState().LastResultMessage = "SFX volume " + std::to_string(settings.SFXVolume) + "%.";
+            GetState().LastResultMessage = "音效音量 " + std::to_string(settings.SFXVolume) + "%。";
             result.Changed = true;
             result.Success = true;
         }
@@ -1456,7 +1456,7 @@ namespace Wheatear::GameProgress {
         std::ostringstream stream;
         const State& state = GetState();
         stream << "材料栏: " << BuildMaterialInventoryText() << "\n";
-        if (state.SelectedSkillNodeId == "magic_bolt" || state.SelectedSkillNodeId == "wind_step")
+        if (state.SelectedSkillNodeId == "vfx_magic_bolt" || state.SelectedSkillNodeId == "wind_step")
             stream << "选中节点需求: 魔剑 Lv2 / " << BuildCostText(MagicSwordLv2Cost());
         else if (state.SelectedSkillNodeId == "break_limit")
             stream << "选中节点需求: 第七章王宫战后正式开放。";
@@ -1470,7 +1470,7 @@ namespace Wheatear::GameProgress {
         const State& state = GetState();
         if (state.SelectedSkillNodeId == "break_limit")
             return "后期节点";
-        if (state.SelectedSkillNodeId != "magic_bolt" && state.SelectedSkillNodeId != "wind_step")
+        if (state.SelectedSkillNodeId != "vfx_magic_bolt" && state.SelectedSkillNodeId != "wind_step")
             return "节点已学 / 查看详情";
         if (state.MagicSwordLevel >= 2)
             return "Lv2 节点已解锁";
@@ -1727,7 +1727,7 @@ namespace Wheatear::GameProgress {
         stream << "音效音量: " << state.Settings.SFXVolume << "%\n";
         stream << "全屏偏好: " << (state.Settings.Fullscreen ? "开" : "关") << "\n";
         stream << "屏幕震动: " << (state.Settings.ScreenShake ? "开" : "关") << "\n\n";
-        stream << "当前竖切先记录设置；音频阶段会把 BGM / 音效音量接到 AudioEngine。";
+        stream << "音量设置已接入 VN BGM、战斗 BGM 和战斗音效。";
         return stream.str();
     }
 

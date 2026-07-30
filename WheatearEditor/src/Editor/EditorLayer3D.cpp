@@ -1,4 +1,4 @@
-﻿#include "wtpch.h"
+#include "wtpch.h"
 #include "EditorLayer3D.h"
 
 #include "Wheatear/Core/AssetPath.h"
@@ -7,7 +7,10 @@
 
 #include "Wheatear/Renderer/Renderer2D.h"
 #include "Wheatear/Renderer/Renderer3D.h"
+#include "Wheatear/Scene/Components.h"
+#include "Wheatear/Scene/Scene.h"
 #include "Wheatear/Utils/PlatformUtils.h"
+#include "Panels/SceneHierarchyPanel.h"
 
 #include <imgui/imgui.h>
 #include <glm/gtc/matrix_transform.hpp>
@@ -23,21 +26,16 @@ namespace Wheatear {
     }
 
     // =========================================================================
-    // Layer 鐢熷懡鍛ㄦ湡
     // =========================================================================
 
     void EditorLayer3D::OnAttach()
     {
-        // 鍏堟墽琛屽熀绫诲垵濮嬪寲锛團ramebuffer / Camera / 鍒濆鍦烘櫙绛夛級
         EditorLayerBase::OnAttach();
 
-        // SSAO 鍒濆鍖栵紙涓?Framebuffer 榛樿灏哄涓€鑷达級
         Renderer3D::InitSSAO(1920, 1080);
         m_LastSSAOWidth = 1920;
         m_LastSSAOHeight = 1080;
 
-        // 鈹€鈹€ IBL 榛樿鍔犺浇 鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€
-        // 鏈?default.hdr 灏遍璁＄畻骞剁粦瀹氾紱娌℃湁灏遍潤榛樿烦杩囷紝澶╃┖鐩掑洖閫€鍒版笎鍙樿壊
         const std::string defaultHDR = "assets/hdr/default.hdr";
         const std::filesystem::path resolvedDefaultHDR = AssetPath::Resolve(defaultHDR);
         if (std::filesystem::exists(resolvedDefaultHDR))
@@ -49,7 +47,6 @@ namespace Wheatear {
     }
 
     // =========================================================================
-    // OnBeginRender锛?D 鍦烘櫙鍓嶇疆娓叉煋
     // =========================================================================
 
     void EditorLayer3D::OnBeginRender()
@@ -63,14 +60,12 @@ namespace Wheatear {
     }
 
     // =========================================================================
-    //  OnPostSceneUpdate    //  姝ゆ椂娉曠嚎 attachment锛坅ttachment 1锛夊凡缁忚 PBR shader 濉厖瀹屾瘯
     // =========================================================================
 
     void EditorLayer3D::OnPostSceneUpdate()
     {
         const auto& spec = m_Framebuffer->GetSpecification();
 
-        // viewport 灏哄鍙樺寲鏃跺悓姝?SSAO FBO
         if (m_LastSSAOWidth != spec.Width ||
             m_LastSSAOHeight != spec.Height)
         {
@@ -80,14 +75,13 @@ namespace Wheatear {
         }
 
         Renderer3D::ComputeSSAO(
-            m_Framebuffer->GetColorAttachmentRendererID(1), // attachment 1: 娉曠嚎
+            m_Framebuffer->GetColorAttachmentRendererID(1),
             m_Framebuffer->GetDepthAttachmentRendererID(),
             GetEditorCamera().GetProjection()
         );
     }
 
     // =========================================================================
-    // OnOverlayRender锛氬厜婧?Gizmo + Editor Grid
     // =========================================================================
 
     void EditorLayer3D::OnOverlayRender()
@@ -193,7 +187,6 @@ namespace Wheatear {
     {
         ImGui::Begin("Settings (3D)");
 
-        // 鈹€鈹€ IBL 鐜璐村浘 鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€
         ImGui::Text("Environment (IBL)");
 
         if (m_IBL && m_IBL->IsValid())
@@ -247,7 +240,6 @@ namespace Wheatear {
             ImGui::SliderFloat("Power##ssao", &Renderer3D::SSAOPower(), 0.5f, 4.0f);
         }
 
-        // 鈹€鈹€ 棰勭暀锛?D 鐗╃悊 / 3D 鍔ㄧ敾璋冭瘯閫夐」 鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€
         // ImGui::Separator();
         // ImGui::Text("3D Physics (coming soon)");
         // ImGui::Text("3D Animation (coming soon)");

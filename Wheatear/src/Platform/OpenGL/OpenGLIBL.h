@@ -24,15 +24,12 @@ namespace Wheatear {
         static constexpr int k_PrefilterMips = 5;
         static constexpr int k_BrdfLUTSize = 512;
 
-        // 私有辅助函数，签名里不出现 Shader / glm，全部移到 .cpp 里实现
         static uint32_t    LoadEquirect(const std::string& path);
         static uint32_t    CreateCubemap(int size, uint32_t internalFormat,
             bool generateMips = false);
         static uint32_t    CreateBrdfLUT();
         static std::string GetCachePath(const std::string& hdrPath);
 
-        // RenderCubeFaces 完全不在头文件声明，只在 .cpp 内部使用
-        // （它需要 Ref<Shader> 和 glm，全部留在 .cpp 就行）
 
         static uint32_t s_BrdfLUT;
     };

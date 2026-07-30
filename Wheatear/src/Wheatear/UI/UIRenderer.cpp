@@ -96,11 +96,7 @@ namespace Wheatear {
         color.a *= textAlpha;
         return color;
     }
-    // 鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺?
-    //  鍧愭爣杞崲宸ュ叿锛坒ile-local锛?
-    // 鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺?
 
-    // 褰掍竴鍖栧潗鏍?0~1) -> NDC(-1~1)锛孻 杞寸炕杞紙ImGui/灞忓箷 Y 鍚戜笅锛孨DC Y 鍚戜笂锛?
     static glm::vec2 NormToNDC(const glm::vec2& pos)
     {
         return { pos.x * 2.0f - 1.0f, 1.0f - pos.y * 2.0f };
@@ -325,27 +321,19 @@ namespace Wheatear {
         Renderer2D::SetLineWidth(previousWidth);
     }
 
-    // 鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺?
     //  WidgetToTransform
-    //  灏?UIWidgetComponent 鐨勫綊涓€鍖栧竷灞€淇℃伅杞崲涓?Renderer2D 鐢ㄧ殑 mat4 鍙樻崲銆?
-    //  NDC 绌洪棿锛歑/Y 鍧囧湪 [-1, 1]锛孮uad 鏈湴鍧愭爣 [-0.5, 0.5]銆?
-    // 鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺?
 
     glm::mat4 UIRenderer::WidgetToTransform(
         const UIWidgetComponent& widget,
         uint32_t /*viewportWidth*/,
         uint32_t /*viewportHeight*/)
     {
-        // Position 涓轰腑蹇冪偣锛堝綊涓€鍖?0~1锛夛紝杞崲涓?NDC
         float ndcX = widget.Position.x * 2.0f - 1.0f;
-        float ndcY = -(widget.Position.y * 2.0f - 1.0f); // Y 杞寸炕杞?
+        float ndcY = -(widget.Position.y * 2.0f - 1.0f);
 
-        // Renderer2D Quad 鏈湴鍧愭爣 [-0.5, 0.5]
-        // Scale 鐩存帴绛変簬 NDC 灏哄锛宷uad 浼氳缂╂斁鍒版纭ぇ灏?
         float ndcW = widget.Size.x * 2.0f;
         float ndcH = widget.Size.y * 2.0f;
 
-        // Anchor 鍋忕Щ锛堝湪 NDC 绌洪棿涓妸涓績鐐圭Щ鍒伴敋鐐瑰搴斾綅缃級
         switch (widget.Anchor)
         {
         case UIAnchor::TopLeft:
@@ -389,56 +377,39 @@ namespace Wheatear {
         return transform;
     }
 
-    // 鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺?
-    //  UI 姝ｄ氦鐩告満锛圢DC 鐩撮€氭姇褰憋級
-    // 鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺?
 
     class UIOrthographicCamera : public Camera
     {
     public:
         UIOrthographicCamera()
         {
-            // NDC 鐩撮€氾細鎶曞奖鐭╅樀灏?[-1,1]^3 鏄犲皠鍒拌鍓┖闂达紝鐩稿綋浜?identity
             m_Projection = glm::ortho(-1.0f, 1.0f, -1.0f, 1.0f, -1.0f, 1.0f);
         }
     };
 
-    // 鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺?
-    //  Pass 绠＄悊
-    // 鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺?
 
     void UIRenderer::BeginUIPass(uint32_t viewportWidth, uint32_t viewportHeight)
     {
         s_ViewportWidth = viewportWidth;
         s_ViewportHeight = viewportHeight;
 
-        // UI 涓嶅仛娣卞害娴嬭瘯锛屽缁堢粯鍒跺湪鍦烘櫙涓婃柟
         RenderCommand::SetScissorTest(false);
         RenderCommand::DisableDepthTest();
 
-        // 浣跨敤鍗曚緥 UI 鐩告満锛坥rtho NDC 鐩撮€氾級锛寁iew = identity
         static UIOrthographicCamera uiCamera;
         Renderer2D::BeginScene(uiCamera, glm::mat4(1.0f));
     }
 
     void UIRenderer::EndUIPass(const glm::mat4& restoreViewProjection)
     {
-        // 鎻愪氦 UI 鎵规
         Renderer2D::EndScene();
         RenderCommand::SetScissorTest(false);
 
-        // BUG FIX: EndUIPass 涔嬪悗璋冪敤 SetViewProjection 鎭㈠娓告垙鐩告満 VP 鍒?UBO锛?
-        // 纭繚鍚庣画 OnOverlayRender 鐨?BeginScene 鑳藉湪姝ｇ‘鐘舵€佷笅寮€濮嬨€?
-        // 娉ㄦ剰锛歋etViewProjection 鍙洿鏂?UBO锛屼笉閲嶇疆鎵规鎸囬拡锛堟壒娆″凡鍦?EndScene 涓?flush锛夈€?
         Renderer2D::SetViewProjection(restoreViewProjection);
 
-        // 鎭㈠娣卞害娴嬭瘯
         RenderCommand::EnableDepthTest();
     }
 
-    // 鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺?
-    //  缁樺埗鎺ュ彛
-    // 鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺?
 
     void UIRenderer::DrawUIImage(
         const UIWidgetComponent& widget,
@@ -450,7 +421,7 @@ namespace Wheatear {
         glm::mat4 transform = WidgetToTransform(widget, s_ViewportWidth, s_ViewportHeight);
 
         if (image.Texture)
-            Renderer2D::DrawQuad(transform, image.Texture, 1.0f, image.Color, entityID);
+            Renderer2D::DrawAnimationFrame(transform, image.Texture, image.UVMin, image.UVMax, false, image.Color, entityID);
         else
             Renderer2D::DrawQuad(transform, image.Color, entityID);
     }
@@ -481,7 +452,6 @@ namespace Wheatear {
 
         glm::mat4 transform = WidgetToTransform(widget, s_ViewportWidth, s_ViewportHeight);
 
-        // 鏍规嵁鐘舵€侀€夎壊
         glm::vec4 color = button.NormalColor;
         if (button.IsPressed) color = button.PressedColor;
         else if (button.IsHovered) color = button.HoverColor;

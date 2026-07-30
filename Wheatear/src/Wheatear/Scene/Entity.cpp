@@ -1,6 +1,8 @@
 #include "wtpch.h"
 #include "Entity.h"
 
+#include "Components.h"
+
 namespace Wheatear {
 
     Entity::Entity(entt::entity handle, Scene* scene)
@@ -8,6 +10,16 @@ namespace Wheatear {
         , m_Scene(scene)
     {
         
+    }
+
+    UUID Entity::GetUUID() const
+    {
+        return GetComponent<IDComponent>().ID;
+    }
+
+    const std::string& Entity::GetName() const
+    {
+        return GetComponent<TagComponent>().Tag;
     }
 
 } // namespace Wheatear

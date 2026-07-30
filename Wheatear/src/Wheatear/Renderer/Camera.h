@@ -4,8 +4,6 @@
 
 namespace Wheatear {
 
-    // 基类：仅持有投影矩阵
-    // SceneCamera 和 EditorCamera 都继承此类
     class Camera
     {
     public:

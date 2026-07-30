@@ -9,7 +9,7 @@ Entity:
     Scale: [0.800000012, 0.5, 1]
   SpriteRendererComponent:
     Color: [1, 1, 1, 1]
-    Texture: assets\textures\bullet2.png
+    Texture: assets/demo_platformer/projectiles/proj_fireball_small.png
     TilingFactor: 1
   Rigidbody2DComponent:
     BodyType: Dynamic

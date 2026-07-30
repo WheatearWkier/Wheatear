@@ -1,6 +1,7 @@
-﻿#include "SpriteRendererDrawer.h"
+#include "SpriteRendererDrawer.h"
 
 #include "../ComponentDrawers.h"
+#include "Panels/SpriteSheetPickerPanel.h"
 
 #include <imgui/imgui.h>
 #include <glm/gtc/type_ptr.hpp>
@@ -15,7 +16,7 @@ namespace Wheatear {
 
     void DrawSpriteRendererComponent(Entity entity)
     {
-        DrawComponent<SpriteRendererComponent>("Sprite Renderer", entity, [](auto& c)
+        DrawComponent<SpriteRendererComponent>("Sprite Renderer", entity, [entity](auto& c)
             {
                 ImGui::ColorEdit4("Color", glm::value_ptr(c.Color));
 
@@ -24,18 +25,12 @@ namespace Wheatear {
                     ? static_cast<ImTextureID>(static_cast<uintptr_t>(c.Texture->GetRendererID()))
                     : static_cast<ImTextureID>(0);
 
-                // 1. 处理 X 轴翻转
-                float uv0x = c.FlipX ? 1.0f : 0.0f;
-                float uv1x = c.FlipX ? 0.0f : 1.0f;
-
-                // 2. 处理 Y 轴翻转 (核心：由于 OpenGL 默认倒置，基础映射是 1 -> 0)
-                // 如果以后在组件加了 FlipY 字段，把下面的 false 换成 c.FlipY
-                bool isFlippedY = false;
-                float uv0y = isFlippedY ? 0.0f : 1.0f; // 默认 1.0 (顶部)
-                float uv1y = isFlippedY ? 1.0f : 0.0f; // 默认 0.0 (底部)
+                const float uv0x = c.FlipX ? c.UVMax.x : c.UVMin.x;
+                const float uv1x = c.FlipX ? c.UVMin.x : c.UVMax.x;
+                const float uv0y = c.UVMax.y;
+                const float uv1y = c.UVMin.y;
 
                 ImGui::PushID(&c);
-                // 注意图片的垂直翻转
                 ImGui::ImageButton("##SpriteTexture", textureID, buttonSize, ImVec2(uv0x, uv0y), ImVec2(uv1x, uv1y));
 
                 if (ImGui::BeginDragDropTarget())
@@ -66,6 +61,16 @@ namespace Wheatear {
                 ImGui::Checkbox("Flip X", &c.FlipX);
                 // ImGui::Checkbox("Flip Y", &c.FlipY);
                 ImGui::DragFloat("Tiling Factor", &c.TilingFactor, 0.1f, 0.0f, 100.0f);
+                if (ImGui::Button("Open Sprite Sheet Picker"))
+                    SpriteSheetPickerPanel::RequestOpen(entity);
+                if (ImGui::IsItemHovered(ImGuiHoveredFlags_DelayShort))
+                    ImGui::SetTooltip("Pick a cell from an atlas or generate sprite animation frames.");
+                if (ImGui::TreeNode("Advanced UV"))
+                {
+                    ImGui::DragFloat2("UV Min", glm::value_ptr(c.UVMin), 0.001f, 0.0f, 1.0f, "%.3f");
+                    ImGui::DragFloat2("UV Max", glm::value_ptr(c.UVMax), 0.001f, 0.0f, 1.0f, "%.3f");
+                    ImGui::TreePop();
+                }
             });
     }
 

@@ -4,8 +4,6 @@
 #include "Wheatear/Core/Log.h"
 #include <glm/glm.hpp>
 
-// tinyobjloader ¡ª¡ª header-only£¬°ÑÊµÏÖ·ÅÔÚÕâ¸ö .cpp Àï
-// ÐèÒªÔÚ premake/CMake Àï°Ñ tinyobjloader µÄ include Â·¾¶¼Ó½øÀ´
 #define TINYOBJLOADER_IMPLEMENTATION
 #include <tiny_obj_loader.h>
 
@@ -16,7 +14,6 @@
 namespace Wheatear {
 
     // -------------------------------------------------------------------------
-    // ¹¤³§·½·¨
     // -------------------------------------------------------------------------
 
     Ref<Mesh> Mesh::Create(const std::string& filepath)
@@ -30,13 +27,12 @@ namespace Wheatear {
 
         if (!mesh->LoadOBJ(resolvedPath.string(), vertices, indices))
         {
-            WT_CORE_ERROR("Mesh::Create ¡ª ¼ÓÔØÊ§°Ü: {0}", resolvedPath.string());
-            // ÍË»¯³ÉÒ»¸öÄ¬ÈÏÁ¢·½Ìå£¬ÈÃ³¡¾°²»±ÀÀ£
+            WT_CORE_ERROR("Mesh::Create â€” åŠ è½½å¤±è´¥: {0}", resolvedPath.string());
             return CreateCube();
         }
 
         mesh->UploadToGPU(vertices, indices);
-        WT_CORE_INFO("Mesh ¼ÓÔØ³É¹¦: {0}  ({1} ¶¥µã, {2} Èý½ÇÐÎ)",
+        WT_CORE_INFO("Mesh åŠ è½½æˆåŠŸ: {0}  ({1} é¡¶ç‚¹, {2} ä¸‰è§’å½¢)",
             mesh->m_Filepath, vertices.size(), indices.size() / 3);
         return mesh;
     }
@@ -50,47 +46,37 @@ namespace Wheatear {
     }
 
     // -------------------------------------------------------------------------
-    // ÄÚÖÃ¼¸ºÎÌå
     // -------------------------------------------------------------------------
 
     Ref<Mesh> Mesh::CreateCube()
     {
-        // Ã¿¸öÃæ 4 ¸ö¶¥µã£¨·¨Ïß¸÷²»ÏàÍ¬£¬²»ÄÜ¹²Ïí¶¥µã£©
-        // ¶¥µãË³Ðò£ºÄæÊ±ÕëÎªÕýÃæ£¨OpenGL Ä¬ÈÏ£©
         std::vector<MeshVertex> vertices = {
-            // Ç°Ãæ (z = +0.5, normal = 0,0,1)
             {{ -0.5f, -0.5f,  0.5f }, { 0,0,1 }, { 0,0 }},
             {{  0.5f, -0.5f,  0.5f }, { 0,0,1 }, { 1,0 }},
             {{  0.5f,  0.5f,  0.5f }, { 0,0,1 }, { 1,1 }},
             {{ -0.5f,  0.5f,  0.5f }, { 0,0,1 }, { 0,1 }},
-            // ºóÃæ (z = -0.5, normal = 0,0,-1)
             {{  0.5f, -0.5f, -0.5f }, { 0,0,-1 }, { 0,0 }},
             {{ -0.5f, -0.5f, -0.5f }, { 0,0,-1 }, { 1,0 }},
             {{ -0.5f,  0.5f, -0.5f }, { 0,0,-1 }, { 1,1 }},
             {{  0.5f,  0.5f, -0.5f }, { 0,0,-1 }, { 0,1 }},
-            // ×óÃæ (x = -0.5, normal = -1,0,0)
             {{ -0.5f, -0.5f, -0.5f }, { -1,0,0 }, { 0,0 }},
             {{ -0.5f, -0.5f,  0.5f }, { -1,0,0 }, { 1,0 }},
             {{ -0.5f,  0.5f,  0.5f }, { -1,0,0 }, { 1,1 }},
             {{ -0.5f,  0.5f, -0.5f }, { -1,0,0 }, { 0,1 }},
-            // ÓÒÃæ (x = +0.5, normal = 1,0,0)
             {{  0.5f, -0.5f,  0.5f }, { 1,0,0 }, { 0,0 }},
             {{  0.5f, -0.5f, -0.5f }, { 1,0,0 }, { 1,0 }},
             {{  0.5f,  0.5f, -0.5f }, { 1,0,0 }, { 1,1 }},
             {{  0.5f,  0.5f,  0.5f }, { 1,0,0 }, { 0,1 }},
-            // ÉÏÃæ (y = +0.5, normal = 0,1,0)
             {{ -0.5f,  0.5f,  0.5f }, { 0,1,0 }, { 0,0 }},
             {{  0.5f,  0.5f,  0.5f }, { 0,1,0 }, { 1,0 }},
             {{  0.5f,  0.5f, -0.5f }, { 0,1,0 }, { 1,1 }},
             {{ -0.5f,  0.5f, -0.5f }, { 0,1,0 }, { 0,1 }},
-            // ÏÂÃæ (y = -0.5, normal = 0,-1,0)
             {{ -0.5f, -0.5f, -0.5f }, { 0,-1,0 }, { 0,0 }},
             {{  0.5f, -0.5f, -0.5f }, { 0,-1,0 }, { 1,0 }},
             {{  0.5f, -0.5f,  0.5f }, { 0,-1,0 }, { 1,1 }},
             {{ -0.5f, -0.5f,  0.5f }, { 0,-1,0 }, { 0,1 }},
         };
 
-        // Ã¿¸öÃæÁ½¸öÈý½ÇÐÎ£¬¹² 6 Ãæ ¡Á 6 Ë÷Òý = 36
         std::vector<uint32_t> indices;
         indices.reserve(36);
         for (uint32_t face = 0; face < 6; ++face)
@@ -114,7 +100,6 @@ namespace Wheatear {
     }
 
     // -------------------------------------------------------------------------
-    // GPU ÉÏ´«£¨¶¥µã²¼¾Ö£ºPosition / Normal / TexCoord£©
     // -------------------------------------------------------------------------
 
     void Mesh::UploadToGPU(const std::vector<MeshVertex>& vertices,
@@ -146,7 +131,6 @@ namespace Wheatear {
     }
 
     // -------------------------------------------------------------------------
-    // OBJ ¼ÓÔØ£¨tinyobjloader£©
     // -------------------------------------------------------------------------
 
     bool Mesh::LoadOBJ(const std::string& filepath,
@@ -158,18 +142,15 @@ namespace Wheatear {
         std::vector<tinyobj::material_t> materials;
         std::string warn, err;
 
-        // ²ÄÖÊËÑË÷Ä¿Â¼ = ÎÄ¼þËùÔÚÄ¿Â¼
         std::string baseDir = filepath.substr(0, filepath.find_last_of("/\\") + 1);
 
-        // 1.0.6 µÄÇ©Ãû£ºwarn ºÍ err ·Ö¿ª£¬filepath Ö±½Ó´« c_str()
         bool ok = tinyobj::LoadObj(&attrib, &shapes, &materials,
-            &err,                  // 1.0.6 Ã»ÓÐ¶ÀÁ¢µÄ warn ²ÎÊý
+            &err,
             filepath.c_str(),
             baseDir.c_str());
         if (!err.empty()) WT_CORE_ERROR("OBJ: {0}", err);
         if (!ok) return false;
 
-        // ÓÃ index È¥ÖØ£ºÏàÍ¬ (pos/normal/uv) ÈýÔª×é ¡ú Í¬Ò»¶¥µã
         // key = "posIdx/normalIdx/uvIdx"
         std::unordered_map<std::string, uint32_t> uniqueVertices;
 
@@ -179,14 +160,12 @@ namespace Wheatear {
             {
                 MeshVertex v{};
 
-                // Î»ÖÃ£¨±ØÓÐ£©
                 v.Position = {
                     attrib.vertices[3 * idx.vertex_index + 0],
                     attrib.vertices[3 * idx.vertex_index + 1],
                     attrib.vertices[3 * idx.vertex_index + 2],
                 };
 
-                // ·¨Ïß£¨¿ÉÄÜÃ»ÓÐ ¡ú ºóÐøÖØÐÂ¼ÆËã£¬ÏÈÌî 0£©
                 if (idx.normal_index >= 0)
                 {
                     v.Normal = {
@@ -196,7 +175,6 @@ namespace Wheatear {
                     };
                 }
 
-                // UV£¨¿ÉÄÜÃ»ÓÐ ¡ú Ìî 0£©
                 if (idx.texcoord_index >= 0)
                 {
                     v.TexCoord = {
@@ -205,7 +183,6 @@ namespace Wheatear {
                     };
                 }
 
-                // È¥ÖØ
                 std::string key = std::to_string(idx.vertex_index) + "/" +
                     std::to_string(idx.normal_index) + "/" +
                     std::to_string(idx.texcoord_index);
@@ -218,7 +195,6 @@ namespace Wheatear {
             }
         }
 
-        // Èç¹û .obj Ã»ÓÐ·¨Ïß£¬°´Èý½ÇÐÎÃæ·¨ÏßÌî³ä£¨flat shading£©
         bool hasNormals = !attrib.normals.empty();
         if (!hasNormals)
         {
@@ -239,7 +215,6 @@ namespace Wheatear {
     }
 
     // -------------------------------------------------------------------------
-    // ÇòÌåÉú³É£¨UV sphere£©
     // -------------------------------------------------------------------------
 
     void Mesh::BuildSphere(uint32_t sectorCount, uint32_t stackCount,
@@ -261,7 +236,7 @@ namespace Wheatear {
                 float z = xz * std::sin(sectorAngle);
 
                 MeshVertex v;
-                v.Position = { x * 0.5f, y * 0.5f, z * 0.5f }; // °ë¾¶ 0.5
+                v.Position = { x * 0.5f, y * 0.5f, z * 0.5f };
                 v.Normal = { x, y, z };
                 v.TexCoord = { (float)j / sectorCount,
                                (float)i / stackCount };

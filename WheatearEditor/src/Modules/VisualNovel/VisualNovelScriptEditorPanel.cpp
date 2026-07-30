@@ -778,7 +778,7 @@ namespace Wheatear {
                 row.Name = "new_label";
                 break;
             case RowKind::Background:
-                row.Value = "assets/vertical_slice/vn/backgrounds/isekai_forest.png";
+                row.Value = "assets/vertical_slice/vn/backgrounds/bg_otherworld_forest_wake.png";
                 break;
             case RowKind::Music:
                 row.Value = m_BGMAssets.empty() ? "assets/vertical_slice/audio/bgm/vn_school_morning.wav" : m_BGMAssets.front();
@@ -787,7 +787,7 @@ namespace Wheatear {
             case RowKind::Character:
                 row.Name = "Character";
                 row.Text = "角色";
-                row.Value = "assets/vertical_slice/vn/portraits/character_{expression}.png";
+                row.Value = "assets/vertical_slice/vn/portraits/protag_school_{expression}.png";
                 break;
             case RowKind::Choice:
                 row.Choices.push_back({ "选项文本", "target_label" });

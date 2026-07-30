@@ -9,11 +9,11 @@
 # @end
 
 @label start
-@background assets/textures/vn/studio.png
+@background assets/demo_vn/backgrounds/bg_demo_studio_day.png
 @music assets/vertical_slice/audio/bgm/vn_school_morning.wav "演示日常"
 @speed 34
-@character Mira 可怜 assets/textures/vn/mira_{expression}.png
-@character Leo 林舟 assets/textures/vn/leo_{expression}.png
+@character Mira 可怜 assets/demo_vn/portraits/char_mira_{expression}.png
+@character Leo 林舟 assets/demo_vn/portraits/char_leo_{expression}.png
 @show Mira:happy Leo:neutral
 Mira: 这个 Demo 是从序列化场景加载的，所以编辑器仍然是制作游戏内容的地方。
 Leo: WheatearSandbox 就像打包后的玩家端。它先打开主菜单场景，再把这个剧情场景作为游戏数据加载进来。
@@ -39,7 +39,7 @@ Mira: 沉默也是一种选择。历史记录仍然会记住这条分支。
 Leo: 按 H 可以查看历史记录，F5 快速存档，F9 读取 1 号存档。
 
 @label common
-@background assets/textures/vn/sunset.png
+@background assets/demo_vn/backgrounds/bg_demo_school_sunset.png
 @music assets/vertical_slice/audio/bgm/vn_unease.wav "庭院异兆"
 @expression Mira surprised
 Mira: 背景颜色变了，我的表情也从脚本里切换了。

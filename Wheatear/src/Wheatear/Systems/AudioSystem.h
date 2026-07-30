@@ -4,11 +4,7 @@
 
 namespace Wheatear {
 
-    /// @brief 音频系统
     /// 
-    /// 负责：
-    ///   - AudioSourceComponent 的 PlayOnStart 初始化
-    ///   - 场景停止时的音频清理
     class AudioSystem : public ISystem
     {
     public:

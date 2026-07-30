@@ -8,7 +8,6 @@ namespace Wheatear {
         const glm::vec2& max)
         : m_Texture(texture)
     {
-        // 逆时针排列：左下 → 右下 → 右上 → 左上
         m_TexCoords[0] = { min.x, min.y };
         m_TexCoords[1] = { max.x, min.y };
         m_TexCoords[2] = { max.x, max.y };
@@ -21,7 +20,6 @@ namespace Wheatear {
         const glm::vec2& cellSize,
         const glm::vec2& spriteSize)
     {
-        // 将格子索引转换为归一化 UV 坐标
         const float texW = static_cast<float>(texture->GetWidth());
         const float texH = static_cast<float>(texture->GetHeight());
 

@@ -7,6 +7,7 @@
 #include "Wheatear/Core/KeyCodes.h"
 #include "Wheatear/Core/MouseButtonCodes.h"
 #include "Wheatear/Modules/Progression/GameProgress.h"
+#include "Wheatear/Animation/AnimationClip.h"
 #include "Wheatear/Renderer/Texture.h"
 #include "Wheatear/Scene/Components.h"
 #include "Wheatear/Scene/Entity.h"
@@ -839,38 +840,38 @@ namespace Wheatear {
         static void AddDefaultAnimationData(SideCombatTuning& tuning)
         {
             const std::string characterRoot = "assets/vertical_slice/side_combat/characters/";
-            AddAnimationClip(tuning.PlayerAnimations, "idle", characterRoot + "player_idle_{frame}.png", 4, 7.0f);
-            AddAnimationClip(tuning.PlayerAnimations, "run", characterRoot + "player_run_{frame}.png", 6, 12.0f);
-            AddAnimationClip(tuning.PlayerAnimations, "jump", characterRoot + "player_jump_{frame}.png", 3, 10.0f, false);
-            AddAnimationClip(tuning.PlayerAnimations, "fall", characterRoot + "player_fall_{frame}.png", 3, 9.0f);
-            AddAnimationClip(tuning.PlayerAnimations, "hit", characterRoot + "player_hit_{frame}.png", 3, 12.0f, false);
-            AddAnimationClip(tuning.PlayerAnimations, "dead", characterRoot + "player_dead_{frame}.png", 4, 7.0f, false);
-            AddAnimationClip(tuning.PlayerAnimations, "basic1", characterRoot + "player_basic1_{frame}.png", 4, 18.0f, false);
-            AddAnimationClip(tuning.PlayerAnimations, "basic2", characterRoot + "player_basic2_{frame}.png", 4, 18.0f, false);
-            AddAnimationClip(tuning.PlayerAnimations, "basic3", characterRoot + "player_basic3_{frame}.png", 5, 18.0f, false);
-            AddAnimationClip(tuning.PlayerAnimations, "air_basic", characterRoot + "player_air_basic_{frame}.png", 4, 18.0f, false);
-            AddAnimationClip(tuning.PlayerAnimations, "launcher", characterRoot + "player_launcher_{frame}.png", 5, 18.0f, false);
-            AddAnimationClip(tuning.PlayerAnimations, "air_chase", characterRoot + "player_air_chase_{frame}.png", 4, 18.0f, false);
-            AddAnimationClip(tuning.PlayerAnimations, "magic_bolt", characterRoot + "player_magic_{frame}.png", 4, 16.0f, false);
-            AddAnimationClip(tuning.PlayerAnimations, "ally_support", characterRoot + "player_support_{frame}.png", 4, 14.0f, false);
-            AddAnimationClip(tuning.PlayerAnimations, "break_limit", characterRoot + "player_break_limit_{frame}.png", 5, 18.0f, false);
+            AddAnimationClip(tuning.PlayerAnimations, "idle", characterRoot + "protag_idle_{frame}.png", 4, 7.0f);
+            AddAnimationClip(tuning.PlayerAnimations, "run", characterRoot + "protag_run_{frame}.png", 6, 12.0f);
+            AddAnimationClip(tuning.PlayerAnimations, "jump", characterRoot + "protag_jump_{frame}.png", 3, 10.0f, false);
+            AddAnimationClip(tuning.PlayerAnimations, "fall", characterRoot + "protag_fall_{frame}.png", 3, 9.0f);
+            AddAnimationClip(tuning.PlayerAnimations, "hit", characterRoot + "protag_hit_{frame}.png", 3, 12.0f, false);
+            AddAnimationClip(tuning.PlayerAnimations, "dead", characterRoot + "protag_dead_{frame}.png", 4, 7.0f, false);
+            AddAnimationClip(tuning.PlayerAnimations, "basic1", characterRoot + "protag_basic1_{frame}.png", 4, 18.0f, false);
+            AddAnimationClip(tuning.PlayerAnimations, "basic2", characterRoot + "protag_basic2_{frame}.png", 4, 18.0f, false);
+            AddAnimationClip(tuning.PlayerAnimations, "basic3", characterRoot + "protag_basic3_{frame}.png", 5, 18.0f, false);
+            AddAnimationClip(tuning.PlayerAnimations, "air_basic", characterRoot + "protag_air_basic_{frame}.png", 4, 18.0f, false);
+            AddAnimationClip(tuning.PlayerAnimations, "launcher", characterRoot + "protag_launcher_{frame}.png", 5, 18.0f, false);
+            AddAnimationClip(tuning.PlayerAnimations, "air_chase", characterRoot + "protag_air_chase_{frame}.png", 4, 18.0f, false);
+            AddAnimationClip(tuning.PlayerAnimations, "magic_bolt", characterRoot + "protag_magic_bolt_{frame}.png", 4, 16.0f, false);
+            AddAnimationClip(tuning.PlayerAnimations, "ally_support", characterRoot + "protag_ally_support_{frame}.png", 4, 14.0f, false);
+            AddAnimationClip(tuning.PlayerAnimations, "break_limit", characterRoot + "protag_break_limit_{frame}.png", 5, 18.0f, false);
 
             const std::string enemyRoot = "assets/vertical_slice/side_combat/enemies/";
-            AddAnimationClip(tuning.GruntAnimations, "idle", enemyRoot + "claw_beast_idle_{frame}.png", 4, 7.0f);
-            AddAnimationClip(tuning.GruntAnimations, "run", enemyRoot + "claw_beast_run_{frame}.png", 5, 11.0f);
-            AddAnimationClip(tuning.GruntAnimations, "hit", enemyRoot + "claw_beast_hit_{frame}.png", 3, 12.0f, false);
-            AddAnimationClip(tuning.GruntAnimations, "fall", enemyRoot + "claw_beast_fall_{frame}.png", 3, 9.0f);
-            AddAnimationClip(tuning.GruntAnimations, "dead", enemyRoot + "claw_beast_dead_{frame}.png", 4, 7.0f, false);
-            AddAnimationClip(tuning.GruntAnimations, "enemy_claw", enemyRoot + "claw_beast_attack_{frame}.png", 4, 14.0f, false);
+            AddAnimationClip(tuning.GruntAnimations, "idle", enemyRoot + "en_claw_beast_idle_{frame}.png", 4, 7.0f);
+            AddAnimationClip(tuning.GruntAnimations, "run", enemyRoot + "en_claw_beast_run_{frame}.png", 5, 11.0f);
+            AddAnimationClip(tuning.GruntAnimations, "hit", enemyRoot + "en_claw_beast_hit_{frame}.png", 3, 12.0f, false);
+            AddAnimationClip(tuning.GruntAnimations, "fall", enemyRoot + "en_claw_beast_fall_{frame}.png", 3, 9.0f);
+            AddAnimationClip(tuning.GruntAnimations, "dead", enemyRoot + "en_claw_beast_dead_{frame}.png", 4, 7.0f, false);
+            AddAnimationClip(tuning.GruntAnimations, "enemy_claw", enemyRoot + "en_claw_beast_attack_{frame}.png", 4, 14.0f, false);
 
-            AddAnimationClip(tuning.BossAnimations, "idle", enemyRoot + "bear_idle_{frame}.png", 4, 6.0f);
-            AddAnimationClip(tuning.BossAnimations, "run", enemyRoot + "bear_walk_{frame}.png", 5, 8.0f);
-            AddAnimationClip(tuning.BossAnimations, "hit", enemyRoot + "bear_hit_{frame}.png", 3, 10.0f, false);
-            AddAnimationClip(tuning.BossAnimations, "fall", enemyRoot + "bear_fall_{frame}.png", 3, 8.0f);
-            AddAnimationClip(tuning.BossAnimations, "dead", enemyRoot + "bear_dead_{frame}.png", 4, 7.0f, false);
-            AddAnimationClip(tuning.BossAnimations, "enemy_claw", enemyRoot + "bear_attack_{frame}.png", 4, 12.0f, false);
-            AddAnimationClip(tuning.BossAnimations, "bear_charge", enemyRoot + "bear_charge_anim_{frame}.png", 4, 12.0f, false);
-            AddAnimationClip(tuning.BossAnimations, "bear_shockwave", enemyRoot + "bear_shockwave_anim_{frame}.png", 4, 12.0f, false);
+            AddAnimationClip(tuning.BossAnimations, "idle", enemyRoot + "boss_bear_husband_idle_{frame}.png", 4, 6.0f);
+            AddAnimationClip(tuning.BossAnimations, "run", enemyRoot + "boss_bear_husband_walk_{frame}.png", 5, 8.0f);
+            AddAnimationClip(tuning.BossAnimations, "hit", enemyRoot + "boss_bear_husband_hit_{frame}.png", 3, 10.0f, false);
+            AddAnimationClip(tuning.BossAnimations, "fall", enemyRoot + "boss_bear_husband_fall_{frame}.png", 3, 8.0f);
+            AddAnimationClip(tuning.BossAnimations, "dead", enemyRoot + "boss_bear_husband_dead_{frame}.png", 4, 7.0f, false);
+            AddAnimationClip(tuning.BossAnimations, "enemy_claw", enemyRoot + "boss_bear_husband_attack_{frame}.png", 4, 12.0f, false);
+            AddAnimationClip(tuning.BossAnimations, "bear_charge", enemyRoot + "boss_bear_husband_charge_{frame}.png", 4, 12.0f, false);
+            AddAnimationClip(tuning.BossAnimations, "bear_shockwave", enemyRoot + "boss_bear_husband_shockwave_{frame}.png", 4, 12.0f, false);
         }
 
         static void ApplyDefaultAttackFeedback(SideCombatTuning& tuning)
@@ -1451,19 +1452,19 @@ namespace Wheatear {
                 CombatItemSlot{
                     "1",
                     "1",
-                    "assets/vertical_slice/side_combat/ui/items/item_slot_1_heal_potion.png",
+                    "assets/vertical_slice/side_combat/ui/items/icon_item_heal_potion.png",
                     "回复药",
                     "恢复生命。正式道具效果后续接入消耗品系统。" },
                 CombatItemSlot{
                     "2",
                     "2",
-                    "assets/vertical_slice/side_combat/ui/items/item_slot_2_focus_vial.png",
+                    "assets/vertical_slice/side_combat/ui/items/icon_item_focus_vial.png",
                     "凝神药剂",
                     "短时间提高魔剑槽恢复。当前为道具栏占位。" },
                 CombatItemSlot{
                     "3",
                     "3",
-                    "assets/vertical_slice/side_combat/ui/items/item_slot_3_burst_bomb.png",
+                    "assets/vertical_slice/side_combat/ui/items/icon_item_burst_bomb.png",
                     "裂空爆弹",
                     "用于打断小怪包围。当前为道具栏占位。" }
             };
@@ -1627,23 +1628,23 @@ namespace Wheatear {
             if (team == (int)SideCombatTeam::Enemy)
             {
                 if (kind == SideAttackKind::EnemyProjectile || kind == SideAttackKind::EnemyShockwave)
-                    return "assets/vertical_slice/side_combat/effects/enemy_projectile.png";
-                return "assets/vertical_slice/side_combat/effects/enemy_claw.png";
+                    return "assets/vertical_slice/side_combat/effects/vfx_enemy_projectile.png";
+                return "assets/vertical_slice/side_combat/effects/vfx_enemy_claw.png";
             }
 
             switch (kind)
             {
             case SideAttackKind::Launcher:
-                return "assets/vertical_slice/side_combat/effects/slash_launcher.png";
+                return "assets/vertical_slice/side_combat/effects/vfx_launcher_slash.png";
             case SideAttackKind::MagicBolt:
-                return "assets/vertical_slice/side_combat/effects/magic_bolt.png";
+                return "assets/vertical_slice/side_combat/effects/vfx_magic_bolt.png";
             case SideAttackKind::AllySupport:
-                return "assets/vertical_slice/side_combat/effects/ally_support.png";
+                return "assets/vertical_slice/side_combat/effects/vfx_ally_support.png";
             case SideAttackKind::BreakLimit:
-                return "assets/vertical_slice/side_combat/effects/ally_support.png";
+                return "assets/vertical_slice/side_combat/effects/vfx_ally_support.png";
             case SideAttackKind::Basic:
             default:
-                return "assets/vertical_slice/side_combat/effects/slash_basic.png";
+                return "assets/vertical_slice/side_combat/effects/vfx_basic_slash.png";
             }
         }
 
@@ -1746,14 +1747,63 @@ namespace Wheatear {
                 return;
 
             const auto& clip = clipIt->second;
+
+            auto* animator = registry.try_get<SpriteAnimatorComponent>(entity);
+            if (!animator)
+            {
+                animator = &registry.emplace<SpriteAnimatorComponent>(entity);
+                animator->DefaultClipName = "idle";
+                animator->PlayOnStart = false;
+                animator->FireEvents = true;
+            }
+
+            for (const auto& [key, clipTuning] : set.Clips)
+            {
+                if (animator->Clips.find(key) != animator->Clips.end())
+                    continue;
+
+                auto animationClip = AnimationClip::Create(key, clipTuning.Loop);
+                const float duration = 1.0f / std::max(1.0f, clipTuning.FrameRate);
+                const int frameCount = std::max(1, clipTuning.FrameCount);
+                for (int frame = 1; frame <= frameCount; ++frame)
+                {
+                    if (Ref<Texture2D> texture = LoadTexture(FormatFramePath(clipTuning.Pattern, frame)))
+                        animationClip->AddFrame({ texture, duration });
+                }
+
+                if (animationClip->GetFrameCount() > 0)
+                    animator->AddClip(animationClip);
+            }
+
+            if (!animator->DefaultClipName.empty() && animator->CurrentClipName.empty())
+                animator->CurrentClipName = animator->DefaultClipName;
+
             if (combatant.RuntimeVisualClipKey != clipKey)
             {
                 combatant.RuntimeVisualClipKey = clipKey;
                 combatant.RuntimeVisualTimer = 0.0f;
+
+                if (animator->Clips.find(clipKey) != animator->Clips.end())
+                {
+                    animator->CurrentClipName.clear();
+                    animator->Play(clipKey);
+                }
             }
             else
             {
                 combatant.RuntimeVisualTimer += dt;
+                if (animator->CurrentClipName != clipKey && animator->Clips.find(clipKey) != animator->Clips.end())
+                {
+                    animator->CurrentClipName.clear();
+                    animator->Play(clipKey);
+                }
+            }
+
+            if (animator->Clips.find(clipKey) != animator->Clips.end())
+            {
+                if (!animator->IsPlaying && !clip.Loop)
+                    animator->IsPlaying = true;
+                return;
             }
 
             const int frameCount = std::max(1, clip.FrameCount);
@@ -3331,17 +3381,17 @@ namespace Wheatear {
                 CreatePickup(scene, "Drop_MagicCore",
                     transform.Translation + glm::vec3(-0.42f, 0.55f, 0.03f),
                     "MAT-MAGIC-CORE-T0", "魔核碎片", 1,
-                    "assets/vertical_slice/side_combat/ui/mat_magic_core.png",
+                    "assets/vertical_slice/side_combat/ui/icon_drop_magic_core.png",
                     pickupTuning);
                 CreatePickup(scene, "Drop_BeastSinew",
                     transform.Translation + glm::vec3(0.0f, 0.72f, 0.03f),
                     "MAT-BEAST-SINEW", "兽筋", 2,
-                    "assets/vertical_slice/side_combat/ui/mat_beast_sinew.png",
+                    "assets/vertical_slice/side_combat/ui/icon_drop_beast_sinew.png",
                     pickupTuning);
                 CreatePickup(scene, "Drop_BeastClaw",
                     transform.Translation + glm::vec3(0.42f, 0.55f, 0.03f),
                     "MAT-BEAST-CLAW", "熊爪", 1,
-                    "assets/vertical_slice/side_combat/ui/mat_beast_claw.png",
+                    "assets/vertical_slice/side_combat/ui/icon_drop_beast_claw.png",
                     pickupTuning);
                 return;
             }
@@ -3349,7 +3399,7 @@ namespace Wheatear {
             CreatePickup(scene, "Drop_BeastSinew",
                 transform.Translation + glm::vec3(0.0f, 0.45f, 0.03f),
                 "MAT-BEAST-SINEW", "兽筋", 1,
-                "assets/vertical_slice/side_combat/ui/mat_beast_sinew.png",
+                "assets/vertical_slice/side_combat/ui/icon_drop_beast_sinew.png",
                 pickupTuning);
         }
 

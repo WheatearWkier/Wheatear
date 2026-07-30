@@ -1,6 +1,5 @@
 #pragma once
 
-//from glfw3.h 更换平台的时候把下面改成平台的keycode即可
 /* Printable keys */
 #define WT_KEY_SPACE              32
 #define WT_KEY_APOSTROPHE         39  /* ' */

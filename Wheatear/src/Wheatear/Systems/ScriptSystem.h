@@ -4,11 +4,7 @@
 
 namespace Wheatear {
 
-    /// @brief 脚本系统
     /// 
-    /// 负责：
-    ///   - NativeScript（C++ 脚本）的实例化与每帧更新
-    ///   - C# 脚本（Mono）的运行时启动、每帧更新、实体销毁回调
     class ScriptSystem : public ISystem
     {
     public:

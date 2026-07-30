@@ -33,11 +33,26 @@ event fake_combat_victory:
     progression:set_flag:FLAG_CH01_FAKE_COMBAT_CLEARED
     progression:save_1
     wait 0.10
+    scene:assets/scenes/VerticalSliceTurnCombat.wt
+end
+
+event turn_combat_victory:
+    progression:set_flag:FLAG_CH01_TURN_COMBAT_CLEARED
+    progression:save_1
+    wait 0.10
     scene:assets/scenes/VerticalSlicePostFake.wt
+end
+
+event turn_combat_retry:
+    scene:assets/scenes/VerticalSliceTurnCombat.wt
 end
 
 event go_side_combat:
     scene:assets/scenes/SideCombatVerticalSlice.wt
+end
+
+event go_tactical_combat:
+    scene:assets/scenes/VerticalSliceTacticalCombat.wt
 end
 
 event tutorial_side_combat_start:

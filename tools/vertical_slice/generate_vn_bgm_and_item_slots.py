@@ -225,9 +225,9 @@ def main() -> None:
         bass_gain=0.030,
     )
 
-    save_icon(draw_heal_potion(), ITEM_ROOT / "item_slot_1_heal_potion.png")
-    save_icon(draw_focus_vial(), ITEM_ROOT / "item_slot_2_focus_vial.png")
-    save_icon(draw_burst_bomb(), ITEM_ROOT / "item_slot_3_burst_bomb.png")
+    save_icon(draw_heal_potion(), ITEM_ROOT / "icon_item_heal_potion.png")
+    save_icon(draw_focus_vial(), ITEM_ROOT / "icon_item_focus_vial.png")
+    save_icon(draw_burst_bomb(), ITEM_ROOT / "icon_item_burst_bomb.png")
 
 
 if __name__ == "__main__":

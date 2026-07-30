@@ -178,7 +178,7 @@ def background(entity_id: int, tag: str, tint: list[float]) -> str:
       Scale: [20, 11.25, 1]
     SpriteRendererComponent:
       Color: [{', '.join(str(v) for v in tint)}]
-      Texture: assets/vertical_slice/vn/backgrounds/forest_camp.png
+      Texture: assets/vertical_slice/vn/backgrounds/bg_forest_camp_night.png
       TilingFactor: 1
 """
 

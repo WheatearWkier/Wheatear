@@ -140,7 +140,7 @@ namespace Wheatear {
 
         glm::mat4 gameVP = mainCamera->GetProjection() * glm::inverse(cameraTransform);
 
-        uint32_t previousFBO = RenderCommand::GetBoundFramebuffer(); // ¼ÓÕâÐÐ
+        uint32_t previousFBO = RenderCommand::GetBoundFramebuffer();
         // Shadow pass
         Renderer3D::GetShadowMapFB()->Bind();
         RenderCommand::Clear();

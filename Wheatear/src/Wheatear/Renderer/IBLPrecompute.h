@@ -21,7 +21,6 @@ namespace Wheatear {
         IBLResult& operator=(IBLResult&& o) noexcept;
     };
 
-    // 平台无关的工厂接口，和 Texture2D::Create() 是同一个套路
     class IBLPrecompute
     {
     public:

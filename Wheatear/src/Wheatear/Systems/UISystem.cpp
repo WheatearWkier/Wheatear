@@ -467,8 +467,6 @@ namespace Wheatear {
 
     void UISystem::OnUpdateEditor(Scene* scene, Timestep ts)
     {
-        // 缂栬緫妯″紡涓?UI 鍙覆鏌擄紝涓嶅鐞嗚緭鍏?
-        // 娓叉煋鐢?RenderSystem 鍦ㄥ悎閫傛椂鏈鸿皟鐢?RenderUI()
     }
 
     void UISystem::RenderUI(Scene* scene)
@@ -478,7 +476,6 @@ namespace Wheatear {
         const uint32_t viewportWidth = scene->GetViewportWidth();
         const uint32_t viewportHeight = scene->GetViewportHeight();
 
-        // 鏀堕泦骞舵寜 SortOrder 鎺掑簭
         std::vector<std::pair<int, entt::entity>> entries;
         for (auto e : registry.view<UIWidgetComponent>())
             entries.emplace_back(registry.get<UIWidgetComponent>(e).SortOrder, e);

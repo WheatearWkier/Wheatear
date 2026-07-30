@@ -52,13 +52,7 @@ namespace Wheatear {
 		uint64_t m_ID = 0;
 	};
 
-	// 单线程事件总线。
 	//
-	// 设计目标：
-	// 1. 事件对象按产生顺序进入 FIFO 队列，避免平台回调直接进入深层业务逻辑。
-	// 2. 订阅者按优先级处理，同优先级下保持订阅顺序稳定。
-	// 3. 订阅返回 EventSubscription，生命周期结束时自动解绑，避免悬空回调。
-	// 4. handler 返回 Consume 后停止后续传播，适合 ImGui/编辑器输入拦截。
 	class WHEATEAR_API EventBus
 	{
 	public:
@@ -96,10 +90,8 @@ namespace Wheatear {
 
 		void Dispatch(Event& event);
 
-		// 复制事件并放入队列。平台层通常创建栈上事件对象，因此这里要求 Event 支持 Clone()。
 		void Queue(const Event& event);
 
-		// 按 FIFO 顺序处理队列中的事件。maxEvents 是防御性上限，避免某一帧事件递归投递导致卡死。
 		void Flush(size_t maxEvents = 1024);
 		void Clear();
 

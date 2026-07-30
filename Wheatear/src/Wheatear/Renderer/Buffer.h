@@ -9,9 +9,7 @@
 
 namespace Wheatear {
 
-    // ═══════════════════════════════════════════════════════
     //  ShaderDataType
-    // ═══════════════════════════════════════════════════════
 
     enum class ShaderDataType
     {
@@ -43,16 +41,14 @@ namespace Wheatear {
         return 0;
     }
 
-    // ═══════════════════════════════════════════════════════
     //  BufferElement
-    // ═══════════════════════════════════════════════════════
 
     struct BufferElement
     {
         std::string    Name;
         ShaderDataType Type = ShaderDataType::None;
         uint32_t       Size = 0;
-        uint32_t       Offset = 0;       // 由 BufferLayout 计算填入
+        uint32_t       Offset = 0;
         bool           Normalized = false;
 
         BufferElement() = default;
@@ -89,9 +85,7 @@ namespace Wheatear {
         }
     };
 
-    // ═══════════════════════════════════════════════════════
     //  BufferLayout
-    // ═══════════════════════════════════════════════════════
 
     class BufferLayout
     {
@@ -107,7 +101,6 @@ namespace Wheatear {
         uint32_t                          GetStride()   const { return m_Stride; }
         const std::vector<BufferElement>& GetElements() const { return m_Elements; }
 
-        // range-for 支持
         std::vector<BufferElement>::iterator       begin() { return m_Elements.begin(); }
         std::vector<BufferElement>::iterator       end() { return m_Elements.end(); }
         std::vector<BufferElement>::const_iterator begin() const { return m_Elements.begin(); }
@@ -119,7 +112,7 @@ namespace Wheatear {
             m_Stride = 0;
             for (auto& element : m_Elements)
             {
-                element.Offset = m_Stride; // offset 就是当前已累积的 stride
+                element.Offset = m_Stride;
                 m_Stride += element.Size;
             }
         }
@@ -128,9 +121,7 @@ namespace Wheatear {
         uint32_t                   m_Stride = 0;
     };
 
-    // ═══════════════════════════════════════════════════════
     //  VertexBuffer
-    // ═══════════════════════════════════════════════════════
 
     class VertexBuffer
     {
@@ -145,16 +136,11 @@ namespace Wheatear {
         virtual const BufferLayout& GetLayout() const = 0;
         virtual void SetLayout(const BufferLayout& layout) = 0;
 
-        // 创建动态顶点缓冲（大小固定，数据后续用 SetData 填充）
         static Ref<VertexBuffer> Create(uint32_t size);
 
-        // 创建静态顶点缓冲（数据在创建时上传）
         static Ref<VertexBuffer> Create(float* vertices, uint32_t size);
     };
 
-    // ═══════════════════════════════════════════════════════
-    //  IndexBuffer（目前只支持 32 位索引）
-    // ═══════════════════════════════════════════════════════
 
     class IndexBuffer
     {

@@ -1,6 +1,5 @@
 #pragma once
 
-// GLM_ENABLE_EXPERIMENTAL 蹇呴』鍦ㄥ寘鍚?gtx 澶存枃浠朵箣鍓嶅畾涔?
 #define GLM_ENABLE_EXPERIMENTAL
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
@@ -17,6 +16,8 @@
 #include "Wheatear/Modules/VisualNovel/VisualNovelComponents.h"
 #include "Wheatear/Modules/ArcadeCombat/ArcadeCombatComponents.h"
 #include "Wheatear/Modules/SideCombat/SideCombatComponents.h"
+#include "Wheatear/Modules/TacticalCombat/TacticalCombatComponents.h"
+#include "Wheatear/Modules/TurnCombat/TurnCombatComponents.h"
 
 #include <algorithm>
 #include <cstdint>
@@ -26,9 +27,6 @@
 
 namespace Wheatear {
 
-    // 鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺?
-    //  鍩虹缁勪欢
-    // 鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺?
 
     struct IDComponent
     {
@@ -36,7 +34,7 @@ namespace Wheatear {
 
         IDComponent() = default;
         IDComponent(const IDComponent&) = default;
-        IDComponent(const UUID& id) : ID(id) {}  // 淇锛歋cene.cpp 缂栬瘧閿欒鐨勬牴婧?
+        IDComponent(const UUID& id) : ID(id) {}
     };
 
     struct TagComponent
@@ -66,9 +64,6 @@ namespace Wheatear {
         }
     };
 
-    // 鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺?
-    //  娓叉煋缁勪欢
-    // 鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺?
 
     struct SpriteRendererComponent
     {
@@ -76,7 +71,6 @@ namespace Wheatear {
         Ref<Texture2D> Texture;
         float          TilingFactor = 1.0f;
 
-        // 鍔ㄧ敾绯荤粺鍐欏叆杩欎袱涓瓧娈碉紝榛樿鏄暣寮犺创鍥?
         glm::vec2      UVMin = { 0.0f, 0.0f };
         glm::vec2      UVMax = { 1.0f, 1.0f };
         bool           FlipX = false;
@@ -96,9 +90,6 @@ namespace Wheatear {
         CircleRendererComponent(const CircleRendererComponent&) = default;
     };
 
-    // 鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺?
-    //  鐩告満缁勪欢
-    // 鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺?
 
     struct CameraComponent
     {
@@ -110,18 +101,13 @@ namespace Wheatear {
         CameraComponent(const CameraComponent&) = default;
     };
 
-    // 鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺?
-    //  鑴氭湰缁勪欢
-    // 鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺?
 
     class ScriptableEntity;
 
-    // C++鍘熺敓鑴氭湰缁勪欢
     struct NativeScriptComponent
     {
         ScriptableEntity* Instance = nullptr;
 
-        // 鍑芥暟鎸囬拡鍒濆鍖栦负 nullptr锛岄槻姝㈡湭缁戝畾鏃惰皟鐢ㄥ穿婧?
         ScriptableEntity* (*InstantiateScript)() = nullptr;
         void              (*DestroyScript)(NativeScriptComponent*) = nullptr;
 
@@ -140,7 +126,6 @@ namespace Wheatear {
         }
     };
 
-    // C#鑴氭湰缁勪欢
     struct ScriptComponent
     {
         std::string ClassName;
@@ -170,9 +155,6 @@ namespace Wheatear {
         EventScriptComponent(const EventScriptComponent&) = default;
     };
 
-    // 鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺?
-    //  鐗╃悊缁勪欢
-    // 鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺?
 
     struct Rigidbody2DComponent
     {
@@ -181,7 +163,7 @@ namespace Wheatear {
         BodyType Type = BodyType::Static;
         bool     FixedRotation = false;
         float    GravityScale = 1.0f;
-        void*    RuntimeBody = nullptr;   // 杩愯鏃剁敱 Box2D 濉厖锛屼笉鍙備笌搴忓垪鍖?
+        void*    RuntimeBody = nullptr;
 
         Rigidbody2DComponent() = default;
         Rigidbody2DComponent(const Rigidbody2DComponent&) = default;
@@ -195,7 +177,7 @@ namespace Wheatear {
         float     Friction = 0.5f;
         float     Restitution = 0.0f;
         float     RestitutionThreshold = 0.5f;
-        void* RuntimeFixture = nullptr;   // 杩愯鏃剁敱 Box2D 濉厖
+        void* RuntimeFixture = nullptr;
 
         BoxCollider2DComponent() = default;
         BoxCollider2DComponent(const BoxCollider2DComponent&) = default;
@@ -209,26 +191,24 @@ namespace Wheatear {
         float     Friction = 0.5f;
         float     Restitution = 0.0f;
         float     RestitutionThreshold = 0.5f;
-        void* RuntimeFixture = nullptr;   // 杩愯鏃剁敱 Box2D 濉厖
+        void* RuntimeFixture = nullptr;
 
         CircleCollider2DComponent() = default;
         CircleCollider2DComponent(const CircleCollider2DComponent&) = default;
     };
 
-    // 3D Mesh 娓叉煋缁勪欢
     struct MeshRendererComponent
     {
         Ref<Mesh>     Mesh;
-        Ref<Material> Material;   // 鈫?浠?MeshMaterial 鎹㈡垚 Ref<Material>
+        Ref<Material> Material;
 
         MeshRendererComponent()
         {
-            Material = Material::Create();  // 榛樿鍒涘缓涓€涓┖鏉愯川
+            Material = Material::Create();
         }
         MeshRendererComponent(const MeshRendererComponent&) = default;
     };
 
-    // 骞宠鍏夛細妯℃嫙澶槼锛屾柟鍚戠敱 Entity 鐨?Rotation 鍐冲畾锛屼笉琛板噺
     struct DirectionalLightComponent
     {
         glm::vec3 Color = { 1.0f, 1.0f, 1.0f };
@@ -238,7 +218,6 @@ namespace Wheatear {
         DirectionalLightComponent(const DirectionalLightComponent&) = default;
     };
 
-    // 鐐瑰厜婧愶細鏈変綅缃紝寮哄害闅忚窛绂昏“鍑?
     struct PointLightComponent
     {
         glm::vec3 Color = { 1.0f, 1.0f, 1.0f };
@@ -251,33 +230,27 @@ namespace Wheatear {
         PointLightComponent(const PointLightComponent&) = default;
     };
 
-    // 鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺?
-    //  鍔ㄧ敾鎺у埗鍣ㄧ粍浠讹紝绠＄悊澶氫釜AnimationClip
-    // 鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺?
     struct SpriteAnimatorComponent
     {
-        // 宸叉敞鍐岀殑鎵€鏈?clip锛宬ey 鏄?clip 鍚嶅瓧
         std::unordered_map<std::string, Ref<AnimationClip>> Clips;
         std::string DefaultClipName;
         bool PlayOnStart = true;
+        bool FireEvents = true;
 
-        // --- 杩愯鏃剁姸鎬侊紙涓嶉渶瑕佸簭鍒楀寲锛?--
         std::string  CurrentClipName;
         int          CurrentFrameIndex = 0;
-        float        ElapsedTime = 0.0f;   // 褰撳墠甯у凡杩囨椂闂?
+        float        ElapsedTime = 0.0f;
         bool         IsPlaying = false;
-        bool         IsFinished = false;  // 闈炲惊鐜姩鐢绘挱瀹屽悗涓?true
+        bool         IsFinished = false;
 
         SpriteAnimatorComponent() = default;
         SpriteAnimatorComponent(const SpriteAnimatorComponent&) = default;
 
-        // 娉ㄥ唽涓€涓?clip
         void AddClip(const Ref<AnimationClip>& clip)
         {
             Clips[clip->GetName()] = clip;
         }
 
-        // 鍒囨崲鍒版寚瀹?clip锛堝悕瀛楃浉鍚屾椂涓嶉噸缃紝閬垮厤鍚屽抚澶氭璋冪敤鎶栧姩锛?
         void Play(const std::string& clipName)
         {
             if (CurrentClipName == clipName) return;
@@ -291,14 +264,12 @@ namespace Wheatear {
             IsFinished = false;
         }
 
-        // 鑾峰彇褰撳墠姝ｅ湪鎾斁鐨?Clip锛堝彲鑳戒负 nullptr锛?
         Ref<AnimationClip> GetCurrentClip() const
         {
             auto it = Clips.find(CurrentClipName);
             return (it != Clips.end()) ? it->second : nullptr;
         }
 
-        // 鑾峰彇褰撳墠甯э紙鍙兘涓?nullptr锛?
         const AnimationFrame* GetCurrentFrame() const
         {
             auto clip = GetCurrentClip();
@@ -307,11 +278,8 @@ namespace Wheatear {
         }
     };
 
-    // 鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€
     //  UI System Components
-    // 鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€
 
-    // UI閿氱偣鏋氫妇锛屽喅瀹歎I鍏冪礌鐩稿灞忓箷鐨勫榻愭柟寮?
     enum class UIAnchor
     {
         TopLeft, TopCenter, TopRight,
@@ -319,11 +287,9 @@ namespace Wheatear {
         BottomLeft, BottomCenter, BottomRight
     };
 
-    // 鈹€鈹€ Canvas锛氭寕鍦ㄤ竴涓牴Entity涓婏紝浠ｈ〃鏁翠釜UI灞?鈹€鈹€
     struct UICanvasComponent
     {
         bool  Visible = true;
-        // 鍙傝€冨垎杈ㄧ巼锛岀敤浜庢妸褰掍竴鍖栧潗鏍囩缉鏀惧埌瀹為檯鍍忕礌
         float ReferenceWidth = 1920.0f;
         float ReferenceHeight = 1080.0f;
 
@@ -331,9 +297,6 @@ namespace Wheatear {
         UICanvasComponent(const UICanvasComponent&) = default;
     };
 
-    // 鈹€鈹€ UIWidget锛氭墍鏈塙I鍏冪礌鍏辩敤鐨凾ransform淇℃伅 鈹€鈹€
-    // 鍧愭爣鍚箟锛氱浉瀵逛簬Canvas鐨勫綊涓€鍖栧潗鏍?(0~1)
-    // 渚嬪 Position={0.5, 0.5} = 灞忓箷姝ｄ腑蹇?
     struct UIWidgetComponent
     {
         bool      Visible = true;
@@ -381,11 +344,12 @@ namespace Wheatear {
         UIAnimatorComponent(const UIAnimatorComponent&) = default;
     };
 
-    // 鈹€鈹€ UIImage锛氱函鑹茬煩褰?鎴?璐村浘 鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€
     struct UIImageComponent
     {
         glm::vec4      Color = { 1.0f, 1.0f, 1.0f, 1.0f };
         Ref<Texture2D> Texture = nullptr;
+        glm::vec2      UVMin = { 0.0f, 0.0f };
+        glm::vec2      UVMax = { 1.0f, 1.0f };
 
         UIImageComponent() = default;
         UIImageComponent(const UIImageComponent&) = default;
@@ -409,9 +373,6 @@ namespace Wheatear {
         UIPanelComponent(const UIPanelComponent&) = default;
     };
 
-    // 鈹€鈹€ UIText锛氬睆骞曟枃瀛?鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€
-    // 娉ㄦ剰锛氳繖閲屽厛鐢ㄤ竴涓畝鍗曠殑鍗犱綅瀹炵幇
-    // 鍚庣画Step 2浼氭帴鍏ョ湡姝ｇ殑瀛椾綋娓叉煋
     struct UITextComponent
     {
         std::string Text = "Text";
@@ -428,31 +389,27 @@ namespace Wheatear {
         explicit UITextComponent(const std::string& text) : Text(text) {}
     };
 
-    // 鈹€鈹€ UIButton锛氬彲鐐瑰嚮鐨勫尯鍩?+ 棰滆壊鐘舵€?鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€
     struct UIButtonComponent
     {
         glm::vec4 NormalColor = { 0.3f, 0.3f, 0.8f, 1.0f };
         glm::vec4 HoverColor = { 0.4f, 0.4f, 1.0f, 1.0f };
         glm::vec4 PressedColor = { 0.2f, 0.2f, 0.6f, 1.0f };
 
-        // 杩愯鏃剁姸鎬侊紙涓嶅簭鍒楀寲锛?
         bool IsHovered = false;
         bool IsPressed = false;
 
-        // C#鍥炶皟鍑芥暟鍚嶏紙ScriptEngine浼氱敤鍒帮級
         std::string OnClickFunction = "";
 
         UIButtonComponent() = default;
         UIButtonComponent(const UIButtonComponent&) = default;
     };
 
-    // 鈹€鈹€ UIProgressBar锛氳鏉?杩涘害鏉?鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€
     struct UIProgressBarComponent
     {
         float     Value = 1.0f;  // 0.0 ~ 1.0
         float     MaxValue = 1.0f;
-        glm::vec4 ForegroundColor = { 0.2f, 0.8f, 0.2f, 1.0f }; // 缁胯壊琛€鏉?
-        glm::vec4 BackgroundColor = { 0.2f, 0.2f, 0.2f, 1.0f }; // 娣辩伆鑳屾櫙
+        glm::vec4 ForegroundColor = { 0.2f, 0.8f, 0.2f, 1.0f };
+        glm::vec4 BackgroundColor = { 0.2f, 0.2f, 0.2f, 1.0f };
 
         float GetNormalized() const
         {
@@ -668,15 +625,13 @@ namespace Wheatear {
         UICheckboxComponent(const UICheckboxComponent&) = default;
     };
 
-    // 鈹€鈹€ miniaudio闊抽绯荤粺 鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€
     struct AudioSourceComponent
     {
-        std::string AudioFilePath = "";   // 闊抽鏂囦欢璺緞锛岀浉瀵逛簬 assets/
+        std::string AudioFilePath = "";
         float       Volume = 1.0f;
         bool        Loop = false;
-        bool        PlayOnStart = false; // Scene 鍚姩鏃惰嚜鍔ㄦ挱鏀?
+        bool        PlayOnStart = false;
 
-        // 杩愯鏃跺彞鏌勶紝涓嶅弬涓庡簭鍒楀寲
         uint32_t    RuntimeHandle = 0;
 
         AudioSourceComponent() = default;
@@ -685,3 +640,5 @@ namespace Wheatear {
 
 
 } // namespace Wheatear
+
+#include "Entity.inl"

@@ -19,7 +19,6 @@ namespace Wheatear {
         static void Shutdown();
         static void OnWindowResize(uint32_t width, uint32_t height);
 
-        // 接受 ViewProjection 矩阵，不再依赖具体相机类型
         static void BeginScene(const glm::mat4& viewProjection);
         static void EndScene();
 
@@ -34,7 +33,7 @@ namespace Wheatear {
     private:
         struct SceneData
         {
-            glm::mat4 ViewProjectionMatrix = glm::mat4(1.0f); // 修复拼写 "Martix"
+            glm::mat4 ViewProjectionMatrix = glm::mat4(1.0f);
             float     Time = 0.0f;
         };
 

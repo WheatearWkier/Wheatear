@@ -2,6 +2,8 @@
 #include "EditorLayer2D.h"
 
 #include "Wheatear/Renderer/Renderer2D.h"
+#include "Wheatear/Scene/Components.h"
+#include "Wheatear/Scene/Scene.h"
 
 #include <imgui/imgui.h>
 #include <glm/gtc/matrix_transform.hpp>
@@ -15,12 +17,10 @@ namespace Wheatear {
     }
 
     // =========================================================================
-    // OnOverlayRender：物理碰撞体 + 场景 Gizmo 叠加层
     // =========================================================================
 
     void EditorLayer2D::OnOverlayRender()
     {
-        // 根据场景状态选择相机来源
         if (GetSceneState() == SceneState::Play)
         {
             Entity camera = GetActiveScene()->GetPrimaryCameraEntity();
@@ -35,7 +35,6 @@ namespace Wheatear {
             Renderer2D::BeginScene(GetEditorCamera());
         }
 
-        // ── 物理碰撞体线框 ──────────────────────────────────────────────────
         if (m_ShowPhysicsColliders)
         {
             for (auto e : GetActiveScene()->GetAllEntitiesWith<TransformComponent, BoxCollider2DComponent>())

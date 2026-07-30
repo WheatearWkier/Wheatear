@@ -1,8 +1,4 @@
 #pragma once
-// 鈹€鈹€ DrawComponent<T> 妯℃澘 鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€
-// 璐熻矗缁樺埗鎶樺彔鏍囬 / 鍙充笂瑙?"+" 璁剧疆鎸夐挳 / Remove component 鑿滃崟
-// 鎵€鏈?Drawer.cpp 鍙渶 include 杩欎竴涓ご鏂囦欢鍗冲彲浣跨敤锛屼笉瑕佸湪鏈枃浠跺寮曠敤
-// 鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€
 #include <imgui/imgui.h>
 #include <imgui/imgui_internal.h>
 #include <unordered_map>
@@ -98,7 +94,6 @@ namespace Wheatear {
         }
     }
 } // namespace Wheatear
-// 鈹€鈹€ 缁熶竴鍑哄彛锛氬閮ㄥ彧闇€ include 杩欎竴涓ご 鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€
 #include "Drawers/TransformDrawer.h"
 #include "Drawers/CameraDrawer.h"
 #include "Drawers/SpriteRendererDrawer.h"

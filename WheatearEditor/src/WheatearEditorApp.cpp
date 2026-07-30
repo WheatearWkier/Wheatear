@@ -90,8 +90,6 @@ namespace Wheatear
             RegisterDefaultGameplayEditorModules();
             RegisterDefaultGameplayModules();
 
-            // 启动时显示模式选择界面
-            // ModeSelectLayer 完成选择后会自动推入对应的 EditorLayer2D / EditorLayer3D
             PushLayer(new ModeSelectLayer());
         }
 

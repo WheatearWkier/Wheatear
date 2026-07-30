@@ -21,8 +21,8 @@ namespace Wheatear {
 
         if (open)
         {
-            // ── 音频文件路径 ──────────────────────────────────────────
-            // BUG FIX: �?ScriptDrawer，改为局�?buffer + entity PushID
+            // Audio file path
+            // Keep a local buffer and entity-scoped ImGui ID to avoid cross-row input collisions.
             char buf[256];
             memset(buf, 0, sizeof(buf));
             strncpy_s(buf, asc.AudioFilePath.c_str(), sizeof(buf) - 1);
@@ -36,7 +36,7 @@ namespace Wheatear {
                 asc.AudioFilePath = buf;
             ImGui::PopID();
 
-            // 拖放音频文件
+            // Drag and drop audio assets.
             if (ImGui::BeginDragDropTarget())
             {
                 if (const ImGuiPayload* payload =
@@ -60,10 +60,10 @@ namespace Wheatear {
             if (asc.AudioFilePath.empty())
                 ImGui::TextDisabled("  Drag an audio file here, or type path");
 
-            // ── 音量 ──────────────────────────────────────────────────
+            // Volume
             ImGui::SliderFloat("Volume", &asc.Volume, 0.0f, 1.0f);
 
-            // ── 循环 / PlayOnStart ────────────────────────────────────
+            // Loop and PlayOnStart
             ImGui::Checkbox("Loop", &asc.Loop);
             ImGui::SameLine();
             ImGui::Checkbox("Play On Start", &asc.PlayOnStart);

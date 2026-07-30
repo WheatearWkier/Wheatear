@@ -9,7 +9,6 @@ namespace Wheatear {
 
 	namespace Utils {
 
-		// 新增辅助函数：根据 internalFormat 返回合适的 type
 		static GLenum TextureDataType(GLenum internalFormat)
 		{
 			switch (internalFormat)

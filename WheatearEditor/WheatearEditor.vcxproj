@@ -85,7 +85,7 @@
       <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
       <Optimization>Disabled</Optimization>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
-      <AdditionalOptions>/utf-8 /wd4828 %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions>/utf-8 /wd4828 /MP %(AdditionalOptions)</AdditionalOptions>
       <LanguageStandard>stdcpp20</LanguageStandard>
       <ExternalWarningLevel>Level3</ExternalWarningLevel>
     </ClCompile>
@@ -110,7 +110,7 @@
       <MinimalRebuild>false</MinimalRebuild>
       <StringPooling>true</StringPooling>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
-      <AdditionalOptions>/utf-8 /wd4828 %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions>/utf-8 /wd4828 /MP %(AdditionalOptions)</AdditionalOptions>
       <LanguageStandard>stdcpp20</LanguageStandard>
       <ExternalWarningLevel>Level3</ExternalWarningLevel>
     </ClCompile>
@@ -136,7 +136,7 @@
       <MinimalRebuild>false</MinimalRebuild>
       <StringPooling>true</StringPooling>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
-      <AdditionalOptions>/utf-8 /wd4828 %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions>/utf-8 /wd4828 /MP %(AdditionalOptions)</AdditionalOptions>
       <LanguageStandard>stdcpp20</LanguageStandard>
       <ExternalWarningLevel>Level3</ExternalWarningLevel>
     </ClCompile>
@@ -153,6 +153,7 @@
     <ClInclude Include="src\Editor\CoreEditorComponents.h" />
     <ClInclude Include="src\Editor\EditorCanvasTools.h" />
     <ClInclude Include="src\Editor\EditorComponentRegistry.h" />
+    <ClInclude Include="src\Editor\EditorToolRegistry.h" />
     <ClInclude Include="src\Editor\EventScriptGraphPanel.h" />
     <ClInclude Include="src\Editor\EditorLayer2D.h" />
     <ClInclude Include="src\Editor\EditorLayer3D.h" />
@@ -163,11 +164,14 @@
     <ClInclude Include="src\Modules\ModuleEditorBootstrap.h" />
     <ClInclude Include="src\Modules\SideCombat\SideCombatDrawer.h" />
     <ClInclude Include="src\Modules\SideCombat\SideCombatTuningEditorPanel.h" />
+    <ClInclude Include="src\Modules\TacticalCombat\TacticalCombatDrawer.h" />
+    <ClInclude Include="src\Modules\TurnCombat\TurnCombatDrawer.h" />
     <ClInclude Include="src\Modules\VisualNovel\VisualNovelDrawer.h" />
     <ClInclude Include="src\Modules\VisualNovel\VisualNovelScriptEditorPanel.h" />
     <ClInclude Include="src\Panels\AnimationEditorPanel.h" />
     <ClInclude Include="src\Panels\ContentBrowserPanel.h" />
     <ClInclude Include="src\Panels\EditorCommands.h" />
+    <ClInclude Include="src\Panels\SpriteSheetPickerPanel.h" />
     <ClInclude Include="src\Panels\SceneHierarchy\ComponentDrawers.h" />
     <ClInclude Include="src\Panels\SceneHierarchy\Drawers\AudioDrawer.h" />
     <ClInclude Include="src\Panels\SceneHierarchy\Drawers\CameraDrawer.h" />
@@ -199,10 +203,13 @@
     <ClCompile Include="src\Modules\ModuleEditorBootstrap.cpp" />
     <ClCompile Include="src\Modules\SideCombat\SideCombatDrawer.cpp" />
     <ClCompile Include="src\Modules\SideCombat\SideCombatTuningEditorPanel.cpp" />
+    <ClCompile Include="src\Modules\TacticalCombat\TacticalCombatDrawer.cpp" />
+    <ClCompile Include="src\Modules\TurnCombat\TurnCombatDrawer.cpp" />
     <ClCompile Include="src\Modules\VisualNovel\VisualNovelDrawer.cpp" />
     <ClCompile Include="src\Modules\VisualNovel\VisualNovelScriptEditorPanel.cpp" />
     <ClCompile Include="src\Panels\AnimationEditorPanel.cpp" />
     <ClCompile Include="src\Panels\ContentBrowserPanel.cpp" />
+    <ClCompile Include="src\Panels\SpriteSheetPickerPanel.cpp" />
     <ClCompile Include="src\Panels\SceneHierarchy\Drawers\AudioDrawer.cpp" />
     <ClCompile Include="src\Panels\SceneHierarchy\Drawers\CameraDrawer.cpp" />
     <ClCompile Include="src\Panels\SceneHierarchy\Drawers\CircleRendererDrawer.cpp" />

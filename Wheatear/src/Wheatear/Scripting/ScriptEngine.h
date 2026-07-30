@@ -1,10 +1,12 @@
 ﻿#pragma once
 
-#include "Wheatear/Scene/Scene.h"
+#include "Wheatear/Core/Core.h"
+#include "Wheatear/Core/Timestep.h"
+#include "Wheatear/Core/UUID.h"
 #include "Wheatear/Scene/Entity.h"
-#include "Wheatear/Scene/Components.h"
 
 #include <cstdint>
+#include <cstring>
 #include <filesystem>
 #include <string>
 #include <unordered_map>
@@ -22,6 +24,8 @@ extern "C" {
 }
 
 namespace Wheatear {
+
+    class Scene;
 
     enum class ScriptFieldType
     {

@@ -1,4 +1,4 @@
-﻿#include "wtpch.h"
+#include "wtpch.h"
 #include "EditorLayerBase.h"
 
 #include "Wheatear/Core/Application.h"
@@ -23,9 +23,9 @@
 #include "Wheatear/UI/UIWidgetLayout.h"
 #include "Wheatear/Math/Math.h"
 #include "Editor/EditorCanvasTools.h"
-#include "Modules/SideCombat/SideCombatTuningEditorPanel.h"
-#include "Modules/VisualNovel/VisualNovelScriptEditorPanel.h"
+#include "Panels/AnimationEditorPanel.h"
 #include "Panels/EditorCommands.h"
+#include "Panels/SceneHierarchyPanel.h"
 
 #include <imgui/imgui.h>
 #include <imgui/imgui_internal.h>
@@ -65,9 +65,9 @@ namespace Wheatear {
 
         FramebufferSpecification fbSpec;
         fbSpec.Attachments = {
-            FramebufferTextureFormat::RGBA8,        // attachment 0: 棰滆壊锛堜笉鍙橈級
-            FramebufferTextureFormat::RGBA16F,      // attachment 1: 瑙嗗浘绌洪棿娉曠嚎锛堟柊澧烇級
-            FramebufferTextureFormat::RED_INTEGER,  // attachment 2: entity ID锛堝師 1锛岀幇鍦?2锛?            FramebufferTextureFormat::Depth
+            FramebufferTextureFormat::RGBA8,
+            FramebufferTextureFormat::RGBA16F,
+            FramebufferTextureFormat::RED_INTEGER,
         };
         fbSpec.Width  = 1920;
         fbSpec.Height = 1080;
@@ -123,7 +123,6 @@ namespace Wheatear {
     {
         WT_PROFILE_FUNCTION();
 
-        // 鈹€鈹€ Framebuffer resize 鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€
         {
             const auto& spec = m_Framebuffer->GetSpecification();
             const auto  w = static_cast<uint32_t>(m_ViewportSize.x);
@@ -145,10 +144,8 @@ namespace Wheatear {
 
         m_ActiveScene->SetViewportOffset(m_ViewportBounds[0].x, m_ViewportBounds[0].y);
 
-        // 鈹€鈹€ 瀛愮被娓叉煋鍓嶇疆锛圔eginScene/Skybox绛夛級鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€
         OnBeginRender();
 
-        // 鈹€鈹€ 鍦烘櫙鏇存柊 鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€
         switch (m_SceneState)
         {
         case SceneState::Edit:
@@ -182,16 +179,15 @@ namespace Wheatear {
         }
         case SceneState::Play:
             m_ActiveScene->OnUpdateRuntime(ts);
+            ConsumePlayModeRuntimeCommands();
             break;
         }
 
-        // 鈹€鈹€ Framebuffer rebind锛圫cene Update鍙兘瑙ｇ粦浜咶B锛夆攢鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€
         m_Framebuffer->Bind();
         RenderCommand::SetViewport(0, 0,
             static_cast<uint32_t>(m_ViewportSize.x),
             static_cast<uint32_t>(m_ViewportSize.y));
 
-        // 鈹€鈹€ Entity picking 鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€
         {
             auto [mx, my] = ImGui::GetMousePos();
             mx -= m_ViewportBounds[0].x;
@@ -211,10 +207,8 @@ namespace Wheatear {
             }
         }
 
-        // 鍙兘鍦ㄨ繖閲屾斁鍦ㄩ『搴忎笂浼氭湁鐐归棶棰橈紵
         OnPostSceneUpdate();
 
-        // 鈹€鈹€ 瀛愮被鍙犲姞娓叉煋锛圕ollider鍙鍖?鍏夋簮Gizmo/Grid绛夛級鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€
         OnOverlayRender();
 
         m_Framebuffer->Unbind();
@@ -234,7 +228,6 @@ namespace Wheatear {
     }
 
     // =========================================================================
-    // 浜嬩欢澶勭悊
     // =========================================================================
 
     bool EditorLayerBase::OnKeyPressed(KeyPressedEvent& e)
@@ -246,7 +239,6 @@ namespace Wheatear {
 
         switch (e.GetKeyCode())
         {
-        // 鏂囦欢鎿嶄綔
         case WT_KEY_N: if (ctrl) NewScene();  break;
         case WT_KEY_O: if (ctrl) OpenScene(); break;
         case WT_KEY_Z:
@@ -261,14 +253,13 @@ namespace Wheatear {
             else if (ctrl)     SaveScene();
             break;
 
-        // 瀹炰綋鎿嶄綔
         case WT_KEY_D: if (ctrl) OnDuplicateEntity(); break;
         case WT_KEY_DELETE:
             if (m_SceneState == SceneState::Edit)
             {
-                if (Entity sel = m_SceneHierarchyPanel.GetSelectedEntity())
+                if (Entity sel = m_SceneHierarchyPanel->GetSelectedEntity())
                 {
-                    m_SceneHierarchyPanel.SetSelectedEntity({});
+                    m_SceneHierarchyPanel->SetSelectedEntity({});
                     auto command = std::make_unique<EntityCreateCommand>(m_ActiveScene.get(), sel, false);
                     command->Execute();
                     CommandHistory::Get().Push(std::move(command));
@@ -276,7 +267,6 @@ namespace Wheatear {
             }
             break;
 
-        // Gizmo锛堥琛屾ā寮忎笅涓嶅搷搴旓級
         case WT_KEY_Q: if (m_EditorCamera.GetMode() != EditorCamera::Mode::Fly) m_GizmoType = -1;                          break;
         case WT_KEY_W: if (m_EditorCamera.GetMode() != EditorCamera::Mode::Fly) m_GizmoType = ImGuizmo::OPERATION::TRANSLATE; break;
         case WT_KEY_E: if (m_EditorCamera.GetMode() != EditorCamera::Mode::Fly) m_GizmoType = ImGuizmo::OPERATION::ROTATE;    break;
@@ -296,8 +286,8 @@ namespace Wheatear {
 
         if (m_ViewportHovered && !ImGuizmo::IsOver() && !Input::IsKeyPressed(WT_KEY_LEFT_ALT))
         {
-            m_SceneHierarchyPanel.SetSelectedEntity(m_HoveredEntity);
-            m_AnimationEditorPanel.SetEntity(m_HoveredEntity);
+            m_SceneHierarchyPanel->SetSelectedEntity(m_HoveredEntity);
+            m_AnimationEditorPanel->SetEntity(m_HoveredEntity);
         }
         return false;
     }
@@ -324,7 +314,6 @@ namespace Wheatear {
     }
 
     // =========================================================================
-    // 鍦烘櫙鐘舵€佹満
     // =========================================================================
 
 } // namespace Wheatear

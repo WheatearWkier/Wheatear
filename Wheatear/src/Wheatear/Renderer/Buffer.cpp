@@ -6,7 +6,6 @@
 
 namespace Wheatear {
 
-    // ©¤©¤ VertexBuffer ©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤
 
     Ref<VertexBuffer> VertexBuffer::Create(uint32_t size)
     {
@@ -36,7 +35,6 @@ namespace Wheatear {
         return nullptr;
     }
 
-    // ©¤©¤ IndexBuffer ©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤
 
     Ref<IndexBuffer> IndexBuffer::Create(uint32_t* indices, uint32_t count)
     {

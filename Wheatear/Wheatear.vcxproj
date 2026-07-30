@@ -81,7 +81,7 @@
       <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
       <Optimization>Disabled</Optimization>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
-      <AdditionalOptions>/utf-8 /wd4828 %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions>/utf-8 /wd4828 /MP %(AdditionalOptions)</AdditionalOptions>
       <LanguageStandard>stdcpp20</LanguageStandard>
       <ExternalWarningLevel>Level3</ExternalWarningLevel>
     </ClCompile>
@@ -108,7 +108,7 @@
       <MinimalRebuild>false</MinimalRebuild>
       <StringPooling>true</StringPooling>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
-      <AdditionalOptions>/utf-8 /wd4828 %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions>/utf-8 /wd4828 /MP %(AdditionalOptions)</AdditionalOptions>
       <LanguageStandard>stdcpp20</LanguageStandard>
       <ExternalWarningLevel>Level3</ExternalWarningLevel>
     </ClCompile>
@@ -136,7 +136,7 @@
       <MinimalRebuild>false</MinimalRebuild>
       <StringPooling>true</StringPooling>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
-      <AdditionalOptions>/utf-8 /wd4828 %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions>/utf-8 /wd4828 /MP %(AdditionalOptions)</AdditionalOptions>
       <LanguageStandard>stdcpp20</LanguageStandard>
       <ExternalWarningLevel>Level3</ExternalWarningLevel>
     </ClCompile>
@@ -190,6 +190,8 @@
     <ClInclude Include="src\Wheatear\Events\MouseEvent.h" />
     <ClInclude Include="src\Wheatear\ImGui\ImGuiLayer.h" />
     <ClInclude Include="src\Wheatear\Math\Math.h" />
+    <ClInclude Include="src\Wheatear\Modules\GameplayModuleComponents.h" />
+    <ClInclude Include="src\Wheatear\Modules\GameplayModuleRuntime.h" />
     <ClInclude Include="src\Wheatear\Modules\ArcadeCombat\ArcadeCombatComponents.h" />
     <ClInclude Include="src\Wheatear\Modules\ArcadeCombat\ArcadeCombatSystem.h" />
     <ClInclude Include="src\Wheatear\Modules\ModuleBootstrap.h" />
@@ -197,6 +199,10 @@
     <ClInclude Include="src\Wheatear\Modules\Progression\ProgressionSystem.h" />
     <ClInclude Include="src\Wheatear\Modules\SideCombat\SideCombatComponents.h" />
     <ClInclude Include="src\Wheatear\Modules\SideCombat\SideCombatSystem.h" />
+    <ClInclude Include="src\Wheatear\Modules\TacticalCombat\TacticalCombatComponents.h" />
+    <ClInclude Include="src\Wheatear\Modules\TacticalCombat\TacticalCombatSystem.h" />
+    <ClInclude Include="src\Wheatear\Modules\TurnCombat\TurnCombatComponents.h" />
+    <ClInclude Include="src\Wheatear\Modules\TurnCombat\TurnCombatSystem.h" />
     <ClInclude Include="src\Wheatear\Modules\VisualNovel\VisualNovelComponents.h" />
     <ClInclude Include="src\Wheatear\Modules\VisualNovel\VisualNovelRuntime.h" />
     <ClInclude Include="src\Wheatear\Modules\VisualNovel\VisualNovelScript.h" />
@@ -227,10 +233,13 @@
     <ClInclude Include="src\Wheatear\Renderer\VertexArray.h" />
     <ClInclude Include="src\Wheatear\Runtime\CommandBus.h" />
     <ClInclude Include="src\Wheatear\Runtime\SceneTransitionService.h" />
+    <ClInclude Include="src\Wheatear\Scene\ComponentLifecycleRegistry.h" />
     <ClInclude Include="src\Wheatear\Scene\ComponentGroup.h" />
     <ClInclude Include="src\Wheatear\Scene\Components.h" />
     <ClInclude Include="src\Wheatear\Scene\Entity.h" />
+    <ClInclude Include="src\Wheatear\Scene\Entity.inl" />
     <ClInclude Include="src\Wheatear\Scene\Scene.h" />
+    <ClInclude Include="src\Wheatear\Scene\SceneComponentGroups.h" />
     <ClInclude Include="src\Wheatear\Scene\SceneSerializer.h" />
     <ClInclude Include="src\Wheatear\Scene\SceneSerializerComponentGroups.h" />
     <ClInclude Include="src\Wheatear\Scene\SceneSerializerComponentSupport.h" />
@@ -650,6 +659,8 @@
     <ClCompile Include="src\Wheatear\Modules\Progression\GameProgress.cpp" />
     <ClCompile Include="src\Wheatear\Modules\Progression\ProgressionSystem.cpp" />
     <ClCompile Include="src\Wheatear\Modules\SideCombat\SideCombatSystem.cpp" />
+    <ClCompile Include="src\Wheatear\Modules\TacticalCombat\TacticalCombatSystem.cpp" />
+    <ClCompile Include="src\Wheatear\Modules\TurnCombat\TurnCombatSystem.cpp" />
     <ClCompile Include="src\Wheatear\Modules\VisualNovel\VisualNovelRuntime.cpp" />
     <ClCompile Include="src\Wheatear\Modules\VisualNovel\VisualNovelScript.cpp" />
     <ClCompile Include="src\Wheatear\Modules\VisualNovel\VisualNovelSystem.cpp" />
@@ -675,8 +686,10 @@
     <ClCompile Include="src\Wheatear\Renderer\VertexArray.cpp" />
     <ClCompile Include="src\Wheatear\Runtime\CommandBus.cpp" />
     <ClCompile Include="src\Wheatear\Runtime\SceneTransitionService.cpp" />
+    <ClCompile Include="src\Wheatear\Scene\ComponentLifecycleRegistry.cpp" />
     <ClCompile Include="src\Wheatear\Scene\Entity.cpp" />
     <ClCompile Include="src\Wheatear\Scene\Scene.cpp" />
+    <ClCompile Include="src\Wheatear\Scene\SceneCopy.cpp" />
     <ClCompile Include="src\Wheatear\Scene\SceneSerializer.cpp" />
     <ClCompile Include="src\Wheatear\Scene\SceneSerializerAnimationComponents.cpp" />
     <ClCompile Include="src\Wheatear\Scene\SceneSerializerCoreComponents.cpp" />

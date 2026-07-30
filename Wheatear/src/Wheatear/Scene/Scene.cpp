@@ -1,7 +1,7 @@
 #include "wtpch.h"
 #include "Scene.h"
 #include "Components.h"
-#include "ComponentGroup.h"
+#include "ComponentLifecycleRegistry.h"
 #include "Entity.h"
 #include "SceneSerializer.h"
 
@@ -17,126 +17,23 @@
 
 #include <glm/glm.hpp>
 
-// 一个bug：在play状态下在动画编辑器面板play动画后再按场景暂停键会程序崩溃
 
 namespace Wheatear {
 
-    // ═══════════════════════════════════════════════════════════════════════════
-    //  组件复制辅助（内部）
-    // ═══════════════════════════════════════════════════════════════════════════
 
-    namespace {
 
-        template<typename... Ts>
-        void CopyComponents(ComponentGroup<Ts...>,
-            entt::registry& dst, entt::registry& src,
-            const std::unordered_map<UUID, entt::entity>& map)
-        {
-            ([&] {
-                for (auto e : src.view<Ts>())
-                {
-                    UUID uuid = src.get<IDComponent>(e).ID;
-                    WT_CORE_ASSERT(map.count(uuid), "Entity UUID not found in map");
-                    dst.emplace_or_replace<Ts>(map.at(uuid), src.get<Ts>(e));
-                }
-                }(), ...);
-        }
-
-        template<typename... Ts>
-        void CopyComponentsIfExist(ComponentGroup<Ts...>, Entity dst, Entity src)
-        {
-            ([&] {
-                if (src.HasComponent<Ts>())
-                    dst.AddOrReplaceComponent<Ts>(src.GetComponent<Ts>());
-                }(), ...);
-        }
-
-        using AllCopyableComponents = ComponentGroup<
-            TransformComponent,
-            SpriteRendererComponent,
-            SpriteAnimatorComponent,
-            CircleRendererComponent,
-            MeshRendererComponent,
-            DirectionalLightComponent,
-            PointLightComponent,
-            CameraComponent,
-            NativeScriptComponent,
-            Rigidbody2DComponent,
-            BoxCollider2DComponent,
-            CircleCollider2DComponent,
-            ScriptComponent,
-            EventScriptComponent,
-            UICanvasComponent,
-            UIWidgetComponent,
-            UIAnimatorComponent,
-            UIImageComponent,
-            UIPanelComponent,
-            UITextComponent,
-            UIButtonComponent,
-            UIProgressBarComponent,
-            UISliderComponent,
-            UIPagerComponent,
-            UIScrollViewComponent,
-            UIPathComponent,
-            UISkillTreeViewComponent,
-            UIPageItemComponent,
-            UICheckboxComponent,
-            AudioSourceComponent,
-            VisualNovelComponent,
-            ArcadeCombatLevelComponent,
-            ArcadeCombatantComponent,
-            ArcadePlayerControllerComponent,
-            ArcadeBossComponent,
-            ArcadeProjectileComponent,
-            ArcadeCoverComponent,
-            ArcadeTriggerComponent,
-            SideCombatLevelComponent,
-            SideCombatantComponent,
-            SidePlayerControllerComponent,
-            SideEnemyAIComponent,
-            SideHitboxComponent,
-            SidePickupComponent
-        >;
-
-    } // anonymous namespace
-
-    // ═══════════════════════════════════════════════════════════════════════════
-    //  构造 / 析构
-    // ═══════════════════════════════════════════════════════════════════════════
-
-    Scene::Scene() = default;
-    Scene::~Scene() = default;
-
-    // ═══════════════════════════════════════════════════════════════════════════
-    //  场景复制
-    // ═══════════════════════════════════════════════════════════════════════════
-
-    Ref<Scene> Scene::Copy(Ref<Scene> other)
+    Scene::Scene()
     {
-        Ref<Scene> newScene = CreateRef<Scene>();
-        newScene->m_ViewportWidth = other->m_ViewportWidth;
-        newScene->m_ViewportHeight = other->m_ViewportHeight;
-        newScene->m_ViewportOffset = other->m_ViewportOffset;
-
-        auto& src = other->m_Registry;
-        auto& dst = newScene->m_Registry;
-
-        std::unordered_map<UUID, entt::entity> enttMap;
-        for (auto e : src.view<IDComponent>())
-        {
-            UUID        uuid = src.get<IDComponent>(e).ID;
-            const auto& name = src.get<TagComponent>(e).Tag;
-            enttMap[uuid] = static_cast<entt::entity>(
-                newScene->CreateEntityWithUUID(uuid, name));
-        }
-
-        CopyComponents(AllCopyableComponents{}, dst, src, enttMap);
-        return newScene;
+        RegisterCoreComponentLifecycles();
+        ComponentLifecycleRegistry::BindScene(*this);
     }
 
-    // ═══════════════════════════════════════════════════════════════════════════
-    //  实体管理
-    // ═══════════════════════════════════════════════════════════════════════════
+    Scene::~Scene()
+    {
+        ComponentLifecycleRegistry::UnbindScene(*this);
+    }
+
+
 
     Entity Scene::CreateEntity(const std::string& name)
     {
@@ -162,13 +59,6 @@ namespace Wheatear {
         m_DestroyQueue.insert(static_cast<entt::entity>(entity));
     }
 
-    Entity Scene::DuplicateEntity(Entity entity)
-    {
-        Entity newEntity = CreateEntity(entity.GetName());
-        CopyComponentsIfExist(AllCopyableComponents{}, newEntity, entity);
-        return newEntity;
-    }
-
     Entity Scene::InstantiateFromPrefab(const std::filesystem::path& prefabPath,
         const glm::vec3& position)
     {
@@ -183,16 +73,12 @@ namespace Wheatear {
         if (entity.HasComponent<TransformComponent>())
             entity.GetComponent<TransformComponent>().Translation = position;
 
-        // Scene 不知道任何系统细节，只广播事件
         for (auto& system : m_Systems)
             system->OnEntityCreated(this, entity);
 
         return entity;
     }
 
-    // ═══════════════════════════════════════════════════════════════════════════
-    //  延迟销毁队列
-    // ═══════════════════════════════════════════════════════════════════════════
 
     void Scene::FlushDestroyQueueEditor()
     {
@@ -209,7 +95,6 @@ namespace Wheatear {
             if (!m_Registry.valid(e)) continue;
             Entity entity = { e, this };
 
-            // 每个系统自己决定销毁时要做什么，Scene 完全不知道细节
             for (auto& system : m_Systems)
                 system->OnEntityDestroy(this, entity);
 
@@ -218,9 +103,6 @@ namespace Wheatear {
         m_DestroyQueue.clear();
     }
 
-    // ═══════════════════════════════════════════════════════════════════════════
-    //  生命周期
-    // ═══════════════════════════════════════════════════════════════════════════
 
     void Scene::ConfigureRuntimeSystems()
     {
@@ -345,9 +227,6 @@ namespace Wheatear {
             ui->SetViewportOffset(x, y);
     }
 
-    // ═══════════════════════════════════════════════════════════════════════════
-    //  动画编辑器预览
-    // ═══════════════════════════════════════════════════════════════════════════
 
     void Scene::SetAnimationEditorPreviewActive(bool active)
     {
@@ -355,9 +234,6 @@ namespace Wheatear {
             anim->SetEditorPreviewActive(active);
     }
 
-    // ═══════════════════════════════════════════════════════════════════════════
-    //  查询
-    // ═══════════════════════════════════════════════════════════════════════════
 
     Entity Scene::GetPrimaryCameraEntity()
     {
@@ -383,35 +259,4 @@ namespace Wheatear {
                 return { e, this };
         return {};
     }
-
-    // ═══════════════════════════════════════════════════════════════════════════
-    //  OnComponentAdded
-    // ═══════════════════════════════════════════════════════════════════════════
-
-    template<typename T>
-    void Scene::OnComponentAdded(Entity, T&) {}
-
-    template<>
-    void Scene::OnComponentAdded<CameraComponent>(Entity, CameraComponent& component)
-    {
-        if (m_ViewportWidth > 0 && m_ViewportHeight > 0)
-            component.Camera.SetViewportSize(m_ViewportWidth, m_ViewportHeight);
-    }
-
-    template<>
-    void Scene::OnComponentAdded<MeshRendererComponent>(Entity entity, MeshRendererComponent& component)
-    {
-        // MeshRendererComponent 不需要特殊初始化，空函数体即可
-    }
-
-    template<>
-    void Scene::OnComponentAdded<DirectionalLightComponent>(Entity entity, DirectionalLightComponent& component)
-    {
-    }
-
-    template<>
-    void Scene::OnComponentAdded<PointLightComponent>(Entity entity, PointLightComponent& component)
-    {
-    }
-
 } // namespace Wheatear

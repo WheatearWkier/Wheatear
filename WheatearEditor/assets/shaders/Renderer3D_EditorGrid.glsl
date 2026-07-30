@@ -1,7 +1,7 @@
 #type vertex
 #version 450 core
 
-// Camera UBO binding=1£¨208 bytes£©
+// Camera UBO binding=1ï¼ˆ208 bytesï¼‰
 layout(std140, binding = 1) uniform Camera
 {
     mat4 u_ViewProjection;
@@ -65,11 +65,11 @@ vec4 DrawGrid(vec3 pos, float scale)
     float line = min(grid.x, grid.y);
     vec4 color = vec4(0.4, 0.4, 0.4, 1.0 - min(line, 1.0));
 
-    // X Öá£ººìÉ«
+    // X è½´ï¼šçº¢è‰²
     if (abs(pos.x) < 0.06 / scale)
         color = vec4(0.85, 0.25, 0.25, color.a);
 
-    // Z Öá£ºÀ¶É«
+    // Z è½´ï¼šè“è‰²
     if (abs(pos.z) < 0.06 / scale)
         color = vec4(0.25, 0.35, 0.85, color.a);
 
@@ -78,21 +78,21 @@ vec4 DrawGrid(vec3 pos, float scale)
 
 void main()
 {
-    // ¹âÏßÓë Y=0 Æ½ÃæÇó½»
+    // å…‰çº¿ä¸Ž Y=0 å¹³é¢æ±‚äº¤
     float t = -v_NearPoint.y / (v_FarPoint.y - v_NearPoint.y);
     if (t < 0.0) discard;
 
     vec3 worldPos = v_NearPoint + t * (v_FarPoint - v_NearPoint);
 
-    // ÊÖ¶¯Ð´Éî¶È£¬ÈÃ grid ÕýÈ·²ÎÓëÉî¶È²âÊÔ
+    // æ‰‹åŠ¨å†™æ·±åº¦ï¼Œè®© grid æ­£ç¡®å‚ä¸Žæ·±åº¦æµ‹è¯•
     vec4 clipPos = u_ViewProjection * vec4(worldPos, 1.0);
     gl_FragDepth = (clipPos.z / clipPos.w) * 0.5 + 0.5;
 
-    // Á½²ãµþ¼Ó£º´Ö¸ñ£¨1 µ¥Î»£©+ Ï¸¸ñ£¨0.1 µ¥Î»£©
+    // ä¸¤å±‚å åŠ ï¼šç²—æ ¼ï¼ˆ1 å•ä½ï¼‰+ ç»†æ ¼ï¼ˆ0.1 å•ä½ï¼‰
     vec4 grid = DrawGrid(worldPos, 1.0) + DrawGrid(worldPos, 0.1);
     grid = clamp(grid, 0.0, 1.0);
 
-    // ¾àÀëË¥¼õ
+    // è·ç¦»è¡°å‡
     float dist = length(u_CameraPosition.xz - worldPos.xz);
     float fade = 1.0 - smoothstep(30.0, 60.0, dist);
     grid.a    *= fade;

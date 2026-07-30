@@ -14,8 +14,8 @@ namespace Wheatear {
 
 		// Color
 		RGBA8,
-		RGBA16F,        // 法线缓冲用 (SSAO)
-		R8,             // SSAO 原始/模糊结果用
+		RGBA16F,
+		R8,
 		RED_INTEGER,
 
 		// Depth/stencil

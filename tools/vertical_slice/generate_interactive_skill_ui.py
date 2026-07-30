@@ -56,7 +56,7 @@ for prefix, names in BRANCH_NAMES.items():
 
 
 def safe_id(node_id: str) -> str:
-    return node_id.replace("-", "_").replace(":", "_")
+    return node_id.replace("-", "_").replace(":", "_").lower()
 
 
 def skill_nodes() -> list[dict[str, object]]:
@@ -178,8 +178,16 @@ def generate_assets() -> None:
     d.rounded_rectangle((9, 9, 55, 55), radius=5, outline=(112, 240, 226, 210), width=2)
     save(upscale(sel), UI_ROOT / "skill_tree" / "skill_selected_frame.png")
 
-    for kind in ("j_slash", "k_launcher", "sj_uppercut", "u_magic", "i_support", "l_break"):
-        save(combat_skill_icon(kind), SC_UI_ROOT / f"skill_{kind}.png")
+    skill_icon_files = {
+        "j_slash": "icon_skill_basic_slash.png",
+        "k_launcher": "icon_skill_launcher_slash.png",
+        "sj_uppercut": "icon_skill_uppercut.png",
+        "u_magic": "icon_skill_magic_bolt.png",
+        "i_support": "icon_skill_ally_support.png",
+        "l_break": "icon_skill_break_limit.png",
+    }
+    for kind, filename in skill_icon_files.items():
+        save(combat_skill_icon(kind), SC_UI_ROOT / filename)
 
 
 def transform() -> str:
@@ -216,7 +224,7 @@ def camera(entity_id: int, tag: str) -> str:
 """
 
 
-def background(entity_id: int, tag: str, color: list[float], texture: str = "assets/vertical_slice/vn/backgrounds/forest_camp.png") -> str:
+def background(entity_id: int, tag: str, color: list[float], texture: str = "assets/vertical_slice/vn/backgrounds/bg_forest_camp_night.png") -> str:
     return entity(entity_id, tag) + f"""    TransformComponent:
       Translation: [0, 0.35, -0.8]
       Rotation: [0, 0, 0]
@@ -489,10 +497,10 @@ def equipment_scene() -> str:
 
 def skill_bar_entities(base_id: int) -> str:
     specs = [
-        ("SJ", "S+J", "skill_sj_uppercut.png"),
-        ("U", "U", "skill_u_magic.png"),
-        ("I", "I", "skill_i_support.png"),
-        ("L", "L", "skill_l_break.png"),
+        ("SJ", "S+J", "icon_skill_uppercut.png"),
+        ("U", "U", "icon_skill_magic_bolt.png"),
+        ("I", "I", "icon_skill_ally_support.png"),
+        ("L", "L", "icon_skill_break_limit.png"),
     ]
     out = ""
     out += panel(base_id, "SC_SkillBarPanel", (0.580, 0.830), (0.330, 0.128), [0.03, 0.045, 0.055, 0.72], [0.20, 0.72, 0.78, 0.70], 50, 1.5)
@@ -556,9 +564,9 @@ def skill_bar_entities(base_id: int) -> str:
 """
 
     item_slot_specs = [
-        ("1", "assets/vertical_slice/side_combat/ui/items/item_slot_1_heal_potion.png", "1"),
-        ("2", "assets/vertical_slice/side_combat/ui/items/item_slot_2_focus_vial.png", "2"),
-        ("3", "assets/vertical_slice/side_combat/ui/items/item_slot_3_burst_bomb.png", "3"),
+        ("1", "assets/vertical_slice/side_combat/ui/items/icon_item_heal_potion.png", "1"),
+        ("2", "assets/vertical_slice/side_combat/ui/items/icon_item_focus_vial.png", "2"),
+        ("3", "assets/vertical_slice/side_combat/ui/items/icon_item_burst_bomb.png", "3"),
     ]
     for i, (key, icon_path, count) in enumerate(item_slot_specs):
         x = 0.040 + i * 0.058
@@ -572,9 +580,9 @@ def skill_bar_entities(base_id: int) -> str:
 
 def result_reward_entities(base_id: int) -> str:
     specs = [
-        ("Core", "assets/vertical_slice/side_combat/ui/mat_magic_core.png", "x1"),
-        ("Sinew", "assets/vertical_slice/side_combat/ui/mat_beast_sinew.png", "x2"),
-        ("Claw", "assets/vertical_slice/side_combat/ui/mat_beast_claw.png", "x1"),
+        ("Core", "assets/vertical_slice/side_combat/ui/icon_drop_magic_core.png", "x1"),
+        ("Sinew", "assets/vertical_slice/side_combat/ui/icon_drop_beast_sinew.png", "x2"),
+        ("Claw", "assets/vertical_slice/side_combat/ui/icon_drop_beast_claw.png", "x1"),
     ]
     out = ""
     for i, (key, icon_path, count) in enumerate(specs):
@@ -727,12 +735,12 @@ def update_manifest() -> None:
         "assets/scenes/VerticalSliceSkillTree.wt",
         "assets/scenes/VerticalSliceEquipment.wt",
         "assets/vertical_slice/ui/skill_tree/skill_magic_sword_core.png",
-        "assets/vertical_slice/side_combat/ui/skill_j_slash.png",
-        "assets/vertical_slice/side_combat/ui/skill_k_launcher.png",
-        "assets/vertical_slice/side_combat/ui/skill_sj_uppercut.png",
-        "assets/vertical_slice/side_combat/ui/skill_u_magic.png",
-        "assets/vertical_slice/side_combat/ui/skill_i_support.png",
-        "assets/vertical_slice/side_combat/ui/skill_l_break.png",
+        "assets/vertical_slice/side_combat/ui/icon_skill_basic_slash.png",
+        "assets/vertical_slice/side_combat/ui/icon_skill_launcher_slash.png",
+        "assets/vertical_slice/side_combat/ui/icon_skill_uppercut.png",
+        "assets/vertical_slice/side_combat/ui/icon_skill_magic_bolt.png",
+        "assets/vertical_slice/side_combat/ui/icon_skill_ally_support.png",
+        "assets/vertical_slice/side_combat/ui/icon_skill_break_limit.png",
     ]:
         generated.add(path)
     manifest["generated_assets"] = sorted(generated)

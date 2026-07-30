@@ -1,4 +1,4 @@
-﻿Scene: SideCombatVerticalSlice
+Scene: SideCombatVerticalSlice
 Entities:
   - Entity: 946100902
     TagComponent:
@@ -59,7 +59,7 @@ Entities:
       Scale: [20, 11.25, 1]
     SpriteRendererComponent:
       Color: [1, 1, 1, 1]
-      Texture: assets/vertical_slice/side_combat/backgrounds/black_forest_stage.png
+      Texture: assets/vertical_slice/side_combat/backgrounds/bg_black_forest_stage.png
       TilingFactor: 1
   - Entity: 940000003
     TagComponent:
@@ -81,7 +81,7 @@ Entities:
       Scale: [1.05, 0.36, 1]
     SpriteRendererComponent:
       Color: [0, 0, 0, 0.38]
-      Texture: assets/vertical_slice/side_combat/ui/blob_shadow.png
+      Texture: assets/vertical_slice/side_combat/ui/blob_shadow_soft.png
       TilingFactor: 1
   - Entity: 940000021
     TagComponent:
@@ -92,7 +92,7 @@ Entities:
       Scale: [1.72, 0.50, 1]
     SpriteRendererComponent:
       Color: [0, 0, 0, 0.42]
-      Texture: assets/vertical_slice/side_combat/ui/blob_shadow.png
+      Texture: assets/vertical_slice/side_combat/ui/blob_shadow_soft.png
       TilingFactor: 1
   - Entity: 940000004
     TagComponent:
@@ -103,7 +103,7 @@ Entities:
       Scale: [1.42, 1.42, 1]
     SpriteRendererComponent:
       Color: [1, 1, 1, 1]
-      Texture: assets/vertical_slice/side_combat/characters/player_magic_swordsman.png
+      Texture: assets/vertical_slice/side_combat/characters/protag_magic_swordsman.png
       TilingFactor: 1
     SideCombatantComponent:
       Team: 1
@@ -138,7 +138,7 @@ Entities:
       Scale: [1.95, 1.55, 1]
     SpriteRendererComponent:
       Color: [1, 1, 1, 1]
-      Texture: assets/vertical_slice/side_combat/enemies/bear_husband.png
+      Texture: assets/vertical_slice/side_combat/enemies/boss_bear_husband.png
       TilingFactor: 1
     SideCombatantComponent:
       Team: 2
@@ -570,7 +570,7 @@ Entities:
       ParentTag: WT_UI_Canvas
     UIImageComponent:
       Color: [1, 1, 1, 1.0]
-      TexturePath: assets/vertical_slice/side_combat/ui/skill_sj_uppercut.png
+      TexturePath: assets/vertical_slice/side_combat/ui/icon_skill_uppercut.png
     UIButtonComponent:
       NormalColor: [0, 0, 0, 0]
       HoverColor: [0.95, 1, 0.82, 0.14]
@@ -680,7 +680,7 @@ Entities:
       ParentTag: WT_UI_Canvas
     UIImageComponent:
       Color: [1, 1, 1, 1.0]
-      TexturePath: assets/vertical_slice/side_combat/ui/skill_u_magic.png
+      TexturePath: assets/vertical_slice/side_combat/ui/icon_skill_magic_bolt.png
     UIButtonComponent:
       NormalColor: [0, 0, 0, 0]
       HoverColor: [0.95, 1, 0.82, 0.14]
@@ -790,7 +790,7 @@ Entities:
       ParentTag: WT_UI_Canvas
     UIImageComponent:
       Color: [1, 1, 1, 1.0]
-      TexturePath: assets/vertical_slice/side_combat/ui/skill_i_support.png
+      TexturePath: assets/vertical_slice/side_combat/ui/icon_skill_ally_support.png
     UIButtonComponent:
       NormalColor: [0, 0, 0, 0]
       HoverColor: [0.95, 1, 0.82, 0.14]
@@ -900,7 +900,7 @@ Entities:
       ParentTag: WT_UI_Canvas
     UIImageComponent:
       Color: [1, 1, 1, 1.0]
-      TexturePath: assets/vertical_slice/side_combat/ui/skill_l_break.png
+      TexturePath: assets/vertical_slice/side_combat/ui/icon_skill_break_limit.png
     UIButtonComponent:
       NormalColor: [0, 0, 0, 0]
       HoverColor: [0.95, 1, 0.82, 0.14]
@@ -1053,7 +1053,7 @@ Entities:
       ParentTag: WT_UI_Canvas
     UIImageComponent:
       Color: [1, 1, 1, 1.0]
-      TexturePath: assets/vertical_slice/side_combat/ui/items/item_slot_1_heal_potion.png
+      TexturePath: assets/vertical_slice/side_combat/ui/items/icon_item_heal_potion.png
   - Entity: 946100702
     TagComponent:
       Tag: SC_ItemSlot_1_Button
@@ -1134,7 +1134,7 @@ Entities:
       ParentTag: WT_UI_Canvas
     UIImageComponent:
       Color: [1, 1, 1, 1.0]
-      TexturePath: assets/vertical_slice/side_combat/ui/items/item_slot_2_focus_vial.png
+      TexturePath: assets/vertical_slice/side_combat/ui/items/icon_item_focus_vial.png
   - Entity: 946100712
     TagComponent:
       Tag: SC_ItemSlot_2_Button
@@ -1215,7 +1215,7 @@ Entities:
       ParentTag: WT_UI_Canvas
     UIImageComponent:
       Color: [1, 1, 1, 1.0]
-      TexturePath: assets/vertical_slice/side_combat/ui/items/item_slot_3_burst_bomb.png
+      TexturePath: assets/vertical_slice/side_combat/ui/items/icon_item_burst_bomb.png
   - Entity: 946100722
     TagComponent:
       Tag: SC_ItemSlot_3_Button

@@ -4,10 +4,7 @@
 
 namespace Wheatear {
 
-    /// @brief 轻量 2D 动作战斗系统
     ///
-    /// 该系统只消费 Arcade* 组件，不依赖具体游戏脚本。视觉小说、普通 2D
-    /// 关卡和播放器运行时都可以通过场景数据复用这套战斗能力。
     class ArcadeCombatSystem : public ISystem
     {
     public:

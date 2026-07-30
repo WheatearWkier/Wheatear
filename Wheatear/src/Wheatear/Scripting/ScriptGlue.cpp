@@ -24,9 +24,6 @@ namespace Wheatear {
     mono_add_internal_call("Wheatear.InternalCalls::" #Name, (void*)Name)
 
     // =========================================================
-    //  类型注册表
-    //  用 std::unordered_map 代替一堆 if-else 字符串比较，
-    //  新增组件只需在 RegisterFunctions() 末尾加一行 REGISTER 宏
     // =========================================================
 
     using HasComponentFn = bool(*)(Entity&);
@@ -35,7 +32,6 @@ namespace Wheatear {
     static std::unordered_map<MonoType*, HasComponentFn> s_HasComponentFns;
     static std::unordered_map<MonoType*, AddComponentFn> s_AddComponentFns;
 
-    // 注册辅助宏
 #define REGISTER_COMPONENT(CppType, CSharpName)                                         \
     {                                                                                    \
         MonoType* mt = mono_reflection_type_from_name(                                  \
@@ -116,8 +112,6 @@ namespace Wheatear {
             mono_type_get_name(monoType));
     }
 
-    // 在场景中按名字查找 Entity，返回其 UUID（找不到返回 0）
-    // C# 端：ulong id = InternalCalls.Scene_FindEntityByName("Player");
     static uint64_t Scene_FindEntityByName(MonoString* name)
     {
         char* cStr = mono_string_to_utf8(name);
@@ -218,7 +212,6 @@ namespace Wheatear {
         body->SetLinearVelocity(b2Vec2(velocity->x, velocity->y));
     }
 
-    // GravityScale —— 读取 / 设置重力缩放比例（0 = 不受重力）
     static float Rigidbody2DComponent_GetGravityScale(uint64_t entityID)
     {
         Entity entity = ScriptEngine::GetSceneContext()->GetEntityByUUID(entityID);
@@ -236,13 +229,12 @@ namespace Wheatear {
         if (!entity || !entity.HasComponent<Rigidbody2DComponent>()) return;
 
         auto& rb2d = entity.GetComponent<Rigidbody2DComponent>();
-        rb2d.GravityScale = scale;   // 同时写回组件数据，以便序列化保存
+        rb2d.GravityScale = scale;
 
         b2Body* body = static_cast<b2Body*>(rb2d.RuntimeBody);
         if (body) body->SetGravityScale(scale);
     }
 
-    // FixedRotation —— 锁定旋转
     static bool Rigidbody2DComponent_GetFixedRotation(uint64_t entityID)
     {
         Entity entity = ScriptEngine::GetSceneContext()->GetEntityByUUID(entityID);
@@ -449,7 +441,6 @@ namespace Wheatear {
     //  Audio
     // =========================================================
 
-    // 最简单的一次性播放，C# 里 Audio.PlaySound("path") 就走这里
     static void Audio_PlaySound(MonoString* filepath, float volume)
     {
         char* path = mono_string_to_utf8(filepath);
@@ -457,7 +448,6 @@ namespace Wheatear {
         mono_free(path);
     }
 
-    // 播放并返回句柄，C# 里可以拿到 handle 再控制
     static uint32_t Audio_PlaySoundWithHandle(MonoString* filepath,
         float volume, bool loop)
     {
@@ -493,7 +483,6 @@ namespace Wheatear {
         return AudioEngine::IsPlaying(handle);
     }
 
-    // ---- AudioSourceComponent 组件读写 ----
     static void AudioSourceComponent_Play(UUID entityID)
     {
         Scene* scene = ScriptEngine::GetSceneContext();
@@ -503,7 +492,6 @@ namespace Wheatear {
         auto& asc = entity.GetComponent<AudioSourceComponent>();
         if (asc.AudioFilePath.empty()) return;
 
-        // 如果已经在播放，先停掉
         if (asc.RuntimeHandle != 0)
             AudioEngine::StopSound(asc.RuntimeHandle);
 
@@ -551,7 +539,6 @@ namespace Wheatear {
 
         auto& asc = entity.GetComponent<AudioSourceComponent>();
         asc.Volume = volume;
-        // 如果正在播放，实时更新音量
         if (asc.RuntimeHandle != 0)
             AudioEngine::SetVolume(asc.RuntimeHandle, volume);
     }
@@ -559,7 +546,6 @@ namespace Wheatear {
     // =========================================================
     //  UI
     // =========================================================
-    // ── UI: UIWidgetComponent ──────────────────────────────────────────────────
 
     static bool UICanvasComponent_GetVisible(uint64_t entityID)
     {
@@ -617,7 +603,6 @@ namespace Wheatear {
         entity.GetComponent<UIWidgetComponent>().Size = *size;
     }
 
-    // ── UI: UIImageComponent ───────────────────────────────────────────────────
 
     static void UIImageComponent_GetColor(uint64_t entityID, glm::vec4* outColor)
     {
@@ -633,7 +618,6 @@ namespace Wheatear {
         entity.GetComponent<UIImageComponent>().Color = *color;
     }
 
-    // ── UI: UIProgressBarComponent ────────────────────────────────────────────
 
     static float UIProgressBarComponent_GetValue(uint64_t entityID)
     {
@@ -677,7 +661,6 @@ namespace Wheatear {
         entity.GetComponent<UIProgressBarComponent>().ForegroundColor = *color;
     }
 
-    // ── UI: UIButtonComponent ─────────────────────────────────────────────────
 
     static bool UIButtonComponent_GetIsHovered(uint64_t entityID)
     {
@@ -693,8 +676,6 @@ namespace Wheatear {
         return entity.GetComponent<UIButtonComponent>().IsPressed;
     }
 
-    // Button点击事件的核心：C++检测到点击后，调用此函数触发C#回调
-    // 这个函数由UIInputSystem调用，不是InternalCall
 
     static void UIButtonComponent_SetOnClickFunction(uint64_t entityID, MonoString* funcName)
     {
@@ -713,7 +694,6 @@ namespace Wheatear {
         return mono_string_new(mono_domain_get(), func.c_str());
     }
 
-    // ── UI: UITextComponent ───────────────────────────────────────────────────
 
     static MonoString* UITextComponent_GetText(uint64_t entityID)
     {
@@ -841,7 +821,6 @@ namespace Wheatear {
         return (uint64_t)entity.GetUUID();
     }
 
-    // 跨脚本通信：通过 UUID 拿到另一个 Entity 的脚本实例（返回 object，C# 端强转）
     static MonoObject* Entity_GetScriptInstance(uint64_t entityID)
     {
         Ref<ScriptInstance> instance = ScriptEngine::GetEntityScriptInstance(entityID);
@@ -850,7 +829,6 @@ namespace Wheatear {
     }
 
     // =========================================================
-    //  注册所有函数
     // =========================================================
 
     void ScriptGlue::RegisterFunctions()
@@ -858,18 +836,15 @@ namespace Wheatear {
         s_HasComponentFns.clear();
         s_AddComponentFns.clear();
 
-        // ── Entity ────────────────────────────────────────────
         WT_ADD_INTERNAL_CALL(Entity_GetTag);
         WT_ADD_INTERNAL_CALL(Entity_Destroy);
         WT_ADD_INTERNAL_CALL(Entity_HasComponent);
         WT_ADD_INTERNAL_CALL(Entity_AddComponent);
         WT_ADD_INTERNAL_CALL(Entity_GetScriptInstance);
 
-        // ── Scene ─────────────────────────────────────────────
         WT_ADD_INTERNAL_CALL(Scene_FindEntityByName);
         WT_ADD_INTERNAL_CALL(Scene_InstantiateFromPrefab);
 
-        // ── Transform ─────────────────────────────────────────
         WT_ADD_INTERNAL_CALL(TransformComponent_GetTranslation);
         WT_ADD_INTERNAL_CALL(TransformComponent_SetTranslation);
         WT_ADD_INTERNAL_CALL(TransformComponent_GetRotation);
@@ -877,7 +852,6 @@ namespace Wheatear {
         WT_ADD_INTERNAL_CALL(TransformComponent_GetScale);
         WT_ADD_INTERNAL_CALL(TransformComponent_SetScale);
 
-        // ── Rigidbody2D ───────────────────────────────────────
         WT_ADD_INTERNAL_CALL(Rigidbody2DComponent_ApplyLinearImpulse);
         WT_ADD_INTERNAL_CALL(Rigidbody2DComponent_GetLinearVelocity);
         WT_ADD_INTERNAL_CALL(Rigidbody2DComponent_SetLinearVelocity);
@@ -888,22 +862,18 @@ namespace Wheatear {
         WT_ADD_INTERNAL_CALL(Rigidbody2DComponent_GetBodyType);
         WT_ADD_INTERNAL_CALL(Rigidbody2DComponent_SetBodyType);
 
-        // ── Input ─────────────────────────────────────────────
         WT_ADD_INTERNAL_CALL(Input_IsKeyDown);
         WT_ADD_INTERNAL_CALL(Input_IsMouseButtonDown);
         WT_ADD_INTERNAL_CALL(Input_GetMousePosition);
 
-        // ── Time ──────────────────────────────────────────────
         WT_ADD_INTERNAL_CALL(Time_GetDeltaTime);
         WT_ADD_INTERNAL_CALL(Time_GetElapsedTime);
         WT_ADD_INTERNAL_CALL(Time_GetFrameCount);
 
-        // ── Log ───────────────────────────────────────────────
         WT_ADD_INTERNAL_CALL(Log_Info);
         WT_ADD_INTERNAL_CALL(Log_Warn);
         WT_ADD_INTERNAL_CALL(Log_Error);
 
-        // ── SpriteRenderer ────────────────────────────────────
         WT_ADD_INTERNAL_CALL(SpriteRendererComponent_GetColor);
         WT_ADD_INTERNAL_CALL(SpriteRendererComponent_SetColor);
         WT_ADD_INTERNAL_CALL(SpriteRendererComponent_GetTilingFactor);
@@ -911,14 +881,12 @@ namespace Wheatear {
         WT_ADD_INTERNAL_CALL(SpriteRendererComponent_GetFlipX);
         WT_ADD_INTERNAL_CALL(SpriteRendererComponent_SetFlipX);
 
-        // ── SpriteAnimator ────────────────────────────────────
         WT_ADD_INTERNAL_CALL(SpriteAnimatorComponent_Play);
         WT_ADD_INTERNAL_CALL(SpriteAnimatorComponent_Stop);
         WT_ADD_INTERNAL_CALL(SpriteAnimatorComponent_Resume);
         WT_ADD_INTERNAL_CALL(SpriteAnimatorComponent_GetCurrentClip);
         WT_ADD_INTERNAL_CALL(SpriteAnimatorComponent_IsFinished);
 
-        // ── Audio ─────────────────────────────────────────────
         WT_ADD_INTERNAL_CALL(Audio_PlaySound);
         WT_ADD_INTERNAL_CALL(Audio_PlaySoundWithHandle);
         WT_ADD_INTERNAL_CALL(Audio_StopSound);
@@ -932,7 +900,6 @@ namespace Wheatear {
         WT_ADD_INTERNAL_CALL(AudioSourceComponent_GetVolume);
         WT_ADD_INTERNAL_CALL(AudioSourceComponent_SetVolume);
 
-        // ── UI Components ─────────────────────────────────────────────────────────
         WT_ADD_INTERNAL_CALL(UICanvasComponent_GetVisible);
         WT_ADD_INTERNAL_CALL(UICanvasComponent_SetVisible);
         WT_ADD_INTERNAL_CALL(UIWidgetComponent_GetVisible);
@@ -966,15 +933,12 @@ namespace Wheatear {
         WT_ADD_INTERNAL_CALL(UITextComponent_GetFontPath);
         WT_ADD_INTERNAL_CALL(UITextComponent_SetFontPath);
 
-        // ── Arcade Combat ────────────────────────────────────────────────────────
         WT_ADD_INTERNAL_CALL(ArcadeCombatLevelComponent_GetPaused);
         WT_ADD_INTERNAL_CALL(ArcadeCombatLevelComponent_GetBossIntroStarted);
         WT_ADD_INTERNAL_CALL(ArcadeCombatLevelComponent_GetBossIntroFinished);
         WT_ADD_INTERNAL_CALL(ArcadeCombatLevelComponent_GetVictory);
         WT_ADD_INTERNAL_CALL(ArcadeCombatLevelComponent_GetDefeat);
         WT_ADD_INTERNAL_CALL(ArcadeCombatLevelComponent_RequestSceneCommand);
-        // ── 类型注册表（HasComponent / AddComponent 用）──────
-        // 新增组件只需在这里加一行，无需修改 HasComponent/AddComponent 函数体
         REGISTER_COMPONENT(TransformComponent, "Wheatear.TransformComponent");
         REGISTER_COMPONENT(Rigidbody2DComponent, "Wheatear.Rigidbody2DComponent");
         REGISTER_COMPONENT(SpriteAnimatorComponent, "Wheatear.SpriteAnimatorComponent");

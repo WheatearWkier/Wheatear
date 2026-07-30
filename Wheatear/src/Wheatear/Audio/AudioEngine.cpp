@@ -3,7 +3,6 @@
 #include "Wheatear/Core/Application.h"
 #include "Wheatear/Core/AssetPath.h"
 
-// miniaudio implementation ¡ª must be defined in only one .cpp
 #define MINIAUDIO_IMPLEMENTATION
 #include "miniaudio.h"
 

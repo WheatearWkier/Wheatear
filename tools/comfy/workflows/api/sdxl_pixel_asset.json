@@ -1,0 +1,107 @@
+{
+  "1": {
+    "class_type": "CheckpointLoaderSimple",
+    "_meta": {
+      "title": "Load SDXL checkpoint"
+    },
+    "inputs": {
+      "ckpt_name": "sd_xl_base_1.0.safetensors"
+    }
+  },
+  "2": {
+    "class_type": "CLIPTextEncode",
+    "_meta": {
+      "title": "Positive prompt"
+    },
+    "inputs": {
+      "clip": [
+        "1",
+        1
+      ],
+      "text": "original pixel art JRPG battle sprite strip, clean readable 32-bit pixel style, transparent background, one horizontal row"
+    }
+  },
+  "3": {
+    "class_type": "CLIPTextEncode",
+    "_meta": {
+      "title": "Negative prompt"
+    },
+    "inputs": {
+      "clip": [
+        "1",
+        1
+      ],
+      "text": "text, logo, watermark, signature, antialiased painting, photorealistic, 3d render, blurry, grid lines, frame numbers, inconsistent frame size"
+    }
+  },
+  "4": {
+    "class_type": "EmptyLatentImage",
+    "_meta": {
+      "title": "Pixel strip canvas"
+    },
+    "inputs": {
+      "width": 512,
+      "height": 128,
+      "batch_size": 1
+    }
+  },
+  "5": {
+    "class_type": "KSampler",
+    "_meta": {
+      "title": "Sampler"
+    },
+    "inputs": {
+      "seed": 99887766,
+      "steps": 26,
+      "cfg": 6.5,
+      "sampler_name": "euler",
+      "scheduler": "normal",
+      "denoise": 1.0,
+      "model": [
+        "1",
+        0
+      ],
+      "positive": [
+        "2",
+        0
+      ],
+      "negative": [
+        "3",
+        0
+      ],
+      "latent_image": [
+        "4",
+        0
+      ]
+    }
+  },
+  "6": {
+    "class_type": "VAEDecode",
+    "_meta": {
+      "title": "Decode"
+    },
+    "inputs": {
+      "samples": [
+        "5",
+        0
+      ],
+      "vae": [
+        "1",
+        2
+      ]
+    }
+  },
+  "7": {
+    "class_type": "SaveImage",
+    "_meta": {
+      "title": "Save"
+    },
+    "inputs": {
+      "filename_prefix": "wheatear/turn_combat/sheets/px_protag_idle_strip",
+      "images": [
+        "6",
+        0
+      ]
+    }
+  }
+}

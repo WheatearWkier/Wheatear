@@ -1,4 +1,4 @@
-﻿Scene: VerticalSliceSkillTree
+Scene: VerticalSliceSkillTree
 Entities:
   - Entity: 970000036
     TagComponent:
@@ -40,7 +40,7 @@ Entities:
       Scale: [20, 11.25, 1]
     SpriteRendererComponent:
       Color: [0.72, 0.84, 0.92, 1]
-      Texture: assets/vertical_slice/vn/backgrounds/forest_camp.png
+      Texture: assets/vertical_slice/vn/backgrounds/bg_forest_camp_night.png
       TilingFactor: 1
   - Entity: 970000010
     TagComponent:
@@ -167,7 +167,7 @@ Entities:
         - Id: "ME-01"
           ParentId: "magic_sword_core"
           Position: [0.500000, 0.351000]
-          IconPath: "assets/vertical_slice/ui/skill_tree/skill_ME_01.png"
+          IconPath: "assets/vertical_slice/ui/skill_tree/skill_me_01.png"
           Branch: "Melee"
           UnlockChapter: 2
           Learned: false
@@ -177,7 +177,7 @@ Entities:
         - Id: "ME-02"
           ParentId: "ME-01"
           Position: [0.516325, 0.294648]
-          IconPath: "assets/vertical_slice/ui/skill_tree/skill_ME_02.png"
+          IconPath: "assets/vertical_slice/ui/skill_tree/skill_me_02.png"
           Branch: "Melee"
           UnlockChapter: 2
           Learned: false
@@ -187,7 +187,7 @@ Entities:
         - Id: "ME-03"
           ParentId: "ME-02"
           Position: [0.540922, 0.244253]
-          IconPath: "assets/vertical_slice/ui/skill_tree/skill_ME_03.png"
+          IconPath: "assets/vertical_slice/ui/skill_tree/skill_me_03.png"
           Branch: "Melee"
           UnlockChapter: 3
           Learned: false
@@ -197,7 +197,7 @@ Entities:
         - Id: "ME-04"
           ParentId: "ME-03"
           Position: [0.566956, 0.224006]
-          IconPath: "assets/vertical_slice/ui/skill_tree/skill_ME_04.png"
+          IconPath: "assets/vertical_slice/ui/skill_tree/skill_me_04.png"
           Branch: "Melee"
           UnlockChapter: 3
           Learned: false
@@ -207,7 +207,7 @@ Entities:
         - Id: "ME-05"
           ParentId: "ME-04"
           Position: [0.606403, 0.176026]
-          IconPath: "assets/vertical_slice/ui/skill_tree/skill_ME_05.png"
+          IconPath: "assets/vertical_slice/ui/skill_tree/skill_me_05.png"
           Branch: "Melee"
           UnlockChapter: 7
           Learned: false
@@ -217,7 +217,7 @@ Entities:
         - Id: "ME-06"
           ParentId: "ME-05"
           Position: [0.652220, 0.136592]
-          IconPath: "assets/vertical_slice/ui/skill_tree/skill_ME_06.png"
+          IconPath: "assets/vertical_slice/ui/skill_tree/skill_me_06.png"
           Branch: "Melee"
           UnlockChapter: 7
           Learned: false
@@ -227,7 +227,7 @@ Entities:
         - Id: "ME-07"
           ParentId: "ME-06"
           Position: [0.691997, 0.127578]
-          IconPath: "assets/vertical_slice/ui/skill_tree/skill_ME_07.png"
+          IconPath: "assets/vertical_slice/ui/skill_tree/skill_me_07.png"
           Branch: "Melee"
           UnlockChapter: 10
           Learned: false
@@ -237,7 +237,7 @@ Entities:
         - Id: "ME-08"
           ParentId: "ME-07"
           Position: [0.750959, 0.095531]
-          IconPath: "assets/vertical_slice/ui/skill_tree/skill_ME_08.png"
+          IconPath: "assets/vertical_slice/ui/skill_tree/skill_me_08.png"
           Branch: "Melee"
           UnlockChapter: 10
           Learned: false
@@ -247,7 +247,7 @@ Entities:
         - Id: "ME-09"
           ParentId: "ME-08"
           Position: [0.813648, 0.074012]
-          IconPath: "assets/vertical_slice/ui/skill_tree/skill_ME_09.png"
+          IconPath: "assets/vertical_slice/ui/skill_tree/skill_me_09.png"
           Branch: "Melee"
           UnlockChapter: 13
           Learned: false
@@ -257,7 +257,7 @@ Entities:
         - Id: "ME-10"
           ParentId: "ME-09"
           Position: [0.862793, 0.081315]
-          IconPath: "assets/vertical_slice/ui/skill_tree/skill_ME_10.png"
+          IconPath: "assets/vertical_slice/ui/skill_tree/skill_me_10.png"
           Branch: "Melee"
           UnlockChapter: 13
           Learned: false
@@ -267,7 +267,7 @@ Entities:
         - Id: "ME-11"
           ParentId: "ME-10"
           Position: [0.935456, 0.071399]
-          IconPath: "assets/vertical_slice/ui/skill_tree/skill_ME_11.png"
+          IconPath: "assets/vertical_slice/ui/skill_tree/skill_me_11.png"
           Branch: "Melee"
           UnlockChapter: 17
           Learned: false
@@ -277,7 +277,7 @@ Entities:
         - Id: "ME-12"
           ParentId: "ME-11"
           Position: [1.008654, 0.073189]
-          IconPath: "assets/vertical_slice/ui/skill_tree/skill_ME_12.png"
+          IconPath: "assets/vertical_slice/ui/skill_tree/skill_me_12.png"
           Branch: "Melee"
           UnlockChapter: 17
           Learned: false
@@ -287,7 +287,7 @@ Entities:
         - Id: "MA-01"
           ParentId: "magic_sword_core"
           Position: [0.641707, 0.453956]
-          IconPath: "assets/vertical_slice/ui/skill_tree/skill_MA_01.png"
+          IconPath: "assets/vertical_slice/ui/skill_tree/skill_ma_01.png"
           Branch: "Magic"
           UnlockChapter: 2
           Learned: false
@@ -297,7 +297,7 @@ Entities:
         - Id: "MA-02"
           ParentId: "MA-01"
           Position: [0.700497, 0.452705]
-          IconPath: "assets/vertical_slice/ui/skill_tree/skill_MA_02.png"
+          IconPath: "assets/vertical_slice/ui/skill_tree/skill_ma_02.png"
           Branch: "Magic"
           UnlockChapter: 2
           Learned: false
@@ -307,7 +307,7 @@ Entities:
         - Id: "MA-03"
           ParentId: "MA-02"
           Position: [0.756125, 0.461514]
-          IconPath: "assets/vertical_slice/ui/skill_tree/skill_MA_03.png"
+          IconPath: "assets/vertical_slice/ui/skill_tree/skill_ma_03.png"
           Branch: "Magic"
           UnlockChapter: 3
           Learned: false
@@ -317,7 +317,7 @@ Entities:
         - Id: "MA-04"
           ParentId: "MA-03"
           Position: [0.783370, 0.481088]
-          IconPath: "assets/vertical_slice/ui/skill_tree/skill_MA_04.png"
+          IconPath: "assets/vertical_slice/ui/skill_tree/skill_ma_04.png"
           Branch: "Magic"
           UnlockChapter: 3
           Learned: false
@@ -327,7 +327,7 @@ Entities:
         - Id: "MA-05"
           ParentId: "MA-04"
           Position: [0.840957, 0.505410]
-          IconPath: "assets/vertical_slice/ui/skill_tree/skill_MA_05.png"
+          IconPath: "assets/vertical_slice/ui/skill_tree/skill_ma_05.png"
           Branch: "Magic"
           UnlockChapter: 7
           Learned: false
@@ -337,7 +337,7 @@ Entities:
         - Id: "MA-06"
           ParentId: "MA-05"
           Position: [0.892095, 0.538697]
-          IconPath: "assets/vertical_slice/ui/skill_tree/skill_MA_06.png"
+          IconPath: "assets/vertical_slice/ui/skill_tree/skill_ma_06.png"
           Branch: "Magic"
           UnlockChapter: 7
           Learned: false
@@ -347,7 +347,7 @@ Entities:
         - Id: "MA-07"
           ParentId: "MA-06"
           Position: [0.912164, 0.575376]
-          IconPath: "assets/vertical_slice/ui/skill_tree/skill_MA_07.png"
+          IconPath: "assets/vertical_slice/ui/skill_tree/skill_ma_07.png"
           Branch: "Magic"
           UnlockChapter: 10
           Learned: false
@@ -357,7 +357,7 @@ Entities:
         - Id: "MA-08"
           ParentId: "MA-07"
           Position: [0.959585, 0.623927]
-          IconPath: "assets/vertical_slice/ui/skill_tree/skill_MA_08.png"
+          IconPath: "assets/vertical_slice/ui/skill_tree/skill_ma_08.png"
           Branch: "Magic"
           UnlockChapter: 10
           Learned: false
@@ -367,7 +367,7 @@ Entities:
         - Id: "MA-09"
           ParentId: "MA-08"
           Position: [0.997669, 0.679350]
-          IconPath: "assets/vertical_slice/ui/skill_tree/skill_MA_09.png"
+          IconPath: "assets/vertical_slice/ui/skill_tree/skill_ma_09.png"
           Branch: "Magic"
           UnlockChapter: 13
           Learned: false
@@ -377,7 +377,7 @@ Entities:
         - Id: "MA-10"
           ParentId: "MA-09"
           Position: [1.003936, 0.730140]
-          IconPath: "assets/vertical_slice/ui/skill_tree/skill_MA_10.png"
+          IconPath: "assets/vertical_slice/ui/skill_tree/skill_ma_10.png"
           Branch: "Magic"
           UnlockChapter: 13
           Learned: false
@@ -387,7 +387,7 @@ Entities:
         - Id: "MA-11"
           ParentId: "MA-10"
           Position: [1.032977, 0.798759]
-          IconPath: "assets/vertical_slice/ui/skill_tree/skill_MA_11.png"
+          IconPath: "assets/vertical_slice/ui/skill_tree/skill_ma_11.png"
           Branch: "Magic"
           UnlockChapter: 17
           Learned: false
@@ -397,7 +397,7 @@ Entities:
         - Id: "MA-12"
           ParentId: "MA-11"
           Position: [1.050481, 0.871304]
-          IconPath: "assets/vertical_slice/ui/skill_tree/skill_MA_12.png"
+          IconPath: "assets/vertical_slice/ui/skill_tree/skill_ma_12.png"
           Branch: "Magic"
           UnlockChapter: 17
           Learned: false
@@ -407,7 +407,7 @@ Entities:
         - Id: "FU-01"
           ParentId: "magic_sword_core"
           Position: [0.587580, 0.620544]
-          IconPath: "assets/vertical_slice/ui/skill_tree/skill_FU_01.png"
+          IconPath: "assets/vertical_slice/ui/skill_tree/skill_fu_01.png"
           Branch: "Aerial"
           UnlockChapter: 2
           Learned: false
@@ -417,7 +417,7 @@ Entities:
         - Id: "FU-02"
           ParentId: "FU-01"
           Position: [0.606937, 0.676069]
-          IconPath: "assets/vertical_slice/ui/skill_tree/skill_FU_02.png"
+          IconPath: "assets/vertical_slice/ui/skill_tree/skill_fu_02.png"
           Branch: "Aerial"
           UnlockChapter: 2
           Learned: false
@@ -427,7 +427,7 @@ Entities:
         - Id: "FU-03"
           ParentId: "FU-02"
           Position: [0.615749, 0.731696]
-          IconPath: "assets/vertical_slice/ui/skill_tree/skill_FU_03.png"
+          IconPath: "assets/vertical_slice/ui/skill_tree/skill_fu_03.png"
           Branch: "Aerial"
           UnlockChapter: 3
           Learned: false
@@ -437,7 +437,7 @@ Entities:
         - Id: "FU-04"
           ParentId: "FU-03"
           Position: [0.605552, 0.763656]
-          IconPath: "assets/vertical_slice/ui/skill_tree/skill_FU_04.png"
+          IconPath: "assets/vertical_slice/ui/skill_tree/skill_fu_04.png"
           Branch: "Aerial"
           UnlockChapter: 3
           Learned: false
@@ -447,7 +447,7 @@ Entities:
         - Id: "FU-05"
           ParentId: "FU-04"
           Position: [0.600216, 0.825941]
-          IconPath: "assets/vertical_slice/ui/skill_tree/skill_FU_05.png"
+          IconPath: "assets/vertical_slice/ui/skill_tree/skill_fu_05.png"
           Branch: "Aerial"
           UnlockChapter: 7
           Learned: false
@@ -457,7 +457,7 @@ Entities:
         - Id: "FU-06"
           ParentId: "FU-05"
           Position: [0.584361, 0.884862]
-          IconPath: "assets/vertical_slice/ui/skill_tree/skill_FU_06.png"
+          IconPath: "assets/vertical_slice/ui/skill_tree/skill_fu_06.png"
           Branch: "Aerial"
           UnlockChapter: 7
           Learned: false
@@ -467,7 +467,7 @@ Entities:
         - Id: "FU-07"
           ParentId: "FU-06"
           Position: [0.555679, 0.915284]
-          IconPath: "assets/vertical_slice/ui/skill_tree/skill_FU_07.png"
+          IconPath: "assets/vertical_slice/ui/skill_tree/skill_fu_07.png"
           Branch: "Aerial"
           UnlockChapter: 10
           Learned: false
@@ -477,7 +477,7 @@ Entities:
         - Id: "FU-08"
           ParentId: "FU-07"
           Position: [0.524158, 0.975387]
-          IconPath: "assets/vertical_slice/ui/skill_tree/skill_FU_08.png"
+          IconPath: "assets/vertical_slice/ui/skill_tree/skill_fu_08.png"
           Branch: "Aerial"
           UnlockChapter: 10
           Learned: false
@@ -487,7 +487,7 @@ Entities:
         - Id: "FU-09"
           ParentId: "FU-08"
           Position: [0.483216, 1.028734]
-          IconPath: "assets/vertical_slice/ui/skill_tree/skill_FU_09.png"
+          IconPath: "assets/vertical_slice/ui/skill_tree/skill_fu_09.png"
           Branch: "Aerial"
           UnlockChapter: 13
           Learned: false
@@ -497,7 +497,7 @@ Entities:
         - Id: "FU-10"
           ParentId: "FU-09"
           Position: [0.436849, 1.050389]
-          IconPath: "assets/vertical_slice/ui/skill_tree/skill_FU_10.png"
+          IconPath: "assets/vertical_slice/ui/skill_tree/skill_fu_10.png"
           Branch: "Aerial"
           UnlockChapter: 13
           Learned: false
@@ -507,7 +507,7 @@ Entities:
         - Id: "FU-11"
           ParentId: "FU-10"
           Position: [0.380562, 1.099212]
-          IconPath: "assets/vertical_slice/ui/skill_tree/skill_FU_11.png"
+          IconPath: "assets/vertical_slice/ui/skill_tree/skill_fu_11.png"
           Branch: "Aerial"
           UnlockChapter: 17
           Learned: false
@@ -517,7 +517,7 @@ Entities:
         - Id: "FU-12"
           ParentId: "FU-11"
           Position: [0.316977, 1.138278]
-          IconPath: "assets/vertical_slice/ui/skill_tree/skill_FU_12.png"
+          IconPath: "assets/vertical_slice/ui/skill_tree/skill_fu_12.png"
           Branch: "Aerial"
           UnlockChapter: 17
           Learned: false
@@ -527,7 +527,7 @@ Entities:
         - Id: "MO-01"
           ParentId: "magic_sword_core"
           Position: [0.412420, 0.620544]
-          IconPath: "assets/vertical_slice/ui/skill_tree/skill_MO_01.png"
+          IconPath: "assets/vertical_slice/ui/skill_tree/skill_mo_01.png"
           Branch: "Mobility"
           UnlockChapter: 2
           Learned: false
@@ -537,7 +537,7 @@ Entities:
         - Id: "MO-02"
           ParentId: "MO-01"
           Position: [0.365593, 0.656112]
-          IconPath: "assets/vertical_slice/ui/skill_tree/skill_MO_02.png"
+          IconPath: "assets/vertical_slice/ui/skill_tree/skill_mo_02.png"
           Branch: "Mobility"
           UnlockChapter: 2
           Learned: false
@@ -547,7 +547,7 @@ Entities:
         - Id: "MO-03"
           ParentId: "MO-02"
           Position: [0.315412, 0.681682]
-          IconPath: "assets/vertical_slice/ui/skill_tree/skill_MO_03.png"
+          IconPath: "assets/vertical_slice/ui/skill_tree/skill_mo_03.png"
           Branch: "Mobility"
           UnlockChapter: 3
           Learned: false
@@ -557,7 +557,7 @@ Entities:
         - Id: "MO-04"
           ParentId: "MO-03"
           Position: [0.281865, 0.681860]
-          IconPath: "assets/vertical_slice/ui/skill_tree/skill_MO_04.png"
+          IconPath: "assets/vertical_slice/ui/skill_tree/skill_mo_04.png"
           Branch: "Mobility"
           UnlockChapter: 3
           Learned: false
@@ -567,7 +567,7 @@ Entities:
         - Id: "MO-05"
           ParentId: "MO-04"
           Position: [0.220980, 0.696033]
-          IconPath: "assets/vertical_slice/ui/skill_tree/skill_MO_05.png"
+          IconPath: "assets/vertical_slice/ui/skill_tree/skill_mo_05.png"
           Branch: "Mobility"
           UnlockChapter: 7
           Learned: false
@@ -577,7 +577,7 @@ Entities:
         - Id: "MO-06"
           ParentId: "MO-05"
           Position: [0.160043, 0.699162]
-          IconPath: "assets/vertical_slice/ui/skill_tree/skill_MO_06.png"
+          IconPath: "assets/vertical_slice/ui/skill_tree/skill_mo_06.png"
           Branch: "Mobility"
           UnlockChapter: 7
           Learned: false
@@ -587,7 +587,7 @@ Entities:
         - Id: "MO-07"
           ParentId: "MO-06"
           Position: [0.122247, 0.681284]
-          IconPath: "assets/vertical_slice/ui/skill_tree/skill_MO_07.png"
+          IconPath: "assets/vertical_slice/ui/skill_tree/skill_mo_07.png"
           Branch: "Mobility"
           UnlockChapter: 10
           Learned: false
@@ -597,7 +597,7 @@ Entities:
         - Id: "MO-08"
           ParentId: "MO-07"
           Position: [0.055346, 0.669878]
-          IconPath: "assets/vertical_slice/ui/skill_tree/skill_MO_08.png"
+          IconPath: "assets/vertical_slice/ui/skill_tree/skill_mo_08.png"
           Branch: "Mobility"
           UnlockChapter: 10
           Learned: false
@@ -607,7 +607,7 @@ Entities:
         - Id: "MO-09"
           ParentId: "MO-08"
           Position: [-0.008042, 0.647425]
-          IconPath: "assets/vertical_slice/ui/skill_tree/skill_MO_09.png"
+          IconPath: "assets/vertical_slice/ui/skill_tree/skill_mo_09.png"
           Branch: "Mobility"
           UnlockChapter: 13
           Learned: false
@@ -617,7 +617,7 @@ Entities:
         - Id: "MO-10"
           ParentId: "MO-09"
           Position: [-0.042966, 0.610019]
-          IconPath: "assets/vertical_slice/ui/skill_tree/skill_MO_10.png"
+          IconPath: "assets/vertical_slice/ui/skill_tree/skill_mo_10.png"
           Branch: "Mobility"
           UnlockChapter: 13
           Learned: false
@@ -627,7 +627,7 @@ Entities:
         - Id: "MO-11"
           ParentId: "MO-10"
           Position: [-0.106793, 0.571575]
-          IconPath: "assets/vertical_slice/ui/skill_tree/skill_MO_11.png"
+          IconPath: "assets/vertical_slice/ui/skill_tree/skill_mo_11.png"
           Branch: "Mobility"
           UnlockChapter: 17
           Learned: false
@@ -637,7 +637,7 @@ Entities:
         - Id: "MO-12"
           ParentId: "MO-11"
           Position: [-0.163596, 0.523173]
-          IconPath: "assets/vertical_slice/ui/skill_tree/skill_MO_12.png"
+          IconPath: "assets/vertical_slice/ui/skill_tree/skill_mo_12.png"
           Branch: "Mobility"
           UnlockChapter: 17
           Learned: false
@@ -647,7 +647,7 @@ Entities:
         - Id: "LI-01"
           ParentId: "magic_sword_core"
           Position: [0.358293, 0.453956]
-          IconPath: "assets/vertical_slice/ui/skill_tree/skill_LI_01.png"
+          IconPath: "assets/vertical_slice/ui/skill_tree/skill_li_01.png"
           Branch: "Limit"
           UnlockChapter: 2
           Learned: false
@@ -657,7 +657,7 @@ Entities:
         - Id: "LI-02"
           ParentId: "LI-01"
           Position: [0.309743, 0.421016]
-          IconPath: "assets/vertical_slice/ui/skill_tree/skill_LI_02.png"
+          IconPath: "assets/vertical_slice/ui/skill_tree/skill_li_02.png"
           Branch: "Limit"
           UnlockChapter: 2
           Learned: false
@@ -667,7 +667,7 @@ Entities:
         - Id: "LI-03"
           ParentId: "LI-02"
           Position: [0.269416, 0.382050]
-          IconPath: "assets/vertical_slice/ui/skill_tree/skill_LI_03.png"
+          IconPath: "assets/vertical_slice/ui/skill_tree/skill_li_03.png"
           Branch: "Limit"
           UnlockChapter: 3
           Learned: false
@@ -677,7 +677,7 @@ Entities:
         - Id: "LI-04"
           ParentId: "LI-03"
           Position: [0.258204, 0.351035]
-          IconPath: "assets/vertical_slice/ui/skill_tree/skill_LI_04.png"
+          IconPath: "assets/vertical_slice/ui/skill_tree/skill_li_04.png"
           Branch: "Limit"
           UnlockChapter: 3
           Learned: false
@@ -687,7 +687,7 @@ Entities:
         - Id: "LI-05"
           ParentId: "LI-04"
           Position: [0.224763, 0.298691]
-          IconPath: "assets/vertical_slice/ui/skill_tree/skill_LI_05.png"
+          IconPath: "assets/vertical_slice/ui/skill_tree/skill_li_05.png"
           Branch: "Limit"
           UnlockChapter: 7
           Learned: false
@@ -697,7 +697,7 @@ Entities:
         - Id: "LI-06"
           ParentId: "LI-05"
           Position: [0.201417, 0.242931]
-          IconPath: "assets/vertical_slice/ui/skill_tree/skill_LI_06.png"
+          IconPath: "assets/vertical_slice/ui/skill_tree/skill_li_06.png"
           Branch: "Limit"
           UnlockChapter: 7
           Learned: false
@@ -707,7 +707,7 @@ Entities:
         - Id: "LI-07"
           ParentId: "LI-06"
           Position: [0.205136, 0.202315]
-          IconPath: "assets/vertical_slice/ui/skill_tree/skill_LI_07.png"
+          IconPath: "assets/vertical_slice/ui/skill_tree/skill_li_07.png"
           Branch: "Limit"
           UnlockChapter: 10
           Learned: false
@@ -717,7 +717,7 @@ Entities:
         - Id: "LI-08"
           ParentId: "LI-07"
           Position: [0.192878, 0.136336]
-          IconPath: "assets/vertical_slice/ui/skill_tree/skill_LI_08.png"
+          IconPath: "assets/vertical_slice/ui/skill_tree/skill_li_08.png"
           Branch: "Limit"
           UnlockChapter: 10
           Learned: false
@@ -727,7 +727,7 @@ Entities:
         - Id: "LI-09"
           ParentId: "LI-08"
           Position: [0.191784, 0.070065]
-          IconPath: "assets/vertical_slice/ui/skill_tree/skill_LI_09.png"
+          IconPath: "assets/vertical_slice/ui/skill_tree/skill_li_09.png"
           Branch: "Limit"
           UnlockChapter: 13
           Learned: false
@@ -737,7 +737,7 @@ Entities:
         - Id: "LI-10"
           ParentId: "LI-09"
           Position: [0.213916, 0.025583]
-          IconPath: "assets/vertical_slice/ui/skill_tree/skill_LI_10.png"
+          IconPath: "assets/vertical_slice/ui/skill_tree/skill_li_10.png"
           Branch: "Limit"
           UnlockChapter: 13
           Learned: false
@@ -747,7 +747,7 @@ Entities:
         - Id: "LI-11"
           ParentId: "LI-10"
           Position: [0.226939, -0.046588]
-          IconPath: "assets/vertical_slice/ui/skill_tree/skill_LI_11.png"
+          IconPath: "assets/vertical_slice/ui/skill_tree/skill_li_11.png"
           Branch: "Limit"
           UnlockChapter: 17
           Learned: false
@@ -757,7 +757,7 @@ Entities:
         - Id: "LI-12"
           ParentId: "LI-11"
           Position: [0.251261, -0.115650]
-          IconPath: "assets/vertical_slice/ui/skill_tree/skill_LI_12.png"
+          IconPath: "assets/vertical_slice/ui/skill_tree/skill_li_12.png"
           Branch: "Limit"
           UnlockChapter: 17
           Learned: false

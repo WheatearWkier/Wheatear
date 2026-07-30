@@ -1,4 +1,4 @@
-﻿#include "wtpch.h"
+#include "wtpch.h"
 #include "SceneSerializerComponentSupport.h"
 
 namespace Wheatear {
@@ -70,11 +70,17 @@ namespace Wheatear {
             o << YAML::Key << "Color" << YAML::Value << c.Color;
             o << YAML::Key << "Texture" << YAML::Value << (c.Texture ? c.Texture->GetPath() : "");
             o << YAML::Key << "TilingFactor" << YAML::Value << c.TilingFactor;
+            o << YAML::Key << "UVMin" << YAML::Value << c.UVMin;
+            o << YAML::Key << "UVMax" << YAML::Value << c.UVMax;
+            o << YAML::Key << "FlipX" << YAML::Value << c.FlipX;
             o << YAML::EndMap;
         }
         static void Deserialize(const YAML::Node& n, SpriteRendererComponent& c) {
             c.Color = n["Color"].as<glm::vec4>();
             c.TilingFactor = n["TilingFactor"].as<float>(1.0f);
+            c.UVMin = n["UVMin"].as<glm::vec2>(c.UVMin);
+            c.UVMax = n["UVMax"].as<glm::vec2>(c.UVMax);
+            c.FlipX = n["FlipX"].as<bool>(c.FlipX);
             if (auto p = n["Texture"].as<std::string>(""); !p.empty())
                 c.Texture = Texture2D::Create(p);
         }
@@ -177,7 +183,6 @@ namespace Wheatear {
     //        if (!path.empty())
     //            c.Mesh = Mesh::Create(path);
     //        else
-    //            c.Mesh = Mesh::CreateCube(); // 璺緞涓虹┖鍒欑敤榛樿绔嬫柟浣?
     //    }
     //};
 

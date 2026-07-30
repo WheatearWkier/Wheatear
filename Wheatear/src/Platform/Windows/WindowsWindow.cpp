@@ -15,8 +15,6 @@
 
 namespace Wheatear {
 
-    // 记录当前已初始化的 GLFW 窗口数量
-    // 第一个窗口创建时初始化 GLFW，最后一个销毁时终止 GLFW
     static uint32_t s_GLFWWindowCount = 0;
 
     static void GLFWErrorCallback(int error, const char* description)
@@ -24,18 +22,12 @@ namespace Wheatear {
         WT_CORE_ERROR("GLFW Error ({0}): {1}", error, description);
     }
 
-    // ═══════════════════════════════════════════════════════
-    //  Window 基类工厂（平台层实现）
-    // ═══════════════════════════════════════════════════════
 
     Window* Window::Create(const WindowProps& props)
     {
         return new WindowsWindow(props);
     }
 
-    // ═══════════════════════════════════════════════════════
-    //  构造 / 析构
-    // ═══════════════════════════════════════════════════════
 
     WindowsWindow::WindowsWindow(const WindowProps& props)
     {
@@ -49,9 +41,6 @@ namespace Wheatear {
         Shutdown();
     }
 
-    // ═══════════════════════════════════════════════════════
-    //  初始化
-    // ═══════════════════════════════════════════════════════
 
     void WindowsWindow::Init(const WindowProps& props)
     {
@@ -64,7 +53,6 @@ namespace Wheatear {
         WT_CORE_INFO("Creating window '{0}' ({1} x {2})",
             props.Title, props.Width, props.Height);
 
-        // 第一个窗口时初始化 GLFW
         if (s_GLFWWindowCount == 0)
         {
             WT_PROFILE_SCOPE("glfwInit");
@@ -83,7 +71,6 @@ namespace Wheatear {
             );
             s_GLFWWindowCount++;
 
-            // ── 设置窗口图标 ──────────────────────────────────────
             if (!props.IconPath.empty())
             {
                 const std::filesystem::path iconPath = AssetPath::ResolveResource(props.IconPath);
@@ -98,31 +85,19 @@ namespace Wheatear {
             }
         }
 
-        // 初始化图形上下文（OpenGL: 创建并设置当前 context）
         m_Context = CreateScope<OpenGLContext>(m_Window);
         m_Context->Init();
 
-        // 把 WindowData 的地址存入 GLFW，供回调函数取回
-        // 原因：GLFW 回调是 C 函数指针，不能捕获 this，
-        // 只能通过 UserPointer 把需要的数据传递进去
         glfwSetWindowUserPointer(m_Window, &m_Data);
         SetVSync(true);
 
         SetupCallbacks();
     }
 
-    // ═══════════════════════════════════════════════════════
-    //  回调注册（拆分出来让 Init 不过长）
-    // ═══════════════════════════════════════════════════════
 
     void WindowsWindow::SetupCallbacks()
     {
-        // 取 UserPointer 的辅助 lambda，所有回调都用这个模式：
-        // 1. 从 GLFW 取回 WindowData
-        // 2. 构造引擎事件对象
-        // 3. 调用 EventCallback，把事件派发给 Application
 
-        // ── 窗口尺寸改变 ─────────────────────────────────
         glfwSetWindowSizeCallback(m_Window,
             [](GLFWwindow* window, int width, int height)
             {
@@ -134,7 +109,6 @@ namespace Wheatear {
                 data.EventCallback(event);
             });
 
-        // ── 窗口关闭 ──────────────────────────────────────
         glfwSetWindowCloseCallback(m_Window,
             [](GLFWwindow* window)
             {
@@ -143,7 +117,6 @@ namespace Wheatear {
                 data.EventCallback(event);
             });
 
-        // ── 键盘按键 ──────────────────────────────────────
         glfwSetKeyCallback(m_Window,
             [](GLFWwindow* window, int key, int /*scancode*/, int action, int /*mods*/)
             {
@@ -171,7 +144,6 @@ namespace Wheatear {
                 }
             });
 
-        // ── 字符输入（用于文本框等 UI 输入）──────────────
         glfwSetCharCallback(m_Window,
             [](GLFWwindow* window, unsigned int codepoint)
             {
@@ -180,7 +152,6 @@ namespace Wheatear {
                 data.EventCallback(event);
             });
 
-        // ── 鼠标按键 ──────────────────────────────────────
         glfwSetMouseButtonCallback(m_Window,
             [](GLFWwindow* window, int button, int action, int /*mods*/)
             {
@@ -202,7 +173,6 @@ namespace Wheatear {
                 }
             });
 
-        // ── 鼠标滚轮 ──────────────────────────────────────
         glfwSetScrollCallback(m_Window,
             [](GLFWwindow* window, double xOffset, double yOffset)
             {
@@ -214,7 +184,6 @@ namespace Wheatear {
                 data.EventCallback(event);
             });
 
-        // ── 鼠标移动 ──────────────────────────────────────
         glfwSetCursorPosCallback(m_Window,
             [](GLFWwindow* window, double xPos, double yPos)
             {
@@ -227,9 +196,6 @@ namespace Wheatear {
             });
     }
 
-    // ═══════════════════════════════════════════════════════
-    //  关闭
-    // ═══════════════════════════════════════════════════════
 
     void WindowsWindow::Shutdown()
     {
@@ -238,31 +204,24 @@ namespace Wheatear {
         glfwDestroyWindow(m_Window);
         s_GLFWWindowCount--;
 
-        // 最后一个窗口销毁时终止 GLFW
         if (s_GLFWWindowCount == 0)
             glfwTerminate();
     }
 
-    // ═══════════════════════════════════════════════════════
-    //  每帧更新
-    // ═══════════════════════════════════════════════════════
 
     void WindowsWindow::OnUpdate()
     {
         WT_PROFILE_FUNCTION();
 
-        m_Context->SwapBuffers(); // 交换前后缓冲，显示当前帧
+        m_Context->SwapBuffers();
     }
 
-    // ═══════════════════════════════════════════════════════
     //  VSync
-    // ═══════════════════════════════════════════════════════
 
     void WindowsWindow::SetVSync(bool enabled)
     {
         WT_PROFILE_FUNCTION();
 
-        // 0 = 不等待垂直同步（不限帧率），1 = 等待（锁 60fps）
         glfwSwapInterval(enabled ? 1 : 0);
         m_Data.VSync = enabled;
     }

@@ -4,12 +4,7 @@
 
 namespace Wheatear {
 
-    /// @brief 精灵动画系统
     /// 
-    /// 负责：
-    ///   - 运行时动画帧推进与采样
-    ///   - 属性轨道（位移、旋转、缩放、颜色）插值写回
-    ///   - 编辑模式下的首帧预览同步
     class AnimationSystem : public ISystem
     {
     public:

@@ -1,6 +1,6 @@
 # WheatearEditor 操作手册
 
-更新日期：2026-07-28
+更新日期：2026-07-30
 
 本文记录 WheatearEditor 当前已经能使用的主要操作。目标是让策划、美术、程序都能直接打开编辑器调整场景、UI、VN 剧本、战斗参数和打包流程，而不是每次都依赖代码生成 YAML。
 
@@ -87,6 +87,7 @@ View / Reset Window Layout
 - `UI Edit Outlines`：显示或隐藏 UI 控件编辑边框。
 - `Hide UI In Scene Viewport`：在主 Viewport 暂时隐藏 UI，方便编辑被 UI 挡住的场景物体。
 - `UI Canvas Editor`：打开专属 UI 编辑视窗。
+- `Sprite Sheet Picker`：打开图集选择器，用于选择 atlas 子图或切割连续动画帧。
 - `Physics Colliders`：显示或隐藏物理碰撞体辅助线。
 - `Reset Window Layout`：重置编辑器窗口停靠布局。
 
@@ -416,12 +417,53 @@ assets/audio
 
 1. 选中带 `SpriteAnimatorComponent` 的实体。
 2. 在动画编辑器中添加或选择 Clip。
-3. 配置播放速度、循环、默认 Clip。
-4. 导入或生成帧。
+3. 配置 `Loop`、`Set Default`、`Play On Start` 和 `Fire Events`。
+4. 用 `Sprite Sheet Picker` 或 `Spritesheet / Atlas Generator` 从图集生成帧，或在 `Frames` 区域手动拖入贴图。
 5. 使用时间轴预览动画。
-6. 需要时增加属性轨道和关键帧。
+6. 在 `Events` 轨道双击或点击 `+ Add Event` 添加动画事件。
+7. 需要时增加属性轨道和关键帧，例如透明度、颜色、位置和缩放。
 
-当前动画编辑器适合做 Sprite 序列帧、简单属性动画和 UI 动画预览。复杂骨骼动画、动画状态机、Blend Tree 还没有做成完整商业级工具。
+动画事件可以在运行时执行 `CommandBus` 命令，常见示例：
+
+```text
+anim:play:{entity}:idle
+anim:play:Enemy_Bear:hurt
+event:FlowController:attack_hit
+turn:skill:resolve_hit
+```
+
+事件命令支持 `{entity}`、`{clip}`、`{event}` 三个占位符。正式资源建议优先使用 spritesheet：一张贴图配多段 UV 帧，比每帧独立贴图更利于批处理和资源管理。
+
+当前动画编辑器适合做 Sprite 序列帧、spritesheet 帧、简单属性动画、UI 动画和事件触发。复杂骨骼动画、动画状态机、Blend Tree 还没有做成完整商业级工具。
+
+### 10.1 Sprite Sheet Picker
+
+`Sprite Sheet Picker` 是通用图集选择器，服务三类工作：
+
+- 角色、敌人、特效：从横向连续帧或规则网格中生成 `AnimationClip` 序列帧。
+- UI 图标：从一张 UI icon atlas 中选中某个格子，写入 `UIImageComponent.Texture + UVMin + UVMax`。
+- 静态 Sprite：从 atlas 中选一个子图，写入 `SpriteRendererComponent.Texture + UVMin + UVMax`。
+
+打开方式：
+
+- 顶部菜单 `View / Sprite Sheet Picker`。
+- 选中 `Sprite Renderer` 或 `UI Image` 组件后点击 `Open Sprite Sheet Picker`。
+- 在 `Animation Editor / Spritesheet / Atlas Generator` 中点击 `Open Sprite Sheet Picker`。
+
+基本操作：
+
+1. 从 `Content Browser` 把图集拖到面板顶部的 drop 区。
+2. 填写 `Columns / Rows`。如果是横向连续帧，通常 `Rows = 1`。
+3. 默认 `Top-origin rows` 表示第 0 行是视觉上的最上面一行，符合 UI 图集和美术软件直觉；如果要兼容旧式底部 UV 起点，可以取消勾选。
+4. 在大预览区点击一个格子，右侧会显示当前子图预览和 UV。
+5. 静态图用 `Apply To SpriteRenderer` 或 `Apply To UI Image`。
+6. 动画用 `Horizontal Strip / Row Major / Vertical Strip` 设置帧序列方向，再点击 `Replace Clip With Sequence` 或 `Append Sequence To Clip`。
+
+建议约定：
+
+- UI 图标图集命名为 `ui_icons_*.png`，按固定格子大小排布。
+- 横向动作帧命名为 `character_action_sheet.png`，一行动作尽量保持同尺寸同中心点。
+- 正式资源优先图集化；只有临时 Demo 或特殊独立大图才用单张 PNG。
 
 ## 11. VN 内容编辑
 

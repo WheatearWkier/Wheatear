@@ -15,10 +15,8 @@
 // =============================================================================
 //  OpenGLShader.cpp
 //
-//  Compile pipeline (current ¡ª OpenGL only):
 //
 //    Your GLSL  -->  shaderc (target: OpenGL 4.5)  -->  OpenGL SPIR-V
-//                                                         ©¦
 //                                                   glShaderBinary
 //                                                   glSpecializeShader
 //
@@ -95,7 +93,6 @@ namespace Wheatear {
                 std::filesystem::create_directories(cacheDirectory);
         }
 
-        // Cache file extensions ¡ª opengl and vulkan kept separate so that
         // adding the Vulkan backend later doesn't invalidate OpenGL caches.
         static const char* GLShaderStageCachedOpenGLFileExtension(uint32_t stage)
         {
@@ -238,7 +235,6 @@ namespace Wheatear {
         shaderc::Compiler      compiler;
         shaderc::CompileOptions options;
 
-        // ©¤©¤ Target ©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤
         // Compiling straight to OpenGL 4.5 SPIR-V avoids the spirv_cross
         // round-trip (Vulkan SPIR-V -> GLSL -> OpenGL SPIR-V) that caused
         // interface-variable name mismatches between shader stages.
@@ -248,7 +244,6 @@ namespace Wheatear {
         options.SetTargetEnvironment(shaderc_target_env_opengl,
             shaderc_env_version_opengl_4_5);
 
-        // Disable optimisation ¡ª the optimiser renames interface variables
         // which breaks the OpenGL linker's name-based interface matching.
         options.SetOptimizationLevel(shaderc_optimization_level_zero);
 
@@ -269,7 +264,6 @@ namespace Wheatear {
             std::ifstream in(cachedPath, std::ios::in | std::ios::binary);
             if (in.is_open())
             {
-                // Cache hit ¡ª load directly
                 in.seekg(0, std::ios::end);
                 auto size = in.tellg();
                 in.seekg(0, std::ios::beg);
@@ -280,7 +274,6 @@ namespace Wheatear {
             }
             else
             {
-                // Cache miss ¡ª compile and cache
                 shaderc::SpvCompilationResult module =
                     compiler.CompileGlslToSpv(source,
                         Utils::GLShaderStageToShaderC(stage),
@@ -289,7 +282,7 @@ namespace Wheatear {
 
                 if (module.GetCompilationStatus() != shaderc_compilation_status_success)
                 {
-                    WT_CORE_ERROR("Shader compilation failed ({0} ¡ª {1}):\n{2}",
+                    WT_CORE_ERROR("Shader compilation failed ({0} â€” {1}):\n{2}",
                         m_FilePath,
                         Utils::GLShaderStageToString(stage),
                         module.GetErrorMessage());
@@ -320,7 +313,6 @@ namespace Wheatear {
     // =========================================================================
     //  CompileOrGetOpenGLBinaries
     //
-    //  Currently unused ¡ª OpenGL SPIR-V is produced directly in
     //  CompileOrGetVulkanBinaries above.
     //
     //  Restore this function when adding Vulkan:
@@ -335,7 +327,6 @@ namespace Wheatear {
     }
 
     // =========================================================================
-    //  CreateProgram  ¡ª upload SPIR-V, specialise entry point, link
     // =========================================================================
 
     void OpenGLShader::CreateProgram()
@@ -382,7 +373,6 @@ namespace Wheatear {
     }
 
     // =========================================================================
-    //  Reflect  ¡ª log UBO / sampler info from SPIR-V
     // =========================================================================
 
     void OpenGLShader::Reflect(GLenum stage, const std::vector<uint32_t>& shaderData)

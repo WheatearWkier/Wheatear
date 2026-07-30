@@ -1,4 +1,4 @@
-﻿Scene: VerticalSliceSettings
+Scene: VerticalSliceSettings
 Entities:
   - Entity: 840000027
     TagComponent:
@@ -59,7 +59,7 @@ Entities:
       Scale: [20, 11.25, 1]
     SpriteRendererComponent:
       Color: [0.76, 0.88, 0.82, 1]
-      Texture: assets/vertical_slice/vn/backgrounds/forest_camp.png
+      Texture: assets/vertical_slice/vn/backgrounds/bg_forest_camp_night.png
       TilingFactor: 1
   - Entity: 840000010
     TagComponent:

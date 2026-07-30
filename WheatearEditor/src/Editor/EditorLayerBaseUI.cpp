@@ -1,4 +1,4 @@
-﻿#include "wtpch.h"
+#include "wtpch.h"
 #include "EditorLayerBase.h"
 
 #include "Wheatear/Core/Application.h"
@@ -24,9 +24,12 @@
 #include "Wheatear/Math/Math.h"
 #include "Editor/EditorCanvasTools.h"
 #include "Editor/EventScriptGraphPanel.h"
-#include "Modules/SideCombat/SideCombatTuningEditorPanel.h"
-#include "Modules/VisualNovel/VisualNovelScriptEditorPanel.h"
+#include "Editor/EditorToolRegistry.h"
+#include "Panels/AnimationEditorPanel.h"
+#include "Panels/ContentBrowserPanel.h"
 #include "Panels/EditorCommands.h"
+#include "Panels/SceneHierarchyPanel.h"
+#include "Panels/SpriteSheetPickerPanel.h"
 
 #include <imgui/imgui.h>
 #include <imgui/imgui_internal.h>
@@ -56,18 +59,6 @@ namespace Wheatear {
             int SortOrder = 0;
             std::string Name;
         };
-
-        static VisualNovelScriptEditorPanel& GetVisualNovelScriptEditorPanel()
-        {
-            static VisualNovelScriptEditorPanel panel;
-            return panel;
-        }
-
-        static SideCombatTuningEditorPanel& GetSideCombatTuningEditorPanel()
-        {
-            static SideCombatTuningEditorPanel panel;
-            return panel;
-        }
 
         static EventScriptGraphPanel& GetEventScriptGraphPanel()
         {
@@ -356,18 +347,22 @@ namespace Wheatear {
 
         UI_MenuBar();
 
-        m_SceneHierarchyPanel.OnImGuiRender();
-        m_ContentBrowserPanel.OnImGuiRender();
-        m_AnimationEditorPanel.SetEntity(m_SceneHierarchyPanel.GetSelectedEntity());
-        m_AnimationEditorPanel.OnImGuiRender(m_LastTimestep);
-        GetVisualNovelScriptEditorPanel().OnImGuiRender();
-        GetSideCombatTuningEditorPanel().OnImGuiRender();
+        m_SceneHierarchyPanel->OnImGuiRender();
+        m_ContentBrowserPanel->OnImGuiRender();
+        m_AnimationEditorPanel->SetEntity(m_SceneHierarchyPanel->GetSelectedEntity());
+        m_AnimationEditorPanel->OnImGuiRender(m_LastTimestep);
+        m_SpriteSheetPickerPanel->SetEntity(m_SceneHierarchyPanel->GetSelectedEntity());
+        m_SpriteSheetPickerPanel->OnImGuiRender();
+        EditorToolRegistry::ForEach([](const EditorToolDescriptor& tool)
+        {
+            if (tool.Draw)
+                tool.Draw();
+        });
         GetEventScriptGraphPanel().OnImGuiRender();
 
         UI_Stats();
         UI_PlayerBuildStatus();
 
-        // 鈹€鈹€ 瀛愮被涓撳睘闈㈡澘锛圫ettings/IBL绛夛級鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€
         OnImGuiExtra();
 
         UI_CanvasEditor();
@@ -403,6 +398,7 @@ namespace Wheatear {
         ImGui::DockBuilderDockWindow("Player Build", rightBottom);
         ImGui::DockBuilderDockWindow("Content Browser", bottom);
         ImGui::DockBuilderDockWindow("Animation Editor", bottomRight);
+        ImGui::DockBuilderDockWindow("Sprite Sheet Picker", bottomRight);
         ImGui::DockBuilderDockWindow("UI Canvas Editor", bottomRight);
         ImGui::DockBuilderDockWindow("Viewport", main);
 
@@ -430,8 +426,8 @@ namespace Wheatear {
             transform.Rotation,
             10.0f);
 
-        m_SceneHierarchyPanel.SetSelectedEntity(cameraEntity);
-        m_AnimationEditorPanel.SetEntity(cameraEntity);
+        m_SceneHierarchyPanel->SetSelectedEntity(cameraEntity);
+        m_AnimationEditorPanel->SetEntity(cameraEntity);
     }
 
     void EditorLayerBase::UI_MenuBar()
@@ -476,33 +472,21 @@ namespace Wheatear {
             if (ImGui::MenuItem("UI Canvas Editor", nullptr, &m_UIEditorOpen))
             {
                 if (!m_UIEditingCanvas)
-                    m_UIEditingCanvas = m_SceneHierarchyPanel.GetSelectedEntity();
+                    m_UIEditingCanvas = m_SceneHierarchyPanel->GetSelectedEntity();
             }
-            if (ImGui::MenuItem("VN Script Editor"))
+            const EditorToolContext toolContext{ m_SceneHierarchyPanel->GetSelectedEntity() };
+            EditorToolRegistry::ForEach([&](const EditorToolDescriptor& tool)
             {
-                std::string scriptPath = "assets/vn/vertical_slice_intro.vn";
-                if (Entity selected = m_SceneHierarchyPanel.GetSelectedEntity())
-                {
-                    if (selected.HasComponent<VisualNovelComponent>())
-                        scriptPath = selected.GetComponent<VisualNovelComponent>().ScriptPath;
-                }
-                GetVisualNovelScriptEditorPanel().Open(scriptPath);
-            }
-            if (ImGui::MenuItem("Side Combat Tuning Editor"))
-            {
-                std::string tuningPath = "assets/vertical_slice/data/side_combat_tuning.yaml";
-                if (Entity selected = m_SceneHierarchyPanel.GetSelectedEntity())
-                {
-                    if (selected.HasComponent<SideCombatLevelComponent>())
-                        tuningPath = selected.GetComponent<SideCombatLevelComponent>().TuningPath;
-                }
-                GetSideCombatTuningEditorPanel().Open(tuningPath);
-            }
+                if (ImGui::MenuItem(tool.MenuLabel.c_str()) && tool.Open)
+                    tool.Open(toolContext);
+            });
+            if (ImGui::MenuItem("Sprite Sheet Picker"))
+                m_SpriteSheetPickerPanel->OpenForEntity(m_SceneHierarchyPanel->GetSelectedEntity());
             if (ImGui::MenuItem("Event Script Graph"))
             {
                 std::string scriptPath = "assets/events/vertical_slice_flow.wts";
                 std::string eventName;
-                if (Entity selected = m_SceneHierarchyPanel.GetSelectedEntity())
+                if (Entity selected = m_SceneHierarchyPanel->GetSelectedEntity())
                 {
                     if (selected.HasComponent<EventScriptComponent>())
                     {
@@ -584,7 +568,7 @@ namespace Wheatear {
         {
             m_UIEditingCanvas = {};
             UIWidgetLayout::Context layout(m_ActiveScene.get());
-            Entity selectedCanvas = FindOwningCanvas(m_SceneHierarchyPanel.GetSelectedEntity(), layout);
+            Entity selectedCanvas = FindOwningCanvas(m_SceneHierarchyPanel->GetSelectedEntity(), layout);
             if (selectedCanvas)
                 m_UIEditingCanvas = selectedCanvas;
 
@@ -602,7 +586,7 @@ namespace Wheatear {
 
         if (ImGui::Button("Use Selected Canvas"))
         {
-            Entity selected = m_SceneHierarchyPanel.GetSelectedEntity();
+            Entity selected = m_SceneHierarchyPanel->GetSelectedEntity();
             UIWidgetLayout::Context layout(m_ActiveScene.get());
             if (Entity owningCanvas = FindOwningCanvas(selected, layout))
                 m_UIEditingCanvas = owningCanvas;
@@ -672,7 +656,7 @@ namespace Wheatear {
         const ImVec2 canvasMin = { regionMin.x, regionMin.y };
         const ImVec2 canvasMax = { regionMin.x + regionSize.x, regionMin.y + regionSize.y };
         UIWidgetLayout::Context layout(m_ActiveScene.get());
-        Entity selected = m_SceneHierarchyPanel.GetSelectedEntity();
+        Entity selected = m_SceneHierarchyPanel->GetSelectedEntity();
         const bool selectedInsideThisCanvas = selected && selected != canvasEntity
             && BelongsToCanvas(selected, canvasEntity, layout);
         const bool canvasIsSelectionContext = selected == canvasEntity || selectedInsideThisCanvas;
@@ -803,8 +787,8 @@ namespace Wheatear {
 
             if (clickedUI)
             {
-                m_SceneHierarchyPanel.SetSelectedEntity(clickedUI);
-                m_AnimationEditorPanel.SetEntity(clickedUI);
+                m_SceneHierarchyPanel->SetSelectedEntity(clickedUI);
+                m_AnimationEditorPanel->SetEntity(clickedUI);
                 selected = clickedUI;
             }
         }
@@ -865,10 +849,11 @@ namespace Wheatear {
             m_UIEditEntity = selected;
             m_UIEditStartMouse = mouseNorm;
             m_UIEditStartRect = RectToVec4(UIWidgetLayout::WidgetToLocalRect(widget));
-            m_UIEditStartWidget = widget;
+            m_UIEditStartWidget = std::make_unique<UIWidgetComponent>(widget);
             m_UIEditStartHadText = selected.HasComponent<UITextComponent>();
+            m_UIEditStartText.reset();
             if (m_UIEditStartHadText)
-                m_UIEditStartText = selected.GetComponent<UITextComponent>();
+                m_UIEditStartText = std::make_unique<UITextComponent>(selected.GetComponent<UITextComponent>());
         }
 
         if (m_UIEditHandle != UIEdit_None && m_UIEditSurface == 2 && m_UIEditEntity == selected)
@@ -976,7 +961,7 @@ namespace Wheatear {
             (mouse.y - m_ViewportBounds[0].y) / std::max(1.0f, m_ViewportSize.y)
         };
 
-        Entity selected = m_SceneHierarchyPanel.GetSelectedEntity();
+        Entity selected = m_SceneHierarchyPanel->GetSelectedEntity();
 
         if (m_ShowUIOutlines)
         {
@@ -1018,8 +1003,8 @@ namespace Wheatear {
 
             if (clickedUI)
             {
-                m_SceneHierarchyPanel.SetSelectedEntity(clickedUI);
-                m_AnimationEditorPanel.SetEntity(clickedUI);
+                m_SceneHierarchyPanel->SetSelectedEntity(clickedUI);
+                m_AnimationEditorPanel->SetEntity(clickedUI);
                 selected = clickedUI;
             }
         }
@@ -1088,10 +1073,11 @@ namespace Wheatear {
             m_UIEditEntity = selected;
             m_UIEditStartMouse = mouseNorm;
             m_UIEditStartRect = RectToVec4(UIWidgetLayout::WidgetToLocalRect(widget));
-            m_UIEditStartWidget = widget;
+            m_UIEditStartWidget = std::make_unique<UIWidgetComponent>(widget);
             m_UIEditStartHadText = selected.HasComponent<UITextComponent>();
+            m_UIEditStartText.reset();
             if (m_UIEditStartHadText)
-                m_UIEditStartText = selected.GetComponent<UITextComponent>();
+                m_UIEditStartText = std::make_unique<UITextComponent>(selected.GetComponent<UITextComponent>());
         }
 
         if (m_UIEditHandle != UIEdit_None && m_UIEditSurface == 1 && m_UIEditEntity == selected)
@@ -1234,7 +1220,6 @@ namespace Wheatear {
             FocusEditorCameraOnPrimarySceneCamera();
         }
 
-        // 鎷栨斁澶勭悊
         if (ImGui::BeginDragDropTarget())
         {
             if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("CONTENT_BROWSER_ITEM"))
@@ -1252,7 +1237,7 @@ namespace Wheatear {
 
         UI_DrawViewportUIOverlay();
 
-        Entity selected = m_SceneHierarchyPanel.GetSelectedEntity();
+        Entity selected = m_SceneHierarchyPanel->GetSelectedEntity();
         const bool selectedIsUI = selected && selected.HasComponent<UIWidgetComponent>();
 
         // Gizmo
@@ -1287,7 +1272,7 @@ namespace Wheatear {
             {
                 m_GizmoWasUsing = true;
                 m_GizmoEditEntity = selected;
-                m_GizmoStartTransform = beforeGizmo;
+                m_GizmoStartTransform = std::make_unique<TransformComponent>(beforeGizmo);
             }
 
             if (gizmoUsing)

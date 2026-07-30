@@ -59,7 +59,7 @@ Entities:
       Scale: [20, 11.25, 1]
     SpriteRendererComponent:
       Color: [1, 1, 1, 1]
-      Texture: assets\textures\vn\studio.png
+      Texture: assets/demo_vn/backgrounds/bg_demo_studio_day.png
       TilingFactor: 1
   - Entity: 910000003
     TagComponent:
@@ -90,7 +90,7 @@ Entities:
       Scale: [2.85, 5.35, 1]
     SpriteRendererComponent:
       Color: [1, 1, 1, 1]
-      Texture: assets\textures\vn\mira_happy.png
+      Texture: assets/demo_vn/portraits/char_mira_happy.png
       TilingFactor: 1
   - Entity: 910000006
     TagComponent:
@@ -101,7 +101,7 @@ Entities:
       Scale: [2.85, 5.35, 1]
     SpriteRendererComponent:
       Color: [1, 1, 1, 0.58]
-      Texture: assets\textures\vn\leo_neutral.png
+      Texture: assets/demo_vn/portraits/char_leo_neutral.png
       TilingFactor: 1
   - Entity: 910000007
     TagComponent:

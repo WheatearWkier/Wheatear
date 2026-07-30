@@ -90,12 +90,12 @@ namespace Wheatear {
         static const char* ResolveProjectileTexturePath(int team, bool heavy, bool melee)
         {
             if (melee)
-                return "assets/textures/battle/katana_slash.png";
+                return "assets/vertical_slice/arcade_combat/effects/vfx_arcade_katana_slash.png";
             if (team == (int)ArcadeTeam::Enemy)
-                return "assets/textures/battle/boss_bullet.png";
+                return "assets/vertical_slice/arcade_combat/projectiles/proj_arcade_boss_orb.png";
             return heavy
-                ? "assets/textures/battle/cannon_blast.png"
-                : "assets/textures/battle/player_bullet.png";
+                ? "assets/vertical_slice/arcade_combat/effects/vfx_arcade_cannon_blast.png"
+                : "assets/vertical_slice/arcade_combat/projectiles/proj_arcade_player_bolt.png";
         }
 
         static void CreateProjectile(Scene* scene,

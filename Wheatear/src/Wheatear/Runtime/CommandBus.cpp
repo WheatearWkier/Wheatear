@@ -4,6 +4,7 @@
 #include "Wheatear/Modules/Progression/GameProgress.h"
 #include "Wheatear/Runtime/SceneTransitionService.h"
 #include "Wheatear/Scene/Components.h"
+#include "Wheatear/Scene/Entity.h"
 #include "Wheatear/Scene/Scene.h"
 #include "Wheatear/UI/UIWidgetLayout.h"
 
@@ -26,9 +27,50 @@ namespace Wheatear {
             return commands;
         }
 
+        static std::vector<std::string>& GameplayCommandQueue()
+        {
+            static std::vector<std::string> commands;
+            return commands;
+        }
+
+        static std::vector<std::string>& NativeCommandPrefixes()
+        {
+            static std::vector<std::string> prefixes;
+            return prefixes;
+        }
+
+        static std::vector<std::string>& GameplayCommandPrefixes()
+        {
+            static std::vector<std::string> prefixes;
+            return prefixes;
+        }
+
         static bool StartsWith(const std::string& value, const std::string& prefix)
         {
             return value.rfind(prefix, 0) == 0;
+        }
+
+        static bool StartsWithAnyRegisteredPrefix(
+            const std::string& command,
+            const std::vector<std::string>& prefixes)
+        {
+            for (const std::string& prefix : prefixes)
+            {
+                if (!prefix.empty() && StartsWith(command, prefix))
+                    return true;
+            }
+            return false;
+        }
+
+        static void RegisterCommandPrefix(std::vector<std::string>& prefixes, const std::string& prefix)
+        {
+            if (prefix.empty())
+                return;
+
+            if (std::find(prefixes.begin(), prefixes.end(), prefix) != prefixes.end())
+                return;
+
+            prefixes.push_back(prefix);
         }
 
         static std::string PayloadAfter(const std::string& value, const std::string& prefix)
@@ -163,6 +205,112 @@ namespace Wheatear {
             return result;
         }
 
+        static CommandResult ExecuteAnimationCommand(Scene* scene, const std::string& command)
+        {
+            CommandResult result;
+            if (!scene || !StartsWith(command, "anim:"))
+                return result;
+
+            const std::vector<std::string> parts = SplitCommand(command);
+            if (parts.size() < 3 || parts[0] != "anim")
+                return result;
+
+            result.Handled = true;
+            const std::string& action = parts[1];
+            const std::string& targetTag = parts[2];
+            Entity target = scene->GetEntityByName(targetTag);
+            if (!target || !target.HasComponent<SpriteAnimatorComponent>())
+            {
+                result.Message = "Animation target not found: " + targetTag;
+                return result;
+            }
+
+            auto& animator = target.GetComponent<SpriteAnimatorComponent>();
+            if (action == "play")
+            {
+                if (parts.size() < 4)
+                {
+                    result.Message = "Missing animation clip name.";
+                    return result;
+                }
+
+                const std::string& clipName = parts[3];
+                if (!animator.Clips.count(clipName))
+                {
+                    result.Message = "Animation clip not found: " + clipName;
+                    return result;
+                }
+
+                animator.Play(clipName);
+                result.Success = true;
+                result.Changed = true;
+                return result;
+            }
+
+            if (action == "restart")
+            {
+                if (!animator.CurrentClipName.empty())
+                {
+                    animator.ElapsedTime = 0.0f;
+                    animator.CurrentFrameIndex = 0;
+                    animator.IsPlaying = true;
+                    animator.IsFinished = false;
+                    result.Success = true;
+                    result.Changed = true;
+                }
+                return result;
+            }
+
+            if (action == "pause")
+            {
+                animator.IsPlaying = false;
+                result.Success = true;
+                result.Changed = true;
+                return result;
+            }
+
+            if (action == "resume")
+            {
+                if (!animator.CurrentClipName.empty())
+                {
+                    animator.IsPlaying = true;
+                    result.Success = true;
+                    result.Changed = true;
+                }
+                return result;
+            }
+
+            if (action == "stop")
+            {
+                animator.ElapsedTime = 0.0f;
+                animator.CurrentFrameIndex = 0;
+                animator.IsPlaying = false;
+                animator.IsFinished = false;
+                result.Success = true;
+                result.Changed = true;
+                return result;
+            }
+
+            if (action == "seek" && parts.size() >= 4)
+            {
+                try
+                {
+                    animator.ElapsedTime = std::max(0.0f, std::stof(parts[3]));
+                    animator.IsFinished = false;
+                    result.Success = true;
+                    result.Changed = true;
+                }
+                catch (...)
+                {
+                    result.Message = "Invalid animation seek time.";
+                }
+                return result;
+            }
+
+            result.Message = "Unknown animation command: " + action;
+            return result;
+        }
+
         static CommandResult ExecuteRuntimeQueuedCommand(const std::string& command)
         {
             CommandResult result;
@@ -232,7 +380,36 @@ namespace Wheatear {
             return result;
         }
 
+        static CommandResult ExecuteGameplayCommand(const std::string& command)
+        {
+            CommandResult result;
+            if (!StartsWithAnyRegisteredPrefix(command, GameplayCommandPrefixes()))
+                return result;
+
+            CommandBus::QueueGameplayCommand(command);
+            result.Handled = true;
+            result.Success = true;
+            result.Changed = true;
+            return result;
+        }
+
     } // namespace
+
+    void CommandBus::RegisterNativeCommandPrefix(const std::string& prefix)
+    {
+        RegisterCommandPrefix(NativeCommandPrefixes(), prefix);
+    }
+
+    void CommandBus::RegisterGameplayCommandPrefix(const std::string& prefix)
+    {
+        RegisterCommandPrefix(GameplayCommandPrefixes(), prefix);
+    }
+
+    void CommandBus::ClearRegisteredCommandPrefixes()
+    {
+        NativeCommandPrefixes().clear();
+        GameplayCommandPrefixes().clear();
+    }
 
     bool CommandBus::IsNativeCommand(const std::string& command)
     {
@@ -241,9 +418,11 @@ namespace Wheatear {
             || StartsWith(command, "newgame:")
             || StartsWith(command, "loadgame:")
             || StartsWith(command, "progression:")
+            || StartsWith(command, "anim:")
             || StartsWith(command, "ui:")
             || StartsWith(command, "event:")
-            || StartsWith(command, "vn:");
+            || StartsWithAnyRegisteredPrefix(command, NativeCommandPrefixes())
+            || StartsWithAnyRegisteredPrefix(command, GameplayCommandPrefixes());
     }
 
     CommandResult CommandBus::Execute(Scene* scene, const std::string& command)
@@ -257,7 +436,13 @@ namespace Wheatear {
         if (CommandResult result = ExecuteProgressionCommand(command); result.Handled)
             return result;
 
+        if (CommandResult result = ExecuteAnimationCommand(scene, command); result.Handled)
+            return result;
+
         if (CommandResult result = ExecuteEventCommand(scene, command); result.Handled)
+            return result;
+
+        if (CommandResult result = ExecuteGameplayCommand(command); result.Handled)
             return result;
 
         if (CommandResult result = ExecuteRuntimeQueuedCommand(command); result.Handled)
@@ -277,6 +462,29 @@ namespace Wheatear {
         std::vector<std::string> commands;
         commands.swap(RuntimeCommandQueue());
         return commands;
+    }
+
+    void CommandBus::QueueGameplayCommand(const std::string& command)
+    {
+        if (!command.empty())
+            GameplayCommandQueue().push_back(command);
+    }
+
+    std::vector<std::string> CommandBus::DrainGameplayCommands(const std::string& prefix)
+    {
+        std::vector<std::string> matched;
+        std::vector<std::string> remaining;
+
+        for (const std::string& command : GameplayCommandQueue())
+        {
+            if (prefix.empty() || StartsWith(command, prefix))
+                matched.push_back(command);
+            else
+                remaining.push_back(command);
+        }
+
+        GameplayCommandQueue().swap(remaining);
+        return matched;
     }
 
     void CommandBus::QueueEventCommand(const EventCommandRequest& request)

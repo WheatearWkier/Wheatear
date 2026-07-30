@@ -348,12 +348,12 @@ def save_effect_sequence(prefix: str, frame_count: int, factory: Callable[[int],
         save(image, SC_ROOT / "effects" / f"{prefix}_{frame:02}.png")
     if first is not None:
         alias = {
-            "slash_basic": "slash_basic.png",
-            "slash_launcher": "slash_launcher.png",
-            "magic_bolt": "magic_bolt.png",
-            "ally_support": "ally_support.png",
-            "enemy_claw": "enemy_claw.png",
-            "bear_shockwave": "enemy_projectile.png",
+            "vfx_basic_slash": "vfx_basic_slash.png",
+            "vfx_launcher_slash": "vfx_launcher_slash.png",
+            "vfx_magic_bolt": "vfx_magic_bolt.png",
+            "vfx_ally_support": "vfx_ally_support.png",
+            "vfx_enemy_claw": "vfx_enemy_claw.png",
+            "vfx_boss_bear_shockwave": "vfx_enemy_projectile.png",
         }.get(prefix)
         if alias:
             save(first, SC_ROOT / "effects" / alias)
@@ -422,60 +422,60 @@ def make_audio() -> None:
 
 
 def main() -> None:
-    save(stage_background(), SC_ROOT / "backgrounds" / "black_forest_stage.png")
-    save(blob_shadow(), SC_ROOT / "ui" / "blob_shadow.png")
+    save(stage_background(), SC_ROOT / "backgrounds" / "bg_black_forest_stage.png")
+    save(blob_shadow(), SC_ROOT / "ui" / "blob_shadow_soft.png")
 
     player_clips = {
-        "player_idle": ("idle", 4, "player_magic_swordsman.png"),
-        "player_run": ("run", 6, None),
-        "player_jump": ("jump", 3, None),
-        "player_fall": ("fall", 3, None),
-        "player_hit": ("hit", 3, None),
-        "player_dead": ("dead", 4, None),
-        "player_basic1": ("basic1", 4, None),
-        "player_basic2": ("basic2", 4, None),
-        "player_basic3": ("basic3", 5, None),
-        "player_air_basic": ("air_basic", 4, None),
-        "player_launcher": ("launcher", 5, None),
-        "player_air_chase": ("air_chase", 4, None),
-        "player_magic": ("magic_bolt", 4, None),
-        "player_support": ("ally_support", 4, None),
-        "player_break_limit": ("break_limit", 5, None),
+        "protag_idle": ("idle", 4, "protag_magic_swordsman.png"),
+        "protag_run": ("run", 6, None),
+        "protag_jump": ("jump", 3, None),
+        "protag_fall": ("fall", 3, None),
+        "protag_hit": ("hit", 3, None),
+        "protag_dead": ("dead", 4, None),
+        "protag_basic1": ("basic1", 4, None),
+        "protag_basic2": ("basic2", 4, None),
+        "protag_basic3": ("basic3", 5, None),
+        "protag_air_basic": ("air_basic", 4, None),
+        "protag_launcher": ("launcher", 5, None),
+        "protag_air_chase": ("air_chase", 4, None),
+        "protag_magic_bolt": ("magic_bolt", 4, None),
+        "protag_ally_support": ("ally_support", 4, None),
+        "protag_break_limit": ("break_limit", 5, None),
     }
     for prefix, (pose, frames, alias) in player_clips.items():
         save_character_sequence("characters", prefix, pose, frames, draw_player_pose, alias)
 
     bear_clips = {
-        "bear_idle": ("idle", 4, "bear_husband.png"),
-        "bear_walk": ("run", 5, None),
-        "bear_hit": ("hit", 3, None),
-        "bear_fall": ("fall", 3, None),
-        "bear_dead": ("dead", 4, None),
-        "bear_attack": ("enemy_claw", 4, None),
-        "bear_charge_anim": ("bear_charge", 4, None),
-        "bear_shockwave_anim": ("bear_shockwave", 4, None),
+        "boss_bear_husband_idle": ("idle", 4, "boss_bear_husband.png"),
+        "boss_bear_husband_walk": ("run", 5, None),
+        "boss_bear_husband_hit": ("hit", 3, None),
+        "boss_bear_husband_fall": ("fall", 3, None),
+        "boss_bear_husband_dead": ("dead", 4, None),
+        "boss_bear_husband_attack": ("enemy_claw", 4, None),
+        "boss_bear_husband_charge": ("bear_charge", 4, None),
+        "boss_bear_husband_shockwave": ("bear_shockwave", 4, None),
     }
     for prefix, (pose, frames, alias) in bear_clips.items():
         save_character_sequence("enemies", prefix, pose, frames, draw_bear_pose, alias)
 
     beast_clips = {
-        "claw_beast_idle": ("idle", 4, "small_claw_beast.png"),
-        "claw_beast_run": ("run", 5, None),
-        "claw_beast_hit": ("hit", 3, None),
-        "claw_beast_fall": ("fall", 3, None),
-        "claw_beast_dead": ("dead", 4, None),
-        "claw_beast_attack": ("enemy_claw", 4, None),
+        "en_claw_beast_idle": ("idle", 4, "en_claw_beast_small.png"),
+        "en_claw_beast_run": ("run", 5, None),
+        "en_claw_beast_hit": ("hit", 3, None),
+        "en_claw_beast_fall": ("fall", 3, None),
+        "en_claw_beast_dead": ("dead", 4, None),
+        "en_claw_beast_attack": ("enemy_claw", 4, None),
     }
     for prefix, (pose, frames, alias) in beast_clips.items():
         save_character_sequence("enemies", prefix, pose, frames, draw_claw_beast_pose, alias)
 
-    save_effect_sequence("slash_basic", 4, slash_frame)
-    save_effect_sequence("slash_launcher", 5, launcher_frame)
-    save_effect_sequence("magic_bolt", 4, magic_bolt_frame)
-    save_effect_sequence("ally_support", 5, support_frame)
-    save_effect_sequence("enemy_claw", 3, enemy_claw_frame)
-    save_effect_sequence("bear_charge", 3, bear_charge_frame)
-    save_effect_sequence("bear_shockwave", 4, shockwave_frame)
+    save_effect_sequence("vfx_basic_slash", 4, slash_frame)
+    save_effect_sequence("vfx_launcher_slash", 5, launcher_frame)
+    save_effect_sequence("vfx_magic_bolt", 4, magic_bolt_frame)
+    save_effect_sequence("vfx_ally_support", 5, support_frame)
+    save_effect_sequence("vfx_enemy_claw", 3, enemy_claw_frame)
+    save_effect_sequence("vfx_boss_bear_charge", 3, bear_charge_frame)
+    save_effect_sequence("vfx_boss_bear_shockwave", 4, shockwave_frame)
     make_audio()
 
 
