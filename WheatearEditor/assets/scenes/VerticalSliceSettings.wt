@@ -31,7 +31,6 @@ Entities:
       Rotation: 0
       Anchor: 0
       SortOrder: 0
-      ParentTag: ""
   - Entity: 840000001
     TagComponent:
       Tag: Settings_Camera
@@ -75,7 +74,6 @@ Entities:
       Rotation: 0.0
       Anchor: 0
       SortOrder: 10
-      ParentTag: WT_UI_Canvas
     UIImageComponent:
       Color: [1, 1, 1, 0.97]
       TexturePath: assets/vertical_slice/ui/panels/panel_settings.png
@@ -93,7 +91,6 @@ Entities:
       Rotation: 0.0
       Anchor: 0
       SortOrder: 42
-      ParentTag: WT_UI_Canvas
     UITextComponent:
       Text: "系统设置"
       Color: [0.88, 1.0, 0.92, 1]
@@ -117,7 +114,6 @@ Entities:
       Rotation: 0.0
       Anchor: 0
       SortOrder: 42
-      ParentTag: WT_UI_Canvas
     UITextComponent:
       Text: "第2章 / 魔剑 Lv1 / 主角 Lv1"
       Color: [0.7, 0.9, 0.78, 1]
@@ -141,7 +137,6 @@ Entities:
       Rotation: 0.0
       Anchor: 0
       SortOrder: 18
-      ParentTag: WT_UI_Canvas
     UIPanelComponent:
       BackgroundColor: [0.04, 0.07, 0.06, 0.65]
       BorderColor: [0.4, 0.8, 0.6, 0.85]
@@ -160,7 +155,6 @@ Entities:
       Rotation: 0.0
       Anchor: 0
       SortOrder: 42
-      ParentTag: WT_UI_Canvas
     UITextComponent:
       Text: "文字速度"
       Color: [0.88, 1.0, 0.9, 1]
@@ -184,7 +178,6 @@ Entities:
       Rotation: 0.0
       Anchor: 0
       SortOrder: 44
-      ParentTag: WT_UI_Canvas
     UISliderComponent:
       Value: 48
       MinValue: 12
@@ -208,7 +201,6 @@ Entities:
       Rotation: 0.0
       Anchor: 0
       SortOrder: 55
-      ParentTag: WT_UI_Canvas
     UIAnimatorComponent:
       Preset: "hover_pulse"
       PlayOnStart: true
@@ -246,7 +238,6 @@ Entities:
       Rotation: 0.0
       Anchor: 0
       SortOrder: 55
-      ParentTag: WT_UI_Canvas
     UIAnimatorComponent:
       Preset: "hover_pulse"
       PlayOnStart: true
@@ -284,7 +275,6 @@ Entities:
       Rotation: 0.0
       Anchor: 0
       SortOrder: 42
-      ParentTag: WT_UI_Canvas
     UITextComponent:
       Text: "主音量"
       Color: [0.88, 1.0, 0.9, 1]
@@ -308,7 +298,6 @@ Entities:
       Rotation: 0.0
       Anchor: 0
       SortOrder: 44
-      ParentTag: WT_UI_Canvas
     UISliderComponent:
       Value: 80
       MinValue: 0
@@ -332,7 +321,6 @@ Entities:
       Rotation: 0.0
       Anchor: 0
       SortOrder: 55
-      ParentTag: WT_UI_Canvas
     UIAnimatorComponent:
       Preset: "hover_pulse"
       PlayOnStart: true
@@ -370,7 +358,6 @@ Entities:
       Rotation: 0.0
       Anchor: 0
       SortOrder: 55
-      ParentTag: WT_UI_Canvas
     UIAnimatorComponent:
       Preset: "hover_pulse"
       PlayOnStart: true
@@ -408,7 +395,6 @@ Entities:
       Rotation: 0.0
       Anchor: 0
       SortOrder: 55
-      ParentTag: WT_UI_Canvas
     UIAnimatorComponent:
       Preset: "hover_pulse"
       PlayOnStart: true
@@ -446,7 +432,6 @@ Entities:
       Rotation: 0.0
       Anchor: 0
       SortOrder: 55
-      ParentTag: WT_UI_Canvas
     UIAnimatorComponent:
       Preset: "hover_pulse"
       PlayOnStart: true
@@ -484,7 +469,6 @@ Entities:
       Rotation: 0.0
       Anchor: 0
       SortOrder: 42
-      ParentTag: WT_UI_Canvas
     UITextComponent:
       Text: "设置状态"
       Color: [0.94, 0.98, 0.9, 1]
@@ -508,7 +492,6 @@ Entities:
       Rotation: 0.0
       Anchor: 0
       SortOrder: 55
-      ParentTag: WT_UI_Canvas
     UIAnimatorComponent:
       Preset: "hover_pulse"
       PlayOnStart: true
@@ -522,7 +505,7 @@ Entities:
       NormalColor: [0.08, 0.1, 0.12, 0.7]
       HoverColor: [0.16, 0.22, 0.25, 0.92]
       PressedColor: [0.04, 0.05, 0.06, 0.92]
-      OnClickFunction: event:FlowController:go_hub
+      OnClickFunction: event:go_hub
     UITextComponent:
       Text: "返回据点"
       Color: [0.9, 0.96, 0.92, 1]

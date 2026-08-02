@@ -30,7 +30,6 @@ namespace Wheatear {
             o << YAML::Key << "Anchor" << YAML::Value << (int)c.Anchor;
             o << YAML::Key << "SortOrder" << YAML::Value << c.SortOrder;
             o << YAML::Key << "ParentEntity" << YAML::Value << static_cast<uint64_t>(c.ParentEntity);
-            o << YAML::Key << "ParentTag" << YAML::Value << c.ParentTag;
             o << YAML::EndMap;
         }
         static void Deserialize(const YAML::Node& n, UIWidgetComponent& c) {
@@ -41,7 +40,6 @@ namespace Wheatear {
             c.Anchor = (UIAnchor)n["Anchor"].as<int>();
             c.SortOrder = n["SortOrder"].as<int>();
             c.ParentEntity = UUID(n["ParentEntity"].as<uint64_t>(static_cast<uint64_t>(c.ParentEntity)));
-            c.ParentTag = n["ParentTag"].as<std::string>(c.ParentTag);
         }
     };
 
@@ -384,13 +382,11 @@ namespace Wheatear {
         static void Serialize(YAML::Emitter& o, const UIPageItemComponent& c) {
             o << YAML::Key << Key << YAML::BeginMap;
             o << YAML::Key << "PagerEntity" << YAML::Value << static_cast<uint64_t>(c.PagerEntity);
-            o << YAML::Key << "PagerTag" << YAML::Value << YAML::DoubleQuoted << c.PagerTag;
             o << YAML::Key << "Page" << YAML::Value << c.Page;
             o << YAML::EndMap;
         }
         static void Deserialize(const YAML::Node& n, UIPageItemComponent& c) {
             c.PagerEntity = UUID(n["PagerEntity"].as<uint64_t>(static_cast<uint64_t>(c.PagerEntity)));
-            c.PagerTag = n["PagerTag"].as<std::string>(c.PagerTag);
             c.Page = std::max(n["Page"].as<int>(c.Page), 1);
         }
     };

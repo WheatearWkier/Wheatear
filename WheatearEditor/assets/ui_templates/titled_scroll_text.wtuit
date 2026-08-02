@@ -1,0 +1,6 @@
+UITemplate:
+  Version: 1
+  Kind: "TitledScrollText"
+  DisplayName: "Titled Scroll Text"
+  Category: "Containers"
+  Description: "Panel with a title and continuous scroll text."

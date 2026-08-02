@@ -85,6 +85,7 @@ namespace Wheatear {
         void SaveSceneAs();
         void SerializeScene(Ref<Scene> scene, const std::filesystem::path& path);
         void InstantiatePrefab(const std::filesystem::path& path);
+        void InstantiateUITemplate(const std::filesystem::path& path);
         void OnDuplicateEntity();
 
         SceneState GetSceneState() const { return m_SceneState; }

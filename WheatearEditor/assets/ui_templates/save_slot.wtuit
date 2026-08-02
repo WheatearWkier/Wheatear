@@ -1,0 +1,6 @@
+UITemplate:
+  Version: 1
+  Kind: "SaveSlot"
+  DisplayName: "Save Slot"
+  Category: "System"
+  Description: "Reusable save/load slot row with icon, title, and detail text."

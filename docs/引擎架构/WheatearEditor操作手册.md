@@ -149,6 +149,7 @@ View / Reset Window Layout
 - `UI / Slider`：创建滑条。
 - `UI / Checkbox`：创建复选框。
 - `UI / Progress Bar`：创建进度条。
+- `UI / Templates`：创建可复用 UI 模板，例如分页网格、装备格子、Tooltip、存档槽、技能树节点和战斗技能槽。
 
 正式 UI 页面必须先创建 `UI / Canvas`。`Panel`、`Image`、`Text`、`Button`、`Slider`、`Checkbox`、`Progress Bar` 只有在当前选中 Canvas 或已经属于某个 Canvas 的 UI 子控件时才可创建。
 
@@ -156,7 +157,7 @@ View / Reset Window Layout
 
 ### 5.4 UI 父子层级
 
-UI 父子关系通过 `UIWidgetComponent.ParentTag` 表示。Hierarchy 会把子 UI 缩进显示在父 UI 下方，Canvas 下的控件会像树一样展开。
+UI 父子关系通过 `UIWidgetComponent.ParentEntity` 保存为 UUID。Hierarchy 会把子 UI 缩进显示在父 UI 下方，Canvas 下的控件会像树一样展开。
 
 当前规则：
 
@@ -224,10 +225,10 @@ UI 父子关系通过 `UIWidgetComponent.ParentTag` 表示。Hierarchy 会把子
 按钮触发事件的写法：
 
 ```text
-event:FlowController:open_skill_tree
+event:open_skill_tree
 ```
 
-其中 `FlowController` 是带 `Event Script` 组件的实体名，`open_skill_tree` 是 `.wts` 文件里的事件名。
+其中 `open_skill_tree` 是 `.wts` 文件里的事件名。默认写法会广播给当前场景的事件脚本；如果同场景有多个流程控制实体，可以使用 `event:@<UUID>:open_skill_tree` 精确指定目标。
 
 `.wts` 中可以写：
 
@@ -279,6 +280,8 @@ View / Focus Primary Camera
 从 `Content Browser` 把 `.wt` 场景拖到 Viewport，可打开该场景。
 
 从 `Content Browser` 把 `.wtprefab` 拖到 Viewport，可实例化 Prefab。
+
+从 `Content Browser` 把 `.wtuit` 拖到 Viewport，可实例化 UI 模板。模板会优先挂到当前选中的 UI 控件下；如果没有选中 UI，但场景里存在 Canvas，会自动挂到第一个 Canvas 下；如果场景里没有 Canvas，编辑器会自动创建一个 `UI Canvas`。
 
 ### 7.5 Play / Stop
 
@@ -376,12 +379,12 @@ Wheatear 当前 UI 采用 `UICanvasComponent + UIWidgetComponent + 具体表现�
 `UISliderComponent` 适合连续滚动或数值调节；`UIPagerComponent` 适合总页数已知的内容切页。分页按钮可在 `UIButtonComponent.OnClickFunction` 中填写：
 
 ```text
-ui:pager:<PagerTag>:next
-ui:pager:<PagerTag>:prev
-ui:pager:<PagerTag>:page:<number>
+ui:pager:@<PagerUUID>:next
+ui:pager:@<PagerUUID>:prev
+ui:pager:@<PagerUUID>:page:<number>
 ```
 
-给内容控件添加 `UIPageItemComponent` 后，填写 `Pager Tag` 和 `Page`，运行时只会在对应页显示。
+给内容控件添加 `UIPageItemComponent` 后，在对象槽里选择对应 Pager，并填写 `Page`，运行时只会在对应页显示。
 
 ## 9. Content Browser
 
@@ -395,7 +398,16 @@ ui:pager:<PagerTag>:page:<number>
 - 右键空白处可新建文件夹或刷新。
 - 拖 `.wt` 到 Viewport 打开场景。
 - 拖 `.wtprefab` 到 Viewport 实例化 Prefab。
+- 拖 `.wtuit` 到 Viewport 实例化 UI 模板。
 - 某些 Inspector 字段支持从 Content Browser 拖入贴图、材质、音频或字体资源。
+
+资源数据库按钮：
+
+- `Rescan Assets`：重新扫描 `assets` 目录，更新中央 `asset_registry.yaml`。添加、删除、替换大量资源后使用。
+- `Write Registry`：把当前 Inspector 中修改过的导入设置、标签和模板信息写回中央 Registry。
+- `Generate UI Templates`：生成内置 `.wtuit` UI 模板描述，并刷新 Registry。
+
+Wheatear 当前不再使用每个资源旁边的 `.wtmeta` 作为正式工作流。资源 UUID、导入设置和引用关系统一保存到 `assets/.wheatear/asset_registry.yaml`；打包时 `.wheatear`、`.wtuit` 和历史 `.wtmeta` 都不会进入运行包。
 
 资源建议保存在 `WheatearEditor/assets` 下，并按功能划分目录，例如：
 
@@ -428,7 +440,7 @@ assets/audio
 ```text
 anim:play:{entity}:idle
 anim:play:Enemy_Bear:hurt
-event:FlowController:attack_hit
+event:attack_hit
 turn:skill:resolve_hit
 ```
 
@@ -642,3 +654,132 @@ content.wtpack
 ### 17.5 打包后资源缺失
 
 确认资源是否被场景、Prefab、VN 脚本、YAML 或打包规则引用。若资源只是临时放在目录里但没有任何引用，打包器可能不会收集它。
+
+## 18. Project Health / 项目体检
+
+打开方式：
+
+```text
+View -> Project Health
+```
+
+常用页签：
+
+- `Summary`：查看资源、场景、脚本、工程源文件同步等总体状态。
+- `Source Sync`：检查源码目录和 Visual Studio 工程文件是否一致。
+
+`Source Sync` 重点看两类问题：
+
+- `Missing From Project` 表示磁盘上有源码但 `.vcxproj` 没登记，通常会导致 VS 或 CI 构建漏编译。
+- `Stale Project Entry` 表示 `.vcxproj` 里有旧路径但磁盘文件不存在，通常来自重命名或删除后没清工程文件。
+
+同一个检查也可以在命令行执行：
+
+```powershell
+powershell -NoProfile -ExecutionPolicy Bypass -File scripts\Check-ProjectSources.ps1
+```
+
+建议每次新增 C++ 服务、编辑器面板、玩法模块后都跑一次。
+
+## 19. WAO Action 数据
+
+WAO action 数据位于：
+
+```text
+WheatearEditor/assets/gameplay/actions/
+```
+
+当前四种玩法都有对应 action 表：
+
+- 弹幕假玩法：`00_arcade_actions.yaml`
+- 横板格斗：`10_side_combat_actions.yaml`
+- 回合制战斗：`20_turn_combat_actions.yaml`
+- 战旗战斗：`30_tactical_combat_actions.yaml`
+
+这些文件会在运行时加载，也会被打包器收集到玩家包里。以后新增技能时，优先在对应玩法的 action YAML 里补图标、音效、特效、标签和效果预览；真正决定手感的玩法专属参数仍放在对应 tuning 或技能服务里。
+## 20. 近期生产力更新
+
+### 20.1 WAO Action Debugger
+
+打开方式：
+
+```text
+View -> WAO Action Debugger
+```
+
+左侧 action 列表可以勾选 `Group by module`，按弹幕假玩法、横板战斗、回合制、战棋等模块分组。选中 action 后，在 `Recipe` 页可以查看对应 YAML、side combat 调参表、图标、音效、特效资源路径。
+
+每个资源路径旁边有：
+
+- `Open Folder`：打开资源所在目录。
+- `Copy Path`：复制绝对路径，方便在资源管理器或外部工具里定位。
+- `Missing`：资源不存在时显示，优先修这个。
+
+### 20.2 Project Health Scene Links
+
+打开方式：
+
+```text
+View -> Project Health -> Scene Links
+```
+
+该页会列出从入口场景开始追踪到的所有 `scene:` / `newgame:` / `loadgame:` 跳转。若某个跳转目标不存在，会在上方显示缺失列表。准备打包前建议先点一次 `Refresh`。
+
+### 20.3 打包前门禁
+
+`Package Player` 现在会在写入资源包前执行依赖 preflight。如果发现缺失资源或缺失场景跳转，会停止打包，并在输出目录生成：
+
+```text
+Builds/Windows/Player/package_preflight_report.txt
+```
+
+正常打包成功时，输出目录仍会生成：
+
+```text
+Builds/Windows/Player/package_report.txt
+```
+
+报告中会包含 packed assets、missing references、scene transitions 和 missing scene transitions。
+
+### 20.4 设置页运行时偏好
+
+据点设置页里的全屏按钮已经接到窗口系统，会立即切换全屏/窗口模式，并随存档保存。主音量、BGM、音效继续走项目统一的非线性音量曲线；默认音量已经调低到更适合试玩的区间。屏幕震动开关继续控制横板战斗 hit feedback。
+## 21. 用户设置、输入映射与 WAO 编辑
+
+### 21.1 用户设置
+
+运行时偏好已经从进度存档里拆出来，统一保存到：
+
+```text
+assets/saves/user_settings.wtsettings
+```
+
+它负责文字速度、主音量、BGM 音量、音效音量、全屏、屏幕震动和按键映射。进度存档只保存章节、材料、装备、技能、好感度等游戏进度，不再保存这些用户偏好。
+
+### 21.2 输入映射
+
+常用输入通过 `InputBindingService` 读取，例如：
+
+- `move.left` / `move.right` / `move.up` / `move.down`
+- `game.pause`
+- `side.jump` / `side.basic` / `side.magic` / `side.support` / `side.break_limit`
+- `arcade.attack` / `arcade.weapon1` / `arcade.weapon2` / `arcade.weapon3`
+- `vn.advance` / `vn.auto` / `vn.history` / `vn.save` / `vn.load`
+
+当前横板格斗、类元气假玩法和 VN 常用快捷键已经接入这层服务。后续做改键面板时，编辑器只需要改 `UserSettings.KeyBindings`，玩法系统不需要知道具体键盘码。
+
+### 21.3 WAO Action Debugger 编辑模式
+
+打开方式：
+
+```text
+View -> WAO Action Debugger
+```
+
+选择一个 action 后，在 `Recipe` 页点击 `Edit Recipe`，可以直接编辑并保存这些常用字段：
+
+- 名字、描述、图标路径、动画 ID、音效路径、VFX 路径
+- 冷却、持续时间、前摇、命中时间、后摇、取消窗口、移动倍率
+- tags、signals、resourceCost
+
+点击 `Save YAML` 后会写回 `WheatearEditor/assets/gameplay/actions/` 下对应 YAML，并立即刷新当前运行中的 `ActionDatabase`。效果列表目前仍是查看和调试用；后续如果需要更深的策划工具，再升级为效果行级编辑器。

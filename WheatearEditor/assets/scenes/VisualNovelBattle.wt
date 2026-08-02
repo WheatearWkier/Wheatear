@@ -1,4 +1,4 @@
-﻿Scene: Untitled
+Scene: Untitled
 Entities:
   - Entity: 930000022
     TagComponent:
@@ -31,7 +31,6 @@ Entities:
       Rotation: 0
       Anchor: 0
       SortOrder: 0
-      ParentTag: ""
   - Entity: 930000001
     TagComponent:
       Tag: Battle_Camera
@@ -219,7 +218,7 @@ Entities:
       DefeatReturnDelay: 2.2
       ResultSceneFadeDuration: 0.55
       BossDefeatFadeDuration: 1.15
-      VictorySceneCommand: "event:FlowController:fake_combat_victory"
+      VictorySceneCommand: "event:fake_combat_victory"
       DefeatSceneCommand: ""
   - Entity: 930000012
     TagComponent:
@@ -235,7 +234,6 @@ Entities:
       Rotation: 0
       Anchor: 0
       SortOrder: 20
-      ParentTag: WT_UI_Canvas
     UIProgressBarComponent:
       Value: 120
       MaxValue: 120
@@ -255,7 +253,6 @@ Entities:
       Rotation: 0
       Anchor: 0
       SortOrder: 21
-      ParentTag: WT_UI_Canvas
     UITextComponent:
       Text: "生命 120/120"
       Color: [0.88, 0.96, 0.92, 1]
@@ -275,7 +272,6 @@ Entities:
       Rotation: 0
       Anchor: 4
       SortOrder: 20
-      ParentTag: WT_UI_Canvas
     UIProgressBarComponent:
       Value: 220
       MaxValue: 220
@@ -295,9 +291,8 @@ Entities:
       Rotation: 0
       Anchor: 4
       SortOrder: 21
-      ParentTag: WT_UI_Canvas
     UITextComponent:
-      Text: "首领 ???"
+      Text: "首领 --/--"
       Color: [1, 0.86, 0.88, 1]
       FontSize: 18
       FontPath: assets/fonts/wqy-microhei.ttc
@@ -315,7 +310,6 @@ Entities:
       Rotation: 0
       Anchor: 0
       SortOrder: 22
-      ParentTag: WT_UI_Canvas
     UITextComponent:
       Text: "武器: 手枪  [1 手枪] [2 重炮] [3 太刀]"
       Color: [0.86, 0.94, 0.98, 1]
@@ -335,7 +329,6 @@ Entities:
       Rotation: 0
       Anchor: 4
       SortOrder: 23
-      ParentTag: WT_UI_Canvas
     UITextComponent:
       Text: "移动到发光点。"
       Color: [0.92, 0.96, 0.92, 1]
@@ -355,7 +348,6 @@ Entities:
       Rotation: 0
       Anchor: 4
       SortOrder: 80
-      ParentTag: WT_UI_Canvas
     UIPanelComponent:
       BackgroundColor: [0.03, 0.04, 0.06, 0.90]
       BorderColor: [0.45, 0.82, 0.92, 0.82]
@@ -379,7 +371,6 @@ Entities:
       Rotation: 0
       Anchor: 4
       SortOrder: 24
-      ParentTag: WT_UI_Canvas
     UITextComponent:
       Text: "原生战斗流程已接管，胜利后返回剧情。"
       Color: [0.72, 0.92, 1, 1]
@@ -399,7 +390,6 @@ Entities:
       Rotation: 0
       Anchor: 4
       SortOrder: 100
-      ParentTag: WT_UI_Canvas
     UIImageComponent:
       Color: [0, 0, 0, 1]
       TexturePath: ""

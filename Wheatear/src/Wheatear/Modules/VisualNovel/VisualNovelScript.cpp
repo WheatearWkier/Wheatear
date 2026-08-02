@@ -333,7 +333,7 @@ namespace Wheatear {
             {
                 VisualNovelLine choice;
                 choice.Type = VisualNovelLineType::Choice;
-                choice.Text = "Choose an answer.";
+                choice.Text = "选择一个答案。";
                 choice.Choices = ParseChoices(payload);
                 applyState(choice);
                 if (!choice.Choices.empty())

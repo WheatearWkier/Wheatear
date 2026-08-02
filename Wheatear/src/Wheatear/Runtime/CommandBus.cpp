@@ -5,6 +5,7 @@
 #include "Wheatear/Runtime/SceneTransitionService.h"
 #include "Wheatear/Scene/Components.h"
 #include "Wheatear/Scene/Entity.h"
+#include "Wheatear/Scene/EntityReference.h"
 #include "Wheatear/Scene/Scene.h"
 #include "Wheatear/UI/UIWidgetLayout.h"
 
@@ -128,13 +129,21 @@ namespace Wheatear {
             if (parts.size() < 4 || parts[0] != "ui" || parts[1] != "pager")
                 return result;
 
-            const std::string& pagerTag = parts[2];
+            const std::string& pagerSelector = parts[2];
             const std::string& action = parts[3];
-            if (pagerTag.empty() || action.empty())
+            if (pagerSelector.empty() || action.empty())
                 return result;
 
             UIWidgetLayout::Context layout(scene);
-            const entt::entity pagerEntity = layout.FindByTag(pagerTag);
+            const UUID pagerID = EntityReferences::ParseUUIDSelector(pagerSelector);
+            if (static_cast<uint64_t>(pagerID) == 0)
+            {
+                result.Handled = true;
+                result.Message = "UI pager command requires @UUID target: " + pagerSelector;
+                return result;
+            }
+
+            const entt::entity pagerEntity = layout.FindByUUID(pagerID);
             auto& registry = scene->GetRegistry();
             if (pagerEntity == entt::null
                 || !registry.valid(pagerEntity)
@@ -217,11 +226,17 @@ namespace Wheatear {
 
             result.Handled = true;
             const std::string& action = parts[1];
-            const std::string& targetTag = parts[2];
-            Entity target = scene->GetEntityByName(targetTag);
+            const std::string& targetSelector = parts[2];
+            if (!EntityReferences::IsUUIDSelector(targetSelector))
+            {
+                result.Message = "Animation command requires @UUID target: " + targetSelector;
+                return result;
+            }
+
+            Entity target = EntityReferences::ResolveSelector(scene, targetSelector);
             if (!target || !target.HasComponent<SpriteAnimatorComponent>())
             {
-                result.Message = "Animation target not found: " + targetTag;
+                result.Message = "Animation target not found: " + targetSelector;
                 return result;
             }
 
@@ -367,14 +382,24 @@ namespace Wheatear {
             const std::vector<std::string> parts = SplitCommand(command);
             if (parts.size() == 2)
             {
-                CommandBus::QueueEventCommand({ "", parts[1] });
+                CommandBus::QueueEventCommand({ UUID(0), parts[1] });
                 result.Handled = true;
                 result.Success = true;
             }
             else if (parts.size() >= 3)
             {
-                CommandBus::QueueEventCommand({ parts[1], parts[2] });
+                const UUID targetID = EntityReferences::ParseUUIDSelector(parts[1]);
                 result.Handled = true;
+                if (static_cast<uint64_t>(targetID) == 0)
+                {
+                    result.Message = "Targeted event command requires @UUID target: " + parts[1];
+                    return result;
+                }
+
+                CommandBus::QueueEventCommand({
+                    targetID,
+                    parts[2]
+                });
                 result.Success = true;
             }
             return result;

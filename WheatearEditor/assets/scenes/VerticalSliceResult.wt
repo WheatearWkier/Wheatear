@@ -31,7 +31,6 @@ Entities:
       Rotation: 0
       Anchor: 0
       SortOrder: 0
-      ParentTag: ""
   - Entity: 960000001
     TagComponent:
       Tag: Result_Camera
@@ -86,7 +85,6 @@ Entities:
       Rotation: 0
       Anchor: 0
       SortOrder: 10
-      ParentTag: WT_UI_Canvas
     UIAnimatorComponent:
       Preset: "slide_fade_in"
       PlayOnStart: true
@@ -113,7 +111,6 @@ Entities:
       Rotation: 0
       Anchor: 0
       SortOrder: 30
-      ParentTag: WT_UI_Canvas
     UIAnimatorComponent:
       Preset: "fade_in"
       PlayOnStart: true
@@ -146,7 +143,6 @@ Entities:
       Rotation: 0
       Anchor: 0
       SortOrder: 31
-      ParentTag: WT_UI_Canvas
     UIAnimatorComponent:
       Preset: "result_pop"
       PlayOnStart: true
@@ -173,7 +169,6 @@ Entities:
       Rotation: 0
       Anchor: 0
       SortOrder: 34
-      ParentTag: WT_UI_Canvas
     UIAnimatorComponent:
       Preset: "result_pop"
       PlayOnStart: true
@@ -206,7 +201,6 @@ Entities:
       Rotation: 0
       Anchor: 0
       SortOrder: 32
-      ParentTag: WT_UI_Canvas
     UIAnimatorComponent:
       Preset: "fade_in"
       PlayOnStart: true
@@ -239,7 +233,6 @@ Entities:
       Rotation: 0
       Anchor: 0
       SortOrder: 32
-      ParentTag: WT_UI_Canvas
     UIProgressBarComponent:
       Value: 0
       MaxValue: 100
@@ -259,7 +252,6 @@ Entities:
       Rotation: 0
       Anchor: 0
       SortOrder: 10
-      ParentTag: WT_UI_Canvas
     UIAnimatorComponent:
       Preset: "slide_fade_in"
       PlayOnStart: true
@@ -286,7 +278,6 @@ Entities:
       Rotation: 0
       Anchor: 0
       SortOrder: 33
-      ParentTag: WT_UI_Canvas
     UIAnimatorComponent:
       Preset: "fade_in"
       PlayOnStart: true
@@ -319,7 +310,6 @@ Entities:
       Rotation: 0
       Anchor: 0
       SortOrder: 40
-      ParentTag: WT_UI_Canvas
     UIAnimatorComponent:
       Preset: "hover_pulse"
       PlayOnStart: true
@@ -333,7 +323,7 @@ Entities:
       NormalColor: [0.13, 0.30, 0.26, 0.94]
       HoverColor: [0.20, 0.44, 0.38, 0.98]
       PressedColor: [0.08, 0.20, 0.18, 1]
-      OnClickFunction: event:FlowController:result_go_hub
+      OnClickFunction: event:result_go_hub
     UITextComponent:
       Text: "回到据点"
       Color: [0.94, 0.98, 0.90, 1]
@@ -357,7 +347,6 @@ Entities:
       Rotation: 0
       Anchor: 0
       SortOrder: 40
-      ParentTag: WT_UI_Canvas
     UIAnimatorComponent:
       Preset: "hover_pulse"
       PlayOnStart: true
@@ -371,7 +360,7 @@ Entities:
       NormalColor: [0.23, 0.26, 0.43, 0.94]
       HoverColor: [0.32, 0.36, 0.58, 0.98]
       PressedColor: [0.16, 0.18, 0.32, 1]
-      OnClickFunction: event:FlowController:result_retry_last_dungeon
+      OnClickFunction: event:result_retry_last_dungeon
     UITextComponent:
       Text: "重刷副本"
       Color: [0.94, 0.96, 1, 1]
@@ -395,7 +384,6 @@ Entities:
       Rotation: 0
       Anchor: 0
       SortOrder: 40
-      ParentTag: WT_UI_Canvas
     UIAnimatorComponent:
       Preset: "hover_pulse"
       PlayOnStart: true
@@ -409,7 +397,7 @@ Entities:
       NormalColor: [0.31, 0.24, 0.15, 0.94]
       HoverColor: [0.48, 0.36, 0.22, 0.98]
       PressedColor: [0.20, 0.15, 0.10, 1]
-      OnClickFunction: event:FlowController:go_skill_tree
+      OnClickFunction: event:go_skill_tree
     UITextComponent:
       Text: "查看技能"
       Color: [1, 0.94, 0.84, 1]
@@ -433,7 +421,6 @@ Entities:
       Rotation: 0.0
       Anchor: 0
       SortOrder: 35
-      ParentTag: WT_UI_Canvas
     UIPanelComponent:
       BackgroundColor: [0.025, 0.032, 0.038, 0.84]
       BorderColor: [0.74, 0.6, 0.3, 0.82]
@@ -452,7 +439,6 @@ Entities:
       Rotation: 0.0
       Anchor: 0
       SortOrder: 38
-      ParentTag: WT_UI_Canvas
     UIImageComponent:
       Color: [1, 1, 1, 1.0]
       TexturePath: assets/vertical_slice/side_combat/ui/icon_drop_magic_core.png
@@ -470,7 +456,6 @@ Entities:
       Rotation: 0.0
       Anchor: 0
       SortOrder: 48
-      ParentTag: WT_UI_Canvas
     UIButtonComponent:
       NormalColor: [0, 0, 0, 0]
       HoverColor: [0.95, 1, 0.82, 0.14]
@@ -490,7 +475,6 @@ Entities:
       Rotation: 0.0
       Anchor: 0
       SortOrder: 50
-      ParentTag: WT_UI_Canvas
     UITextComponent:
       Text: "x1"
       Color: [1.0, 0.92, 0.68, 1]
@@ -514,7 +498,6 @@ Entities:
       Rotation: 0.0
       Anchor: 0
       SortOrder: 35
-      ParentTag: WT_UI_Canvas
     UIPanelComponent:
       BackgroundColor: [0.025, 0.032, 0.038, 0.84]
       BorderColor: [0.74, 0.6, 0.3, 0.82]
@@ -533,7 +516,6 @@ Entities:
       Rotation: 0.0
       Anchor: 0
       SortOrder: 38
-      ParentTag: WT_UI_Canvas
     UIImageComponent:
       Color: [1, 1, 1, 1.0]
       TexturePath: assets/vertical_slice/side_combat/ui/icon_drop_beast_sinew.png
@@ -551,7 +533,6 @@ Entities:
       Rotation: 0.0
       Anchor: 0
       SortOrder: 48
-      ParentTag: WT_UI_Canvas
     UIButtonComponent:
       NormalColor: [0, 0, 0, 0]
       HoverColor: [0.95, 1, 0.82, 0.14]
@@ -571,7 +552,6 @@ Entities:
       Rotation: 0.0
       Anchor: 0
       SortOrder: 50
-      ParentTag: WT_UI_Canvas
     UITextComponent:
       Text: "x2"
       Color: [1.0, 0.92, 0.68, 1]
@@ -595,7 +575,6 @@ Entities:
       Rotation: 0.0
       Anchor: 0
       SortOrder: 35
-      ParentTag: WT_UI_Canvas
     UIPanelComponent:
       BackgroundColor: [0.025, 0.032, 0.038, 0.84]
       BorderColor: [0.74, 0.6, 0.3, 0.82]
@@ -614,7 +593,6 @@ Entities:
       Rotation: 0.0
       Anchor: 0
       SortOrder: 38
-      ParentTag: WT_UI_Canvas
     UIImageComponent:
       Color: [1, 1, 1, 1.0]
       TexturePath: assets/vertical_slice/side_combat/ui/icon_drop_beast_claw.png
@@ -632,7 +610,6 @@ Entities:
       Rotation: 0.0
       Anchor: 0
       SortOrder: 48
-      ParentTag: WT_UI_Canvas
     UIButtonComponent:
       NormalColor: [0, 0, 0, 0]
       HoverColor: [0.95, 1, 0.82, 0.14]
@@ -652,7 +629,6 @@ Entities:
       Rotation: 0.0
       Anchor: 0
       SortOrder: 50
-      ParentTag: WT_UI_Canvas
     UITextComponent:
       Text: "x1"
       Color: [1.0, 0.92, 0.68, 1]
@@ -676,7 +652,6 @@ Entities:
       Rotation: 0.0
       Anchor: 0
       SortOrder: 78
-      ParentTag: WT_UI_Canvas
     UIPanelComponent:
       BackgroundColor: [0.025, 0.032, 0.038, 0.94]
       BorderColor: [0.74, 0.60, 0.30, 0.86]
@@ -695,7 +670,6 @@ Entities:
       Rotation: 0.0
       Anchor: 0
       SortOrder: 79
-      ParentTag: WT_UI_Canvas
     UITextComponent:
       Text: ""
       Color: [0.94, 0.98, 0.92, 1]

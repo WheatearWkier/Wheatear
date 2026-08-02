@@ -1,8 +1,10 @@
 # Batch01B VN 当前可见表情与场景生产包
 
-更新时间：2026-07-30
+更新时间：2026-07-31
 
 本包承接 `Batch01A_VN风格小样生产包.md`。Batch01A 锁定了 VN 基础画风；本批补齐当前竖切马上会看到的 VN 表情差分和系统/预告背景，同时开始执行正式资源命名迁移。
+
+本批所有资源都是静态单图，不参与动画 strip 拼接流程；表情差分本身就必须作为单张 RGBA 透明 PNG 交付。
 
 ## 1. 本批原则
 
@@ -58,8 +60,25 @@
 所有提示词追加：
 
 ```text
-no text, no logo, no watermark, no signature, no UI letters, no copyright character, no recognizable franchise design, no cropped body, no blurry edge, no inconsistent frame size, no changing costume between variants, no changing apparent age, no redesigning the character
+no text, no logo, no watermark, no signature, no UI letters, no copyright character, no recognizable franchise design, no cropped body, no blurry edge, no inconsistent frame size, no changing costume between variants, no changing apparent age, no redesigning the character, no white background behind portraits, no gray background behind portraits, no checkerboard background, no white matte, no dirty alpha edge
 ```
+
+### 4.1 表情差分 PNG 真透明规则
+
+背景图明确为不透明 PNG；所有表情差分立绘必须是 **RGBA PNG 真透明**：
+
+```yaml
+portraitTransparency:
+  requireRgba: true
+  unusedPixelsAlpha: 0
+  rejectWhiteBackground: true
+  rejectGrayBackground: true
+  rejectCheckerboardBackground: true
+  rejectWhiteMatte: true
+  rejectDirtyAlphaEdge: true
+```
+
+验收时把立绘差分放到纯黑、纯白、亮粉和透明棋盘背景上检查；只要外缘出现白边、灰边、残底或半透明脏像素，直接重生，不再后期抠图。
 
 ## 5. 本批资产清单
 
@@ -166,9 +185,9 @@ Input images: Image 1: protag_school_neutral.png as the exact character anchor
 Primary request: create a new transparent PNG expression variant of the same young male protagonist: [EXPRESSION REQUEST]
 Subject: same teenage boy protagonist, same face, same hair, same school uniform, same canvas position, same apparent age, same body proportions
 Style/medium: same polished galgame character portrait style as the anchor, clean cel shading, refined line art
-Composition/framing: transparent background, same 1024x1536-style portrait canvas, half-body, front three-quarter view, centered consistent standing pose
-Constraints: change only facial expression and tiny natural head/shoulder nuance; preserve outfit, hairstyle, pose scale, lighting direction, and silhouette; no text, no logo, no watermark
-Avoid: redesigning the character, changing costume, changing age, changing camera angle, cropped body
+Composition/framing: RGBA transparent background, unused pixels alpha 0, same 1024x1536-style portrait canvas, half-body, front three-quarter view, centered consistent standing pose
+Constraints: change only facial expression and tiny natural head/shoulder nuance; preserve outfit, hairstyle, pose scale, lighting direction, and silhouette; no text, no logo, no watermark, no white matte, no dirty alpha edge
+Avoid: redesigning the character, changing costume, changing age, changing camera angle, cropped body, background residue requiring cutout
 ```
 
 主角表情替换：
@@ -190,9 +209,9 @@ Primary request: create a new transparent PNG expression variant of the same Aob
 Subject: same teenage girl Aoba, same face shape, same warm brown eyes, same black medium-length hair, same bangs, same daily outfit, same apparent age, same body proportions
 Identity lock: this is the same person as mentor_neutral.png; keep apparent age and facial structure identical, only daily outfit and accessories differ from the mentor version
 Style/medium: same polished galgame character portrait style as the anchor, clean cel shading, expressive eyes
-Composition/framing: transparent background, same 1024x1536-style portrait canvas, half-body, front three-quarter view, centered consistent standing pose
-Constraints: change only facial expression and tiny natural head/shoulder nuance; preserve outfit, hairstyle, pose scale, lighting direction, and silhouette; no text, no logo, no watermark
-Avoid: redesigning her, making her look older or younger, changing costume, copying reference characters, cropped body
+Composition/framing: RGBA transparent background, unused pixels alpha 0, same 1024x1536-style portrait canvas, half-body, front three-quarter view, centered consistent standing pose
+Constraints: change only facial expression and tiny natural head/shoulder nuance; preserve outfit, hairstyle, pose scale, lighting direction, and silhouette; no text, no logo, no watermark, no white matte, no dirty alpha edge
+Avoid: redesigning her, making her look older or younger, changing costume, copying reference characters, cropped body, background residue requiring cutout
 ```
 
 青梅表情替换：
@@ -214,9 +233,9 @@ Primary request: create a new transparent PNG expression variant of Aoba wearing
 Subject: the exact same person as Aoba, same apparent age, same face shape, same warm brown eyes, same black medium-length hair foundation, same mentor outfit and ornaments, same controlled posture
 Identity lock: do not make her older, do not imply a different life stage, do not redesign her face; differences from daily Aoba are only outfit, accessories, styling, posture, and expression control
 Style/medium: same polished galgame character portrait style as the anchor, clean cel shading, refined line art
-Composition/framing: transparent background, same 1024x1536-style portrait canvas, half-body, front three-quarter view, centered consistent standing pose
-Constraints: change only facial expression and tiny natural head/shoulder nuance; preserve outfit, ornaments, hairstyle, pose scale, lighting direction, and silhouette; no text, no logo, no watermark
-Avoid: making her look older than Aoba, changing costume, heavy armor redesign, unrelated character face, cropped body
+Composition/framing: RGBA transparent background, unused pixels alpha 0, same 1024x1536-style portrait canvas, half-body, front three-quarter view, centered consistent standing pose
+Constraints: change only facial expression and tiny natural head/shoulder nuance; preserve outfit, ornaments, hairstyle, pose scale, lighting direction, and silhouette; no text, no logo, no watermark, no white matte, no dirty alpha edge
+Avoid: making her look older than Aoba, changing costume, heavy armor redesign, unrelated character face, cropped body, background residue requiring cutout
 ```
 
 导师表情替换：
@@ -264,4 +283,5 @@ Batch01B_VN_CurrentVisible/
 - `bg_chapter3_road.png` 要有继续旅行的预告感，但不要喧宾夺主。
 - 表情差分和 neutral 图叠放时，脸部位置、身体高度、服装边缘和画布位置基本一致。
 - 青梅和导师必须是同一人同年龄感：只有打扮、装饰、气质控制不同，不能生成成不同角色。
-- 所有立绘必须为透明 PNG；如果生成工具不能直接输出透明，请先用纯色平面背景生成，再抠成透明，确保边缘无明显色边。
+- 所有立绘必须为 RGBA 透明 PNG，无用区域 alpha 为 0；不接受白底、灰底、棋盘格底、白色 matte、半透明残底或脏 alpha。
+- 如果生成工具不能直接输出透明，应改用能输出透明的流程重生；不要把带白底的图交付给我再抠图。

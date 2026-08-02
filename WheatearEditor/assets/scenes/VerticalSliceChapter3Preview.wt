@@ -1,4 +1,4 @@
-Scene: VerticalSliceChapter3Preview
+﻿Scene: VerticalSliceChapter3Preview
 Entities:
   - Entity: 930049605
     TagComponent:
@@ -31,7 +31,6 @@ Entities:
       Rotation: 0
       Anchor: 0
       SortOrder: 0
-      ParentTag: ""
   - Entity: 910000001
     TagComponent:
       Tag: VN_Camera
@@ -117,7 +116,6 @@ Entities:
       Rotation: 0
       Anchor: 4
       SortOrder: 10
-      ParentTag: WT_UI_Canvas
     UIImageComponent:
       Color: [0.06, 0.07, 0.09, 0.88]
       TexturePath: ""
@@ -135,7 +133,6 @@ Entities:
       Rotation: 0
       Anchor: 0
       SortOrder: 20
-      ParentTag: WT_UI_Canvas
     UITextComponent:
       Text: "角色"
       Color: [0.62, 0.92, 0.86, 1]
@@ -159,7 +156,6 @@ Entities:
       Rotation: 0
       Anchor: 0
       SortOrder: 21
-      ParentTag: WT_UI_Canvas
     UITextComponent:
       Text: "对白文本"
       Color: [0.94, 0.92, 0.84, 1]
@@ -183,7 +179,6 @@ Entities:
       Rotation: 0
       Anchor: 0
       SortOrder: 22
-      ParentTag: WT_UI_Canvas
     UITextComponent:
       Text: "点击 / 空格"
       Color: [0.88, 0.74, 0.42, 1]
@@ -238,7 +233,6 @@ Entities:
       Rotation: 0
       Anchor: 4
       SortOrder: 30
-      ParentTag: WT_UI_Canvas
     UIButtonComponent:
       NormalColor: [0.1, 0.2, 0.22, 0.9]
       HoverColor: [0.16, 0.35, 0.34, 0.95]
@@ -267,7 +261,6 @@ Entities:
       Rotation: 0
       Anchor: 4
       SortOrder: 31
-      ParentTag: WT_UI_Canvas
     UIButtonComponent:
       NormalColor: [0.1, 0.2, 0.22, 0.9]
       HoverColor: [0.16, 0.35, 0.34, 0.95]
@@ -296,7 +289,6 @@ Entities:
       Rotation: 0
       Anchor: 4
       SortOrder: 32
-      ParentTag: WT_UI_Canvas
     UIButtonComponent:
       NormalColor: [0.1, 0.2, 0.22, 0.9]
       HoverColor: [0.16, 0.35, 0.34, 0.95]
@@ -325,7 +317,6 @@ Entities:
       Rotation: 0
       Anchor: 0
       SortOrder: 71
-      ParentTag: WT_UI_Canvas
     UITextComponent:
       Text: "历史记录"
       Color: [0.88, 0.94, 0.95, 1]
@@ -349,7 +340,6 @@ Entities:
       Rotation: 0
       Anchor: 0
       SortOrder: 41
-      ParentTag: WT_UI_Canvas
     UITextComponent:
       Text: "自动"
       Color: [0.72, 0.96, 0.74, 1]
@@ -373,7 +363,6 @@ Entities:
       Rotation: 0
       Anchor: 4
       SortOrder: 45
-      ParentTag: WT_UI_Canvas
     UIAnimatorComponent:
       Preset: "slide_fade_in"
       PlayOnStart: true
@@ -400,7 +389,6 @@ Entities:
       Rotation: 0
       Anchor: 4
       SortOrder: 50
-      ParentTag: WT_UI_Canvas
     UIAnimatorComponent:
       Preset: "hover_pulse"
       PlayOnStart: true
@@ -438,7 +426,6 @@ Entities:
       Rotation: 0
       Anchor: 4
       SortOrder: 51
-      ParentTag: WT_UI_Canvas
     UIAnimatorComponent:
       Preset: "hover_pulse"
       PlayOnStart: true
@@ -476,7 +463,6 @@ Entities:
       Rotation: 0
       Anchor: 4
       SortOrder: 52
-      ParentTag: WT_UI_Canvas
     UIAnimatorComponent:
       Preset: "hover_pulse"
       PlayOnStart: true
@@ -514,7 +500,6 @@ Entities:
       Rotation: 0
       Anchor: 4
       SortOrder: 53
-      ParentTag: WT_UI_Canvas
     UIAnimatorComponent:
       Preset: "hover_pulse"
       PlayOnStart: true
@@ -552,7 +537,6 @@ Entities:
       Rotation: 0
       Anchor: 4
       SortOrder: 54
-      ParentTag: WT_UI_Canvas
     UIAnimatorComponent:
       Preset: "hover_pulse"
       PlayOnStart: true
@@ -590,7 +574,6 @@ Entities:
       Rotation: 0
       Anchor: 4
       SortOrder: 55
-      ParentTag: WT_UI_Canvas
     UIAnimatorComponent:
       Preset: "hover_pulse"
       PlayOnStart: true
@@ -628,7 +611,6 @@ Entities:
       Rotation: 0
       Anchor: 4
       SortOrder: 56
-      ParentTag: WT_UI_Canvas
     UIAnimatorComponent:
       Preset: "hover_pulse"
       PlayOnStart: true
@@ -666,7 +648,6 @@ Entities:
       Rotation: 0
       Anchor: 4
       SortOrder: 70
-      ParentTag: WT_UI_Canvas
     UIAnimatorComponent:
       Preset: "slide_fade_in"
       PlayOnStart: true
@@ -693,7 +674,6 @@ Entities:
       Rotation: 0
       Anchor: 4
       SortOrder: 72
-      ParentTag: WT_UI_Canvas
     UIAnimatorComponent:
       Preset: "hover_pulse"
       PlayOnStart: true
@@ -731,7 +711,6 @@ Entities:
       Rotation: 0
       Anchor: 4
       SortOrder: 80
-      ParentTag: WT_UI_Canvas
     UIAnimatorComponent:
       Preset: "slide_fade_in"
       PlayOnStart: true
@@ -758,7 +737,6 @@ Entities:
       Rotation: 0
       Anchor: 0
       SortOrder: 81
-      ParentTag: WT_UI_Canvas
     UITextComponent:
       Text: "系统设置"
       Color: [0.9, 0.95, 0.96, 1]
@@ -782,7 +760,6 @@ Entities:
       Rotation: 0
       Anchor: 4
       SortOrder: 82
-      ParentTag: WT_UI_Canvas
     UIButtonComponent:
       NormalColor: [0.16, 0.24, 0.31, 0.88]
       HoverColor: [0.24, 0.38, 0.47, 0.96]
@@ -811,7 +788,6 @@ Entities:
       Rotation: 0
       Anchor: 4
       SortOrder: 83
-      ParentTag: WT_UI_Canvas
     UIButtonComponent:
       NormalColor: [0.16, 0.24, 0.31, 0.88]
       HoverColor: [0.24, 0.38, 0.47, 0.96]
@@ -840,7 +816,6 @@ Entities:
       Rotation: 0
       Anchor: 4
       SortOrder: 84
-      ParentTag: WT_UI_Canvas
     UIButtonComponent:
       NormalColor: [0.16, 0.24, 0.31, 0.88]
       HoverColor: [0.24, 0.38, 0.47, 0.96]
@@ -869,7 +844,6 @@ Entities:
       Rotation: 0
       Anchor: 4
       SortOrder: 85
-      ParentTag: WT_UI_Canvas
     UIButtonComponent:
       NormalColor: [0.16, 0.24, 0.31, 0.88]
       HoverColor: [0.24, 0.38, 0.47, 0.96]
@@ -898,7 +872,6 @@ Entities:
       Rotation: 0
       Anchor: 4
       SortOrder: 86
-      ParentTag: WT_UI_Canvas
     UIAnimatorComponent:
       Preset: "hover_pulse"
       PlayOnStart: true
@@ -936,7 +909,6 @@ Entities:
       Rotation: 0
       Anchor: 4
       SortOrder: 90
-      ParentTag: WT_UI_Canvas
     UITextComponent:
       Text: "已保存"
       Color: [0.92, 0.98, 0.86, 1]
@@ -960,7 +932,6 @@ Entities:
       Rotation: 0.0
       Anchor: 0
       SortOrder: 80
-      ParentTag: WT_UI_Canvas
     UIPanelComponent:
       BackgroundColor: [0.04, 0.045, 0.055, 0.88]
       BorderColor: [0.8, 0.64, 0.36, 0.9]
@@ -979,7 +950,6 @@ Entities:
       Rotation: 0.0
       Anchor: 0
       SortOrder: 86
-      ParentTag: WT_UI_Canvas
     UIImageComponent:
       Color: [1, 1, 1, 1.0]
       TexturePath: assets/vertical_slice/ui/icons/icon_save.png
@@ -997,7 +967,6 @@ Entities:
       Rotation: 0.0
       Anchor: 0
       SortOrder: 86
-      ParentTag: WT_UI_Canvas
     UITextComponent:
       Text: "存档 / 读取"
       Color: [1.0, 0.94, 0.78, 1]
@@ -1021,7 +990,6 @@ Entities:
       Rotation: 0.0
       Anchor: 0
       SortOrder: 86
-      ParentTag: WT_UI_Canvas
     UITextComponent:
       Text: "存档 / 读取"
       Color: [0.94, 0.96, 0.88, 1]
@@ -1045,7 +1013,6 @@ Entities:
       Rotation: 0.0
       Anchor: 0
       SortOrder: 90
-      ParentTag: WT_UI_Canvas
     UIAnimatorComponent:
       Preset: "hover_pulse"
       PlayOnStart: true
@@ -1083,7 +1050,6 @@ Entities:
       Rotation: 0.0
       Anchor: 0
       SortOrder: 90
-      ParentTag: WT_UI_Canvas
     UIAnimatorComponent:
       Preset: "hover_pulse"
       PlayOnStart: true
@@ -1121,7 +1087,6 @@ Entities:
       Rotation: 0.0
       Anchor: 0
       SortOrder: 90
-      ParentTag: WT_UI_Canvas
     UIAnimatorComponent:
       Preset: "hover_pulse"
       PlayOnStart: true

@@ -1,5 +1,8 @@
 #pragma once
 
+#include "Wheatear/Core/UUID.h"
+#include "Wheatear/Gameplay/Action/ActionTypes.h"
+
 #include <string>
 #include <vector>
 
@@ -48,8 +51,8 @@ namespace Wheatear {
         std::string ActionFlashEntityName = "TC_ActionFlash";
         std::string ActionEffectEntityName = "TC_ActionEffect";
 
-        std::string VictorySceneCommand = "event:FlowController:turn_combat_victory";
-        std::string DefeatSceneCommand = "event:FlowController:turn_combat_retry";
+        std::string VictorySceneCommand = "event:turn_combat_victory";
+        std::string DefeatSceneCommand = "event:turn_combat_retry";
 
         float StartFadeDuration = 0.55f;
         float IntroDuration = 0.80f;
@@ -62,11 +65,12 @@ namespace Wheatear {
         TurnCombatPhase RuntimePhase = TurnCombatPhase::Intro;
         int RuntimeRound = 1;
         int RuntimeTurnIndex = 0;
-        std::vector<std::string> RuntimeTurnQueue;
-        std::string RuntimeActiveActorTag;
+        std::vector<UUID> RuntimeTurnQueue;
+        UUID RuntimeActiveActor = 0;
+        std::string RuntimeCommandMenuPage = "root";
         std::string RuntimeSelectedSkillId;
-        std::string RuntimeActionActorTag;
-        std::string RuntimeActionTargetTag;
+        UUID RuntimeActionActor = 0;
+        UUID RuntimeActionTarget = 0;
         std::string RuntimeActionSkillId;
         std::string RuntimeMessage;
         std::string RuntimeRequestedCommand;
@@ -124,6 +128,7 @@ namespace Wheatear {
         bool RuntimeGuarding = false;
         bool RuntimeSelectedTarget = false;
         float RuntimeHitFlashTimer = 0.0f;
+        std::vector<WAO::RuntimeState> RuntimeStatusEffects;
         glm::vec3 RuntimeBaseTranslation = { 0.0f, 0.0f, 0.0f };
         glm::vec3 RuntimeBaseScale = { 1.0f, 1.0f, 1.0f };
         bool RuntimeVisualCached = false;

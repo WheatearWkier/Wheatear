@@ -1,0 +1,200 @@
+actions:
+  - id: turn.slash
+    displayName: Turn Slash
+    description: Basic single target sword action.
+    icon: assets/vertical_slice/turn_combat/ui/icons/cmd_attack.png
+    sound: assets/vertical_slice/turn_combat/audio/turn_slash.wav
+    effect: assets/vertical_slice/turn_combat/effects/vfx_turn_slash.png
+    duration: 0.72
+    startup: 0.16
+    hitTime: 0.36
+    recovery: 0.20
+    tags: [Gameplay.TurnCombat, Gameplay.Combat, Category.Attack, Target.EnemySingle]
+    effects:
+      - type: Damage
+        attribute: attack
+        value: 1.00
+    signals: [turn.skill.apply, turn.skill.vfx, turn.skill.sfx]
+
+  - id: turn.aether_edge
+    displayName: Aether Edge
+    description: Magic sword strike with defense down utility.
+    icon: assets/vertical_slice/turn_combat/ui/icons/cmd_magic_sword.png
+    sound: assets/vertical_slice/turn_combat/audio/turn_magic.wav
+    effect: assets/vertical_slice/turn_combat/effects/vfx_turn_magic_sword.png
+    duration: 0.92
+    startup: 0.18
+    hitTime: 0.46
+    recovery: 0.28
+    resourceCost:
+      mana: 8
+    tags: [Gameplay.TurnCombat, Gameplay.Combat, Category.Skill, Target.EnemySingle, Element.Aether]
+    effects:
+      - type: Damage
+        attribute: magic
+        value: 1.45
+      - type: AddState
+        state: def_down
+        value: 0.22
+        turns: 2
+        durationPolicy: turns
+    signals: [turn.skill.apply, turn.skill.vfx, turn.skill.sfx]
+
+  - id: turn.white_vow
+    displayName: White Vow
+    description: Single ally heal with short regeneration.
+    icon: assets/vertical_slice/turn_combat/ui/icons/cmd_heal.png
+    sound: assets/vertical_slice/turn_combat/audio/turn_heal.wav
+    effect: assets/vertical_slice/turn_combat/effects/vfx_turn_heal.png
+    duration: 0.90
+    startup: 0.14
+    hitTime: 0.42
+    recovery: 0.24
+    resourceCost:
+      mana: 7
+    tags: [Gameplay.TurnCombat, Gameplay.Combat, Category.Skill, Category.Heal, Target.AllySingle, Element.White]
+    effects:
+      - type: Heal
+        attribute: magic
+        value: 1.25
+      - type: AddState
+        state: regen
+        value: 10
+        turns: 2
+        durationPolicy: turns
+    signals: [turn.skill.apply, turn.skill.vfx, turn.skill.sfx]
+
+  - id: turn.shield_oath
+    displayName: Shield Oath
+    description: Self guard action for one round.
+    icon: assets/vertical_slice/turn_combat/ui/icons/cmd_guard.png
+    sound: assets/vertical_slice/turn_combat/audio/turn_guard.wav
+    effect: assets/vertical_slice/turn_combat/effects/vfx_turn_guard.png
+    duration: 0.62
+    startup: 0.08
+    hitTime: 0.26
+    recovery: 0.18
+    resourceCost:
+      mana: 4
+    tags: [Gameplay.TurnCombat, Gameplay.Combat, Category.Guard, Target.Self]
+    effects:
+      - type: AddState
+        state: guard
+        value: 0.45
+        turns: 1
+        durationPolicy: turns
+    signals: [turn.skill.apply, turn.skill.vfx, turn.skill.sfx]
+
+  - id: turn.black_flare
+    displayName: Black Flare
+    description: Enemy party dark magic with burn pressure.
+    icon: assets/vertical_slice/turn_combat/ui/icons/cmd_dark.png
+    sound: assets/vertical_slice/turn_combat/audio/turn_magic.wav
+    effect: assets/vertical_slice/turn_combat/effects/vfx_turn_dark.png
+    duration: 1.04
+    startup: 0.24
+    hitTime: 0.56
+    recovery: 0.28
+    resourceCost:
+      mana: 12
+    tags: [Gameplay.TurnCombat, Gameplay.Combat, Category.Skill, Target.EnemyAll, Element.Dark]
+    effects:
+      - type: Damage
+        attribute: magic
+        value: 0.86
+      - type: AddState
+        state: burn
+        value: 8
+        turns: 2
+        durationPolicy: turns
+    signals: [turn.skill.apply, turn.skill.vfx, turn.skill.sfx]
+
+  - id: turn.healing_potion
+    displayName: Healing Potion
+    description: Consumable ally recovery action.
+    icon: assets/vertical_slice/turn_combat/ui/icons/cmd_item_potion.png
+    sound: assets/vertical_slice/turn_combat/audio/turn_heal.wav
+    effect: assets/vertical_slice/turn_combat/effects/vfx_turn_heal.png
+    duration: 0.72
+    startup: 0.10
+    hitTime: 0.34
+    recovery: 0.20
+    tags: [Gameplay.TurnCombat, Gameplay.Combat, Category.Item, Category.Heal, Target.AllySingle]
+    effects:
+      - type: Heal
+        attribute: item
+        value: 0.85
+    signals: [turn.skill.apply, turn.skill.vfx, turn.skill.sfx]
+
+  - id: turn.focus_wait
+    displayName: Focus Wait
+    description: Wait action with mana recovery.
+    icon: assets/vertical_slice/turn_combat/ui/icons/cmd_wait.png
+    sound: assets/vertical_slice/turn_combat/audio/turn_guard.wav
+    effect: assets/vertical_slice/turn_combat/effects/vfx_turn_focus.png
+    duration: 0.52
+    startup: 0.06
+    hitTime: 0.22
+    recovery: 0.12
+    tags: [Gameplay.TurnCombat, Gameplay.Combat, Category.Wait, Target.Self]
+    effects:
+      - type: ModifyAttribute
+        attribute: mana
+        value: 10
+    signals: [turn.skill.apply, turn.skill.vfx, turn.skill.sfx]
+
+  - id: turn.claw
+    displayName: Enemy Claw
+    description: Monster single target melee action.
+    icon: assets/vertical_slice/turn_combat/ui/icons/cmd_enemy_claw.png
+    sound: assets/vertical_slice/turn_combat/audio/turn_hit.wav
+    effect: assets/vertical_slice/turn_combat/effects/vfx_turn_claw.png
+    duration: 0.70
+    startup: 0.14
+    hitTime: 0.32
+    recovery: 0.22
+    tags: [Gameplay.TurnCombat, Gameplay.Combat, Category.Attack, Target.EnemySingle, Faction.Enemy]
+    effects:
+      - type: Damage
+        attribute: attack
+        value: 0.95
+    signals: [turn.skill.apply, turn.skill.vfx, turn.skill.sfx]
+
+  - id: turn.wild_pounce
+    displayName: Wild Pounce
+    description: Heavy monster pounce action.
+    icon: assets/vertical_slice/turn_combat/ui/icons/cmd_enemy_claw.png
+    sound: assets/vertical_slice/turn_combat/audio/turn_hit.wav
+    effect: assets/vertical_slice/turn_combat/effects/vfx_turn_claw.png
+    duration: 0.86
+    startup: 0.18
+    hitTime: 0.44
+    recovery: 0.24
+    tags: [Gameplay.TurnCombat, Gameplay.Combat, Category.Attack, Target.EnemySingle, Faction.Enemy]
+    effects:
+      - type: Damage
+        attribute: attack
+        value: 1.25
+    signals: [turn.skill.apply, turn.skill.vfx, turn.skill.sfx]
+
+  - id: turn.dark_orb
+    displayName: Dark Orb
+    description: Enemy dark magic with burn.
+    icon: assets/vertical_slice/turn_combat/ui/icons/cmd_enemy_orb.png
+    sound: assets/vertical_slice/turn_combat/audio/turn_magic.wav
+    effect: assets/vertical_slice/turn_combat/effects/vfx_turn_dark.png
+    duration: 0.92
+    startup: 0.20
+    hitTime: 0.46
+    recovery: 0.26
+    tags: [Gameplay.TurnCombat, Gameplay.Combat, Category.Skill, Target.EnemySingle, Faction.Enemy, Element.Dark]
+    effects:
+      - type: Damage
+        attribute: magic
+        value: 1.18
+      - type: AddState
+        state: burn
+        value: 7
+        turns: 2
+        durationPolicy: turns
+    signals: [turn.skill.apply, turn.skill.vfx, turn.skill.sfx]

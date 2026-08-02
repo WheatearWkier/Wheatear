@@ -25,6 +25,8 @@ namespace Wheatear {
 
         void SetVSync(bool enabled) override;
         bool IsVSync() const override;
+        void SetFullscreen(bool enabled) override;
+        bool IsFullscreen() const override { return m_Data.Fullscreen; }
 
         void* GetNativeWindow() const override { return m_Window; }
 
@@ -44,6 +46,11 @@ namespace Wheatear {
             uint32_t        Width = 0;
             uint32_t        Height = 0;
             bool            VSync = false;
+            bool            Fullscreen = false;
+            int             WindowedX = 100;
+            int             WindowedY = 100;
+            uint32_t        WindowedWidth = 0;
+            uint32_t        WindowedHeight = 0;
             EventCallbackFn EventCallback;
         };
 

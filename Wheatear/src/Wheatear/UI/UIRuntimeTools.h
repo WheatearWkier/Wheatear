@@ -17,7 +17,7 @@ namespace Wheatear::UIRuntimeTools {
         const glm::vec2& position,
         const glm::vec2& size,
         float rotation = 0.0f);
-    void SetWidgetParent(Scene* scene, const std::string& entityName, const std::string& parentTag);
+    void SetWidgetParent(Scene* scene, const std::string& entityName, const std::string& parentName);
 
     void SetText(Scene* scene, const std::string& entityName, const std::string& text);
     void SetProgress(Scene* scene, const std::string& entityName, float value, float maxValue);

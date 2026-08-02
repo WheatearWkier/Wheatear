@@ -3,6 +3,7 @@
 #include "Scene.h"
 #include "ComponentGroup.h"
 #include <filesystem>
+#include <vector>
 
 namespace Wheatear {
 
@@ -16,6 +17,7 @@ namespace Wheatear {
         bool DeserializeYaml(const std::filesystem::path& filepath);
 
         static bool SerializePrefab(Entity entity, const std::filesystem::path& filepath);
+        static std::vector<Entity> DeserializePrefabEntities(const std::filesystem::path& filepath, Scene* scene);
         static Entity DeserializePrefab(const std::filesystem::path& filepath, Scene* scene);
 
     private:

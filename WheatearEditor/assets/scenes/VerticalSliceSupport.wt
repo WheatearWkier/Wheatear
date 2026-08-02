@@ -31,7 +31,6 @@ Entities:
       Rotation: 0
       Anchor: 0
       SortOrder: 0
-      ParentTag: ""
   - Entity: 983000001
     TagComponent:
       Tag: Support_Camera
@@ -75,7 +74,6 @@ Entities:
       Rotation: 0
       Anchor: 0
       SortOrder: 10
-      ParentTag: WT_UI_Canvas
     UIAnimatorComponent:
       Preset: "slide_fade_in"
       PlayOnStart: true
@@ -102,7 +100,6 @@ Entities:
       Rotation: 0
       Anchor: 0
       SortOrder: 31
-      ParentTag: WT_UI_Canvas
     UIAnimatorComponent:
       Preset: "slide_fade_in"
       PlayOnStart: true
@@ -129,7 +126,6 @@ Entities:
       Rotation: 0
       Anchor: 0
       SortOrder: 30
-      ParentTag: WT_UI_Canvas
     UIAnimatorComponent:
       Preset: "fade_in"
       PlayOnStart: true
@@ -162,7 +158,6 @@ Entities:
       Rotation: 0
       Anchor: 0
       SortOrder: 30
-      ParentTag: WT_UI_Canvas
     UIAnimatorComponent:
       Preset: "fade_in"
       PlayOnStart: true
@@ -195,7 +190,6 @@ Entities:
       Rotation: 0
       Anchor: 0
       SortOrder: 30
-      ParentTag: WT_UI_Canvas
     UIAnimatorComponent:
       Preset: "fade_in"
       PlayOnStart: true
@@ -228,7 +222,6 @@ Entities:
       Rotation: 0
       Anchor: 0
       SortOrder: 40
-      ParentTag: WT_UI_Canvas
     UIAnimatorComponent:
       Preset: "hover_pulse"
       PlayOnStart: true
@@ -266,7 +259,6 @@ Entities:
       Rotation: 0
       Anchor: 0
       SortOrder: 40
-      ParentTag: WT_UI_Canvas
     UIAnimatorComponent:
       Preset: "hover_pulse"
       PlayOnStart: true
@@ -304,7 +296,6 @@ Entities:
       Rotation: 0
       Anchor: 0
       SortOrder: 40
-      ParentTag: WT_UI_Canvas
     UIAnimatorComponent:
       Preset: "hover_pulse"
       PlayOnStart: true
@@ -342,7 +333,6 @@ Entities:
       Rotation: 0
       Anchor: 0
       SortOrder: 40
-      ParentTag: WT_UI_Canvas
     UIAnimatorComponent:
       Preset: "hover_pulse"
       PlayOnStart: true
@@ -380,7 +370,6 @@ Entities:
       Rotation: 0
       Anchor: 0
       SortOrder: 40
-      ParentTag: WT_UI_Canvas
     UIAnimatorComponent:
       Preset: "hover_pulse"
       PlayOnStart: true
@@ -394,7 +383,7 @@ Entities:
       NormalColor: [0.34, 0.25, 0.13, 0.94]
       HoverColor: [0.52, 0.38, 0.2, 0.98]
       PressedColor: [0.22, 0.16, 0.09, 1]
-      OnClickFunction: event:FlowController:go_hub
+      OnClickFunction: event:go_hub
     UITextComponent:
       Text: "返回据点"
       Color: [1, 0.94, 0.82, 1]

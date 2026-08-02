@@ -204,7 +204,7 @@ namespace Wheatear {
             return { 0.0f, 1.0f, 0.0f, 1.0f };
 
         auto& registry = scene->GetRegistry();
-        const entt::entity parent = layout.ResolveReference(widget.ParentEntity, widget.ParentTag);
+        const entt::entity parent = layout.ResolveReference(widget.ParentEntity);
         if (parent == entt::null || !registry.valid(parent) || !registry.all_of<UIWidgetComponent>(parent))
             return { 0.0f, 1.0f, 0.0f, 1.0f };
 

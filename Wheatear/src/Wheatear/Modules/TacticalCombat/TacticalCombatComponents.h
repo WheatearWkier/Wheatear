@@ -1,6 +1,10 @@
 #pragma once
 
+#include "Wheatear/Core/UUID.h"
+#include "Wheatear/Gameplay/Action/ActionTypes.h"
+
 #include <string>
+#include <vector>
 
 #include <glm/glm.hpp>
 
@@ -44,8 +48,8 @@ namespace Wheatear {
         std::string CommandPanelEntityName = "TK_CommandPanel";
         std::string ActionEffectEntityName = "TK_ActionEffect";
 
-        std::string VictorySceneCommand = "event:FlowController:tactical_combat_victory";
-        std::string DefeatSceneCommand = "event:FlowController:tactical_combat_retry";
+        std::string VictorySceneCommand = "event:tactical_combat_victory";
+        std::string DefeatSceneCommand = "event:tactical_combat_retry";
 
         float StartFadeDuration = 0.45f;
         float IntroDuration = 0.65f;
@@ -65,10 +69,11 @@ namespace Wheatear {
         TacticalCombatPhase RuntimeActionReturnPhase = TacticalCombatPhase::PlayerTurn;
         int RuntimeRound = 1;
         int RuntimeEnemyCursor = 0;
-        std::string RuntimeSelectedUnitTag;
+        UUID RuntimeSelectedUnit = 0;
+        std::string RuntimeCommandMenuPage = "root";
         std::string RuntimeSelectedSkillId;
-        std::string RuntimeActionActorTag;
-        std::string RuntimeActionTargetTag;
+        UUID RuntimeActionActor = 0;
+        UUID RuntimeActionTarget = 0;
         std::string RuntimeActionSkillId;
         std::string RuntimeMessage;
         std::string RuntimeRequestedCommand;
@@ -126,6 +131,7 @@ namespace Wheatear {
         bool RuntimeMoved = false;
         bool RuntimeGuarding = false;
         float RuntimeHitFlashTimer = 0.0f;
+        std::vector<WAO::RuntimeState> RuntimeStatusEffects;
         std::string RuntimeVisualClip;
         float RuntimeVisualTimer = 0.0f;
 

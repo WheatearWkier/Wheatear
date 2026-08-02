@@ -1,0 +1,6 @@
+UITemplate:
+  Version: 1
+  Kind: "PagedInventoryGrid"
+  DisplayName: "Paged Inventory Grid"
+  Category: "Inventory"
+  Description: "Inventory-style paged item grid with reusable item slots."

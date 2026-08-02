@@ -1,0 +1,6 @@
+UITemplate:
+  Version: 1
+  Kind: "SkillButton"
+  DisplayName: "Skill Button"
+  Category: "Progression"
+  Description: "Reusable skill icon button with a compact label."

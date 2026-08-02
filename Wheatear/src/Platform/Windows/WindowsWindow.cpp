@@ -231,4 +231,45 @@ namespace Wheatear {
         return m_Data.VSync;
     }
 
+    void WindowsWindow::SetFullscreen(bool enabled)
+    {
+        WT_PROFILE_FUNCTION();
+
+        if (!m_Window || m_Data.Fullscreen == enabled)
+            return;
+
+        if (enabled)
+        {
+            GLFWmonitor* monitor = glfwGetPrimaryMonitor();
+            const GLFWvidmode* mode = monitor ? glfwGetVideoMode(monitor) : nullptr;
+            if (!monitor || !mode)
+            {
+                WT_CORE_WARN("WindowsWindow: could not enter fullscreen; primary monitor unavailable.");
+                return;
+            }
+
+            glfwGetWindowPos(m_Window, &m_Data.WindowedX, &m_Data.WindowedY);
+            m_Data.WindowedWidth = m_Data.Width;
+            m_Data.WindowedHeight = m_Data.Height;
+            m_Data.Fullscreen = true;
+            m_Data.Width = static_cast<uint32_t>(mode->width);
+            m_Data.Height = static_cast<uint32_t>(mode->height);
+            glfwSetWindowMonitor(m_Window, monitor, 0, 0, mode->width, mode->height, mode->refreshRate);
+            return;
+        }
+
+        const uint32_t restoreWidth = m_Data.WindowedWidth > 0 ? m_Data.WindowedWidth : 1280;
+        const uint32_t restoreHeight = m_Data.WindowedHeight > 0 ? m_Data.WindowedHeight : 720;
+        m_Data.Fullscreen = false;
+        m_Data.Width = restoreWidth;
+        m_Data.Height = restoreHeight;
+        glfwSetWindowMonitor(m_Window,
+            nullptr,
+            m_Data.WindowedX,
+            m_Data.WindowedY,
+            static_cast<int>(restoreWidth),
+            static_cast<int>(restoreHeight),
+            0);
+    }
+
 } // namespace Wheatear

@@ -1,0 +1,74 @@
+actions:
+  - id: side.basic1
+    displayName: Basic Slash I
+    description: First ground-chain slash.
+    icon: assets/vertical_slice/side_combat/ui/icons/skill_basic.png
+    animation: side_basic1
+    tags: [Gameplay.SideCombat, Gameplay.Combat, Attack.Basic, Combo.Ground]
+    signals: [side.action.start, side.action.hit]
+
+  - id: side.basic2
+    displayName: Basic Slash II
+    description: Second ground-chain slash.
+    icon: assets/vertical_slice/side_combat/ui/icons/skill_basic.png
+    animation: side_basic2
+    tags: [Gameplay.SideCombat, Gameplay.Combat, Attack.Basic, Combo.Ground]
+    signals: [side.action.start, side.action.hit]
+
+  - id: side.basic3
+    displayName: Basic Finisher
+    description: Ground-chain finisher with stronger lift.
+    icon: assets/vertical_slice/side_combat/ui/icons/skill_basic.png
+    animation: side_basic3
+    tags: [Gameplay.SideCombat, Gameplay.Combat, Attack.Basic, Combo.Ground, Combo.Launch]
+    signals: [side.action.start, side.action.hit]
+
+  - id: side.air_basic
+    displayName: Air Slash
+    description: Air combo filler with hang-time support.
+    icon: assets/vertical_slice/side_combat/ui/icons/skill_basic.png
+    animation: side_air_basic
+    tags: [Gameplay.SideCombat, Gameplay.Combat, Attack.Basic, Combo.Air]
+    signals: [side.action.start, side.action.hit]
+
+  - id: side.launcher
+    displayName: Launcher
+    description: Ground opener that sends targets upward.
+    icon: assets/vertical_slice/side_combat/ui/icons/skill_launcher.png
+    animation: side_launcher
+    tags: [Gameplay.SideCombat, Gameplay.Combat, Attack.Launcher, Combo.Launch]
+    signals: [side.action.start, side.action.hit]
+
+  - id: side.air_chase
+    displayName: Air Chase
+    description: Air relaunch tool for combo extension.
+    icon: assets/vertical_slice/side_combat/ui/icons/skill_launcher.png
+    animation: side_air_chase
+    tags: [Gameplay.SideCombat, Gameplay.Combat, Attack.Launcher, Combo.Air, Combo.Relaunch]
+    signals: [side.action.start, side.action.hit]
+
+  - id: side.magic_bolt
+    displayName: Magic Bolt
+    description: Ranged magic hit used inside combo routes.
+    icon: assets/vertical_slice/side_combat/ui/icons/skill_magic.png
+    animation: side_magic_bolt
+    tags: [Gameplay.SideCombat, Gameplay.Combat, Attack.Magic, Combo.RouteTool]
+    signals: [side.action.start, side.action.hit]
+
+  - id: side.ally_support
+    displayName: Ally Support
+    description: Partner assist hit with high control value.
+    icon: assets/vertical_slice/side_combat/ui/icons/skill_support.png
+    animation: side_ally_support
+    tags: [Gameplay.SideCombat, Gameplay.Combat, Attack.Support, Affection.Support]
+    signals: [side.action.start, side.action.hit]
+
+  - id: side.break_limit
+    displayName: Break Limit Chase
+    description: Advanced reset that extends air combo resources.
+    icon: assets/vertical_slice/side_combat/ui/icons/skill_break_limit.png
+    animation: side_break_limit
+    resourceCost:
+      magic_sword: 1
+    tags: [Gameplay.SideCombat, Gameplay.Combat, Attack.BreakLimit, Combo.Air, Combo.Advanced]
+    signals: [side.action.start, side.action.hit, side.break_limit.flash]

@@ -98,7 +98,7 @@ namespace Wheatear {
             ImGui::TextDisabled("Runtime");
             ImGui::Text("Phase: %s", PhaseName(level.RuntimePhase));
             ImGui::Text("Round: %d", level.RuntimeRound);
-            ImGui::Text("Selected: %s", level.RuntimeSelectedUnitTag.c_str());
+            ImGui::Text("Selected: %llu", static_cast<unsigned long long>(level.RuntimeSelectedUnit));
             ImGui::Text("Skill: %s", level.RuntimeSelectedSkillId.c_str());
             ImGui::TextWrapped("%s", level.RuntimeMessage.c_str());
         });

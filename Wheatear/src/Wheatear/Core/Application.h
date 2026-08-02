@@ -72,6 +72,7 @@ namespace Wheatear {
 		ImGuiLayer* GetImGuiLayer() { return m_ImGuiLayer; }
 
 		inline static Application& Get() { return *s_Instance; }
+		inline static bool Exists() { return s_Instance != nullptr; }
 
 		const ApplicationSpecification& GetSpecification() const { return m_Specification; }
 		ApplicationCommandLineArgs GetCommandLineArgs() const { return m_Specification.CommandLineArgs; }

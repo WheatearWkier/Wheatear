@@ -8,6 +8,7 @@ project "Wheatear"
     files {
         "src/**.h",
         "src/**.cpp",
+        "src/**.inl",
         "vendor/stb_image/**.h",
         "vendor/stb_image/**.cpp",
         "vendor/glm/glm/**.hpp",

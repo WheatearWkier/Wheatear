@@ -1,0 +1,6 @@
+UITemplate:
+  Version: 1
+  Kind: "EquipmentSlot"
+  DisplayName: "Equipment Slot"
+  Category: "Inventory"
+  Description: "Reusable equipment slot with icon area, border, and rarity label."

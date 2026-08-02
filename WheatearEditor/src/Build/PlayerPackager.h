@@ -20,6 +20,11 @@ namespace Wheatear {
         std::string Message;
         std::filesystem::path PackageDirectory;
         std::filesystem::path ExecutablePath;
+        std::filesystem::path AssetPackPath;
+        std::filesystem::path ReportPath;
+        size_t PackedAssetCount = 0;
+        uintmax_t PackedAssetBytes = 0;
+        uintmax_t AssetPackBytes = 0;
     };
 
     class PlayerPackager

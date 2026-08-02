@@ -11,6 +11,8 @@
 #include "Modules/TurnCombat/TurnCombatDrawer.h"
 #include "Modules/VisualNovel/VisualNovelDrawer.h"
 #include "Modules/VisualNovel/VisualNovelScriptEditorPanel.h"
+#include "Tools/ProjectHealthPanel.h"
+#include "Tools/WAOActionEditorPanel.h"
 #include "Wheatear/Modules/ArcadeCombat/ArcadeCombatComponents.h"
 #include "Wheatear/Modules/SideCombat/SideCombatComponents.h"
 #include "Wheatear/Modules/TacticalCombat/TacticalCombatComponents.h"
@@ -30,6 +32,18 @@ namespace Wheatear {
         static SideCombatTuningEditorPanel& GetSideCombatTuningEditorPanel()
         {
             static SideCombatTuningEditorPanel panel;
+            return panel;
+        }
+
+        static ProjectHealthPanel& GetProjectHealthPanel()
+        {
+            static ProjectHealthPanel panel;
+            return panel;
+        }
+
+        static WAOActionEditorPanel& GetWAOActionEditorPanel()
+        {
+            static WAOActionEditorPanel panel;
             return panel;
         }
 
@@ -63,6 +77,30 @@ namespace Wheatear {
 
         static void RegisterEditorTools()
         {
+            EditorToolRegistry::Register({
+                "Project Health",
+                [](const EditorToolContext& context)
+                {
+                    GetProjectHealthPanel().Open(context);
+                },
+                []()
+                {
+                    GetProjectHealthPanel().OnImGuiRender();
+                }
+            });
+
+            EditorToolRegistry::Register({
+                "WAO Action Debugger",
+                [](const EditorToolContext& context)
+                {
+                    GetWAOActionEditorPanel().Open(context);
+                },
+                []()
+                {
+                    GetWAOActionEditorPanel().OnImGuiRender();
+                }
+            });
+
             EditorToolRegistry::Register({
                 "VN Script Editor",
                 [](const EditorToolContext& context)

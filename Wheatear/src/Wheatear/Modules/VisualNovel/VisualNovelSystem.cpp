@@ -1,12 +1,12 @@
 #include "wtpch.h"
 #include "VisualNovelSystem.h"
 
+#include "VisualNovelInputService.h"
 #include "Wheatear/Audio/AudioEngine.h"
 #include "Wheatear/Core/AssetPath.h"
-#include "Wheatear/Core/Input.h"
-#include "Wheatear/Core/KeyCodes.h"
 #include "Wheatear/Core/Log.h"
-#include "Wheatear/Core/MouseButtonCodes.h"
+#include "Wheatear/Core/UserSettings.h"
+#include "Wheatear/Modules/Common/GameplayAudioService.h"
 #include "Wheatear/Modules/Progression/GameProgress.h"
 #include "Wheatear/Renderer/Texture.h"
 #include "Wheatear/Scene/Components.h"
@@ -101,7 +101,8 @@ namespace Wheatear {
             widget.Position = position;
             widget.Size = size;
             widget.SortOrder = 5200;
-            widget.ParentTag = parentTag;
+            Entity parent = parentTag.empty() ? Entity{} : FindEntityByName(scene, parentTag);
+            widget.ParentEntity = parent ? parent.GetUUID() : UUID(0);
 
             auto& panel = entity.HasComponent<UIPanelComponent>()
                 ? entity.GetComponent<UIPanelComponent>()
@@ -134,7 +135,8 @@ namespace Wheatear {
             widget.Position = position;
             widget.Size = size;
             widget.SortOrder = 5201;
-            widget.ParentTag = parentTag;
+            Entity parent = parentTag.empty() ? Entity{} : FindEntityByName(scene, parentTag);
+            widget.ParentEntity = parent ? parent.GetUUID() : UUID(0);
 
             auto& text = entity.HasComponent<UITextComponent>()
                 ? entity.GetComponent<UITextComponent>()
@@ -173,7 +175,6 @@ namespace Wheatear {
 
             Entity parent = parentTag.empty() ? Entity{} : FindEntityByName(scene, parentTag);
             widget.ParentEntity = parent ? parent.GetUUID() : UUID(0);
-            widget.ParentTag = parentTag;
             return entity;
         }
 
@@ -299,7 +300,7 @@ namespace Wheatear {
             SetWidgetTopLeft(scene, "VN_Settings_AutoPlus", { 0.51f, 0.665f }, { 0.15f, 0.048f });
             SetWidgetTopLeft(scene, "VN_SettingsClose", { 0.41f, 0.735f }, { 0.18f, 0.052f });
 
-            const auto& settings = GameProgress::GetState().Settings;
+            const auto& settings = UserSettings::Get();
             const glm::vec4 labelColor = { 0.88f, 0.98f, 0.93f, 1.0f };
             const glm::vec2 labelSize = { 0.13f, 0.035f };
             const glm::vec2 sliderSize = { 0.20f, 0.030f };
@@ -348,7 +349,7 @@ namespace Wheatear {
                 { 0.30f, 0.452f },
                 labelSize,
                 88,
-                "BGM " + std::to_string(settings.BGMVolume) + "%",
+                "音乐 " + std::to_string(settings.BGMVolume) + "%",
                 16.0f,
                 labelColor,
                 visible);
@@ -459,14 +460,6 @@ namespace Wheatear {
         {
             std::replace(path.begin(), path.end(), '\\', '/');
             return path;
-        }
-
-        static float GetBGMVolume(float volume)
-        {
-            const auto& settings = GameProgress::GetState().Settings;
-            const float master = AudioEngine::PercentToGain(static_cast<float>(settings.MasterVolume));
-            const float bgm = AudioEngine::PercentToGain(static_cast<float>(settings.BGMVolume));
-            return std::clamp(volume, 0.0f, 2.0f) * master * bgm;
         }
 
         static std::string ResolveMusicTitle(const std::string& musicPath, const std::string& explicitTitle)
@@ -652,14 +645,6 @@ namespace Wheatear {
             return color;
         }
 
-        static bool AdvancePressed()
-        {
-            return Input::IsMouseButtonPressed(WT_MOUSE_BUTTON_LEFT)
-                || Input::IsKeyPressed(WT_KEY_SPACE)
-                || Input::IsKeyPressed(WT_KEY_ENTER)
-                || Input::IsKeyPressed(WT_KEY_RIGHT);
-        }
-
         static bool IsEntityHoveredButton(Scene* scene, const std::string& entityName)
         {
             Entity entity = FindEntityByName(scene, entityName);
@@ -783,7 +768,7 @@ namespace Wheatear {
                 LoadRuntime(state, component);
             }
 
-            component.CharactersPerSecond = static_cast<float>(GameProgress::GetState().Settings.TextSpeed);
+            component.CharactersPerSecond = static_cast<float>(UserSettings::Get().TextSpeed);
             state.Runtime.SetCharactersPerSecond(component.CharactersPerSecond);
             state.Runtime.SetAutoPlayDelay(component.AutoPlayDelay);
             const float deltaSeconds = ts.GetSeconds();
@@ -833,7 +818,7 @@ namespace Wheatear {
         if (desiredPath == state.CurrentBGMPath)
         {
             if (state.BGMHandle != 0)
-                AudioEngine::SetVolume(state.BGMHandle, GetBGMVolume(0.82f));
+                GameplayAudioService::SetBGMVolume(state.BGMHandle, 0.82f);
             return;
         }
 
@@ -853,9 +838,9 @@ namespace Wheatear {
             return;
         }
 
-        state.BGMHandle = AudioEngine::PlaySoundWithHandle(
+        state.BGMHandle = GameplayAudioService::PlayBGM(
             state.CurrentBGMPath,
-            GetBGMVolume(0.82f),
+            0.82f,
             true);
 
         if (state.BGMHandle != 0)
@@ -914,7 +899,7 @@ namespace Wheatear {
         if (textEntity && textEntity.HasComponent<UITextComponent>())
         {
             auto& text = textEntity.GetComponent<UITextComponent>();
-            const std::string notice = "BGM  " + state.CurrentBGMTitle;
+            const std::string notice = "音乐  " + state.CurrentBGMTitle;
             if (text.Text != notice)
             {
                 text.Text = notice;
@@ -1085,8 +1070,10 @@ namespace Wheatear {
 
         if (action == "textspeed+" || action == "speed+")
         {
-            auto& settings = GameProgress::GetState().Settings;
+            auto& settings = UserSettings::Get();
             settings.TextSpeed = std::min(180, settings.TextSpeed + 12);
+            UserSettings::Save();
+            UserSettings::ApplyToRuntime();
             component.CharactersPerSecond = static_cast<float>(settings.TextSpeed);
             pushMessage("文字速度提高");
             return true;
@@ -1094,8 +1081,10 @@ namespace Wheatear {
 
         if (action == "textspeed-" || action == "speed-")
         {
-            auto& settings = GameProgress::GetState().Settings;
+            auto& settings = UserSettings::Get();
             settings.TextSpeed = std::max(12, settings.TextSpeed - 12);
+            UserSettings::Save();
+            UserSettings::ApplyToRuntime();
             component.CharactersPerSecond = static_cast<float>(settings.TextSpeed);
             pushMessage("文字速度降低");
             return true;
@@ -1135,13 +1124,14 @@ namespace Wheatear {
         if (state.PreviousChoicePressed.size() < 9)
             state.PreviousChoicePressed.assign(9, false);
 
-        const bool commandPressed = Input::IsMouseButtonPressed(WT_MOUSE_BUTTON_LEFT);
+        const VisualNovelInputService::InputSnapshot input = VisualNovelInputService::Sample();
+        const bool commandPressed = input.PrimaryMousePressed;
         if (commandPressed && !state.PreviousCommandPressed)
         {
             if (ExecuteHoveredCommand(scene, component, state))
             {
                 state.PreviousCommandPressed = commandPressed;
-                state.PreviousAdvancePressed = AdvancePressed();
+                state.PreviousAdvancePressed = input.AdvancePressed;
                 return;
             }
         }
@@ -1149,36 +1139,36 @@ namespace Wheatear {
 
         if (state.DialogueHidden)
         {
-            const bool pressed = AdvancePressed();
+            const bool pressed = input.AdvancePressed;
             if (pressed && !state.PreviousAdvancePressed)
                 state.DialogueHidden = false;
             state.PreviousAdvancePressed = pressed;
             return;
         }
 
-        const bool autoPressed = Input::IsKeyPressed(WT_KEY_A);
+        const bool autoPressed = input.AutoPressed;
         if (autoPressed && !state.PreviousAutoPressed)
             ExecuteCommand(scene, component, state, "vn:auto");
         state.PreviousAutoPressed = autoPressed;
 
-        const bool historyPressed = Input::IsKeyPressed(WT_KEY_H);
+        const bool historyPressed = input.HistoryPressed;
         if (historyPressed && !state.PreviousHistoryPressed)
             ExecuteCommand(scene, component, state, "vn:history");
         state.PreviousHistoryPressed = historyPressed;
 
-        const bool savePressed = Input::IsKeyPressed(WT_KEY_F5);
+        const bool savePressed = input.SavePressed;
         if (savePressed && !state.PreviousSavePressed)
             ExecuteCommand(scene, component, state, "vn:save");
         state.PreviousSavePressed = savePressed;
 
-        const bool loadPressed = Input::IsKeyPressed(WT_KEY_F9);
+        const bool loadPressed = input.LoadPressed;
         if (loadPressed && !state.PreviousLoadPressed)
             ExecuteCommand(scene, component, state, "vn:load");
         state.PreviousLoadPressed = loadPressed;
 
         if (state.ShowHistory || state.ShowSettings || state.ShowSaveLoad)
         {
-            state.PreviousAdvancePressed = AdvancePressed();
+            state.PreviousAdvancePressed = input.AdvancePressed;
             return;
         }
 
@@ -1189,7 +1179,7 @@ namespace Wheatear {
 
             for (size_t i = 0; i < maxChoices; ++i)
             {
-                const bool pressed = Input::IsKeyPressed(WT_KEY_1 + static_cast<int>(i));
+                const bool pressed = input.ChoicePressed[i];
                 if (pressed && !state.PreviousChoicePressed[i])
                 {
                     if (IsExternalChoiceCommand(choices[i].TargetLabel))
@@ -1201,7 +1191,7 @@ namespace Wheatear {
                 state.PreviousChoicePressed[i] = pressed;
             }
 
-            const bool mousePressed = Input::IsMouseButtonPressed(WT_MOUSE_BUTTON_LEFT);
+            const bool mousePressed = input.PrimaryMousePressed;
             if (mousePressed && !state.PreviousAdvancePressed)
             {
                 for (size_t i = 0; i < maxChoices; ++i)
@@ -1217,11 +1207,11 @@ namespace Wheatear {
                 }
             }
 
-            state.PreviousAdvancePressed = AdvancePressed();
+            state.PreviousAdvancePressed = input.AdvancePressed;
             return;
         }
 
-        const bool pressed = AdvancePressed();
+        const bool pressed = input.AdvancePressed;
         if (pressed && !state.PreviousAdvancePressed)
         {
             if (component.RestartOnFinish || !state.Runtime.IsFinished())

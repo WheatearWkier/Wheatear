@@ -1,5 +1,7 @@
 #pragma once
 
+#include "Wheatear/Core/UUID.h"
+
 #include <cstdint>
 #include <string>
 
@@ -79,6 +81,12 @@ namespace Wheatear {
         float       ComboDropDelay = 1.15f;
         std::string FirstClearRewardText = "获得: 魔核碎片 x1 / 兽筋 x2 / 熊爪 x1";
 
+        bool        WaveModeEnabled = false;
+        int         WaveCount = 3;
+        float       Wave1RightWall = -2.2f;
+        float       Wave2RightWall = 3.2f;
+        float       Wave3RightWall = 8.8f;
+
         float       RuntimeElapsed = 0.0f;
         float       RuntimeFadeAlpha = 1.0f;
         bool        RuntimePaused = false;
@@ -97,6 +105,8 @@ namespace Wheatear {
         int         RuntimeResultExperience = 0;
         int         RuntimeResultRepeatExperience = 0;
         bool        RuntimeResultFirstClear = false;
+        UUID        RuntimePlayerEntity = 0;
+        UUID        RuntimeBossEntity = 0;
         std::string RuntimeResultGrade = "";
         std::string RuntimeResultSummary = "";
         float       RuntimeHitPauseTimer = 0.0f;
@@ -105,6 +115,9 @@ namespace Wheatear {
         float       RuntimeCameraShakeStrength = 0.0f;
         glm::vec3   RuntimeCameraBaseTranslation = { 0.0f, 0.0f, 0.0f };
         bool        RuntimeCameraBaseCaptured = false;
+        int         RuntimeWaveIndex = 0;
+        float       RuntimeWaveRightWall = 8.8f;
+        bool        RuntimeWaveSpawnsCreated = false;
 
         SideCombatLevelComponent() = default;
         SideCombatLevelComponent(const SideCombatLevelComponent&) = default;
@@ -128,8 +141,10 @@ namespace Wheatear {
         bool      ControlsLocked = false;
         bool      RuntimeOnGround = false;
         bool      RuntimeDeathProcessed = false;
+        bool      RuntimeRemoveAfterDeath = false;
         SideCombatState RuntimeState = SideCombatState::Normal;
         float     RuntimeStateTimer = 0.0f;
+        float     RuntimeDeathTimer = 0.0f;
         float     RuntimeFacing = 1.0f;
         float     RuntimeHitStun = 0.0f;
         float     RuntimeInvulnerableTimer = 0.0f;
@@ -177,6 +192,7 @@ namespace Wheatear {
         float RuntimeAttackChainTimer = 0.0f;
         int   RuntimeAirActionsRemaining = 0;
         std::string RuntimeActionAttackId = "";
+        std::string RuntimeActionRecipeId = "";
         std::string RuntimeActionEntityName = "";
         SideAttackKind RuntimeActionKind = SideAttackKind::Basic;
         float RuntimeActionTimer = 0.0f;
@@ -206,6 +222,7 @@ namespace Wheatear {
         float RuntimeDecisionTimer = 0.0f;
         bool  RuntimeAwake = true;
         std::string RuntimeActionAttackId = "";
+        std::string RuntimeActionRecipeId = "";
         std::string RuntimeActionEntityName = "";
         SideAttackKind RuntimeActionKind = SideAttackKind::EnemyMelee;
         float RuntimeActionTimer = 0.0f;
@@ -223,6 +240,7 @@ namespace Wheatear {
     {
         int            Team = (int)SideCombatTeam::Player;
         SideAttackKind AttackKind = SideAttackKind::Basic;
+        std::string    ActionRecipeId;
         glm::vec2      Size = { 0.8f, 0.4f };
         glm::vec2      Velocity = { 0.0f, 0.0f };
         glm::vec2      LaunchVelocity = { 0.0f, 0.0f };

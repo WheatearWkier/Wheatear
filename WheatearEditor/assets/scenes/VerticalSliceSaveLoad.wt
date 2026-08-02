@@ -31,7 +31,6 @@ Entities:
       Rotation: 0
       Anchor: 0
       SortOrder: 0
-      ParentTag: ""
   - Entity: 850000001
     TagComponent:
       Tag: SaveLoad_Camera
@@ -75,7 +74,6 @@ Entities:
       Rotation: 0.0
       Anchor: 0
       SortOrder: 10
-      ParentTag: WT_UI_Canvas
     UIImageComponent:
       Color: [1, 1, 1, 0.97]
       TexturePath: assets/vertical_slice/ui/panels/panel_save_load.png
@@ -93,7 +91,6 @@ Entities:
       Rotation: 0.0
       Anchor: 0
       SortOrder: 35
-      ParentTag: WT_UI_Canvas
     UIAnimatorComponent:
       Preset: "pulse"
       PlayOnStart: true
@@ -120,7 +117,6 @@ Entities:
       Rotation: 0.0
       Anchor: 0
       SortOrder: 42
-      ParentTag: WT_UI_Canvas
     UITextComponent:
       Text: "存档 / 读取"
       Color: [1.0, 0.94, 0.78, 1]
@@ -144,7 +140,6 @@ Entities:
       Rotation: 0.0
       Anchor: 0
       SortOrder: 42
-      ParentTag: WT_UI_Canvas
     UITextComponent:
       Text: "第2章 / 魔剑 Lv1 / 主角 Lv1"
       Color: [0.92, 0.82, 0.66, 1]
@@ -168,7 +163,6 @@ Entities:
       Rotation: 0.0
       Anchor: 0
       SortOrder: 18
-      ParentTag: WT_UI_Canvas
     UIPanelComponent:
       BackgroundColor: [0.06, 0.05, 0.04, 0.7]
       BorderColor: [0.8, 0.62, 0.28, 0.86]
@@ -187,7 +181,6 @@ Entities:
       Rotation: 0.0
       Anchor: 0
       SortOrder: 34
-      ParentTag: WT_UI_Canvas
     UIImageComponent:
       Color: [1, 1, 1, 1.0]
       TexturePath: assets/vertical_slice/ui/icons/icon_save.png
@@ -205,7 +198,6 @@ Entities:
       Rotation: 0.0
       Anchor: 0
       SortOrder: 42
-      ParentTag: WT_UI_Canvas
     UITextComponent:
       Text: "1 号槽"
       Color: [0.96, 0.92, 0.82, 1]
@@ -229,7 +221,6 @@ Entities:
       Rotation: 0.0
       Anchor: 0
       SortOrder: 55
-      ParentTag: WT_UI_Canvas
     UIAnimatorComponent:
       Preset: "hover_pulse"
       PlayOnStart: true
@@ -243,7 +234,7 @@ Entities:
       NormalColor: [0.35, 0.25, 0.12, 0.92]
       HoverColor: [0.53, 0.39, 0.18, 0.98]
       PressedColor: [0.22, 0.15, 0.08, 1]
-      OnClickFunction: event:FlowController:save_slot_1
+      OnClickFunction: event:save_slot_1
     UITextComponent:
       Text: "保存 1 号槽"
       Color: [1.0, 0.95, 0.78, 1]
@@ -267,7 +258,6 @@ Entities:
       Rotation: 0.0
       Anchor: 0
       SortOrder: 55
-      ParentTag: WT_UI_Canvas
     UIAnimatorComponent:
       Preset: "hover_pulse"
       PlayOnStart: true
@@ -281,7 +271,7 @@ Entities:
       NormalColor: [0.1, 0.29, 0.28, 0.92]
       HoverColor: [0.17, 0.45, 0.42, 0.98]
       PressedColor: [0.07, 0.18, 0.18, 1]
-      OnClickFunction: event:FlowController:load_slot_1
+      OnClickFunction: event:load_slot_1
     UITextComponent:
       Text: "读取 1 号槽"
       Color: [0.93, 1.0, 0.92, 1]
@@ -305,7 +295,6 @@ Entities:
       Rotation: 0.0
       Anchor: 0
       SortOrder: 18
-      ParentTag: WT_UI_Canvas
     UIPanelComponent:
       BackgroundColor: [0.04, 0.04, 0.045, 0.55]
       BorderColor: [0.48, 0.42, 0.32, 0.65]
@@ -324,7 +313,6 @@ Entities:
       Rotation: 0.0
       Anchor: 0
       SortOrder: 42
-      ParentTag: WT_UI_Canvas
     UITextComponent:
       Text: "槽位 2-4 会在正式多槽存档阶段开放。当前竖切先稳定一号槽。"
       Color: [0.82, 0.78, 0.68, 1]
@@ -348,7 +336,6 @@ Entities:
       Rotation: 0.0
       Anchor: 0
       SortOrder: 55
-      ParentTag: WT_UI_Canvas
     UIAnimatorComponent:
       Preset: "hover_pulse"
       PlayOnStart: true
@@ -362,7 +349,7 @@ Entities:
       NormalColor: [0.08, 0.1, 0.12, 0.7]
       HoverColor: [0.16, 0.22, 0.25, 0.92]
       PressedColor: [0.04, 0.05, 0.06, 0.92]
-      OnClickFunction: event:FlowController:go_hub
+      OnClickFunction: event:go_hub
     UITextComponent:
       Text: "返回据点"
       Color: [0.9, 0.96, 0.92, 1]
@@ -386,7 +373,6 @@ Entities:
       Rotation: 0.0
       Anchor: 0
       SortOrder: 55
-      ParentTag: WT_UI_Canvas
     UIAnimatorComponent:
       Preset: "hover_pulse"
       PlayOnStart: true
@@ -400,7 +386,7 @@ Entities:
       NormalColor: [0.08, 0.1, 0.12, 0.7]
       HoverColor: [0.16, 0.22, 0.25, 0.92]
       PressedColor: [0.04, 0.05, 0.06, 0.92]
-      OnClickFunction: event:FlowController:go_main_menu
+      OnClickFunction: event:go_main_menu
     UITextComponent:
       Text: "返回标题"
       Color: [0.9, 0.96, 0.92, 1]

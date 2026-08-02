@@ -1,5 +1,6 @@
 #include "PlayerPackager.h"
 
+#include "AssetDependencyScanner.h"
 #include "Wheatear/Core/AssetPath.h"
 #include "Wheatear/Core/EngineInfo.h"
 #include "Wheatear/Core/FileSystem.h"
@@ -10,11 +11,7 @@
 #include <cstdlib>
 #include <cstring>
 #include <fstream>
-#include <iterator>
 #include <limits>
-#include <queue>
-#include <regex>
-#include <set>
 #include <system_error>
 #include <vector>
 
@@ -198,196 +195,6 @@ namespace Wheatear {
                 (std::string("PackagedStartup") + AssetFileType::SceneExtension);
         }
 
-        static bool FirstPartEquals(const std::filesystem::path& path, const char* expected)
-        {
-            for (const auto& part : path)
-            {
-                const std::string text = part.generic_string();
-                if (text.empty() || text == ".")
-                    continue;
-                return text == expected;
-            }
-            return false;
-        }
-
-        static std::string NormalizeAssetReference(std::string reference)
-        {
-            std::replace(reference.begin(), reference.end(), '\\', '/');
-            while (!reference.empty() &&
-                (reference.back() == '.' || reference.back() == ',' || reference.back() == ';'))
-            {
-                reference.pop_back();
-            }
-            return std::filesystem::path(reference).lexically_normal().generic_string();
-        }
-
-        static bool IsPackableAsset(const std::filesystem::path& relativePath)
-        {
-            if (relativePath.empty() || relativePath.is_absolute())
-                return false;
-
-            if (!FirstPartEquals(relativePath, "assets"))
-                return false;
-
-            auto it = relativePath.begin();
-            if (it == relativePath.end())
-                return false;
-            ++it;
-
-            if (it != relativePath.end())
-            {
-                const std::string secondPart = it->generic_string();
-                if (secondPart == "cache" || secondPart == "saves")
-                    return false;
-                if (secondPart == "game" && relativePath.filename() == "player.config")
-                    return false;
-            }
-
-            for (const auto& part : relativePath)
-            {
-                const std::string text = part.generic_string();
-                if (text == "..")
-                    return false;
-            }
-
-            return true;
-        }
-
-        static bool ShouldParseDependencies(const std::filesystem::path& relativePath)
-        {
-            const std::string extension = relativePath.extension().generic_string();
-            return extension == AssetFileType::SceneExtension ||
-                extension == AssetFileType::PrefabExtension ||
-                extension == AssetFileType::MaterialExtension ||
-                extension == ".vn" ||
-                extension == ".wts" ||
-                extension == ".yaml" ||
-                extension == ".yml" ||
-                extension == ".json";
-        }
-
-        static bool ReadTextFile(const std::filesystem::path& path, std::string* text)
-        {
-            if (!text)
-                return false;
-
-            std::ifstream input(path, std::ios::binary);
-            if (!input.is_open())
-                return false;
-
-            *text = std::string(std::istreambuf_iterator<char>(input), std::istreambuf_iterator<char>());
-            return true;
-        }
-
-        static void ExtractAssetReferences(const std::string& text, std::vector<std::string>* references)
-        {
-            if (!references)
-                return;
-
-            static const std::regex assetRegex(R"(assets[\\/][A-Za-z0-9_\-./\\{}]+)");
-            for (std::sregex_iterator it(text.begin(), text.end(), assetRegex), end; it != end; ++it)
-            {
-                const std::string reference = NormalizeAssetReference(it->str());
-                if (!reference.empty())
-                    references->push_back(reference);
-            }
-        }
-
-        static bool TryAddPackageAsset(const std::filesystem::path& projectRoot,
-            const std::filesystem::path& relativePath,
-            std::set<std::string>* assets,
-            std::queue<std::string>* parseQueue)
-        {
-            if (!assets)
-                return false;
-
-            const std::string normalized = NormalizeAssetReference(relativePath.generic_string());
-            const std::filesystem::path normalizedPath(normalized);
-            if (!IsPackableAsset(normalizedPath))
-                return false;
-
-            const std::filesystem::path sourcePath = projectRoot / normalizedPath;
-            if (!std::filesystem::is_regular_file(sourcePath))
-                return false;
-
-            const bool inserted = assets->insert(normalized).second;
-            if (inserted && parseQueue && ShouldParseDependencies(normalizedPath))
-                parseQueue->push(normalized);
-            return inserted;
-        }
-
-        static bool EndsWith(const std::string& value, const std::string& suffix)
-        {
-            return value.size() >= suffix.size() &&
-                value.compare(value.size() - suffix.size(), suffix.size(), suffix) == 0;
-        }
-
-        static void ExpandTemplateReference(const std::filesystem::path& projectRoot,
-            const std::string& reference,
-            std::set<std::string>* assets,
-            std::queue<std::string>* parseQueue)
-        {
-            const std::string normalized = NormalizeAssetReference(reference);
-            const size_t placeholder = normalized.find('{');
-            if (placeholder == std::string::npos)
-            {
-                TryAddPackageAsset(projectRoot, normalized, assets, parseQueue);
-                return;
-            }
-
-            const std::filesystem::path templatePath(normalized);
-            const std::filesystem::path relativeDirectory = templatePath.parent_path();
-            const std::filesystem::path sourceDirectory = projectRoot / relativeDirectory;
-            if (!std::filesystem::is_directory(sourceDirectory))
-                return;
-
-            const std::string filenameTemplate = templatePath.filename().generic_string();
-            const size_t localPlaceholder = filenameTemplate.find('{');
-            if (localPlaceholder == std::string::npos)
-                return;
-
-            const size_t localPlaceholderEnd = filenameTemplate.find('}', localPlaceholder);
-            if (localPlaceholderEnd == std::string::npos)
-                return;
-
-            const std::string prefix = filenameTemplate.substr(0, localPlaceholder);
-            const std::string suffix = filenameTemplate.substr(localPlaceholderEnd + 1);
-
-            std::error_code error;
-            for (const auto& entry : std::filesystem::directory_iterator(sourceDirectory, error))
-            {
-                if (error || !entry.is_regular_file())
-                    continue;
-
-                const std::string filename = entry.path().filename().generic_string();
-                if (filename.rfind(prefix, 0) != 0 || !EndsWith(filename, suffix))
-                    continue;
-
-                TryAddPackageAsset(projectRoot, relativeDirectory / filename, assets, parseQueue);
-            }
-        }
-
-        static void AddDirectoryFiles(const std::filesystem::path& projectRoot,
-            const std::filesystem::path& relativeDirectory,
-            std::set<std::string>* assets)
-        {
-            const std::filesystem::path sourceDirectory = projectRoot / relativeDirectory;
-            if (!std::filesystem::is_directory(sourceDirectory))
-                return;
-
-            std::error_code error;
-            for (const auto& entry : std::filesystem::recursive_directory_iterator(sourceDirectory, error))
-            {
-                if (error || !entry.is_regular_file())
-                    continue;
-
-                const std::filesystem::path relativePath =
-                    std::filesystem::relative(entry.path(), projectRoot, error);
-                if (!error)
-                TryAddPackageAsset(projectRoot, relativePath, assets, nullptr);
-            }
-        }
-
         static bool IsLooseTuningAsset(const std::filesystem::path& relativePath)
         {
             const std::string extension = relativePath.extension().generic_string();
@@ -430,53 +237,6 @@ namespace Wheatear {
             }
 
             return true;
-        }
-
-        static std::vector<std::filesystem::path> CollectPackageAssets(
-            const std::filesystem::path& projectRoot,
-            const std::filesystem::path& startupScene,
-            bool enableScripts)
-        {
-            std::set<std::string> assets;
-            std::queue<std::string> parseQueue;
-
-            TryAddPackageAsset(projectRoot, startupScene, &assets, &parseQueue);
-
-            AddDirectoryFiles(projectRoot, "assets/shaders", &assets);
-            TryAddPackageAsset(projectRoot, "assets/fonts/wqy-microhei.ttc", &assets, nullptr);
-            TryAddPackageAsset(projectRoot, "assets/fonts/licenses/WenQuanYiMicroHei/LICENSE_Apache2.txt", &assets, nullptr);
-            TryAddPackageAsset(projectRoot, "assets/fonts/licenses/WenQuanYiMicroHei/LICENSE_GPLv3.txt", &assets, nullptr);
-            TryAddPackageAsset(projectRoot, "assets/fonts/licenses/WenQuanYiMicroHei/README.txt", &assets, nullptr);
-            TryAddPackageAsset(projectRoot, "assets/fonts/licenses/WenQuanYiMicroHei/AUTHORS.txt", &assets, nullptr);
-            TryAddPackageAsset(projectRoot, "assets/fonts/NotoSansSC-VF.ttf", &assets, nullptr);
-            TryAddPackageAsset(projectRoot, "assets/fonts/Open-Sans-2.ttf", &assets, nullptr);
-
-            if (enableScripts)
-            {
-                TryAddPackageAsset(projectRoot, EngineInfo::ScriptCoreAssemblyPath, &assets, nullptr);
-                TryAddPackageAsset(projectRoot, "assets/scripts/Wheatear-ScriptCore.deps.json", &assets, nullptr);
-            }
-
-            while (!parseQueue.empty())
-            {
-                const std::string current = parseQueue.front();
-                parseQueue.pop();
-
-                std::string text;
-                if (!ReadTextFile(projectRoot / current, &text))
-                    continue;
-
-                std::vector<std::string> references;
-                ExtractAssetReferences(text, &references);
-                for (const std::string& reference : references)
-                    ExpandTemplateReference(projectRoot, reference, &assets, &parseQueue);
-            }
-
-            std::vector<std::filesystem::path> result;
-            result.reserve(assets.size());
-            for (const std::string& asset : assets)
-                result.emplace_back(asset);
-            return result;
         }
 
         static void WriteU16(std::ostream& output, uint16_t value)
@@ -528,7 +288,7 @@ namespace Wheatear {
 
             for (const auto& relativePath : assets)
             {
-                const std::string entryPath = NormalizeAssetReference(relativePath.generic_string());
+                const std::string entryPath = AssetDependencyScanner::NormalizeAssetReference(relativePath.generic_string());
                 if (entryPath.size() > std::numeric_limits<uint16_t>::max())
                 {
                     if (errorMessage)
@@ -584,6 +344,80 @@ namespace Wheatear {
                     return false;
                 }
             }
+
+            return true;
+        }
+
+        static bool WritePackageReport(const PlayerPackageOptions& options,
+            const AssetDependencyReport& report,
+            const std::filesystem::path& reportPath,
+            const std::filesystem::path& assetPackPath,
+            std::string* errorMessage)
+        {
+            std::ofstream output(reportPath, std::ios::binary | std::ios::trunc);
+            if (!output.is_open())
+            {
+                if (errorMessage)
+                    *errorMessage = "Could not create package report: " + reportPath.string();
+                return false;
+            }
+
+            std::error_code error;
+            const uintmax_t packBytes = std::filesystem::file_size(assetPackPath, error);
+
+            output << "Wheatear Player Package Report\n";
+            output << "================================\n\n";
+            output << "Startup Scene: " << options.StartupScene.generic_string() << "\n";
+            output << "Configuration: " << options.Configuration << "\n";
+            output << "C# Scripts: " << (options.EnableScripts ? "enabled" : "disabled") << "\n";
+            output << "Packed Assets: " << report.IncludedAssets.size() << "\n";
+            output << "Source Asset Bytes: " << report.IncludedBytes << "\n";
+            output << "Asset Pack Bytes: " << (error ? 0 : packBytes) << "\n";
+            output << "Parsed Text Assets: " << report.ParsedTextAssets.size() << "\n";
+            output << "Scene Transitions: " << report.SceneTransitions.size() << "\n";
+            output << "Missing Scene Transitions: " << report.MissingSceneTransitions.size() << "\n";
+            output << "Missing References: " << report.MissingReferences.size() << "\n\n";
+
+            if (!report.Warnings.empty())
+            {
+                output << "Warnings\n";
+                output << "--------\n";
+                for (const std::string& warning : report.Warnings)
+                    output << "- " << warning << "\n";
+                output << "\n";
+            }
+
+            if (!report.MissingReferences.empty())
+            {
+                output << "Missing References\n";
+                output << "------------------\n";
+                for (const auto& missing : report.MissingReferences)
+                    output << "- " << missing.Reference << "  (from " << missing.SourceAsset << ")\n";
+                output << "\n";
+            }
+
+            if (!report.MissingSceneTransitions.empty())
+            {
+                output << "Missing Scene Transitions\n";
+                output << "-------------------------\n";
+                for (const auto& missing : report.MissingSceneTransitions)
+                    output << "- " << missing.Reference << "  (from " << missing.SourceAsset << ")\n";
+                output << "\n";
+            }
+
+            if (!report.SceneTransitions.empty())
+            {
+                output << "Scene Transition List\n";
+                output << "---------------------\n";
+                for (const auto& transition : report.SceneTransitions)
+                    output << "- " << transition.Reference << "  (from " << transition.SourceAsset << ")\n";
+                output << "\n";
+            }
+
+            output << "Packed Asset List\n";
+            output << "-----------------\n";
+            for (const auto& asset : report.IncludedAssets)
+                output << "- " << asset.generic_string() << "\n";
 
             return true;
         }
@@ -684,10 +518,29 @@ namespace Wheatear {
         }
 
         const std::filesystem::path startupScene = ResolvePackagedStartupScene(options, outputDirectory);
-        const std::vector<std::filesystem::path> packageAssets = CollectPackageAssets(
-            AssetPath::GetProjectRoot(),
-            startupScene,
-            options.EnableScripts);
+        AssetDependencyScanOptions scanOptions;
+        scanOptions.ProjectRoot = AssetPath::GetProjectRoot();
+        scanOptions.StartupAsset = startupScene;
+        scanOptions.EnableScripts = options.EnableScripts;
+        scanOptions.IncludeBuiltinAssets = true;
+        scanOptions.IncludeUnusedAssets = false;
+        const AssetDependencyReport dependencyReport = AssetDependencyScanner::BuildReport(scanOptions);
+        if (!dependencyReport.MissingReferences.empty() || !dependencyReport.MissingSceneTransitions.empty())
+        {
+            const std::filesystem::path preflightReportPath = outputDirectory / "package_preflight_report.txt";
+            (void)WritePackageReport(options,
+                dependencyReport,
+                preflightReportPath,
+                {},
+                &errorMessage);
+
+            return Fail("Package preflight failed: " +
+                std::to_string(dependencyReport.MissingReferences.size()) + " missing asset reference(s), " +
+                std::to_string(dependencyReport.MissingSceneTransitions.size()) + " missing scene transition(s). See package_preflight_report.txt.",
+                outputDirectory);
+        }
+
+        const std::vector<std::filesystem::path>& packageAssets = dependencyReport.IncludedAssets;
         if (packageAssets.empty())
             return Fail("No assets were collected for the package.", outputDirectory);
 
@@ -697,6 +550,10 @@ namespace Wheatear {
 
         if (!CopyLooseTuningAssets(AssetPath::GetProjectRoot(), packageAssets, outputDirectory, &errorMessage))
             return Fail("Failed to copy loose tuning assets: " + errorMessage, outputDirectory);
+
+        const std::filesystem::path reportPath = outputDirectory / "package_report.txt";
+        if (!WritePackageReport(options, dependencyReport, reportPath, assetPackPath, &errorMessage))
+            return Fail("Failed to write package report: " + errorMessage, outputDirectory);
 
         RuntimePlayerConfig playerConfig;
         playerConfig.StartupScene = startupScene;
@@ -712,14 +569,20 @@ namespace Wheatear {
         WT_CORE_INFO("PlayerPackager: package completed '{}' with {} packed assets",
             outputDirectory.string(),
             packageAssets.size());
-        return {
-            true,
-            "Package completed: " + outputDirectory.string() +
+        std::error_code sizeError;
+        PlayerPackageResult result;
+        result.Success = true;
+        result.Message = "Package completed: " + outputDirectory.string() +
                 " (" + std::to_string(packageAssets.size()) + " assets packed into " +
-                kAssetPackFilename + ")",
-            outputDirectory,
-            executablePath
-        };
+                kAssetPackFilename + ")";
+        result.PackageDirectory = outputDirectory;
+        result.ExecutablePath = executablePath;
+        result.AssetPackPath = assetPackPath;
+        result.ReportPath = reportPath;
+        result.PackedAssetCount = packageAssets.size();
+        result.PackedAssetBytes = dependencyReport.IncludedBytes;
+        result.AssetPackBytes = std::filesystem::file_size(assetPackPath, sizeError);
+        return result;
 #endif
     }
 

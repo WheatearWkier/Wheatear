@@ -1,6 +1,9 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
+    <Filter Include="Assets">
+      <UniqueIdentifier>{80B59B21-75B2-4E6D-8AA1-A72D6B4473C9}</UniqueIdentifier>
+    </Filter>
     <Filter Include="Build">
       <UniqueIdentifier>{B546EB0C-215B-13BE-EADC-B61D56B00FEF}</UniqueIdentifier>
     </Filter>
@@ -17,10 +20,10 @@
       <UniqueIdentifier>{68116838-54F5-288E-BD55-23E1A9581310}</UniqueIdentifier>
     </Filter>
     <Filter Include="Modules\TacticalCombat">
-      <UniqueIdentifier>{6F97B2A7-3F5D-4EF3-8EAB-9FB4EBC59F19}</UniqueIdentifier>
+      <UniqueIdentifier>{088E7A93-F487-A3E5-DDF4-39F6C98D0952}</UniqueIdentifier>
     </Filter>
     <Filter Include="Modules\TurnCombat">
-      <UniqueIdentifier>{9192085C-3B56-43BB-9854-5D30A19AF407}</UniqueIdentifier>
+      <UniqueIdentifier>{ACB5AD52-9899-6EA8-01FA-68FBEDFC582A}</UniqueIdentifier>
     </Filter>
     <Filter Include="Modules\VisualNovel">
       <UniqueIdentifier>{25711269-91D2-EF76-1A40-362986A02636}</UniqueIdentifier>
@@ -34,9 +37,24 @@
     <Filter Include="Panels\SceneHierarchy\Drawers">
       <UniqueIdentifier>{EBA8C363-57C1-AA8D-206E-3A278C453F27}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Tools">
+      <UniqueIdentifier>{16CF2D0E-82E3-55BF-4B65-F91EB73852F0}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="src\Assets\AssetRegistry.h">
+      <Filter>Assets</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Assets\UITemplateFactory.h">
+      <Filter>Assets</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Build\AssetDependencyScanner.h">
+      <Filter>Build</Filter>
+    </ClInclude>
     <ClInclude Include="src\Build\PlayerPackager.h">
+      <Filter>Build</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Build\ProjectSourceScanner.h">
       <Filter>Build</Filter>
     </ClInclude>
     <ClInclude Include="src\Editor\CoreEditorComponents.h">
@@ -48,12 +66,6 @@
     <ClInclude Include="src\Editor\EditorComponentRegistry.h">
       <Filter>Editor</Filter>
     </ClInclude>
-    <ClInclude Include="src\Editor\EditorToolRegistry.h">
-      <Filter>Editor</Filter>
-    </ClInclude>
-    <ClInclude Include="src\Editor\EventScriptGraphPanel.h">
-      <Filter>Editor</Filter>
-    </ClInclude>
     <ClInclude Include="src\Editor\EditorLayer2D.h">
       <Filter>Editor</Filter>
     </ClInclude>
@@ -61,6 +73,12 @@
       <Filter>Editor</Filter>
     </ClInclude>
     <ClInclude Include="src\Editor\EditorLayerBase.h">
+      <Filter>Editor</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Editor\EditorToolRegistry.h">
+      <Filter>Editor</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Editor\EventScriptGraphPanel.h">
       <Filter>Editor</Filter>
     </ClInclude>
     <ClInclude Include="src\Editor\ModeSelectLayer.h">
@@ -102,9 +120,6 @@
     <ClInclude Include="src\Panels\EditorCommands.h">
       <Filter>Panels</Filter>
     </ClInclude>
-    <ClInclude Include="src\Panels\SpriteSheetPickerPanel.h">
-      <Filter>Panels</Filter>
-    </ClInclude>
     <ClInclude Include="src\Panels\SceneHierarchy\ComponentDrawers.h">
       <Filter>Panels\SceneHierarchy</Filter>
     </ClInclude>
@@ -144,19 +159,37 @@
     <ClInclude Include="src\Panels\SceneHierarchyPanel.h">
       <Filter>Panels</Filter>
     </ClInclude>
+    <ClInclude Include="src\Panels\SpriteSheetPickerPanel.h">
+      <Filter>Panels</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Tools\ProjectHealthPanel.h">
+      <Filter>Tools</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Tools\WAOActionEditorPanel.h">
+      <Filter>Tools</Filter>
+    </ClInclude>
     <ClInclude Include="src\wepch.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="src\Assets\AssetRegistry.cpp">
+      <Filter>Assets</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Assets\UITemplateFactory.cpp">
+      <Filter>Assets</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Build\AssetDependencyScanner.cpp">
+      <Filter>Build</Filter>
+    </ClCompile>
     <ClCompile Include="src\Build\PlayerPackager.cpp">
+      <Filter>Build</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Build\ProjectSourceScanner.cpp">
       <Filter>Build</Filter>
     </ClCompile>
     <ClCompile Include="src\Editor\CoreEditorComponents.cpp">
       <Filter>Editor</Filter>
     </ClCompile>
     <ClCompile Include="src\Editor\EditorComponentRegistry.cpp">
-      <Filter>Editor</Filter>
-    </ClCompile>
-    <ClCompile Include="src\Editor\EventScriptGraphPanel.cpp">
       <Filter>Editor</Filter>
     </ClCompile>
     <ClCompile Include="src\Editor\EditorLayer2D.cpp">
@@ -175,6 +208,12 @@
       <Filter>Editor</Filter>
     </ClCompile>
     <ClCompile Include="src\Editor\EditorLayerBaseUI.cpp">
+      <Filter>Editor</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Editor\EditorLayerDockspace.cpp">
+      <Filter>Editor</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Editor\EventScriptGraphPanel.cpp">
       <Filter>Editor</Filter>
     </ClCompile>
     <ClCompile Include="src\Editor\ModeSelectLayer.cpp">
@@ -207,10 +246,10 @@
     <ClCompile Include="src\Panels\AnimationEditorPanel.cpp">
       <Filter>Panels</Filter>
     </ClCompile>
-    <ClCompile Include="src\Panels\ContentBrowserPanel.cpp">
+    <ClCompile Include="src\Panels\AnimationEditorPanelSections.cpp">
       <Filter>Panels</Filter>
     </ClCompile>
-    <ClCompile Include="src\Panels\SpriteSheetPickerPanel.cpp">
+    <ClCompile Include="src\Panels\ContentBrowserPanel.cpp">
       <Filter>Panels</Filter>
     </ClCompile>
     <ClCompile Include="src\Panels\SceneHierarchy\Drawers\AudioDrawer.cpp">
@@ -254,6 +293,15 @@
     </ClCompile>
     <ClCompile Include="src\Panels\SceneHierarchyPanelTree.cpp">
       <Filter>Panels</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Panels\SpriteSheetPickerPanel.cpp">
+      <Filter>Panels</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Tools\ProjectHealthPanel.cpp">
+      <Filter>Tools</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Tools\WAOActionEditorPanel.cpp">
+      <Filter>Tools</Filter>
     </ClCompile>
     <ClCompile Include="src\WheatearEditorApp.cpp" />
     <ClCompile Include="src\wepch.cpp" />

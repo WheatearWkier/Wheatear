@@ -9,6 +9,7 @@
 #include "Wheatear/Core/Window.h"
 #include "Wheatear/Events/Event.h"
 #include "Wheatear/Events/MouseEvent.h"
+#include "Wheatear/Gameplay/Action/ActionDebugHistory.h"
 #include "Wheatear/Modules/GameplayModuleRuntime.h"
 #include "Wheatear/Modules/Progression/GameProgress.h"
 #include "Wheatear/Renderer/RenderCommand.h"
@@ -37,6 +38,8 @@ RuntimeSceneLayer::RuntimeSceneLayer()
 
 void RuntimeSceneLayer::OnAttach()
 {
+    Wheatear::WAO::ActionDebugHistory::Clear();
+
     Wheatear::RuntimePlayerConfig config = Wheatear::LoadRuntimePlayerConfig();
     std::filesystem::path requestedPath = config.StartupScene.empty()
         ? m_DefaultScenePath

@@ -1,8 +1,10 @@
 # Batch01A VN 风格小样生产包
 
-更新时间：2026-07-30
+更新时间：2026-07-31
 
 本包用于先锁定 VN 高清美术方向，再批量扩展 Batch 01 的完整背景与立绘差分。目标不是一次性铺满所有素材，而是先得到 2 张背景和 3 张 neutral 立绘，用来验证画风、角色识别度、透明 PNG 后处理和工程接入路径。
+
+本批所有资源都是静态单图，不参与动画 strip 拼接流程；立绘本身就必须作为单张 RGBA 透明 PNG 交付。
 
 ## 1. 本批资产
 
@@ -19,8 +21,25 @@
 所有提示词追加：
 
 ```text
-no text, no logo, no watermark, no signature, no UI letters, no copyright character, no recognizable franchise design, no cropped body, no blurry edge, no inconsistent frame size, no changing costume between variants
+no text, no logo, no watermark, no signature, no UI letters, no copyright character, no recognizable franchise design, no cropped body, no blurry edge, no inconsistent frame size, no changing costume between variants, no white background behind portraits, no gray background behind portraits, no checkerboard background, no white matte, no dirty alpha edge
 ```
+
+### 2.1 立绘 PNG 真透明规则
+
+背景图明确为不透明 PNG；三张立绘必须是 **RGBA PNG 真透明**：
+
+```yaml
+portraitTransparency:
+  requireRgba: true
+  unusedPixelsAlpha: 0
+  rejectWhiteBackground: true
+  rejectGrayBackground: true
+  rejectCheckerboardBackground: true
+  rejectWhiteMatte: true
+  rejectDirtyAlphaEdge: true
+```
+
+验收时把立绘放到纯黑、纯白、亮粉和透明棋盘背景上检查；只要角色外缘出现白边、灰边、残底或半透明脏像素，直接重生，不再后期抠图。
 
 ## 3. 风格总纲
 
@@ -90,11 +109,11 @@ Asset type: visual novel half-body character portrait
 Primary request: original anime visual novel half-body portrait of the young male protagonist in his real-world school uniform, neutral expression
 Subject: teenage boy protagonist, slim build, slightly tired but kind eyes, neat dark hair, modern school uniform with subtle loosened details, ordinary student before the fantasy incident
 Style/medium: polished galgame character portrait, clean cel shading, expressive eyes, refined line art
-Composition/framing: transparent background, 1024x1536 portrait canvas, half-body, front three-quarter view, centered consistent standing pose, generous padding, no cropped body
+Composition/framing: RGBA transparent background, unused pixels alpha 0, 1024x1536 portrait canvas, half-body, front three-quarter view, centered consistent standing pose, generous padding, no cropped body
 Lighting/mood: soft neutral VN portrait lighting, calm but with a hint of inner tension
 Color palette: dark school uniform, white shirt accents, subtle cool shadows
-Constraints: transparent background, no text, no logo, no watermark; keep costume simple enough to support later damaged/fantasy variants
-Avoid: heroic armor, exaggerated action pose, childlike proportions
+Constraints: transparent background, no text, no logo, no watermark, no white matte, no dirty alpha edge; keep costume simple enough to support later damaged/fantasy variants
+Avoid: heroic armor, exaggerated action pose, childlike proportions, background residue requiring cutout
 ```
 
 ### 5.4 aoba_neutral.png
@@ -106,11 +125,11 @@ Primary request: original anime visual novel half-body portrait of Aoba, the rea
 Subject: teenage girl childhood friend, black medium-length hair with soft straight bangs and slightly inward curling ends, warm brown eyes, approachable smile held back into a neutral expression, cute everyday student feeling
 Identity lock: she is the same person as the mentor outfit version; preserve the same face shape, eye shape, hair texture, bangs structure, apparent age, and gentle reliable core personality
 Style/medium: polished galgame character portrait, clean cel shading, expressive eyes, refined line art
-Composition/framing: transparent background, 1024x1536 portrait canvas, half-body, front three-quarter view, centered consistent standing pose, no cropped body
+Composition/framing: RGBA transparent background, unused pixels alpha 0, 1024x1536 portrait canvas, half-body, front three-quarter view, centered consistent standing pose, no cropped body
 Lighting/mood: soft warm VN portrait lighting, familiar and comforting
 Color palette: modest school or casual outfit colors, soft whites and muted warm accents, natural black hair
-Constraints: transparent background, no text, no logo, no watermark; outfit and accessories should feel intentionally simpler than the mentor form
-Avoid: copying any reference character, fantasy armor, overly mature styling
+Constraints: transparent background, no text, no logo, no watermark, no white matte, no dirty alpha edge; outfit and accessories should feel intentionally simpler than the mentor form
+Avoid: copying any reference character, fantasy armor, overly mature styling, background residue requiring cutout
 ```
 
 ### 5.5 mentor_neutral.png
@@ -122,17 +141,17 @@ Primary request: original anime visual novel half-body portrait of Aoba wearing 
 Subject: the exact same person as Aoba in a different outfit and accessories, same black medium-length hair foundation but styled more controlled, same warm brown eyes with a calmer sharper gaze, reliable mentor aura without changing her apparent age, fantasy magic swordswoman outfit with restrained black-silver fabric, subtle cyan magic ornament, small deliberate accessories that differ from her daily form
 Identity lock: she is the same person and same apparent age as Aoba; preserve the same face shape, eye shape, hair texture, bangs structure, head-to-body proportion, skin softness, and gentle reliable core personality while changing only posture, styling, clothing, ornaments, and expression control
 Style/medium: polished galgame character portrait, clean cel shading, expressive eyes, refined line art
-Composition/framing: transparent background, 1024x1536 portrait canvas, half-body, front three-quarter view, centered consistent standing pose, no cropped body
+Composition/framing: RGBA transparent background, unused pixels alpha 0, 1024x1536 portrait canvas, half-body, front three-quarter view, centered consistent standing pose, no cropped body
 Lighting/mood: cool soft VN portrait lighting with a controlled heroic edge
 Color palette: black and silver outfit, subtle cyan magical accents, warm skin tones, natural black hair
-Constraints: transparent background, no text, no logo, no watermark; differences from Aoba must come from clothing, ornaments, posture, expression control, and magic-swordswoman details, not from age or character redesign
-Avoid: making her look older than Aoba, making her look like an unrelated character, implying a different life stage, overly revealing costume, heavy armor, copying any reference character
+Constraints: transparent background, no text, no logo, no watermark, no white matte, no dirty alpha edge; differences from Aoba must come from clothing, ornaments, posture, expression control, and magic-swordswoman details, not from age or character redesign
+Avoid: making her look older than Aoba, making her look like an unrelated character, implying a different life stage, overly revealing costume, heavy armor, copying any reference character, background residue requiring cutout
 ```
 
 ## 6. 后续验收标准
 
 - 背景能直接用于 1920x1080 VN 场景，不含文字、Logo、人物或明显商业可识别元素。
-- 立绘必须是真透明 PNG，角色边缘干净，无彩边。
+- 立绘必须是真 RGBA 透明 PNG，无用区域 alpha 为 0；角色边缘干净，无彩边、白边、灰边、白色 matte 或半透明残底。
 - `aoba_neutral.png` 和 `mentor_neutral.png` 一眼能看出是同一个人，但打扮、装饰和身份呈现明显不同。
 - 三张立绘的画布、人物高度、站位、视角一致，方便后续在 VN 系统里切换。
 - 如果小样通过，继续按同一锚点扩展 Batch 01 的表情差分和剩余背景。

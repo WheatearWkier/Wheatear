@@ -1,0 +1,211 @@
+productionMode: programmatic_lowfi_validation
+generatedWithAi: false
+purpose: engineering validation placeholder, not final art
+transparentPngRule:
+  requireRgba: true
+  unusedPixelsAlpha: 0
+  noBakedShadow: true
+
+profiles:
+  small_enemy:
+    cellWidth: 512
+    cellHeight: 384
+    pivot: bottom_center
+    pivotX: 256
+    pivotY: 306
+    baselineY: 306
+    renderScale: [1.0, 1.0]
+    renderOffset: [0.0, 0.2969]
+    safePadding: [56, 42, 56, 42]
+  small_enemy_wide:
+    cellWidth: 768
+    cellHeight: 384
+    pivot: bottom_center
+    pivotX: 384
+    pivotY: 306
+    baselineY: 306
+    renderScale: [1.5, 1.0]
+    renderOffset: [0.0, 0.2969]
+    safePadding: [96, 42, 112, 42]
+  small_enemy_air:
+    cellWidth: 512
+    cellHeight: 512
+    pivot: bottom_center
+    pivotX: 256
+    pivotY: 390
+    baselineY: 390
+    renderScale: [1.0, 1.3333]
+    renderOffset: [0.0, 0.3516]
+    safePadding: [56, 58, 56, 64]
+  small_enemy_air_wide:
+    cellWidth: 768
+    cellHeight: 512
+    pivot: bottom_center
+    pivotX: 384
+    pivotY: 390
+    baselineY: 390
+    renderScale: [1.5, 1.3333]
+    renderOffset: [0.0, 0.3516]
+    safePadding: [96, 58, 112, 64]
+  boss_bear_husband:
+    cellWidth: 1024
+    cellHeight: 768
+    pivot: bottom_center
+    pivotX: 512
+    pivotY: 626
+    baselineY: 626
+    renderScale: [1.0, 1.0]
+    renderOffset: [0.0, 0.3151]
+    safePadding: [112, 72, 112, 72]
+  boss_bear_husband_wide:
+    cellWidth: 1280
+    cellHeight: 768
+    pivot: bottom_center
+    pivotX: 640
+    pivotY: 626
+    baselineY: 626
+    renderScale: [1.25, 1.0]
+    renderOffset: [0.0, 0.3151]
+    safePadding: [160, 72, 176, 72]
+
+clips:
+  en_claw_beast_idle:
+    frameCount: 4
+    frameRate: 7.0
+    profile: small_enemy
+    cellWidth: 512
+    cellHeight: 384
+    runtimePattern: assets/vertical_slice/side_combat/enemies/en_claw_beast_idle_{frame2}.png
+    fixedCanvasPerClip: true
+    pivotBaselineStable: true
+    collisionIndependentFromCanvas: true
+  en_claw_beast_run:
+    frameCount: 5
+    frameRate: 11.0
+    profile: small_enemy
+    cellWidth: 512
+    cellHeight: 384
+    runtimePattern: assets/vertical_slice/side_combat/enemies/en_claw_beast_run_{frame2}.png
+    fixedCanvasPerClip: true
+    pivotBaselineStable: true
+    collisionIndependentFromCanvas: true
+  en_claw_beast_hit:
+    frameCount: 3
+    frameRate: 12.0
+    profile: small_enemy_wide
+    cellWidth: 768
+    cellHeight: 384
+    runtimePattern: assets/vertical_slice/side_combat/enemies/en_claw_beast_hit_{frame2}.png
+    fixedCanvasPerClip: true
+    pivotBaselineStable: true
+    collisionIndependentFromCanvas: true
+  en_claw_beast_fall:
+    frameCount: 3
+    frameRate: 9.0
+    profile: small_enemy_air_wide
+    cellWidth: 768
+    cellHeight: 512
+    runtimePattern: assets/vertical_slice/side_combat/enemies/en_claw_beast_fall_{frame2}.png
+    fixedCanvasPerClip: true
+    pivotBaselineStable: true
+    collisionIndependentFromCanvas: true
+  en_claw_beast_dead:
+    frameCount: 4
+    frameRate: 7.0
+    profile: small_enemy_wide
+    cellWidth: 768
+    cellHeight: 384
+    runtimePattern: assets/vertical_slice/side_combat/enemies/en_claw_beast_dead_{frame2}.png
+    fixedCanvasPerClip: true
+    pivotBaselineStable: true
+    collisionIndependentFromCanvas: true
+  en_claw_beast_attack:
+    frameCount: 4
+    frameRate: 14.0
+    profile: small_enemy_wide
+    cellWidth: 768
+    cellHeight: 384
+    runtimePattern: assets/vertical_slice/side_combat/enemies/en_claw_beast_attack_{frame2}.png
+    fixedCanvasPerClip: true
+    pivotBaselineStable: true
+    collisionIndependentFromCanvas: true
+  boss_bear_husband_idle:
+    frameCount: 4
+    frameRate: 6.0
+    profile: boss_bear_husband
+    cellWidth: 1024
+    cellHeight: 768
+    runtimePattern: assets/vertical_slice/side_combat/enemies/boss_bear_husband_idle_{frame2}.png
+    fixedCanvasPerClip: true
+    pivotBaselineStable: true
+    collisionIndependentFromCanvas: true
+  boss_bear_husband_walk:
+    frameCount: 5
+    frameRate: 8.0
+    profile: boss_bear_husband
+    cellWidth: 1024
+    cellHeight: 768
+    runtimePattern: assets/vertical_slice/side_combat/enemies/boss_bear_husband_walk_{frame2}.png
+    fixedCanvasPerClip: true
+    pivotBaselineStable: true
+    collisionIndependentFromCanvas: true
+  boss_bear_husband_hit:
+    frameCount: 3
+    frameRate: 10.0
+    profile: boss_bear_husband
+    cellWidth: 1024
+    cellHeight: 768
+    runtimePattern: assets/vertical_slice/side_combat/enemies/boss_bear_husband_hit_{frame2}.png
+    fixedCanvasPerClip: true
+    pivotBaselineStable: true
+    collisionIndependentFromCanvas: true
+  boss_bear_husband_fall:
+    frameCount: 3
+    frameRate: 8.0
+    profile: boss_bear_husband
+    cellWidth: 1024
+    cellHeight: 768
+    runtimePattern: assets/vertical_slice/side_combat/enemies/boss_bear_husband_fall_{frame2}.png
+    fixedCanvasPerClip: true
+    pivotBaselineStable: true
+    collisionIndependentFromCanvas: true
+  boss_bear_husband_dead:
+    frameCount: 4
+    frameRate: 7.0
+    profile: boss_bear_husband_wide
+    cellWidth: 1280
+    cellHeight: 768
+    runtimePattern: assets/vertical_slice/side_combat/enemies/boss_bear_husband_dead_{frame2}.png
+    fixedCanvasPerClip: true
+    pivotBaselineStable: true
+    collisionIndependentFromCanvas: true
+  boss_bear_husband_attack:
+    frameCount: 4
+    frameRate: 12.0
+    profile: boss_bear_husband_wide
+    cellWidth: 1280
+    cellHeight: 768
+    runtimePattern: assets/vertical_slice/side_combat/enemies/boss_bear_husband_attack_{frame2}.png
+    fixedCanvasPerClip: true
+    pivotBaselineStable: true
+    collisionIndependentFromCanvas: true
+  boss_bear_husband_charge:
+    frameCount: 4
+    frameRate: 12.0
+    profile: boss_bear_husband
+    cellWidth: 1024
+    cellHeight: 768
+    runtimePattern: assets/vertical_slice/side_combat/enemies/boss_bear_husband_charge_{frame2}.png
+    fixedCanvasPerClip: true
+    pivotBaselineStable: true
+    collisionIndependentFromCanvas: true
+  boss_bear_husband_shockwave:
+    frameCount: 4
+    frameRate: 12.0
+    profile: boss_bear_husband_wide
+    cellWidth: 1280
+    cellHeight: 768
+    runtimePattern: assets/vertical_slice/side_combat/enemies/boss_bear_husband_shockwave_{frame2}.png
+    fixedCanvasPerClip: true
+    pivotBaselineStable: true
+    collisionIndependentFromCanvas: true

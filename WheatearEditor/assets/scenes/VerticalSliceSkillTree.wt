@@ -42,6 +42,25 @@ Entities:
       Color: [0.72, 0.84, 0.92, 1]
       Texture: assets/vertical_slice/vn/backgrounds/bg_forest_camp_night.png
       TilingFactor: 1
+  - Entity: 970000000
+    TagComponent:
+      Tag: WT_UI_Canvas
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    UICanvasComponent:
+      Visible: true
+      ReferenceWidth: 1920
+      ReferenceHeight: 1080
+    UIWidgetComponent:
+      Visible: true
+      Position: [0, 0]
+      Size: [1, 1]
+      Rotation: 0
+      Anchor: 0
+      SortOrder: 0
+      ParentEntity: 0
   - Entity: 970000010
     TagComponent:
       Tag: SkillTree_MainPanel
@@ -56,7 +75,6 @@ Entities:
       Rotation: 0.0
       Anchor: 0
       SortOrder: 10
-      ParentTag: WT_UI_Canvas
     UIPanelComponent:
       BackgroundColor: [0.035, 0.047, 0.058, 0.88]
       BorderColor: [0.26, 0.66, 0.72, 0.92]
@@ -75,7 +93,6 @@ Entities:
       Rotation: 0.0
       Anchor: 0
       SortOrder: 42
-      ParentTag: WT_UI_Canvas
     UITextComponent:
       Text: "魔剑技能树"
       Color: [0.9, 0.99, 1.0, 1]
@@ -99,7 +116,6 @@ Entities:
       Rotation: 0.0
       Anchor: 0
       SortOrder: 42
-      ParentTag: WT_UI_Canvas
     UITextComponent:
       Text: "第 2 章 / 魔剑 Lv1 / 主角 Lv1"
       Color: [0.7, 0.9, 0.92, 1]
@@ -123,7 +139,6 @@ Entities:
       Rotation: 0.0
       Anchor: 0
       SortOrder: 18
-      ParentTag: WT_UI_Canvas
     UIPanelComponent:
       BackgroundColor: [0.03, 0.045, 0.052, 0.76]
       BorderColor: [0.18, 0.58, 0.62, 0.88]
@@ -778,7 +793,6 @@ Entities:
       Rotation: 0.0
       Anchor: 0
       SortOrder: 18
-      ParentTag: WT_UI_Canvas
     UIPanelComponent:
       BackgroundColor: [0.04, 0.046, 0.056, 0.84]
       BorderColor: [0.56, 0.72, 0.76, 0.88]
@@ -797,7 +811,6 @@ Entities:
       Rotation: 0.0
       Anchor: 0
       SortOrder: 42
-      ParentTag: WT_UI_Canvas
     UITextComponent:
       Text: "拖动画布浏览完整技能树；点击节点查看详情"
       Color: [0.7, 0.88, 0.88, 1]
@@ -821,7 +834,6 @@ Entities:
       Rotation: 0.0
       Anchor: 0
       SortOrder: 42
-      ParentTag: WT_UI_Canvas
     UITextComponent:
       Text: "魔剑 Lv1 / 完整技能网"
       Color: [0.88, 0.98, 0.92, 1]
@@ -845,7 +857,6 @@ Entities:
       Rotation: 0.0
       Anchor: 0
       SortOrder: 42
-      ParentTag: WT_UI_Canvas
     UITextComponent:
       Text: "魔剑核心"
       Color: [0.96, 0.99, 0.94, 1]
@@ -869,7 +880,6 @@ Entities:
       Rotation: 0.0
       Anchor: 0
       SortOrder: 42
-      ParentTag: WT_UI_Canvas
     UITextComponent:
       Text: "材料"
       Color: [1.0, 0.93, 0.72, 1]
@@ -893,7 +903,6 @@ Entities:
       Rotation: 0.0
       Anchor: 0
       SortOrder: 44
-      ParentTag: WT_UI_Canvas
     UIProgressBarComponent:
       Value: 1
       MaxValue: 2
@@ -913,7 +922,6 @@ Entities:
       Rotation: 0.0
       Anchor: 0
       SortOrder: 55
-      ParentTag: WT_UI_Canvas
     UIButtonComponent:
       NormalColor: [0.74, 0.52, 0.2, 0.94]
       HoverColor: [0.92, 0.72, 0.3, 0.96]
@@ -942,12 +950,11 @@ Entities:
       Rotation: 0.0
       Anchor: 0
       SortOrder: 55
-      ParentTag: WT_UI_Canvas
     UIButtonComponent:
       NormalColor: [0.1, 0.12, 0.14, 0.9]
       HoverColor: [0.2, 0.24, 0.28, 0.96]
       PressedColor: [0.07, 0.08, 0.1, 0.96]
-      OnClickFunction: "event:FlowController:go_hub"
+      OnClickFunction: "event:go_hub"
     UITextComponent:
       Text: "返回据点"
       Color: [0.9, 0.96, 0.94, 1]

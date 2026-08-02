@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Wheatear/Core/Core.h"
+#include "Wheatear/Core/UUID.h"
 
 #include <string>
 #include <vector>
@@ -19,7 +20,7 @@ namespace Wheatear {
 
     struct EventCommandRequest
     {
-        std::string TargetTag;
+        UUID TargetEntity = 0;
         std::string EventName;
     };
 

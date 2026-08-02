@@ -1,6 +1,8 @@
 #include "wtpch.h"
 #include "ContentBrowserPanel.h"
 
+#include "Assets/AssetRegistry.h"
+#include "Assets/UITemplateFactory.h"
 #include "Wheatear/Core/AssetPath.h"
 #include "Wheatear/Core/EngineInfo.h"
 
@@ -11,6 +13,34 @@
 #include <cstring>
 
 namespace Wheatear {
+
+    namespace {
+
+        static bool EditString(const char* label, std::string& value, size_t capacity)
+        {
+            std::vector<char> buffer(capacity, 0);
+            strncpy_s(buffer.data(), buffer.size(), value.c_str(), _TRUNCATE);
+            if (ImGui::InputText(label, buffer.data(), buffer.size()))
+            {
+                value = buffer.data();
+                return true;
+            }
+            return false;
+        }
+
+        static bool EditMultilineString(const char* label, std::string& value, size_t capacity, const ImVec2& size)
+        {
+            std::vector<char> buffer(capacity, 0);
+            strncpy_s(buffer.data(), buffer.size(), value.c_str(), _TRUNCATE);
+            if (ImGui::InputTextMultiline(label, buffer.data(), buffer.size(), size))
+            {
+                value = buffer.data();
+                return true;
+            }
+            return false;
+        }
+
+    } // namespace
 
     std::filesystem::path GetEditorAssetPath()
     {
@@ -28,8 +58,13 @@ namespace Wheatear {
         m_Icons[AssetType::Audio]     = m_Icons[AssetType::Unknown];
         m_Icons[AssetType::Script]    = m_Icons[AssetType::Unknown];
         m_Icons[AssetType::Prefab]    = m_Icons[AssetType::Unknown];
+        m_Icons[AssetType::UITemplate]= m_Icons[AssetType::Unknown];
         m_Icons[AssetType::Material]  = m_Icons[AssetType::Unknown];
+        m_Icons[AssetType::Data]      = m_Icons[AssetType::Unknown];
+        m_Icons[AssetType::Metadata]  = m_Icons[AssetType::Unknown];
 
+        AssetRegistry::Get().LoadCache(AssetPath::GetProjectRoot());
+        m_RegistryStatus = "Loaded asset registry cache. Use Rescan Assets after adding or replacing resources.";
         NavigateTo(GetEditorAssetPath());
     }
 
@@ -43,6 +78,10 @@ namespace Wheatear {
             return AssetType::Scene;
         if (ext == AssetFileType::PrefabExtension)
             return AssetType::Prefab;
+        if (ext == AssetFileType::UITemplateExtension)
+            return AssetType::UITemplate;
+        if (ext == AssetFileType::MetadataExtension)
+            return AssetType::Metadata;
         if (ext == ".png" || ext == ".jpg" || ext == ".jpeg" || ext == ".tga")
             return AssetType::Texture;
         if (ext == ".glsl" || ext == ".hlsl")
@@ -53,6 +92,8 @@ namespace Wheatear {
             return AssetType::Script;
         if (ext == AssetFileType::MaterialExtension)
             return AssetType::Material;
+        if (ext == ".yaml" || ext == ".yml" || ext == ".json" || ext == ".txt")
+            return AssetType::Data;
 
         return AssetType::Unknown;
     }
@@ -76,6 +117,11 @@ namespace Wheatear {
         for (const auto& entry : std::filesystem::directory_iterator(m_CurrentDirectory))
         {
             const std::string name = entry.path().filename().string();
+            if (entry.path().extension() == AssetFileType::MetadataExtension)
+                continue;
+            if (entry.is_directory() && entry.path().filename() == ".wheatear")
+                continue;
+
             if (filter.empty() || name.find(filter) != std::string::npos)
                 result.push_back(entry);
         }
@@ -173,6 +219,30 @@ namespace Wheatear {
         ImGui::SameLine(ImGui::GetContentRegionAvail().x - 200.0f);
         ImGui::SetNextItemWidth(150.0f);
         ImGui::InputTextWithHint("##search", "Search...", m_SearchBuffer, sizeof(m_SearchBuffer));
+
+        ImGui::SameLine();
+        if (ImGui::Button("Rescan Assets"))
+        {
+            AssetRegistry::Get().Scan(AssetPath::GetProjectRoot());
+            AssetRegistry::Get().WriteRegistry();
+            m_RegistryStatus = "Asset registry rescanned and written.";
+        }
+
+        ImGui::SameLine();
+        if (ImGui::Button("Write Registry"))
+        {
+            const bool saved = AssetRegistry::Get().WriteRegistry();
+            m_RegistryStatus = saved ? "asset_registry.yaml written." : "Failed to write asset_registry.yaml.";
+        }
+
+        ImGui::SameLine();
+        if (ImGui::Button("Generate UI Templates"))
+        {
+            UITemplateFactory::WriteBuiltinTemplateAssets(AssetPath::GetProjectRoot());
+            AssetRegistry::Get().Scan(AssetPath::GetProjectRoot());
+            AssetRegistry::Get().WriteRegistry();
+            m_RegistryStatus = "Builtin .wtuit UI template assets generated.";
+        }
 
         ImGui::SameLine();
         if (ImGui::Button(m_ShowSidebar ? "<<" : ">>"))
@@ -377,10 +447,134 @@ namespace Wheatear {
                 case AssetType::Audio:     typeStr = "Audio"; break;
                 case AssetType::Script:    typeStr = "Script"; break;
                 case AssetType::Prefab:    typeStr = "Prefab"; break;
+                case AssetType::UITemplate:typeStr = "UI Template"; break;
                 case AssetType::Material:  typeStr = "Material"; break;
+                case AssetType::Data:      typeStr = "Data"; break;
+                case AssetType::Metadata:  typeStr = "Metadata"; break;
                 default: break;
             }
             ImGui::Text("%s", typeStr);
+
+            const std::filesystem::path relativePath = AssetPath::ToProjectRelative(m_SelectedPath);
+            EditorAssetMetadata* metadata = AssetRegistry::Get().FindMutableByPath(relativePath);
+            if (metadata)
+            {
+                ImGui::Spacing();
+                ImGui::TextDisabled("Asset UUID");
+                ImGui::TextWrapped("%llu", static_cast<unsigned long long>(static_cast<uint64_t>(metadata->ID)));
+
+                ImGui::Spacing();
+                ImGui::TextDisabled("Registry Type");
+                ImGui::Text("%s", AssetRegistry::KindToString(metadata->Kind).c_str());
+
+                bool changed = false;
+                if (metadata->Kind == EditorAssetKind::Texture || metadata->Kind == EditorAssetKind::SpriteSheet)
+                {
+                    ImGui::Spacing();
+                    ImGui::TextDisabled("Texture Import");
+                    const char* filters[] = { "Linear", "Nearest" };
+                    int filterIndex = metadata->Texture.Filter == "Nearest" ? 1 : 0;
+                    if (ImGui::Combo("Filter", &filterIndex, filters, IM_ARRAYSIZE(filters)))
+                    {
+                        metadata->Texture.Filter = filters[filterIndex];
+                        changed = true;
+                    }
+                    changed |= ImGui::DragFloat("PPU", &metadata->Texture.PixelsPerUnit, 1.0f, 1.0f, 1000.0f, "%.0f");
+                    changed |= ImGui::InputInt("Columns", &metadata->Texture.Columns);
+                    changed |= ImGui::InputInt("Rows", &metadata->Texture.Rows);
+                    changed |= ImGui::InputInt("Cell W", &metadata->Texture.CellWidth);
+                    changed |= ImGui::InputInt("Cell H", &metadata->Texture.CellHeight);
+                    metadata->Texture.Columns = std::max(metadata->Texture.Columns, 1);
+                    metadata->Texture.Rows = std::max(metadata->Texture.Rows, 1);
+                    metadata->Texture.CellWidth = std::max(metadata->Texture.CellWidth, 0);
+                    metadata->Texture.CellHeight = std::max(metadata->Texture.CellHeight, 0);
+                }
+                else if (metadata->Kind == EditorAssetKind::Audio)
+                {
+                    ImGui::Spacing();
+                    ImGui::TextDisabled("Audio Import");
+                    const char* usages[] = { "SFX", "BGM", "UI", "Voice" };
+                    int usageIndex = 0;
+                    for (int i = 0; i < IM_ARRAYSIZE(usages); ++i)
+                    {
+                        if (metadata->Audio.Usage == usages[i])
+                            usageIndex = i;
+                    }
+                    if (ImGui::Combo("Usage", &usageIndex, usages, IM_ARRAYSIZE(usages)))
+                    {
+                        metadata->Audio.Usage = usages[usageIndex];
+                        changed = true;
+                    }
+                    changed |= ImGui::SliderFloat("Default Volume", &metadata->Audio.DefaultVolume, 0.0f, 1.0f, "%.2f");
+                    changed |= ImGui::Checkbox("Loop", &metadata->Audio.Loop);
+                }
+                else if (metadata->Kind == EditorAssetKind::Prefab || metadata->Kind == EditorAssetKind::UITemplate)
+                {
+                    ImGui::Spacing();
+                    ImGui::TextDisabled("Template / Prefab");
+                    changed |= EditString("Category", metadata->Prefab.Category, 128);
+                    changed |= EditString("Template Kind", metadata->Prefab.TemplateKind, 128);
+                    changed |= EditMultilineString("Description", metadata->Prefab.Description, 512, ImVec2(-1.0f, 64.0f));
+                }
+
+                if (changed)
+                    metadata->Dirty = true;
+
+                ImGui::Spacing();
+                if (ImGui::Button("Save Registry"))
+                {
+                    const bool saved = AssetRegistry::Get().WriteRegistry();
+                    if (saved)
+                    {
+                        metadata->Dirty = false;
+                        m_RegistryStatus = "asset_registry.yaml saved.";
+                    }
+                    else
+                    {
+                        m_RegistryStatus = "Failed to save asset_registry.yaml.";
+                    }
+                }
+
+                ImGui::SameLine();
+                if (ImGui::Button("Copy UUID"))
+                    ImGui::SetClipboardText(std::to_string(static_cast<uint64_t>(metadata->ID)).c_str());
+
+                if (metadata->Dirty)
+                    ImGui::TextColored(ImVec4(1.0f, 0.76f, 0.28f, 1.0f), "Unsaved metadata");
+
+                ImGui::Spacing();
+                ImGui::TextDisabled("References");
+                if (metadata->References.empty())
+                    ImGui::TextDisabled("None");
+                else
+                {
+                    ImGui::BeginChild("##refs", ImVec2(0, 70), true);
+                    for (const std::string& reference : metadata->References)
+                        ImGui::BulletText("%s", reference.c_str());
+                    ImGui::EndChild();
+                }
+
+                ImGui::TextDisabled("Referenced By");
+                if (metadata->ReferencedBy.empty())
+                    ImGui::TextDisabled("None");
+                else
+                {
+                    ImGui::BeginChild("##refby", ImVec2(0, 70), true);
+                    for (const std::string& reference : metadata->ReferencedBy)
+                        ImGui::BulletText("%s", reference.c_str());
+                    ImGui::EndChild();
+                }
+            }
+            else if (!std::filesystem::is_directory(m_SelectedPath))
+            {
+                ImGui::Spacing();
+                ImGui::TextWrapped("This asset is not in the registry yet.");
+                if (ImGui::Button("Rescan Registry"))
+                {
+                    AssetRegistry::Get().Scan(AssetPath::GetProjectRoot());
+                    m_RegistryStatus = "Asset registry rescanned.";
+                }
+            }
 
             if (!ext.empty())
             {
@@ -432,6 +626,12 @@ namespace Wheatear {
         {
             ImGui::SameLine();
             ImGui::TextDisabled("|  %s", m_SelectedPath.filename().string().c_str());
+        }
+
+        if (!m_RegistryStatus.empty())
+        {
+            ImGui::SameLine();
+            ImGui::TextDisabled("|  %s", m_RegistryStatus.c_str());
         }
 
         ImGui::SameLine(ImGui::GetContentRegionAvail().x - 200.0f);

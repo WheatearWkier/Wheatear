@@ -74,6 +74,8 @@ namespace Wheatear {
         glm::vec2      UVMin = { 0.0f, 0.0f };
         glm::vec2      UVMax = { 1.0f, 1.0f };
         bool           FlipX = false;
+        glm::vec2      DrawOffset = { 0.0f, 0.0f };
+        glm::vec2      DrawScale = { 1.0f, 1.0f };
 
         SpriteRendererComponent() = default;
         SpriteRendererComponent(const SpriteRendererComponent&) = default;
@@ -306,7 +308,6 @@ namespace Wheatear {
         UIAnchor  Anchor = UIAnchor::MiddleCenter;
         int       SortOrder = 0;
         UUID      ParentEntity = 0;
-        std::string ParentTag;
 
         UIWidgetComponent() = default;
         UIWidgetComponent(const UIWidgetComponent&) = default;
@@ -601,7 +602,6 @@ namespace Wheatear {
     struct UIPageItemComponent
     {
         UUID PagerEntity = 0;
-        std::string PagerTag;
         int Page = 1;
 
         UIPageItemComponent() = default;

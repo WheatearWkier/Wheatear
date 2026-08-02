@@ -1,0 +1,6 @@
+UITemplate:
+  Version: 1
+  Kind: "SkillTreeNode"
+  DisplayName: "Skill Tree Node"
+  Category: "Progression"
+  Description: "Reusable visual node for skill graph authoring."

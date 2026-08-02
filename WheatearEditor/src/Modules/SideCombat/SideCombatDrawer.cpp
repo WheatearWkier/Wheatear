@@ -108,6 +108,14 @@ namespace Wheatear {
             InputString("First Clear Reward", level.FirstClearRewardText, 260);
 
             ImGui::Separator();
+            ImGui::TextDisabled("Wave / Air Wall Flow");
+            ImGui::Checkbox("Wave Mode Enabled", &level.WaveModeEnabled);
+            ImGui::DragInt("Wave Count", &level.WaveCount, 1.0f, 1, 3);
+            ImGui::DragFloat("Wave 1 Right Wall", &level.Wave1RightWall, 0.05f, -50.0f, 50.0f);
+            ImGui::DragFloat("Wave 2 Right Wall", &level.Wave2RightWall, 0.05f, -50.0f, 50.0f);
+            ImGui::DragFloat("Wave 3 Right Wall", &level.Wave3RightWall, 0.05f, -50.0f, 50.0f);
+
+            ImGui::Separator();
             ImGui::TextDisabled("Scene Bindings");
             InputString("Player", level.PlayerEntityName);
             InputString("Boss", level.BossEntityName);
@@ -124,6 +132,10 @@ namespace Wheatear {
             ImGui::Separator();
             ImGui::TextDisabled("Runtime");
             ImGui::Text("Result: %s", level.RuntimeVictory ? "Victory" : (level.RuntimeDefeat ? "Defeat" : "Playing"));
+            ImGui::Text("Wave: %d / %d, Wall X: %.2f",
+                level.RuntimeWaveIndex + 1,
+                std::max(1, level.WaveCount),
+                level.RuntimeWaveRightWall);
             ImGui::Text("Combo: %d / Best: %d", level.RuntimeComboCount, level.RuntimeBestCombo);
             ImGui::Text("Collected Pickups: %d", level.RuntimeCollectedPickups);
         });

@@ -1,0 +1,6 @@
+UITemplate:
+  Version: 1
+  Kind: "Tooltip"
+  DisplayName: "Tooltip"
+  Category: "Common"
+  Description: "Compact hover/detail panel for item, skill, and command descriptions."

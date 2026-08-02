@@ -1,4 +1,4 @@
-﻿# Wheatear 竖切入口 VN。
+# Wheatear 竖切入口 VN。
 # 流程：现实序章 -> 穿越 -> 假青梅被掳走 -> 第一章假玩法。
 
 @label start
@@ -32,7 +32,7 @@ Mira: 救我。
 Leo: 她被掳走了。好，游戏主线来了。虽然这个开场槽点很多，但我现在确实很想把人追回来。
 Leo: 前面那只黑熊看起来像教程怪。来吧，让我看看这个世界的第一场战斗到底有多离谱。
 
-@choice 进入第一章假玩法 -> event:FlowController:go_fake_combat | 先吐槽两句 -> roast
+@choice 进入第一章假玩法 -> event:go_fake_combat | 先吐槽两句 -> roast
 
 @label roast
 @expression Leo skeptical
@@ -41,4 +41,4 @@ Leo: 等一下。为什么我的武器看起来像从隔壁小游戏借来的？
 @expression Mira smile
 Mira: 也许这是命运给你的试炼。
 Leo: 这不是试炼，这是项目早期原型。
-@choice 行吧，先把假玩法打完 -> event:FlowController:go_fake_combat
+@choice 行吧，先把假玩法打完 -> event:go_fake_combat

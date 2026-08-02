@@ -1,0 +1,6 @@
+UITemplate:
+  Version: 1
+  Kind: "PagedGrid"
+  DisplayName: "Paged Grid"
+  Category: "Containers"
+  Description: "Known-size paged grid for gallery, quest, mail, and records."

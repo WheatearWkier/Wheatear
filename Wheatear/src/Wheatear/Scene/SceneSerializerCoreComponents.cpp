@@ -73,6 +73,8 @@ namespace Wheatear {
             o << YAML::Key << "UVMin" << YAML::Value << c.UVMin;
             o << YAML::Key << "UVMax" << YAML::Value << c.UVMax;
             o << YAML::Key << "FlipX" << YAML::Value << c.FlipX;
+            o << YAML::Key << "DrawOffset" << YAML::Value << c.DrawOffset;
+            o << YAML::Key << "DrawScale" << YAML::Value << c.DrawScale;
             o << YAML::EndMap;
         }
         static void Deserialize(const YAML::Node& n, SpriteRendererComponent& c) {
@@ -81,6 +83,8 @@ namespace Wheatear {
             c.UVMin = n["UVMin"].as<glm::vec2>(c.UVMin);
             c.UVMax = n["UVMax"].as<glm::vec2>(c.UVMax);
             c.FlipX = n["FlipX"].as<bool>(c.FlipX);
+            c.DrawOffset = n["DrawOffset"].as<glm::vec2>(c.DrawOffset);
+            c.DrawScale = n["DrawScale"].as<glm::vec2>(c.DrawScale);
             if (auto p = n["Texture"].as<std::string>(""); !p.empty())
                 c.Texture = Texture2D::Create(p);
         }

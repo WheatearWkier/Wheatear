@@ -31,6 +31,12 @@
     <Filter Include="src\Wheatear\Events">
       <UniqueIdentifier>{11DEBA49-7D3F-9857-06AD-DE09720DCF16}</UniqueIdentifier>
     </Filter>
+    <Filter Include="src\Wheatear\Gameplay">
+      <UniqueIdentifier>{6C7AEB3D-D8E6-A638-A1DA-3E960D06C9A0}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\Wheatear\Gameplay\Action">
+      <UniqueIdentifier>{796495D3-651F-857F-0ED7-FDC9FA70CF0F}</UniqueIdentifier>
+    </Filter>
     <Filter Include="src\Wheatear\ImGui">
       <UniqueIdentifier>{B79529AD-A379-EA02-0CDA-E455F8DCD484}</UniqueIdentifier>
     </Filter>
@@ -43,6 +49,9 @@
     <Filter Include="src\Wheatear\Modules\ArcadeCombat">
       <UniqueIdentifier>{5A0022E3-C66E-7762-0F58-32627B056DFE}</UniqueIdentifier>
     </Filter>
+    <Filter Include="src\Wheatear\Modules\Common">
+      <UniqueIdentifier>{2D78BB95-9985-E97B-226C-E5668E78B532}</UniqueIdentifier>
+    </Filter>
     <Filter Include="src\Wheatear\Modules\Progression">
       <UniqueIdentifier>{3F9033C2-2BE1-1E04-5445-0DC640F5B16D}</UniqueIdentifier>
     </Filter>
@@ -50,10 +59,10 @@
       <UniqueIdentifier>{BF602EE3-2B44-3D23-3447-6B5FA0A90374}</UniqueIdentifier>
     </Filter>
     <Filter Include="src\Wheatear\Modules\TacticalCombat">
-      <UniqueIdentifier>{949C4B1B-B734-4E3E-8CC9-5D84C1907E3D}</UniqueIdentifier>
+      <UniqueIdentifier>{DFB0F6CC-4B6A-6177-D4C9-7B51408217E7}</UniqueIdentifier>
     </Filter>
     <Filter Include="src\Wheatear\Modules\TurnCombat">
-      <UniqueIdentifier>{EAFDE560-979A-4F67-8892-4DFE2E97C049}</UniqueIdentifier>
+      <UniqueIdentifier>{030574FD-6FE8-823D-78EB-B079E44D498E}</UniqueIdentifier>
     </Filter>
     <Filter Include="src\Wheatear\Modules\VisualNovel">
       <UniqueIdentifier>{5CABA26C-48FC-8DAE-7160-7C705D102118}</UniqueIdentifier>
@@ -171,6 +180,9 @@
     <ClInclude Include="src\Wheatear\Core\Input.h">
       <Filter>src\Wheatear\Core</Filter>
     </ClInclude>
+    <ClInclude Include="src\Wheatear\Core\InputBindingService.h">
+      <Filter>src\Wheatear\Core</Filter>
+    </ClInclude>
     <ClInclude Include="src\Wheatear\Core\KeyCodes.h">
       <Filter>src\Wheatear\Core</Filter>
     </ClInclude>
@@ -198,6 +210,9 @@
     <ClInclude Include="src\Wheatear\Core\UUID.h">
       <Filter>src\Wheatear\Core</Filter>
     </ClInclude>
+    <ClInclude Include="src\Wheatear\Core\UserSettings.h">
+      <Filter>src\Wheatear\Core</Filter>
+    </ClInclude>
     <ClInclude Include="src\Wheatear\Core\Window.h">
       <Filter>src\Wheatear\Core</Filter>
     </ClInclude>
@@ -219,11 +234,104 @@
     <ClInclude Include="src\Wheatear\Events\MouseEvent.h">
       <Filter>src\Wheatear\Events</Filter>
     </ClInclude>
+    <ClInclude Include="src\Wheatear\Gameplay\Action\ActionAssetLoader.h">
+      <Filter>src\Wheatear\Gameplay\Action</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Wheatear\Gameplay\Action\ActionDatabase.h">
+      <Filter>src\Wheatear\Gameplay\Action</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Wheatear\Gameplay\Action\ActionDebugHistory.h">
+      <Filter>src\Wheatear\Gameplay\Action</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Wheatear\Gameplay\Action\ActionResolver.h">
+      <Filter>src\Wheatear\Gameplay\Action</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Wheatear\Gameplay\Action\ActionRunner.h">
+      <Filter>src\Wheatear\Gameplay\Action</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Wheatear\Gameplay\Action\ActionSignalRouter.h">
+      <Filter>src\Wheatear\Gameplay\Action</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Wheatear\Gameplay\Action\ActionTypes.h">
+      <Filter>src\Wheatear\Gameplay\Action</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Wheatear\Gameplay\Action\StateRegistry.h">
+      <Filter>src\Wheatear\Gameplay\Action</Filter>
+    </ClInclude>
     <ClInclude Include="src\Wheatear\ImGui\ImGuiLayer.h">
       <Filter>src\Wheatear\ImGui</Filter>
     </ClInclude>
     <ClInclude Include="src\Wheatear\Math\Math.h">
       <Filter>src\Wheatear\Math</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Wheatear\Modules\ArcadeCombat\ArcadeCombatActionCatalog.h">
+      <Filter>src\Wheatear\Modules\ArcadeCombat</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Wheatear\Modules\ArcadeCombat\ArcadeCombatActionResolver.h">
+      <Filter>src\Wheatear\Modules\ArcadeCombat</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Wheatear\Modules\ArcadeCombat\ArcadeCombatBossService.h">
+      <Filter>src\Wheatear\Modules\ArcadeCombat</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Wheatear\Modules\ArcadeCombat\ArcadeCombatComponents.h">
+      <Filter>src\Wheatear\Modules\ArcadeCombat</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Wheatear\Modules\ArcadeCombat\ArcadeCombatHudService.h">
+      <Filter>src\Wheatear\Modules\ArcadeCombat</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Wheatear\Modules\ArcadeCombat\ArcadeCombatLifecycleService.h">
+      <Filter>src\Wheatear\Modules\ArcadeCombat</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Wheatear\Modules\ArcadeCombat\ArcadeCombatMath.h">
+      <Filter>src\Wheatear\Modules\ArcadeCombat</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Wheatear\Modules\ArcadeCombat\ArcadeCombatOutcomeService.h">
+      <Filter>src\Wheatear\Modules\ArcadeCombat</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Wheatear\Modules\ArcadeCombat\ArcadeCombatPlayerService.h">
+      <Filter>src\Wheatear\Modules\ArcadeCombat</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Wheatear\Modules\ArcadeCombat\ArcadeCombatPresentationService.h">
+      <Filter>src\Wheatear\Modules\ArcadeCombat</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Wheatear\Modules\ArcadeCombat\ArcadeCombatProjectileService.h">
+      <Filter>src\Wheatear\Modules\ArcadeCombat</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Wheatear\Modules\ArcadeCombat\ArcadeCombatSignalHandlers.h">
+      <Filter>src\Wheatear\Modules\ArcadeCombat</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Wheatear\Modules\ArcadeCombat\ArcadeCombatSystem.h">
+      <Filter>src\Wheatear\Modules\ArcadeCombat</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Wheatear\Modules\Common\GameplayAudioService.h">
+      <Filter>src\Wheatear\Modules\Common</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Wheatear\Modules\Common\GameplayCombatService.h">
+      <Filter>src\Wheatear\Modules\Common</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Wheatear\Modules\Common\GameplayEntityService.h">
+      <Filter>src\Wheatear\Modules\Common</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Wheatear\Modules\Common\GameplayFlowService.h">
+      <Filter>src\Wheatear\Modules\Common</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Wheatear\Modules\Common\GameplayRewardService.h">
+      <Filter>src\Wheatear\Modules\Common</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Wheatear\Modules\Common\GameplayTargetingService.h">
+      <Filter>src\Wheatear\Modules\Common</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Wheatear\Modules\Common\GameplayTextService.h">
+      <Filter>src\Wheatear\Modules\Common</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Wheatear\Modules\Common\GameplayUILayoutService.h">
+      <Filter>src\Wheatear\Modules\Common</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Wheatear\Modules\Common\GameplayUIService.h">
+      <Filter>src\Wheatear\Modules\Common</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Wheatear\Modules\Common\GameplayVisualService.h">
+      <Filter>src\Wheatear\Modules\Common</Filter>
     </ClInclude>
     <ClInclude Include="src\Wheatear\Modules\GameplayModuleComponents.h">
       <Filter>src\Wheatear\Modules</Filter>
@@ -231,40 +339,166 @@
     <ClInclude Include="src\Wheatear\Modules\GameplayModuleRuntime.h">
       <Filter>src\Wheatear\Modules</Filter>
     </ClInclude>
-    <ClInclude Include="src\Wheatear\Modules\ArcadeCombat\ArcadeCombatComponents.h">
-      <Filter>src\Wheatear\Modules\ArcadeCombat</Filter>
-    </ClInclude>
-    <ClInclude Include="src\Wheatear\Modules\ArcadeCombat\ArcadeCombatSystem.h">
-      <Filter>src\Wheatear\Modules\ArcadeCombat</Filter>
-    </ClInclude>
     <ClInclude Include="src\Wheatear\Modules\ModuleBootstrap.h">
       <Filter>src\Wheatear\Modules</Filter>
     </ClInclude>
     <ClInclude Include="src\Wheatear\Modules\Progression\GameProgress.h">
       <Filter>src\Wheatear\Modules\Progression</Filter>
     </ClInclude>
+    <ClInclude Include="src\Wheatear\Modules\Progression\ProgressionEquipmentPageService.h">
+      <Filter>src\Wheatear\Modules\Progression</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Wheatear\Modules\Progression\ProgressionResultPageService.h">
+      <Filter>src\Wheatear\Modules\Progression</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Wheatear\Modules\Progression\ProgressionSaveLoadPageService.h">
+      <Filter>src\Wheatear\Modules\Progression</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Wheatear\Modules\Progression\ProgressionSettingsCommandService.h">
+      <Filter>src\Wheatear\Modules\Progression</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Wheatear\Modules\Progression\ProgressionSettingsPageService.h">
+      <Filter>src\Wheatear\Modules\Progression</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Wheatear\Modules\Progression\ProgressionSkillTreePageService.h">
+      <Filter>src\Wheatear\Modules\Progression</Filter>
+    </ClInclude>
     <ClInclude Include="src\Wheatear\Modules\Progression\ProgressionSystem.h">
       <Filter>src\Wheatear\Modules\Progression</Filter>
     </ClInclude>
+    <ClInclude Include="src\Wheatear\Modules\SideCombat\SideCombatActionCatalog.h">
+      <Filter>src\Wheatear\Modules\SideCombat</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Wheatear\Modules\SideCombat\SideCombatActionService.h">
+      <Filter>src\Wheatear\Modules\SideCombat</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Wheatear\Modules\SideCombat\SideCombatComboService.h">
+      <Filter>src\Wheatear\Modules\SideCombat</Filter>
+    </ClInclude>
     <ClInclude Include="src\Wheatear\Modules\SideCombat\SideCombatComponents.h">
+      <Filter>src\Wheatear\Modules\SideCombat</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Wheatear\Modules\SideCombat\SideCombatEnemyAIService.h">
+      <Filter>src\Wheatear\Modules\SideCombat</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Wheatear\Modules\SideCombat\SideCombatEntityReferenceService.h">
+      <Filter>src\Wheatear\Modules\SideCombat</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Wheatear\Modules\SideCombat\SideCombatFeedbackService.h">
+      <Filter>src\Wheatear\Modules\SideCombat</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Wheatear\Modules\SideCombat\SideCombatHitResolutionService.h">
+      <Filter>src\Wheatear\Modules\SideCombat</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Wheatear\Modules\SideCombat\SideCombatHitboxService.h">
+      <Filter>src\Wheatear\Modules\SideCombat</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Wheatear\Modules\SideCombat\SideCombatHudService.h">
+      <Filter>src\Wheatear\Modules\SideCombat</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Wheatear\Modules\SideCombat\SideCombatLifecycleService.h">
+      <Filter>src\Wheatear\Modules\SideCombat</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Wheatear\Modules\SideCombat\SideCombatMath.h">
+      <Filter>src\Wheatear\Modules\SideCombat</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Wheatear\Modules\SideCombat\SideCombatOutcomeService.h">
+      <Filter>src\Wheatear\Modules\SideCombat</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Wheatear\Modules\SideCombat\SideCombatPhysicsService.h">
+      <Filter>src\Wheatear\Modules\SideCombat</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Wheatear\Modules\SideCombat\SideCombatPickupService.h">
+      <Filter>src\Wheatear\Modules\SideCombat</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Wheatear\Modules\SideCombat\SideCombatPlayerService.h">
+      <Filter>src\Wheatear\Modules\SideCombat</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Wheatear\Modules\SideCombat\SideCombatResultService.h">
       <Filter>src\Wheatear\Modules\SideCombat</Filter>
     </ClInclude>
     <ClInclude Include="src\Wheatear\Modules\SideCombat\SideCombatSystem.h">
       <Filter>src\Wheatear\Modules\SideCombat</Filter>
     </ClInclude>
+    <ClInclude Include="src\Wheatear\Modules\SideCombat\SideCombatTargetService.h">
+      <Filter>src\Wheatear\Modules\SideCombat</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Wheatear\Modules\SideCombat\SideCombatTuningService.h">
+      <Filter>src\Wheatear\Modules\SideCombat</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Wheatear\Modules\SideCombat\SideCombatVisualService.h">
+      <Filter>src\Wheatear\Modules\SideCombat</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Wheatear\Modules\TacticalCombat\TacticalCombatAIService.h">
+      <Filter>src\Wheatear\Modules\TacticalCombat</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Wheatear\Modules\TacticalCombat\TacticalCombatActionCatalog.h">
+      <Filter>src\Wheatear\Modules\TacticalCombat</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Wheatear\Modules\TacticalCombat\TacticalCombatActionService.h">
+      <Filter>src\Wheatear\Modules\TacticalCombat</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Wheatear\Modules\TacticalCombat\TacticalCombatBoardService.h">
+      <Filter>src\Wheatear\Modules\TacticalCombat</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Wheatear\Modules\TacticalCombat\TacticalCombatCommandService.h">
+      <Filter>src\Wheatear\Modules\TacticalCombat</Filter>
+    </ClInclude>
     <ClInclude Include="src\Wheatear\Modules\TacticalCombat\TacticalCombatComponents.h">
+      <Filter>src\Wheatear\Modules\TacticalCombat</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Wheatear\Modules\TacticalCombat\TacticalCombatFeedbackService.h">
+      <Filter>src\Wheatear\Modules\TacticalCombat</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Wheatear\Modules\TacticalCombat\TacticalCombatFlowService.h">
+      <Filter>src\Wheatear\Modules\TacticalCombat</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Wheatear\Modules\TacticalCombat\TacticalCombatSkillService.h">
       <Filter>src\Wheatear\Modules\TacticalCombat</Filter>
     </ClInclude>
     <ClInclude Include="src\Wheatear\Modules\TacticalCombat\TacticalCombatSystem.h">
       <Filter>src\Wheatear\Modules\TacticalCombat</Filter>
     </ClInclude>
+    <ClInclude Include="src\Wheatear\Modules\TacticalCombat\TacticalCombatUIService.h">
+      <Filter>src\Wheatear\Modules\TacticalCombat</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Wheatear\Modules\TacticalCombat\TacticalCombatVisualService.h">
+      <Filter>src\Wheatear\Modules\TacticalCombat</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Wheatear\Modules\TurnCombat\TurnCombatActionCatalog.h">
+      <Filter>src\Wheatear\Modules\TurnCombat</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Wheatear\Modules\TurnCombat\TurnCombatActionService.h">
+      <Filter>src\Wheatear\Modules\TurnCombat</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Wheatear\Modules\TurnCombat\TurnCombatCommandService.h">
+      <Filter>src\Wheatear\Modules\TurnCombat</Filter>
+    </ClInclude>
     <ClInclude Include="src\Wheatear\Modules\TurnCombat\TurnCombatComponents.h">
+      <Filter>src\Wheatear\Modules\TurnCombat</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Wheatear\Modules\TurnCombat\TurnCombatFlowService.h">
+      <Filter>src\Wheatear\Modules\TurnCombat</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Wheatear\Modules\TurnCombat\TurnCombatSkillService.h">
       <Filter>src\Wheatear\Modules\TurnCombat</Filter>
     </ClInclude>
     <ClInclude Include="src\Wheatear\Modules\TurnCombat\TurnCombatSystem.h">
       <Filter>src\Wheatear\Modules\TurnCombat</Filter>
     </ClInclude>
+    <ClInclude Include="src\Wheatear\Modules\TurnCombat\TurnCombatTargetService.h">
+      <Filter>src\Wheatear\Modules\TurnCombat</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Wheatear\Modules\TurnCombat\TurnCombatUIService.h">
+      <Filter>src\Wheatear\Modules\TurnCombat</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Wheatear\Modules\TurnCombat\TurnCombatVisualService.h">
+      <Filter>src\Wheatear\Modules\TurnCombat</Filter>
+    </ClInclude>
     <ClInclude Include="src\Wheatear\Modules\VisualNovel\VisualNovelComponents.h">
+      <Filter>src\Wheatear\Modules\VisualNovel</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Wheatear\Modules\VisualNovel\VisualNovelInputService.h">
       <Filter>src\Wheatear\Modules\VisualNovel</Filter>
     </ClInclude>
     <ClInclude Include="src\Wheatear\Modules\VisualNovel\VisualNovelRuntime.h">
@@ -357,10 +591,10 @@
     <ClInclude Include="src\Wheatear\Scene\ComponentGroup.h">
       <Filter>src\Wheatear\Scene</Filter>
     </ClInclude>
-    <ClInclude Include="src\Wheatear\Scene\Components.h">
+    <ClInclude Include="src\Wheatear\Scene\ComponentLifecycleRegistry.h">
       <Filter>src\Wheatear\Scene</Filter>
     </ClInclude>
-    <ClInclude Include="src\Wheatear\Scene\ComponentLifecycleRegistry.h">
+    <ClInclude Include="src\Wheatear\Scene\Components.h">
       <Filter>src\Wheatear\Scene</Filter>
     </ClInclude>
     <ClInclude Include="src\Wheatear\Scene\Entity.h">
@@ -369,10 +603,16 @@
     <ClInclude Include="src\Wheatear\Scene\Entity.inl">
       <Filter>src\Wheatear\Scene</Filter>
     </ClInclude>
+    <ClInclude Include="src\Wheatear\Scene\EntityReference.h">
+      <Filter>src\Wheatear\Scene</Filter>
+    </ClInclude>
     <ClInclude Include="src\Wheatear\Scene\Scene.h">
       <Filter>src\Wheatear\Scene</Filter>
     </ClInclude>
     <ClInclude Include="src\Wheatear\Scene\SceneComponentGroups.h">
+      <Filter>src\Wheatear\Scene</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Wheatear\Scene\SceneQueries.h">
       <Filter>src\Wheatear\Scene</Filter>
     </ClInclude>
     <ClInclude Include="src\Wheatear\Scene\SceneSerializer.h">
@@ -382,9 +622,6 @@
       <Filter>src\Wheatear\Scene</Filter>
     </ClInclude>
     <ClInclude Include="src\Wheatear\Scene\SceneSerializerComponentSupport.h">
-      <Filter>src\Wheatear\Scene</Filter>
-    </ClInclude>
-    <ClInclude Include="src\Wheatear\Scene\SceneQueries.h">
       <Filter>src\Wheatear\Scene</Filter>
     </ClInclude>
     <ClInclude Include="src\Wheatear\Scene\SceneSystemRegistry.h">
@@ -1586,6 +1823,9 @@
     <ClCompile Include="src\Wheatear\Core\FileSystem.cpp">
       <Filter>src\Wheatear\Core</Filter>
     </ClCompile>
+    <ClCompile Include="src\Wheatear\Core\InputBindingService.cpp">
+      <Filter>src\Wheatear\Core</Filter>
+    </ClCompile>
     <ClCompile Include="src\Wheatear\Core\Layer.cpp">
       <Filter>src\Wheatear\Core</Filter>
     </ClCompile>
@@ -1601,8 +1841,35 @@
     <ClCompile Include="src\Wheatear\Core\UUID.cpp">
       <Filter>src\Wheatear\Core</Filter>
     </ClCompile>
+    <ClCompile Include="src\Wheatear\Core\UserSettings.cpp">
+      <Filter>src\Wheatear\Core</Filter>
+    </ClCompile>
     <ClCompile Include="src\Wheatear\Events\EventBus.cpp">
       <Filter>src\Wheatear\Events</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Wheatear\Gameplay\Action\ActionAssetLoader.cpp">
+      <Filter>src\Wheatear\Gameplay\Action</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Wheatear\Gameplay\Action\ActionDatabase.cpp">
+      <Filter>src\Wheatear\Gameplay\Action</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Wheatear\Gameplay\Action\ActionDebugHistory.cpp">
+      <Filter>src\Wheatear\Gameplay\Action</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Wheatear\Gameplay\Action\ActionResolver.cpp">
+      <Filter>src\Wheatear\Gameplay\Action</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Wheatear\Gameplay\Action\ActionRunner.cpp">
+      <Filter>src\Wheatear\Gameplay\Action</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Wheatear\Gameplay\Action\ActionSignalRouter.cpp">
+      <Filter>src\Wheatear\Gameplay\Action</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Wheatear\Gameplay\Action\ActionTypes.cpp">
+      <Filter>src\Wheatear\Gameplay\Action</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Wheatear\Gameplay\Action\StateRegistry.cpp">
+      <Filter>src\Wheatear\Gameplay\Action</Filter>
     </ClCompile>
     <ClCompile Include="src\Wheatear\ImGui\ImGuiBuild.cpp">
       <Filter>src\Wheatear\ImGui</Filter>
@@ -1613,8 +1880,65 @@
     <ClCompile Include="src\Wheatear\Math\Math.cpp">
       <Filter>src\Wheatear\Math</Filter>
     </ClCompile>
+    <ClCompile Include="src\Wheatear\Modules\ArcadeCombat\ArcadeCombatActionCatalog.cpp">
+      <Filter>src\Wheatear\Modules\ArcadeCombat</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Wheatear\Modules\ArcadeCombat\ArcadeCombatActionResolver.cpp">
+      <Filter>src\Wheatear\Modules\ArcadeCombat</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Wheatear\Modules\ArcadeCombat\ArcadeCombatBossService.cpp">
+      <Filter>src\Wheatear\Modules\ArcadeCombat</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Wheatear\Modules\ArcadeCombat\ArcadeCombatHudService.cpp">
+      <Filter>src\Wheatear\Modules\ArcadeCombat</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Wheatear\Modules\ArcadeCombat\ArcadeCombatLifecycleService.cpp">
+      <Filter>src\Wheatear\Modules\ArcadeCombat</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Wheatear\Modules\ArcadeCombat\ArcadeCombatOutcomeService.cpp">
+      <Filter>src\Wheatear\Modules\ArcadeCombat</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Wheatear\Modules\ArcadeCombat\ArcadeCombatPlayerService.cpp">
+      <Filter>src\Wheatear\Modules\ArcadeCombat</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Wheatear\Modules\ArcadeCombat\ArcadeCombatPresentationService.cpp">
+      <Filter>src\Wheatear\Modules\ArcadeCombat</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Wheatear\Modules\ArcadeCombat\ArcadeCombatProjectileService.cpp">
+      <Filter>src\Wheatear\Modules\ArcadeCombat</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Wheatear\Modules\ArcadeCombat\ArcadeCombatSignalHandlers.cpp">
+      <Filter>src\Wheatear\Modules\ArcadeCombat</Filter>
+    </ClCompile>
     <ClCompile Include="src\Wheatear\Modules\ArcadeCombat\ArcadeCombatSystem.cpp">
       <Filter>src\Wheatear\Modules\ArcadeCombat</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Wheatear\Modules\Common\GameplayAudioService.cpp">
+      <Filter>src\Wheatear\Modules\Common</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Wheatear\Modules\Common\GameplayCombatService.cpp">
+      <Filter>src\Wheatear\Modules\Common</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Wheatear\Modules\Common\GameplayEntityService.cpp">
+      <Filter>src\Wheatear\Modules\Common</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Wheatear\Modules\Common\GameplayFlowService.cpp">
+      <Filter>src\Wheatear\Modules\Common</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Wheatear\Modules\Common\GameplayRewardService.cpp">
+      <Filter>src\Wheatear\Modules\Common</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Wheatear\Modules\Common\GameplayTextService.cpp">
+      <Filter>src\Wheatear\Modules\Common</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Wheatear\Modules\Common\GameplayUILayoutService.cpp">
+      <Filter>src\Wheatear\Modules\Common</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Wheatear\Modules\Common\GameplayUIService.cpp">
+      <Filter>src\Wheatear\Modules\Common</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Wheatear\Modules\Common\GameplayVisualService.cpp">
+      <Filter>src\Wheatear\Modules\Common</Filter>
     </ClCompile>
     <ClCompile Include="src\Wheatear\Modules\ModuleBootstrap.cpp">
       <Filter>src\Wheatear\Modules</Filter>
@@ -1622,17 +1946,146 @@
     <ClCompile Include="src\Wheatear\Modules\Progression\GameProgress.cpp">
       <Filter>src\Wheatear\Modules\Progression</Filter>
     </ClCompile>
+    <ClCompile Include="src\Wheatear\Modules\Progression\ProgressionEquipmentPageService.cpp">
+      <Filter>src\Wheatear\Modules\Progression</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Wheatear\Modules\Progression\ProgressionResultPageService.cpp">
+      <Filter>src\Wheatear\Modules\Progression</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Wheatear\Modules\Progression\ProgressionSaveLoadPageService.cpp">
+      <Filter>src\Wheatear\Modules\Progression</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Wheatear\Modules\Progression\ProgressionSettingsCommandService.cpp">
+      <Filter>src\Wheatear\Modules\Progression</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Wheatear\Modules\Progression\ProgressionSettingsPageService.cpp">
+      <Filter>src\Wheatear\Modules\Progression</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Wheatear\Modules\Progression\ProgressionSkillTreePageService.cpp">
+      <Filter>src\Wheatear\Modules\Progression</Filter>
+    </ClCompile>
     <ClCompile Include="src\Wheatear\Modules\Progression\ProgressionSystem.cpp">
       <Filter>src\Wheatear\Modules\Progression</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Wheatear\Modules\SideCombat\SideCombatActionCatalog.cpp">
+      <Filter>src\Wheatear\Modules\SideCombat</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Wheatear\Modules\SideCombat\SideCombatActionService.cpp">
+      <Filter>src\Wheatear\Modules\SideCombat</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Wheatear\Modules\SideCombat\SideCombatComboService.cpp">
+      <Filter>src\Wheatear\Modules\SideCombat</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Wheatear\Modules\SideCombat\SideCombatEnemyAIService.cpp">
+      <Filter>src\Wheatear\Modules\SideCombat</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Wheatear\Modules\SideCombat\SideCombatEntityReferenceService.cpp">
+      <Filter>src\Wheatear\Modules\SideCombat</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Wheatear\Modules\SideCombat\SideCombatFeedbackService.cpp">
+      <Filter>src\Wheatear\Modules\SideCombat</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Wheatear\Modules\SideCombat\SideCombatHitResolutionService.cpp">
+      <Filter>src\Wheatear\Modules\SideCombat</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Wheatear\Modules\SideCombat\SideCombatHitboxService.cpp">
+      <Filter>src\Wheatear\Modules\SideCombat</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Wheatear\Modules\SideCombat\SideCombatHudService.cpp">
+      <Filter>src\Wheatear\Modules\SideCombat</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Wheatear\Modules\SideCombat\SideCombatLifecycleService.cpp">
+      <Filter>src\Wheatear\Modules\SideCombat</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Wheatear\Modules\SideCombat\SideCombatOutcomeService.cpp">
+      <Filter>src\Wheatear\Modules\SideCombat</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Wheatear\Modules\SideCombat\SideCombatPhysicsService.cpp">
+      <Filter>src\Wheatear\Modules\SideCombat</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Wheatear\Modules\SideCombat\SideCombatPickupService.cpp">
+      <Filter>src\Wheatear\Modules\SideCombat</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Wheatear\Modules\SideCombat\SideCombatPlayerService.cpp">
+      <Filter>src\Wheatear\Modules\SideCombat</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Wheatear\Modules\SideCombat\SideCombatResultService.cpp">
+      <Filter>src\Wheatear\Modules\SideCombat</Filter>
     </ClCompile>
     <ClCompile Include="src\Wheatear\Modules\SideCombat\SideCombatSystem.cpp">
       <Filter>src\Wheatear\Modules\SideCombat</Filter>
     </ClCompile>
+    <ClCompile Include="src\Wheatear\Modules\SideCombat\SideCombatTargetService.cpp">
+      <Filter>src\Wheatear\Modules\SideCombat</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Wheatear\Modules\SideCombat\SideCombatTuningService.cpp">
+      <Filter>src\Wheatear\Modules\SideCombat</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Wheatear\Modules\SideCombat\SideCombatVisualService.cpp">
+      <Filter>src\Wheatear\Modules\SideCombat</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Wheatear\Modules\TacticalCombat\TacticalCombatAIService.cpp">
+      <Filter>src\Wheatear\Modules\TacticalCombat</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Wheatear\Modules\TacticalCombat\TacticalCombatActionCatalog.cpp">
+      <Filter>src\Wheatear\Modules\TacticalCombat</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Wheatear\Modules\TacticalCombat\TacticalCombatActionService.cpp">
+      <Filter>src\Wheatear\Modules\TacticalCombat</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Wheatear\Modules\TacticalCombat\TacticalCombatBoardService.cpp">
+      <Filter>src\Wheatear\Modules\TacticalCombat</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Wheatear\Modules\TacticalCombat\TacticalCombatCommandService.cpp">
+      <Filter>src\Wheatear\Modules\TacticalCombat</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Wheatear\Modules\TacticalCombat\TacticalCombatFeedbackService.cpp">
+      <Filter>src\Wheatear\Modules\TacticalCombat</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Wheatear\Modules\TacticalCombat\TacticalCombatFlowService.cpp">
+      <Filter>src\Wheatear\Modules\TacticalCombat</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Wheatear\Modules\TacticalCombat\TacticalCombatSkillService.cpp">
+      <Filter>src\Wheatear\Modules\TacticalCombat</Filter>
+    </ClCompile>
     <ClCompile Include="src\Wheatear\Modules\TacticalCombat\TacticalCombatSystem.cpp">
       <Filter>src\Wheatear\Modules\TacticalCombat</Filter>
     </ClCompile>
+    <ClCompile Include="src\Wheatear\Modules\TacticalCombat\TacticalCombatUIService.cpp">
+      <Filter>src\Wheatear\Modules\TacticalCombat</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Wheatear\Modules\TacticalCombat\TacticalCombatVisualService.cpp">
+      <Filter>src\Wheatear\Modules\TacticalCombat</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Wheatear\Modules\TurnCombat\TurnCombatActionCatalog.cpp">
+      <Filter>src\Wheatear\Modules\TurnCombat</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Wheatear\Modules\TurnCombat\TurnCombatActionService.cpp">
+      <Filter>src\Wheatear\Modules\TurnCombat</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Wheatear\Modules\TurnCombat\TurnCombatCommandService.cpp">
+      <Filter>src\Wheatear\Modules\TurnCombat</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Wheatear\Modules\TurnCombat\TurnCombatFlowService.cpp">
+      <Filter>src\Wheatear\Modules\TurnCombat</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Wheatear\Modules\TurnCombat\TurnCombatSkillService.cpp">
+      <Filter>src\Wheatear\Modules\TurnCombat</Filter>
+    </ClCompile>
     <ClCompile Include="src\Wheatear\Modules\TurnCombat\TurnCombatSystem.cpp">
       <Filter>src\Wheatear\Modules\TurnCombat</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Wheatear\Modules\TurnCombat\TurnCombatTargetService.cpp">
+      <Filter>src\Wheatear\Modules\TurnCombat</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Wheatear\Modules\TurnCombat\TurnCombatUIService.cpp">
+      <Filter>src\Wheatear\Modules\TurnCombat</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Wheatear\Modules\TurnCombat\TurnCombatVisualService.cpp">
+      <Filter>src\Wheatear\Modules\TurnCombat</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Wheatear\Modules\VisualNovel\VisualNovelInputService.cpp">
+      <Filter>src\Wheatear\Modules\VisualNovel</Filter>
     </ClCompile>
     <ClCompile Include="src\Wheatear\Modules\VisualNovel\VisualNovelRuntime.cpp">
       <Filter>src\Wheatear\Modules\VisualNovel</Filter>
@@ -1715,10 +2168,16 @@
     <ClCompile Include="src\Wheatear\Scene\Entity.cpp">
       <Filter>src\Wheatear\Scene</Filter>
     </ClCompile>
+    <ClCompile Include="src\Wheatear\Scene\EntityReference.cpp">
+      <Filter>src\Wheatear\Scene</Filter>
+    </ClCompile>
     <ClCompile Include="src\Wheatear\Scene\Scene.cpp">
       <Filter>src\Wheatear\Scene</Filter>
     </ClCompile>
     <ClCompile Include="src\Wheatear\Scene\SceneCopy.cpp">
+      <Filter>src\Wheatear\Scene</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Wheatear\Scene\SceneQueries.cpp">
       <Filter>src\Wheatear\Scene</Filter>
     </ClCompile>
     <ClCompile Include="src\Wheatear\Scene\SceneSerializer.cpp">
@@ -1737,9 +2196,6 @@
       <Filter>src\Wheatear\Scene</Filter>
     </ClCompile>
     <ClCompile Include="src\Wheatear\Scene\SceneSerializerUIComponents.cpp">
-      <Filter>src\Wheatear\Scene</Filter>
-    </ClCompile>
-    <ClCompile Include="src\Wheatear\Scene\SceneQueries.cpp">
       <Filter>src\Wheatear\Scene</Filter>
     </ClCompile>
     <ClCompile Include="src\Wheatear\Scene\SceneSystemRegistry.cpp">

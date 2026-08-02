@@ -355,12 +355,21 @@ namespace Wheatear {
     void Renderer2D::DrawSprite(const glm::mat4& transform,
         SpriteRendererComponent& src, int entityID)
     {
+        glm::mat4 drawTransform = transform;
+        const bool hasDrawOffset = src.DrawOffset.x != 0.0f || src.DrawOffset.y != 0.0f;
+        const bool hasDrawScale = src.DrawScale.x != 1.0f || src.DrawScale.y != 1.0f;
+        if (hasDrawOffset || hasDrawScale)
+        {
+            drawTransform *= glm::translate(glm::mat4(1.0f), { src.DrawOffset.x, src.DrawOffset.y, 0.0f });
+            drawTransform *= glm::scale(glm::mat4(1.0f), { src.DrawScale.x, src.DrawScale.y, 1.0f });
+        }
+
         if (src.Texture)
-            DrawAnimationFrame(transform, src.Texture,
+            DrawAnimationFrame(drawTransform, src.Texture,
                 src.UVMin, src.UVMax, src.FlipX,
                 src.Color, entityID);
         else
-            DrawQuad(transform, src.Color, entityID);
+            DrawQuad(drawTransform, src.Color, entityID);
     }
 
     void Renderer2D::DrawAnimationFrame(const glm::mat4& transform,

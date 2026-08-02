@@ -149,15 +149,19 @@
     </ProjectReference>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="src\Assets\AssetRegistry.h" />
+    <ClInclude Include="src\Assets\UITemplateFactory.h" />
+    <ClInclude Include="src\Build\AssetDependencyScanner.h" />
     <ClInclude Include="src\Build\PlayerPackager.h" />
+    <ClInclude Include="src\Build\ProjectSourceScanner.h" />
     <ClInclude Include="src\Editor\CoreEditorComponents.h" />
     <ClInclude Include="src\Editor\EditorCanvasTools.h" />
     <ClInclude Include="src\Editor\EditorComponentRegistry.h" />
-    <ClInclude Include="src\Editor\EditorToolRegistry.h" />
-    <ClInclude Include="src\Editor\EventScriptGraphPanel.h" />
     <ClInclude Include="src\Editor\EditorLayer2D.h" />
     <ClInclude Include="src\Editor\EditorLayer3D.h" />
     <ClInclude Include="src\Editor\EditorLayerBase.h" />
+    <ClInclude Include="src\Editor\EditorToolRegistry.h" />
+    <ClInclude Include="src\Editor\EventScriptGraphPanel.h" />
     <ClInclude Include="src\Editor\ModeSelectLayer.h" />
     <ClInclude Include="src\Editor\TextAssetEditor.h" />
     <ClInclude Include="src\Modules\ArcadeCombat\ArcadeCombatDrawer.h" />
@@ -171,7 +175,6 @@
     <ClInclude Include="src\Panels\AnimationEditorPanel.h" />
     <ClInclude Include="src\Panels\ContentBrowserPanel.h" />
     <ClInclude Include="src\Panels\EditorCommands.h" />
-    <ClInclude Include="src\Panels\SpriteSheetPickerPanel.h" />
     <ClInclude Include="src\Panels\SceneHierarchy\ComponentDrawers.h" />
     <ClInclude Include="src\Panels\SceneHierarchy\Drawers\AudioDrawer.h" />
     <ClInclude Include="src\Panels\SceneHierarchy\Drawers\CameraDrawer.h" />
@@ -185,19 +188,27 @@
     <ClInclude Include="src\Panels\SceneHierarchy\Drawers\UIDrawers.h" />
     <ClInclude Include="src\Panels\SceneHierarchy\WidgetHelpers.h" />
     <ClInclude Include="src\Panels\SceneHierarchyPanel.h" />
+    <ClInclude Include="src\Panels\SpriteSheetPickerPanel.h" />
+    <ClInclude Include="src\Tools\ProjectHealthPanel.h" />
+    <ClInclude Include="src\Tools\WAOActionEditorPanel.h" />
     <ClInclude Include="src\wepch.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="src\Assets\AssetRegistry.cpp" />
+    <ClCompile Include="src\Assets\UITemplateFactory.cpp" />
+    <ClCompile Include="src\Build\AssetDependencyScanner.cpp" />
     <ClCompile Include="src\Build\PlayerPackager.cpp" />
+    <ClCompile Include="src\Build\ProjectSourceScanner.cpp" />
     <ClCompile Include="src\Editor\CoreEditorComponents.cpp" />
     <ClCompile Include="src\Editor\EditorComponentRegistry.cpp" />
-    <ClCompile Include="src\Editor\EventScriptGraphPanel.cpp" />
     <ClCompile Include="src\Editor\EditorLayer2D.cpp" />
     <ClCompile Include="src\Editor\EditorLayer3D.cpp" />
     <ClCompile Include="src\Editor\EditorLayerBase.cpp" />
     <ClCompile Include="src\Editor\EditorLayerBaseLifecycle.cpp" />
     <ClCompile Include="src\Editor\EditorLayerBaseScene.cpp" />
     <ClCompile Include="src\Editor\EditorLayerBaseUI.cpp" />
+    <ClCompile Include="src\Editor\EditorLayerDockspace.cpp" />
+    <ClCompile Include="src\Editor\EventScriptGraphPanel.cpp" />
     <ClCompile Include="src\Editor\ModeSelectLayer.cpp" />
     <ClCompile Include="src\Modules\ArcadeCombat\ArcadeCombatDrawer.cpp" />
     <ClCompile Include="src\Modules\ModuleEditorBootstrap.cpp" />
@@ -208,8 +219,8 @@
     <ClCompile Include="src\Modules\VisualNovel\VisualNovelDrawer.cpp" />
     <ClCompile Include="src\Modules\VisualNovel\VisualNovelScriptEditorPanel.cpp" />
     <ClCompile Include="src\Panels\AnimationEditorPanel.cpp" />
+    <ClCompile Include="src\Panels\AnimationEditorPanelSections.cpp" />
     <ClCompile Include="src\Panels\ContentBrowserPanel.cpp" />
-    <ClCompile Include="src\Panels\SpriteSheetPickerPanel.cpp" />
     <ClCompile Include="src\Panels\SceneHierarchy\Drawers\AudioDrawer.cpp" />
     <ClCompile Include="src\Panels\SceneHierarchy\Drawers\CameraDrawer.cpp" />
     <ClCompile Include="src\Panels\SceneHierarchy\Drawers\CircleRendererDrawer.cpp" />
@@ -224,6 +235,9 @@
     <ClCompile Include="src\Panels\SceneHierarchyPanel.cpp" />
     <ClCompile Include="src\Panels\SceneHierarchyPanelComponents.cpp" />
     <ClCompile Include="src\Panels\SceneHierarchyPanelTree.cpp" />
+    <ClCompile Include="src\Panels\SpriteSheetPickerPanel.cpp" />
+    <ClCompile Include="src\Tools\ProjectHealthPanel.cpp" />
+    <ClCompile Include="src\Tools\WAOActionEditorPanel.cpp" />
     <ClCompile Include="src\WheatearEditorApp.cpp" />
     <ClCompile Include="src\wepch.cpp">
       <PrecompiledHeader>Create</PrecompiledHeader>

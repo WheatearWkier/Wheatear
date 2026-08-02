@@ -1,4 +1,4 @@
-Scene: VerticalSliceTacticalCombat
+﻿Scene: VerticalSliceTacticalCombat
 Entities:
   - Entity: 950200001
     TagComponent:
@@ -19,7 +19,6 @@ Entities:
       Anchor: 0
       SortOrder: 0
       ParentEntity: 0
-      ParentTag: ""
   - Entity: 950200002
     TagComponent:
       Tag: TK_Camera
@@ -52,8 +51,7 @@ Entities:
       Rotation: 0
       Anchor: 0
       SortOrder: 1
-      ParentEntity: 0
-      ParentTag: "WT_UI_Canvas"
+      ParentEntity: 950200001
     UIImageComponent:
       Color: [1, 1, 1, 1]
       TexturePath: "assets/vertical_slice/tactical_combat/backgrounds/bg_tactical_ruins_grid.png"
@@ -91,8 +89,8 @@ Entities:
       DetailTextEntityName: TK_DetailText
       CommandPanelEntityName: TK_CommandPanel
       ActionEffectEntityName: TK_ActionEffect
-      VictorySceneCommand: "scene:assets/scenes/VerticalSliceHub.wt"
-      DefeatSceneCommand: "scene:assets/scenes/VerticalSliceTacticalCombat.wt"
+      VictorySceneCommand: "event:tactical_combat_victory"
+      DefeatSceneCommand: "event:tactical_combat_retry"
       StartFadeDuration: 0.45
       IntroDuration: 0.65
       ActionDuration: 0.62
@@ -117,8 +115,7 @@ Entities:
       Rotation: 0
       Anchor: 0
       SortOrder: 5
-      ParentEntity: 0
-      ParentTag: "WT_UI_Canvas"
+      ParentEntity: 950200001
     UIImageComponent:
       Color: [1, 1, 1, 1]
       TexturePath: "assets/vertical_slice/tactical_combat/tiles/tile_plain.png"
@@ -141,8 +138,7 @@ Entities:
       Rotation: 0
       Anchor: 0
       SortOrder: 5
-      ParentEntity: 0
-      ParentTag: "WT_UI_Canvas"
+      ParentEntity: 950200001
     UIImageComponent:
       Color: [1, 1, 1, 1]
       TexturePath: "assets/vertical_slice/tactical_combat/tiles/tile_plain.png"
@@ -165,8 +161,7 @@ Entities:
       Rotation: 0
       Anchor: 0
       SortOrder: 5
-      ParentEntity: 0
-      ParentTag: "WT_UI_Canvas"
+      ParentEntity: 950200001
     UIImageComponent:
       Color: [1, 1, 1, 1]
       TexturePath: "assets/vertical_slice/tactical_combat/tiles/tile_plain.png"
@@ -189,8 +184,7 @@ Entities:
       Rotation: 0
       Anchor: 0
       SortOrder: 5
-      ParentEntity: 0
-      ParentTag: "WT_UI_Canvas"
+      ParentEntity: 950200001
     UIImageComponent:
       Color: [1, 1, 1, 1]
       TexturePath: "assets/vertical_slice/tactical_combat/tiles/tile_plain.png"
@@ -213,8 +207,7 @@ Entities:
       Rotation: 0
       Anchor: 0
       SortOrder: 5
-      ParentEntity: 0
-      ParentTag: "WT_UI_Canvas"
+      ParentEntity: 950200001
     UIImageComponent:
       Color: [1, 1, 1, 1]
       TexturePath: "assets/vertical_slice/tactical_combat/tiles/tile_plain.png"
@@ -237,8 +230,7 @@ Entities:
       Rotation: 0
       Anchor: 0
       SortOrder: 5
-      ParentEntity: 0
-      ParentTag: "WT_UI_Canvas"
+      ParentEntity: 950200001
     UIImageComponent:
       Color: [1, 1, 1, 1]
       TexturePath: "assets/vertical_slice/tactical_combat/tiles/tile_plain.png"
@@ -261,8 +253,7 @@ Entities:
       Rotation: 0
       Anchor: 0
       SortOrder: 5
-      ParentEntity: 0
-      ParentTag: "WT_UI_Canvas"
+      ParentEntity: 950200001
     UIImageComponent:
       Color: [1, 1, 1, 1]
       TexturePath: "assets/vertical_slice/tactical_combat/tiles/tile_plain.png"
@@ -285,8 +276,7 @@ Entities:
       Rotation: 0
       Anchor: 0
       SortOrder: 5
-      ParentEntity: 0
-      ParentTag: "WT_UI_Canvas"
+      ParentEntity: 950200001
     UIImageComponent:
       Color: [1, 1, 1, 1]
       TexturePath: "assets/vertical_slice/tactical_combat/tiles/tile_plain.png"
@@ -309,8 +299,7 @@ Entities:
       Rotation: 0
       Anchor: 0
       SortOrder: 5
-      ParentEntity: 0
-      ParentTag: "WT_UI_Canvas"
+      ParentEntity: 950200001
     UIImageComponent:
       Color: [1, 1, 1, 1]
       TexturePath: "assets/vertical_slice/tactical_combat/tiles/tile_plain.png"
@@ -333,8 +322,7 @@ Entities:
       Rotation: 0
       Anchor: 0
       SortOrder: 5
-      ParentEntity: 0
-      ParentTag: "WT_UI_Canvas"
+      ParentEntity: 950200001
     UIImageComponent:
       Color: [1, 1, 1, 1]
       TexturePath: "assets/vertical_slice/tactical_combat/tiles/tile_plain.png"
@@ -357,8 +345,7 @@ Entities:
       Rotation: 0
       Anchor: 0
       SortOrder: 5
-      ParentEntity: 0
-      ParentTag: "WT_UI_Canvas"
+      ParentEntity: 950200001
     UIImageComponent:
       Color: [1, 1, 1, 1]
       TexturePath: "assets/vertical_slice/tactical_combat/tiles/tile_plain.png"
@@ -381,8 +368,7 @@ Entities:
       Rotation: 0
       Anchor: 0
       SortOrder: 5
-      ParentEntity: 0
-      ParentTag: "WT_UI_Canvas"
+      ParentEntity: 950200001
     UIImageComponent:
       Color: [1, 1, 1, 1]
       TexturePath: "assets/vertical_slice/tactical_combat/tiles/tile_plain.png"
@@ -405,8 +391,7 @@ Entities:
       Rotation: 0
       Anchor: 0
       SortOrder: 5
-      ParentEntity: 0
-      ParentTag: "WT_UI_Canvas"
+      ParentEntity: 950200001
     UIImageComponent:
       Color: [1, 1, 1, 1]
       TexturePath: "assets/vertical_slice/tactical_combat/tiles/tile_plain.png"
@@ -429,8 +414,7 @@ Entities:
       Rotation: 0
       Anchor: 0
       SortOrder: 5
-      ParentEntity: 0
-      ParentTag: "WT_UI_Canvas"
+      ParentEntity: 950200001
     UIImageComponent:
       Color: [1, 1, 1, 1]
       TexturePath: "assets/vertical_slice/tactical_combat/tiles/tile_plain.png"
@@ -453,8 +437,7 @@ Entities:
       Rotation: 0
       Anchor: 0
       SortOrder: 5
-      ParentEntity: 0
-      ParentTag: "WT_UI_Canvas"
+      ParentEntity: 950200001
     UIImageComponent:
       Color: [1, 1, 1, 1]
       TexturePath: "assets/vertical_slice/tactical_combat/tiles/tile_plain.png"
@@ -477,8 +460,7 @@ Entities:
       Rotation: 0
       Anchor: 0
       SortOrder: 5
-      ParentEntity: 0
-      ParentTag: "WT_UI_Canvas"
+      ParentEntity: 950200001
     UIImageComponent:
       Color: [1, 1, 1, 1]
       TexturePath: "assets/vertical_slice/tactical_combat/tiles/tile_plain.png"
@@ -501,8 +483,7 @@ Entities:
       Rotation: 0
       Anchor: 0
       SortOrder: 5
-      ParentEntity: 0
-      ParentTag: "WT_UI_Canvas"
+      ParentEntity: 950200001
     UIImageComponent:
       Color: [1, 1, 1, 1]
       TexturePath: "assets/vertical_slice/tactical_combat/tiles/tile_plain.png"
@@ -525,8 +506,7 @@ Entities:
       Rotation: 0
       Anchor: 0
       SortOrder: 5
-      ParentEntity: 0
-      ParentTag: "WT_UI_Canvas"
+      ParentEntity: 950200001
     UIImageComponent:
       Color: [1, 1, 1, 1]
       TexturePath: "assets/vertical_slice/tactical_combat/tiles/tile_plain.png"
@@ -549,8 +529,7 @@ Entities:
       Rotation: 0
       Anchor: 0
       SortOrder: 5
-      ParentEntity: 0
-      ParentTag: "WT_UI_Canvas"
+      ParentEntity: 950200001
     UIImageComponent:
       Color: [1, 1, 1, 1]
       TexturePath: "assets/vertical_slice/tactical_combat/tiles/tile_plain.png"
@@ -573,8 +552,7 @@ Entities:
       Rotation: 0
       Anchor: 0
       SortOrder: 5
-      ParentEntity: 0
-      ParentTag: "WT_UI_Canvas"
+      ParentEntity: 950200001
     UIImageComponent:
       Color: [1, 1, 1, 1]
       TexturePath: "assets/vertical_slice/tactical_combat/tiles/tile_plain.png"
@@ -597,8 +575,7 @@ Entities:
       Rotation: 0
       Anchor: 0
       SortOrder: 5
-      ParentEntity: 0
-      ParentTag: "WT_UI_Canvas"
+      ParentEntity: 950200001
     UIImageComponent:
       Color: [1, 1, 1, 1]
       TexturePath: "assets/vertical_slice/tactical_combat/tiles/tile_plain.png"
@@ -621,8 +598,7 @@ Entities:
       Rotation: 0
       Anchor: 0
       SortOrder: 5
-      ParentEntity: 0
-      ParentTag: "WT_UI_Canvas"
+      ParentEntity: 950200001
     UIImageComponent:
       Color: [1, 1, 1, 1]
       TexturePath: "assets/vertical_slice/tactical_combat/tiles/tile_plain.png"
@@ -645,8 +621,7 @@ Entities:
       Rotation: 0
       Anchor: 0
       SortOrder: 5
-      ParentEntity: 0
-      ParentTag: "WT_UI_Canvas"
+      ParentEntity: 950200001
     UIImageComponent:
       Color: [1, 1, 1, 1]
       TexturePath: "assets/vertical_slice/tactical_combat/tiles/tile_plain.png"
@@ -669,8 +644,7 @@ Entities:
       Rotation: 0
       Anchor: 0
       SortOrder: 5
-      ParentEntity: 0
-      ParentTag: "WT_UI_Canvas"
+      ParentEntity: 950200001
     UIImageComponent:
       Color: [1, 1, 1, 1]
       TexturePath: "assets/vertical_slice/tactical_combat/tiles/tile_plain.png"
@@ -693,8 +667,7 @@ Entities:
       Rotation: 0
       Anchor: 0
       SortOrder: 5
-      ParentEntity: 0
-      ParentTag: "WT_UI_Canvas"
+      ParentEntity: 950200001
     UIImageComponent:
       Color: [1, 1, 1, 1]
       TexturePath: "assets/vertical_slice/tactical_combat/tiles/tile_plain.png"
@@ -717,8 +690,7 @@ Entities:
       Rotation: 0
       Anchor: 0
       SortOrder: 5
-      ParentEntity: 0
-      ParentTag: "WT_UI_Canvas"
+      ParentEntity: 950200001
     UIImageComponent:
       Color: [1, 1, 1, 1]
       TexturePath: "assets/vertical_slice/tactical_combat/tiles/tile_plain.png"
@@ -741,8 +713,7 @@ Entities:
       Rotation: 0
       Anchor: 0
       SortOrder: 5
-      ParentEntity: 0
-      ParentTag: "WT_UI_Canvas"
+      ParentEntity: 950200001
     UIImageComponent:
       Color: [1, 1, 1, 1]
       TexturePath: "assets/vertical_slice/tactical_combat/tiles/tile_plain.png"
@@ -765,8 +736,7 @@ Entities:
       Rotation: 0
       Anchor: 0
       SortOrder: 5
-      ParentEntity: 0
-      ParentTag: "WT_UI_Canvas"
+      ParentEntity: 950200001
     UIImageComponent:
       Color: [1, 1, 1, 1]
       TexturePath: "assets/vertical_slice/tactical_combat/tiles/tile_plain.png"
@@ -789,8 +759,7 @@ Entities:
       Rotation: 0
       Anchor: 0
       SortOrder: 5
-      ParentEntity: 0
-      ParentTag: "WT_UI_Canvas"
+      ParentEntity: 950200001
     UIImageComponent:
       Color: [1, 1, 1, 1]
       TexturePath: "assets/vertical_slice/tactical_combat/tiles/tile_plain.png"
@@ -813,8 +782,7 @@ Entities:
       Rotation: 0
       Anchor: 0
       SortOrder: 5
-      ParentEntity: 0
-      ParentTag: "WT_UI_Canvas"
+      ParentEntity: 950200001
     UIImageComponent:
       Color: [1, 1, 1, 1]
       TexturePath: "assets/vertical_slice/tactical_combat/tiles/tile_plain.png"
@@ -837,8 +805,7 @@ Entities:
       Rotation: 0
       Anchor: 0
       SortOrder: 5
-      ParentEntity: 0
-      ParentTag: "WT_UI_Canvas"
+      ParentEntity: 950200001
     UIImageComponent:
       Color: [1, 1, 1, 1]
       TexturePath: "assets/vertical_slice/tactical_combat/tiles/tile_plain.png"
@@ -861,8 +828,7 @@ Entities:
       Rotation: 0
       Anchor: 0
       SortOrder: 5
-      ParentEntity: 0
-      ParentTag: "WT_UI_Canvas"
+      ParentEntity: 950200001
     UIImageComponent:
       Color: [1, 1, 1, 1]
       TexturePath: "assets/vertical_slice/tactical_combat/tiles/tile_plain.png"
@@ -885,8 +851,7 @@ Entities:
       Rotation: 0
       Anchor: 0
       SortOrder: 5
-      ParentEntity: 0
-      ParentTag: "WT_UI_Canvas"
+      ParentEntity: 950200001
     UIImageComponent:
       Color: [1, 1, 1, 1]
       TexturePath: "assets/vertical_slice/tactical_combat/tiles/tile_plain.png"
@@ -909,8 +874,7 @@ Entities:
       Rotation: 0
       Anchor: 0
       SortOrder: 5
-      ParentEntity: 0
-      ParentTag: "WT_UI_Canvas"
+      ParentEntity: 950200001
     UIImageComponent:
       Color: [1, 1, 1, 1]
       TexturePath: "assets/vertical_slice/tactical_combat/tiles/tile_plain.png"
@@ -933,8 +897,7 @@ Entities:
       Rotation: 0
       Anchor: 0
       SortOrder: 5
-      ParentEntity: 0
-      ParentTag: "WT_UI_Canvas"
+      ParentEntity: 950200001
     UIImageComponent:
       Color: [1, 1, 1, 1]
       TexturePath: "assets/vertical_slice/tactical_combat/tiles/tile_plain.png"
@@ -957,8 +920,7 @@ Entities:
       Rotation: 0
       Anchor: 0
       SortOrder: 5
-      ParentEntity: 0
-      ParentTag: "WT_UI_Canvas"
+      ParentEntity: 950200001
     UIImageComponent:
       Color: [1, 1, 1, 1]
       TexturePath: "assets/vertical_slice/tactical_combat/tiles/tile_plain.png"
@@ -981,8 +943,7 @@ Entities:
       Rotation: 0
       Anchor: 0
       SortOrder: 5
-      ParentEntity: 0
-      ParentTag: "WT_UI_Canvas"
+      ParentEntity: 950200001
     UIImageComponent:
       Color: [1, 1, 1, 1]
       TexturePath: "assets/vertical_slice/tactical_combat/tiles/tile_plain.png"
@@ -1005,8 +966,7 @@ Entities:
       Rotation: 0
       Anchor: 0
       SortOrder: 5
-      ParentEntity: 0
-      ParentTag: "WT_UI_Canvas"
+      ParentEntity: 950200001
     UIImageComponent:
       Color: [1, 1, 1, 1]
       TexturePath: "assets/vertical_slice/tactical_combat/tiles/tile_plain.png"
@@ -1029,8 +989,7 @@ Entities:
       Rotation: 0
       Anchor: 0
       SortOrder: 5
-      ParentEntity: 0
-      ParentTag: "WT_UI_Canvas"
+      ParentEntity: 950200001
     UIImageComponent:
       Color: [1, 1, 1, 1]
       TexturePath: "assets/vertical_slice/tactical_combat/tiles/tile_plain.png"
@@ -1053,8 +1012,7 @@ Entities:
       Rotation: 0
       Anchor: 0
       SortOrder: 5
-      ParentEntity: 0
-      ParentTag: "WT_UI_Canvas"
+      ParentEntity: 950200001
     UIImageComponent:
       Color: [1, 1, 1, 1]
       TexturePath: "assets/vertical_slice/tactical_combat/tiles/tile_plain.png"
@@ -1077,8 +1035,7 @@ Entities:
       Rotation: 0
       Anchor: 0
       SortOrder: 5
-      ParentEntity: 0
-      ParentTag: "WT_UI_Canvas"
+      ParentEntity: 950200001
     UIImageComponent:
       Color: [1, 1, 1, 1]
       TexturePath: "assets/vertical_slice/tactical_combat/tiles/tile_plain.png"
@@ -1101,8 +1058,7 @@ Entities:
       Rotation: 0
       Anchor: 0
       SortOrder: 5
-      ParentEntity: 0
-      ParentTag: "WT_UI_Canvas"
+      ParentEntity: 950200001
     UIImageComponent:
       Color: [1, 1, 1, 1]
       TexturePath: "assets/vertical_slice/tactical_combat/tiles/tile_plain.png"
@@ -1125,8 +1081,7 @@ Entities:
       Rotation: 0
       Anchor: 0
       SortOrder: 5
-      ParentEntity: 0
-      ParentTag: "WT_UI_Canvas"
+      ParentEntity: 950200001
     UIImageComponent:
       Color: [1, 1, 1, 1]
       TexturePath: "assets/vertical_slice/tactical_combat/tiles/tile_plain.png"
@@ -1149,8 +1104,7 @@ Entities:
       Rotation: 0
       Anchor: 0
       SortOrder: 5
-      ParentEntity: 0
-      ParentTag: "WT_UI_Canvas"
+      ParentEntity: 950200001
     UIImageComponent:
       Color: [1, 1, 1, 1]
       TexturePath: "assets/vertical_slice/tactical_combat/tiles/tile_plain.png"
@@ -1173,8 +1127,7 @@ Entities:
       Rotation: 0
       Anchor: 0
       SortOrder: 5
-      ParentEntity: 0
-      ParentTag: "WT_UI_Canvas"
+      ParentEntity: 950200001
     UIImageComponent:
       Color: [1, 1, 1, 1]
       TexturePath: "assets/vertical_slice/tactical_combat/tiles/tile_plain.png"
@@ -1197,8 +1150,7 @@ Entities:
       Rotation: 0
       Anchor: 0
       SortOrder: 5
-      ParentEntity: 0
-      ParentTag: "WT_UI_Canvas"
+      ParentEntity: 950200001
     UIImageComponent:
       Color: [1, 1, 1, 1]
       TexturePath: "assets/vertical_slice/tactical_combat/tiles/tile_plain.png"
@@ -1221,8 +1173,7 @@ Entities:
       Rotation: 0
       Anchor: 0
       SortOrder: 5
-      ParentEntity: 0
-      ParentTag: "WT_UI_Canvas"
+      ParentEntity: 950200001
     UIImageComponent:
       Color: [1, 1, 1, 1]
       TexturePath: "assets/vertical_slice/tactical_combat/tiles/tile_plain.png"
@@ -1245,8 +1196,7 @@ Entities:
       Rotation: 0
       Anchor: 0
       SortOrder: 5
-      ParentEntity: 0
-      ParentTag: "WT_UI_Canvas"
+      ParentEntity: 950200001
     UIImageComponent:
       Color: [1, 1, 1, 1]
       TexturePath: "assets/vertical_slice/tactical_combat/tiles/tile_plain.png"
@@ -1269,8 +1219,7 @@ Entities:
       Rotation: 0
       Anchor: 0
       SortOrder: 12
-      ParentEntity: 0
-      ParentTag: "WT_UI_Canvas"
+      ParentEntity: 950200001
     UIImageComponent:
       Color: [1, 1, 1, 1]
       TexturePath: "assets/vertical_slice/tactical_combat/characters/unit_protag_magic_swordsman.png"
@@ -1319,8 +1268,7 @@ Entities:
       Rotation: 0
       Anchor: 0
       SortOrder: 11
-      ParentEntity: 0
-      ParentTag: "WT_UI_Canvas"
+      ParentEntity: 950200001
     UIImageComponent:
       Color: [1, 1, 1, 1]
       TexturePath: "assets/vertical_slice/tactical_combat/ui/marker_selected.png"
@@ -1338,8 +1286,7 @@ Entities:
       Rotation: 0
       Anchor: 0
       SortOrder: 12
-      ParentEntity: 0
-      ParentTag: "WT_UI_Canvas"
+      ParentEntity: 950200001
     UIImageComponent:
       Color: [1, 1, 1, 1]
       TexturePath: "assets/vertical_slice/tactical_combat/characters/unit_white_mage.png"
@@ -1388,8 +1335,7 @@ Entities:
       Rotation: 0
       Anchor: 0
       SortOrder: 11
-      ParentEntity: 0
-      ParentTag: "WT_UI_Canvas"
+      ParentEntity: 950200001
     UIImageComponent:
       Color: [1, 1, 1, 1]
       TexturePath: "assets/vertical_slice/tactical_combat/ui/marker_selected.png"
@@ -1407,8 +1353,7 @@ Entities:
       Rotation: 0
       Anchor: 0
       SortOrder: 12
-      ParentEntity: 0
-      ParentTag: "WT_UI_Canvas"
+      ParentEntity: 950200001
     UIImageComponent:
       Color: [1, 1, 1, 1]
       TexturePath: "assets/vertical_slice/tactical_combat/characters/unit_guardian.png"
@@ -1457,8 +1402,7 @@ Entities:
       Rotation: 0
       Anchor: 0
       SortOrder: 11
-      ParentEntity: 0
-      ParentTag: "WT_UI_Canvas"
+      ParentEntity: 950200001
     UIImageComponent:
       Color: [1, 1, 1, 1]
       TexturePath: "assets/vertical_slice/tactical_combat/ui/marker_selected.png"
@@ -1476,8 +1420,7 @@ Entities:
       Rotation: 0
       Anchor: 0
       SortOrder: 12
-      ParentEntity: 0
-      ParentTag: "WT_UI_Canvas"
+      ParentEntity: 950200001
     UIImageComponent:
       Color: [1, 1, 1, 1]
       TexturePath: "assets/vertical_slice/tactical_combat/characters/unit_en_spear_soldier.png"
@@ -1526,8 +1469,7 @@ Entities:
       Rotation: 0
       Anchor: 0
       SortOrder: 11
-      ParentEntity: 0
-      ParentTag: "WT_UI_Canvas"
+      ParentEntity: 950200001
     UIImageComponent:
       Color: [1, 1, 1, 1]
       TexturePath: "assets/vertical_slice/tactical_combat/ui/marker_selected.png"
@@ -1545,8 +1487,7 @@ Entities:
       Rotation: 0
       Anchor: 0
       SortOrder: 12
-      ParentEntity: 0
-      ParentTag: "WT_UI_Canvas"
+      ParentEntity: 950200001
     UIImageComponent:
       Color: [1, 1, 1, 1]
       TexturePath: "assets/vertical_slice/tactical_combat/characters/unit_en_dark_mage.png"
@@ -1595,8 +1536,7 @@ Entities:
       Rotation: 0
       Anchor: 0
       SortOrder: 11
-      ParentEntity: 0
-      ParentTag: "WT_UI_Canvas"
+      ParentEntity: 950200001
     UIImageComponent:
       Color: [1, 1, 1, 1]
       TexturePath: "assets/vertical_slice/tactical_combat/ui/marker_selected.png"
@@ -1614,8 +1554,7 @@ Entities:
       Rotation: 0
       Anchor: 0
       SortOrder: 12
-      ParentEntity: 0
-      ParentTag: "WT_UI_Canvas"
+      ParentEntity: 950200001
     UIImageComponent:
       Color: [1, 1, 1, 1]
       TexturePath: "assets/vertical_slice/tactical_combat/characters/unit_en_beast.png"
@@ -1664,8 +1603,7 @@ Entities:
       Rotation: 0
       Anchor: 0
       SortOrder: 11
-      ParentEntity: 0
-      ParentTag: "WT_UI_Canvas"
+      ParentEntity: 950200001
     UIImageComponent:
       Color: [1, 1, 1, 1]
       TexturePath: "assets/vertical_slice/tactical_combat/ui/marker_selected.png"
@@ -1683,8 +1621,7 @@ Entities:
       Rotation: 0
       Anchor: 0
       SortOrder: 20
-      ParentEntity: 0
-      ParentTag: "WT_UI_Canvas"
+      ParentEntity: 950200001
     UIImageComponent:
       Color: [1, 1, 1, 1]
       TexturePath: "assets/vertical_slice/tactical_combat/ui/panels/panel_tactical_top.png"
@@ -1702,8 +1639,7 @@ Entities:
       Rotation: 0
       Anchor: 0
       SortOrder: 24
-      ParentEntity: 0
-      ParentTag: "WT_UI_Canvas"
+      ParentEntity: 950200001
     UITextComponent:
       Text: "我方回合"
       Color: [0.92, 0.94, 0.86, 1]
@@ -1727,8 +1663,7 @@ Entities:
       Rotation: 0
       Anchor: 0
       SortOrder: 24
-      ParentEntity: 0
-      ParentTag: "WT_UI_Canvas"
+      ParentEntity: 950200001
     UITextComponent:
       Text: "点击角色开始行动。"
       Color: [0.92, 0.94, 0.86, 1]
@@ -1752,8 +1687,7 @@ Entities:
       Rotation: 0
       Anchor: 0
       SortOrder: 20
-      ParentEntity: 0
-      ParentTag: "WT_UI_Canvas"
+      ParentEntity: 950200001
     UIImageComponent:
       Color: [1, 1, 1, 1]
       TexturePath: "assets/vertical_slice/tactical_combat/ui/panels/panel_tactical_status.png"
@@ -1771,8 +1705,7 @@ Entities:
       Rotation: 0
       Anchor: 0
       SortOrder: 25
-      ParentEntity: 0
-      ParentTag: "WT_UI_Canvas"
+      ParentEntity: 950200001
     UITextComponent:
       Text: "主角 160/160"
       Color: [0.9, 0.93, 0.86, 1]
@@ -1796,8 +1729,7 @@ Entities:
       Rotation: 0
       Anchor: 0
       SortOrder: 25
-      ParentEntity: 0
-      ParentTag: "WT_UI_Canvas"
+      ParentEntity: 950200001
     UIProgressBarComponent:
       Value: 1
       MaxValue: 1
@@ -1817,8 +1749,7 @@ Entities:
       Rotation: 0
       Anchor: 0
       SortOrder: 25
-      ParentEntity: 0
-      ParentTag: "WT_UI_Canvas"
+      ParentEntity: 950200001
     UITextComponent:
       Text: "白魔队友 112/112"
       Color: [0.9, 0.93, 0.86, 1]
@@ -1842,8 +1773,7 @@ Entities:
       Rotation: 0
       Anchor: 0
       SortOrder: 25
-      ParentEntity: 0
-      ParentTag: "WT_UI_Canvas"
+      ParentEntity: 950200001
     UIProgressBarComponent:
       Value: 1
       MaxValue: 1
@@ -1863,8 +1793,7 @@ Entities:
       Rotation: 0
       Anchor: 0
       SortOrder: 25
-      ParentEntity: 0
-      ParentTag: "WT_UI_Canvas"
+      ParentEntity: 950200001
     UITextComponent:
       Text: "护卫队友 190/190"
       Color: [0.9, 0.93, 0.86, 1]
@@ -1888,8 +1817,7 @@ Entities:
       Rotation: 0
       Anchor: 0
       SortOrder: 25
-      ParentEntity: 0
-      ParentTag: "WT_UI_Canvas"
+      ParentEntity: 950200001
     UIProgressBarComponent:
       Value: 1
       MaxValue: 1
@@ -1909,8 +1837,7 @@ Entities:
       Rotation: 0
       Anchor: 0
       SortOrder: 25
-      ParentEntity: 0
-      ParentTag: "WT_UI_Canvas"
+      ParentEntity: 950200001
     UITextComponent:
       Text: "敌方枪兵 110/110"
       Color: [1, 0.82, 0.76, 1]
@@ -1934,8 +1861,7 @@ Entities:
       Rotation: 0
       Anchor: 0
       SortOrder: 25
-      ParentEntity: 0
-      ParentTag: "WT_UI_Canvas"
+      ParentEntity: 950200001
     UIProgressBarComponent:
       Value: 1
       MaxValue: 1
@@ -1955,8 +1881,7 @@ Entities:
       Rotation: 0
       Anchor: 0
       SortOrder: 25
-      ParentEntity: 0
-      ParentTag: "WT_UI_Canvas"
+      ParentEntity: 950200001
     UITextComponent:
       Text: "敌方法师 92/92"
       Color: [1, 0.82, 0.76, 1]
@@ -1980,8 +1905,7 @@ Entities:
       Rotation: 0
       Anchor: 0
       SortOrder: 25
-      ParentEntity: 0
-      ParentTag: "WT_UI_Canvas"
+      ParentEntity: 950200001
     UIProgressBarComponent:
       Value: 1
       MaxValue: 1
@@ -2001,8 +1925,7 @@ Entities:
       Rotation: 0
       Anchor: 0
       SortOrder: 25
-      ParentEntity: 0
-      ParentTag: "WT_UI_Canvas"
+      ParentEntity: 950200001
     UITextComponent:
       Text: "敌方兽兵 128/128"
       Color: [1, 0.82, 0.76, 1]
@@ -2026,8 +1949,7 @@ Entities:
       Rotation: 0
       Anchor: 0
       SortOrder: 25
-      ParentEntity: 0
-      ParentTag: "WT_UI_Canvas"
+      ParentEntity: 950200001
     UIProgressBarComponent:
       Value: 1
       MaxValue: 1
@@ -2047,8 +1969,7 @@ Entities:
       Rotation: 0
       Anchor: 0
       SortOrder: 20
-      ParentEntity: 0
-      ParentTag: "WT_UI_Canvas"
+      ParentEntity: 950200001
     UIImageComponent:
       Color: [1, 1, 1, 1]
       TexturePath: "assets/vertical_slice/tactical_combat/ui/panels/panel_tactical_detail.png"
@@ -2066,8 +1987,7 @@ Entities:
       Rotation: 0
       Anchor: 0
       SortOrder: 25
-      ParentEntity: 0
-      ParentTag: "WT_UI_Canvas"
+      ParentEntity: 950200001
     UITextComponent:
       Text: "选择我方单位。"
       Color: [0.92, 0.94, 0.86, 1]
@@ -2091,8 +2011,7 @@ Entities:
       Rotation: 0
       Anchor: 0
       SortOrder: 22
-      ParentEntity: 0
-      ParentTag: "WT_UI_Canvas"
+      ParentEntity: 950200001
     UIImageComponent:
       Color: [1, 1, 1, 1]
       TexturePath: "assets/vertical_slice/tactical_combat/ui/panels/panel_tactical_command.png"
@@ -2110,8 +2029,7 @@ Entities:
       Rotation: 0
       Anchor: 0
       SortOrder: 24
-      ParentEntity: 0
-      ParentTag: "TK_CommandPanel"
+      ParentEntity: 950200084
     UIImageComponent:
       Color: [1, 1, 1, 1]
       TexturePath: "assets/vertical_slice/tactical_combat/ui/panels/panel_tactical_button.png"
@@ -2134,8 +2052,7 @@ Entities:
       Rotation: 0
       Anchor: 0
       SortOrder: 27
-      ParentEntity: 0
-      ParentTag: "TK_Command_1_Root"
+      ParentEntity: 950200085
     UIImageComponent:
       Color: [1, 1, 1, 1]
       TexturePath: "assets/vertical_slice/tactical_combat/ui/icons/cmd_tac_attack.png"
@@ -2153,8 +2070,7 @@ Entities:
       Rotation: 0
       Anchor: 0
       SortOrder: 28
-      ParentEntity: 0
-      ParentTag: "TK_Command_1_Root"
+      ParentEntity: 950200085
     UITextComponent:
       Text: "攻击"
       Color: [0.92, 0.94, 0.86, 1]
@@ -2178,8 +2094,7 @@ Entities:
       Rotation: 0
       Anchor: 0
       SortOrder: 24
-      ParentEntity: 0
-      ParentTag: "TK_CommandPanel"
+      ParentEntity: 950200084
     UIImageComponent:
       Color: [1, 1, 1, 1]
       TexturePath: "assets/vertical_slice/tactical_combat/ui/panels/panel_tactical_button.png"
@@ -2202,8 +2117,7 @@ Entities:
       Rotation: 0
       Anchor: 0
       SortOrder: 27
-      ParentEntity: 0
-      ParentTag: "TK_Command_2_Root"
+      ParentEntity: 950200088
     UIImageComponent:
       Color: [1, 1, 1, 1]
       TexturePath: "assets/vertical_slice/tactical_combat/ui/icons/cmd_tac_magic.png"
@@ -2221,8 +2135,7 @@ Entities:
       Rotation: 0
       Anchor: 0
       SortOrder: 28
-      ParentEntity: 0
-      ParentTag: "TK_Command_2_Root"
+      ParentEntity: 950200088
     UITextComponent:
       Text: "技能1"
       Color: [0.92, 0.94, 0.86, 1]
@@ -2246,8 +2159,7 @@ Entities:
       Rotation: 0
       Anchor: 0
       SortOrder: 24
-      ParentEntity: 0
-      ParentTag: "TK_CommandPanel"
+      ParentEntity: 950200084
     UIImageComponent:
       Color: [1, 1, 1, 1]
       TexturePath: "assets/vertical_slice/tactical_combat/ui/panels/panel_tactical_button.png"
@@ -2270,8 +2182,7 @@ Entities:
       Rotation: 0
       Anchor: 0
       SortOrder: 27
-      ParentEntity: 0
-      ParentTag: "TK_Command_3_Root"
+      ParentEntity: 950200091
     UIImageComponent:
       Color: [1, 1, 1, 1]
       TexturePath: "assets/vertical_slice/tactical_combat/ui/icons/cmd_tac_heal.png"
@@ -2289,8 +2200,7 @@ Entities:
       Rotation: 0
       Anchor: 0
       SortOrder: 28
-      ParentEntity: 0
-      ParentTag: "TK_Command_3_Root"
+      ParentEntity: 950200091
     UITextComponent:
       Text: "技能2"
       Color: [0.92, 0.94, 0.86, 1]
@@ -2314,8 +2224,7 @@ Entities:
       Rotation: 0
       Anchor: 0
       SortOrder: 24
-      ParentEntity: 0
-      ParentTag: "TK_CommandPanel"
+      ParentEntity: 950200084
     UIImageComponent:
       Color: [1, 1, 1, 1]
       TexturePath: "assets/vertical_slice/tactical_combat/ui/panels/panel_tactical_button.png"
@@ -2338,8 +2247,7 @@ Entities:
       Rotation: 0
       Anchor: 0
       SortOrder: 27
-      ParentEntity: 0
-      ParentTag: "TK_Command_4_Root"
+      ParentEntity: 950200094
     UIImageComponent:
       Color: [1, 1, 1, 1]
       TexturePath: "assets/vertical_slice/tactical_combat/ui/icons/cmd_tac_guard.png"
@@ -2357,8 +2265,7 @@ Entities:
       Rotation: 0
       Anchor: 0
       SortOrder: 28
-      ParentEntity: 0
-      ParentTag: "TK_Command_4_Root"
+      ParentEntity: 950200094
     UITextComponent:
       Text: "待机"
       Color: [0.92, 0.94, 0.86, 1]
@@ -2382,8 +2289,7 @@ Entities:
       Rotation: 0
       Anchor: 0
       SortOrder: 24
-      ParentEntity: 0
-      ParentTag: "WT_UI_Canvas"
+      ParentEntity: 950200001
     UIImageComponent:
       Color: [1, 1, 1, 1]
       TexturePath: "assets/vertical_slice/tactical_combat/ui/panels/panel_tactical_button.png"
@@ -2406,8 +2312,7 @@ Entities:
       Rotation: 0
       Anchor: 0
       SortOrder: 27
-      ParentEntity: 0
-      ParentTag: "WT_UI_Canvas"
+      ParentEntity: 950200001
     UITextComponent:
       Text: "取消"
       Color: [0.92, 0.94, 0.86, 1]
@@ -2431,8 +2336,7 @@ Entities:
       Rotation: 0
       Anchor: 0
       SortOrder: 30
-      ParentEntity: 0
-      ParentTag: "WT_UI_Canvas"
+      ParentEntity: 950200001
     UIImageComponent:
       Color: [1, 1, 1, 0]
       TexturePath: "assets/vertical_slice/tactical_combat/effects/vfx_tac_slash_01.png"
@@ -2450,8 +2354,7 @@ Entities:
       Rotation: 0
       Anchor: 0
       SortOrder: 100
-      ParentEntity: 0
-      ParentTag: "WT_UI_Canvas"
+      ParentEntity: 950200001
     UIImageComponent:
       Color: [0, 0, 0, 1]
       TexturePath: ""

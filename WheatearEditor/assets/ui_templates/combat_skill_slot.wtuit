@@ -1,0 +1,6 @@
+UITemplate:
+  Version: 1
+  Kind: "CombatSkillSlot"
+  DisplayName: "Combat Skill Slot"
+  Category: "HUD"
+  Description: "Battle HUD skill slot with icon, cooldown mask, countdown text, and key label."

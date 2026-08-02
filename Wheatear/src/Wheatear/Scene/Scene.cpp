@@ -63,7 +63,8 @@ namespace Wheatear {
         const glm::vec3& position)
     {
         const std::filesystem::path resolvedPath = AssetPath::Resolve(prefabPath);
-        Entity entity = SceneSerializer::DeserializePrefab(resolvedPath, this);
+        const std::vector<Entity> entities = SceneSerializer::DeserializePrefabEntities(resolvedPath, this);
+        Entity entity = entities.empty() ? Entity{} : entities.front();
         if (!entity)
         {
             WT_CORE_WARN("InstantiateFromPrefab: failed to load '{}'", resolvedPath.string());
@@ -73,8 +74,11 @@ namespace Wheatear {
         if (entity.HasComponent<TransformComponent>())
             entity.GetComponent<TransformComponent>().Translation = position;
 
-        for (auto& system : m_Systems)
-            system->OnEntityCreated(this, entity);
+        for (Entity prefabEntity : entities)
+        {
+            for (auto& system : m_Systems)
+                system->OnEntityCreated(this, prefabEntity);
+        }
 
         return entity;
     }

@@ -31,7 +31,6 @@ Entities:
       Rotation: 0
       Anchor: 0
       SortOrder: 0
-      ParentTag: ""
   - Entity: 920000011
     TagComponent:
       Tag: Menu_MainPanel
@@ -46,7 +45,6 @@ Entities:
       Rotation: 0
       Anchor: 0
       SortOrder: 18
-      ParentTag: WT_UI_Canvas
     UIAnimatorComponent:
       Preset: "slide_fade_in"
       PlayOnStart: true
@@ -73,7 +71,6 @@ Entities:
       Rotation: 0
       Anchor: 0
       SortOrder: 22
-      ParentTag: WT_UI_Canvas
     UITextComponent:
       Text: "演示版本 0.1"
       Color: [0.680000007, 0.75999999, 0.74000001, 1]
@@ -97,7 +94,6 @@ Entities:
       Rotation: 0
       Anchor: 0
       SortOrder: 32
-      ParentTag: WT_UI_Canvas
     UIAnimatorComponent:
       Preset: "hover_pulse"
       PlayOnStart: true
@@ -120,7 +116,7 @@ Entities:
       NormalColor: [0.319999993, 0.180000007, 0.219999999, 0.920000017]
       HoverColor: [0.460000008, 0.239999995, 0.289999992, 0.980000019]
       PressedColor: [0.239999995, 0.109999999, 0.150000006, 1]
-      OnClickFunction: event:FlowController:menu_quit
+      OnClickFunction: event:menu_quit
   - Entity: 920000008
     TagComponent:
       Tag: Menu_LoadGame
@@ -135,7 +131,6 @@ Entities:
       Rotation: 0
       Anchor: 0
       SortOrder: 31
-      ParentTag: WT_UI_Canvas
     UIAnimatorComponent:
       Preset: "hover_pulse"
       PlayOnStart: true
@@ -158,7 +153,7 @@ Entities:
       NormalColor: [0.180000007, 0.25, 0.349999994, 0.920000017]
       HoverColor: [0.25, 0.360000014, 0.5, 0.980000019]
       PressedColor: [0.119999997, 0.180000007, 0.280000001, 1]
-      OnClickFunction: event:FlowController:menu_load_game
+      OnClickFunction: event:menu_load_game
   - Entity: 920000007
     TagComponent:
       Tag: Menu_NewGame
@@ -173,7 +168,6 @@ Entities:
       Rotation: 0
       Anchor: 0
       SortOrder: 30
-      ParentTag: WT_UI_Canvas
     UIAnimatorComponent:
       Preset: "hover_pulse"
       PlayOnStart: true
@@ -196,7 +190,7 @@ Entities:
       NormalColor: [0.129999995, 0.330000013, 0.340000004, 0.920000017]
       HoverColor: [0.180000007, 0.479999989, 0.439999998, 0.980000019]
       PressedColor: [0.0799999982, 0.239999995, 0.25, 1]
-      OnClickFunction: event:FlowController:menu_new_game
+      OnClickFunction: event:menu_new_game
   - Entity: 920000006
     TagComponent:
       Tag: Menu_Subtitle
@@ -211,7 +205,6 @@ Entities:
       Rotation: 0
       Anchor: 0
       SortOrder: 21
-      ParentTag: WT_UI_Canvas
     UIAnimatorComponent:
       Preset: "fade_in"
       PlayOnStart: true
@@ -244,7 +237,6 @@ Entities:
       Rotation: 0
       Anchor: 0
       SortOrder: 20
-      ParentTag: WT_UI_Canvas
     UIAnimatorComponent:
       Preset: "fade_in"
       PlayOnStart: true

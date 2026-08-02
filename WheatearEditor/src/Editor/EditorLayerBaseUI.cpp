@@ -278,7 +278,7 @@ namespace Wheatear {
                     return {};
 
                 const auto& widget = current.GetComponent<UIWidgetComponent>();
-                const entt::entity parentID = layout.ResolveReference(widget.ParentEntity, widget.ParentTag);
+                const entt::entity parentID = layout.ResolveReference(widget.ParentEntity);
                 if (parentID == entt::null || !registry.valid(parentID))
                     return {};
 
@@ -370,45 +370,6 @@ namespace Wheatear {
         UI_Toolbar();
 
         ImGui::End();
-    }
-
-    void EditorLayerBase::BuildDefaultDockspaceLayout(uint32_t dockspaceID)
-    {
-        if (!m_RequestDefaultDockspaceLayout || m_DefaultDockspaceLayoutBuilt)
-            return;
-
-        const ImGuiViewport* viewport = ImGui::GetMainViewport();
-        ImGuiID dockspace = static_cast<ImGuiID>(dockspaceID);
-
-        ImGui::DockBuilderRemoveNode(dockspace);
-        ImGui::DockBuilderAddNode(dockspace, ImGuiDockNodeFlags_DockSpace);
-        ImGui::DockBuilderSetNodePos(dockspace, viewport->WorkPos);
-        ImGui::DockBuilderSetNodeSize(dockspace, viewport->WorkSize);
-
-        ImGuiID main = dockspace;
-        ImGuiID left = ImGui::DockBuilderSplitNode(main, ImGuiDir_Left, 0.22f, nullptr, &main);
-        ImGuiID right = ImGui::DockBuilderSplitNode(main, ImGuiDir_Right, 0.27f, nullptr, &main);
-        ImGuiID bottom = ImGui::DockBuilderSplitNode(main, ImGuiDir_Down, 0.27f, nullptr, &main);
-        ImGuiID bottomRight = ImGui::DockBuilderSplitNode(bottom, ImGuiDir_Right, 0.45f, nullptr, &bottom);
-        ImGuiID rightBottom = ImGui::DockBuilderSplitNode(right, ImGuiDir_Down, 0.30f, nullptr, &right);
-
-        ImGui::DockBuilderDockWindow("Scene Hierarchy", left);
-        ImGui::DockBuilderDockWindow("Properties", right);
-        ImGui::DockBuilderDockWindow("Stats", rightBottom);
-        ImGui::DockBuilderDockWindow("Player Build", rightBottom);
-        ImGui::DockBuilderDockWindow("Content Browser", bottom);
-        ImGui::DockBuilderDockWindow("Animation Editor", bottomRight);
-        ImGui::DockBuilderDockWindow("Sprite Sheet Picker", bottomRight);
-        ImGui::DockBuilderDockWindow("UI Canvas Editor", bottomRight);
-        ImGui::DockBuilderDockWindow("Viewport", main);
-
-        ImGui::DockBuilderFinish(dockspace);
-
-        if (const char* iniPath = ImGui::GetIO().IniFilename)
-            ImGui::SaveIniSettingsToDisk(iniPath);
-
-        m_DefaultDockspaceLayoutBuilt = true;
-        m_RequestDefaultDockspaceLayout = false;
     }
 
     void EditorLayerBase::FocusEditorCameraOnPrimarySceneCamera()
@@ -860,7 +821,7 @@ namespace Wheatear {
         {
             float parentWidth = 1.0f;
             float parentHeight = 1.0f;
-            const entt::entity parentID = layout.ResolveReference(widget.ParentEntity, widget.ParentTag);
+            const entt::entity parentID = layout.ResolveReference(widget.ParentEntity);
             if (parentID != entt::null)
             {
                 if (parentID != entt::null && registry.valid(parentID) && registry.all_of<UIWidgetComponent>(parentID))
@@ -1030,7 +991,7 @@ namespace Wheatear {
         ImVec2 rectMax = ToScreenPoint(viewportMin, viewportSize, selectedRect.Right, selectedRect.Bottom);
 
         auto& widget = selected.GetComponent<UIWidgetComponent>();
-        const entt::entity selectedParentID = layout.ResolveReference(widget.ParentEntity, widget.ParentTag);
+        const entt::entity selectedParentID = layout.ResolveReference(widget.ParentEntity);
         if (selectedParentID != entt::null)
         {
             if (registry.valid(selectedParentID) && registry.all_of<UIWidgetComponent>(selectedParentID))
@@ -1090,7 +1051,7 @@ namespace Wheatear {
 
             float parentWidth = 1.0f;
             float parentHeight = 1.0f;
-            const entt::entity parentID = layout.ResolveReference(widget.ParentEntity, widget.ParentTag);
+            const entt::entity parentID = layout.ResolveReference(widget.ParentEntity);
             if (parentID != entt::null)
             {
                 if (parentID != entt::null && registry.valid(parentID) && registry.all_of<UIWidgetComponent>(parentID))
@@ -1231,6 +1192,8 @@ namespace Wheatear {
                     OpenScene(fullPath);
                 else if (fullPath.extension() == AssetFileType::PrefabExtension)
                     InstantiatePrefab(fullPath);
+                else if (fullPath.extension() == AssetFileType::UITemplateExtension)
+                    InstantiateUITemplate(fullPath);
             }
             ImGui::EndDragDropTarget();
         }

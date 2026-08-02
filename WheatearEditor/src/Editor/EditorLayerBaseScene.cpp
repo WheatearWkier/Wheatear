@@ -10,6 +10,7 @@
 #include "Wheatear/Events/Event.h"
 #include "Wheatear/Events/KeyEvent.h"
 #include "Wheatear/Events/MouseEvent.h"
+#include "Wheatear/Gameplay/Action/ActionDebugHistory.h"
 #include "Wheatear/ImGui/ImGuiLayer.h"
 #include "Wheatear/Modules/GameplayModuleRuntime.h"
 #include "Wheatear/Modules/Progression/GameProgress.h"
@@ -26,6 +27,7 @@
 #include "Wheatear/UI/UIInputSystem.h"
 #include "Wheatear/UI/UIWidgetLayout.h"
 #include "Wheatear/Math/Math.h"
+#include "Assets/UITemplateFactory.h"
 #include "Editor/EditorCanvasTools.h"
 #include "Panels/AnimationEditorPanel.h"
 #include "Panels/EditorCommands.h"
@@ -93,6 +95,7 @@ namespace Wheatear {
 
         ClearEntitySelection();
         m_PendingVisualNovelLoadSlot = 0;
+        WAO::ActionDebugHistory::Clear();
         CommandBus::DrainRuntimeCommands();
         CommandBus::DrainGameplayCommands();
         SceneTransitionService::DrainRequests();
@@ -381,6 +384,43 @@ namespace Wheatear {
         m_SceneHierarchyPanel->SetSelectedEntity(e);
     }
 
+    void EditorLayerBase::InstantiateUITemplate(const std::filesystem::path& path)
+    {
+        if (m_SceneState != SceneState::Edit || !m_EditorScene)
+            return;
+
+        UUID parentID = 0;
+        Entity selected = m_SceneHierarchyPanel->GetSelectedEntity();
+        if (selected && selected.HasComponent<UIWidgetComponent>())
+            parentID = selected.GetUUID();
+
+        if (static_cast<uint64_t>(parentID) == 0)
+        {
+            for (auto id : m_EditorScene->GetRegistry().view<UICanvasComponent>())
+            {
+                Entity canvas{ id, m_EditorScene.get() };
+                parentID = canvas.GetUUID();
+                break;
+            }
+        }
+
+        if (static_cast<uint64_t>(parentID) == 0)
+        {
+            Entity canvas = m_EditorScene->CreateEntity("UI Canvas");
+            canvas.AddComponent<UICanvasComponent>();
+            auto& widget = canvas.AddComponent<UIWidgetComponent>();
+            widget.Anchor = UIAnchor::TopLeft;
+            widget.Position = { 0.0f, 0.0f };
+            widget.Size = { 1.0f, 1.0f };
+            widget.SortOrder = 0;
+            parentID = canvas.GetUUID();
+        }
+
+        std::vector<Entity> entities = UITemplateFactory::CreateFromAsset(m_EditorScene.get(), path, parentID);
+        if (!entities.empty())
+            m_SceneHierarchyPanel->SetSelectedEntity(entities.front());
+    }
+
     void EditorLayerBase::OnDuplicateEntity()
     {
         if (m_SceneState != SceneState::Edit) return;
@@ -463,7 +503,11 @@ namespace Wheatear {
         m_PlayerBuildRunning = false;
         m_PlayerBuildStatus = result.Message;
         if (result.Success)
+        {
             m_LastPlayerBuildDirectory = result.PackageDirectory;
+            if (!result.ReportPath.empty())
+                m_PlayerBuildStatus += "\nReport: " + result.ReportPath.string();
+        }
     }
 
 } // namespace Wheatear

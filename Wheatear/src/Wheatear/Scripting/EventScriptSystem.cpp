@@ -185,6 +185,19 @@ namespace Wheatear {
             return instructions.size();
         }
 
+        static bool MatchesEventTarget(entt::registry& registry,
+            entt::entity entity,
+            const EventCommandRequest& request)
+        {
+            if (static_cast<uint64_t>(request.TargetEntity) != 0)
+            {
+                return registry.all_of<IDComponent>(entity)
+                    && registry.get<IDComponent>(entity).ID == request.TargetEntity;
+            }
+
+            return true;
+        }
+
     } // namespace
 
     void EventScriptSystem::OnRuntimeStart(Scene* scene)
@@ -234,14 +247,8 @@ namespace Wheatear {
         {
             for (auto entity : registry.view<EventScriptComponent>())
             {
-                if (!request.TargetTag.empty())
-                {
-                    if (!registry.all_of<TagComponent>(entity)
-                        || registry.get<TagComponent>(entity).Tag != request.TargetTag)
-                    {
-                        continue;
-                    }
-                }
+                if (!MatchesEventTarget(registry, entity, request))
+                    continue;
 
                 StartEvent(scene, entity, request.EventName);
             }

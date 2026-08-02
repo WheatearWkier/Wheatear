@@ -5,7 +5,6 @@
 
 #include <algorithm>
 #include <optional>
-#include <string>
 #include <unordered_map>
 #include <unordered_set>
 
@@ -22,7 +21,6 @@ namespace Wheatear::UIWidgetLayout {
     struct Context
     {
         Scene* ScenePtr = nullptr;
-        std::unordered_map<std::string, entt::entity> Tags;
         std::unordered_map<UUID, entt::entity> Entities;
         mutable std::unordered_map<uint32_t, Rect> RectCache;
         mutable std::unordered_map<uint32_t, bool> VisibilityCache;
@@ -34,25 +32,12 @@ namespace Wheatear::UIWidgetLayout {
                 return;
 
             auto& registry = scene->GetRegistry();
-            for (auto entity : registry.view<TagComponent>())
-            {
-                const auto& tag = registry.get<TagComponent>(entity).Tag;
-                if (!tag.empty())
-                    Tags[tag] = entity;
-            }
-
             for (auto entity : registry.view<IDComponent>())
             {
                 const UUID id = registry.get<IDComponent>(entity).ID;
                 if (static_cast<uint64_t>(id) != 0)
                     Entities[id] = entity;
             }
-        }
-
-        entt::entity FindByTag(const std::string& tag) const
-        {
-            auto it = Tags.find(tag);
-            return it != Tags.end() ? it->second : entt::null;
         }
 
         entt::entity FindByUUID(UUID uuid) const
@@ -64,12 +49,9 @@ namespace Wheatear::UIWidgetLayout {
             return it != Entities.end() ? it->second : entt::null;
         }
 
-        entt::entity ResolveReference(UUID uuid, const std::string& fallbackTag) const
+        entt::entity ResolveReference(UUID uuid) const
         {
-            const entt::entity byUUID = FindByUUID(uuid);
-            if (byUUID != entt::null)
-                return byUUID;
-            return FindByTag(fallbackTag);
+            return FindByUUID(uuid);
         }
     };
 
@@ -143,7 +125,7 @@ namespace Wheatear::UIWidgetLayout {
 
         const auto& widget = registry.get<UIWidgetComponent>(entity);
         Rect rect = WidgetToLocalRect(widget);
-        const entt::entity parent = context.ResolveReference(widget.ParentEntity, widget.ParentTag);
+        const entt::entity parent = context.ResolveReference(widget.ParentEntity);
         if (parent != entt::null && parent != entity)
         {
             Rect localRect = rect;
@@ -201,7 +183,7 @@ namespace Wheatear::UIWidgetLayout {
         if (visible && registry.all_of<UIPageItemComponent>(entity))
         {
             const auto& pageItem = registry.get<UIPageItemComponent>(entity);
-            const entt::entity pagerEntity = context.ResolveReference(pageItem.PagerEntity, pageItem.PagerTag);
+            const entt::entity pagerEntity = context.ResolveReference(pageItem.PagerEntity);
             if (pagerEntity != entt::null)
             {
                 visible = pagerEntity != entt::null
@@ -212,7 +194,7 @@ namespace Wheatear::UIWidgetLayout {
         }
         if (visible)
         {
-            const entt::entity parent = context.ResolveReference(widget.ParentEntity, widget.ParentTag);
+            const entt::entity parent = context.ResolveReference(widget.ParentEntity);
             if (parent != entt::null)
             {
                 visible = parent != entity
@@ -238,7 +220,6 @@ namespace Wheatear::UIWidgetLayout {
         const Rect rect = ResolveRect(context, entity);
         resolved.Visible = ResolveVisible(context, entity);
         resolved.ParentEntity = 0;
-        resolved.ParentTag.clear();
         resolved.Anchor = UIAnchor::TopLeft;
         resolved.Position = { rect.Left, rect.Top };
         resolved.Size = { std::max(0.0f, rect.Right - rect.Left),
@@ -276,7 +257,7 @@ namespace Wheatear::UIWidgetLayout {
         while (registry.valid(current) && registry.all_of<UIWidgetComponent>(current))
         {
             const auto& widget = registry.get<UIWidgetComponent>(current);
-            const entt::entity parent = context.ResolveReference(widget.ParentEntity, widget.ParentTag);
+            const entt::entity parent = context.ResolveReference(widget.ParentEntity);
             if (parent == entt::null || parent == current)
                 break;
 

@@ -123,7 +123,7 @@ progression:set_master_volume:<value>
 
 本轮 UI 系统新增了父子层级语义：
 
-- `UIWidgetComponent.ParentTag`：子 UI 可以填写父 UI 的 Tag，子节点坐标会按父节点矩形的局部空间解析。
+- `UIWidgetComponent.ParentEntity`：子 UI 保存父 UI 的 UUID，子节点坐标会按父节点矩形的局部空间解析。
 - `UIPanelComponent.ClipChildren`：面板可以裁剪自己的子节点，渲染和输入命中都会遵守裁剪范围。
 - `SkillTree_NetworkPanel` 已启用 `ClipChildren`，技能树节点、连线、锁定层、选中框和标签在运行时挂到该面板下。
 - 魔剑技能树由原先的十字展开改为圆环/螺旋式分支布局，拖动画布时只有进入面板范围的部分可见。
@@ -194,7 +194,7 @@ progression:set_master_volume:<value>
 - `UIPanelComponent` 新增 `Draggable`、`ConstrainDragToParent` 和 `DragHandleHeight`，面板可以在运行时通过勾选项获得通用拖动能力。
 - 拖动范围默认限制在父控件内；直接挂在 Canvas 下时相当于限制在整张画布内。
 - 新增 `UIPagerComponent` 和 `UIPageItemComponent`，用于总页数已知的分页内容，例如信件、图鉴、任务、存档页。
-- 通用分页按钮命令：`ui:pager:<PagerTag>:next`、`ui:pager:<PagerTag>:prev`、`ui:pager:<PagerTag>:page:<number>`。
+- 通用分页按钮命令：`ui:pager:@<PagerUUID>:next`、`ui:pager:@<PagerUUID>:prev`、`ui:pager:@<PagerUUID>:page:<number>`。
 - `UIWidgetLayout` 会根据分页器当前页自动隐藏或显示 `UIPageItemComponent` 内容项，避免每个页面重复写专用显示逻辑。
 - 编辑器 UI 轮廓优化：纯文本控件使用虚线框，避免和 Panel 实体的实线边框混淆。
 - Hierarchy 和 Canvas Editor 增强 Canvas 选中提示：选中 Canvas 或其子控件时，所属 Canvas 会以高亮背景/边框提示。
@@ -208,7 +208,7 @@ progression:set_master_volume:<value>
 - ScrollView 需要搭配 `UIPanelComponent.ClipChildren` 使用；子 UI 可以超出面板高度，运行时根据 `OffsetY` 在父面板内裁剪显示。
 - ScrollView 支持鼠标滚轮和拖动滚动条，编辑器 Inspector 可调 `ContentHeight`、`WheelStep`、`ScrollbarWidth`、是否启用滚轮、是否显示滚动条。
 - `UIPagerComponent/UIPageItemComponent` 专门用于已知页数的分页内容，和 ScrollView 分工明确：前者按页切，后者连续滚。
-- 装备页现在同步到通用 `Equipment_Pager`，页码按钮走 `ui:pager:Equipment_Pager:page:<n>`；背包物品按未装备列表连续填格。
+- 装备页现在同步到通用 Pager，页码按钮走 `ui:pager:@<PagerUUID>:page:<n>`；背包物品按未装备列表连续填格。
 - 本轮打包版已更新并烟测：主菜单、装备页、技能树场景均能启动并保持运行。
 
 ## 15. 2026-07-29 UI 模板与竖切 Demo 迁移
@@ -218,7 +218,7 @@ progression:set_master_volume:<value>
 - `Titled Scroll Text` 会自动生成标题、ScrollView、正文 Text，适合教程、任务说明、信件正文、VN 历史等长文本页面。
 - `Paged Grid` 和 `Paged Inventory Grid` 会自动生成 Pager、上一页/下一页按钮、页码文本、两页 Slot，并给每个 Slot 写入 `UIPageItemComponent`。
 - 竖切装备页运行时迁移到可复用结构：装备详情和材料说明被包进 ScrollView，可用滚轮/滚动条查看，背包分页继续走通用 `Equipment_Pager`。
-- 竖切存档页运行时迁移到可复用结构：`SaveLoad_Pager` 控制 1 号槽页面和后续槽位预告页面，页码按钮使用 `ui:pager:SaveLoad_Pager:prev/next`。
+- 竖切存档页运行时迁移到可复用结构：存档 Pager 控制 1 号槽页面和后续槽位预告页面，页码按钮使用 `ui:pager:@<PagerUUID>:prev/next`。
 - 最新打包版已重新生成，主菜单、装备页、存档页均通过 8 秒隐藏窗口启动烟测。
 
 ## 16. 2026-07-29 VN BGM 与战斗道具栏

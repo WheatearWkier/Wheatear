@@ -9,6 +9,10 @@
 #include <yaml-cpp/yaml.h>
 #include <filesystem>
 #include <fstream>
+#include <algorithm>
+#include <unordered_map>
+#include <unordered_set>
+#include <vector>
 
 namespace Wheatear {
 
@@ -28,9 +32,16 @@ namespace Wheatear {
         out << YAML::EndMap;
     }
 
-    static Entity DeserializeEntityFromNode(const YAML::Node& node, Scene* scene, bool newUUID)
+    static Entity DeserializeEntityFromNode(const YAML::Node& node,
+        Scene* scene,
+        bool newUUID,
+        std::unordered_map<uint64_t, UUID>* idRemap = nullptr)
     {
-        const uint64_t uuid = newUUID ? static_cast<uint64_t>(UUID()) : node["Entity"].as<uint64_t>();
+        const uint64_t sourceUUID = node["Entity"].as<uint64_t>();
+        const uint64_t uuid = newUUID ? static_cast<uint64_t>(UUID()) : sourceUUID;
+        if (idRemap)
+            (*idRemap)[sourceUUID] = UUID(uuid);
+
         std::string name;
         if (auto tagNode = node["TagComponent"])
             name = tagNode["Tag"].as<std::string>();
@@ -44,6 +55,126 @@ namespace Wheatear {
         DeserializeUISceneComponents(node, entity);
 
         return entity;
+    }
+
+    static uint32_t EntityKey(Entity entity)
+    {
+        return static_cast<uint32_t>(static_cast<entt::entity>(entity));
+    }
+
+    static void CollectUIPrefabEntitiesRecursive(Entity root,
+        std::vector<Entity>& entities,
+        std::unordered_set<uint32_t>& visited)
+    {
+        if (!root || !root.HasComponent<IDComponent>())
+            return;
+
+        const uint32_t rootKey = EntityKey(root);
+        if (!visited.insert(rootKey).second)
+            return;
+
+        entities.push_back(root);
+
+        if (!root.HasComponent<UIWidgetComponent>())
+            return;
+
+        const UUID rootID = root.GetUUID();
+        Scene* scene = root.GetScene();
+        if (!scene)
+            return;
+
+        auto& registry = scene->GetRegistry();
+        std::vector<Entity> children;
+        for (auto entityID : registry.view<IDComponent, UIWidgetComponent>())
+        {
+            Entity candidate{ entityID, scene };
+            if (candidate == root)
+                continue;
+
+            const auto& widget = candidate.GetComponent<UIWidgetComponent>();
+            if (widget.ParentEntity == rootID)
+                children.push_back(candidate);
+        }
+
+        std::sort(children.begin(), children.end(), [](Entity a, Entity b)
+        {
+            const auto& aw = a.GetComponent<UIWidgetComponent>();
+            const auto& bw = b.GetComponent<UIWidgetComponent>();
+            if (aw.SortOrder != bw.SortOrder)
+                return aw.SortOrder < bw.SortOrder;
+            return a.GetName() < b.GetName();
+        });
+
+        for (Entity child : children)
+            CollectUIPrefabEntitiesRecursive(child, entities, visited);
+    }
+
+    static std::vector<Entity> CollectPrefabEntities(Entity root)
+    {
+        std::vector<Entity> entities;
+        std::unordered_set<uint32_t> visited;
+        CollectUIPrefabEntitiesRecursive(root, entities, visited);
+
+        if (entities.empty() && root)
+            entities.push_back(root);
+
+        return entities;
+    }
+
+    static UUID RemapUUID(UUID value, const std::unordered_map<uint64_t, UUID>& idRemap)
+    {
+        const uint64_t oldID = static_cast<uint64_t>(value);
+        if (oldID == 0)
+            return UUID(0);
+
+        auto it = idRemap.find(oldID);
+        return it == idRemap.end() ? UUID(0) : it->second;
+    }
+
+    static void ReplaceAll(std::string& text, const std::string& from, const std::string& to)
+    {
+        if (from.empty())
+            return;
+
+        size_t cursor = 0;
+        while ((cursor = text.find(from, cursor)) != std::string::npos)
+        {
+            text.replace(cursor, from.size(), to);
+            cursor += to.size();
+        }
+    }
+
+    static void RemapPrefabEntityReferences(const std::vector<Entity>& entities,
+        const std::unordered_map<uint64_t, UUID>& idRemap)
+    {
+        for (Entity entity : entities)
+        {
+            if (!entity)
+                continue;
+
+            if (entity.HasComponent<UIWidgetComponent>())
+            {
+                auto& widget = entity.GetComponent<UIWidgetComponent>();
+                widget.ParentEntity = RemapUUID(widget.ParentEntity, idRemap);
+            }
+
+            if (entity.HasComponent<UIPageItemComponent>())
+            {
+                auto& pageItem = entity.GetComponent<UIPageItemComponent>();
+                pageItem.PagerEntity = RemapUUID(pageItem.PagerEntity, idRemap);
+            }
+
+            if (entity.HasComponent<UIButtonComponent>())
+            {
+                auto& button = entity.GetComponent<UIButtonComponent>();
+                for (const auto& [oldID, newID] : idRemap)
+                {
+                    const std::string oldSelector = "@" + std::to_string(oldID);
+                    const std::string newSelector = "@" + std::to_string(static_cast<uint64_t>(newID));
+                    ReplaceAll(button.OnClickFunction, oldSelector, newSelector);
+                }
+            }
+        }
     }
 
     SceneSerializer::SceneSerializer(const Ref<Scene>& scene)
@@ -98,11 +229,17 @@ namespace Wheatear {
 
     bool SceneSerializer::SerializePrefab(Entity entity, const std::filesystem::path& filepath)
     {
+        const std::vector<Entity> prefabEntities = CollectPrefabEntities(entity);
+
         YAML::Emitter out;
         out << YAML::BeginMap;
         out << YAML::Key << "Prefab" << YAML::Value << entity.GetName();
-        out << YAML::Key << "Entity";
-        SerializeEntity(out, entity);
+        out << YAML::Key << "Version" << YAML::Value << 2;
+        out << YAML::Key << "RootEntity" << YAML::Value << entity.GetUUID();
+        out << YAML::Key << "Entities" << YAML::Value << YAML::BeginSeq;
+        for (Entity prefabEntity : prefabEntities)
+            SerializeEntity(out, prefabEntity);
+        out << YAML::EndSeq;
         out << YAML::EndMap;
 
         const std::filesystem::path resolvedPath = AssetPath::Resolve(filepath);
@@ -121,7 +258,7 @@ namespace Wheatear {
         return true;
     }
 
-    Entity SceneSerializer::DeserializePrefab(const std::filesystem::path& filepath, Scene* scene)
+    std::vector<Entity> SceneSerializer::DeserializePrefabEntities(const std::filesystem::path& filepath, Scene* scene)
     {
         const std::filesystem::path resolvedPath = AssetPath::Resolve(filepath);
         YAML::Node data;
@@ -135,13 +272,26 @@ namespace Wheatear {
             return {};
         }
 
-        if (!data["Prefab"] || !data["Entity"])
+        if (!data["Prefab"] || !data["Version"] || data["Version"].as<int>(0) != 2 || !data["Entities"])
         {
-            WT_CORE_ERROR("PrefabSerializer: invalid file '{}'", resolvedPath.string());
+            WT_CORE_ERROR("PrefabSerializer: '{}' must use Prefab Version 2 with an Entities array.", resolvedPath.string());
             return {};
         }
 
-        return DeserializeEntityFromNode(data["Entity"], scene, true);
+        std::vector<Entity> entities;
+        std::unordered_map<uint64_t, UUID> idRemap;
+
+        for (auto entityNode : data["Entities"])
+            entities.push_back(DeserializeEntityFromNode(entityNode, scene, true, &idRemap));
+
+        RemapPrefabEntityReferences(entities, idRemap);
+        return entities;
+    }
+
+    Entity SceneSerializer::DeserializePrefab(const std::filesystem::path& filepath, Scene* scene)
+    {
+        const std::vector<Entity> entities = DeserializePrefabEntities(filepath, scene);
+        return entities.empty() ? Entity{} : entities.front();
     }
 
 } // namespace Wheatear

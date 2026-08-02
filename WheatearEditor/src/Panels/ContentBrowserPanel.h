@@ -22,7 +22,10 @@ namespace Wheatear {
         Audio,
         Script,
         Prefab,
+        UITemplate,
         Material,
+        Data,
+        Metadata,
     };
 
     class ContentBrowserPanel
@@ -60,6 +63,7 @@ namespace Wheatear {
         float m_Padding = 8.0f;
         bool  m_ShowSidebar = true;
         bool  m_ShowInspector = true;
+        std::string m_RegistryStatus;
 
         std::unordered_map<AssetType, Ref<Texture2D>> m_Icons;
     };

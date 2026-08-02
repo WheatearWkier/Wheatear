@@ -31,7 +31,6 @@ Entities:
       Rotation: 0
       Anchor: 0
       SortOrder: 0
-      ParentTag: ""
   - Entity: 982000001
     TagComponent:
       Tag: Relationship_Camera
@@ -75,7 +74,6 @@ Entities:
       Rotation: 0
       Anchor: 0
       SortOrder: 10
-      ParentTag: WT_UI_Canvas
     UIAnimatorComponent:
       Preset: "slide_fade_in"
       PlayOnStart: true
@@ -102,7 +100,6 @@ Entities:
       Rotation: 0
       Anchor: 0
       SortOrder: 31
-      ParentTag: WT_UI_Canvas
     UIAnimatorComponent:
       Preset: "slide_fade_in"
       PlayOnStart: true
@@ -129,7 +126,6 @@ Entities:
       Rotation: 0
       Anchor: 0
       SortOrder: 30
-      ParentTag: WT_UI_Canvas
     UIAnimatorComponent:
       Preset: "fade_in"
       PlayOnStart: true
@@ -162,7 +158,6 @@ Entities:
       Rotation: 0
       Anchor: 0
       SortOrder: 30
-      ParentTag: WT_UI_Canvas
     UIAnimatorComponent:
       Preset: "fade_in"
       PlayOnStart: true
@@ -195,7 +190,6 @@ Entities:
       Rotation: 0
       Anchor: 0
       SortOrder: 30
-      ParentTag: WT_UI_Canvas
     UIAnimatorComponent:
       Preset: "fade_in"
       PlayOnStart: true
@@ -228,7 +222,6 @@ Entities:
       Rotation: 0
       Anchor: 0
       SortOrder: 40
-      ParentTag: WT_UI_Canvas
     UIAnimatorComponent:
       Preset: "hover_pulse"
       PlayOnStart: true
@@ -242,7 +235,7 @@ Entities:
       NormalColor: [0.27, 0.22, 0.48, 0.94]
       HoverColor: [0.4, 0.32, 0.68, 0.98]
       PressedColor: [0.18, 0.14, 0.34, 1]
-      OnClickFunction: event:FlowController:go_support
+      OnClickFunction: event:go_support
     UITextComponent:
       Text: "打开支援配置"
       Color: [0.96, 0.94, 1, 1]
@@ -266,7 +259,6 @@ Entities:
       Rotation: 0
       Anchor: 0
       SortOrder: 40
-      ParentTag: WT_UI_Canvas
     UIAnimatorComponent:
       Preset: "hover_pulse"
       PlayOnStart: true
@@ -280,7 +272,7 @@ Entities:
       NormalColor: [0.34, 0.25, 0.13, 0.94]
       HoverColor: [0.52, 0.38, 0.2, 0.98]
       PressedColor: [0.22, 0.16, 0.09, 1]
-      OnClickFunction: event:FlowController:save_slot_1
+      OnClickFunction: event:save_slot_1
     UITextComponent:
       Text: "保存进度"
       Color: [1, 0.94, 0.82, 1]
@@ -304,7 +296,6 @@ Entities:
       Rotation: 0
       Anchor: 0
       SortOrder: 40
-      ParentTag: WT_UI_Canvas
     UIAnimatorComponent:
       Preset: "hover_pulse"
       PlayOnStart: true
@@ -318,7 +309,7 @@ Entities:
       NormalColor: [0.13, 0.3, 0.26, 0.94]
       HoverColor: [0.2, 0.44, 0.38, 0.98]
       PressedColor: [0.08, 0.2, 0.18, 1]
-      OnClickFunction: event:FlowController:go_hub
+      OnClickFunction: event:go_hub
     UITextComponent:
       Text: "返回据点"
       Color: [0.94, 0.98, 0.9, 1]

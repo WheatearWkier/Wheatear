@@ -267,6 +267,11 @@ namespace Wheatear {
             o << YAML::Key << "DefeatSceneCommand" << YAML::Value << YAML::DoubleQuoted << c.DefeatSceneCommand;
             o << YAML::Key << "ComboDropDelay" << YAML::Value << c.ComboDropDelay;
             o << YAML::Key << "FirstClearRewardText" << YAML::Value << YAML::DoubleQuoted << c.FirstClearRewardText;
+            o << YAML::Key << "WaveModeEnabled" << YAML::Value << c.WaveModeEnabled;
+            o << YAML::Key << "WaveCount" << YAML::Value << c.WaveCount;
+            o << YAML::Key << "Wave1RightWall" << YAML::Value << c.Wave1RightWall;
+            o << YAML::Key << "Wave2RightWall" << YAML::Value << c.Wave2RightWall;
+            o << YAML::Key << "Wave3RightWall" << YAML::Value << c.Wave3RightWall;
             o << YAML::EndMap;
         }
         static void Deserialize(const YAML::Node& n, SideCombatLevelComponent& c) {
@@ -297,6 +302,11 @@ namespace Wheatear {
             c.DefeatSceneCommand = n["DefeatSceneCommand"].as<std::string>(c.DefeatSceneCommand);
             c.ComboDropDelay = n["ComboDropDelay"].as<float>(c.ComboDropDelay);
             c.FirstClearRewardText = n["FirstClearRewardText"].as<std::string>(c.FirstClearRewardText);
+            c.WaveModeEnabled = n["WaveModeEnabled"].as<bool>(c.WaveModeEnabled);
+            c.WaveCount = n["WaveCount"].as<int>(c.WaveCount);
+            c.Wave1RightWall = n["Wave1RightWall"].as<float>(c.Wave1RightWall);
+            c.Wave2RightWall = n["Wave2RightWall"].as<float>(c.Wave2RightWall);
+            c.Wave3RightWall = n["Wave3RightWall"].as<float>(c.Wave3RightWall);
         }
     };
 

@@ -3,6 +3,7 @@
 
 #include "Wheatear/Audio/AudioEngine.h"
 #include "Wheatear/Core/AssetPath.h"
+#include "Wheatear/Core/UserSettings.h"
 #include "Wheatear/Events/ApplicationEvent.h"
 #include "Wheatear/ImGui/ImGuiLayer.h"
 #include "Wheatear/Renderer/Renderer.h"
@@ -62,6 +63,8 @@ namespace Wheatear {
 
 		m_Window = std::unique_ptr<Window>(Window::Create(WindowProps(m_Specification.Name)));
 		m_Window->SetEventCallback(BIND_EVENT_FN(OnEvent));
+		UserSettings::Load();
+		UserSettings::ApplyToRuntime();
 
 		InstallApplicationEventHandlers();
 

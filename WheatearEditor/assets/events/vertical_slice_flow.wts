@@ -55,6 +55,17 @@ event go_tactical_combat:
     scene:assets/scenes/VerticalSliceTacticalCombat.wt
 end
 
+event tactical_combat_victory:
+    progression:set_flag:FLAG_CH01_TACTICAL_COMBAT_CLEARED
+    progression:save_1
+    wait 0.10
+    scene:assets/scenes/VerticalSliceHub.wt
+end
+
+event tactical_combat_retry:
+    scene:assets/scenes/VerticalSliceTacticalCombat.wt
+end
+
 event tutorial_side_combat_start:
     progression:set_flag:FLAG_CH02_TUTORIAL_STARTED
     progression:save_1
@@ -154,7 +165,7 @@ end
 
 event route_after_result:
     if flag FLAG_HUB_UNLOCKED
-        event:FlowController:result_go_hub
+        event:result_go_hub
     endif
 end
 

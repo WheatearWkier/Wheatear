@@ -1,4 +1,6 @@
 #include <Wheatear.h>
+#include "Assets/AssetRegistry.h"
+#include "Assets/UITemplateFactory.h"
 #include "Editor/ModeSelectLayer.h"
 #include "Editor/CoreEditorComponents.h"
 #include "Build/PlayerPackager.h"
@@ -29,6 +31,17 @@ namespace Wheatear
             {
                 const std::string argument = args[i];
                 if (argument == "--package-player" || argument == "--build-player")
+                    return true;
+            }
+            return false;
+        }
+
+        static bool IsRefreshAssetRegistryCommand(ApplicationCommandLineArgs args)
+        {
+            for (int i = 1; i < args.Count; ++i)
+            {
+                const std::string argument = args[i];
+                if (argument == "--refresh-assets" || argument == "--refresh-asset-registry")
                     return true;
             }
             return false;
@@ -86,9 +99,30 @@ namespace Wheatear
                 return;
             }
 
+            if (IsRefreshAssetRegistryCommand(args))
+            {
+                const std::filesystem::path projectRoot = GetSpecification().ProjectRoot.empty()
+                    ? AssetPath::GetProjectRoot()
+                    : GetSpecification().ProjectRoot;
+                UITemplateFactory::WriteBuiltinTemplateAssets(projectRoot);
+                AssetRegistry::Get().Scan(projectRoot);
+                if (AssetRegistry::Get().WriteRegistry())
+                    WT_CORE_INFO("AssetRegistry refreshed at '{}'", (projectRoot / "assets" / ".wheatear" / "asset_registry.yaml").string());
+                else
+                    WT_CORE_ERROR("AssetRegistry failed to write registry under '{}'", projectRoot.string());
+                Close();
+                return;
+            }
+
             RegisterCoreEditorComponents();
             RegisterDefaultGameplayEditorModules();
             RegisterDefaultGameplayModules();
+
+            const std::filesystem::path projectRoot = GetSpecification().ProjectRoot.empty()
+                ? AssetPath::GetProjectRoot()
+                : GetSpecification().ProjectRoot;
+            UITemplateFactory::WriteBuiltinTemplateAssets(projectRoot);
+            AssetRegistry::Get().LoadCache(projectRoot);
 
             PushLayer(new ModeSelectLayer());
         }

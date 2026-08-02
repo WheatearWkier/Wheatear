@@ -4,7 +4,7 @@
 #include "Wheatear/Scene/Scene.h"
 #include "Wheatear/Scene/Components.h"
 #include "Wheatear/Audio/AudioEngine.h"
-#include "Wheatear/Modules/Progression/GameProgress.h"
+#include "Wheatear/Core/UserSettings.h"
 
 namespace Wheatear {
 
@@ -15,7 +15,7 @@ namespace Wheatear {
             auto& asc = scene->GetRegistry().get<AudioSourceComponent>(e);
             if (asc.PlayOnStart && !asc.AudioFilePath.empty())
             {
-                const auto& settings = GameProgress::GetState().Settings;
+                const auto& settings = UserSettings::Get();
                 const float channel = asc.Loop
                     ? AudioEngine::PercentToGain(static_cast<float>(settings.BGMVolume))
                     : AudioEngine::PercentToGain(static_cast<float>(settings.SFXVolume));

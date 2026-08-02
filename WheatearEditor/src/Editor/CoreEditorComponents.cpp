@@ -33,7 +33,7 @@ namespace Wheatear {
                     return {};
 
                 const auto& widget = current.GetComponent<UIWidgetComponent>();
-                const entt::entity parentID = layout.ResolveReference(widget.ParentEntity, widget.ParentTag);
+                const entt::entity parentID = layout.ResolveReference(widget.ParentEntity);
                 if (parentID == entt::null || !registry.valid(parentID))
                     return {};
 

@@ -61,16 +61,15 @@ namespace Wheatear::UIRuntimeTools {
         widget.Rotation = rotation;
     }
 
-    void SetWidgetParent(Scene* scene, const std::string& entityName, const std::string& parentTag)
+    void SetWidgetParent(Scene* scene, const std::string& entityName, const std::string& parentName)
     {
         Entity entity = SceneQueries::FindEntityByName(scene, entityName);
         if (!entity || !entity.HasComponent<UIWidgetComponent>())
             return;
 
-        Entity parent = SceneQueries::FindEntityByName(scene, parentTag);
+        Entity parent = SceneQueries::FindEntityByName(scene, parentName);
         auto& widget = entity.GetComponent<UIWidgetComponent>();
         widget.ParentEntity = parent ? parent.GetUUID() : UUID(0);
-        widget.ParentTag = parentTag;
     }
 
     void SetText(Scene* scene, const std::string& entityName, const std::string& text)

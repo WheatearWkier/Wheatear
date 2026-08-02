@@ -1,7 +1,9 @@
 #include "wtpch.h"
 #include "GameProgress.h"
 
+#include "ProgressionSettingsCommandService.h"
 #include "Wheatear/Core/AssetPath.h"
+#include "Wheatear/Core/UserSettings.h"
 
 #include <algorithm>
 #include <filesystem>
@@ -307,18 +309,18 @@ namespace Wheatear::GameProgress {
                 { "ME-05", "破盾连斩", "近战", "J-J-K", "削韧、打开精英怪防御", "第 4 章 / 剑盾队友", "专门处理持盾精英怪，让近战分支也承担破防职责。", 4 },
                 { "ME-06", "踏前刺", "近战", "前 + J", "低冷却突进补位", "第 4 章", "短距离贴身技能，用来接住被击退的敌人，防止连招断掉。", 4 },
                 { "ME-07", "十字裂斩", "近战", "J-K-J", "横向范围清小怪", "第 5 章 / 黑魔法队友", "把单体连击扩展成横向压制，适合清理护卫小怪。", 5 },
-                { "ME-08", "空旋回刃", "近战", "空中 方向 + J", "空中位移攻击，保持高度并调整身位", "第 6 章 / 魔法师老巢前", "让玩家在空中绕到 Boss 另一侧，避开正面反击。", 6 },
+                { "ME-08", "空旋回刃", "近战", "空中 方向 + J", "空中位移攻击，保持高度并调整身位", "第 6 章 / 魔法师老巢前", "让玩家在空中绕到首领另一侧，避开正面反击。", 6 },
                 { "ME-09", "王宫破阵斩", "近战", "K 后 J", "霸体阶段破阵、反制骑士", "第 7 章 / 王宫战", "针对骑士系敌人的护阵，命中后短时间降低其保护槽增长。", 7 },
                 { "ME-10", "青龙裂鳞", "近战", "J 连段终结", "青龙祝福强化的高空续连", "青龙祝福", "连击末端追加上升剑气，把即将坠落的目标重新托起。", 8 },
-                { "ME-11", "白虎断牙", "近战", "前 + K", "高削韧、高风险爆发", "白虎祝福", "对精英和 Boss 护甲有效，但空挥后硬直更大。", 9 },
-                { "ME-12", "终式百裂", "近战", "奥义输入", "最终近战爆发", "魔剑完全觉醒", "魔剑完全觉醒后的近战奥义，用来打完整技能试刀 Boss。", 12 },
+                { "ME-11", "白虎断牙", "近战", "前 + K", "高削韧、高风险爆发", "白虎祝福", "对精英和首领护甲有效，但空挥后硬直更大。", 9 },
+                { "ME-12", "终式百裂", "近战", "奥义输入", "最终近战爆发", "魔剑完全觉醒", "魔剑完全觉醒后的近战奥义，用来打完整技能试刀首领。", 12 },
 
                 { "MA-01", "魔法弹", "魔法", "U", "远程补 Hit、打断投射怪、维持连击计时", "魔剑 Lv1 / 战斗觉醒后", "魔法分支的第一颗实用节点。", 2 },
                 { "MA-02", "炎刃附魔", "魔法", "U 后 J", "给下一次近战附加灼烧", "魔剑 Lv2 / 魔核碎片", "把魔法和近战粘在一起，鼓励玩家做组合连段。", 2 },
                 { "MA-03", "魔力浮环", "魔法", "空中 U", "空中停顿、延长滞空窗口", "第 3 章", "短暂降低下坠速度，给玩家调整输入的时间。", 3 },
                 { "MA-04", "白辉护印", "魔法", "支援后 U", "回血 Buff、容错、支援协同", "白魔法队友好感 30", "白魔法队友的力量通过魔剑转化成护印。", 3 },
                 { "MA-05", "寒星矢", "魔法", "后 + U", "减速和控场", "第 4 章", "让玩家在有纵深的横板战斗里控制 X 轴推进速度。", 4 },
-                { "MA-06", "黑炎刻印", "魔法", "U-U", "伤害 Debuff、爆发前置", "黑魔法队友好感 30", "给 Boss 打上刻印，后续近战和断限会获得更高收益。", 5 },
+                { "MA-06", "黑炎刻印", "魔法", "U-U", "伤害 Debuff、爆发前置", "黑魔法队友好感 30", "给首领打上刻印，后续近战和断限会获得更高收益。", 5 },
                 { "MA-07", "雷锁", "魔法", "上 + U", "锁定浮空目标，短暂停住坠落", "第 6 章", "用于高手空连，让目标在高空多停一拍。", 6 },
                 { "MA-08", "破法反弹", "魔法", "防御瞬间 U", "反制魔法师弹幕", "魔法师老巢", "专门回应中期魔法师敌人的密集远程压迫。", 6 },
                 { "MA-09", "王权封印", "魔法", "U 长按", "削除傀儡控制、打王宫怪", "王宫篇", "针对国王、骑士和傀儡系敌人的控制魔法。", 7 },
@@ -333,7 +335,7 @@ namespace Wheatear::GameProgress {
                 { "FU-05", "护卫借势", "魔剑融合", "剑盾支援 + K", "断限失败时格挡一次反击", "剑盾队友好感 60", "让高手机制失败不一定直接崩盘。", 4 },
                 { "FU-06", "黑咒扩散", "魔剑融合", "黑魔法支援 + U", "延长断限窗口、降低保护槽增长", "黑魔法队友好感 60", "黑魔法队友提供更激进的连段收益。", 5 },
                 { "FU-07", "魂线牵引", "魔剑融合", "上 + 支援", "把支援技能转化为空中追击", "第 6 章", "让 I 支援不只是额外伤害，而是能参与空连结构。", 6 },
-                { "FU-08", "伪青梅残影", "魔剑融合", "剧情触发", "剧情误导、复制主角基础招式", "王宫篇", "王宫前后用于解释假青梅和傀儡术，也可做 Boss 镜像机制。", 7 },
+                { "FU-08", "伪青梅残影", "魔剑融合", "剧情触发", "剧情误导、复制主角基础招式", "王宫篇", "王宫前后用于解释假青梅和傀儡术，也可做首领镜像机制。", 7 },
                 { "FU-09", "真青梅魂契", "魔剑融合", "终章后", "青梅专属支援、断限特化", "真相揭露后", "青梅从指导者回到正宫支援位。", 7 },
                 { "FU-10", "四圣兽合契", "魔剑融合", "四祝福齐备", "四位后宫祝福同步触发", "青龙/白虎/朱雀/玄武祝福", "四圣兽篇的系统性回报。", 11 },
                 { "FU-11", "天使契印", "魔剑融合", "复活后自动强化", "复活后短时间无敌和高回复", "天使祝福", "把一条命机制和战斗节奏连接起来。", 12 },
@@ -352,9 +354,9 @@ namespace Wheatear::GameProgress {
                 { "MO-11", "朱雀翔焰", "机动", "空中 U 后移动", "魔法推进、空中换位", "朱雀祝福", "让魔法也能承担空中位移。", 10 },
                 { "MO-12", "玄武稳域", "机动", "站定防御", "抗击退、守据点", "玄武祝福", "后期以一敌二时用于抵抗压制和弹幕。", 11 },
 
-                { "LI-01", "保护槽识别", "断限", "HUD 提示", "看懂 Boss 受击保护，不靠漏洞无限连", "第 5 章预告", "先让玩家理解保护槽，普通打法仍然能过，只是花时间。", 5 },
+                { "LI-01", "保护槽识别", "断限", "HUD 提示", "看懂首领受击保护，不靠漏洞无限连", "第 5 章预告", "先让玩家理解保护槽，普通打法仍然能过，只是花时间。", 5 },
                 { "LI-02", "断限追击", "断限", "上 + 技能键", "重置跳跃、滞空、空中动作和保护槽窗口", "第 7 章正式教学", "高手玩法核心。", 7 },
-                { "LI-03", "空界锁痕", "断限", "断限成功", "短暂停住 Boss 坠落", "第 7 章", "表现为魔法阵碎裂、时间停顿一瞬、剑痕锁住 Boss。", 7 },
+                { "LI-03", "空界锁痕", "断限", "断限成功", "短暂停住首领坠落", "第 7 章", "表现为魔法阵碎裂、时间停顿一瞬、剑痕锁住首领。", 7 },
                 { "LI-04", "断限递耗", "断限", "连续断限", "每次窗口更短、消耗更高", "第 7 章", "防止无限赖皮，同时把高手上限做成主动挑战。", 7 },
                 { "LI-05", "低空抢断", "断限", "低高度断限", "低空救连，但容易被地面怪打断", "第 8 章", "让不同高度的空连风险明确。", 8 },
                 { "LI-06", "高空连锁", "断限", "高高度断限", "高空安全长连、评分提升", "第 8 章", "高空断限越成功，评分和爽感越强。", 8 },
@@ -424,13 +426,13 @@ namespace Wheatear::GameProgress {
         {
             static const std::vector<SkillNodeInfo> nodes = {
                 { "magic_sword_core", "魔剑核心", "核心", "剧情获得", "技能树中心，连接近战、魔法、机动和支援", "序章后由青梅赠予", "魔剑会自动吸收靠近的材料，是主角后续成长和双修技能的承载物。" },
-                { "triple_slash", "三段斩", "近战", "J / 鼠标左键", "地面连段、压低 Boss 保护条", "魔剑 Lv1", "基础但重要的近战连段。每一段都应能接上挑、火球或闪避取消。" },
+                { "triple_slash", "三段斩", "近战", "J / 鼠标左键", "地面连段、压低首领保护条", "魔剑 Lv1", "基础但重要的近战连段。每一段都应能接上挑、火球或闪避取消。" },
                 { "rising_cleave", "裂空挑斩", "近战 / 浮空", "S+J", "浮空起手", "魔剑 Lv1", "把可受控目标挑起，是前期空中连击的主要入口。" },
                 { "air_chase", "空中追斩", "空连", "空中 S+J", "滞空续连、重新抬高下落目标", "魔剑 Lv1，后续可用材料强化", "空中攻击不会让角色一直悬停，而是慢慢下落；追斩负责把快掉下去的目标续住。" },
                 { "vfx_magic_bolt", "魔法弹", "魔法", "U", "远程补 hit、打断投射怪", "魔剑 Lv2", "魔法分支第一个实用节点。它让近战空连之外也能补连击和处理远程怪。" },
                 { "mentor_support", "导师支援", "支援", "I", "空中留敌、危急保护", "导师好感 100", "真青梅伪装导师时提供的支援。当前竖切用于展示好感会影响支援强度。" },
                 { "wind_step", "疾风步", "机动", "闪避 / 方向键", "取消后摇、调整纵深", "魔剑 Lv2", "机动分支让玩家在俯视横板战斗中控制 X 轴和纵深，不是单纯跑路。" },
-                { "break_limit", "断限追击", "高阶", "后期：上 + 技能键", "重置跳跃、滞空和 Boss 保护窗口", "第七章正式教学", "高手玩法核心。普通玩家不靠它也能通关，高手靠它打高空长连。" }
+                { "break_limit", "断限追击", "高阶", "后期：上 + 技能键", "重置跳跃、滞空和首领保护窗口", "第七章正式教学", "高手玩法核心。普通玩家不靠它也能通关，高手靠它打高空长连。" }
             };
 
             for (const SkillNodeInfo& node : nodes)
@@ -480,12 +482,12 @@ namespace Wheatear::GameProgress {
         static const std::vector<EquipmentInfo>& EquipmentCatalog()
         {
             static const std::vector<EquipmentInfo> equipment = {
-                { "traveler_armor", "旅人护衣", "防具", 1, "已装备", "HP +0 / DEF +0，+1 后 HP +30 / DEF +2", "第二章剧情装备", "前期容错装。低空空连失败后不至于被远程怪两下带走。", "armor", "assets/vertical_slice/ui/icons/icon_equipment_traveler_armor.png" },
-                { "black_forest_armor", "黑林皮甲", "防具", 1, "未获得", "DEF +4 / 受击硬直 -5%", "黑林兽道精英掉落", "更适合刷材料本，后续可作为兽系套装第一件。", "armor", "assets/vertical_slice/ui/icons/icon_equipment_black_forest_armor.png" },
-                { "beast_tooth_pendant", "兽牙坠饰", "饰品", 1, "未获得", "ATK +3 / 空中伤害 +4%", "黑熊丈夫首通或复战掉落", "强化近战空连输出，适合喜欢跳斩续连的玩家。", "charm", "assets/vertical_slice/ui/icons/icon_equipment_beast_tooth.png" },
-                { "novice_magic_ring", "初级魔晶戒", "饰品", 1, "未获得", "MATK +4 / 火球冷却 -0.2s", "黑林兽道材料合成", "魔法分支入门装备，让火球更像连击补刀工具。", "ring", "assets/vertical_slice/ui/icons/icon_equipment_magic_ring.png" },
+                { "traveler_armor", "旅人护衣", "防具", 1, "已装备", "生命 +0 / 防御 +0，+1 后 生命 +30 / 防御 +2", "第二章剧情装备", "前期容错装。低空空连失败后不至于被远程怪两下带走。", "armor", "assets/vertical_slice/ui/icons/icon_equipment_traveler_armor.png" },
+                { "black_forest_armor", "黑林皮甲", "防具", 1, "未获得", "防御 +4 / 受击硬直 -5%", "黑林兽道精英掉落", "更适合刷材料本，后续可作为兽系套装第一件。", "armor", "assets/vertical_slice/ui/icons/icon_equipment_black_forest_armor.png" },
+                { "beast_tooth_pendant", "兽牙坠饰", "饰品", 1, "未获得", "攻击 +3 / 空中伤害 +4%", "黑熊丈夫首通或复战掉落", "强化近战空连输出，适合喜欢跳斩续连的玩家。", "charm", "assets/vertical_slice/ui/icons/icon_equipment_beast_tooth.png" },
+                { "novice_magic_ring", "初级魔晶戒", "饰品", 1, "未获得", "魔攻 +4 / 火球冷却 -0.2s", "黑林兽道材料合成", "魔法分支入门装备，让火球更像连击补刀工具。", "ring", "assets/vertical_slice/ui/icons/icon_equipment_magic_ring.png" },
                 { "wind_boots", "疾风短靴", "足部", 2, "后续章节", "纵深移动 +8% / 闪避恢复 -6%", "剑盾队友章节", "解决横板俯视战斗中走位偏慢的问题。", "boots", "assets/vertical_slice/ui/icons/icon_equipment_wind_boots.png" },
-                { "old_ward_charm", "旧护符", "护符", 2, "未获得", "MDEF +3 / 受远程伤害 -5%", "投石怪掉落", "给不会稳定跳躲远程的新手提供一点容错。", "charm", "assets/vertical_slice/ui/icons/icon_equipment_ward_charm.png" },
+                { "old_ward_charm", "旧护符", "护符", 2, "未获得", "魔防 +3 / 受远程伤害 -5%", "投石怪掉落", "给不会稳定跳躲远程的新手提供一点容错。", "charm", "assets/vertical_slice/ui/icons/icon_equipment_ward_charm.png" },
                 { "training_blade", "练习短剑", "副武器", 2, "后续章节", "取消窗口 +0.03s", "导师训练事件", "教学玩家理解取消窗口，不作为毕业装备。", "weapon", "assets/vertical_slice/ui/icons/icon_equipment_training_blade.png" },
                 { "angel_feather", "天使羽饰", "特殊", 2, "第十二章后", "复活次数 +1", "天使祝福剧情", "终盘系统关键装备，和天使祝福的一条命规则绑定。", "special", "assets/vertical_slice/ui/icons/icon_equipment_angel_feather.png" }
             };
@@ -574,6 +576,12 @@ namespace Wheatear::GameProgress {
     void ResetForNewGame()
     {
         GetState() = MakeDefaultState();
+        ApplySettingsToRuntime();
+    }
+
+    void ApplySettingsToRuntime()
+    {
+        ProgressionSettingsCommandService::ApplyToRuntime();
     }
 
     bool SaveSlot(int slot)
@@ -611,12 +619,6 @@ namespace Wheatear::GameProgress {
         output << "equippedItems=" << JoinMap(state.EquippedItemsBySlot) << "\n";
         output << "storyFlags=" << JoinSet(state.StoryFlags) << "\n";
         output << "activeSupport=" << state.ActiveSupportCharacterId << "\n";
-        output << "setting.textSpeed=" << state.Settings.TextSpeed << "\n";
-        output << "setting.masterVolume=" << state.Settings.MasterVolume << "\n";
-        output << "setting.bgmVolume=" << state.Settings.BGMVolume << "\n";
-        output << "setting.sfxVolume=" << state.Settings.SFXVolume << "\n";
-        output << "setting.fullscreen=" << (state.Settings.Fullscreen ? 1 : 0) << "\n";
-        output << "setting.screenShake=" << (state.Settings.ScreenShake ? 1 : 0) << "\n";
 
         for (const auto& [itemId, amount] : state.Materials)
             output << "material." << itemId << "=" << amount << "\n";
@@ -676,12 +678,6 @@ namespace Wheatear::GameProgress {
             else if (key == "equippedItems") LoadMap(loaded.EquippedItemsBySlot, value);
             else if (key == "storyFlags") LoadSet(loaded.StoryFlags, value);
             else if (key == "activeSupport") loaded.ActiveSupportCharacterId = value;
-            else if (key == "setting.textSpeed") loaded.Settings.TextSpeed = ParseInt(value, loaded.Settings.TextSpeed);
-            else if (key == "setting.masterVolume") loaded.Settings.MasterVolume = ParseInt(value, loaded.Settings.MasterVolume);
-            else if (key == "setting.bgmVolume") loaded.Settings.BGMVolume = ParseInt(value, loaded.Settings.BGMVolume);
-            else if (key == "setting.sfxVolume") loaded.Settings.SFXVolume = ParseInt(value, loaded.Settings.SFXVolume);
-            else if (key == "setting.fullscreen") loaded.Settings.Fullscreen = ParseBool(value, loaded.Settings.Fullscreen);
-            else if (key == "setting.screenShake") loaded.Settings.ScreenShake = ParseBool(value, loaded.Settings.ScreenShake);
             else if (key.rfind("material.", 0) == 0)
             {
                 const std::string itemId = key.substr(9);
@@ -717,6 +713,7 @@ namespace Wheatear::GameProgress {
         loaded.LastResultMessage = "已读取 " + std::to_string(std::clamp(slot, 1, 9)) + " 号槽。";
         PushNotification(loaded, loaded.LastResultMessage);
         GetState() = loaded;
+        ApplySettingsToRuntime();
         return true;
     }
 
@@ -817,8 +814,8 @@ namespace Wheatear::GameProgress {
         }
 
         std::ostringstream stream;
-        stream << (firstClear ? "首通 " : "再战 ") << dungeonId
-               << "，最佳连击 x" << bestCombo;
+        stream << (firstClear ? "首通 " : "再战 ") << DungeonDisplayName(dungeonId)
+               << "，最高连击 x" << bestCombo;
         PushNotification(state, stream.str());
         state.LastResultMessage = stream.str();
 
@@ -854,7 +851,7 @@ namespace Wheatear::GameProgress {
         stream << state.LastDungeonResult.DungeonName
                << "完成，评价 " << state.LastDungeonResult.Grade
                << "，经验 +" << experience
-               << "，最佳连击 x" << bestCombo;
+               << "，最高连击 x" << bestCombo;
         state.LastResultMessage = stream.str();
     }
 
@@ -1207,9 +1204,13 @@ namespace Wheatear::GameProgress {
             GetState().LastResultMessage = "该队友将在后续章节加入；当前竖切先保留支援槽入口。";
             result.Success = true;
         }
+        else if (ProgressionSettingsCommandService::IsSettingsCommand(action))
+        {
+            result = ProgressionSettingsCommandService::Execute(action, GetState());
+        }
         else if (action.rfind("set_text_speed:", 0) == 0)
         {
-            auto& settings = GetState().Settings;
+            auto& settings = UserSettings::Get();
             settings.TextSpeed = std::clamp(static_cast<int>(ParseFloat(action.substr(15), static_cast<float>(settings.TextSpeed)) + 0.5f), 12, 180);
             GetState().LastResultMessage = "文字速度设置为 " + std::to_string(settings.TextSpeed) + " 字/秒。";
             result.Changed = true;
@@ -1217,7 +1218,7 @@ namespace Wheatear::GameProgress {
         }
         else if (action.rfind("set_master_volume:", 0) == 0)
         {
-            auto& settings = GetState().Settings;
+            auto& settings = UserSettings::Get();
             settings.MasterVolume = std::clamp(static_cast<int>(ParseFloat(action.substr(18), static_cast<float>(settings.MasterVolume)) + 0.5f), 0, 100);
             GetState().LastResultMessage = "主音量设置为 " + std::to_string(settings.MasterVolume) + "%。";
             result.Changed = true;
@@ -1225,7 +1226,7 @@ namespace Wheatear::GameProgress {
         }
         else if (action.rfind("set_bgm_volume:", 0) == 0)
         {
-            auto& settings = GetState().Settings;
+            auto& settings = UserSettings::Get();
             settings.BGMVolume = std::clamp(static_cast<int>(ParseFloat(action.substr(15), static_cast<float>(settings.BGMVolume)) + 0.5f), 0, 100);
             GetState().LastResultMessage = "BGM 音量设置为 " + std::to_string(settings.BGMVolume) + "%。";
             result.Changed = true;
@@ -1233,7 +1234,7 @@ namespace Wheatear::GameProgress {
         }
         else if (action.rfind("set_sfx_volume:", 0) == 0)
         {
-            auto& settings = GetState().Settings;
+            auto& settings = UserSettings::Get();
             settings.SFXVolume = std::clamp(static_cast<int>(ParseFloat(action.substr(15), static_cast<float>(settings.SFXVolume)) + 0.5f), 0, 100);
             GetState().LastResultMessage = "音效音量设置为 " + std::to_string(settings.SFXVolume) + "%。";
             result.Changed = true;
@@ -1241,7 +1242,7 @@ namespace Wheatear::GameProgress {
         }
         else if (action == "text_speed_up")
         {
-            auto& settings = GetState().Settings;
+            auto& settings = UserSettings::Get();
             settings.TextSpeed = std::min(180, settings.TextSpeed + 6);
             GetState().LastResultMessage = "文字速度提高到 " + std::to_string(settings.TextSpeed) + " 字/秒。";
             result.Changed = true;
@@ -1249,7 +1250,7 @@ namespace Wheatear::GameProgress {
         }
         else if (action == "text_speed_down")
         {
-            auto& settings = GetState().Settings;
+            auto& settings = UserSettings::Get();
             settings.TextSpeed = std::max(12, settings.TextSpeed - 6);
             GetState().LastResultMessage = "文字速度降低到 " + std::to_string(settings.TextSpeed) + " 字/秒。";
             result.Changed = true;
@@ -1257,7 +1258,7 @@ namespace Wheatear::GameProgress {
         }
         else if (action == "master_volume_up")
         {
-            auto& settings = GetState().Settings;
+            auto& settings = UserSettings::Get();
             settings.MasterVolume = std::min(100, settings.MasterVolume + 5);
             GetState().LastResultMessage = "主音量 " + std::to_string(settings.MasterVolume) + "%。";
             result.Changed = true;
@@ -1265,7 +1266,7 @@ namespace Wheatear::GameProgress {
         }
         else if (action == "master_volume_down")
         {
-            auto& settings = GetState().Settings;
+            auto& settings = UserSettings::Get();
             settings.MasterVolume = std::max(0, settings.MasterVolume - 5);
             GetState().LastResultMessage = "主音量 " + std::to_string(settings.MasterVolume) + "%。";
             result.Changed = true;
@@ -1273,7 +1274,7 @@ namespace Wheatear::GameProgress {
         }
         else if (action == "bgm_volume_up")
         {
-            auto& settings = GetState().Settings;
+            auto& settings = UserSettings::Get();
             settings.BGMVolume = std::min(100, settings.BGMVolume + 5);
             GetState().LastResultMessage = "BGM 音量 " + std::to_string(settings.BGMVolume) + "%。";
             result.Changed = true;
@@ -1281,7 +1282,7 @@ namespace Wheatear::GameProgress {
         }
         else if (action == "bgm_volume_down")
         {
-            auto& settings = GetState().Settings;
+            auto& settings = UserSettings::Get();
             settings.BGMVolume = std::max(0, settings.BGMVolume - 5);
             GetState().LastResultMessage = "BGM 音量 " + std::to_string(settings.BGMVolume) + "%。";
             result.Changed = true;
@@ -1289,7 +1290,7 @@ namespace Wheatear::GameProgress {
         }
         else if (action == "sfx_volume_up")
         {
-            auto& settings = GetState().Settings;
+            auto& settings = UserSettings::Get();
             settings.SFXVolume = std::min(100, settings.SFXVolume + 5);
             GetState().LastResultMessage = "音效音量 " + std::to_string(settings.SFXVolume) + "%。";
             result.Changed = true;
@@ -1297,7 +1298,7 @@ namespace Wheatear::GameProgress {
         }
         else if (action == "sfx_volume_down")
         {
-            auto& settings = GetState().Settings;
+            auto& settings = UserSettings::Get();
             settings.SFXVolume = std::max(0, settings.SFXVolume - 5);
             GetState().LastResultMessage = "音效音量 " + std::to_string(settings.SFXVolume) + "%。";
             result.Changed = true;
@@ -1305,7 +1306,7 @@ namespace Wheatear::GameProgress {
         }
         else if (action == "toggle_screen_shake")
         {
-            auto& settings = GetState().Settings;
+            auto& settings = UserSettings::Get();
             settings.ScreenShake = !settings.ScreenShake;
             GetState().LastResultMessage = std::string("屏幕震动已") + (settings.ScreenShake ? "开启。" : "关闭。");
             result.Changed = true;
@@ -1313,9 +1314,10 @@ namespace Wheatear::GameProgress {
         }
         else if (action == "toggle_fullscreen")
         {
-            auto& settings = GetState().Settings;
+            auto& settings = UserSettings::Get();
             settings.Fullscreen = !settings.Fullscreen;
-            GetState().LastResultMessage = std::string("全屏偏好已") + (settings.Fullscreen ? "开启。" : "关闭。") + "当前竖切先记录设置，后续接窗口系统。";
+            ApplySettingsToRuntime();
+            GetState().LastResultMessage = std::string("全屏偏好已") + (settings.Fullscreen ? "开启。" : "关闭。") + "已应用到当前窗口。";
             result.Changed = true;
             result.Success = true;
         }
@@ -1330,7 +1332,7 @@ namespace Wheatear::GameProgress {
         std::ostringstream stream;
         stream << "第" << state.CurrentChapter << "章  /  魔剑 Lv" << state.MagicSwordLevel
                << "  /  主角 Lv" << state.PlayerLevel
-               << "  EXP " << state.Experience << "/" << state.ExperienceToNext
+               << "  经验 " << state.Experience << "/" << state.ExperienceToNext
                << "  /  " << (IsDungeonUnlocked(BeastPathDungeonId) ? "黑林兽道已解锁" : "黑林兽道未解锁");
         return stream.str();
     }
@@ -1342,9 +1344,9 @@ namespace Wheatear::GameProgress {
         stream << "目标: " << state.Objective << "\n";
         stream << "材料: " << BuildMaterialInventoryText() << "\n";
         stream << "能力: HP " << state.Attributes.HP
-               << " / ATK " << state.Attributes.ATK
-               << " / DEF " << state.Attributes.DEF
-               << " / MATK " << state.Attributes.MATK << "\n";
+               << " / 攻击 " << state.Attributes.ATK
+               << " / 防御 " << state.Attributes.DEF
+               << " / 魔攻 " << state.Attributes.MATK << "\n";
 
         if (state.MagicSwordLevel < 2)
             stream << "魔剑 Lv2: " << (CanUpgradeMagicSwordToLv2() ? "可升级" : BuildCostText(MagicSwordLv2Cost()));
@@ -1408,7 +1410,7 @@ namespace Wheatear::GameProgress {
         stream << "受击次数: " << result.HitsTaken << "\n";
         stream << "通关时间: " << FormatSeconds(result.ClearTimeSeconds) << "\n";
         stream << "获得经验: +" << result.Experience << "\n";
-        stream << "当前等级: Lv" << state.PlayerLevel << "  EXP "
+        stream << "当前等级: Lv" << state.PlayerLevel << "  经验 "
                << state.Experience << "/" << state.ExperienceToNext;
         return stream.str();
     }
@@ -1550,9 +1552,9 @@ namespace Wheatear::GameProgress {
         std::ostringstream stream;
         stream << "背包 " << state.EquipmentPage << " / 2\n";
         stream << "能力  HP " << state.Attributes.HP
-               << " / ATK " << state.Attributes.ATK
-               << " / DEF " << state.Attributes.DEF
-               << " / MATK " << state.Attributes.MATK << "\n";
+               << " / 攻击 " << state.Attributes.ATK
+               << " / 防御 " << state.Attributes.DEF
+               << " / 魔攻 " << state.Attributes.MATK << "\n";
         stream << "选中  " << FindEquipment(state.SelectedEquipmentId).Name;
         return stream.str();
     }
@@ -1719,16 +1721,7 @@ namespace Wheatear::GameProgress {
 
     std::string BuildSettingsStatus()
     {
-        const State& state = GetState();
-        std::ostringstream stream;
-        stream << "文字速度: " << state.Settings.TextSpeed << " 字/秒\n";
-        stream << "主音量: " << state.Settings.MasterVolume << "%\n";
-        stream << "BGM 音量: " << state.Settings.BGMVolume << "%\n";
-        stream << "音效音量: " << state.Settings.SFXVolume << "%\n";
-        stream << "全屏偏好: " << (state.Settings.Fullscreen ? "开" : "关") << "\n";
-        stream << "屏幕震动: " << (state.Settings.ScreenShake ? "开" : "关") << "\n\n";
-        stream << "音量设置已接入 VN BGM、战斗 BGM 和战斗音效。";
-        return stream.str();
+        return ProgressionSettingsCommandService::BuildStatusText();
     }
 
     std::string BuildSaveLoadStatus()
@@ -1737,7 +1730,7 @@ namespace Wheatear::GameProgress {
         std::ostringstream stream;
         stream << "当前进度\n";
         stream << "章节: 第" << state.CurrentChapter << "章\n";
-        stream << "主角: Lv" << state.PlayerLevel << "  EXP "
+        stream << "主角: Lv" << state.PlayerLevel << "  经验 "
                << state.Experience << "/" << state.ExperienceToNext << "\n";
         stream << "魔剑: Lv" << state.MagicSwordLevel << "  旅人护衣 +" << state.TravelerArmorLevel << "\n";
         stream << "材料: " << BuildMaterialInventoryText() << "\n";

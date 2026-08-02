@@ -29,16 +29,6 @@ namespace Wheatear::GameProgress {
         std::string NextMilestone;
     };
 
-    struct PlayerSettings
-    {
-        int TextSpeed = 48;
-        int MasterVolume = 85;
-        int BGMVolume = 90;
-        int SFXVolume = 85;
-        bool Fullscreen = false;
-        bool ScreenShake = true;
-    };
-
     struct MaterialCost
     {
         std::string ItemId;
@@ -92,7 +82,6 @@ namespace Wheatear::GameProgress {
         std::unordered_set<std::string> StoryFlags;
         std::vector<std::string> Notifications;
         std::vector<RelationshipRecord> Relationships;
-        PlayerSettings Settings;
         std::string ActiveSupportCharacterId = "mentor";
         std::string SelectedSkillNodeId = "magic_sword_core";
         std::string SelectedEquipmentId = "traveler_armor";
@@ -106,6 +95,7 @@ namespace Wheatear::GameProgress {
 
     WHEATEAR_API State& GetState();
     WHEATEAR_API void ResetForNewGame();
+    WHEATEAR_API void ApplySettingsToRuntime();
     WHEATEAR_API bool SaveSlot(int slot);
     WHEATEAR_API bool LoadSlot(int slot);
 

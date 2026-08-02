@@ -50,9 +50,14 @@ WheatearProfile-*.json
 WheatearEditor/imgui.ini
 WheatearEditor/assets/cache/
 WheatearEditor/assets/saves/
+WheatearEditor/assets/**/*.wtmeta
+WheatearEditor/assets/**/_backup_before_*/
+WheatearEditor/assets/**/previews/
+WheatearEditor/assets/vertical_slice/source_frames/
 PicGeneration/
 vertical_slice.rar
 vertical_slice.tmp
+*.rar
 
 # Generated script binaries
 WheatearEditor/assets/scripts/*.dll

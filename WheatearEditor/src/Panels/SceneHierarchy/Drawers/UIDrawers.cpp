@@ -160,7 +160,6 @@ namespace Wheatear {
         static void DrawUIReferenceCombo(Entity owner,
             const char* label,
             UUID& targetID,
-            std::string& fallbackTag,
             bool requirePager,
             bool allowSelf)
         {
@@ -170,21 +169,15 @@ namespace Wheatear {
 
             auto& registry = scene->GetRegistry();
             UIWidgetLayout::Context layout(scene);
-            const entt::entity current = layout.ResolveReference(targetID, fallbackTag);
+            const entt::entity current = layout.ResolveReference(targetID);
             std::string preview = EntityReferenceLabel(scene, current);
-            if (current == entt::null && !fallbackTag.empty())
-                preview = "<Missing> " + fallbackTag;
 
             if (ImGui::BeginCombo(label, preview.c_str()))
             {
                 const bool noneSelected = current == entt::null
-                    && static_cast<uint64_t>(targetID) == 0
-                    && fallbackTag.empty();
+                    && static_cast<uint64_t>(targetID) == 0;
                 if (ImGui::Selectable("<None>", noneSelected))
-                {
                     targetID = 0;
-                    fallbackTag.clear();
-                }
 
                 for (auto candidate : registry.view<IDComponent, TagComponent, UIWidgetComponent>())
                 {
@@ -194,13 +187,9 @@ namespace Wheatear {
                         continue;
 
                     const auto& id = registry.get<IDComponent>(candidate).ID;
-                    const auto& tag = registry.get<TagComponent>(candidate).Tag;
                     const bool selected = candidate == current;
                     if (ImGui::Selectable(EntityReferenceLabel(scene, candidate).c_str(), selected))
-                    {
                         targetID = id;
-                        fallbackTag = tag;
-                    }
                     if (selected)
                         ImGui::SetItemDefaultFocus();
                 }
@@ -252,22 +241,7 @@ namespace Wheatear {
                 if (ImGui::Button("Bring Front")) widget.SortOrder += 10;
 
                 SectionLabel("Hierarchy");
-                DrawUIReferenceCombo(entity, "Parent", widget.ParentEntity, widget.ParentTag, false, false);
-
-                char parentBuffer[128];
-                memset(parentBuffer, 0, sizeof(parentBuffer));
-                strncpy_s(parentBuffer, sizeof(parentBuffer), widget.ParentTag.c_str(), _TRUNCATE);
-                if (ImGui::InputText("Parent Tag", parentBuffer, sizeof(parentBuffer)))
-                {
-                    widget.ParentTag = parentBuffer;
-                    widget.ParentEntity = 0;
-                }
-                ImGui::SameLine();
-                if (ImGui::Button("Clear##ParentTag"))
-                {
-                    widget.ParentEntity = 0;
-                    widget.ParentTag.clear();
-                }
+                DrawUIReferenceCombo(entity, "Parent", widget.ParentEntity, false, false);
 
                 DrawAnchorGrid(widget.Anchor);
 
@@ -726,19 +700,7 @@ namespace Wheatear {
     {
         DrawComponent<UIPageItemComponent>("UI Page Item", entity, [entity](auto& pageItem)
             {
-                DrawUIReferenceCombo(entity, "Pager", pageItem.PagerEntity, pageItem.PagerTag, true, false);
-
-                char pagerBuffer[128];
-                memset(pagerBuffer, 0, sizeof(pagerBuffer));
-                strncpy_s(pagerBuffer, sizeof(pagerBuffer), pageItem.PagerTag.c_str(), _TRUNCATE);
-
-                ImGui::PushID((int)(uint32_t)entity);
-                if (ImGui::InputText("Pager Tag", pagerBuffer, sizeof(pagerBuffer)))
-                {
-                    pageItem.PagerTag = pagerBuffer;
-                    pageItem.PagerEntity = 0;
-                }
-                ImGui::PopID();
+                DrawUIReferenceCombo(entity, "Pager", pageItem.PagerEntity, true, false);
 
                 ImGui::DragInt("Page", &pageItem.Page, 1.0f, 1, 999);
                 if (pageItem.Page < 1)
