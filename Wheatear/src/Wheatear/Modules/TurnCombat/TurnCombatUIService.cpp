@@ -3,6 +3,7 @@
 
 #include "TurnCombatSkillService.h"
 #include "TurnCombatTargetService.h"
+#include "Wheatear/Core/AssetAliasRegistry.h"
 #include "Wheatear/Modules/Common/GameplayEntityService.h"
 #include "Wheatear/Modules/Common/GameplayUILayoutService.h"
 #include "Wheatear/Scene/Components.h"
@@ -26,18 +27,13 @@ namespace Wheatear::TurnCombatUIService {
             bool Enabled = true;
         };
 
-        static constexpr const char* AttackIcon =
-            "assets/vertical_slice/turn_combat/ui/icons/cmd_attack.png";
-        static constexpr const char* GuardIcon =
-            "assets/vertical_slice/turn_combat/ui/icons/cmd_guard.png";
-        static constexpr const char* SkillIcon =
-            "assets/vertical_slice/turn_combat/ui/icons/cmd_magic_sword.png";
-        static constexpr const char* ItemIcon =
-            "assets/vertical_slice/turn_combat/ui/icons/cmd_item_potion.png";
-        static constexpr const char* CancelIcon =
-            "assets/vertical_slice/turn_combat/ui/icons/cmd_cancel.png";
-        static constexpr const char* WaitIcon =
-            "assets/vertical_slice/turn_combat/ui/icons/cmd_wait.png";
+        static std::string AttackIcon() { return AssetAliasRegistry::Path("turn.icon.attack"); }
+        static std::string GuardIcon() { return AssetAliasRegistry::Path("turn.icon.guard"); }
+        static std::string SkillIcon() { return AssetAliasRegistry::Path("turn.icon.magic_sword"); }
+        static std::string ItemIcon() { return AssetAliasRegistry::Path("turn.icon.item_potion"); }
+        static std::string EmptyItemIcon() { return AssetAliasRegistry::Path("turn.icon.item_empty"); }
+        static std::string CancelIcon() { return AssetAliasRegistry::Path("turn.icon.cancel"); }
+        static std::string WaitIcon() { return AssetAliasRegistry::Path("turn.icon.wait"); }
 
         static void SetCommandSlot(Scene* scene, int index, const CommandSlot& slot, bool visible)
         {
@@ -111,11 +107,11 @@ namespace Wheatear::TurnCombatUIService {
         static std::array<CommandSlot, 5> BuildRootSlots()
         {
             return {
-                CommandSlot{ "攻击", AttackIcon, "turn:skill:basic" },
-                CommandSlot{ "防守", GuardIcon, "turn:guard" },
-                CommandSlot{ "技能", SkillIcon, "turn:menu:skills" },
-                CommandSlot{ "道具", ItemIcon, "turn:menu:items" },
-                CommandSlot{ "取消", CancelIcon, "turn:cancel" }
+                CommandSlot{ "攻击", AttackIcon(), "turn:skill:basic" },
+                CommandSlot{ "防守", GuardIcon(), "turn:guard" },
+                CommandSlot{ "技能", SkillIcon(), "turn:menu:skills" },
+                CommandSlot{ "道具", ItemIcon(), "turn:menu:items" },
+                CommandSlot{ "取消", CancelIcon(), "turn:cancel" }
             };
         }
 
@@ -141,28 +137,28 @@ namespace Wheatear::TurnCombatUIService {
                     combatant.Mana >= skill->ManaCost
                 };
             }
-            slots[4] = { "返回", CancelIcon, "turn:cancel" };
+            slots[4] = { "返回", CancelIcon(), "turn:cancel" };
             return slots;
         }
 
         static std::array<CommandSlot, 5> BuildItemSlots()
         {
             return {
-                CommandSlot{ "恢复药水", ItemIcon, "turn:item:potion" },
+                CommandSlot{ "恢复药水", ItemIcon(), "turn:item:potion" },
                 CommandSlot{
                     "空",
-                    "assets/vertical_slice/turn_combat/ui/icons/cmd_item_empty.png",
+                    EmptyItemIcon(),
                     "",
                     false
                 },
                 CommandSlot{
                     "空",
-                    "assets/vertical_slice/turn_combat/ui/icons/cmd_item_empty.png",
+                    EmptyItemIcon(),
                     "",
                     false
                 },
-                CommandSlot{ "冥想", WaitIcon, "turn:wait" },
-                CommandSlot{ "返回", CancelIcon, "turn:cancel" }
+                CommandSlot{ "冥想", WaitIcon(), "turn:wait" },
+                CommandSlot{ "返回", CancelIcon(), "turn:cancel" }
             };
         }
 
@@ -185,7 +181,7 @@ namespace Wheatear::TurnCombatUIService {
             if (level.RuntimePhase == TurnCombatPhase::AwaitTarget)
             {
                 slots = {};
-                slots[4] = { "返回", CancelIcon, "turn:cancel" };
+                slots[4] = { "返回", CancelIcon(), "turn:cancel" };
             }
             else if (level.RuntimeCommandMenuPage == "skills")
             {

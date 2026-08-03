@@ -3,6 +3,7 @@
 
 #include "../ComponentDrawers.h"
 
+#include "Editor/EditorWidgets.h"
 #include "Editor/EventScriptGraphPanel.h"
 #include "Editor/TextAssetEditor.h"
 #include "Wheatear/Scene/Components.h"
@@ -31,17 +32,7 @@ namespace Wheatear {
         static std::unordered_map<uint64_t, ScriptSelectorState> s_SelectorStates;
         static std::unordered_map<std::string, EditorUI::TextAssetEditorState> s_EventScriptEditors;
 
-        static bool InputString(const char* label, std::string& value, size_t capacity = 256)
-        {
-            std::vector<char> buffer(capacity, 0);
-            strncpy_s(buffer.data(), buffer.size(), value.c_str(), _TRUNCATE);
-            if (ImGui::InputText(label, buffer.data(), buffer.size()))
-            {
-                value = buffer.data();
-                return true;
-            }
-            return false;
-        }
+        using EditorWidgets::InputString;
 
         static std::string ToLower(std::string value)
         {

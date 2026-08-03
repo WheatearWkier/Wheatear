@@ -1,19 +1,19 @@
 #include "wepch.h"
 #include "WAOActionEditorPanel.h"
 
-#include "Build/PlayerPackager.h"
+#include "Editor/EditorFloatingWindow.h"
+#include "Editor/EditorWidgets.h"
+#include "Wheatear/Core/AssetAliasRegistry.h"
 #include "Wheatear/Core/AssetPath.h"
 #include "Wheatear/Gameplay/Action/ActionAssetLoader.h"
-#include "Wheatear/Gameplay/Action/ActionDatabase.h"
 #include "Wheatear/Gameplay/Action/ActionDebugHistory.h"
+#include "Wheatear/Gameplay/Action/ActionRecipeQueries.h"
 
 #include <imgui/imgui.h>
 #include <yaml-cpp/yaml.h>
 
 #include <algorithm>
-#include <cstring>
 #include <filesystem>
-#include <fstream>
 #include <map>
 #include <sstream>
 #include <string>
@@ -122,100 +122,118 @@ namespace Wheatear {
             return "misc";
         }
 
-        const char* ActionModuleLabel(const std::string& key)
+        struct ActionSetDefinition
         {
-            if (key == "arcade") return "Arcade Combat";
-            if (key == "side") return "Side Combat";
-            if (key == "turn") return "Turn Combat";
-            if (key == "tactical") return "Tactical Combat";
+            std::string Key;
+            std::string Label;
+            std::string Path;
+        };
+
+        std::string ReadYamlString(const YAML::Node& node, const char* key, const std::string& fallback = {})
+        {
+            const YAML::Node value = node[key];
+            return value ? value.as<std::string>(fallback) : fallback;
+        }
+
+        std::vector<ActionSetDefinition> LoadActionSets()
+        {
+            std::vector<ActionSetDefinition> sets;
+            const std::filesystem::path path = AssetPath::Resolve(
+                AssetAliasRegistry::Path("wao.action_sets", "assets/gameplay/actions/action_sets.yaml"));
+            if (!std::filesystem::is_regular_file(path))
+                return {};
+
+            try
+            {
+                const YAML::Node root = YAML::LoadFile(path.string());
+                const YAML::Node yamlSets = root["sets"];
+                if (!yamlSets || !yamlSets.IsSequence())
+                    return {};
+
+                for (const YAML::Node& item : yamlSets)
+                {
+                    ActionSetDefinition set;
+                    set.Key = ReadYamlString(item, "key");
+                    set.Label = ReadYamlString(item, "label", set.Key);
+                    set.Path = ReadYamlString(item, "path");
+                    if (!set.Key.empty() && !set.Path.empty())
+                        sets.push_back(std::move(set));
+                }
+            }
+            catch (const YAML::Exception&)
+            {
+                return {};
+            }
+
+            return sets;
+        }
+
+        std::vector<ActionSetDefinition>& MutableActionSets()
+        {
+            static std::vector<ActionSetDefinition> sets = LoadActionSets();
+            return sets;
+        }
+
+        const std::vector<ActionSetDefinition>& ActionSets()
+        {
+            return MutableActionSets();
+        }
+
+        void ReloadActionSetDefinitions()
+        {
+            MutableActionSets() = LoadActionSets();
+        }
+
+        std::string ActionModuleLabel(const std::string& key)
+        {
+            for (const ActionSetDefinition& set : ActionSets())
+            {
+                if (set.Key == key)
+                    return set.Label;
+            }
             return "Misc";
         }
 
         std::string RecipeSourcePath(const std::string& actionId)
         {
-            if (actionId.rfind("arcade.", 0) == 0)
-                return "assets/gameplay/actions/00_arcade_actions.yaml";
-            if (actionId.rfind("side.", 0) == 0)
-                return "assets/gameplay/actions/10_side_combat_actions.yaml";
-            if (actionId.rfind("turn.", 0) == 0)
-                return "assets/gameplay/actions/20_turn_combat_actions.yaml";
-            if (actionId.rfind("tactical.", 0) == 0)
-                return "assets/gameplay/actions/30_tactical_combat_actions.yaml";
+            const size_t split = actionId.find('.');
+            if (split == std::string::npos)
+                return {};
+
+            const std::string key = actionId.substr(0, split);
+            for (const ActionSetDefinition& set : ActionSets())
+            {
+                if (set.Key == key)
+                    return set.Path;
+            }
             return {};
         }
 
         std::string TuningSourcePath(const std::string& actionId)
         {
             if (actionId.rfind("side.", 0) == 0)
-                return "assets/vertical_slice/data/side_combat_tuning.yaml";
+                return "side.tuning";
             return {};
         }
 
-        std::filesystem::path ResolveProjectAsset(const std::string& relativePath)
+        static std::string NormalizeAssetReference(std::string value)
         {
-            if (relativePath.empty())
+            std::replace(value.begin(), value.end(), '\\', '/');
+            return value;
+        }
+
+        std::string AuthoringPath(const std::string& value)
+        {
+            if (value.empty())
                 return {};
-            return AssetPath::GetProjectRoot() / std::filesystem::path(relativePath);
-        }
 
-        bool ProjectAssetExists(const std::string& relativePath)
-        {
-            const std::filesystem::path resolved = ResolveProjectAsset(relativePath);
-            return !resolved.empty() && std::filesystem::exists(resolved);
-        }
-
-        void CopyProjectAssetPath(const std::string& relativePath)
-        {
-            const std::filesystem::path resolved = ResolveProjectAsset(relativePath);
-            const std::string text = resolved.empty() ? relativePath : resolved.string();
-            ImGui::SetClipboardText(text.c_str());
-        }
-
-        void OpenProjectAssetFolder(const std::string& relativePath)
-        {
-            const std::filesystem::path resolved = ResolveProjectAsset(relativePath);
-            if (resolved.empty())
-                return;
-
-            const std::filesystem::path directory = std::filesystem::is_directory(resolved)
-                ? resolved
-                : resolved.parent_path();
-            PlayerPackager::OpenDirectory(directory);
-        }
-
-        void DrawPathTools(const char* id, const std::string& relativePath)
-        {
-            if (relativePath.empty())
+            const std::string normalized = NormalizeAssetReference(value);
+            for (const auto& [alias, path] : AssetAliasRegistry::All())
             {
-                ImGui::TextDisabled("-");
-                return;
+                if (NormalizeAssetReference(path) == normalized)
+                    return alias;
             }
-
-            const bool exists = ProjectAssetExists(relativePath);
-            ImGui::TextWrapped("%s", relativePath.c_str());
-            ImGui::SameLine();
-            ImGui::PushID(id);
-            if (exists)
-            {
-                if (ImGui::SmallButton("Open Folder"))
-                    OpenProjectAssetFolder(relativePath);
-                ImGui::SameLine();
-            }
-            else
-            {
-                ImGui::TextColored(ImVec4(1.0f, 0.35f, 0.25f, 1.0f), "Missing");
-                ImGui::SameLine();
-            }
-            if (ImGui::SmallButton("Copy Path"))
-                CopyProjectAssetPath(relativePath);
-            ImGui::PopID();
-        }
-
-        void LabelPathTools(const char* label, const std::string& relativePath)
-        {
-            ImGui::TextDisabled("%s", label);
-            ImGui::SameLine(150.0f);
-            DrawPathTools(label, relativePath);
+            return normalized;
         }
 
         bool MatchesFilter(const WAO::ActionRecipe& recipe, const char* filter)
@@ -241,79 +259,12 @@ namespace Wheatear {
 
         std::vector<WAO::ActionRecipe> SortedActions()
         {
-            std::vector<WAO::ActionRecipe> actions = WAO::ActionDatabase::All();
-            std::sort(actions.begin(),
-                actions.end(),
-                [](const WAO::ActionRecipe& a, const WAO::ActionRecipe& b)
-                {
-                    return a.Id < b.Id;
-                });
-            return actions;
+            return WAO::RecipesWithPrefix("");
         }
 
         const WAO::ActionRecipe* FindSelectedRecipe(const std::string& id)
         {
-            return id.empty() ? nullptr : WAO::ActionDatabase::Find(id);
-        }
-
-        bool EditStringField(const char* label, std::string& value, size_t capacity = 512)
-        {
-            std::vector<char> buffer(capacity + 1, '\0');
-            std::strncpy(buffer.data(), value.c_str(), capacity);
-            buffer[capacity] = '\0';
-            if (!ImGui::InputText(label, buffer.data(), buffer.size()))
-                return false;
-
-            value = buffer.data();
-            return true;
-        }
-
-        bool EditMultilineField(const char* label, std::string& value, const ImVec2& size, size_t capacity = 1024)
-        {
-            std::vector<char> buffer(capacity + 1, '\0');
-            std::strncpy(buffer.data(), value.c_str(), capacity);
-            buffer[capacity] = '\0';
-            if (!ImGui::InputTextMultiline(label, buffer.data(), buffer.size(), size))
-                return false;
-
-            value = buffer.data();
-            return true;
-        }
-
-        std::vector<std::string> SplitList(const std::string& text)
-        {
-            std::vector<std::string> values;
-            std::string current;
-            auto flush = [&]()
-            {
-                const size_t start = current.find_first_not_of(" \t\r\n");
-                const size_t end = current.find_last_not_of(" \t\r\n");
-                if (start != std::string::npos && end != std::string::npos)
-                    values.push_back(current.substr(start, end - start + 1));
-                current.clear();
-            };
-
-            for (char c : text)
-            {
-                if (c == ',' || c == ';' || c == '|')
-                    flush();
-                else
-                    current.push_back(c);
-            }
-            flush();
-            return values;
-        }
-
-        std::string JoinList(const std::vector<std::string>& values)
-        {
-            std::ostringstream stream;
-            for (size_t i = 0; i < values.size(); ++i)
-            {
-                if (i > 0)
-                    stream << ", ";
-                stream << values[i];
-            }
-            return stream.str();
+            return id.empty() ? nullptr : WAO::FindRecipeOrWarn(id, "WAOActionEditorPanel");
         }
 
         std::string JoinResourceCost(const std::unordered_map<std::string, float>& values)
@@ -366,6 +317,55 @@ namespace Wheatear {
             return costs;
         }
 
+        std::string JoinParams(const std::unordered_map<std::string, std::string>& values)
+        {
+            std::vector<std::pair<std::string, std::string>> sorted(values.begin(), values.end());
+            std::sort(sorted.begin(), sorted.end(),
+                [](const auto& a, const auto& b) { return a.first < b.first; });
+
+            std::ostringstream stream;
+            for (size_t i = 0; i < sorted.size(); ++i)
+            {
+                if (i > 0)
+                    stream << ", ";
+                stream << sorted[i].first << "=" << sorted[i].second;
+            }
+            return stream.str();
+        }
+
+        std::unordered_map<std::string, std::string> ParseParams(const std::string& text)
+        {
+            std::unordered_map<std::string, std::string> params;
+            std::stringstream stream(text);
+            std::string item;
+            while (std::getline(stream, item, ','))
+            {
+                const size_t split = item.find('=');
+                if (split == std::string::npos)
+                    continue;
+
+                std::string key = item.substr(0, split);
+                std::string value = item.substr(split + 1);
+                const auto trim = [](std::string& textValue)
+                {
+                    const char* whitespace = " \t\r\n";
+                    const size_t begin = textValue.find_first_not_of(whitespace);
+                    if (begin == std::string::npos)
+                    {
+                        textValue.clear();
+                        return;
+                    }
+                    const size_t end = textValue.find_last_not_of(whitespace);
+                    textValue = textValue.substr(begin, end - begin + 1);
+                };
+                trim(key);
+                trim(value);
+                if (!key.empty())
+                    params[key] = value;
+            }
+            return params;
+        }
+
         void WriteStringSequence(YAML::Node node, const char* key, const std::vector<std::string>& values)
         {
             YAML::Node sequence(YAML::NodeType::Sequence);
@@ -389,6 +389,20 @@ namespace Wheatear {
                     map[id] = cost;
             }
             node["resourceCost"] = map;
+        }
+
+        void WriteParams(YAML::Node node, const std::unordered_map<std::string, std::string>& values)
+        {
+            YAML::Node map(YAML::NodeType::Map);
+            std::vector<std::pair<std::string, std::string>> sorted(values.begin(), values.end());
+            std::sort(sorted.begin(), sorted.end(),
+                [](const auto& a, const auto& b) { return a.first < b.first; });
+            for (const auto& [id, value] : sorted)
+            {
+                if (!id.empty())
+                    map[id] = value;
+            }
+            node["params"] = map;
         }
 
         void WriteEffects(YAML::Node node, const std::vector<WAO::EffectSpec>& effects)
@@ -424,10 +438,10 @@ namespace Wheatear {
             node["id"] = recipe.Id;
             node["displayName"] = recipe.DisplayName;
             node["description"] = recipe.Description;
-            node["icon"] = recipe.IconPath;
+            node["icon"] = AuthoringPath(recipe.IconPath);
             node["animation"] = recipe.AnimationId;
-            node["sound"] = recipe.SoundPath;
-            node["effect"] = recipe.EffectPath;
+            node["sound"] = AuthoringPath(recipe.SoundPath);
+            node["effect"] = AuthoringPath(recipe.EffectPath);
             node["cooldown"] = recipe.Cooldown;
             node["duration"] = recipe.Duration;
             node["startup"] = recipe.Startup;
@@ -439,6 +453,7 @@ namespace Wheatear {
             WriteStringSequence(node, "tags", recipe.Tags);
             WriteStringSequence(node, "signals", recipe.Signals);
             WriteResourceCost(node, recipe.ResourceCost);
+            WriteParams(node, recipe.Params);
             WriteEffects(node, recipe.Effects);
             return true;
         }
@@ -483,8 +498,7 @@ namespace Wheatear {
 
         void SectionHeader(const char* label)
         {
-            ImGui::Separator();
-            ImGui::TextDisabled("%s", label);
+            EditorWidgets::SectionHeader(label);
         }
 
     } // namespace
@@ -505,14 +519,17 @@ namespace Wheatear {
         if (!m_Open)
             return;
 
-        if (!ImGui::Begin("WAO Action Debugger", &m_Open))
+        if (!EditorFloatingWindow::Begin("WAO Action Debugger", &m_Open, 0, { 1220.0f, 760.0f }))
         {
-            ImGui::End();
+            EditorFloatingWindow::End();
             return;
         }
 
         const auto actions = SortedActions();
-        ImGui::Text("Actions: %d", static_cast<int>(actions.size()));
+        EditorWidgets::PanelHeader("WAO Action Editor", "Author and inspect reusable gameplay action recipes, effects, validation, and runtime ledger entries.");
+        EditorWidgets::StatusBadge((std::to_string(actions.size()) + " recipes").c_str(), EditorWidgets::StatusKind::Info);
+        ImGui::SameLine();
+        EditorWidgets::StatusBadge(m_EditDirty ? "Unsaved edit" : "Clean", m_EditDirty ? EditorWidgets::StatusKind::Warning : EditorWidgets::StatusKind::Success);
         ImGui::SameLine();
         if (ImGui::Button("Clear Ledger"))
         {
@@ -523,9 +540,13 @@ namespace Wheatear {
         if (ImGui::Button("Reload YAML"))
             ReloadActionSources();
         ImGui::SameLine();
-        ImGui::TextDisabled("Runtime recipes update as gameplay starts actions.");
-        if (!m_SaveStatus.empty())
-            ImGui::TextColored(ImVec4(0.55f, 0.85f, 1.0f, 1.0f), "%s", m_SaveStatus.c_str());
+        EditorFloatingWindow::DrawToggleButton("WAO Action Debugger");
+        ImGui::SameLine();
+        EditorWidgets::InlineStatus(
+            m_SaveStatus.empty() ? "Runtime recipes update as gameplay starts actions." : m_SaveStatus,
+            m_SaveStatus.find("fail") != std::string::npos || m_SaveStatus.find("Failed") != std::string::npos
+                ? EditorWidgets::StatusKind::Error
+                : EditorWidgets::StatusKind::Info);
 
         ImGui::Separator();
         const float leftWidth = std::max(260.0f, ImGui::GetContentRegionAvail().x * 0.30f);
@@ -538,12 +559,14 @@ namespace Wheatear {
         DrawActionDetails();
         ImGui::EndChild();
 
-        ImGui::End();
+        EditorFloatingWindow::End();
     }
 
     void WAOActionEditorPanel::DrawActionList()
     {
-        ImGui::InputTextWithHint("##WAOFilter", "Filter id / tag / text", m_Filter, sizeof(m_Filter));
+        EditorWidgets::SectionHeader("Recipes", "Filter by id, display name, description, or tag.");
+        ImGui::SetNextItemWidth(-1.0f);
+        EditorWidgets::SearchBar("##WAOFilter", m_Filter, sizeof(m_Filter), "Filter id / tag / text");
         ImGui::Checkbox("Group by module", &m_GroupByModule);
         ImGui::Separator();
 
@@ -580,7 +603,7 @@ namespace Wheatear {
 
         for (const auto& [module, recipes] : byModule)
         {
-            const std::string header = std::string(ActionModuleLabel(module)) + " (" + std::to_string(recipes.size()) + ")";
+            const std::string header = ActionModuleLabel(module) + " (" + std::to_string(recipes.size()) + ")";
             if (!ImGui::CollapsingHeader(header.c_str(), ImGuiTreeNodeFlags_DefaultOpen))
                 continue;
 
@@ -595,7 +618,7 @@ namespace Wheatear {
     {
         if (!FindSelectedRecipe(m_SelectedActionId))
         {
-            ImGui::TextDisabled("Select an action recipe.");
+            EditorWidgets::EmptyState("Select an action recipe.", "Choose a recipe on the left to inspect YAML source, effects, validation, preview, and ledger history.");
             DrawDebugLedger();
             return;
         }
@@ -664,12 +687,12 @@ namespace Wheatear {
         LabelValue("Module", ActionModuleLabel(ActionModuleKey(*recipe)));
 
         SectionHeader("Authoring");
-        LabelPathTools("Recipe YAML", RecipeSourcePath(recipe->Id));
-        LabelPathTools("Tuning", TuningSourcePath(recipe->Id));
-        LabelPathTools("Icon", recipe->IconPath);
+        EditorWidgets::DrawLabeledPathTools("Recipe YAML", RecipeSourcePath(recipe->Id));
+        EditorWidgets::DrawLabeledPathTools("Tuning", TuningSourcePath(recipe->Id));
+        EditorWidgets::DrawLabeledPathTools("Icon", recipe->IconPath);
         LabelValue("Animation", recipe->AnimationId);
-        LabelPathTools("SFX", recipe->SoundPath);
-        LabelPathTools("VFX", recipe->EffectPath);
+        EditorWidgets::DrawLabeledPathTools("SFX", recipe->SoundPath);
+        EditorWidgets::DrawLabeledPathTools("VFX", recipe->EffectPath);
 
         ImGui::Separator();
         LabelValue("Cooldown", recipe->Cooldown);
@@ -688,6 +711,15 @@ namespace Wheatear {
         {
             for (const auto& [id, cost] : recipe->ResourceCost)
                 LabelValue(id.c_str(), cost);
+        }
+
+        SectionHeader("Params");
+        if (recipe->Params.empty())
+            ImGui::TextDisabled("No recipe params.");
+        else
+        {
+            for (const auto& [id, value] : recipe->Params)
+                LabelValue(id.c_str(), value);
         }
 
         SectionHeader("Tags");
@@ -734,12 +766,12 @@ namespace Wheatear {
         ImGui::TextUnformatted(m_EditingActionId.c_str());
 
         bool changed = false;
-        changed |= EditStringField("Name", m_EditRecipe.DisplayName);
-        changed |= EditMultilineField("Description", m_EditRecipe.Description, ImVec2(0.0f, 76.0f), 1536);
-        changed |= EditStringField("Icon Path", m_EditRecipe.IconPath);
-        changed |= EditStringField("Animation Id", m_EditRecipe.AnimationId);
-        changed |= EditStringField("SFX Path", m_EditRecipe.SoundPath);
-        changed |= EditStringField("VFX Path", m_EditRecipe.EffectPath);
+        changed |= EditorWidgets::InputString("Name", m_EditRecipe.DisplayName);
+        changed |= EditorWidgets::InputMultilineString("Description", m_EditRecipe.Description, ImVec2(0.0f, 76.0f), 1536);
+        changed |= EditorWidgets::InputString("Icon Path", m_EditRecipe.IconPath);
+        changed |= EditorWidgets::InputString("Animation Id", m_EditRecipe.AnimationId);
+        changed |= EditorWidgets::InputString("SFX Path", m_EditRecipe.SoundPath);
+        changed |= EditorWidgets::InputString("VFX Path", m_EditRecipe.EffectPath);
 
         SectionHeader("Timing");
         changed |= ImGui::DragFloat("Cooldown", &m_EditRecipe.Cooldown, 0.01f, 0.0f, 60.0f, "%.3f");
@@ -752,27 +784,35 @@ namespace Wheatear {
         changed |= ImGui::DragFloat("Move Scale", &m_EditRecipe.MovementScale, 0.01f, -4.0f, 4.0f, "%.3f");
 
         SectionHeader("Lists");
-        std::string tags = JoinList(m_EditRecipe.Tags);
-        if (EditStringField("Tags", tags))
+        std::string tags = EditorWidgets::JoinList(m_EditRecipe.Tags);
+        if (EditorWidgets::InputString("Tags", tags))
         {
-            m_EditRecipe.Tags = SplitList(tags);
+            m_EditRecipe.Tags = EditorWidgets::SplitList(tags);
             changed = true;
         }
 
-        std::string signals = JoinList(m_EditRecipe.Signals);
-        if (EditStringField("Signals", signals))
+        std::string signals = EditorWidgets::JoinList(m_EditRecipe.Signals);
+        if (EditorWidgets::InputString("Signals", signals))
         {
-            m_EditRecipe.Signals = SplitList(signals);
+            m_EditRecipe.Signals = EditorWidgets::SplitList(signals);
             changed = true;
         }
 
         std::string resourceCost = JoinResourceCost(m_EditRecipe.ResourceCost);
-        if (EditStringField("Resource Cost", resourceCost))
+        if (EditorWidgets::InputString("Resource Cost", resourceCost))
         {
             m_EditRecipe.ResourceCost = ParseResourceCost(resourceCost);
             changed = true;
         }
         ImGui::TextDisabled("Resource format: mana=12, sword=1");
+
+        std::string params = JoinParams(m_EditRecipe.Params);
+        if (EditorWidgets::InputString("Params", params, 1024))
+        {
+            m_EditRecipe.Params = ParseParams(params);
+            changed = true;
+        }
+        ImGui::TextDisabled("Param format: targetRule=EnemySingle, category=Skill, magic=true, defensePierce=0.22");
 
         DrawEffectEditor();
 
@@ -780,28 +820,27 @@ namespace Wheatear {
             m_EditDirty = true;
 
         ImGui::Separator();
-        if (ImGui::Button("Save YAML"))
+        bool cancelClicked = false;
+        if (EditorWidgets::DirtySaveBar(m_EditDirty, m_SaveStatus, "Save YAML", "Cancel", &cancelClicked))
         {
             if (SaveEditedRecipe())
             {
-                WAO::ActionDatabase::Register(m_EditRecipe);
+                const std::string savedId = m_EditRecipe.Id;
+                const bool reloaded = ReloadActionSources();
+                m_SelectedActionId = savedId;
                 m_EditMode = false;
                 m_EditDirty = false;
-                m_SaveStatus = "Saved " + m_EditRecipe.Id;
+                m_SaveStatus = reloaded
+                    ? "Saved and reloaded " + savedId
+                    : "Saved " + savedId + ", but no YAML recipes were reloaded.";
             }
         }
-        ImGui::SameLine();
-        if (ImGui::Button("Cancel"))
+        if (cancelClicked)
         {
             m_EditMode = false;
             m_EditDirty = false;
             m_SaveStatus = "Edit cancelled.";
         }
-        ImGui::SameLine();
-        ImGui::TextDisabled("%s", m_EditDirty ? "Unsaved changes" : "No changes");
-
-        if (!m_SaveStatus.empty())
-            ImGui::TextWrapped("%s", m_SaveStatus.c_str());
     }
 
     bool WAOActionEditorPanel::SaveEditedRecipe()
@@ -813,7 +852,7 @@ namespace Wheatear {
             return false;
         }
 
-        const std::filesystem::path path = ResolveProjectAsset(relativePath);
+        const std::filesystem::path path = EditorWidgets::ResolveProjectAsset(relativePath);
         if (path.empty() || !std::filesystem::is_regular_file(path))
         {
             m_SaveStatus = "Missing YAML source: " + relativePath;
@@ -851,14 +890,11 @@ namespace Wheatear {
                 return false;
             }
 
-            std::ofstream output(path, std::ios::binary | std::ios::trunc);
-            if (!output.is_open())
+            if (!EditorWidgets::WriteFileText(path, std::string(YAML::Dump(root))))
             {
                 m_SaveStatus = "Failed to write " + path.string();
                 return false;
             }
-
-            output << root;
             return true;
         }
         catch (const YAML::Exception& exception)
@@ -941,9 +977,9 @@ namespace Wheatear {
             ImGui::EndCombo();
         }
 
-        changed |= EditStringField("Attribute Id", effect.AttributeId, 128);
-        changed |= EditStringField("State Id", effect.StateId, 128);
-        changed |= EditStringField("Signal Id", effect.SignalId, 128);
+        changed |= EditorWidgets::InputString("Attribute Id", effect.AttributeId, 128);
+        changed |= EditorWidgets::InputString("State Id", effect.StateId, 128);
+        changed |= EditorWidgets::InputString("Signal Id", effect.SignalId, 128);
         changed |= ImGui::DragFloat("Value", &effect.Value, 0.05f, -100000.0f, 100000.0f, "%.3f");
 
         int turns = effect.Turns;
@@ -1037,11 +1073,11 @@ namespace Wheatear {
             warnings.push_back("Hit time is later than duration.");
         if (recipe->CancelEnd > 0.0f && recipe->CancelEnd < recipe->CancelStart)
             errors.push_back("Cancel end is earlier than cancel start.");
-        if (!recipe->IconPath.empty() && !ProjectAssetExists(recipe->IconPath))
+        if (!recipe->IconPath.empty() && !EditorWidgets::ProjectAssetExists(recipe->IconPath))
             warnings.push_back("Icon path is missing: " + recipe->IconPath);
-        if (!recipe->SoundPath.empty() && !ProjectAssetExists(recipe->SoundPath))
+        if (!recipe->SoundPath.empty() && !EditorWidgets::ProjectAssetExists(recipe->SoundPath))
             warnings.push_back("SFX path is missing: " + recipe->SoundPath);
-        if (!recipe->EffectPath.empty() && !ProjectAssetExists(recipe->EffectPath))
+        if (!recipe->EffectPath.empty() && !EditorWidgets::ProjectAssetExists(recipe->EffectPath))
             warnings.push_back("VFX path is missing: " + recipe->EffectPath);
 
         for (const auto& [id, cost] : recipe->ResourceCost)
@@ -1050,6 +1086,14 @@ namespace Wheatear {
                 errors.push_back("Resource cost has an empty id.");
             if (cost < 0.0f)
                 errors.push_back("Resource cost is negative: " + id);
+        }
+
+        for (const auto& [id, value] : recipe->Params)
+        {
+            if (id.empty())
+                errors.push_back("Recipe params contain an empty key.");
+            if (value.empty())
+                warnings.push_back("Recipe param has an empty value: " + id);
         }
 
         for (size_t i = 0; i < recipe->Effects.size(); ++i)
@@ -1102,9 +1146,9 @@ namespace Wheatear {
 
         LabelValue("Action", recipe->Id);
         LabelValue("Animation", recipe->AnimationId);
-        LabelPathTools("Icon", recipe->IconPath);
-        LabelPathTools("SFX", recipe->SoundPath);
-        LabelPathTools("VFX", recipe->EffectPath);
+        EditorWidgets::DrawLabeledPathTools("Icon", recipe->IconPath);
+        EditorWidgets::DrawLabeledPathTools("SFX", recipe->SoundPath);
+        EditorWidgets::DrawLabeledPathTools("VFX", recipe->EffectPath);
 
         SectionHeader("Timing Preview");
         const float total = std::max({ 0.1f, recipe->Duration, recipe->Startup + recipe->Recovery, recipe->HitTime + recipe->Recovery, recipe->CancelEnd });
@@ -1138,13 +1182,21 @@ namespace Wheatear {
 
         SectionHeader("Gameplay Output");
         ImGui::Text("Effects: %d", static_cast<int>(recipe->Effects.size()));
-        ImGui::Text("Signals: %s", recipe->Signals.empty() ? "-" : JoinList(recipe->Signals).c_str());
+        ImGui::Text("Signals: %s", recipe->Signals.empty() ? "-" : EditorWidgets::JoinList(recipe->Signals).c_str());
         ImGui::Text("Cost: %s", recipe->ResourceCost.empty() ? "-" : JoinResourceCost(recipe->ResourceCost).c_str());
+        ImGui::Text("Params: %s", recipe->Params.empty() ? "-" : JoinParams(recipe->Params).c_str());
     }
 
     bool WAOActionEditorPanel::ReloadActionSources()
     {
-        const size_t loaded = WAO::ActionAssetLoader::LoadDirectory("assets/gameplay/actions");
+        ReloadActionSetDefinitions();
+        size_t loaded = WAO::ActionAssetLoader::ReloadManifest(
+            AssetAliasRegistry::Path("wao.action_sets", "assets/gameplay/actions/action_sets.yaml"));
+        if (loaded == 0)
+        {
+            loaded = WAO::ActionAssetLoader::ReloadDirectory(
+                AssetAliasRegistry::Path("wao.action_directory", "assets/gameplay/actions"));
+        }
         m_SaveStatus = "Reloaded " + std::to_string(loaded) + " YAML action recipe(s).";
         return loaded > 0;
     }

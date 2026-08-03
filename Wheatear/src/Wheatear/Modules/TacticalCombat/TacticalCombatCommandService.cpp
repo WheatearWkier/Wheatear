@@ -5,6 +5,7 @@
 #include "TacticalCombatBoardService.h"
 #include "TacticalCombatFeedbackService.h"
 #include "TacticalCombatSkillService.h"
+#include "Wheatear/Core/AssetAliasRegistry.h"
 #include "Wheatear/Modules/Common/GameplayEntityService.h"
 #include "Wheatear/Modules/Common/GameplayTextService.h"
 
@@ -60,7 +61,7 @@ namespace Wheatear::TacticalCombatCommandService {
                 level.RuntimePhase = TacticalCombatPhase::AwaitCommand;
                 level.RuntimeMessage = unit.DisplayName + "：请选择行动。";
                 TacticalCombatFeedbackService::PlaySound(
-                    "assets/vertical_slice/tactical_combat/audio/tac_select.wav", 0.34f);
+                    AssetAliasRegistry::Path("tactical.audio.select"), 0.34f);
                 return;
             }
 
@@ -87,7 +88,7 @@ namespace Wheatear::TacticalCombatCommandService {
                     level.RuntimeCommandMenuPage = "root";
                     level.RuntimeMessage = selectedUnit.DisplayName + " 已移动，可以继续攻击或待机。";
                     TacticalCombatFeedbackService::PlaySound(
-                        "assets/vertical_slice/tactical_combat/audio/tac_move.wav", 0.38f);
+                        AssetAliasRegistry::Path("tactical.audio.move"), 0.38f);
                     return;
                 }
 
@@ -107,8 +108,9 @@ namespace Wheatear::TacticalCombatCommandService {
                         return;
                     }
 
+                    const std::string skillId = basic->Id;
                     TacticalCombatActionService::BeginAction(
-                        scene, level, selected, basic->Id, occupant, TacticalCombatPhase::PlayerTurn);
+                        scene, level, selected, skillId, occupant, TacticalCombatPhase::PlayerTurn);
                     return;
                 }
 
@@ -122,8 +124,9 @@ namespace Wheatear::TacticalCombatCommandService {
                         const auto* basic = TacticalCombatSkillService::FindSkill(selectedUnit.BasicSkillId);
                         if (basic && TacticalCombatBoardService::IsValidTarget(*basic, selectedUnit, targetUnit))
                         {
+                            const std::string skillId = basic->Id;
                             TacticalCombatActionService::BeginAction(
-                                scene, level, selected, basic->Id, occupant, TacticalCombatPhase::PlayerTurn);
+                                scene, level, selected, skillId, occupant, TacticalCombatPhase::PlayerTurn);
                             return;
                         }
                     }
@@ -135,7 +138,7 @@ namespace Wheatear::TacticalCombatCommandService {
                         selectedUnit.RuntimeMoved = true;
                         level.RuntimeMessage = selectedUnit.DisplayName + " 已移动，可以继续攻击或待机。";
                         TacticalCombatFeedbackService::PlaySound(
-                            "assets/vertical_slice/tactical_combat/audio/tac_move.wav", 0.38f);
+                            AssetAliasRegistry::Path("tactical.audio.move"), 0.38f);
                     }
                 }
                 return;
@@ -158,8 +161,9 @@ namespace Wheatear::TacticalCombatCommandService {
                 return;
             }
 
+            const std::string skillId = skill->Id;
             TacticalCombatActionService::BeginAction(
-                scene, level, selected, skill->Id, occupant, TacticalCombatPhase::PlayerTurn);
+                scene, level, selected, skillId, occupant, TacticalCombatPhase::PlayerTurn);
         }
 
         static void HandleSkillCommand(Scene* scene,
@@ -205,8 +209,9 @@ namespace Wheatear::TacticalCombatCommandService {
             level.RuntimeSelectedSkillId = skill->Id;
             if (skill->TargetRule == TacticalCombatSkillService::TacticalTargetRule::Self)
             {
+                const std::string actionSkillId = skill->Id;
                 TacticalCombatActionService::BeginAction(
-                    scene, level, selected, skill->Id, selected, TacticalCombatPhase::PlayerTurn);
+                    scene, level, selected, actionSkillId, selected, TacticalCombatPhase::PlayerTurn);
                 return;
             }
 

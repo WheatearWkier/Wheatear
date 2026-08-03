@@ -4,6 +4,8 @@
 #include "Wheatear/Scene/Entity.h"
 
 #include <cstdint>
+#include <functional>
+#include <string>
 #include <unordered_map>
 #include <unordered_set>
 #include <vector>
@@ -11,6 +13,7 @@
 namespace Wheatear {
 
     class Scene;
+    enum class UITemplateKind;
 
     class SceneHierarchyPanel
     {
@@ -23,6 +26,7 @@ namespace Wheatear {
 
         Entity GetSelectedEntity() const { return m_SelectionContext; }
         void SetSelectedEntity(Entity entity);
+        void SetEntityActivatedCallback(std::function<void(Entity)> callback);
 
     private:
         using UIChildMap = std::unordered_map<uint32_t, std::vector<Entity>>;
@@ -45,11 +49,18 @@ namespace Wheatear {
             std::unordered_set<uint32_t>& visiting) const;
         std::vector<Entity> CollectUIChildrenRecursive(Entity entity,
             const UIChildMap& childMap) const;
+        Entity FindSingleUICanvas() const;
+        UUID ResolveUIParentID(Entity entity) const;
+        Entity CreateEntityWithUndo(const std::string& name,
+            const std::function<void(Entity)>& configure);
+        Entity CreateUITemplateWithUndo(UITemplateKind kind, UUID parentID);
+        void DrawCreateUIMenuItems(UUID parentID, bool includeCanvas);
         void DrawComponents(Entity entity);
 
     private:
         Ref<Scene> m_Context;
         Entity m_SelectionContext;
+        std::function<void(Entity)> m_EntityActivatedCallback;
         bool m_ScrollToSelection = false;
         bool m_RenameRequested = false;
         char m_SearchBuffer[128] = {};

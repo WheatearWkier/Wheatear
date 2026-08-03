@@ -1,15 +1,14 @@
 #include "SideCombatTuningEditorPanel.h"
 
+#include "Editor/EditorFloatingWindow.h"
+#include "Editor/EditorWidgets.h"
+#include "Wheatear/Core/AssetAliasRegistry.h"
 #include "Wheatear/Core/AssetPath.h"
 
 #include <imgui/imgui.h>
 #include <yaml-cpp/yaml.h>
 
 #include <algorithm>
-#include <cstring>
-#include <fstream>
-#include <iterator>
-#include <sstream>
 #include <vector>
 
 namespace Wheatear {
@@ -19,257 +18,15 @@ namespace Wheatear {
         static bool s_HasPendingOpen = false;
         static std::string s_PendingOpenPath;
 
-        template<typename T>
-        static T ReadScalar(const YAML::Node& node, const char* key, T fallback)
-        {
-            try
-            {
-                const YAML::Node value = node[key];
-                return value ? value.as<T>(fallback) : fallback;
-            }
-            catch (...)
-            {
-                return fallback;
-            }
-        }
-
-        static std::string ReadString(const YAML::Node& node, const char* key, const std::string& fallback = {})
-        {
-            return ReadScalar<std::string>(node, key, fallback);
-        }
-
-        static YAML::Node EnsureMap(YAML::Node node, const char* key)
-        {
-            if (!node[key] || !node[key].IsMap())
-                node[key] = YAML::Node(YAML::NodeType::Map);
-            return node[key];
-        }
-
-        static std::vector<std::string> MapKeys(const YAML::Node& node)
-        {
-            std::vector<std::string> keys;
-            if (!node || !node.IsMap())
-                return keys;
-
-            for (auto it = node.begin(); it != node.end(); ++it)
-            {
-                if (it->first.IsScalar())
-                    keys.push_back(it->first.as<std::string>());
-            }
-            std::sort(keys.begin(), keys.end());
-            return keys;
-        }
-
-        static bool ReadFileText(const std::filesystem::path& path, std::string& text)
-        {
-            std::ifstream input(path, std::ios::binary);
-            if (!input.is_open())
-                return false;
-
-            text.assign(std::istreambuf_iterator<char>(input), std::istreambuf_iterator<char>());
-            return true;
-        }
-
-        static bool WriteFileText(const std::filesystem::path& path, const std::string& text)
-        {
-            std::ofstream output(path, std::ios::binary | std::ios::trunc);
-            if (!output.is_open())
-                return false;
-            output.write(text.data(), static_cast<std::streamsize>(text.size()));
-            return output.good();
-        }
-
-        static bool InputString(const char* label, std::string& value, size_t capacity = 512)
-        {
-            std::vector<char> buffer(std::max<size_t>(capacity, value.size() + 32), 0);
-            strncpy_s(buffer.data(), buffer.size(), value.c_str(), _TRUNCATE);
-            if (ImGui::InputText(label, buffer.data(), buffer.size()))
-            {
-                value = buffer.data();
-                return true;
-            }
-            return false;
-        }
-
-        static void Help(const char* text)
-        {
-            if (ImGui::IsItemHovered())
-                ImGui::SetTooltip("%s", text);
-        }
-
-        static bool DrawFloat(YAML::Node map,
-            const char* key,
-            const char* label,
-            float speed = 0.01f,
-            float minValue = 0.0f,
-            float maxValue = 0.0f,
-            const char* format = "%.3f")
-        {
-            float value = ReadScalar<float>(map, key, 0.0f);
-            if (ImGui::DragFloat(label, &value, speed, minValue, maxValue, format))
-            {
-                map[key] = value;
-                return true;
-            }
-            return false;
-        }
-
-        static bool DrawInt(YAML::Node map,
-            const char* key,
-            const char* label,
-            int minValue = 0,
-            int maxValue = 999)
-        {
-            int value = ReadScalar<int>(map, key, 0);
-            if (ImGui::DragInt(label, &value, 1.0f, minValue, maxValue))
-            {
-                map[key] = value;
-                return true;
-            }
-            return false;
-        }
-
-        static bool DrawBool(YAML::Node map, const char* key, const char* label)
-        {
-            bool value = ReadScalar<bool>(map, key, false);
-            if (ImGui::Checkbox(label, &value))
-            {
-                map[key] = value;
-                return true;
-            }
-            return false;
-        }
-
-        static bool DrawString(YAML::Node map,
-            const char* key,
-            const char* label,
-            size_t capacity = 512)
-        {
-            std::string value = ReadString(map, key);
-            if (InputString(label, value, capacity))
-            {
-                map[key] = value;
-                return true;
-            }
-            return false;
-        }
-
-        static bool DrawVec2(YAML::Node map,
-            const char* key,
-            const char* label,
-            float speed = 0.01f)
-        {
-            float values[2] = { 0.0f, 0.0f };
-            const YAML::Node source = map[key];
-            if (source && source.IsSequence() && source.size() >= 2)
-            {
-                values[0] = source[0].as<float>(0.0f);
-                values[1] = source[1].as<float>(0.0f);
-            }
-
-            if (ImGui::DragFloat2(label, values, speed))
-            {
-                YAML::Node sequence(YAML::NodeType::Sequence);
-                sequence.push_back(values[0]);
-                sequence.push_back(values[1]);
-                map[key] = sequence;
-                return true;
-            }
-            return false;
-        }
-
-        static std::vector<std::string> ReadStringList(const YAML::Node& node)
-        {
-            std::vector<std::string> values;
-            if (!node || !node.IsSequence())
-                return values;
-
-            for (std::size_t i = 0; i < node.size(); ++i)
-            {
-                const YAML::Node value = node[i];
-                if (value.IsScalar())
-                    values.push_back(value.as<std::string>());
-            }
-            return values;
-        }
-
-        static std::string JoinList(const std::vector<std::string>& values)
-        {
-            std::ostringstream stream;
-            for (size_t i = 0; i < values.size(); ++i)
-            {
-                if (i > 0)
-                    stream << ", ";
-                stream << values[i];
-            }
-            return stream.str();
-        }
-
-        static std::vector<std::string> SplitList(const std::string& text)
-        {
-            std::vector<std::string> values;
-            std::stringstream stream(text);
-            std::string item;
-            while (std::getline(stream, item, ','))
-            {
-                const char* whitespace = " \t\r\n";
-                const size_t begin = item.find_first_not_of(whitespace);
-                if (begin == std::string::npos)
-                    continue;
-                const size_t end = item.find_last_not_of(whitespace);
-                values.push_back(item.substr(begin, end - begin + 1));
-            }
-            return values;
-        }
-
-        static bool DrawStringList(YAML::Node map,
-            const char* key,
-            const char* label,
-            size_t capacity = 512)
-        {
-            std::string value = JoinList(ReadStringList(map[key]));
-            if (InputString(label, value, capacity))
-            {
-                YAML::Node sequence(YAML::NodeType::Sequence);
-                for (const std::string& item : SplitList(value))
-                    sequence.push_back(item);
-                map[key] = sequence;
-                return true;
-            }
-            return false;
-        }
-
-        static bool BeginSelector(const char* label,
-            const std::vector<std::string>& keys,
-            std::string& selected)
-        {
-            if (selected.empty() && !keys.empty())
-                selected = keys.front();
-
-            if (ImGui::BeginCombo(label, selected.empty() ? "(none)" : selected.c_str()))
-            {
-                for (const std::string& key : keys)
-                {
-                    const bool isSelected = selected == key;
-                    if (ImGui::Selectable(key.c_str(), isSelected))
-                        selected = key;
-                    if (isSelected)
-                        ImGui::SetItemDefaultFocus();
-                }
-                ImGui::EndCombo();
-            }
-
-            return !selected.empty();
-        }
+        using namespace EditorWidgets;
 
         static void DrawRawPreview(const std::string& text)
         {
-            std::vector<char> buffer(std::max<size_t>(text.size() + 1, 4096), 0);
-            strncpy_s(buffer.data(), buffer.size(), text.c_str(), _TRUNCATE);
-            ImGui::InputTextMultiline("##SideCombatRawPreview",
-                buffer.data(),
-                buffer.size(),
+            std::string preview = text;
+            EditorWidgets::InputMultilineString("##SideCombatRawPreview",
+                preview,
                 ImVec2(-1.0f, -1.0f),
+                std::max<size_t>(text.size() + 1, 4096),
                 ImGuiInputTextFlags_ReadOnly | ImGuiInputTextFlags_AllowTabInput);
         }
 
@@ -325,15 +82,23 @@ namespace Wheatear {
         if (!m_Loaded)
             Load();
 
-        ImGui::Begin("Side Combat Tuning Editor", &m_Open);
+        EditorFloatingWindow::Begin("Side Combat Tuning Editor", &m_Open, 0, { 1180.0f, 760.0f });
+        EditorWidgets::PanelHeader("Side Combat Tuning", "Structured YAML authoring for runtime movement, combo feel, attacks, skills, and progression profiles.");
+        EditorWidgets::StatusBadge(m_ParseValid ? "YAML valid" : "YAML invalid",
+            m_ParseValid ? EditorWidgets::StatusKind::Success : EditorWidgets::StatusKind::Error);
+        ImGui::SameLine();
+        EditorWidgets::StatusBadge(m_Dirty ? "Unsaved edit" : "Clean",
+            m_Dirty ? EditorWidgets::StatusKind::Warning : EditorWidgets::StatusKind::Success);
+        ImGui::SameLine();
+        EditorFloatingWindow::DrawToggleButton("Side Combat Tuning Editor");
         DrawToolbar();
 
         if (!m_ParseValid)
         {
             ImGui::Separator();
-            ImGui::TextColored(ImVec4(1.0f, 0.34f, 0.25f, 1.0f), "YAML parse failed. Use the raw YAML editor to fix the file first.");
+            EditorWidgets::InlineStatus("YAML parse failed. Use the raw YAML editor to fix the file first.", EditorWidgets::StatusKind::Error);
             DrawRawPreview(m_RawPreview);
-            ImGui::End();
+            EditorFloatingWindow::End();
             return;
         }
 
@@ -378,12 +143,12 @@ namespace Wheatear {
             ImGui::EndTabBar();
         }
 
-        ImGui::End();
+        EditorFloatingWindow::End();
     }
 
     void SideCombatTuningEditorPanel::Load()
     {
-        m_ResolvedPath = AssetPath::Resolve(m_SourcePath);
+        m_ResolvedPath = AssetPath::Resolve(AssetAliasRegistry::Resolve(m_SourcePath));
         m_Status.clear();
         m_RawPreview.clear();
         m_ParseValid = false;
@@ -470,30 +235,31 @@ namespace Wheatear {
 
     void SideCombatTuningEditorPanel::DrawToolbar()
     {
-        ImGui::PushItemWidth(-260.0f);
+        EditorWidgets::SectionHeader("Source", "This YAML remains the runtime data source for SideCombat.");
+
+        ImGui::PushItemWidth(-1.0f);
         if (InputString("Tuning YAML", m_SourcePath, 512))
             m_Loaded = false;
         ImGui::PopItemWidth();
 
-        ImGui::SameLine();
         if (ImGui::Button("Load"))
             Load();
+
         ImGui::SameLine();
-        if (ImGui::Button("Save"))
+        bool reloadClicked = false;
+        if (EditorWidgets::DirtySaveBar(m_Dirty, m_Status, "Save", "Reload", &reloadClicked))
             Save();
+        if (reloadClicked)
+            Load();
 
-        if (m_Dirty)
-        {
-            ImGui::SameLine();
-            ImGui::TextColored(ImVec4(1.0f, 0.76f, 0.25f, 1.0f), "Modified");
-        }
-
-        if (!m_Status.empty())
-            ImGui::TextDisabled("%s  %s", m_Status.c_str(), m_ResolvedPath.generic_string().c_str());
+        if (!m_ResolvedPath.empty())
+            ImGui::TextDisabled("%s", m_ResolvedPath.generic_string().c_str());
     }
 
     void SideCombatTuningEditorPanel::DrawFeelTab()
     {
+        EditorWidgets::SectionHeader("Combat Feel", "Designer-facing controls mirrored from movement and air-combo YAML sections.");
+
         YAML::Node root = *m_Root;
         YAML::Node player = EnsureMap(root, "player");
         YAML::Node airCombo = EnsureMap(root, "airCombo");
@@ -503,16 +269,14 @@ namespace Wheatear {
         YAML::Node airChase = EnsureMap(attacks, "air_chase");
         YAML::Node breakLimit = EnsureMap(attacks, "break_limit");
 
-        ImGui::TextDisabled("Common feel controls. These are mirrored from the YAML sections below.");
-
         if (ImGui::CollapsingHeader("Movement / Jump", ImGuiTreeNodeFlags_DefaultOpen))
         {
             if (DrawFloat(player, "moveSpeed", "Move Speed", 0.02f, 0.0f, 30.0f)) m_Dirty = true;
             if (DrawInt(player, "maxJumps", "Max Jumps", 1, 3)) m_Dirty = true;
             if (DrawFloat(player, "jumpImpulse", "Jump Impulse", 0.05f, 0.0f, 40.0f)) m_Dirty = true;
-            Help("Jump height. Higher means the player reaches the airborne combo window more easily.");
+            EditorWidgets::HelpTooltip("Jump height. Higher means the player reaches the airborne combo window more easily.");
             if (DrawFloat(player, "gravity", "Gravity", 0.05f, 0.0f, 80.0f)) m_Dirty = true;
-            Help("Falling speed. Lower means longer hang time.");
+            EditorWidgets::HelpTooltip("Falling speed. Lower means longer hang time.");
             if (DrawFloat(player, "airControl", "Air Control", 0.05f, 0.0f, 80.0f)) m_Dirty = true;
             if (DrawFloat(player, "jumpBufferTime", "Jump Buffer", 0.005f, 0.0f, 0.5f)) m_Dirty = true;
             if (DrawFloat(player, "coyoteTime", "Coyote Time", 0.005f, 0.0f, 0.5f)) m_Dirty = true;
@@ -556,6 +320,8 @@ namespace Wheatear {
 
     void SideCombatTuningEditorPanel::DrawRulesTab()
     {
+        EditorWidgets::SectionHeader("Runtime Rules", "Damage, feedback, boss protection, enemy pacing, pickup, and stage visual parameters.");
+
         YAML::Node root = *m_Root;
         YAML::Node player = EnsureMap(root, "player");
         YAML::Node combat = EnsureMap(root, "combat");
@@ -673,12 +439,14 @@ namespace Wheatear {
 
     void SideCombatTuningEditorPanel::DrawAttacksTab()
     {
+        EditorWidgets::SectionHeader("Attacks", "Author hitbox, frame, launch, VFX, and SFX parameters for each attack id.");
+
         YAML::Node root = *m_Root;
         YAML::Node attacks = EnsureMap(root, "attacks");
         const std::vector<std::string> keys = MapKeys(attacks);
         if (!BeginSelector("Attack", keys, m_SelectedAttackId))
         {
-            ImGui::TextDisabled("No attacks in YAML.");
+            EditorWidgets::EmptyState("No attacks in YAML.", "Add attack entries to the side-combat tuning data before authoring skills.");
             return;
         }
 
@@ -727,12 +495,14 @@ namespace Wheatear {
 
     void SideCombatTuningEditorPanel::DrawSkillsTab()
     {
+        EditorWidgets::SectionHeader("Skills", "Skill ids bind display data, inputs, unlocks, and attack id chains.");
+
         YAML::Node root = *m_Root;
         YAML::Node skills = EnsureMap(root, "skills");
         const std::vector<std::string> keys = MapKeys(skills);
         if (!BeginSelector("Skill", keys, m_SelectedSkillId))
         {
-            ImGui::TextDisabled("No skills in YAML.");
+            EditorWidgets::EmptyState("No skills in YAML.", "Add skill entries to expose player moves through data.");
             return;
         }
 
@@ -748,6 +518,8 @@ namespace Wheatear {
 
     void SideCombatTuningEditorPanel::DrawProgressionTab()
     {
+        EditorWidgets::SectionHeader("Progression", "Profiles decide which skills and HUD systems are visible at runtime.");
+
         YAML::Node root = *m_Root;
         YAML::Node progression = EnsureMap(root, "progression");
         if (DrawString(progression, "defaultProfile", "Default Profile", 256)) m_Dirty = true;
@@ -756,7 +528,7 @@ namespace Wheatear {
         const std::vector<std::string> keys = MapKeys(profiles);
         if (!BeginSelector("Profile", keys, m_SelectedProfileId))
         {
-            ImGui::TextDisabled("No profiles in YAML.");
+            EditorWidgets::EmptyState("No profiles in YAML.", "Add progression profiles so packaged builds can switch loadouts without recompiling.");
             return;
         }
 
@@ -777,9 +549,9 @@ namespace Wheatear {
 
     void SideCombatTuningEditorPanel::DrawRawPreviewTab()
     {
+        EditorWidgets::SectionHeader("Raw Preview", "Generated YAML preview. Save writes this text back to disk.");
         RefreshRawPreview();
         DrawRawPreview(m_RawPreview);
-        ImGui::TextDisabled("Raw preview is generated from structured controls. Save writes this YAML back to disk.");
     }
 
 } // namespace Wheatear

@@ -1,106 +1,146 @@
 #include "wtpch.h"
 #include "TurnCombatSkillService.h"
 
+#include "Wheatear/Core/Log.h"
+#include "Wheatear/Gameplay/Action/ActionDatabase.h"
+#include "Wheatear/Gameplay/Action/ActionRecipeQueries.h"
 #include "Wheatear/Gameplay/Action/StateRegistry.h"
 
 #include <algorithm>
+#include <cctype>
 #include <cmath>
 #include <sstream>
 
 namespace Wheatear::TurnCombatSkillService {
 
+    namespace {
+
+        static std::string ToLower(std::string value)
+        {
+            std::transform(value.begin(), value.end(), value.begin(),
+                [](unsigned char c) { return static_cast<char>(std::tolower(c)); });
+            return value;
+        }
+
+        static TurnSkillCategory CategoryFromRecipe(const WAO::ActionRecipe& recipe)
+        {
+            const std::string category = ToLower(WAO::ParamString(recipe, "category"));
+            if (category == "attack" || WAO::HasTag(recipe, "Category.Attack"))
+                return TurnSkillCategory::Attack;
+            if (category == "guard" || WAO::HasTag(recipe, "Category.Guard"))
+                return TurnSkillCategory::Guard;
+            if (category == "item" || WAO::HasTag(recipe, "Category.Item"))
+                return TurnSkillCategory::Item;
+            if (category == "wait" || WAO::HasTag(recipe, "Category.Wait"))
+                return TurnSkillCategory::Wait;
+            return TurnSkillCategory::Skill;
+        }
+
+        static TurnTargetRule TargetFromRecipe(const WAO::ActionRecipe& recipe)
+        {
+            const std::string target = ToLower(WAO::ParamString(recipe, "targetRule"));
+            if (target == "allysingle" || WAO::HasTag(recipe, "Target.AllySingle"))
+                return TurnTargetRule::AllySingle;
+            if (target == "self" || WAO::HasTag(recipe, "Target.Self"))
+                return TurnTargetRule::Self;
+            if (target == "enemyall" || WAO::HasTag(recipe, "Target.EnemyAll"))
+                return TurnTargetRule::EnemyAll;
+            if (target == "allyall" || WAO::HasTag(recipe, "Target.AllyAll"))
+                return TurnTargetRule::AllyAll;
+            return TurnTargetRule::EnemySingle;
+        }
+
+        static TurnStatusEffectKind StatusFromText(const std::string& value)
+        {
+            const std::string status = ToLower(value);
+            if (status == "guard" || status == WAO::StateIds::Guard)
+                return TurnStatusEffectKind::Guard;
+            if (status == "regeneration" || status == "regen" || status == WAO::StateIds::Regeneration)
+                return TurnStatusEffectKind::Regeneration;
+            if (status == "burn" || status == WAO::StateIds::Burn)
+                return TurnStatusEffectKind::Burn;
+            if (status == "defensedown" || status == "defense_down" || status == "def_down" || status == WAO::StateIds::DefenseDown)
+                return TurnStatusEffectKind::DefenseDown;
+            if (status == "stun" || status == WAO::StateIds::Stun)
+                return TurnStatusEffectKind::Stun;
+            return TurnStatusEffectKind::None;
+        }
+
+        static TurnSkillDefinition BuildSkillFromRecipe(const WAO::ActionRecipe& recipe)
+        {
+            const WAO::EffectSpec* damage = WAO::FirstEffect(recipe, WAO::EffectType::Damage);
+            const WAO::EffectSpec* heal = WAO::FirstEffect(recipe, WAO::EffectType::Heal);
+            const WAO::EffectSpec* state = WAO::FirstEffect(recipe, WAO::EffectType::AddState);
+
+            TurnSkillDefinition skill;
+            skill.Id = recipe.Id.rfind("turn.", 0) == 0 ? recipe.Id.substr(5) : recipe.Id;
+            skill.DisplayName = recipe.DisplayName;
+            skill.Description = recipe.Description;
+            skill.IconPath = recipe.IconPath;
+            skill.SoundPath = recipe.SoundPath;
+            skill.EffectPath = recipe.EffectPath;
+            skill.TargetRule = TargetFromRecipe(recipe);
+            skill.ManaCost = WAO::ParamFloat(recipe, "manaCost", WAO::ResourceCost(recipe, "mana"));
+            skill.Power = WAO::ParamFloat(recipe, "power", damage ? damage->Value : 0.0f);
+            skill.HealPower = WAO::ParamFloat(recipe, "healPower", heal ? heal->Value : 0.0f);
+            skill.DefensePierce = WAO::ParamFloat(recipe, "defensePierce", 0.0f);
+            skill.Magic = WAO::ParamBool(recipe, "magic",
+                WAO::HasTag(recipe, "Skill.Magic")
+                || (damage && damage->AttributeId == "magic")
+                || (heal && heal->AttributeId == "magic"));
+            skill.Guard = WAO::ParamBool(recipe, "guard", WAO::HasTag(recipe, "Skill.Guard"));
+            skill.Category = CategoryFromRecipe(recipe);
+            skill.AppliedEffect = StatusFromText(WAO::ParamString(recipe, "statusEffect"));
+            if (skill.AppliedEffect == TurnStatusEffectKind::None && state)
+                skill.AppliedEffect = StatusFromText(state->StateId);
+            skill.EffectTurns = WAO::ParamInt(recipe, "effectTurns", state ? state->Turns : 0);
+            skill.EffectPower = WAO::ParamFloat(recipe, "effectPower", state ? state->Value : 0.0f);
+            return skill;
+        }
+
+        static std::vector<TurnSkillDefinition> BuildSkillsFromActionDatabase()
+        {
+            std::vector<TurnSkillDefinition> skills;
+            for (const auto& recipe : WAO::RecipesWithPrefix("turn."))
+                skills.push_back(BuildSkillFromRecipe(recipe));
+            return skills;
+        }
+
+        static std::string StripTurnPrefix(const std::string& id)
+        {
+            return id.rfind("turn.", 0) == 0 ? id.substr(5) : id;
+        }
+
+    } // namespace
+
     const std::vector<TurnSkillDefinition>& SkillLibrary()
     {
-        static const std::vector<TurnSkillDefinition> skills = {
-            {
-                "slash", "魔剑斩", "快速的单体魔剑斩击。",
-                "assets/vertical_slice/turn_combat/ui/icons/cmd_attack.png",
-                "assets/vertical_slice/turn_combat/audio/turn_slash.wav",
-                "assets/vertical_slice/turn_combat/effects/vfx_turn_slash.png",
-                TurnTargetRule::EnemySingle, 0.0f, 1.00f, 0.0f, 0.10f, false, false,
-                TurnSkillCategory::Attack
-            },
-            {
-                "aether_edge", "灵素剑锋", "消耗魔力发动更重的剑与魔法合击。",
-                "assets/vertical_slice/turn_combat/ui/icons/cmd_magic_sword.png",
-                "assets/vertical_slice/turn_combat/audio/turn_magic.wav",
-                "assets/vertical_slice/turn_combat/effects/vfx_turn_magic_sword.png",
-                TurnTargetRule::EnemySingle, 8.0f, 1.45f, 0.0f, 0.22f, true, false,
-                TurnSkillCategory::Skill, TurnStatusEffectKind::DefenseDown, 2, 0.22f
-            },
-            {
-                "white_vow", "白誓治愈", "治疗一名我方角色，并施加短暂再生。",
-                "assets/vertical_slice/turn_combat/ui/icons/cmd_heal.png",
-                "assets/vertical_slice/turn_combat/audio/turn_heal.wav",
-                "assets/vertical_slice/turn_combat/effects/vfx_turn_heal.png",
-                TurnTargetRule::AllySingle, 7.0f, 0.0f, 1.25f, 0.0f, true, false,
-                TurnSkillCategory::Skill, TurnStatusEffectKind::Regeneration, 2, 10.0f
-            },
-            {
-                "shield_oath", "守护誓约", "本回合进入防御，降低受到的伤害。",
-                "assets/vertical_slice/turn_combat/ui/icons/cmd_guard.png",
-                "assets/vertical_slice/turn_combat/audio/turn_guard.wav",
-                "assets/vertical_slice/turn_combat/effects/vfx_turn_guard.png",
-                TurnTargetRule::Self, 4.0f, 0.0f, 0.0f, 0.0f, false, true,
-                TurnSkillCategory::Guard, TurnStatusEffectKind::Guard, 1, 0.45f
-            },
-            {
-                "black_flare", "黑炎爆发", "不稳定的暗魔法，攻击所有敌人并施加燃烧。",
-                "assets/vertical_slice/turn_combat/ui/icons/cmd_dark.png",
-                "assets/vertical_slice/turn_combat/audio/turn_magic.wav",
-                "assets/vertical_slice/turn_combat/effects/vfx_turn_dark.png",
-                TurnTargetRule::EnemyAll, 12.0f, 0.86f, 0.0f, 0.18f, true, false,
-                TurnSkillCategory::Skill, TurnStatusEffectKind::Burn, 2, 8.0f
-            },
-            {
-                "healing_potion", "恢复药水", "消耗道具，恢复一名我方角色的生命。",
-                "assets/vertical_slice/turn_combat/ui/icons/cmd_item_potion.png",
-                "assets/vertical_slice/turn_combat/audio/turn_heal.wav",
-                "assets/vertical_slice/turn_combat/effects/vfx_turn_heal.png",
-                TurnTargetRule::AllySingle, 0.0f, 0.0f, 0.85f, 0.0f, false, false,
-                TurnSkillCategory::Item
-            },
-            {
-                "focus_wait", "冥想", "跳过回合并恢复魔力。",
-                "assets/vertical_slice/turn_combat/ui/icons/cmd_wait.png",
-                "assets/vertical_slice/turn_combat/audio/turn_guard.wav",
-                "assets/vertical_slice/turn_combat/effects/vfx_turn_focus.png",
-                TurnTargetRule::Self, 0.0f, 0.0f, 0.0f, 0.0f, false, false,
-                TurnSkillCategory::Wait
-            },
-            {
-                "claw", "爪击", "魔物的近身攻击。",
-                "assets/vertical_slice/turn_combat/ui/icons/cmd_enemy_claw.png",
-                "assets/vertical_slice/turn_combat/audio/turn_hit.wav",
-                "assets/vertical_slice/turn_combat/effects/vfx_turn_claw.png",
-                TurnTargetRule::EnemySingle, 0.0f, 0.95f, 0.0f, 0.0f, false, false,
-                TurnSkillCategory::Attack
-            },
-            {
-                "wild_pounce", "猛扑", "魔物的强力突进攻击。",
-                "assets/vertical_slice/turn_combat/ui/icons/cmd_enemy_claw.png",
-                "assets/vertical_slice/turn_combat/audio/turn_hit.wav",
-                "assets/vertical_slice/turn_combat/effects/vfx_turn_claw.png",
-                TurnTargetRule::EnemySingle, 0.0f, 1.25f, 0.0f, 0.08f, false, false,
-                TurnSkillCategory::Attack
-            },
-            {
-                "dark_orb", "暗影魔弹", "精英法师发射的暗属性魔法弹。",
-                "assets/vertical_slice/turn_combat/ui/icons/cmd_enemy_orb.png",
-                "assets/vertical_slice/turn_combat/audio/turn_magic.wav",
-                "assets/vertical_slice/turn_combat/effects/vfx_turn_dark.png",
-                TurnTargetRule::EnemySingle, 0.0f, 1.18f, 0.0f, 0.20f, true, false,
-                TurnSkillCategory::Skill, TurnStatusEffectKind::Burn, 2, 7.0f
-            }
-        };
+        static std::vector<TurnSkillDefinition> skills;
+        static uint64_t cachedRevision = 0;
+        static bool initialized = false;
+        const uint64_t revision = WAO::ActionDatabase::Revision();
+        if (!initialized || cachedRevision != revision)
+        {
+            skills = BuildSkillsFromActionDatabase();
+            cachedRevision = revision;
+            initialized = true;
+        }
+
+        static bool warnedMissingData = false;
+        if (skills.empty() && !warnedMissingData)
+        {
+            WT_CORE_WARN("TurnCombatSkillService: no turn.* WAO action recipes loaded. Check assets/gameplay/actions.");
+            warnedMissingData = true;
+        }
         return skills;
     }
 
     const TurnSkillDefinition* FindSkill(const std::string& id)
     {
         const auto& skills = SkillLibrary();
+        const std::string normalizedId = StripTurnPrefix(id);
         const auto it = std::find_if(skills.begin(), skills.end(),
-            [&](const TurnSkillDefinition& skill) { return skill.Id == id; });
+            [&](const TurnSkillDefinition& skill) { return skill.Id == normalizedId; });
         return it == skills.end() ? nullptr : &(*it);
     }
 
@@ -109,17 +149,18 @@ namespace Wheatear::TurnCombatSkillService {
         const std::string& payload)
     {
         if (payload == "basic" || payload == "slot0")
-            return actor.BasicSkillId;
+            return StripTurnPrefix(actor.BasicSkillId);
         if (payload == "slot1")
-            return actor.Skill1Id;
+            return StripTurnPrefix(actor.Skill1Id);
         if (payload == "slot2")
-            return actor.Skill2Id;
+            return StripTurnPrefix(actor.Skill2Id);
         if (payload == "slot3")
-            return actor.Skill3Id;
+            return StripTurnPrefix(actor.Skill3Id);
         if (payload == "item0" || payload == "potion")
             return std::string("healing_potion");
-        if (FindSkill(payload))
-            return payload;
+        const std::string normalizedPayload = StripTurnPrefix(payload);
+        if (FindSkill(normalizedPayload))
+            return normalizedPayload;
         return std::nullopt;
     }
 

@@ -98,6 +98,7 @@ namespace Wheatear::WAO {
         float CancelEnd = 0.0f;
         float MovementScale = 1.0f;
         std::unordered_map<std::string, float> ResourceCost;
+        std::unordered_map<std::string, std::string> Params;
         std::vector<std::string> RequiredStates;
         std::vector<std::string> BlockedStates;
         std::vector<std::string> RequiredTags;

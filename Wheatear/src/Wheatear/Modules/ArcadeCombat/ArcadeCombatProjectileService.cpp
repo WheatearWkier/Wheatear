@@ -2,6 +2,7 @@
 #include "ArcadeCombatProjectileService.h"
 
 #include "ArcadeCombatComponents.h"
+#include "Wheatear/Core/AssetAliasRegistry.h"
 #include "Wheatear/Modules/Common/GameplayCombatService.h"
 #include "Wheatear/Modules/Common/GameplayVisualService.h"
 #include "Wheatear/Renderer/Texture.h"
@@ -35,15 +36,15 @@ namespace Wheatear::ArcadeCombatProjectileService {
             target.Alive = GameplayCombatService::IsAlive(target.Health);
         }
 
-        static const char* ResolveProjectileTexturePath(int team, bool heavy, bool melee)
+        static std::string ResolveProjectileTexturePath(int team, bool heavy, bool melee)
         {
             if (melee)
-                return "assets/vertical_slice/arcade_combat/effects/vfx_arcade_katana_slash.png";
+                return AssetAliasRegistry::Path("arcade.vfx.katana_slash");
             if (team == (int)ArcadeTeam::Enemy)
-                return "assets/vertical_slice/arcade_combat/projectiles/proj_arcade_boss_orb.png";
+                return AssetAliasRegistry::Path("arcade.projectile.boss_orb");
             return heavy
-                ? "assets/vertical_slice/arcade_combat/effects/vfx_arcade_cannon_blast.png"
-                : "assets/vertical_slice/arcade_combat/projectiles/proj_arcade_player_bolt.png";
+                ? AssetAliasRegistry::Path("arcade.vfx.cannon_blast")
+                : AssetAliasRegistry::Path("arcade.projectile.player_bolt");
         }
 
         static bool ProjectileBlockedByCover(Scene* scene,

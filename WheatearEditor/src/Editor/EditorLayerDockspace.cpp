@@ -25,6 +25,7 @@ namespace Wheatear {
         ImGuiID bottom = ImGui::DockBuilderSplitNode(main, ImGuiDir_Down, 0.27f, nullptr, &main);
         ImGuiID bottomRight = ImGui::DockBuilderSplitNode(bottom, ImGuiDir_Right, 0.45f, nullptr, &bottom);
         ImGuiID rightBottom = ImGui::DockBuilderSplitNode(right, ImGuiDir_Down, 0.30f, nullptr, &right);
+        ImGuiID canvas = ImGui::DockBuilderSplitNode(main, ImGuiDir_Right, 0.38f, nullptr, &main);
 
         ImGui::DockBuilderDockWindow("Scene Hierarchy", left);
         ImGui::DockBuilderDockWindow("Properties", right);
@@ -33,8 +34,8 @@ namespace Wheatear {
         ImGui::DockBuilderDockWindow("Content Browser", bottom);
         ImGui::DockBuilderDockWindow("Animation Editor", bottomRight);
         ImGui::DockBuilderDockWindow("Sprite Sheet Picker", bottomRight);
-        ImGui::DockBuilderDockWindow("UI Canvas Editor", bottomRight);
         ImGui::DockBuilderDockWindow("Viewport", main);
+        ImGui::DockBuilderDockWindow("UI Canvas Editor", canvas);
 
         ImGui::DockBuilderFinish(dockspace);
 

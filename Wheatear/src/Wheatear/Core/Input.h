@@ -22,6 +22,10 @@ namespace Wheatear {
 		static float GetMouseX();
 		static float GetMouseY();
 
+		static void SetMouseInputBounds(float minX, float minY, float maxX, float maxY);
+		static void ClearMouseInputBounds();
+		static bool IsMouseWithinInputBounds();
+
 		static void SetCursorMode(CursorMode mode);
 	};
 

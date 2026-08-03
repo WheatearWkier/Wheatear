@@ -1,0 +1,49 @@
+vn_textbox_panel:
+  width: 3200
+  height: 640
+  type: nine_slice_panel
+  transparent: true
+  requireRgba: true
+  unusedPixelsAlpha: 0
+  suggestedBorder: [96, 96, 96, 96]
+
+vn_nameplate:
+  width: 720
+  height: 192
+  type: nine_slice_panel
+  transparent: true
+  requireRgba: true
+  unusedPixelsAlpha: 0
+  suggestedBorder: [56, 56, 48, 48]
+
+vn_command_icons_256:
+  width: 2048
+  height: 512
+  cellWidth: 256
+  cellHeight: 256
+  columns: 8
+  rows: 2
+  transparent: true
+  requireRgba: true
+  unusedPixelsAlpha: 0
+  row0: normal
+  row1: hover_active
+  order: [save, load, quick_save, quick_load, system, history, auto, skip]
+
+vn_bgm_notice_panel:
+  width: 1120
+  height: 192
+  type: nine_slice_panel
+  transparent: true
+  requireRgba: true
+  unusedPixelsAlpha: 0
+  suggestedBorder: [56, 56, 48, 48]
+
+vn_choice_panel:
+  width: 1800
+  height: 240
+  type: nine_slice_panel
+  transparent: true
+  requireRgba: true
+  unusedPixelsAlpha: 0
+  suggestedBorder: [72, 72, 56, 56]

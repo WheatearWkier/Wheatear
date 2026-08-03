@@ -1,7 +1,7 @@
 #include "wtpch.h"
 #include "SideCombatActionService.h"
 
-#include "Wheatear/Gameplay/Action/ActionDatabase.h"
+#include "Wheatear/Gameplay/Action/ActionRecipeQueries.h"
 #include "Wheatear/Gameplay/Action/ActionResolver.h"
 #include "Wheatear/Modules/Common/GameplayAudioService.h"
 
@@ -20,7 +20,31 @@ namespace Wheatear::SideCombatActionService {
 
         static const WAO::ActionRecipe* FindRecipe(const std::string& recipeId)
         {
-            return recipeId.empty() ? nullptr : WAO::ActionDatabase::Find(recipeId);
+            return recipeId.empty() ? nullptr : WAO::FindRecipeOrWarn(recipeId, "SideCombat");
+        }
+
+        static float ResolveRecipeDuration(const WAO::ActionRecipe* recipe, float fallback)
+        {
+            if (!recipe || recipe->Duration <= 0.0f)
+                return fallback;
+            return std::max(0.01f, recipe->Duration);
+        }
+
+        static float ResolveRecipeHitTime(const WAO::ActionRecipe* recipe, float fallback, float duration)
+        {
+            const float hitTime = recipe && recipe->HitTime > 0.0f ? recipe->HitTime : fallback;
+            return std::clamp(hitTime, 0.0f, duration);
+        }
+
+        static float ResolveRecipeMovementScale(const WAO::ActionRecipe* recipe, float fallback)
+        {
+            if (!recipe || recipe->MovementScale <= 0.0f)
+                return fallback;
+
+            if (std::abs(recipe->MovementScale - 1.0f) <= 0.0001f)
+                return fallback;
+
+            return recipe->MovementScale;
         }
 
         static void ResolveRecipeAction(const WAO::ActionRecipe* recipe,
@@ -91,7 +115,7 @@ namespace Wheatear::SideCombatActionService {
         SideAttackKind kind)
     {
         const WAO::ActionRecipe* recipe = FindRecipe(recipeId);
-        float duration = recipe ? std::max(0.01f, recipe->Duration) : GetActionDuration(attack);
+        float duration = ResolveRecipeDuration(recipe, GetActionDuration(attack));
         if (!recipe && kind == SideAttackKind::MagicBolt && std::abs(attack.Velocity.x) > 0.001f)
         {
             duration = std::max({
@@ -100,8 +124,12 @@ namespace Wheatear::SideCombatActionService {
                 attack.Startup + 0.16f
             });
         }
-        const float recipeCancelStart = recipe ? recipe->CancelStart : attack.CancelWindowStart;
-        const float recipeCancelEnd = recipe ? recipe->CancelEnd : attack.CancelWindowEnd;
+        const float recipeCancelStart = recipe && recipe->CancelStart > 0.0f
+            ? recipe->CancelStart
+            : attack.CancelWindowStart;
+        const float recipeCancelEnd = recipe && recipe->CancelEnd > 0.0f
+            ? recipe->CancelEnd
+            : attack.CancelWindowEnd;
         float cancelStart = std::clamp(recipeCancelStart, 0.0f, duration);
         float cancelEnd = recipeCancelEnd > 0.0f
             ? std::clamp(recipeCancelEnd, cancelStart, duration)
@@ -118,10 +146,10 @@ namespace Wheatear::SideCombatActionService {
         controller.RuntimeActionKind = kind;
         controller.RuntimeActionTimer = 0.0f;
         controller.RuntimeActionDuration = duration;
-        controller.RuntimeActionHitboxTime = std::clamp(recipe ? recipe->HitTime : attack.Startup, 0.0f, duration);
+        controller.RuntimeActionHitboxTime = ResolveRecipeHitTime(recipe, attack.Startup, duration);
         controller.RuntimeActionCancelStart = cancelStart;
         controller.RuntimeActionCancelEnd = cancelEnd;
-        controller.RuntimeActionMovementScale = recipe ? recipe->MovementScale : attack.MovementScale;
+        controller.RuntimeActionMovementScale = ResolveRecipeMovementScale(recipe, attack.MovementScale);
         controller.RuntimeActionHitboxSpawned = false;
         PlaySfx(recipe && !recipe->SoundPath.empty() ? recipe->SoundPath : attack.SwingSound, attack.SoundVolume);
         ResolveRecipeAction(recipe, "SideCombat.Player", "start " + entityName);
@@ -161,9 +189,9 @@ namespace Wheatear::SideCombatActionService {
         ai.RuntimeActionEntityName = entityName;
         ai.RuntimeActionKind = kind;
         ai.RuntimeActionTimer = 0.0f;
-        ai.RuntimeActionDuration = recipe ? std::max(0.01f, recipe->Duration) : GetActionDuration(attack);
-        ai.RuntimeActionHitboxTime = std::clamp(recipe ? recipe->HitTime : attack.Startup, 0.0f, ai.RuntimeActionDuration);
-        ai.RuntimeActionMovementScale = recipe ? recipe->MovementScale : attack.MovementScale;
+        ai.RuntimeActionDuration = ResolveRecipeDuration(recipe, GetActionDuration(attack));
+        ai.RuntimeActionHitboxTime = ResolveRecipeHitTime(recipe, attack.Startup, ai.RuntimeActionDuration);
+        ai.RuntimeActionMovementScale = ResolveRecipeMovementScale(recipe, attack.MovementScale);
         ai.RuntimeActionFacing = facing;
         ai.RuntimeActionHitboxSpawned = false;
         PlaySfx(recipe && !recipe->SoundPath.empty() ? recipe->SoundPath : attack.SwingSound, attack.SoundVolume);

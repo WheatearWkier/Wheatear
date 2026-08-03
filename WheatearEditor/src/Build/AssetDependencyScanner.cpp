@@ -1,6 +1,7 @@
 #include "wepch.h"
 #include "AssetDependencyScanner.h"
 
+#include "Wheatear/Core/AssetAliasRegistry.h"
 #include "Wheatear/Core/AssetPath.h"
 #include "Wheatear/Core/EngineInfo.h"
 
@@ -80,6 +81,22 @@ namespace Wheatear {
                 return false;
 
             const std::filesystem::path sourcePath = projectRoot / normalizedPath;
+            if (std::filesystem::is_directory(sourcePath))
+            {
+                bool addedAny = false;
+                std::error_code error;
+                for (const auto& entry : std::filesystem::recursive_directory_iterator(sourcePath, error))
+                {
+                    if (error || !entry.is_regular_file())
+                        continue;
+
+                    const std::filesystem::path childPath = std::filesystem::relative(entry.path(), projectRoot, error);
+                    if (!error)
+                        addedAny = TryAddAsset(projectRoot, childPath, sourceAsset, assets, parseQueue, missingReferences) || addedAny;
+                }
+                return addedAny;
+            }
+
             if (!std::filesystem::is_regular_file(sourcePath))
             {
                 if (missingReferences)
@@ -148,7 +165,9 @@ namespace Wheatear {
 
         static void AddDirectoryFiles(const std::filesystem::path& projectRoot,
             const std::filesystem::path& relativeDirectory,
-            std::set<std::string>* assets)
+            std::set<std::string>* assets,
+            std::queue<std::string>* parseQueue = nullptr,
+            std::vector<AssetReferenceRecord>* missingReferences = nullptr)
         {
             const std::filesystem::path sourceDirectory = projectRoot / relativeDirectory;
             if (!std::filesystem::is_directory(sourceDirectory))
@@ -162,26 +181,27 @@ namespace Wheatear {
 
                 const std::filesystem::path relativePath = std::filesystem::relative(entry.path(), projectRoot, error);
                 if (!error)
-                    TryAddAsset(projectRoot, relativePath, {}, assets, nullptr, nullptr);
+                    TryAddAsset(projectRoot, relativePath, {}, assets, parseQueue, missingReferences);
             }
         }
 
         static void AddBuiltinAssets(const std::filesystem::path& projectRoot,
             bool enableScripts,
-            std::set<std::string>* assets)
+            std::set<std::string>* assets,
+            std::queue<std::string>* parseQueue,
+            std::vector<AssetReferenceRecord>* missingReferences)
         {
             AddDirectoryFiles(projectRoot, "assets/shaders", assets);
-            AddDirectoryFiles(projectRoot, "assets/gameplay/actions", assets);
-            TryAddAsset(projectRoot, "assets/fonts/wqy-microhei.ttc", {}, assets, nullptr, nullptr);
+            AddDirectoryFiles(projectRoot, "assets/gameplay/actions", assets, parseQueue, missingReferences);
+            AddDirectoryFiles(projectRoot, "assets/gameplay/progression", assets, parseQueue, missingReferences);
+            TryAddAsset(projectRoot, "assets/gameplay/content_manifest.yaml", {}, assets, parseQueue, missingReferences);
+            TryAddAsset(projectRoot, AssetAliasRegistry::Path("font.ui_default", "assets/fonts/wqy-microhei.ttc"), {}, assets, nullptr, nullptr);
             TryAddAsset(projectRoot, "assets/fonts/licenses/WenQuanYiMicroHei/LICENSE_Apache2.txt", {}, assets, nullptr, nullptr);
             TryAddAsset(projectRoot, "assets/fonts/licenses/WenQuanYiMicroHei/LICENSE_GPLv3.txt", {}, assets, nullptr, nullptr);
             TryAddAsset(projectRoot, "assets/fonts/licenses/WenQuanYiMicroHei/README.txt", {}, assets, nullptr, nullptr);
             TryAddAsset(projectRoot, "assets/fonts/licenses/WenQuanYiMicroHei/AUTHORS.txt", {}, assets, nullptr, nullptr);
-            TryAddAsset(projectRoot, "assets/fonts/NotoSansSC-VF.ttf", {}, assets, nullptr, nullptr);
-            TryAddAsset(projectRoot, "assets/fonts/Open-Sans-2.ttf", {}, assets, nullptr, nullptr);
-
-            AddDirectoryFiles(projectRoot, "assets/vertical_slice/arcade_combat/projectiles", assets);
-            AddDirectoryFiles(projectRoot, "assets/vertical_slice/turn_combat/ui/icons", assets);
+            TryAddAsset(projectRoot, AssetAliasRegistry::Path("font.ui_fallback_sc", "assets/fonts/NotoSansSC-VF.ttf"), {}, assets, nullptr, nullptr);
+            TryAddAsset(projectRoot, AssetAliasRegistry::Path("font.latin", "assets/fonts/Open-Sans-2.ttf"), {}, assets, nullptr, nullptr);
 
             if (enableScripts)
             {
@@ -264,7 +284,7 @@ namespace Wheatear {
         }
 
         if (options.IncludeBuiltinAssets)
-            AddBuiltinAssets(projectRoot, options.EnableScripts, &assets);
+            AddBuiltinAssets(projectRoot, options.EnableScripts, &assets, &parseQueue, &report.MissingReferences);
 
         while (!parseQueue.empty())
         {
@@ -375,7 +395,7 @@ namespace Wheatear {
             const std::string secondPart = it->generic_string();
             if (secondPart == ".wheatear")
                 return false;
-            if (secondPart == "cache" || secondPart == "saves")
+            if (secondPart == "archive" || secondPart == "cache" || secondPart == "saves")
                 return false;
             if (secondPart == "game" && relativePath.filename() == "player.config")
                 return false;

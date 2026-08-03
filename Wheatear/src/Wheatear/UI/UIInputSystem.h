@@ -20,6 +20,7 @@ namespace Wheatear {
             float mouseY,
             uint32_t viewportWidth,
             uint32_t viewportHeight);
+        static void Reset();
 
     private:
         static bool HitTest(const UIWidgetComponent& widget,

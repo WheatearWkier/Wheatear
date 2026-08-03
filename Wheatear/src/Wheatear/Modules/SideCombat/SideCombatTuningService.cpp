@@ -1,6 +1,7 @@
 #include "wtpch.h"
 #include "SideCombatTuningService.h"
 
+#include "Wheatear/Core/AssetAliasRegistry.h"
 #include "Wheatear/Core/AssetPath.h"
 #include "Wheatear/Modules/Common/GameplayTextService.h"
 
@@ -52,40 +53,13 @@ namespace Wheatear::SideCombatTuningService {
             set.Clips[key] = MakeAnimationClip(pattern, frameCount, frameRate, loop, renderScale, renderOffset);
         }
 
-        static std::filesystem::path FindLooseTuningPath(const std::filesystem::path& path)
-        {
-            if (path.empty() || path.is_absolute())
-                return path;
-
-            std::error_code error;
-            std::filesystem::path cursor = std::filesystem::current_path(error);
-            while (!error && !cursor.empty())
-            {
-                const std::filesystem::path candidate = (cursor / path).lexically_normal();
-                if (std::filesystem::is_regular_file(candidate, error) && !error)
-                    return candidate;
-
-                error.clear();
-                const std::filesystem::path parent = cursor.parent_path();
-                if (parent == cursor)
-                    break;
-                cursor = parent;
-            }
-
-            return {};
-        }
-
         static std::filesystem::path ResolveTuningPath(const std::string& path)
         {
             if (path.empty())
                 return {};
 
-            const std::filesystem::path requested(path);
-            const std::filesystem::path loosePath = FindLooseTuningPath(requested);
-            if (!loosePath.empty())
-                return loosePath;
-
-            return AssetPath::Resolve(requested);
+            const std::filesystem::path requested(AssetAliasRegistry::Resolve(path));
+            return AssetPath::ResolveRuntimeData(requested);
         }
 
         static bool TryGetWriteTime(const std::filesystem::path& path,
@@ -151,11 +125,14 @@ namespace Wheatear::SideCombatTuningService {
             tuning.TargetAirFallStep = node["targetAirFallStep"].as<float>(tuning.TargetAirFallStep);
             tuning.ProtectionGain = node["protectionGain"].as<float>(tuning.ProtectionGain);
             tuning.DestroyOnHit = node["destroyOnHit"].as<bool>(tuning.DestroyOnHit);
-            tuning.TextureFramePattern = node["textureFramePattern"].as<std::string>(tuning.TextureFramePattern);
+            tuning.TextureFramePattern = AssetAliasRegistry::Resolve(
+                node["textureFramePattern"].as<std::string>(tuning.TextureFramePattern));
             tuning.TextureFrameCount = node["textureFrameCount"].as<int>(tuning.TextureFrameCount);
             tuning.TextureFrameRate = node["textureFrameRate"].as<float>(tuning.TextureFrameRate);
-            tuning.SwingSound = node["swingSound"].as<std::string>(tuning.SwingSound);
-            tuning.HitSound = node["hitSound"].as<std::string>(tuning.HitSound);
+            tuning.SwingSound = AssetAliasRegistry::Resolve(
+                node["swingSound"].as<std::string>(tuning.SwingSound));
+            tuning.HitSound = AssetAliasRegistry::Resolve(
+                node["hitSound"].as<std::string>(tuning.HitSound));
             tuning.SoundVolume = node["soundVolume"].as<float>(tuning.SoundVolume);
             tuning.HitPause = node["hitPause"].as<float>(tuning.HitPause);
             tuning.CameraShake = node["cameraShake"].as<float>(tuning.CameraShake);
@@ -170,8 +147,8 @@ namespace Wheatear::SideCombatTuningService {
                 return tuning;
 
             tuning.HitPauseTimeScale = node["hitPauseTimeScale"].as<float>(tuning.HitPauseTimeScale);
-            tuning.JumpSound = node["jumpSound"].as<std::string>(tuning.JumpSound);
-            tuning.LandSound = node["landSound"].as<std::string>(tuning.LandSound);
+            tuning.JumpSound = AssetAliasRegistry::Resolve(node["jumpSound"].as<std::string>(tuning.JumpSound));
+            tuning.LandSound = AssetAliasRegistry::Resolve(node["landSound"].as<std::string>(tuning.LandSound));
             tuning.JumpSoundVolume = node["jumpSoundVolume"].as<float>(tuning.JumpSoundVolume);
             tuning.LandSoundVolume = node["landSoundVolume"].as<float>(tuning.LandSoundVolume);
             return tuning;
@@ -556,7 +533,7 @@ namespace Wheatear::SideCombatTuningService {
 
         static void AddDefaultAnimationData(SideCombatTuning& tuning)
         {
-            const std::string characterRoot = "assets/vertical_slice/side_combat/characters/";
+            const std::string characterRoot = AssetAliasRegistry::Path("side.path.characters");
             const glm::vec2 bodyScale = { 1.0f, 1.0f };
             const glm::vec2 bodyOffset = { 0.0f, 0.3398f };
             const glm::vec2 bodyTallScale = { 1.0f, 1.25f };
@@ -585,7 +562,7 @@ namespace Wheatear::SideCombatTuningService {
             AddAnimationClip(tuning.PlayerAnimations, "ally_support", characterRoot + "protag_ally_support_{frame2}.png", 8, 18.0f, false, slashScale, bodyOffset);
             AddAnimationClip(tuning.PlayerAnimations, "break_limit", characterRoot + "protag_break_limit_{frame2}.png", 12, 24.0f, false, dashWideScale, bodyOffset);
 
-            const std::string enemyRoot = "assets/vertical_slice/side_combat/enemies/";
+            const std::string enemyRoot = AssetAliasRegistry::Path("side.path.enemies");
             const glm::vec2 gruntScale = { 1.0f, 1.0f };
             const glm::vec2 gruntOffset = { 0.0f, 0.2969f };
             const glm::vec2 gruntWideScale = { 1.5f, 1.0f };
@@ -635,7 +612,7 @@ namespace Wheatear::SideCombatTuningService {
                 attack.CameraShakeDuration = cameraShakeDuration;
             };
 
-            const std::string audioRoot = "assets/vertical_slice/side_combat/audio/";
+            const std::string audioRoot = AssetAliasRegistry::Path("side.path.audio");
             apply("basic1", audioRoot + "swing_light.wav", audioRoot + "hit_light.wav", 0.70f, 0.035f, 0.016f, 0.060f);
             apply("basic2", audioRoot + "swing_light.wav", audioRoot + "hit_light.wav", 0.72f, 0.040f, 0.018f, 0.065f);
             apply("basic3", audioRoot + "swing_heavy.wav", audioRoot + "hit_heavy.wav", 0.80f, 0.055f, 0.028f, 0.085f);
@@ -653,6 +630,8 @@ namespace Wheatear::SideCombatTuningService {
         static SideCombatTuning BuildDefaultTuning()
         {
             SideCombatTuning tuning;
+            tuning.Feedback.JumpSound = AssetAliasRegistry::Resolve(tuning.Feedback.JumpSound);
+            tuning.Feedback.LandSound = AssetAliasRegistry::Resolve(tuning.Feedback.LandSound);
             AddDefaultProgressionData(tuning);
             AddDefaultAnimationData(tuning);
 

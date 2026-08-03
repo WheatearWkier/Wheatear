@@ -1,37 +1,20 @@
 #include "TacticalCombatDrawer.h"
 
+#include "Editor/EditorWidgets.h"
 #include "Panels/SceneHierarchy/ComponentDrawers.h"
 #include "Wheatear/Modules/TacticalCombat/TacticalCombatComponents.h"
 
 #include <imgui/imgui.h>
 
 #include <algorithm>
-#include <cstring>
 #include <vector>
 
 namespace Wheatear {
 
     namespace {
 
-        static bool InputString(const char* label, std::string& value, size_t capacity = 220)
-        {
-            std::vector<char> buffer(capacity, 0);
-            strncpy_s(buffer.data(), buffer.size(), value.c_str(), _TRUNCATE);
-            if (ImGui::InputText(label, buffer.data(), buffer.size()))
-            {
-                value = buffer.data();
-                return true;
-            }
-            return false;
-        }
-
-        static void DrawTeamCombo(int& team)
-        {
-            static const char* labels[] = { "Neutral", "Player", "Enemy" };
-            int index = std::clamp(team, 0, 2);
-            if (ImGui::Combo("Team", &index, labels, 3))
-                team = index;
-        }
+        using EditorWidgets::DrawTeamCombo;
+        using EditorWidgets::InputString;
 
         static const char* PhaseName(TacticalCombatPhase phase)
         {

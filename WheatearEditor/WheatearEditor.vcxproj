@@ -159,8 +159,11 @@
     <ClInclude Include="src\Editor\EditorComponentRegistry.h" />
     <ClInclude Include="src\Editor\EditorLayer2D.h" />
     <ClInclude Include="src\Editor\EditorLayer3D.h" />
-    <ClInclude Include="src\Editor\EditorLayerBase.h" />
+      <ClInclude Include="src\Editor\EditorLayerBase.h" />
+      <ClInclude Include="src\Editor\EditorFloatingWindow.h" />
+      <ClInclude Include="src\Editor\EditorPlatform.h" />
     <ClInclude Include="src\Editor\EditorToolRegistry.h" />
+    <ClInclude Include="src\Editor\EditorWidgets.h" />
     <ClInclude Include="src\Editor\EventScriptGraphPanel.h" />
     <ClInclude Include="src\Editor\ModeSelectLayer.h" />
     <ClInclude Include="src\Editor\TextAssetEditor.h" />
@@ -192,6 +195,7 @@
     <ClInclude Include="src\Tools\ProjectHealthPanel.h" />
     <ClInclude Include="src\Tools\WAOActionEditorPanel.h" />
     <ClInclude Include="src\wepch.h" />
+    <ClInclude Include="resource.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Assets\AssetRegistry.cpp" />
@@ -208,6 +212,8 @@
     <ClCompile Include="src\Editor\EditorLayerBaseScene.cpp" />
     <ClCompile Include="src\Editor\EditorLayerBaseUI.cpp" />
     <ClCompile Include="src\Editor\EditorLayerDockspace.cpp" />
+    <ClCompile Include="src\Editor\EditorPlatform.cpp" />
+    <ClCompile Include="src\Editor\EditorWidgets.cpp" />
     <ClCompile Include="src\Editor\EventScriptGraphPanel.cpp" />
     <ClCompile Include="src\Editor\ModeSelectLayer.cpp" />
     <ClCompile Include="src\Modules\ArcadeCombat\ArcadeCombatDrawer.cpp" />
@@ -242,6 +248,9 @@
     <ClCompile Include="src\wepch.cpp">
       <PrecompiledHeader>Create</PrecompiledHeader>
     </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="WheatearEditor.rc" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Wheatear\Wheatear.vcxproj">

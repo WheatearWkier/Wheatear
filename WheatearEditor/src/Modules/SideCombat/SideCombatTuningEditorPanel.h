@@ -44,7 +44,7 @@ namespace Wheatear {
         bool m_Loaded = false;
         bool m_ParseValid = false;
         bool m_Dirty = false;
-        std::string m_SourcePath = "assets/vertical_slice/data/side_combat_tuning.yaml";
+        std::string m_SourcePath = "side.tuning";
         std::filesystem::path m_ResolvedPath;
         std::string m_Status;
         std::string m_SelectedAttackId;

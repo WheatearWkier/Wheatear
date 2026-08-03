@@ -8,7 +8,13 @@ namespace Wheatear {
     {
     public:
         void OnUpdateRuntime(Scene* scene, Timestep ts) override;
-        void RenderWithEditorCamera(Scene* scene, EditorCamera& camera);
+        void RenderWithEditorCamera(Scene* scene,
+            EditorCamera& camera,
+            bool includeUI = false);
+        void RenderWithSceneCamera(Scene* scene,
+            const Camera& camera,
+            const glm::mat4& cameraTransform,
+            bool includeUI);
 
     private:
         glm::mat4 ComputeLightSpaceMatrix(Scene* scene);

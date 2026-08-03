@@ -1,0 +1,39 @@
+vn_ui_atlas:
+  path: assets/vertical_slice/ui/atlases/vn_ui_atlas.png
+  width: 3200
+  height: 1584
+  type: ui_atlas
+  transparent: true
+  requireRgba: true
+  unusedPixelsAlpha: 0
+  regions:
+    textbox_panel:
+      rect: [0, 0, 3200, 640]
+      type: nine_slice_panel
+      suggestedBorder: [96, 96, 96, 96]
+      sourceArchive: AI生成素材批次/Batch02_VN_UI高清皮肤生产包/ui/atlases/vn_textbox_panel.png
+    command_icons:
+      rect: [0, 640, 2048, 512]
+      cellWidth: 256
+      cellHeight: 256
+      columns: 8
+      rows: 2
+      row0: normal
+      row1: hover_active
+      order: [save, load, quick_save, quick_load, system, history, auto, skip]
+      sourceArchive: AI生成素材批次/Batch02_VN_UI高清皮肤生产包/ui/atlases/vn_command_icons_256.png
+    choice_panel:
+      rect: [0, 1152, 1800, 240]
+      type: nine_slice_panel
+      suggestedBorder: [72, 72, 56, 56]
+      sourceArchive: AI生成素材批次/Batch02_VN_UI高清皮肤生产包/ui/atlases/vn_choice_panel.png
+    nameplate:
+      rect: [0, 1392, 720, 192]
+      type: nine_slice_panel
+      suggestedBorder: [56, 56, 48, 48]
+      sourceArchive: AI生成素材批次/Batch02_VN_UI高清皮肤生产包/ui/atlases/vn_nameplate.png
+    bgm_notice_panel:
+      rect: [720, 1392, 1120, 192]
+      type: nine_slice_panel
+      suggestedBorder: [56, 56, 48, 48]
+      sourceArchive: AI生成素材批次/Batch02_VN_UI高清皮肤生产包/ui/atlases/vn_bgm_notice_panel.png

@@ -74,6 +74,7 @@ Entities:
       Rotation: 0
       Anchor: 0
       SortOrder: 10
+      ParentEntity: 981000054
     UIAnimatorComponent:
       Preset: "slide_fade_in"
       PlayOnStart: true
@@ -100,6 +101,7 @@ Entities:
       Rotation: 0
       Anchor: 0
       SortOrder: 31
+      ParentEntity: 981000054
     UIAnimatorComponent:
       Preset: "slide_fade_in"
       PlayOnStart: true
@@ -126,6 +128,7 @@ Entities:
       Rotation: 0
       Anchor: 0
       SortOrder: 30
+      ParentEntity: 981000054
     UIAnimatorComponent:
       Preset: "fade_in"
       PlayOnStart: true
@@ -158,6 +161,7 @@ Entities:
       Rotation: 0
       Anchor: 0
       SortOrder: 30
+      ParentEntity: 981000054
     UIAnimatorComponent:
       Preset: "fade_in"
       PlayOnStart: true
@@ -190,6 +194,7 @@ Entities:
       Rotation: 0
       Anchor: 0
       SortOrder: 30
+      ParentEntity: 981000054
     UIAnimatorComponent:
       Preset: "fade_in"
       PlayOnStart: true
@@ -222,6 +227,7 @@ Entities:
       Rotation: 0
       Anchor: 0
       SortOrder: 30
+      ParentEntity: 981000054
     UIAnimatorComponent:
       Preset: "fade_in"
       PlayOnStart: true
@@ -254,6 +260,7 @@ Entities:
       Rotation: 0
       Anchor: 0
       SortOrder: 40
+      ParentEntity: 981000054
     UIAnimatorComponent:
       Preset: "hover_pulse"
       PlayOnStart: true
@@ -291,6 +298,7 @@ Entities:
       Rotation: 0
       Anchor: 0
       SortOrder: 40
+      ParentEntity: 981000054
     UIAnimatorComponent:
       Preset: "hover_pulse"
       PlayOnStart: true
@@ -328,6 +336,7 @@ Entities:
       Rotation: 0
       Anchor: 0
       SortOrder: 40
+      ParentEntity: 981000054
     UIAnimatorComponent:
       Preset: "hover_pulse"
       PlayOnStart: true
@@ -365,6 +374,7 @@ Entities:
       Rotation: 0
       Anchor: 0
       SortOrder: 40
+      ParentEntity: 981000054
     UIAnimatorComponent:
       Preset: "hover_pulse"
       PlayOnStart: true

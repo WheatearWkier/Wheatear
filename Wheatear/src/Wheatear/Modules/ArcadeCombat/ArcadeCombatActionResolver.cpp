@@ -1,8 +1,8 @@
 #include "wtpch.h"
 #include "ArcadeCombatActionResolver.h"
 
-#include "ArcadeCombatActionCatalog.h"
 #include "ArcadeCombatSignalHandlers.h"
+#include "Wheatear/Gameplay/Action/ActionRecipeQueries.h"
 #include "Wheatear/Gameplay/Action/ActionResolver.h"
 #include "Wheatear/Gameplay/Action/ActionSignalRouter.h"
 
@@ -52,7 +52,7 @@ namespace Wheatear::ArcadeCombatActionResolver {
 
             const float damage = payload->Damage > 0.0f
                 ? payload->Damage
-                : ArcadeCombatActionCatalog::PrimaryDamage(recipe, 0.0f);
+                : WAO::PrimaryEffectValue(recipe, WAO::EffectType::Damage, 0.0f);
             Record(result.Ledger,
                 context.Intent,
                 WAO::EffectType::Damage,

@@ -56,6 +56,9 @@ namespace Wheatear {
         void OnEditorStart();
         void OnEditorStop();
         void OnUpdateEditor(Timestep ts, EditorCamera& camera);
+        void RenderWithSceneCamera(const Camera& camera,
+            const glm::mat4& cameraTransform,
+            bool includeUI = false);
 
         void OnViewportResize(uint32_t width, uint32_t height);
         void SetViewportOffset(float x, float y);

@@ -2,6 +2,7 @@
 #include "AnimationEditorPanel.h"
 
 #include "ContentBrowserPanel.h"
+#include "Editor/EditorWidgets.h"
 #include "SpriteSheetPickerPanel.h"
 #include "Wheatear/Core/AssetPath.h"
 #include "Wheatear/Scene/Components.h"
@@ -10,24 +11,13 @@
 #include <glm/gtc/type_ptr.hpp>
 
 #include <cfloat>
-#include <cstring>
 #include <vector>
 
 namespace Wheatear {
 
     namespace {
 
-        static bool InputString(const char* label, std::string& value, size_t capacity = 256)
-        {
-            std::vector<char> buffer(capacity, 0);
-            strncpy_s(buffer.data(), buffer.size(), value.c_str(), _TRUNCATE);
-            if (ImGui::InputText(label, buffer.data(), buffer.size()))
-            {
-                value = buffer.data();
-                return true;
-            }
-            return false;
-        }
+        using EditorWidgets::InputString;
 
     } // namespace
 

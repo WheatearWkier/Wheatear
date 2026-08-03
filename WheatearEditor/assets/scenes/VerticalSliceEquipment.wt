@@ -74,6 +74,7 @@ Entities:
       Rotation: 0.0
       Anchor: 0
       SortOrder: 10
+      ParentEntity: 980000209
     UIPanelComponent:
       BackgroundColor: [0.06, 0.052, 0.045, 0.88]
       BorderColor: [0.82, 0.62, 0.32, 0.9]
@@ -92,6 +93,7 @@ Entities:
       Rotation: 0.0
       Anchor: 0
       SortOrder: 42
+      ParentEntity: 980000209
     UITextComponent:
       Text: "装备与背包"
       Color: [1.0, 0.94, 0.78, 1]
@@ -115,6 +117,7 @@ Entities:
       Rotation: 0.0
       Anchor: 0
       SortOrder: 42
+      ParentEntity: 980000209
     UITextComponent:
       Text: "第 2 章 / 魔剑 Lv1 / 主角 Lv1"
       Color: [0.9, 0.82, 0.68, 1]
@@ -138,6 +141,7 @@ Entities:
       Rotation: 0.0
       Anchor: 0
       SortOrder: 18
+      ParentEntity: 980000209
     UIPanelComponent:
       BackgroundColor: [0.06, 0.05, 0.05, 0.64]
       BorderColor: [0.72, 0.54, 0.28, 0.86]
@@ -156,6 +160,7 @@ Entities:
       Rotation: 0.0
       Anchor: 0
       SortOrder: 18
+      ParentEntity: 980000209
     UIPanelComponent:
       BackgroundColor: [0.07, 0.06, 0.05, 0.62]
       BorderColor: [0.7, 0.58, 0.34, 0.84]
@@ -174,6 +179,7 @@ Entities:
       Rotation: 0.0
       Anchor: 0
       SortOrder: 18
+      ParentEntity: 980000209
     UIPanelComponent:
       BackgroundColor: [0.05, 0.05, 0.06, 0.76]
       BorderColor: [0.82, 0.62, 0.32, 0.86]
@@ -192,6 +198,7 @@ Entities:
       Rotation: 0.0
       Anchor: 0
       SortOrder: 42
+      ParentEntity: 980000209
     UITextComponent:
       Text: "当前装备"
       Color: [1.0, 0.92, 0.74, 1]
@@ -215,6 +222,7 @@ Entities:
       Rotation: 0.0
       Anchor: 0
       SortOrder: 42
+      ParentEntity: 980000209
     UITextComponent:
       Text: "背包分页"
       Color: [1.0, 0.92, 0.74, 1]
@@ -238,6 +246,7 @@ Entities:
       Rotation: 0.0
       Anchor: 0
       SortOrder: 25
+      ParentEntity: 980000209
     UIPanelComponent:
       BackgroundColor: [0.025, 0.03, 0.035, 0.78]
       BorderColor: [0.68, 0.58, 0.38, 0.82]
@@ -256,6 +265,7 @@ Entities:
       Rotation: 0.0
       Anchor: 0
       SortOrder: 34
+      ParentEntity: 980000209
     UIImageComponent:
       Color: [1, 1, 1, 1.0]
       TexturePath: assets/vertical_slice/ui/icons/icon_equipment_traveler_armor.png
@@ -273,6 +283,7 @@ Entities:
       Rotation: 0.0
       Anchor: 0
       SortOrder: 42
+      ParentEntity: 980000209
     UITextComponent:
       Text: "防具"
       Color: [0.9, 0.86, 0.76, 1]
@@ -296,6 +307,7 @@ Entities:
       Rotation: 0.0
       Anchor: 0
       SortOrder: 25
+      ParentEntity: 980000209
     UIPanelComponent:
       BackgroundColor: [0.025, 0.03, 0.035, 0.78]
       BorderColor: [0.68, 0.58, 0.38, 0.82]
@@ -314,6 +326,7 @@ Entities:
       Rotation: 0.0
       Anchor: 0
       SortOrder: 34
+      ParentEntity: 980000209
     UIImageComponent:
       Color: [1, 1, 1, 1.0]
       TexturePath: assets/vertical_slice/ui/icons/icon_equipment_magic_ring.png
@@ -331,6 +344,7 @@ Entities:
       Rotation: 0.0
       Anchor: 0
       SortOrder: 42
+      ParentEntity: 980000209
     UITextComponent:
       Text: "饰品"
       Color: [0.9, 0.86, 0.76, 1]
@@ -354,6 +368,7 @@ Entities:
       Rotation: 0.0
       Anchor: 0
       SortOrder: 25
+      ParentEntity: 980000209
     UIPanelComponent:
       BackgroundColor: [0.025, 0.03, 0.035, 0.78]
       BorderColor: [0.68, 0.58, 0.38, 0.82]
@@ -372,6 +387,7 @@ Entities:
       Rotation: 0.0
       Anchor: 0
       SortOrder: 34
+      ParentEntity: 980000209
     UIImageComponent:
       Color: [1, 1, 1, 1.0]
       TexturePath: assets/vertical_slice/ui/icons/icon_equipment_beast_tooth.png
@@ -389,6 +405,7 @@ Entities:
       Rotation: 0.0
       Anchor: 0
       SortOrder: 42
+      ParentEntity: 980000209
     UITextComponent:
       Text: "护符"
       Color: [0.9, 0.86, 0.76, 1]
@@ -412,6 +429,7 @@ Entities:
       Rotation: 0.0
       Anchor: 0
       SortOrder: 25
+      ParentEntity: 980000209
     UIPanelComponent:
       BackgroundColor: [0.025, 0.03, 0.035, 0.78]
       BorderColor: [0.68, 0.58, 0.38, 0.82]
@@ -430,6 +448,7 @@ Entities:
       Rotation: 0.0
       Anchor: 0
       SortOrder: 34
+      ParentEntity: 980000209
     UIImageComponent:
       Color: [1, 1, 1, 1.0]
       TexturePath: assets/vertical_slice/ui/icons/icon_equipment_wind_boots.png
@@ -447,6 +466,7 @@ Entities:
       Rotation: 0.0
       Anchor: 0
       SortOrder: 42
+      ParentEntity: 980000209
     UITextComponent:
       Text: "足部"
       Color: [0.9, 0.86, 0.76, 1]
@@ -470,6 +490,7 @@ Entities:
       Rotation: 0.0
       Anchor: 0
       SortOrder: 25
+      ParentEntity: 980000209
     UIPanelComponent:
       BackgroundColor: [0.025, 0.03, 0.035, 0.78]
       BorderColor: [0.58, 0.48, 0.31, 0.78]
@@ -488,6 +509,7 @@ Entities:
       Rotation: 0.0
       Anchor: 0
       SortOrder: 34
+      ParentEntity: 980000209
     UIImageComponent:
       Color: [1, 1, 1, 1.0]
       TexturePath: assets/vertical_slice/ui/icons/icon_equipment_traveler_armor.png
@@ -505,6 +527,7 @@ Entities:
       Rotation: 0.0
       Anchor: 0
       SortOrder: 58
+      ParentEntity: 980000209
     UIButtonComponent:
       NormalColor: [0, 0, 0, 0]
       HoverColor: [0.95, 1, 0.82, 0.14]
@@ -524,6 +547,7 @@ Entities:
       Rotation: 0.0
       Anchor: 0
       SortOrder: 25
+      ParentEntity: 980000209
     UIPanelComponent:
       BackgroundColor: [0.025, 0.03, 0.035, 0.78]
       BorderColor: [0.58, 0.48, 0.31, 0.78]
@@ -542,6 +566,7 @@ Entities:
       Rotation: 0.0
       Anchor: 0
       SortOrder: 34
+      ParentEntity: 980000209
     UIImageComponent:
       Color: [1, 1, 1, 1.0]
       TexturePath: assets/vertical_slice/ui/icons/icon_equipment_black_forest_armor.png
@@ -559,6 +584,7 @@ Entities:
       Rotation: 0.0
       Anchor: 0
       SortOrder: 58
+      ParentEntity: 980000209
     UIButtonComponent:
       NormalColor: [0, 0, 0, 0]
       HoverColor: [0.95, 1, 0.82, 0.14]
@@ -578,6 +604,7 @@ Entities:
       Rotation: 0.0
       Anchor: 0
       SortOrder: 25
+      ParentEntity: 980000209
     UIPanelComponent:
       BackgroundColor: [0.025, 0.03, 0.035, 0.78]
       BorderColor: [0.58, 0.48, 0.31, 0.78]
@@ -596,6 +623,7 @@ Entities:
       Rotation: 0.0
       Anchor: 0
       SortOrder: 34
+      ParentEntity: 980000209
     UIImageComponent:
       Color: [1, 1, 1, 1.0]
       TexturePath: assets/vertical_slice/ui/icons/icon_equipment_beast_tooth.png
@@ -613,6 +641,7 @@ Entities:
       Rotation: 0.0
       Anchor: 0
       SortOrder: 58
+      ParentEntity: 980000209
     UIButtonComponent:
       NormalColor: [0, 0, 0, 0]
       HoverColor: [0.95, 1, 0.82, 0.14]
@@ -632,6 +661,7 @@ Entities:
       Rotation: 0.0
       Anchor: 0
       SortOrder: 25
+      ParentEntity: 980000209
     UIPanelComponent:
       BackgroundColor: [0.025, 0.03, 0.035, 0.78]
       BorderColor: [0.58, 0.48, 0.31, 0.78]
@@ -650,6 +680,7 @@ Entities:
       Rotation: 0.0
       Anchor: 0
       SortOrder: 34
+      ParentEntity: 980000209
     UIImageComponent:
       Color: [1, 1, 1, 1.0]
       TexturePath: assets/vertical_slice/ui/icons/icon_equipment_magic_ring.png
@@ -667,6 +698,7 @@ Entities:
       Rotation: 0.0
       Anchor: 0
       SortOrder: 58
+      ParentEntity: 980000209
     UIButtonComponent:
       NormalColor: [0, 0, 0, 0]
       HoverColor: [0.95, 1, 0.82, 0.14]
@@ -686,6 +718,7 @@ Entities:
       Rotation: 0.0
       Anchor: 0
       SortOrder: 25
+      ParentEntity: 980000209
     UIPanelComponent:
       BackgroundColor: [0.025, 0.03, 0.035, 0.78]
       BorderColor: [0.58, 0.48, 0.31, 0.78]
@@ -704,6 +737,7 @@ Entities:
       Rotation: 0.0
       Anchor: 0
       SortOrder: 34
+      ParentEntity: 980000209
     UIImageComponent:
       Color: [1, 1, 1, 1.0]
       TexturePath: assets/vertical_slice/ui/icons/icon_equipment_wind_boots.png
@@ -721,6 +755,7 @@ Entities:
       Rotation: 0.0
       Anchor: 0
       SortOrder: 58
+      ParentEntity: 980000209
     UIButtonComponent:
       NormalColor: [0, 0, 0, 0]
       HoverColor: [0.95, 1, 0.82, 0.14]
@@ -740,6 +775,7 @@ Entities:
       Rotation: 0.0
       Anchor: 0
       SortOrder: 25
+      ParentEntity: 980000209
     UIPanelComponent:
       BackgroundColor: [0.025, 0.03, 0.035, 0.78]
       BorderColor: [0.58, 0.48, 0.31, 0.78]
@@ -758,6 +794,7 @@ Entities:
       Rotation: 0.0
       Anchor: 0
       SortOrder: 34
+      ParentEntity: 980000209
     UIImageComponent:
       Color: [1, 1, 1, 1.0]
       TexturePath: assets/vertical_slice/ui/icons/icon_equipment_ward_charm.png
@@ -775,6 +812,7 @@ Entities:
       Rotation: 0.0
       Anchor: 0
       SortOrder: 58
+      ParentEntity: 980000209
     UIButtonComponent:
       NormalColor: [0, 0, 0, 0]
       HoverColor: [0.95, 1, 0.82, 0.14]
@@ -794,6 +832,7 @@ Entities:
       Rotation: 0.0
       Anchor: 0
       SortOrder: 25
+      ParentEntity: 980000209
     UIPanelComponent:
       BackgroundColor: [0.025, 0.03, 0.035, 0.78]
       BorderColor: [0.58, 0.48, 0.31, 0.78]
@@ -812,6 +851,7 @@ Entities:
       Rotation: 0.0
       Anchor: 0
       SortOrder: 34
+      ParentEntity: 980000209
     UIImageComponent:
       Color: [1, 1, 1, 1.0]
       TexturePath: assets/vertical_slice/ui/icons/icon_equipment_training_blade.png
@@ -829,6 +869,7 @@ Entities:
       Rotation: 0.0
       Anchor: 0
       SortOrder: 58
+      ParentEntity: 980000209
     UIButtonComponent:
       NormalColor: [0, 0, 0, 0]
       HoverColor: [0.95, 1, 0.82, 0.14]
@@ -848,6 +889,7 @@ Entities:
       Rotation: 0.0
       Anchor: 0
       SortOrder: 25
+      ParentEntity: 980000209
     UIPanelComponent:
       BackgroundColor: [0.025, 0.03, 0.035, 0.78]
       BorderColor: [0.58, 0.48, 0.31, 0.78]
@@ -866,6 +908,7 @@ Entities:
       Rotation: 0.0
       Anchor: 0
       SortOrder: 34
+      ParentEntity: 980000209
     UIImageComponent:
       Color: [1, 1, 1, 1.0]
       TexturePath: assets/vertical_slice/ui/icons/icon_equipment_angel_feather.png
@@ -883,6 +926,7 @@ Entities:
       Rotation: 0.0
       Anchor: 0
       SortOrder: 58
+      ParentEntity: 980000209
     UIButtonComponent:
       NormalColor: [0, 0, 0, 0]
       HoverColor: [0.95, 1, 0.82, 0.14]
@@ -902,6 +946,7 @@ Entities:
       Rotation: 0.0
       Anchor: 0
       SortOrder: 42
+      ParentEntity: 980000209
     UITextComponent:
       Text: "装备页 1 / 2"
       Color: [0.96, 0.92, 0.82, 1]
@@ -925,6 +970,7 @@ Entities:
       Rotation: 0.0
       Anchor: 0
       SortOrder: 42
+      ParentEntity: 980000209
     UITextComponent:
       Text: "第 1 页"
       Color: [0.94, 0.9, 0.8, 1]
@@ -948,6 +994,7 @@ Entities:
       Rotation: 0.0
       Anchor: 0
       SortOrder: 44
+      ParentEntity: 980000209
     UISliderComponent:
       Value: 1
       MinValue: 1
@@ -971,6 +1018,7 @@ Entities:
       Rotation: 0.0
       Anchor: 0
       SortOrder: 55
+      ParentEntity: 980000209
     UIButtonComponent:
       NormalColor: [0.74, 0.52, 0.2, 0.94]
       HoverColor: [0.92, 0.72, 0.3, 0.96]
@@ -999,6 +1047,7 @@ Entities:
       Rotation: 0.0
       Anchor: 0
       SortOrder: 55
+      ParentEntity: 980000209
     UIButtonComponent:
       NormalColor: [0.32, 0.44, 0.42, 0.94]
       HoverColor: [0.44, 0.66, 0.60, 0.96]
@@ -1027,6 +1076,7 @@ Entities:
       Rotation: 0.0
       Anchor: 0
       SortOrder: 60
+      ParentEntity: 980000209
     UIButtonComponent:
       NormalColor: [0, 0, 0, 0]
       HoverColor: [1.0, 0.85, 0.32, 0.12]
@@ -1046,6 +1096,7 @@ Entities:
       Rotation: 0.0
       Anchor: 0
       SortOrder: 60
+      ParentEntity: 980000209
     UIButtonComponent:
       NormalColor: [0, 0, 0, 0]
       HoverColor: [1.0, 0.85, 0.32, 0.12]
@@ -1065,6 +1116,7 @@ Entities:
       Rotation: 0.0
       Anchor: 0
       SortOrder: 60
+      ParentEntity: 980000209
     UIButtonComponent:
       NormalColor: [0, 0, 0, 0]
       HoverColor: [1.0, 0.85, 0.32, 0.12]
@@ -1084,6 +1136,7 @@ Entities:
       Rotation: 0.0
       Anchor: 0
       SortOrder: 60
+      ParentEntity: 980000209
     UIButtonComponent:
       NormalColor: [0, 0, 0, 0]
       HoverColor: [1.0, 0.85, 0.32, 0.12]
@@ -1103,6 +1156,7 @@ Entities:
       Rotation: 0.0
       Anchor: 0
       SortOrder: 85
+      ParentEntity: 980000209
     UIPanelComponent:
       BackgroundColor: [0.025, 0.028, 0.032, 0.94]
       BorderColor: [0.92, 0.76, 0.36, 0.88]
@@ -1121,6 +1175,7 @@ Entities:
       Rotation: 0.0
       Anchor: 0
       SortOrder: 86
+      ParentEntity: 980000209
     UITextComponent:
       Text: "装备属性"
       Color: [0.96, 0.93, 0.82, 1]
@@ -1144,6 +1199,7 @@ Entities:
       Rotation: 0.0
       Anchor: 0
       SortOrder: 55
+      ParentEntity: 980000209
     UIButtonComponent:
       NormalColor: [0.1, 0.12, 0.14, 0.9]
       HoverColor: [0.2, 0.24, 0.28, 0.96]
@@ -1172,6 +1228,7 @@ Entities:
       Rotation: 0.0
       Anchor: 0
       SortOrder: 42
+      ParentEntity: 980000209
     UITextComponent:
       Text: "旅人护衣"
       Color: [0.98, 0.95, 0.86, 1]
@@ -1195,6 +1252,7 @@ Entities:
       Rotation: 0.0
       Anchor: 0
       SortOrder: 42
+      ParentEntity: 980000209
     UITextComponent:
       Text: "材料"
       Color: [1.0, 0.9, 0.68, 1]
@@ -1218,6 +1276,7 @@ Entities:
       Rotation: 0.0
       Anchor: 0
       SortOrder: 44
+      ParentEntity: 980000209
     UIProgressBarComponent:
       Value: 0
       MaxValue: 1
@@ -1237,6 +1296,7 @@ Entities:
       Rotation: 0.0
       Anchor: 0
       SortOrder: 55
+      ParentEntity: 980000209
     UIButtonComponent:
       NormalColor: [0.74, 0.52, 0.2, 0.94]
       HoverColor: [0.92, 0.72, 0.3, 0.96]
@@ -1265,6 +1325,7 @@ Entities:
       Rotation: 0.0
       Anchor: 0
       SortOrder: 55
+      ParentEntity: 980000209
     UIButtonComponent:
       NormalColor: [0.1, 0.12, 0.14, 0.9]
       HoverColor: [0.2, 0.24, 0.28, 0.96]

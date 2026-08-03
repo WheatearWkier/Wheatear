@@ -1,5 +1,6 @@
 #include "VisualNovelDrawer.h"
 
+#include "Editor/EditorWidgets.h"
 #include "Editor/TextAssetEditor.h"
 #include "Modules/VisualNovel/VisualNovelScriptEditorPanel.h"
 #include "Panels/SceneHierarchy/ComponentDrawers.h"
@@ -7,7 +8,6 @@
 
 #include <imgui/imgui.h>
 
-#include <cstring>
 #include <unordered_map>
 #include <vector>
 
@@ -15,17 +15,7 @@ namespace Wheatear {
 
     namespace {
 
-        static bool InputString(const char* label, std::string& value, size_t capacity = 256)
-        {
-            std::vector<char> buffer(capacity, 0);
-            strncpy_s(buffer.data(), buffer.size(), value.c_str(), _TRUNCATE);
-            if (ImGui::InputText(label, buffer.data(), buffer.size()))
-            {
-                value = buffer.data();
-                return true;
-            }
-            return false;
-        }
+        using EditorWidgets::InputString;
 
         static std::unordered_map<std::string, EditorUI::TextAssetEditorState> s_ScriptEditors;
 

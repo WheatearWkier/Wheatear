@@ -77,7 +77,7 @@ namespace Wheatear {
             if (scriptPath.empty())
                 return nullptr;
 
-            const std::filesystem::path resolved = AssetPath::Resolve(scriptPath);
+            const std::filesystem::path resolved = AssetPath::ResolveRuntimeData(scriptPath);
             std::error_code error;
             const auto writeTime = std::filesystem::exists(resolved, error)
                 ? std::filesystem::last_write_time(resolved, error)
@@ -86,7 +86,7 @@ namespace Wheatear {
             auto& cache = ScriptCache()[scriptPath];
             if (!cache.Loaded || cache.LastWriteTime != writeTime)
             {
-                cache.Script = EventScript::FromFile(scriptPath);
+                cache.Script = EventScript::FromFile(resolved);
                 cache.LastWriteTime = writeTime;
                 cache.Loaded = true;
             }

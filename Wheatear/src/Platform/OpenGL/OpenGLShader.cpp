@@ -127,15 +127,26 @@ namespace Wheatear {
     {
         WT_PROFILE_FUNCTION();
 
+        m_Name = std::filesystem::path(filepath).stem().string();
+
         std::string source = ReadFile(m_FilePath);
+        if (source.empty())
+        {
+            WT_CORE_ERROR("Shader source is empty or missing; shader program was not created: {0}", m_FilePath);
+            return;
+        }
+
         auto        shaderSrcs = PreProcess(source);
+        if (shaderSrcs.empty())
+        {
+            WT_CORE_ERROR("Shader source has no usable '#type' stage blocks; shader program was not created: {0}", m_FilePath);
+            return;
+        }
 
         Timer timer;
         CompileOrGetVulkanBinaries(shaderSrcs);   // fills m_OpenGLSPIRV (see note above)
         CreateProgram();
         WT_CORE_WARN("Shader creation took {0} ms", timer.ElapsedMillis());
-
-        m_Name = std::filesystem::path(filepath).stem().string();
     }
 
     OpenGLShader::OpenGLShader(const std::string& name,
@@ -331,6 +342,13 @@ namespace Wheatear {
 
     void OpenGLShader::CreateProgram()
     {
+        if (m_OpenGLSPIRV.empty())
+        {
+            WT_CORE_ERROR("Shader program was not created because no compiled stages are available: {0}", m_FilePath);
+            m_RendererID = 0;
+            return;
+        }
+
         GLuint program = glCreateProgram();
 
         std::vector<GLuint> shaderIDs;
@@ -353,13 +371,21 @@ namespace Wheatear {
         {
             GLint maxLength = 0;
             glGetProgramiv(program, GL_INFO_LOG_LENGTH, &maxLength);
-            std::vector<GLchar> infoLog(maxLength);
-            glGetProgramInfoLog(program, maxLength, &maxLength, infoLog.data());
+            std::string linkLog = "No OpenGL link log was returned.";
+            if (maxLength > 1)
+            {
+                std::vector<GLchar> infoLog(static_cast<size_t>(maxLength));
+                GLsizei written = 0;
+                glGetProgramInfoLog(program, maxLength, &written, infoLog.data());
+                if (written > 0)
+                    linkLog.assign(infoLog.data(), static_cast<size_t>(written));
+            }
             WT_CORE_ERROR("Shader linking failed ({0}):\n{1}",
-                m_FilePath, infoLog.data());
+                m_FilePath, linkLog);
             glDeleteProgram(program);
             for (auto id : shaderIDs)
                 glDeleteShader(id);
+            m_RendererID = 0;
             return;
         }
 

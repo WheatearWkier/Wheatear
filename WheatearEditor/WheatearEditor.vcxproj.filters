@@ -40,6 +40,9 @@
     <Filter Include="Tools">
       <UniqueIdentifier>{16CF2D0E-82E3-55BF-4B65-F91EB73852F0}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Resources">
+      <UniqueIdentifier>{6F268935-87EF-4C38-BFE1-5D170DDC9EB4}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\Assets\AssetRegistry.h">
@@ -72,10 +75,19 @@
     <ClInclude Include="src\Editor\EditorLayer3D.h">
       <Filter>Editor</Filter>
     </ClInclude>
-    <ClInclude Include="src\Editor\EditorLayerBase.h">
+      <ClInclude Include="src\Editor\EditorLayerBase.h">
+        <Filter>Editor</Filter>
+      </ClInclude>
+      <ClInclude Include="src\Editor\EditorFloatingWindow.h">
+        <Filter>Editor</Filter>
+      </ClInclude>
+      <ClInclude Include="src\Editor\EditorPlatform.h">
+        <Filter>Editor</Filter>
+      </ClInclude>
+    <ClInclude Include="src\Editor\EditorToolRegistry.h">
       <Filter>Editor</Filter>
     </ClInclude>
-    <ClInclude Include="src\Editor\EditorToolRegistry.h">
+    <ClInclude Include="src\Editor\EditorWidgets.h">
       <Filter>Editor</Filter>
     </ClInclude>
     <ClInclude Include="src\Editor\EventScriptGraphPanel.h">
@@ -169,6 +181,9 @@
       <Filter>Tools</Filter>
     </ClInclude>
     <ClInclude Include="src\wepch.h" />
+    <ClInclude Include="resource.h">
+      <Filter>Resources</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Assets\AssetRegistry.cpp">
@@ -211,6 +226,12 @@
       <Filter>Editor</Filter>
     </ClCompile>
     <ClCompile Include="src\Editor\EditorLayerDockspace.cpp">
+      <Filter>Editor</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Editor\EditorPlatform.cpp">
+      <Filter>Editor</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Editor\EditorWidgets.cpp">
       <Filter>Editor</Filter>
     </ClCompile>
     <ClCompile Include="src\Editor\EventScriptGraphPanel.cpp">
@@ -305,5 +326,10 @@
     </ClCompile>
     <ClCompile Include="src\WheatearEditorApp.cpp" />
     <ClCompile Include="src\wepch.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="WheatearEditor.rc">
+      <Filter>Resources</Filter>
+    </ResourceCompile>
   </ItemGroup>
 </Project>

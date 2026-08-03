@@ -108,7 +108,8 @@ namespace Wheatear {
         void UI_Toolbar();
         void UI_Viewport();
         void UI_CanvasEditor();
-        void UI_DrawViewportUIOverlay();
+        void UI_DrawCanvasSceneReference(const glm::vec2& regionMin,
+            const glm::vec2& regionSize);
         void UI_DrawCanvasOverlay(const glm::vec2& regionMin,
             const glm::vec2& regionSize,
             bool surfaceHovered,
@@ -126,6 +127,18 @@ namespace Wheatear {
         void UpdateUITextFontDuringUIResize(Entity entity);
         void StartPlayerPackageBuild(bool enableScripts = false);
         void PollPlayerPackageBuild();
+        void ProcessDeferredViewportAssetDrop();
+        void SelectEditorEntity(Entity entity, bool preferMoveGizmo);
+        Entity PickViewportEditorEntity(const glm::vec2& screenMouse);
+        Entity PickSceneSpriteEntityAtViewportPoint(const glm::vec2& screenMouse);
+        Entity PickUIEntityAtCanvasPoint(const glm::vec2& regionMin,
+            const glm::vec2& regionSize,
+            Entity canvasEntity,
+            const glm::vec2& screenMouse);
+        void ActivateHierarchyEntity(Entity entity);
+        void OpenCanvasEditorForEntity(Entity entity);
+        void FrameEditorCameraOnEntity(Entity entity);
+        void FrameEditorCameraOnScene();
         void LoadPlayScene(const std::filesystem::path& scenePath);
         void ApplyPendingVisualNovelLoad();
         bool ConsumePlayModeSceneTransitionRequests();
@@ -133,6 +146,7 @@ namespace Wheatear {
 
     protected:
         Ref<Framebuffer> m_Framebuffer;
+        Ref<Framebuffer> m_UIReferenceFramebuffer;
         EditorCamera m_EditorCamera;
 
         Ref<Scene> m_ActiveScene;
@@ -146,6 +160,9 @@ namespace Wheatear {
         glm::vec2 m_ViewportBounds[2] = {};
         bool m_ViewportFocused = false;
         bool m_ViewportHovered = false;
+        bool m_ViewportImageHovered = false;
+        bool m_EditorCameraViewportMouseDown = false;
+        bool m_PlayModeViewportMouseDown = false;
 
         int m_GizmoType = -1;
         bool m_GizmoWasUsing = false;
@@ -154,13 +171,15 @@ namespace Wheatear {
 
         bool m_ShowPhysicsColliders = false;
         bool m_ShowUIOutlines = true;
-        bool m_HideUIInSceneViewport = false;
-        bool m_UIEditorOpen = false;
+        bool m_UIEditorOpen = true;
+        bool m_FocusCanvasEditor = false;
+        bool m_UIEditorMouseOverCanvas = false;
+        glm::vec2 m_UIEditorCanvasBounds[2] = {};
+        bool m_ShowStats = true;
         bool m_RequestDefaultDockspaceLayout = false;
         bool m_DefaultDockspaceLayoutBuilt = false;
         Entity m_UIEditingCanvas;
         int m_UIEditHandle = 0;
-        int m_UIEditSurface = 0;
         Entity m_UIEditEntity;
         glm::vec2 m_UIEditStartMouse = { 0.0f, 0.0f };
         glm::vec4 m_UIEditStartRect = { 0.0f, 0.0f, 0.0f, 0.0f };
@@ -170,6 +189,16 @@ namespace Wheatear {
 
         Ref<Texture2D> m_IconPlay;
         Ref<Texture2D> m_IconStop;
+        Ref<Texture2D> m_IconNewScene;
+        Ref<Texture2D> m_IconOpenScene;
+        Ref<Texture2D> m_IconSaveScene;
+        Ref<Texture2D> m_IconPackage;
+        Ref<Texture2D> m_IconHealth;
+        Ref<Texture2D> m_IconUICanvas;
+        Ref<Texture2D> m_IconSpriteSheet;
+        Ref<Texture2D> m_IconEventGraph;
+        Ref<Texture2D> m_IconFocus;
+        Ref<Texture2D> m_IconResetLayout;
 
         std::unique_ptr<SceneHierarchyPanel> m_SceneHierarchyPanel;
         std::unique_ptr<ContentBrowserPanel> m_ContentBrowserPanel;
@@ -181,6 +210,10 @@ namespace Wheatear {
         bool m_PlayerBuildRunning = false;
         std::string m_PlayerBuildStatus;
         std::filesystem::path m_LastPlayerBuildDirectory;
+        std::filesystem::path m_LastEditorBuildDirectory;
+        std::filesystem::path m_DeferredSceneOpenPath;
+        std::filesystem::path m_DeferredPrefabInstantiatePath;
+        std::filesystem::path m_DeferredUITemplateInstantiatePath;
         int m_PendingVisualNovelLoadSlot = 0;
     };
 

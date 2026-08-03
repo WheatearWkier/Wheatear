@@ -1,0 +1,7 @@
+materials:
+  - id: 'MAT-MAGIC-CORE-T0'
+    name: '魔核碎片'
+  - id: 'MAT-BEAST-SINEW'
+    name: '兽筋'
+  - id: 'MAT-BEAST-CLAW'
+    name: '熊爪'

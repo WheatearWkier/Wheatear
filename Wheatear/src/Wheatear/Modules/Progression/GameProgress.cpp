@@ -1,14 +1,17 @@
 #include "wtpch.h"
 #include "GameProgress.h"
 
+#include "ProgressionContent.h"
 #include "ProgressionSettingsCommandService.h"
 #include "Wheatear/Core/AssetPath.h"
 #include "Wheatear/Core/UserSettings.h"
 
 #include <algorithm>
+#include <cctype>
 #include <filesystem>
 #include <fstream>
 #include <iomanip>
+#include <optional>
 #include <sstream>
 #include <vector>
 
@@ -16,12 +19,17 @@ namespace Wheatear::GameProgress {
 
     namespace {
 
-        static constexpr const char* MainDungeonId = "CH02_MAIN_BearAwakening";
-        static constexpr const char* BeastPathDungeonId = "CH02_MAT_BeastPath";
+        static constexpr int kMaxSaveSlots = 20;
+        static constexpr int kCurrentSaveVersion = 2;
+
+        static int ClampSaveSlot(int slot)
+        {
+            return std::clamp(slot, 1, kMaxSaveSlots);
+        }
 
         static std::filesystem::path SavePathForSlot(int slot)
         {
-            const int safeSlot = std::clamp(slot, 1, 9);
+            const int safeSlot = ClampSaveSlot(slot);
             return AssetPath::Resolve("assets/saves/progression_slot" + std::to_string(safeSlot) + ".wtsave");
         }
 
@@ -126,55 +134,42 @@ namespace Wheatear::GameProgress {
             return fallback;
         }
 
+        static std::optional<int> ParseTrailingSlot(const std::string& value, const std::string& prefix)
+        {
+            if (value.rfind(prefix, 0) != 0)
+                return std::nullopt;
+
+            const std::string payload = value.substr(prefix.size());
+            if (payload.empty())
+                return std::nullopt;
+
+            for (char c : payload)
+            {
+                if (!std::isdigit(static_cast<unsigned char>(c)))
+                    return std::nullopt;
+            }
+
+            return ClampSaveSlot(ParseInt(payload, 1));
+        }
+
+        static const std::string& MainDungeonId()
+        {
+            return ProgressionContent::Get().MainDungeonId;
+        }
+
+        static const std::string& BeastPathDungeonId()
+        {
+            return ProgressionContent::Get().MaterialDungeonId;
+        }
+
+        static const std::string& TravelerArmorUpgradeEquipmentId()
+        {
+            return ProgressionContent::Get().TravelerArmorUpgradeEquipmentId;
+        }
+
         static std::vector<RelationshipRecord> DefaultRelationships()
         {
-            return {
-                {
-                    "mentor",
-                    "魔剑士导师",
-                    100,
-                    2,
-                    true,
-                    "青梅伪装 / 空连指导",
-                    "当前已满好感。后续揭露真青梅身份后解锁正宫支援。"
-                },
-                {
-                    "white_mage",
-                    "白魔法队友",
-                    15,
-                    1,
-                    false,
-                    "回复 / 护盾 / 净化",
-                    "第三章加入后开放好感事件和白魔法支援。"
-                },
-                {
-                    "shield_guard",
-                    "剑盾护卫",
-                    0,
-                    0,
-                    false,
-                    "格挡 / 嘲讽 / 霸体保护",
-                    "第四章加入后开放护卫支援。"
-                },
-                {
-                    "black_mage",
-                    "黑魔法队友",
-                    0,
-                    0,
-                    false,
-                    "伤害 / Debuff / 连招留敌",
-                    "第五章加入后开放黑魔法支援。"
-                },
-                {
-                    "queen_angel",
-                    "王妃 / 天使转生",
-                    0,
-                    0,
-                    false,
-                    "复活 / 天使祝福 / 终盘容错",
-                    "第十二章后进入主线，天使祝福提供一次复活。"
-                }
-            };
+            return ProgressionContent::Get().Relationships;
         }
 
         static int ExperienceForNextLevel(int level)
@@ -184,10 +179,8 @@ namespace Wheatear::GameProgress {
 
         static std::string DungeonDisplayName(const std::string& dungeonId)
         {
-            if (dungeonId == MainDungeonId)
-                return "黑熊丈夫讨伐";
-            if (dungeonId == BeastPathDungeonId)
-                return "黑林兽道";
+            if (const auto* dungeon = ProgressionContent::FindDungeon(dungeonId))
+                return dungeon->Name;
             return dungeonId;
         }
 
@@ -198,32 +191,28 @@ namespace Wheatear::GameProgress {
             return stream.str();
         }
 
-        static const char* DefaultMaterialName(const std::string& itemId)
+        static std::string DefaultMaterialName(const std::string& itemId)
         {
-            if (itemId == "MAT-MAGIC-CORE-T0")
-                return "魔核碎片";
-            if (itemId == "MAT-BEAST-SINEW")
-                return "兽筋";
-            if (itemId == "MAT-BEAST-CLAW")
-                return "熊爪";
-            return "未知材料";
+            return ProgressionContent::MaterialName(itemId);
         }
 
         static std::vector<MaterialCost> MagicSwordLv2Cost()
         {
-            return {
-                { "MAT-MAGIC-CORE-T0", "魔核碎片", 1 },
-                { "MAT-BEAST-SINEW", "兽筋", 2 },
-                { "MAT-BEAST-CLAW", "熊爪", 1 }
-            };
+            return ProgressionContent::Get().MagicSwordLv2.Costs;
         }
 
         static std::vector<MaterialCost> TravelerArmorLv1Cost()
         {
-            return {
-                { "MAT-BEAST-SINEW", "兽筋", 1 },
-                { "MAT-BEAST-CLAW", "熊爪", 1 }
-            };
+            return ProgressionContent::Get().TravelerArmorLv1.Costs;
+        }
+
+        static void ApplyAttributeBonus(State& state, const ProgressionContent::AttributeBonus& bonus)
+        {
+            state.Attributes.HP += bonus.HP;
+            state.Attributes.ATK += bonus.ATK;
+            state.Attributes.DEF += bonus.DEF;
+            state.Attributes.MATK += bonus.MATK;
+            state.Attributes.MDEF += bonus.MDEF;
         }
 
         static void PushNotification(State& state, const std::string& message)
@@ -238,30 +227,22 @@ namespace Wheatear::GameProgress {
 
         static State MakeDefaultState()
         {
+            const auto& content = ProgressionContent::Get();
             State state;
-            state.Objective = "整理黑熊掉落的材料，确认魔剑和装备的强化方向。";
+            state.Objective = content.DefaultObjective;
             state.ExperienceToNext = ExperienceForNextLevel(state.PlayerLevel);
-            state.UnlockedSkills.insert("basic_attack");
-            state.UnlockedSkills.insert("air_basic");
-            state.UnlockedSkills.insert("launcher");
-            state.UnlockedSkills.insert("air_chase");
-            state.UnlockedSkills.insert("vfx_magic_bolt");
-            state.UnlockedSkills.insert("vfx_ally_support");
-            state.UnlockedSkills.insert("magic_sword_core");
-            state.UnlockedSkills.insert("ME-01");
-            state.UnlockedSkills.insert("ME-02");
-            state.UnlockedSkills.insert("ME-03");
-            state.UnlockedSkills.insert("MA-01");
-            state.UnlockedSkills.insert("MO-01");
-            state.UnlockedSkills.insert("MO-02");
-            state.OwnedEquipment.insert("traveler_armor");
-            state.OwnedEquipment.insert("beast_tooth_pendant");
-            state.OwnedEquipment.insert("old_ward_charm");
-            state.EquippedItemsBySlot["armor"] = "traveler_armor";
-            state.UnlockedDungeons.insert(MainDungeonId);
-            state.StoryFlags.insert("FLAG_CH02_SIDE_COMBAT_STARTED");
+            for (const std::string& skillId : content.InitialUnlockedSkills)
+                state.UnlockedSkills.insert(skillId);
+            for (const std::string& equipmentId : content.InitialOwnedEquipment)
+                state.OwnedEquipment.insert(equipmentId);
+            state.EquippedItemsBySlot = content.InitialEquippedItemsBySlot;
+            for (const std::string& dungeonId : content.InitialUnlockedDungeons)
+                state.UnlockedDungeons.insert(dungeonId);
+            for (const std::string& flag : content.InitialStoryFlags)
+                state.StoryFlags.insert(flag);
+            state.SelectedEquipmentId = content.InitialSelectedEquipmentId;
             state.Relationships = DefaultRelationships();
-            state.LastResultMessage = "据点已开启。完成黑熊战后，掉落会写入这里。";
+            state.LastResultMessage = content.DefaultLastResultMessage;
             return state;
         }
 
@@ -279,95 +260,41 @@ namespace Wheatear::GameProgress {
 
         static std::string BuildMaterialInventoryText()
         {
+            const auto& content = ProgressionContent::Get();
             std::ostringstream stream;
-            stream << "魔核碎片 x" << GetMaterialAmount("MAT-MAGIC-CORE-T0")
-                   << " / 兽筋 x" << GetMaterialAmount("MAT-BEAST-SINEW")
-                   << " / 熊爪 x" << GetMaterialAmount("MAT-BEAST-CLAW");
+            bool wroteAny = false;
+            for (const MaterialCost& material : content.Materials)
+            {
+                if (material.ItemId.empty())
+                    continue;
+                if (wroteAny)
+                    stream << " / ";
+                stream << material.DisplayName << " x" << GetMaterialAmount(material.ItemId);
+                wroteAny = true;
+            }
+
+            if (!wroteAny)
+            {
+                const State& state = GetState();
+                std::vector<std::pair<std::string, int>> sorted(state.Materials.begin(), state.Materials.end());
+                std::sort(sorted.begin(), sorted.end(), [](const auto& a, const auto& b) { return a.first < b.first; });
+                for (const auto& [itemId, amount] : sorted)
+                {
+                    if (wroteAny)
+                        stream << " / ";
+                    stream << DefaultMaterialName(itemId) << " x" << amount;
+                    wroteAny = true;
+                }
+            }
             return stream.str();
         }
 
-        struct SkillNodeDisplayInfo
-        {
-            const char* Id;
-            const char* Name;
-            const char* Branch;
-            const char* Input;
-            const char* ComboRole;
-            const char* Requirement;
-            const char* Description;
-            int UnlockChapter;
-        };
+        using SkillNodeDisplayInfo = ProgressionContent::SkillNodeDefinition;
+        using SkillNodeInfo = ProgressionContent::SkillNodeDefinition;
 
         static const std::vector<SkillNodeDisplayInfo>& GetSkillNodeDisplayInfos()
         {
-            static const std::vector<SkillNodeDisplayInfo> nodes = {
-                { "magic_sword_core", "魔剑核心", "核心", "剧情获得", "技能树中心，连接近战、魔法、融合、机动和断限", "序章后由真青梅赠与", "魔剑会自动吸收靠近的材料，是主角后续成长和双修技能的承载物。", 0 },
-                { "ME-01", "三段斩", "近战", "J", "地面连段、压低保护槽、接上挑或闪避取消", "魔剑 Lv1", "基础近战连段。每一段都应能接上挑、魔法或闪避取消。", 2 },
-                { "ME-02", "裂空挑斩", "近战", "S+J", "浮空起手，把可控目标打进空连状态", "魔剑 Lv1", "前期空中连击的主要入口。上挑高度要足够让玩家跳上去继续追击。", 2 },
-                { "ME-03", "空中追斩", "近战", "空中 J", "滞空续连，每次攻击小幅下落但保持连击", "魔剑 Lv1", "空中普通攻击不会让角色无限悬停，而是慢慢下坠。", 2 },
-                { "ME-04", "落星斩", "近战", "空中 J 长按", "空中收尾、把小怪砸落并制造落点", "第 3 章 / 白魔法队友", "用于把空连自然收束到地面，普通玩家也能靠它稳定结束连段。", 3 },
-                { "ME-05", "破盾连斩", "近战", "J-J-K", "削韧、打开精英怪防御", "第 4 章 / 剑盾队友", "专门处理持盾精英怪，让近战分支也承担破防职责。", 4 },
-                { "ME-06", "踏前刺", "近战", "前 + J", "低冷却突进补位", "第 4 章", "短距离贴身技能，用来接住被击退的敌人，防止连招断掉。", 4 },
-                { "ME-07", "十字裂斩", "近战", "J-K-J", "横向范围清小怪", "第 5 章 / 黑魔法队友", "把单体连击扩展成横向压制，适合清理护卫小怪。", 5 },
-                { "ME-08", "空旋回刃", "近战", "空中 方向 + J", "空中位移攻击，保持高度并调整身位", "第 6 章 / 魔法师老巢前", "让玩家在空中绕到首领另一侧，避开正面反击。", 6 },
-                { "ME-09", "王宫破阵斩", "近战", "K 后 J", "霸体阶段破阵、反制骑士", "第 7 章 / 王宫战", "针对骑士系敌人的护阵，命中后短时间降低其保护槽增长。", 7 },
-                { "ME-10", "青龙裂鳞", "近战", "J 连段终结", "青龙祝福强化的高空续连", "青龙祝福", "连击末端追加上升剑气，把即将坠落的目标重新托起。", 8 },
-                { "ME-11", "白虎断牙", "近战", "前 + K", "高削韧、高风险爆发", "白虎祝福", "对精英和首领护甲有效，但空挥后硬直更大。", 9 },
-                { "ME-12", "终式百裂", "近战", "奥义输入", "最终近战爆发", "魔剑完全觉醒", "魔剑完全觉醒后的近战奥义，用来打完整技能试刀首领。", 12 },
-
-                { "MA-01", "魔法弹", "魔法", "U", "远程补 Hit、打断投射怪、维持连击计时", "魔剑 Lv1 / 战斗觉醒后", "魔法分支的第一颗实用节点。", 2 },
-                { "MA-02", "炎刃附魔", "魔法", "U 后 J", "给下一次近战附加灼烧", "魔剑 Lv2 / 魔核碎片", "把魔法和近战粘在一起，鼓励玩家做组合连段。", 2 },
-                { "MA-03", "魔力浮环", "魔法", "空中 U", "空中停顿、延长滞空窗口", "第 3 章", "短暂降低下坠速度，给玩家调整输入的时间。", 3 },
-                { "MA-04", "白辉护印", "魔法", "支援后 U", "回血 Buff、容错、支援协同", "白魔法队友好感 30", "白魔法队友的力量通过魔剑转化成护印。", 3 },
-                { "MA-05", "寒星矢", "魔法", "后 + U", "减速和控场", "第 4 章", "让玩家在有纵深的横板战斗里控制 X 轴推进速度。", 4 },
-                { "MA-06", "黑炎刻印", "魔法", "U-U", "伤害 Debuff、爆发前置", "黑魔法队友好感 30", "给首领打上刻印，后续近战和断限会获得更高收益。", 5 },
-                { "MA-07", "雷锁", "魔法", "上 + U", "锁定浮空目标，短暂停住坠落", "第 6 章", "用于高手空连，让目标在高空多停一拍。", 6 },
-                { "MA-08", "破法反弹", "魔法", "防御瞬间 U", "反制魔法师弹幕", "魔法师老巢", "专门回应中期魔法师敌人的密集远程压迫。", 6 },
-                { "MA-09", "王权封印", "魔法", "U 长按", "削除傀儡控制、打王宫怪", "王宫篇", "针对国王、骑士和傀儡系敌人的控制魔法。", 7 },
-                { "MA-10", "朱雀焚天", "魔法", "空中 U 长按", "高空范围火焰", "朱雀祝福", "高空空连时的范围收割技能。", 10 },
-                { "MA-11", "玄武结界", "魔法", "下 + U", "护盾、抗远程、稳住阵地", "玄武祝福", "给低熟练玩家更多站稳脚跟的空间。", 11 },
-                { "MA-12", "天使之泪", "魔法", "被击败时自动", "一条命、复活、最终容错", "天使祝福", "天使祝福提供一次复活，是后期挑战七大罪和国师的关键保险。", 12 },
-
-                { "FU-01", "魔剑共鸣", "魔剑融合", "J/U 交替", "近战和魔法互相刷新轻量取消窗口", "魔剑 Lv2", "融合分支的核心：前期每个主动攻击都能找到连招位置。", 2 },
-                { "FU-02", "剑气回环", "魔剑融合", "J-J-U", "把被推远的敌人拉回", "第 3 章", "解决横向击退导致连招断掉的问题。", 3 },
-                { "FU-03", "魔核超载", "魔剑融合", "消耗魔剑槽", "短时间提高伤害但增加保护槽增长", "第 3 章", "高风险爆发，让玩家在输出和保护槽之间做选择。", 3 },
-                { "FU-04", "白辉共振", "魔剑融合", "白魔法支援 + J", "断限成功后生成空中护盾", "白魔法队友好感 60", "把好感度正式接进空连上限。", 3 },
-                { "FU-05", "护卫借势", "魔剑融合", "剑盾支援 + K", "断限失败时格挡一次反击", "剑盾队友好感 60", "让高手机制失败不一定直接崩盘。", 4 },
-                { "FU-06", "黑咒扩散", "魔剑融合", "黑魔法支援 + U", "延长断限窗口、降低保护槽增长", "黑魔法队友好感 60", "黑魔法队友提供更激进的连段收益。", 5 },
-                { "FU-07", "魂线牵引", "魔剑融合", "上 + 支援", "把支援技能转化为空中追击", "第 6 章", "让 I 支援不只是额外伤害，而是能参与空连结构。", 6 },
-                { "FU-08", "伪青梅残影", "魔剑融合", "剧情触发", "剧情误导、复制主角基础招式", "王宫篇", "王宫前后用于解释假青梅和傀儡术，也可做首领镜像机制。", 7 },
-                { "FU-09", "真青梅魂契", "魔剑融合", "终章后", "青梅专属支援、断限特化", "真相揭露后", "青梅从指导者回到正宫支援位。", 7 },
-                { "FU-10", "四圣兽合契", "魔剑融合", "四祝福齐备", "四位后宫祝福同步触发", "青龙/白虎/朱雀/玄武祝福", "四圣兽篇的系统性回报。", 11 },
-                { "FU-11", "天使契印", "魔剑融合", "复活后自动强化", "复活后短时间无敌和高回复", "天使祝福", "把一条命机制和战斗节奏连接起来。", 12 },
-                { "FU-12", "完全魔剑士", "魔剑融合", "最终形态", "解锁最终技能树闭环", "魔剑完全觉醒", "五分支合流，作为商业版后期 build 的完整目标。", 12 },
-
-                { "MO-01", "疾风步", "机动", "方向 + 闪避", "取消后摇、调整纵深", "魔剑 Lv1", "在俯视横板战斗里控制 X 轴和纵深。", 2 },
-                { "MO-02", "一段跳", "机动", "Space", "起跳追击、躲远程、进入空连", "魔剑 Lv1", "游戏没有常驻二段跳，一段跳承担进攻和防御两种职责。", 2 },
-                { "MO-03", "滞空调息", "机动", "空中攻击命中", "空中慢坠，让玩家能连很多下但仍会逐步下落", "魔剑 Lv1", "这是空连手感核心。", 2 },
-                { "MO-04", "踏影横移", "机动", "空中 方向 + 闪避", "空中横移、错开弹道", "第 3 章", "提高空中走位，让跳跃不仅连招也能躲远程。", 3 },
-                { "MO-05", "斜线冲刺", "机动", "前上 + 闪避", "低空追击、越过小怪包围", "第 4 章", "解决低空空连容易被地面怪打断的问题。", 4 },
-                { "MO-06", "受身翻滚", "机动", "倒地瞬间方向", "减少被连、重回站位", "第 4 章", "避免玩家在精英怪连招里失控太久。", 4 },
-                { "MO-07", "高空安全域", "机动", "高空连击状态", "高空避开普通怪地面攻击", "第 5 章", "落实我们讨论的高空优势。", 5 },
-                { "MO-08", "魔阵踏步", "机动", "断限成功后 Space", "临时重置一次跳跃", "断限教程", "这不是常驻二段跳，而是断限追击奖励的临时再跳。", 7 },
-                { "MO-09", "青龙游空", "机动", "空中闪避强化", "高空横移、延长连击路线", "青龙祝福", "提升高空移动和转向能力。", 8 },
-                { "MO-10", "白虎踏阵", "机动", "落地冲刺", "高速切入、破阵", "白虎祝福", "强化落地后的再起手速度。", 9 },
-                { "MO-11", "朱雀翔焰", "机动", "空中 U 后移动", "魔法推进、空中换位", "朱雀祝福", "让魔法也能承担空中位移。", 10 },
-                { "MO-12", "玄武稳域", "机动", "站定防御", "抗击退、守据点", "玄武祝福", "后期以一敌二时用于抵抗压制和弹幕。", 11 },
-
-                { "LI-01", "保护槽识别", "断限", "HUD 提示", "看懂首领受击保护，不靠漏洞无限连", "第 5 章预告", "先让玩家理解保护槽，普通打法仍然能过，只是花时间。", 5 },
-                { "LI-02", "断限追击", "断限", "上 + 技能键", "重置跳跃、滞空、空中动作和保护槽窗口", "第 7 章正式教学", "高手玩法核心。", 7 },
-                { "LI-03", "空界锁痕", "断限", "断限成功", "短暂停住首领坠落", "第 7 章", "表现为魔法阵碎裂、时间停顿一瞬、剑痕锁住首领。", 7 },
-                { "LI-04", "断限递耗", "断限", "连续断限", "每次窗口更短、消耗更高", "第 7 章", "防止无限赖皮，同时把高手上限做成主动挑战。", 7 },
-                { "LI-05", "低空抢断", "断限", "低高度断限", "低空救连，但容易被地面怪打断", "第 8 章", "让不同高度的空连风险明确。", 8 },
-                { "LI-06", "高空连锁", "断限", "高高度断限", "高空安全长连、评分提升", "第 8 章", "高空断限越成功，评分和爽感越强。", 8 },
-                { "LI-07", "青龙断限", "断限", "青龙祝福 + 断限", "断限后追加位移", "青龙祝福", "青龙让断限后的追击距离更远。", 8 },
-                { "LI-08", "白虎断限", "断限", "白虎祝福 + 断限", "断限后破韧", "白虎祝福", "白虎让断限也能承担破防职责。", 9 },
-                { "LI-09", "朱雀断限", "断限", "朱雀祝福 + 断限", "断限后爆燃范围伤害", "朱雀祝福", "朱雀把高手空连转化成清场能力。", 10 },
-                { "LI-10", "玄武断限", "断限", "玄武祝福 + 断限", "断限失败时减伤", "玄武祝福", "玄武给断限失败留一点回旋余地。", 11 },
-                { "LI-11", "天使续命", "断限", "复活后断限", "复活后重置一次断限惩罚", "天使祝福", "天使祝福不只是多一条命，也会给高手一次重新表演的机会。", 12 },
-                { "LI-12", "空界连锁", "断限", "终局连续断限", "最终高手评分机制", "魔剑完全觉醒", "普通玩家不依赖它也能通关，但高手会靠它打出超长空连。", 13 },
-            };
-            return nodes;
+            return ProgressionContent::Get().SkillNodes;
         }
 
         static const SkillNodeDisplayInfo* LookupSkillNodeDisplayInfo(const std::string& nodeId)
@@ -381,6 +308,19 @@ namespace Wheatear::GameProgress {
             return nodes.empty() ? nullptr : &nodes.front();
         }
 
+        static const SkillNodeInfo& FindSkillNode(const std::string& nodeId)
+        {
+            const auto& nodes = ProgressionContent::Get().SkillNodes;
+            if (const auto* node = ProgressionContent::FindSkillNode(nodeId))
+                return *node;
+            return nodes.front();
+        }
+
+        static bool RequiresMagicSwordLv2(const SkillNodeDisplayInfo& node)
+        {
+            return node.Requirement.find("Lv2") != std::string::npos;
+        }
+
         static std::string SkillNodeDisplayState(const State& state, const std::string& nodeId)
         {
             const SkillNodeDisplayInfo* node = LookupSkillNodeDisplayInfo(nodeId);
@@ -388,121 +328,48 @@ namespace Wheatear::GameProgress {
                 return {};
             if (state.UnlockedSkills.find(nodeId) != state.UnlockedSkills.end())
                 return "已习得";
-            const std::string requirement = node->Requirement ? node->Requirement : "";
-            if (requirement.find("魔剑 Lv2") != std::string::npos && state.MagicSwordLevel < 2)
+            if (RequiresMagicSwordLv2(*node) && state.MagicSwordLevel < 2)
                 return "需要魔剑 Lv2";
             if (node->UnlockChapter <= state.CurrentChapter)
                 return "可学习";
             if (node->UnlockChapter == state.CurrentChapter + 1)
-                return "下一章开放";
+                return "下一章节开放";
             return "后续第 " + std::to_string(node->UnlockChapter) + " 章开放";
         }
 
         static std::string LegacySkillActionToNodeId(const std::string& action)
         {
-            if (action == "select_skill_core") return "magic_sword_core";
-            if (action == "select_skill_melee") return "ME-01";
-            if (action == "select_skill_launcher") return "ME-02";
-            if (action == "select_skill_air") return "ME-03";
-            if (action == "select_skill_magic") return "MA-01";
-            if (action == "select_skill_support") return "FU-04";
-            if (action == "select_skill_mobility") return "MO-01";
-            if (action == "select_skill_break") return "LI-02";
-            return {};
-        }
-
-        struct SkillNodeInfo
-        {
-            const char* Id;
-            const char* Name;
-            const char* Branch;
-            const char* Input;
-            const char* ComboRole;
-            const char* Requirement;
-            const char* Description;
-        };
-
-        static const SkillNodeInfo& FindSkillNode(const std::string& nodeId)
-        {
-            static const std::vector<SkillNodeInfo> nodes = {
-                { "magic_sword_core", "魔剑核心", "核心", "剧情获得", "技能树中心，连接近战、魔法、机动和支援", "序章后由青梅赠予", "魔剑会自动吸收靠近的材料，是主角后续成长和双修技能的承载物。" },
-                { "triple_slash", "三段斩", "近战", "J / 鼠标左键", "地面连段、压低首领保护条", "魔剑 Lv1", "基础但重要的近战连段。每一段都应能接上挑、火球或闪避取消。" },
-                { "rising_cleave", "裂空挑斩", "近战 / 浮空", "S+J", "浮空起手", "魔剑 Lv1", "把可受控目标挑起，是前期空中连击的主要入口。" },
-                { "air_chase", "空中追斩", "空连", "空中 S+J", "滞空续连、重新抬高下落目标", "魔剑 Lv1，后续可用材料强化", "空中攻击不会让角色一直悬停，而是慢慢下落；追斩负责把快掉下去的目标续住。" },
-                { "vfx_magic_bolt", "魔法弹", "魔法", "U", "远程补 hit、打断投射怪", "魔剑 Lv2", "魔法分支第一个实用节点。它让近战空连之外也能补连击和处理远程怪。" },
-                { "mentor_support", "导师支援", "支援", "I", "空中留敌、危急保护", "导师好感 100", "真青梅伪装导师时提供的支援。当前竖切用于展示好感会影响支援强度。" },
-                { "wind_step", "疾风步", "机动", "闪避 / 方向键", "取消后摇、调整纵深", "魔剑 Lv2", "机动分支让玩家在俯视横板战斗中控制 X 轴和纵深，不是单纯跑路。" },
-                { "break_limit", "断限追击", "高阶", "后期：上 + 技能键", "重置跳跃、滞空和首领保护窗口", "第七章正式教学", "高手玩法核心。普通玩家不靠它也能通关，高手靠它打高空长连。" }
-            };
-
-            for (const SkillNodeInfo& node : nodes)
-            {
-                if (node.Id == nodeId)
-                    return node;
-            }
-            return nodes.front();
+            return ProgressionContent::ResolveLegacySkillSelection(action);
         }
 
         static std::string SkillNodeState(const State& state, const std::string& nodeId)
         {
-            if (nodeId == "break_limit")
-                return "后期锁定";
-            if (nodeId == "vfx_magic_bolt" || nodeId == "wind_step")
-                return state.MagicSwordLevel >= 2 ? "已解锁" : "可通过魔剑 Lv2 解锁";
-            return "已习得";
+            return SkillNodeDisplayState(state, nodeId);
         }
 
         static std::string SkillActionToNodeId(const std::string& action)
         {
-            if (action == "select_skill_core") return "magic_sword_core";
-            if (action == "select_skill_melee") return "triple_slash";
-            if (action == "select_skill_launcher") return "rising_cleave";
-            if (action == "select_skill_air") return "air_chase";
-            if (action == "select_skill_magic") return "vfx_magic_bolt";
-            if (action == "select_skill_support") return "mentor_support";
-            if (action == "select_skill_mobility") return "wind_step";
-            if (action == "select_skill_break") return "break_limit";
-            return {};
+            return ProgressionContent::ResolveLegacySkillSelection(action);
         }
 
-        struct EquipmentInfo
-        {
-            const char* Id;
-            const char* Name;
-            const char* Slot;
-            int Page;
-            const char* Status;
-            const char* Stats;
-            const char* Source;
-            const char* Description;
-            const char* SlotId;
-            const char* IconPath;
-        };
+        using EquipmentInfo = ProgressionContent::EquipmentDefinition;
 
         static const std::vector<EquipmentInfo>& EquipmentCatalog()
         {
-            static const std::vector<EquipmentInfo> equipment = {
-                { "traveler_armor", "旅人护衣", "防具", 1, "已装备", "生命 +0 / 防御 +0，+1 后 生命 +30 / 防御 +2", "第二章剧情装备", "前期容错装。低空空连失败后不至于被远程怪两下带走。", "armor", "assets/vertical_slice/ui/icons/icon_equipment_traveler_armor.png" },
-                { "black_forest_armor", "黑林皮甲", "防具", 1, "未获得", "防御 +4 / 受击硬直 -5%", "黑林兽道精英掉落", "更适合刷材料本，后续可作为兽系套装第一件。", "armor", "assets/vertical_slice/ui/icons/icon_equipment_black_forest_armor.png" },
-                { "beast_tooth_pendant", "兽牙坠饰", "饰品", 1, "未获得", "攻击 +3 / 空中伤害 +4%", "黑熊丈夫首通或复战掉落", "强化近战空连输出，适合喜欢跳斩续连的玩家。", "charm", "assets/vertical_slice/ui/icons/icon_equipment_beast_tooth.png" },
-                { "novice_magic_ring", "初级魔晶戒", "饰品", 1, "未获得", "魔攻 +4 / 火球冷却 -0.2s", "黑林兽道材料合成", "魔法分支入门装备，让火球更像连击补刀工具。", "ring", "assets/vertical_slice/ui/icons/icon_equipment_magic_ring.png" },
-                { "wind_boots", "疾风短靴", "足部", 2, "后续章节", "纵深移动 +8% / 闪避恢复 -6%", "剑盾队友章节", "解决横板俯视战斗中走位偏慢的问题。", "boots", "assets/vertical_slice/ui/icons/icon_equipment_wind_boots.png" },
-                { "old_ward_charm", "旧护符", "护符", 2, "未获得", "魔防 +3 / 受远程伤害 -5%", "投石怪掉落", "给不会稳定跳躲远程的新手提供一点容错。", "charm", "assets/vertical_slice/ui/icons/icon_equipment_ward_charm.png" },
-                { "training_blade", "练习短剑", "副武器", 2, "后续章节", "取消窗口 +0.03s", "导师训练事件", "教学玩家理解取消窗口，不作为毕业装备。", "weapon", "assets/vertical_slice/ui/icons/icon_equipment_training_blade.png" },
-                { "angel_feather", "天使羽饰", "特殊", 2, "第十二章后", "复活次数 +1", "天使祝福剧情", "终盘系统关键装备，和天使祝福的一条命规则绑定。", "special", "assets/vertical_slice/ui/icons/icon_equipment_angel_feather.png" }
-            };
-            return equipment;
+            return ProgressionContent::Get().Equipment;
         }
 
         static const EquipmentInfo& FindEquipment(const std::string& equipmentId)
         {
             const std::vector<EquipmentInfo>& equipment = EquipmentCatalog();
-            for (const EquipmentInfo& item : equipment)
-            {
-                if (item.Id == equipmentId)
-                    return item;
-            }
+            if (const auto* item = ProgressionContent::FindEquipment(equipmentId))
+                return *item;
             return equipment.front();
+        }
+
+        static std::string SlotDisplayName(const std::string& slotId)
+        {
+            return ProgressionContent::SlotDisplayName(slotId);
         }
 
         static bool IsEquipmentEquippedInState(const State& state, const std::string& equipmentId)
@@ -554,17 +421,6 @@ namespace Wheatear::GameProgress {
                 state.SelectedEquipmentId = bagEquipment[start];
         }
 
-        static const char* SlotDisplayName(const std::string& slotId)
-        {
-            if (slotId == "weapon") return "副武器";
-            if (slotId == "armor") return "防具";
-            if (slotId == "ring") return "戒指";
-            if (slotId == "charm") return "护符";
-            if (slotId == "boots") return "足部";
-            if (slotId == "special") return "特殊";
-            return "空槽";
-        }
-
     } // namespace
 
     State& GetState()
@@ -584,10 +440,55 @@ namespace Wheatear::GameProgress {
         ProgressionSettingsCommandService::ApplyToRuntime();
     }
 
+    int GetMaxSaveSlots()
+    {
+        return kMaxSaveSlots;
+    }
+
+    bool IsSaveSlotOccupied(int slot)
+    {
+        return std::filesystem::exists(SavePathForSlot(slot));
+    }
+
+    SaveSlotInfo GetSaveSlotInfo(int slot)
+    {
+        SaveSlotInfo info;
+        info.Slot = ClampSaveSlot(slot);
+        const std::filesystem::path path = SavePathForSlot(info.Slot);
+        std::ifstream input(path, std::ios::binary);
+        if (!input.is_open())
+            return info;
+
+        info.Exists = true;
+        std::string line;
+        while (std::getline(input, line))
+        {
+            const size_t split = line.find('=');
+            if (split == std::string::npos)
+                continue;
+
+            const std::string key = line.substr(0, split);
+            const std::string value = line.substr(split + 1);
+            if (key == "saveVersion")
+                info.SaveVersion = ParseInt(value, info.SaveVersion);
+            else if (key == "chapter")
+                info.Chapter = ParseInt(value, info.Chapter);
+            else if (key == "objective")
+                info.Objective = value;
+            else if (key == "playerLevel")
+                info.PlayerLevel = ParseInt(value, info.PlayerLevel);
+            else if (key == "gold")
+                info.Gold = ParseInt(value, info.Gold);
+        }
+
+        return info;
+    }
+
     bool SaveSlot(int slot)
     {
         State& state = GetState();
         const std::filesystem::path path = SavePathForSlot(slot);
+        const int safeSlot = ClampSaveSlot(slot);
         std::error_code error;
         std::filesystem::create_directories(path.parent_path(), error);
 
@@ -598,7 +499,8 @@ namespace Wheatear::GameProgress {
             return false;
         }
 
-        output << "schema=wheatear.progress.v1\n";
+        output << "schema=wheatear.progress.v2\n";
+        output << "saveVersion=" << kCurrentSaveVersion << "\n";
         output << "chapter=" << state.CurrentChapter << "\n";
         output << "objective=" << state.Objective << "\n";
         output << "playerLevel=" << state.PlayerLevel << "\n";
@@ -631,7 +533,7 @@ namespace Wheatear::GameProgress {
             output << "relationship." << relationship.CharacterId << ".unlocked=" << (relationship.Unlocked ? 1 : 0) << "\n";
         }
 
-        state.LastResultMessage = "已保存到 " + std::to_string(std::clamp(slot, 1, 9)) + " 号槽。";
+        state.LastResultMessage = "已保存到 " + std::to_string(safeSlot) + " 号槽。";
         PushNotification(state, state.LastResultMessage);
         return true;
     }
@@ -639,10 +541,11 @@ namespace Wheatear::GameProgress {
     bool LoadSlot(int slot)
     {
         const std::filesystem::path path = SavePathForSlot(slot);
+        const int safeSlot = ClampSaveSlot(slot);
         std::ifstream input(path, std::ios::binary);
         if (!input.is_open())
         {
-            GetState().LastResultMessage = "没有找到 " + std::to_string(std::clamp(slot, 1, 9)) + " 号槽存档。";
+            GetState().LastResultMessage = "没有找到 " + std::to_string(safeSlot) + " 号槽存档。";
             return false;
         }
 
@@ -710,7 +613,7 @@ namespace Wheatear::GameProgress {
             }
         }
 
-        loaded.LastResultMessage = "已读取 " + std::to_string(std::clamp(slot, 1, 9)) + " 号槽。";
+        loaded.LastResultMessage = "已读取 " + std::to_string(safeSlot) + " 号槽。";
         PushNotification(loaded, loaded.LastResultMessage);
         GetState() = loaded;
         ApplySettingsToRuntime();
@@ -803,14 +706,19 @@ namespace Wheatear::GameProgress {
         const bool firstClear = state.CompletedDungeons.insert(dungeonId).second;
         state.BestCombosByDungeon[dungeonId] = std::max(state.BestCombosByDungeon[dungeonId], bestCombo);
 
-        if (dungeonId == MainDungeonId)
+        if (const auto* dungeon = ProgressionContent::FindDungeon(dungeonId))
         {
-            state.UnlockedDungeons.insert(BeastPathDungeonId);
-            state.StoryFlags.insert("FLAG_CH02_BOSS_DEFEATED");
-            state.StoryFlags.insert("FLAG_HUB_UNLOCKED");
-            state.Objective = "在据点强化魔剑，重刷黑林兽道练习空连，或继续前往边境村。";
             if (firstClear)
-                PushNotification(state, "新副本解锁：黑林兽道");
+            {
+                for (const std::string& unlockedDungeon : dungeon->UnlocksOnFirstClear)
+                    state.UnlockedDungeons.insert(unlockedDungeon);
+                if (!dungeon->FirstClearNotification.empty())
+                    PushNotification(state, dungeon->FirstClearNotification);
+            }
+            for (const std::string& flag : dungeon->FlagsOnClear)
+                state.StoryFlags.insert(flag);
+            if (!dungeon->ObjectiveOnClear.empty())
+                state.Objective = dungeon->ObjectiveOnClear;
         }
 
         std::ostringstream stream;
@@ -923,11 +831,10 @@ namespace Wheatear::GameProgress {
         }
 
         state.MagicSwordLevel = 2;
-        state.Attributes.ATK += 3;
-        state.Attributes.MATK += 3;
-        state.UnlockedSkills.insert("magic_sword_lv2");
-        state.UnlockedSkills.insert("basic_slash_boost");
-        state.UnlockedSkills.insert("air_chain_training");
+        const auto& upgrade = ProgressionContent::Get().MagicSwordLv2;
+        ApplyAttributeBonus(state, upgrade.Bonus);
+        for (const std::string& skillId : upgrade.UnlockSkills)
+            state.UnlockedSkills.insert(skillId);
         state.Objective = "魔剑已经回应你。可以重刷练习空连，也可以继续追查假青梅的去向。";
         state.LastResultMessage = "魔剑 Lv2 觉醒：基础斩击、跳斩和火球衔接更稳定。";
         PushNotification(state, "魔剑 Lv2 已觉醒");
@@ -956,8 +863,7 @@ namespace Wheatear::GameProgress {
         }
 
         state.TravelerArmorLevel = 1;
-        state.Attributes.HP += 30;
-        state.Attributes.DEF += 2;
+        ApplyAttributeBonus(state, ProgressionContent::Get().TravelerArmorLv1.Bonus);
         state.LastResultMessage = "旅人护衣 +1：生命和防御提高，低空连击失误更不容易暴毙。";
         PushNotification(state, "旅人护衣 +1 完成");
         return true;
@@ -978,7 +884,7 @@ namespace Wheatear::GameProgress {
         }
         else if (action == "upgrade_traveler_armor")
         {
-            if (GetState().SelectedEquipmentId != "traveler_armor")
+            if (GetState().SelectedEquipmentId != TravelerArmorUpgradeEquipmentId())
             {
                 GetState().LastResultMessage = "当前选中装备暂未开放强化。请选择旅人护衣查看竖切强化流程。";
                 result.Success = true;
@@ -1003,8 +909,7 @@ namespace Wheatear::GameProgress {
                 state.LastResultMessage = std::string(node->Name) + " 会在后续第 " + std::to_string(node->UnlockChapter) + " 章开放。";
                 result.Success = true;
             }
-            else if ((std::string(node->Requirement ? node->Requirement : "").find("魔剑 Lv2") != std::string::npos)
-                && state.MagicSwordLevel < 2)
+            else if (RequiresMagicSwordLv2(*node) && state.MagicSwordLevel < 2)
             {
                 state.LastResultMessage = std::string(node->Name) + " 需要先把魔剑觉醒到 Lv2。";
                 result.Success = true;
@@ -1185,9 +1090,19 @@ namespace Wheatear::GameProgress {
             result.Changed = SaveSlot(1);
             result.Success = result.Changed;
         }
+        else if (auto slot = ParseTrailingSlot(action, "save_slot"))
+        {
+            result.Changed = SaveSlot(*slot);
+            result.Success = result.Changed;
+        }
         else if (action == "load_1" || action == "load_slot1")
         {
             result.Changed = LoadSlot(1);
+            result.Success = result.Changed;
+        }
+        else if (auto slot = ParseTrailingSlot(action, "load_slot"))
+        {
+            result.Changed = LoadSlot(*slot);
             result.Success = result.Changed;
         }
         else if (action == "select_support_mentor")
@@ -1333,7 +1248,9 @@ namespace Wheatear::GameProgress {
         stream << "第" << state.CurrentChapter << "章  /  魔剑 Lv" << state.MagicSwordLevel
                << "  /  主角 Lv" << state.PlayerLevel
                << "  经验 " << state.Experience << "/" << state.ExperienceToNext
-               << "  /  " << (IsDungeonUnlocked(BeastPathDungeonId) ? "黑林兽道已解锁" : "黑林兽道未解锁");
+               << "  /  " << (IsDungeonUnlocked(BeastPathDungeonId())
+                   ? DungeonDisplayName(BeastPathDungeonId()) + "已解锁"
+                   : DungeonDisplayName(BeastPathDungeonId()) + "未解锁");
         return stream.str();
     }
 
@@ -1361,7 +1278,9 @@ namespace Wheatear::GameProgress {
 
     std::string GetDungeonButtonText()
     {
-        return IsDungeonUnlocked(BeastPathDungeonId) ? "重刷黑林兽道" : "黑林兽道未解锁";
+        return IsDungeonUnlocked(BeastPathDungeonId())
+            ? "重刷" + DungeonDisplayName(BeastPathDungeonId())
+            : DungeonDisplayName(BeastPathDungeonId()) + "未解锁";
     }
 
     std::string GetSkillButtonText()
@@ -1520,8 +1439,7 @@ namespace Wheatear::GameProgress {
 
         if (node->UnlockChapter > state.CurrentChapter)
             stream << "后续章节开放: 第 " << node->UnlockChapter << " 章";
-        else if ((std::string(node->Requirement ? node->Requirement : "").find("魔剑 Lv2") != std::string::npos)
-            && state.MagicSwordLevel < 2)
+        else if (RequiresMagicSwordLv2(*node) && state.MagicSwordLevel < 2)
             stream << "当前节点需要魔剑 Lv2。先在据点刷材料并完成魔剑觉醒。";
         else if (state.UnlockedSkills.find(state.SelectedSkillNodeId) != state.UnlockedSkills.end())
             stream << "当前节点已学，可继续查看相邻分支。";
@@ -1538,8 +1456,7 @@ namespace Wheatear::GameProgress {
             return "节点无效";
         if (node->UnlockChapter > state.CurrentChapter)
             return "后续章节开放";
-        if ((std::string(node->Requirement ? node->Requirement : "").find("魔剑 Lv2") != std::string::npos)
-            && state.MagicSwordLevel < 2)
+        if (RequiresMagicSwordLv2(*node) && state.MagicSwordLevel < 2)
             return "需要魔剑 Lv2";
         if (state.UnlockedSkills.find(state.SelectedSkillNodeId) != state.UnlockedSkills.end())
             return "节点已学";
@@ -1569,7 +1486,7 @@ namespace Wheatear::GameProgress {
         stream << item.Name << "\n";
         stream << "槽位  " << item.Slot << "\n";
         stream << "状态  " << (equipped ? "已装备" : (owned ? "背包中" : item.Status));
-        if (state.SelectedEquipmentId == "traveler_armor")
+        if (state.SelectedEquipmentId == TravelerArmorUpgradeEquipmentId())
             stream << " +" << state.TravelerArmorLevel;
         stream << "\n";
         stream << "属性  " << item.Stats << "\n";
@@ -1604,7 +1521,7 @@ namespace Wheatear::GameProgress {
     {
         std::ostringstream stream;
         stream << "材料  " << BuildMaterialInventoryText() << "\n";
-        if (GetState().SelectedEquipmentId == "traveler_armor")
+        if (GetState().SelectedEquipmentId == TravelerArmorUpgradeEquipmentId())
             stream << "+1 需求  " << BuildCostText(TravelerArmorLv1Cost());
         else
             stream << "当前装备不可强化。";
@@ -1614,7 +1531,7 @@ namespace Wheatear::GameProgress {
     std::string GetTravelerArmorUpgradeButtonText()
     {
         const State& state = GetState();
-        if (state.SelectedEquipmentId != "traveler_armor")
+        if (state.SelectedEquipmentId != TravelerArmorUpgradeEquipmentId())
             return "选择旅人护衣强化";
         if (state.TravelerArmorLevel >= 1)
             return "旅人护衣 +1 已完成";
@@ -1635,25 +1552,42 @@ namespace Wheatear::GameProgress {
     std::string BuildDungeonSelectStatus()
     {
         const State& state = GetState();
+        const auto& content = ProgressionContent::Get();
         std::ostringstream stream;
-        stream << "主线副本\n";
-        stream << "黑熊丈夫讨伐  推荐 Lv1  状态: "
-               << (state.CompletedDungeons.count(MainDungeonId) ? "已通关" : "可挑战")
-               << "  最佳连击 x";
-        if (auto it = state.BestCombosByDungeon.find(MainDungeonId); it != state.BestCombosByDungeon.end())
-            stream << it->second;
-        else
-            stream << 0;
-        stream << "\n\n";
 
-        stream << "材料副本\n";
-        stream << "黑林兽道  推荐 Lv2  状态: "
-               << (IsDungeonUnlocked(BeastPathDungeonId) ? "已解锁，可重刷" : "击败黑熊丈夫后解锁")
-               << "  最佳连击 x";
-        if (auto it = state.BestCombosByDungeon.find(BeastPathDungeonId); it != state.BestCombosByDungeon.end())
-            stream << it->second;
-        else
-            stream << 0;
+        std::string currentCategory;
+        bool wroteAny = false;
+        for (const auto& dungeon : content.Dungeons)
+        {
+            if (dungeon.Id.empty())
+                continue;
+
+            if (dungeon.Category != currentCategory)
+            {
+                if (wroteAny)
+                    stream << "\n";
+                currentCategory = dungeon.Category;
+                stream << (currentCategory.empty() ? "副本" : currentCategory) << "\n";
+            }
+
+            const bool completed = state.CompletedDungeons.count(dungeon.Id) > 0;
+            const bool unlocked = IsDungeonUnlocked(dungeon.Id);
+            std::string status = completed
+                ? "已通关"
+                : (unlocked ? dungeon.StatusWhenUnlocked : dungeon.StatusWhenLocked);
+            if (status.empty())
+                status = unlocked ? "可挑战" : "未解锁";
+
+            stream << dungeon.Name << "  推荐 Lv" << dungeon.RecommendedLevel
+                   << "  状态: " << status
+                   << "  最佳连击 x";
+            if (auto it = state.BestCombosByDungeon.find(dungeon.Id); it != state.BestCombosByDungeon.end())
+                stream << it->second;
+            else
+                stream << 0;
+            stream << "\n";
+            wroteAny = true;
+        }
 
         stream << "\n\n当前目标: " << state.Objective;
         return stream.str();
@@ -1661,10 +1595,14 @@ namespace Wheatear::GameProgress {
 
     std::string BuildDungeonSelectRewards()
     {
+        const auto& rewards = ProgressionContent::Get().DungeonRewardSummary;
         std::ostringstream stream;
-        stream << "黑熊丈夫讨伐首通: 魔核碎片 x1 / 兽筋 x2 / 熊爪 x1 / 经验 90\n";
-        stream << "黑林兽道重刷: 兽筋、熊爪、少量魔核碎片、连击评分额外材料\n";
-        stream << "用途: 魔剑 Lv2、旅人护衣 +1、后续空连训练节点。";
+        for (size_t i = 0; i < rewards.size(); ++i)
+        {
+            if (i > 0)
+                stream << "\n";
+            stream << rewards[i];
+        }
         return stream.str();
     }
 
@@ -1739,14 +1677,40 @@ namespace Wheatear::GameProgress {
         return stream.str();
     }
 
+    std::string BuildSaveSlotSummary(int slot)
+    {
+        const SaveSlotInfo info = GetSaveSlotInfo(slot);
+        const int safeSlot = ClampSaveSlot(slot);
+        if (!info.Exists)
+            return "槽位 " + std::to_string(safeSlot) + "  空槽";
+
+        std::ostringstream stream;
+        stream << "槽位 " << safeSlot
+               << "  第" << info.Chapter << "章"
+               << "  Lv" << info.PlayerLevel
+               << "  金币 " << info.Gold;
+        return stream.str();
+    }
+
+    std::string BuildSaveSlotDetails(int slot)
+    {
+        const SaveSlotInfo info = GetSaveSlotInfo(slot);
+        if (!info.Exists)
+            return "点击即可保存当前进度。";
+
+        if (!info.Objective.empty())
+            return info.Objective;
+        return "已有成长进度，可读取或覆盖。";
+    }
+
     std::string GetSaveButtonText(int slot)
     {
-        return "保存到 " + std::to_string(std::clamp(slot, 1, 9)) + " 号槽";
+        return "保存到 " + std::to_string(ClampSaveSlot(slot)) + " 号槽";
     }
 
     std::string GetLoadButtonText(int slot)
     {
-        const int safeSlot = std::clamp(slot, 1, 9);
+        const int safeSlot = ClampSaveSlot(slot);
         return std::filesystem::exists(SavePathForSlot(safeSlot))
             ? "读取 " + std::to_string(safeSlot) + " 号槽"
             : std::to_string(safeSlot) + " 号槽为空";

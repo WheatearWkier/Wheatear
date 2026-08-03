@@ -1,6 +1,7 @@
 #include "wtpch.h"
 #include "TextRenderer.h"
 
+#include "Wheatear/Core/AssetAliasRegistry.h"
 #include "Wheatear/Core/AssetPath.h"
 #include "Wheatear/Core/Log.h"
 #include "Wheatear/Renderer/Renderer2D.h"
@@ -19,7 +20,7 @@ namespace Wheatear {
 
     static std::filesystem::path ResolveFontPath(const std::string& filepath)
     {
-        return AssetPath::Resolve(filepath);
+        return AssetPath::Resolve(AssetAliasRegistry::Resolve(filepath));
     }
 
     static void AppendSystemFontCandidates(std::vector<std::string>& candidates)
@@ -97,10 +98,10 @@ namespace Wheatear {
             return s_DefaultFont;
 
         std::vector<std::string> fontCandidates;
-        fontCandidates.push_back("assets/fonts/wqy-microhei.ttc");
+        fontCandidates.push_back("font.ui_default");
         AppendSystemFontCandidates(fontCandidates);
-        fontCandidates.push_back("assets/fonts/NotoSansSC-VF.ttf");
-        fontCandidates.push_back("assets/fonts/Open-Sans-2.ttf");
+        fontCandidates.push_back("font.ui_fallback_sc");
+        fontCandidates.push_back("font.latin");
 
         for (const auto& candidate : fontCandidates)
         {

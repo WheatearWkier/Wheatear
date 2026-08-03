@@ -1,12 +1,11 @@
 #include "wtpch.h"
 #include "TurnCombatActionService.h"
 
-#include "TurnCombatActionCatalog.h"
 #include "TurnCombatSkillService.h"
 #include "TurnCombatTargetService.h"
 #include "TurnCombatVisualService.h"
-#include "Wheatear/Gameplay/Action/ActionDatabase.h"
 #include "Wheatear/Gameplay/Action/ActionDebugHistory.h"
+#include "Wheatear/Gameplay/Action/ActionRecipeQueries.h"
 #include "Wheatear/Gameplay/Action/StateRegistry.h"
 #include "Wheatear/Modules/Common/GameplayAudioService.h"
 #include "Wheatear/Modules/Common/GameplayCombatService.h"
@@ -30,12 +29,7 @@ namespace Wheatear::TurnCombatActionService {
         static const WAO::ActionRecipe* ResolveRecipe(
             const TurnCombatSkillService::TurnSkillDefinition& skill)
         {
-            const std::string recipeId = TurnCombatActionCatalog::ActionRecipeId(skill.Id);
-            if (const WAO::ActionRecipe* recipe = WAO::ActionDatabase::Find(recipeId))
-                return recipe;
-
-            WAO::ActionDatabase::Register(TurnCombatActionCatalog::BuildActionRecipe(skill));
-            return WAO::ActionDatabase::Find(recipeId);
+            return WAO::FindRecipeOrWarn(WAO::ComposeActionId("turn", skill.Id), "TurnCombat");
         }
 
         static const char* StatusId(TurnCombatSkillService::TurnStatusEffectKind effect)
@@ -142,7 +136,7 @@ namespace Wheatear::TurnCombatActionService {
         const WAO::ActionRecipe* recipe = ResolveRecipe(*skill);
         const std::string actionId = recipe
             ? recipe->Id
-            : TurnCombatActionCatalog::ActionRecipeId(level.RuntimeActionSkillId);
+            : WAO::ComposeActionId("turn", level.RuntimeActionSkillId);
         WAO::EffectLedger ledger;
         const WAO::ActionIntent intent = BuildIntent(actor, explicitTarget, actionId);
         ledger.BeginAction(intent);

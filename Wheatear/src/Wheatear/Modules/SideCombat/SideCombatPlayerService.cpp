@@ -1,7 +1,6 @@
 #include "wtpch.h"
 #include "SideCombatPlayerService.h"
 
-#include "SideCombatActionCatalog.h"
 #include "SideCombatActionService.h"
 #include "SideCombatFeedbackService.h"
 #include "SideCombatHitboxService.h"
@@ -9,7 +8,7 @@
 #include "SideCombatMath.h"
 #include "SideCombatTargetService.h"
 #include "SideCombatTuningService.h"
-#include "Wheatear/Gameplay/Action/ActionDatabase.h"
+#include "Wheatear/Gameplay/Action/ActionRecipeQueries.h"
 #include "Wheatear/Scene/Components.h"
 #include "Wheatear/Scene/Scene.h"
 
@@ -36,60 +35,9 @@ namespace Wheatear::SideCombatPlayerService {
         using SideCombatTuningService::IsBreakLimitOfficiallyAvailable;
         using SideCombatTuningService::IsSkillUnlocked;
 
-        static void ApplyAuthoringRecipeFields(WAO::ActionRecipe& recipe,
-            const WAO::ActionRecipe* authored)
+        static std::string ActionRecipeId(const std::string& attackId)
         {
-            if (!authored)
-                return;
-
-            if (!authored->DisplayName.empty())
-                recipe.DisplayName = authored->DisplayName;
-            if (!authored->Description.empty())
-                recipe.Description = authored->Description;
-            if (!authored->IconPath.empty())
-                recipe.IconPath = authored->IconPath;
-            if (!authored->AnimationId.empty())
-                recipe.AnimationId = authored->AnimationId;
-            if (!authored->SoundPath.empty())
-                recipe.SoundPath = authored->SoundPath;
-            if (!authored->EffectPath.empty())
-                recipe.EffectPath = authored->EffectPath;
-            if (!authored->Tags.empty())
-                recipe.Tags = authored->Tags;
-            if (!authored->Signals.empty())
-                recipe.Signals = authored->Signals;
-            if (!authored->ResourceCost.empty())
-                recipe.ResourceCost = authored->ResourceCost;
-        }
-
-        static WAO::ActionRecipe RegisterRuntimeRecipe(const std::string& attackId,
-            const SideCombatTuningService::SideAttackTuning& attack,
-            SideAttackKind kind,
-            const std::string& displayName,
-            const std::string& description,
-            float cooldown,
-            float resourceCost = 0.0f)
-        {
-            const std::string recipeId = SideCombatActionCatalog::ActionRecipeId(attackId);
-            const WAO::ActionRecipe* authored = WAO::ActionDatabase::Find(recipeId);
-            WAO::ActionRecipe recipe = SideCombatActionCatalog::BuildActionRecipe(attackId,
-                attack,
-                kind,
-                displayName,
-                description,
-                cooldown,
-                resourceCost);
-            ApplyAuthoringRecipeFields(recipe, authored);
-            WAO::ActionDatabase::Register(recipe);
-            return recipe;
-        }
-
-        static float ResourceCost(const WAO::ActionRecipe& recipe,
-            const std::string& id,
-            float fallback)
-        {
-            const auto it = recipe.ResourceCost.find(id);
-            return it != recipe.ResourceCost.end() ? it->second : fallback;
+            return WAO::ComposeActionId("side", attackId);
         }
 
         static void UpdatePlayerAction(Scene* scene,
@@ -175,14 +123,12 @@ namespace Wheatear::SideCombatPlayerService {
                 controller.RuntimeAttackChain = 0;
                 controller.RuntimeAttackChainTimer = tuning.Player.BasicChainWindow;
                 const auto& attack = GetAttack(tuning, "air_basic");
-                const WAO::ActionRecipe recipe = RegisterRuntimeRecipe("air_basic",
-                    attack,
-                    SideAttackKind::Basic,
-                    "Air Slash",
-                    "Air combo filler with hang-time support.",
-                    tuning.AirCombo.AirBasicCooldown);
-                controller.RuntimeBasicCooldown = recipe.Cooldown;
-                BeginPlayerAction(controller, attack, "air_basic", recipe.Id, "Side_PlayerAirSlash", SideAttackKind::Basic);
+                const std::string recipeId = ActionRecipeId("air_basic");
+                const WAO::ActionRecipe* recipe = WAO::FindRecipeOrWarn(recipeId, "SideCombat.Player");
+                controller.RuntimeBasicCooldown = (recipe && recipe->Cooldown > 0.0f)
+                    ? recipe->Cooldown
+                    : tuning.AirCombo.AirBasicCooldown;
+                BeginPlayerAction(controller, attack, "air_basic", recipeId, "Side_PlayerAirSlash", SideAttackKind::Basic);
                 return;
             }
 
@@ -196,14 +142,12 @@ namespace Wheatear::SideCombatPlayerService {
             controller.RuntimeAttackChainTimer = tuning.Player.BasicChainWindow;
             const std::string attackId = "basic" + std::to_string(chain);
             const auto& attack = GetAttack(tuning, attackId);
-            const WAO::ActionRecipe recipe = RegisterRuntimeRecipe(attackId,
-                attack,
-                SideAttackKind::Basic,
-                chain == 3 ? "Basic Finisher" : "Basic Slash",
-                "Ground basic chain action.",
-                chain == 3 ? controller.BasicCooldown + tuning.Player.BasicFinisherExtraCooldown : controller.BasicCooldown);
-            controller.RuntimeBasicCooldown = recipe.Cooldown;
-            BeginPlayerAction(controller, attack, attackId, recipe.Id, "Side_PlayerSlash", SideAttackKind::Basic);
+            const std::string recipeId = ActionRecipeId(attackId);
+            const WAO::ActionRecipe* recipe = WAO::FindRecipeOrWarn(recipeId, "SideCombat.Player");
+            controller.RuntimeBasicCooldown = (recipe && recipe->Cooldown > 0.0f)
+                ? recipe->Cooldown
+                : (chain == 3 ? controller.BasicCooldown + tuning.Player.BasicFinisherExtraCooldown : controller.BasicCooldown);
+            BeginPlayerAction(controller, attack, attackId, recipeId, "Side_PlayerSlash", SideAttackKind::Basic);
         }
 
         static void CreatePlayerLauncher(Scene*,
@@ -223,13 +167,11 @@ namespace Wheatear::SideCombatPlayerService {
 
             const std::string attackId = airborne ? "air_chase" : "launcher";
             const auto& attack = GetAttack(tuning, attackId);
-            const WAO::ActionRecipe recipe = RegisterRuntimeRecipe(attackId,
-                attack,
-                SideAttackKind::Launcher,
-                airborne ? "Air Chase" : "Launcher",
-                airborne ? "Air relaunch tool for combo extension." : "Ground opener that sends targets upward.",
-                airborne ? tuning.AirCombo.AirChaseCooldown : controller.LauncherCooldown);
-            controller.RuntimeLauncherCooldown = recipe.Cooldown;
+            const std::string recipeId = ActionRecipeId(attackId);
+            const WAO::ActionRecipe* recipe = WAO::FindRecipeOrWarn(recipeId, "SideCombat.Player");
+            controller.RuntimeLauncherCooldown = (recipe && recipe->Cooldown > 0.0f)
+                ? recipe->Cooldown
+                : (airborne ? tuning.AirCombo.AirChaseCooldown : controller.LauncherCooldown);
             if (airborne)
                 --controller.RuntimeAirActionsRemaining;
             else
@@ -238,7 +180,7 @@ namespace Wheatear::SideCombatPlayerService {
             BeginPlayerAction(controller,
                 attack,
                 attackId,
-                recipe.Id,
+                recipeId,
                 airborne ? "Side_PlayerAirChase" : "Side_PlayerLauncher",
                 SideAttackKind::Launcher);
         }
@@ -292,16 +234,13 @@ namespace Wheatear::SideCombatPlayerService {
                 return;
 
             const auto& attack = GetAttack(tuning, "break_limit");
-            const WAO::ActionRecipe recipe = RegisterRuntimeRecipe("break_limit",
-                attack,
-                SideAttackKind::BreakLimit,
-                "Break Limit Chase",
-                "Advanced reset that extends air combo resources.",
-                tuning.AirCombo.BreakLimitCooldown,
-                tuning.AirCombo.BreakLimitGaugeCost);
-            controller.RuntimeBreakLimitCooldown = recipe.Cooldown;
+            const std::string recipeId = ActionRecipeId("break_limit");
+            const WAO::ActionRecipe* recipe = WAO::FindRecipeOrWarn(recipeId, "SideCombat.Player");
+            controller.RuntimeBreakLimitCooldown = (recipe && recipe->Cooldown > 0.0f)
+                ? recipe->Cooldown
+                : tuning.AirCombo.BreakLimitCooldown;
             controller.RuntimeMagicSwordGauge = std::max(0.0f,
-                controller.RuntimeMagicSwordGauge - ResourceCost(recipe, "magic_sword", tuning.AirCombo.BreakLimitGaugeCost));
+                controller.RuntimeMagicSwordGauge - (recipe ? WAO::ResourceCost(*recipe, "magic_sword", tuning.AirCombo.BreakLimitGaugeCost) : tuning.AirCombo.BreakLimitGaugeCost));
             controller.RuntimeJumpsRemaining = std::max(controller.RuntimeJumpsRemaining, 1);
             controller.RuntimeAirActionsRemaining = tuning.AirCombo.AirActionLimitAfterBreak;
             controller.RuntimeAttackChainTimer = tuning.Player.LauncherChainWindow;
@@ -316,7 +255,7 @@ namespace Wheatear::SideCombatPlayerService {
                 combatant.RuntimeFacing = SideCombatMath::SignNonZero(targetCombatant.RuntimeGroundPosition.x - combatant.RuntimeGroundPosition.x);
             }
 
-            BeginPlayerAction(controller, attack, "break_limit", recipe.Id, "Side_BreakLimitChase", SideAttackKind::BreakLimit);
+            BeginPlayerAction(controller, attack, "break_limit", recipeId, "Side_BreakLimitChase", SideAttackKind::BreakLimit);
         }
 
         static void CreatePlayerMagicBolt(Scene*,
@@ -332,14 +271,12 @@ namespace Wheatear::SideCombatPlayerService {
             controller.RuntimeAttackChainTimer = tuning.Player.MagicChainWindow;
 
             const auto& attack = GetAttack(tuning, "magic_bolt");
-            const WAO::ActionRecipe recipe = RegisterRuntimeRecipe("magic_bolt",
-                attack,
-                SideAttackKind::MagicBolt,
-                "Magic Bolt",
-                "Ranged magic hit used inside combo routes.",
-                controller.MagicBoltCooldown);
-            controller.RuntimeMagicBoltCooldown = recipe.Cooldown;
-            BeginPlayerAction(controller, attack, "magic_bolt", recipe.Id, "Side_PlayerMagicBolt", SideAttackKind::MagicBolt);
+            const std::string recipeId = ActionRecipeId("magic_bolt");
+            const WAO::ActionRecipe* recipe = WAO::FindRecipeOrWarn(recipeId, "SideCombat.Player");
+            controller.RuntimeMagicBoltCooldown = (recipe && recipe->Cooldown > 0.0f)
+                ? recipe->Cooldown
+                : controller.MagicBoltCooldown;
+            BeginPlayerAction(controller, attack, "magic_bolt", recipeId, "Side_PlayerMagicBolt", SideAttackKind::MagicBolt);
         }
 
         static void CreateAllySupport(Scene*,
@@ -355,14 +292,12 @@ namespace Wheatear::SideCombatPlayerService {
             controller.RuntimeAttackChainTimer = tuning.Player.SupportChainWindow;
 
             const auto& attack = GetAttack(tuning, "ally_support");
-            const WAO::ActionRecipe recipe = RegisterRuntimeRecipe("ally_support",
-                attack,
-                SideAttackKind::AllySupport,
-                "Ally Support",
-                "Partner assist hit with high control value.",
-                controller.AllySupportCooldown);
-            controller.RuntimeAllySupportCooldown = recipe.Cooldown;
-            BeginPlayerAction(controller, attack, "ally_support", recipe.Id, "Side_AllySupport", SideAttackKind::AllySupport);
+            const std::string recipeId = ActionRecipeId("ally_support");
+            const WAO::ActionRecipe* recipe = WAO::FindRecipeOrWarn(recipeId, "SideCombat.Player");
+            controller.RuntimeAllySupportCooldown = (recipe && recipe->Cooldown > 0.0f)
+                ? recipe->Cooldown
+                : controller.AllySupportCooldown;
+            BeginPlayerAction(controller, attack, "ally_support", recipeId, "Side_AllySupport", SideAttackKind::AllySupport);
         }
 
     } // namespace

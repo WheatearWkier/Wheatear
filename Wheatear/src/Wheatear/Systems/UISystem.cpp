@@ -362,6 +362,8 @@ namespace Wheatear {
             if (!scene)
                 return;
 
+            dt = std::clamp(dt, 0.0f, 1.0f / 30.0f);
+
             auto& registry = scene->GetRegistry();
             auto view = registry.view<UIWidgetComponent, UIAnimatorComponent>();
             for (auto entity : view)

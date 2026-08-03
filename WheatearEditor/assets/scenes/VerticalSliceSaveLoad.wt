@@ -74,6 +74,7 @@ Entities:
       Rotation: 0.0
       Anchor: 0
       SortOrder: 10
+      ParentEntity: 850000023
     UIImageComponent:
       Color: [1, 1, 1, 0.97]
       TexturePath: assets/vertical_slice/ui/panels/panel_save_load.png
@@ -91,6 +92,7 @@ Entities:
       Rotation: 0.0
       Anchor: 0
       SortOrder: 35
+      ParentEntity: 850000023
     UIAnimatorComponent:
       Preset: "pulse"
       PlayOnStart: true
@@ -117,6 +119,7 @@ Entities:
       Rotation: 0.0
       Anchor: 0
       SortOrder: 42
+      ParentEntity: 850000023
     UITextComponent:
       Text: "存档 / 读取"
       Color: [1.0, 0.94, 0.78, 1]
@@ -140,6 +143,7 @@ Entities:
       Rotation: 0.0
       Anchor: 0
       SortOrder: 42
+      ParentEntity: 850000023
     UITextComponent:
       Text: "第2章 / 魔剑 Lv1 / 主角 Lv1"
       Color: [0.92, 0.82, 0.66, 1]
@@ -163,6 +167,7 @@ Entities:
       Rotation: 0.0
       Anchor: 0
       SortOrder: 18
+      ParentEntity: 850000023
     UIPanelComponent:
       BackgroundColor: [0.06, 0.05, 0.04, 0.7]
       BorderColor: [0.8, 0.62, 0.28, 0.86]
@@ -181,6 +186,7 @@ Entities:
       Rotation: 0.0
       Anchor: 0
       SortOrder: 34
+      ParentEntity: 850000023
     UIImageComponent:
       Color: [1, 1, 1, 1.0]
       TexturePath: assets/vertical_slice/ui/icons/icon_save.png
@@ -198,6 +204,7 @@ Entities:
       Rotation: 0.0
       Anchor: 0
       SortOrder: 42
+      ParentEntity: 850000023
     UITextComponent:
       Text: "1 号槽"
       Color: [0.96, 0.92, 0.82, 1]
@@ -221,6 +228,7 @@ Entities:
       Rotation: 0.0
       Anchor: 0
       SortOrder: 55
+      ParentEntity: 850000023
     UIAnimatorComponent:
       Preset: "hover_pulse"
       PlayOnStart: true
@@ -258,6 +266,7 @@ Entities:
       Rotation: 0.0
       Anchor: 0
       SortOrder: 55
+      ParentEntity: 850000023
     UIAnimatorComponent:
       Preset: "hover_pulse"
       PlayOnStart: true
@@ -295,6 +304,7 @@ Entities:
       Rotation: 0.0
       Anchor: 0
       SortOrder: 18
+      ParentEntity: 850000023
     UIPanelComponent:
       BackgroundColor: [0.04, 0.04, 0.045, 0.55]
       BorderColor: [0.48, 0.42, 0.32, 0.65]
@@ -313,6 +323,7 @@ Entities:
       Rotation: 0.0
       Anchor: 0
       SortOrder: 42
+      ParentEntity: 850000023
     UITextComponent:
       Text: "槽位 2-4 会在正式多槽存档阶段开放。当前竖切先稳定一号槽。"
       Color: [0.82, 0.78, 0.68, 1]
@@ -336,6 +347,7 @@ Entities:
       Rotation: 0.0
       Anchor: 0
       SortOrder: 55
+      ParentEntity: 850000023
     UIAnimatorComponent:
       Preset: "hover_pulse"
       PlayOnStart: true
@@ -373,6 +385,7 @@ Entities:
       Rotation: 0.0
       Anchor: 0
       SortOrder: 55
+      ParentEntity: 850000023
     UIAnimatorComponent:
       Preset: "hover_pulse"
       PlayOnStart: true

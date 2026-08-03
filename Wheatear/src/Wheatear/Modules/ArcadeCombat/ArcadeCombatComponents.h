@@ -47,7 +47,7 @@ namespace Wheatear {
         float       DefeatReturnDelay = 2.2f;
         float       ResultSceneFadeDuration = 0.55f;
         float       BossDefeatFadeDuration = 1.15f;
-        std::string VictorySceneCommand = "scene:assets/scenes/VisualNovelDemo.wt";
+        std::string VictorySceneCommand = "";
         std::string DefeatSceneCommand = "";
 
         float       RuntimeElapsed = 0.0f;

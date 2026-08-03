@@ -3,6 +3,7 @@
 
 #include "GameProgress.h"
 #include "Wheatear/Core/Application.h"
+#include "Wheatear/Core/AssetAliasRegistry.h"
 #include "Wheatear/Core/Input.h"
 #include "Wheatear/Core/MouseButtonCodes.h"
 #include "Wheatear/Core/Window.h"
@@ -466,8 +467,9 @@ namespace Wheatear::ProgressionSkillTreePageService {
         static std::string SkillTreeIconPath(const std::string& nodeId)
         {
             if (nodeId == "magic_sword_core")
-                return "assets/vertical_slice/ui/skill_tree/skill_magic_sword_core.png";
-            return "assets/vertical_slice/ui/skill_tree/skill_" + SkillSafeTag(nodeId) + ".png";
+                return AssetAliasRegistry::Path("progression.skill_tree.magic_sword_core");
+            return AssetAliasRegistry::Path("progression.skill_tree.root")
+                + "skill_" + SkillSafeTag(nodeId) + ".png";
         }
 
         static std::string SkillTreeBranchName(const std::string& nodeId)

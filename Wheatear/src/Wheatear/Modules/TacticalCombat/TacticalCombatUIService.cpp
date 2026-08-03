@@ -3,6 +3,7 @@
 
 #include "TacticalCombatBoardService.h"
 #include "TacticalCombatSkillService.h"
+#include "Wheatear/Core/AssetAliasRegistry.h"
 #include "Wheatear/Modules/Common/GameplayEntityService.h"
 #include "Wheatear/Modules/Common/GameplayUILayoutService.h"
 #include "Wheatear/Scene/Components.h"
@@ -26,18 +27,14 @@ namespace Wheatear::TacticalCombatUIService {
             bool Enabled = true;
         };
 
-        static constexpr const char* MoveIcon =
-            "assets/vertical_slice/tactical_combat/ui/icons/cmd_tac_move.png";
-        static constexpr const char* AttackIcon =
-            "assets/vertical_slice/tactical_combat/ui/icons/cmd_tac_attack.png";
-        static constexpr const char* SkillIcon =
-            "assets/vertical_slice/tactical_combat/ui/icons/cmd_tac_magic.png";
-        static constexpr const char* ItemIcon =
-            "assets/vertical_slice/tactical_combat/ui/icons/cmd_tac_item.png";
-        static constexpr const char* WaitIcon =
-            "assets/vertical_slice/tactical_combat/ui/icons/cmd_tac_guard.png";
-        static constexpr const char* CancelIcon =
-            "assets/vertical_slice/tactical_combat/ui/icons/cmd_tac_cancel.png";
+        static std::string MoveIcon() { return AssetAliasRegistry::Path("tactical.icon.move"); }
+        static std::string AttackIcon() { return AssetAliasRegistry::Path("tactical.icon.attack"); }
+        static std::string SkillIcon() { return AssetAliasRegistry::Path("tactical.icon.magic"); }
+        static std::string ItemIcon() { return AssetAliasRegistry::Path("tactical.icon.item"); }
+        static std::string WaitIcon() { return AssetAliasRegistry::Path("tactical.icon.guard"); }
+        static std::string EmptyIcon() { return AssetAliasRegistry::Path("tactical.icon.empty"); }
+        static std::string CancelIcon() { return AssetAliasRegistry::Path("tactical.icon.cancel"); }
+        static std::string ButtonPanelPath() { return AssetAliasRegistry::Path("tactical.panel.button"); }
 
         static void EnsureWaitButton(Scene* scene)
         {
@@ -58,7 +55,7 @@ namespace Wheatear::TacticalCombatUIService {
             UIRuntimeTools::SetImageTexture(
                 scene,
                 "TK_Command_5_Root",
-                "assets/vertical_slice/tactical_combat/ui/panels/panel_tactical_button.png",
+                ButtonPanelPath(),
                 true);
 
             auto& button = root.HasComponent<UIButtonComponent>()
@@ -76,7 +73,7 @@ namespace Wheatear::TacticalCombatUIService {
             UIRuntimeTools::SetImageTexture(
                 scene,
                 "TK_Command_5_Icon",
-                WaitIcon,
+                WaitIcon(),
                 true);
 
             GameplayUILayoutService::EnsureText(
@@ -106,10 +103,10 @@ namespace Wheatear::TacticalCombatUIService {
         static std::array<CommandSlot, 4> BuildRootSlots()
         {
             return {
-                CommandSlot{ "移动", MoveIcon, "tactic:menu:move" },
-                CommandSlot{ "攻击", AttackIcon, "tactic:menu:attack" },
-                CommandSlot{ "技能", SkillIcon, "tactic:menu:skills" },
-                CommandSlot{ "道具", ItemIcon, "tactic:menu:items" }
+                CommandSlot{ "移动", MoveIcon(), "tactic:menu:move" },
+                CommandSlot{ "攻击", AttackIcon(), "tactic:menu:attack" },
+                CommandSlot{ "技能", SkillIcon(), "tactic:menu:skills" },
+                CommandSlot{ "道具", ItemIcon(), "tactic:menu:items" }
             };
         }
 
@@ -139,24 +136,24 @@ namespace Wheatear::TacticalCombatUIService {
             return {
                 CommandSlot{
                     "恢复药水",
-                    ItemIcon,
+                    ItemIcon(),
                     "tactic:skill:item0"
                 },
                 CommandSlot{
                     "空",
-                    "assets/vertical_slice/tactical_combat/ui/icons/cmd_tac_empty.png",
+                    EmptyIcon(),
                     "",
                     false
                 },
                 CommandSlot{
                     "空",
-                    "assets/vertical_slice/tactical_combat/ui/icons/cmd_tac_empty.png",
+                    EmptyIcon(),
                     "",
                     false
                 },
                 CommandSlot{
                     "返回",
-                    CancelIcon,
+                    CancelIcon(),
                     "tactic:cancel"
                 }
             };
@@ -263,7 +260,7 @@ namespace Wheatear::TacticalCombatUIService {
                 scene,
                 "TK_CancelText",
                 level.RuntimeCommandMenuPage == "root" ? "取消" : "返回");
-            UIRuntimeTools::SetImageTexture(scene, "TK_CancelIcon", CancelIcon, true);
+            UIRuntimeTools::SetImageTexture(scene, "TK_CancelIcon", CancelIcon(), true);
             UIRuntimeTools::SetWidgetVisible(
                 scene,
                 "TK_Command_5_Root",

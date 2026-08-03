@@ -1,11 +1,13 @@
 #include "EventScriptGraphPanel.h"
 
+#include "Editor/EditorFloatingWindow.h"
+#include "Editor/EditorWidgets.h"
+
 #include <imgui/imgui_internal.h>
 
 #include <algorithm>
 #include <array>
 #include <cmath>
-#include <cstring>
 #include <sstream>
 #include <vector>
 
@@ -17,19 +19,7 @@ namespace Wheatear {
         static std::string s_PendingOpenPath;
         static std::string s_PendingOpenEvent;
 
-        static bool InputString(const char* label,
-            std::string& value,
-            size_t capacity = 512)
-        {
-            std::vector<char> buffer(std::max<size_t>(capacity, value.size() + 32), 0);
-            strncpy_s(buffer.data(), buffer.size(), value.c_str(), _TRUNCATE);
-            if (ImGui::InputText(label, buffer.data(), buffer.size()))
-            {
-                value = buffer.data();
-                return true;
-            }
-            return false;
-        }
+        using EditorWidgets::InputString;
 
         static const char* InstructionTypeName(EventScriptInstructionType type)
         {
@@ -442,13 +432,15 @@ namespace Wheatear {
         if (!m_Loaded)
             Load();
 
-        if (ImGui::Begin("Event Script Graph", &m_Open))
+        if (EditorFloatingWindow::Begin("Event Script Graph", &m_Open, 0, { 1220.0f, 760.0f }))
         {
+            EditorFloatingWindow::DrawToggleButton("Event Script Graph");
+            ImGui::Separator();
             DrawToolbar();
             ImGui::Separator();
             DrawGraph();
         }
-        ImGui::End();
+        EditorFloatingWindow::End();
     }
 
 } // namespace Wheatear

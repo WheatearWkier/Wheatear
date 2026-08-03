@@ -162,6 +162,9 @@
     <ClInclude Include="src\Wheatear\Core\Application.h">
       <Filter>src\Wheatear\Core</Filter>
     </ClInclude>
+    <ClInclude Include="src\Wheatear\Core\AssetAliasRegistry.h">
+      <Filter>src\Wheatear\Core</Filter>
+    </ClInclude>
     <ClInclude Include="src\Wheatear\Core\AssetPath.h">
       <Filter>src\Wheatear\Core</Filter>
     </ClInclude>
@@ -246,6 +249,9 @@
     <ClInclude Include="src\Wheatear\Gameplay\Action\ActionResolver.h">
       <Filter>src\Wheatear\Gameplay\Action</Filter>
     </ClInclude>
+    <ClInclude Include="src\Wheatear\Gameplay\Action\ActionRecipeQueries.h">
+      <Filter>src\Wheatear\Gameplay\Action</Filter>
+    </ClInclude>
     <ClInclude Include="src\Wheatear\Gameplay\Action\ActionRunner.h">
       <Filter>src\Wheatear\Gameplay\Action</Filter>
     </ClInclude>
@@ -263,9 +269,6 @@
     </ClInclude>
     <ClInclude Include="src\Wheatear\Math\Math.h">
       <Filter>src\Wheatear\Math</Filter>
-    </ClInclude>
-    <ClInclude Include="src\Wheatear\Modules\ArcadeCombat\ArcadeCombatActionCatalog.h">
-      <Filter>src\Wheatear\Modules\ArcadeCombat</Filter>
     </ClInclude>
     <ClInclude Include="src\Wheatear\Modules\ArcadeCombat\ArcadeCombatActionResolver.h">
       <Filter>src\Wheatear\Modules\ArcadeCombat</Filter>
@@ -345,6 +348,9 @@
     <ClInclude Include="src\Wheatear\Modules\Progression\GameProgress.h">
       <Filter>src\Wheatear\Modules\Progression</Filter>
     </ClInclude>
+    <ClInclude Include="src\Wheatear\Modules\Progression\ProgressionContent.h">
+      <Filter>src\Wheatear\Modules\Progression</Filter>
+    </ClInclude>
     <ClInclude Include="src\Wheatear\Modules\Progression\ProgressionEquipmentPageService.h">
       <Filter>src\Wheatear\Modules\Progression</Filter>
     </ClInclude>
@@ -365,9 +371,6 @@
     </ClInclude>
     <ClInclude Include="src\Wheatear\Modules\Progression\ProgressionSystem.h">
       <Filter>src\Wheatear\Modules\Progression</Filter>
-    </ClInclude>
-    <ClInclude Include="src\Wheatear\Modules\SideCombat\SideCombatActionCatalog.h">
-      <Filter>src\Wheatear\Modules\SideCombat</Filter>
     </ClInclude>
     <ClInclude Include="src\Wheatear\Modules\SideCombat\SideCombatActionService.h">
       <Filter>src\Wheatear\Modules\SideCombat</Filter>
@@ -432,9 +435,6 @@
     <ClInclude Include="src\Wheatear\Modules\TacticalCombat\TacticalCombatAIService.h">
       <Filter>src\Wheatear\Modules\TacticalCombat</Filter>
     </ClInclude>
-    <ClInclude Include="src\Wheatear\Modules\TacticalCombat\TacticalCombatActionCatalog.h">
-      <Filter>src\Wheatear\Modules\TacticalCombat</Filter>
-    </ClInclude>
     <ClInclude Include="src\Wheatear\Modules\TacticalCombat\TacticalCombatActionService.h">
       <Filter>src\Wheatear\Modules\TacticalCombat</Filter>
     </ClInclude>
@@ -464,9 +464,6 @@
     </ClInclude>
     <ClInclude Include="src\Wheatear\Modules\TacticalCombat\TacticalCombatVisualService.h">
       <Filter>src\Wheatear\Modules\TacticalCombat</Filter>
-    </ClInclude>
-    <ClInclude Include="src\Wheatear\Modules\TurnCombat\TurnCombatActionCatalog.h">
-      <Filter>src\Wheatear\Modules\TurnCombat</Filter>
     </ClInclude>
     <ClInclude Include="src\Wheatear\Modules\TurnCombat\TurnCombatActionService.h">
       <Filter>src\Wheatear\Modules\TurnCombat</Filter>
@@ -1817,6 +1814,9 @@
     <ClCompile Include="src\Wheatear\Core\Application.cpp">
       <Filter>src\Wheatear\Core</Filter>
     </ClCompile>
+    <ClCompile Include="src\Wheatear\Core\AssetAliasRegistry.cpp">
+      <Filter>src\Wheatear\Core</Filter>
+    </ClCompile>
     <ClCompile Include="src\Wheatear\Core\AssetPath.cpp">
       <Filter>src\Wheatear\Core</Filter>
     </ClCompile>
@@ -1859,6 +1859,9 @@
     <ClCompile Include="src\Wheatear\Gameplay\Action\ActionResolver.cpp">
       <Filter>src\Wheatear\Gameplay\Action</Filter>
     </ClCompile>
+    <ClCompile Include="src\Wheatear\Gameplay\Action\ActionRecipeQueries.cpp">
+      <Filter>src\Wheatear\Gameplay\Action</Filter>
+    </ClCompile>
     <ClCompile Include="src\Wheatear\Gameplay\Action\ActionRunner.cpp">
       <Filter>src\Wheatear\Gameplay\Action</Filter>
     </ClCompile>
@@ -1879,9 +1882,6 @@
     </ClCompile>
     <ClCompile Include="src\Wheatear\Math\Math.cpp">
       <Filter>src\Wheatear\Math</Filter>
-    </ClCompile>
-    <ClCompile Include="src\Wheatear\Modules\ArcadeCombat\ArcadeCombatActionCatalog.cpp">
-      <Filter>src\Wheatear\Modules\ArcadeCombat</Filter>
     </ClCompile>
     <ClCompile Include="src\Wheatear\Modules\ArcadeCombat\ArcadeCombatActionResolver.cpp">
       <Filter>src\Wheatear\Modules\ArcadeCombat</Filter>
@@ -1946,6 +1946,9 @@
     <ClCompile Include="src\Wheatear\Modules\Progression\GameProgress.cpp">
       <Filter>src\Wheatear\Modules\Progression</Filter>
     </ClCompile>
+    <ClCompile Include="src\Wheatear\Modules\Progression\ProgressionContent.cpp">
+      <Filter>src\Wheatear\Modules\Progression</Filter>
+    </ClCompile>
     <ClCompile Include="src\Wheatear\Modules\Progression\ProgressionEquipmentPageService.cpp">
       <Filter>src\Wheatear\Modules\Progression</Filter>
     </ClCompile>
@@ -1966,9 +1969,6 @@
     </ClCompile>
     <ClCompile Include="src\Wheatear\Modules\Progression\ProgressionSystem.cpp">
       <Filter>src\Wheatear\Modules\Progression</Filter>
-    </ClCompile>
-    <ClCompile Include="src\Wheatear\Modules\SideCombat\SideCombatActionCatalog.cpp">
-      <Filter>src\Wheatear\Modules\SideCombat</Filter>
     </ClCompile>
     <ClCompile Include="src\Wheatear\Modules\SideCombat\SideCombatActionService.cpp">
       <Filter>src\Wheatear\Modules\SideCombat</Filter>
@@ -2027,9 +2027,6 @@
     <ClCompile Include="src\Wheatear\Modules\TacticalCombat\TacticalCombatAIService.cpp">
       <Filter>src\Wheatear\Modules\TacticalCombat</Filter>
     </ClCompile>
-    <ClCompile Include="src\Wheatear\Modules\TacticalCombat\TacticalCombatActionCatalog.cpp">
-      <Filter>src\Wheatear\Modules\TacticalCombat</Filter>
-    </ClCompile>
     <ClCompile Include="src\Wheatear\Modules\TacticalCombat\TacticalCombatActionService.cpp">
       <Filter>src\Wheatear\Modules\TacticalCombat</Filter>
     </ClCompile>
@@ -2056,9 +2053,6 @@
     </ClCompile>
     <ClCompile Include="src\Wheatear\Modules\TacticalCombat\TacticalCombatVisualService.cpp">
       <Filter>src\Wheatear\Modules\TacticalCombat</Filter>
-    </ClCompile>
-    <ClCompile Include="src\Wheatear\Modules\TurnCombat\TurnCombatActionCatalog.cpp">
-      <Filter>src\Wheatear\Modules\TurnCombat</Filter>
     </ClCompile>
     <ClCompile Include="src\Wheatear\Modules\TurnCombat\TurnCombatActionService.cpp">
       <Filter>src\Wheatear\Modules\TurnCombat</Filter>

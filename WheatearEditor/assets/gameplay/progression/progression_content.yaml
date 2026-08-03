@@ -1,0 +1,12 @@
+version: 2
+files:
+  defaults: assets/gameplay/progression/core/defaults.yaml
+  materials: assets/gameplay/progression/inventory/materials.yaml
+  upgrades: assets/gameplay/progression/inventory/upgrades.yaml
+  dungeons: assets/gameplay/progression/dungeons/dungeons.yaml
+  dungeonRewardSummary: assets/gameplay/progression/dungeons/reward_summary.yaml
+  relationships: assets/gameplay/progression/relationships/relationships.yaml
+  skillNodes: assets/gameplay/progression/skill_tree/skill_nodes.yaml
+  legacySkillSelections: assets/gameplay/progression/skill_tree/legacy_skill_selections.yaml
+  equipmentSlots: assets/gameplay/progression/equipment/equipment_slots.yaml
+  equipment: assets/gameplay/progression/equipment/equipment.yaml

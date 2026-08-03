@@ -2,9 +2,9 @@ actions:
   - id: arcade.gun
     displayName: Gun
     description: Fast basic ranged shot for the fake arcade combat module.
-    icon: assets/vertical_slice/arcade_combat/ui/icons/arcade_gun.png
+    icon: arcade.icon.gun
     animation: arcade_gun
-    sound: assets/vertical_slice/arcade_combat/audio/arcade_gun.wav
+    sound: arcade.audio.gun
     cooldown: 0.16
     duration: 0.16
     tags: [Gameplay.Arcade, Gameplay.Combat, Weapon.Ranged, Tier.FakeMode]
@@ -16,9 +16,9 @@ actions:
   - id: arcade.cannon
     displayName: Cannon
     description: Slow heavy shot with stronger impact.
-    icon: assets/vertical_slice/arcade_combat/ui/icons/arcade_cannon.png
+    icon: arcade.icon.cannon
     animation: arcade_cannon
-    sound: assets/vertical_slice/arcade_combat/audio/arcade_cannon.wav
+    sound: arcade.audio.cannon
     cooldown: 0.75
     duration: 0.75
     tags: [Gameplay.Arcade, Gameplay.Combat, Weapon.Ranged, Impact.Heavy, Tier.FakeMode]
@@ -30,9 +30,9 @@ actions:
   - id: arcade.katana
     displayName: Katana
     description: Short melee slash used in the fake arcade combat module.
-    icon: assets/vertical_slice/arcade_combat/ui/icons/arcade_katana.png
+    icon: arcade.icon.katana
     animation: arcade_katana
-    sound: assets/vertical_slice/arcade_combat/audio/arcade_katana.wav
+    sound: arcade.audio.katana
     cooldown: 0.38
     duration: 0.38
     tags: [Gameplay.Arcade, Gameplay.Combat, Weapon.Melee, Tier.FakeMode]
@@ -44,9 +44,9 @@ actions:
   - id: arcade.boss_bullet
     displayName: Boss Bullet
     description: Standard projectile spawned by the fake arcade boss.
-    icon: assets/vertical_slice/arcade_combat/ui/icons/arcade_boss_bullet.png
+    icon: arcade.icon.boss_bullet
     animation: arcade_boss_bullet
-    sound: assets/vertical_slice/arcade_combat/audio/arcade_boss_bullet.wav
+    sound: arcade.audio.boss_bullet
     cooldown: 1.05
     duration: 1.05
     tags: [Gameplay.Arcade, Gameplay.Combat, Enemy.Boss, Projectile]

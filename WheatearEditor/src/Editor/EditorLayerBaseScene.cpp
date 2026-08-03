@@ -32,6 +32,7 @@
 #include "Panels/AnimationEditorPanel.h"
 #include "Panels/EditorCommands.h"
 #include "Panels/SceneHierarchyPanel.h"
+#include "Panels/SpriteSheetPickerPanel.h"
 
 #include <imgui/imgui.h>
 #include <imgui/imgui_internal.h>
@@ -71,6 +72,8 @@ namespace Wheatear {
         }
 
         ClearEntitySelection();
+        Input::ClearMouseInputBounds();
+        m_PlayModeViewportMouseDown = false;
 
         m_SceneState      = SceneState::Edit;
         m_EditorScene     = newScene;
@@ -87,6 +90,8 @@ namespace Wheatear {
         m_ActiveScene->OnEditorStart();
         SyncPanels();
         CommandHistory::Get().Clear();
+
+        FrameEditorCameraOnScene();
     }
 
     void EditorLayerBase::TransitionToPlay()
@@ -96,8 +101,10 @@ namespace Wheatear {
         ClearEntitySelection();
         m_PendingVisualNovelLoadSlot = 0;
         WAO::ActionDebugHistory::Clear();
-        CommandBus::DrainRuntimeCommands();
-        CommandBus::DrainGameplayCommands();
+        UIInputSystem::Reset();
+        Input::ClearMouseInputBounds();
+        m_PlayModeViewportMouseDown = false;
+        CommandBus::ClearQueuedCommands();
         SceneTransitionService::DrainRequests();
         m_SceneState  = SceneState::Play;
         m_ActiveScene = Scene::Copy(m_EditorScene);
@@ -112,11 +119,14 @@ namespace Wheatear {
         WT_CORE_ASSERT(m_SceneState == SceneState::Play, "TransitionToStop called from non-Play state");
 
         m_PendingVisualNovelLoadSlot = 0;
-        CommandBus::DrainRuntimeCommands();
-        CommandBus::DrainGameplayCommands();
+        UIInputSystem::Reset();
+        Input::ClearMouseInputBounds();
+        m_PlayModeViewportMouseDown = false;
+        CommandBus::ClearQueuedCommands();
         SceneTransitionService::DrainRequests();
         m_ActiveScene->OnRuntimeStop();
         Renderer2D::EndScene();
+        CommandBus::ClearQueuedCommands();
         ClearEntitySelection();
 
         m_SceneState  = SceneState::Edit;
@@ -140,10 +150,17 @@ namespace Wheatear {
             return;
         }
 
+        ClearEntitySelection();
+        UIInputSystem::Reset();
+        Input::ClearMouseInputBounds();
+        m_PlayModeViewportMouseDown = false;
+        CommandBus::ClearQueuedCommands();
+
         if (m_ActiveScene)
         {
             m_ActiveScene->OnRuntimeStop();
             Renderer2D::EndScene();
+            CommandBus::ClearQueuedCommands();
         }
 
         m_ActiveScene = newScene;
@@ -242,7 +259,55 @@ namespace Wheatear {
     void EditorLayerBase::ClearEntitySelection()
     {
         m_HoveredEntity = {};
+        m_EditorCameraViewportMouseDown = false;
+        m_GizmoWasUsing = false;
+        m_GizmoEditEntity = {};
+        m_GizmoStartTransform.reset();
+        m_UIEditingCanvas = {};
+        m_UIEditHandle = UIEdit_None;
+        m_UIEditEntity = {};
+        m_UIEditStartHadText = false;
+        m_UIEditStartWidget.reset();
+        m_UIEditStartText.reset();
         m_SceneHierarchyPanel->SetSelectedEntity({});
+        m_AnimationEditorPanel->SetEntity({});
+        m_SpriteSheetPickerPanel->SetEntity({});
+    }
+
+    void EditorLayerBase::ProcessDeferredViewportAssetDrop()
+    {
+        if (m_DeferredSceneOpenPath.empty() &&
+            m_DeferredPrefabInstantiatePath.empty() &&
+            m_DeferredUITemplateInstantiatePath.empty())
+        {
+            return;
+        }
+
+        const std::filesystem::path scenePath = m_DeferredSceneOpenPath;
+        const std::filesystem::path prefabPath = m_DeferredPrefabInstantiatePath;
+        const std::filesystem::path uiTemplatePath = m_DeferredUITemplateInstantiatePath;
+        m_DeferredSceneOpenPath.clear();
+        m_DeferredPrefabInstantiatePath.clear();
+        m_DeferredUITemplateInstantiatePath.clear();
+
+        if (m_SceneState != SceneState::Edit)
+            return;
+
+        if (!scenePath.empty())
+        {
+            WT_CORE_INFO("Editor viewport opening dropped scene '{}'", scenePath.string());
+            OpenScene(scenePath);
+            return;
+        }
+
+        if (!prefabPath.empty())
+        {
+            InstantiatePrefab(prefabPath);
+            return;
+        }
+
+        if (!uiTemplatePath.empty())
+            InstantiateUITemplate(uiTemplatePath);
     }
 
     void EditorLayerBase::CommitPendingGizmoEdit()
@@ -275,7 +340,6 @@ namespace Wheatear {
         }
 
         m_UIEditHandle = UIEdit_None;
-        m_UIEditSurface = 0;
         m_UIEditEntity = {};
         m_UIEditStartHadText = false;
         m_UIEditStartWidget.reset();
@@ -465,8 +529,8 @@ namespace Wheatear {
         options.IncludeDebugSymbols = false;
 
         m_PlayerBuildStatus = enableScripts
-            ? "Packaging player with C# scripts..."
-            : "Packaging player without C# scripts...";
+            ? "Packaging player and editor with C# scripts..."
+            : "Packaging player and editor without C# scripts...";
         m_PlayerBuildRunning = true;
         m_PlayerBuildFuture = std::async(std::launch::async, [options]() mutable
         {
@@ -505,6 +569,7 @@ namespace Wheatear {
         if (result.Success)
         {
             m_LastPlayerBuildDirectory = result.PackageDirectory;
+            m_LastEditorBuildDirectory = result.EditorPackageDirectory;
             if (!result.ReportPath.empty())
                 m_PlayerBuildStatus += "\nReport: " + result.ReportPath.string();
         }

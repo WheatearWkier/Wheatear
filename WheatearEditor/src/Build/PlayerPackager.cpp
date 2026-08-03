@@ -20,7 +20,6 @@
 #include "GLFW/deps/stb_image_write.h"
 
 #ifdef WT_PLATFORM_WINDOWS
-    #include <shellapi.h>
     #include <windows.h>
 #endif
 
@@ -64,6 +63,29 @@ namespace Wheatear {
             }
 
             return "powershell.exe";
+        }
+
+        static std::filesystem::path GetCurrentExecutablePath()
+        {
+#ifdef WT_PLATFORM_WINDOWS
+            std::wstring buffer;
+            buffer.resize(32768);
+            const DWORD length = GetModuleFileNameW(nullptr, buffer.data(), static_cast<DWORD>(buffer.size()));
+            if (length == 0 || length >= buffer.size())
+                return {};
+
+            buffer.resize(length);
+            return std::filesystem::path(buffer);
+#else
+            return {};
+#endif
+        }
+
+        static bool IsSameNormalizedPath(const std::filesystem::path& lhs, const std::filesystem::path& rhs)
+        {
+            if (lhs.empty() || rhs.empty())
+                return false;
+            return FileSystem::Normalize(lhs) == FileSystem::Normalize(rhs);
         }
 
         static std::string Quote(const std::filesystem::path& path)
@@ -127,6 +149,43 @@ namespace Wheatear {
         static constexpr uint32_t kAssetPackVersion = 1;
         static constexpr uint32_t kAssetPackMethodStore = 0;
         static constexpr uint32_t kAssetPackMethodZlib = 1;
+
+        static bool BuildVisualStudioProject(const std::filesystem::path& repositoryRoot,
+            const std::filesystem::path& powerShell,
+            const std::filesystem::path& buildScript,
+            const std::filesystem::path& projectPath,
+            const std::string& configuration,
+            const std::string& logFile,
+            const std::string& label,
+            std::string* errorMessage)
+        {
+            const std::string command =
+                Quote(powerShell) +
+                " -NoProfile -ExecutionPolicy Bypass -File " + Quote(buildScript) +
+                " -ProjectPath " + Quote(projectPath) +
+                " -Configuration " + configuration +
+                " -Platform x64 -Verbosity m -LinkIncremental false -LogFile " + logFile;
+            WT_CORE_INFO("PlayerPackager: building {} with '{}'", label, command);
+
+#ifdef WT_PLATFORM_WINDOWS
+            const std::wstring arguments =
+                L"-NoProfile -ExecutionPolicy Bypass -File " + QuoteWide(buildScript) +
+                L" -ProjectPath " + QuoteWide(projectPath) +
+                L" -Configuration " + std::wstring(configuration.begin(), configuration.end()) +
+                L" -Platform x64 -Verbosity m -LinkIncremental false -LogFile " +
+                std::wstring(logFile.begin(), logFile.end());
+            const int buildResult = RunProcess(powerShell, arguments, repositoryRoot);
+#else
+            const int buildResult = std::system(command.c_str());
+#endif
+            if (buildResult != 0)
+            {
+                if (errorMessage)
+                    *errorMessage = label + " project build failed. Check the build output for details.";
+                return false;
+            }
+            return true;
+        }
 
         static bool CopyRuntimeBinaries(const std::filesystem::path& source,
             const std::filesystem::path& destination,
@@ -195,17 +254,24 @@ namespace Wheatear {
                 (std::string("PackagedStartup") + AssetFileType::SceneExtension);
         }
 
-        static bool IsLooseTuningAsset(const std::filesystem::path& relativePath)
+        static bool IsLooseRuntimeDataAsset(const std::filesystem::path& relativePath)
         {
             const std::string extension = relativePath.extension().generic_string();
-            if (extension != ".yaml" && extension != ".yml")
-                return false;
+            if (extension == ".yaml" || extension == ".yml" || extension == ".json" ||
+                extension == ".wt" || extension == ".wts" || extension == ".vn" ||
+                extension == ".glsl" || extension == ".vert" || extension == ".frag" ||
+                extension == ".geom" || extension == ".comp" || extension == ".hlsl")
+            {
+                return true;
+            }
 
-            const std::string filename = relativePath.filename().generic_string();
-            return filename.find("tuning") != std::string::npos;
+            if (extension == ".config" && relativePath.generic_string().find("assets/game/") == 0)
+                return true;
+
+            return false;
         }
 
-        static bool CopyLooseTuningAssets(const std::filesystem::path& projectRoot,
+        static bool CopyLooseRuntimeDataAssets(const std::filesystem::path& projectRoot,
             const std::vector<std::filesystem::path>& packageAssets,
             const std::filesystem::path& outputDirectory,
             std::string* errorMessage)
@@ -213,7 +279,7 @@ namespace Wheatear {
             std::error_code error;
             for (const std::filesystem::path& relativePath : packageAssets)
             {
-                if (!IsLooseTuningAsset(relativePath))
+                if (!IsLooseRuntimeDataAsset(relativePath))
                     continue;
 
                 const std::filesystem::path sourcePath = projectRoot / relativePath;
@@ -352,6 +418,7 @@ namespace Wheatear {
             const AssetDependencyReport& report,
             const std::filesystem::path& reportPath,
             const std::filesystem::path& assetPackPath,
+            const std::filesystem::path& editorOutputDirectory,
             std::string* errorMessage)
         {
             std::ofstream output(reportPath, std::ios::binary | std::ios::trunc);
@@ -370,6 +437,9 @@ namespace Wheatear {
             output << "Startup Scene: " << options.StartupScene.generic_string() << "\n";
             output << "Configuration: " << options.Configuration << "\n";
             output << "C# Scripts: " << (options.EnableScripts ? "enabled" : "disabled") << "\n";
+            output << "Runtime Executable: WheatearSandbox.exe\n";
+            output << "Editor Package: " << editorOutputDirectory.generic_string() << "\n";
+            output << "Loose Runtime Data: text configs, scenes, scripts and shaders\n";
             output << "Packed Assets: " << report.IncludedAssets.size() << "\n";
             output << "Source Asset Bytes: " << report.IncludedBytes << "\n";
             output << "Asset Pack Bytes: " << (error ? 0 : packBytes) << "\n";
@@ -446,6 +516,9 @@ namespace Wheatear {
         const std::filesystem::path outputDirectory = options.OutputDirectory.empty()
             ? repositoryRoot / "Builds" / "Windows" / "Player"
             : options.OutputDirectory;
+        const std::filesystem::path editorOutputDirectory = options.EditorOutputDirectory.empty()
+            ? outputDirectory.parent_path() / "Editor"
+            : options.EditorOutputDirectory;
         const std::filesystem::path buildsRoot = repositoryRoot / "Builds";
 
         if (FileSystem::Normalize(outputDirectory) == FileSystem::Normalize(buildsRoot) ||
@@ -453,57 +526,100 @@ namespace Wheatear {
         {
             return Fail("Package output directory must be inside Builds and may not be Builds itself.");
         }
+        if (FileSystem::Normalize(editorOutputDirectory) == FileSystem::Normalize(buildsRoot) ||
+            !FileSystem::IsSubPath(editorOutputDirectory, buildsRoot))
+        {
+            return Fail("Editor package output directory must be inside Builds and may not be Builds itself.");
+        }
+        if (FileSystem::Normalize(outputDirectory) == FileSystem::Normalize(editorOutputDirectory))
+            return Fail("Player and editor package output directories must be separate.", outputDirectory);
 
         const std::filesystem::path playerProject = repositoryRoot / "WheatearSandbox" / "WheatearSandbox.vcxproj";
         if (!std::filesystem::exists(playerProject))
             return Fail("WheatearSandbox project file was not generated. Run premake first.", outputDirectory);
 
+        const std::filesystem::path editorProject = repositoryRoot / "WheatearEditor" / "WheatearEditor.vcxproj";
+        if (!std::filesystem::exists(editorProject))
+            return Fail("WheatearEditor project file was not generated. Run premake first.", outputDirectory);
+
         const std::filesystem::path buildScript = repositoryRoot / "scripts" / "Build-Windows.ps1";
         if (!std::filesystem::exists(buildScript))
             return Fail("Build-Windows.ps1 was not found; package build cannot start.", outputDirectory);
 
-        const std::filesystem::path powerShell = FindPowerShell();
-        const std::filesystem::path projectPath = std::filesystem::path("WheatearSandbox") / "WheatearSandbox.vcxproj";
-        const std::string command =
-            Quote(powerShell) +
-            " -NoProfile -ExecutionPolicy Bypass -File " + Quote(buildScript) +
-            " -ProjectPath " + Quote(projectPath) +
-            " -Configuration " + options.Configuration +
-            " -Platform x64 -Verbosity m -LinkIncremental false -LogFile build-msbuild.log";
-
-        WT_CORE_INFO("PlayerPackager: building WheatearSandbox with '{}'", command);
-#ifdef WT_PLATFORM_WINDOWS
-        const std::wstring arguments =
-            L"-NoProfile -ExecutionPolicy Bypass -File " + QuoteWide(buildScript) +
-            L" -ProjectPath " + QuoteWide(projectPath) +
-            L" -Configuration " + std::wstring(options.Configuration.begin(), options.Configuration.end()) +
-            L" -Platform x64 -Verbosity m -LinkIncremental false -LogFile build-msbuild.log";
-        const int buildResult = RunProcess(powerShell, arguments, repositoryRoot);
-#else
-        const int buildResult = std::system(command.c_str());
-#endif
-        if (buildResult != 0)
-            return Fail("WheatearSandbox project build failed. Check the build output for details.", outputDirectory);
-
         const std::filesystem::path runtimeBinaryDirectory =
             repositoryRoot / "bin" / ToOutputDirectoryName(options.Configuration) / "WheatearSandbox";
+        const std::filesystem::path editorBinaryDirectory =
+            repositoryRoot / "bin" / ToOutputDirectoryName(options.Configuration) / "WheatearEditor";
         const std::filesystem::path playerExe = runtimeBinaryDirectory / "WheatearSandbox.exe";
+        const std::filesystem::path editorExe = editorBinaryDirectory / "WheatearEditor.exe";
+
+        const std::filesystem::path powerShell = FindPowerShell();
+        std::string errorMessage;
+        if (!BuildVisualStudioProject(repositoryRoot,
+            powerShell,
+            buildScript,
+            std::filesystem::path("WheatearSandbox") / "WheatearSandbox.vcxproj",
+            options.Configuration,
+            "build-sandbox-msbuild.log",
+            "WheatearSandbox",
+            &errorMessage))
+        {
+            return Fail(errorMessage, outputDirectory);
+        }
+
+        const std::filesystem::path currentExecutable = GetCurrentExecutablePath();
+        if (IsSameNormalizedPath(currentExecutable, editorExe))
+        {
+            WT_CORE_INFO("PlayerPackager: using running editor executable '{}'; skipping locked self-rebuild",
+                editorExe.string());
+        }
+        else if (!BuildVisualStudioProject(repositoryRoot,
+            powerShell,
+            buildScript,
+            std::filesystem::path("WheatearEditor") / "WheatearEditor.vcxproj",
+            options.Configuration,
+            "build-editor-msbuild.log",
+            "WheatearEditor",
+            &errorMessage))
+        {
+            return Fail(errorMessage, outputDirectory);
+        }
+
         if (!std::filesystem::exists(playerExe))
             return Fail("WheatearSandbox.exe was not generated; package aborted.", outputDirectory);
+        if (!std::filesystem::exists(editorExe))
+            return Fail("WheatearEditor.exe was not generated; package aborted.", outputDirectory);
 
         std::error_code error;
         std::filesystem::remove_all(outputDirectory, error);
         if (error)
             return Fail("Failed to clean previous package directory: " + error.message(), outputDirectory);
+        error.clear();
+        std::filesystem::remove_all(editorOutputDirectory, error);
+        if (error)
+            return Fail("Failed to clean previous editor package directory: " + error.message(), editorOutputDirectory);
 
-        std::string errorMessage;
         if (!FileSystem::EnsureDirectory(outputDirectory, &errorMessage))
             return Fail("Failed to create package directory: " + errorMessage, outputDirectory);
+        if (!FileSystem::EnsureDirectory(editorOutputDirectory, &errorMessage))
+            return Fail("Failed to create editor package directory: " + errorMessage, editorOutputDirectory);
 
         if (!CopyRuntimeBinaries(runtimeBinaryDirectory, outputDirectory,
             options.IncludeDebugSymbols, &errorMessage))
         {
             return Fail("Failed to copy runtime binaries: " + errorMessage, outputDirectory);
+        }
+        if (!CopyRuntimeBinaries(editorBinaryDirectory, editorOutputDirectory,
+            options.IncludeDebugSymbols, &errorMessage))
+        {
+            return Fail("Failed to copy editor binaries: " + errorMessage, editorOutputDirectory);
+        }
+
+        const std::filesystem::path editorResources = repositoryRoot / "WheatearEditor" / "Resources";
+        if (std::filesystem::exists(editorResources) &&
+            !FileSystem::CopyDirectoryRecursive(editorResources, editorOutputDirectory / "Resources", {}, &errorMessage))
+        {
+            return Fail("Failed to copy editor resources: " + errorMessage, editorOutputDirectory);
         }
 
         const std::filesystem::path monoSource = AssetPath::GetProjectRoot() / "mono";
@@ -532,6 +648,7 @@ namespace Wheatear {
                 dependencyReport,
                 preflightReportPath,
                 {},
+                editorOutputDirectory,
                 &errorMessage);
 
             return Fail("Package preflight failed: " +
@@ -548,11 +665,11 @@ namespace Wheatear {
         if (!WriteAssetPack(AssetPath::GetProjectRoot(), packageAssets, assetPackPath, &errorMessage))
             return Fail("Failed to write asset pack: " + errorMessage, outputDirectory);
 
-        if (!CopyLooseTuningAssets(AssetPath::GetProjectRoot(), packageAssets, outputDirectory, &errorMessage))
-            return Fail("Failed to copy loose tuning assets: " + errorMessage, outputDirectory);
+        if (!CopyLooseRuntimeDataAssets(AssetPath::GetProjectRoot(), packageAssets, outputDirectory, &errorMessage))
+            return Fail("Failed to copy loose runtime data assets: " + errorMessage, outputDirectory);
 
         const std::filesystem::path reportPath = outputDirectory / "package_report.txt";
-        if (!WritePackageReport(options, dependencyReport, reportPath, assetPackPath, &errorMessage))
+        if (!WritePackageReport(options, dependencyReport, reportPath, assetPackPath, editorOutputDirectory, &errorMessage))
             return Fail("Failed to write package report: " + errorMessage, outputDirectory);
 
         RuntimePlayerConfig playerConfig;
@@ -566,37 +683,28 @@ namespace Wheatear {
         }
 
         const std::filesystem::path executablePath = outputDirectory / "WheatearSandbox.exe";
+        const std::filesystem::path editorExecutablePath = editorOutputDirectory / "WheatearEditor.exe";
         WT_CORE_INFO("PlayerPackager: package completed '{}' with {} packed assets",
             outputDirectory.string(),
             packageAssets.size());
         std::error_code sizeError;
         PlayerPackageResult result;
         result.Success = true;
-        result.Message = "Package completed: " + outputDirectory.string() +
-                " (" + std::to_string(packageAssets.size()) + " assets packed into " +
-                kAssetPackFilename + ")";
+        result.Message = "Package completed: Player=" + outputDirectory.string() +
+                ", Editor=" + editorOutputDirectory.string() +
+                " (Sandbox uses " + kAssetPackFilename +
+                ", Editor uses WheatearEditor/assets, C# scripts " +
+                (options.EnableScripts ? "enabled" : "disabled") + ")";
         result.PackageDirectory = outputDirectory;
+        result.EditorPackageDirectory = editorOutputDirectory;
         result.ExecutablePath = executablePath;
+        result.EditorExecutablePath = editorExecutablePath;
         result.AssetPackPath = assetPackPath;
         result.ReportPath = reportPath;
         result.PackedAssetCount = packageAssets.size();
         result.PackedAssetBytes = dependencyReport.IncludedBytes;
         result.AssetPackBytes = std::filesystem::file_size(assetPackPath, sizeError);
         return result;
-#endif
-    }
-
-    void PlayerPackager::OpenDirectory(const std::filesystem::path& directory)
-    {
-        if (directory.empty() || !std::filesystem::exists(directory))
-            return;
-
-#ifdef WT_PLATFORM_WINDOWS
-        ShellExecuteA(nullptr, "open", directory.string().c_str(), nullptr, nullptr, SW_SHOWDEFAULT);
-#elif defined(WT_PLATFORM_MACOS)
-        (void)std::system(("open " + Quote(directory)).c_str());
-#else
-        (void)std::system(("xdg-open " + Quote(directory)).c_str());
 #endif
     }
 

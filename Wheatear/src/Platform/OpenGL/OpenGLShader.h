@@ -50,7 +50,7 @@ namespace Wheatear {
 		void CreateProgram();
 		void Reflect(GLenum stage, const std::vector<uint32_t>& shaderData);
 
-		uint32_t m_RendererID;
+		uint32_t m_RendererID = 0;
 		std::string m_FilePath;
 		std::string m_Name;
 

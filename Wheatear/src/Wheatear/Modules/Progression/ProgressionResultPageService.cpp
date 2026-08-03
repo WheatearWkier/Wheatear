@@ -2,6 +2,7 @@
 #include "ProgressionResultPageService.h"
 
 #include "GameProgress.h"
+#include "Wheatear/Core/AssetAliasRegistry.h"
 #include "Wheatear/Modules/Common/GameplayRewardService.h"
 #include "Wheatear/Modules/Common/GameplayUIService.h"
 #include "Wheatear/Scene/Entity.h"
@@ -32,19 +33,19 @@ namespace Wheatear::ProgressionResultPageService {
                     "Core",
                     "MAT-MAGIC-CORE-T0",
                     "魔核碎片",
-                    "assets/vertical_slice/side_combat/ui/icon_drop_magic_core.png",
+                    AssetAliasRegistry::Path("side.drop.magic_core"),
                     "用于魔剑觉醒、魔法分支技能与高级装备升级。" },
                 ResultDropIcon{
                     "Sinew",
                     "MAT-BEAST-SINEW",
                     "兽筋",
-                    "assets/vertical_slice/side_combat/ui/icon_drop_beast_sinew.png",
+                    AssetAliasRegistry::Path("side.drop.beast_sinew"),
                     "用于护甲升级、皮革装备与机动训练。" },
                 ResultDropIcon{
                     "Claw",
                     "MAT-BEAST-CLAW",
                     "熊爪",
-                    "assets/vertical_slice/side_combat/ui/icon_drop_beast_claw.png",
+                    AssetAliasRegistry::Path("side.drop.beast_claw"),
                     "用于近战剑技、护甲强化与好感礼物。" }
             };
             return icons;

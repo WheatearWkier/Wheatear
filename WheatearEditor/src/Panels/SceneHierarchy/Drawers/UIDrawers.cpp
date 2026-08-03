@@ -1,12 +1,12 @@
 #include "UIDrawers.h"
 #include "../ComponentDrawers.h"
 #include "Editor/EditorCanvasTools.h"
+#include "Editor/EditorWidgets.h"
 #include "Panels/SpriteSheetPickerPanel.h"
 #include <imgui/imgui.h>
 #include <glm/gtc/type_ptr.hpp>
 #include <algorithm>
 #include <filesystem>
-#include <cstring>
 #include "Wheatear/Core/AssetPath.h"
 #include "Wheatear/Scene/Components.h"
 #include "Wheatear/UI/UIWidgetLayout.h"
@@ -360,14 +360,11 @@ namespace Wheatear {
     {
         DrawComponent<UITextComponent>("UI Text", entity, [entity](auto& text)
             {
-                char buffer[1024];
-                memset(buffer, 0, sizeof(buffer));
-                strncpy_s(buffer, sizeof(buffer), text.Text.c_str(), _TRUNCATE);
-
                 ImGui::PushID((int)(uint32_t)entity);
-                if (ImGui::InputTextMultiline("Text", buffer, sizeof(buffer),
-                    ImVec2(-1.0f, ImGui::GetTextLineHeight() * 3)))
-                    text.Text = buffer;
+                EditorWidgets::InputMultilineString("Text",
+                    text.Text,
+                    ImVec2(-1.0f, ImGui::GetTextLineHeight() * 3),
+                    1024);
                 ImGui::PopID();
 
                 ImGui::ColorEdit4("Color", glm::value_ptr(text.Color));
@@ -377,11 +374,7 @@ namespace Wheatear {
                 ImGui::ColorEdit4("Outline Color", glm::value_ptr(text.OutlineColor));
                 ImGui::DragFloat("Outline px", &text.OutlineThickness, 0.1f, 0.0f, 8.0f);
 
-                char fontBuffer[260];
-                memset(fontBuffer, 0, sizeof(fontBuffer));
-                strncpy_s(fontBuffer, sizeof(fontBuffer), text.FontPath.c_str(), _TRUNCATE);
-                if (ImGui::InputText("Font Path", fontBuffer, sizeof(fontBuffer)))
-                    text.FontPath = fontBuffer;
+                EditorWidgets::InputString("Font Path", text.FontPath, 260);
 
                 if (ImGui::BeginDragDropTarget())
                 {

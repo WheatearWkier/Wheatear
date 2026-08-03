@@ -2,6 +2,7 @@
 #include "ProgressionEquipmentPageService.h"
 
 #include "GameProgress.h"
+#include "ProgressionContent.h"
 #include "Wheatear/Modules/Common/GameplayUILayoutService.h"
 #include "Wheatear/Scene/Components.h"
 #include "Wheatear/Scene/Entity.h"
@@ -51,17 +52,6 @@ namespace Wheatear::ProgressionEquipmentPageService {
             UIRuntimeTools::SetImageTexture(scene, entityName, texturePath, true);
         }
 
-        static constexpr std::array<const char*, 8> kBagEquipment = {
-            "traveler_armor",
-            "black_forest_armor",
-            "beast_tooth_pendant",
-            "novice_magic_ring",
-            "wind_boots",
-            "old_ward_charm",
-            "training_blade",
-            "angel_feather"
-        };
-
         static constexpr std::array<EquipmentSlotView, 4> kSlots = {
             EquipmentSlotView{ "armor", "Equipment_SlotArmor", "Equipment_SlotArmor_Button", { 0.105f, 0.335f } },
             EquipmentSlotView{ "ring", "Equipment_SlotRing", "Equipment_SlotRing_Button", { 0.205f, 0.335f } },
@@ -110,13 +100,14 @@ namespace Wheatear::ProgressionEquipmentPageService {
         std::string hoveredEquipmentId;
         glm::vec2 hoveredPosition = { 0.0f, 0.0f };
         std::vector<std::string> bagEquipment;
-        bagEquipment.reserve(kBagEquipment.size());
-        for (const char* equipmentId : kBagEquipment)
+        const auto& equipmentCatalog = ProgressionContent::Get().Equipment;
+        bagEquipment.reserve(equipmentCatalog.size());
+        for (const auto& equipment : equipmentCatalog)
         {
-            if (GameProgress::IsEquipmentOwned(equipmentId)
-                && !GameProgress::IsEquipmentEquipped(equipmentId))
+            if (GameProgress::IsEquipmentOwned(equipment.Id)
+                && !GameProgress::IsEquipmentEquipped(equipment.Id))
             {
-                bagEquipment.emplace_back(equipmentId);
+                bagEquipment.emplace_back(equipment.Id);
             }
         }
 

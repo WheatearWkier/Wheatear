@@ -19,7 +19,7 @@ namespace Wheatear {
 
     // -------------------------------------------------------------------------
     //
-    //   auto mesh = Mesh::Create("assets/models/cube.obj");
+    //   auto mesh = Mesh::CreateCube();
     //   Renderer3D::DrawMesh(transform, mesh, material, entityID);
     // -------------------------------------------------------------------------
     class Mesh

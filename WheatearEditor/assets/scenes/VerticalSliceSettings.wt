@@ -74,6 +74,7 @@ Entities:
       Rotation: 0.0
       Anchor: 0
       SortOrder: 10
+      ParentEntity: 840000026
     UIImageComponent:
       Color: [1, 1, 1, 0.97]
       TexturePath: assets/vertical_slice/ui/panels/panel_settings.png
@@ -91,6 +92,7 @@ Entities:
       Rotation: 0.0
       Anchor: 0
       SortOrder: 42
+      ParentEntity: 840000026
     UITextComponent:
       Text: "系统设置"
       Color: [0.88, 1.0, 0.92, 1]
@@ -114,6 +116,7 @@ Entities:
       Rotation: 0.0
       Anchor: 0
       SortOrder: 42
+      ParentEntity: 840000026
     UITextComponent:
       Text: "第2章 / 魔剑 Lv1 / 主角 Lv1"
       Color: [0.7, 0.9, 0.78, 1]
@@ -137,6 +140,7 @@ Entities:
       Rotation: 0.0
       Anchor: 0
       SortOrder: 18
+      ParentEntity: 840000026
     UIPanelComponent:
       BackgroundColor: [0.04, 0.07, 0.06, 0.65]
       BorderColor: [0.4, 0.8, 0.6, 0.85]
@@ -155,6 +159,7 @@ Entities:
       Rotation: 0.0
       Anchor: 0
       SortOrder: 42
+      ParentEntity: 840000026
     UITextComponent:
       Text: "文字速度"
       Color: [0.88, 1.0, 0.9, 1]
@@ -178,6 +183,7 @@ Entities:
       Rotation: 0.0
       Anchor: 0
       SortOrder: 44
+      ParentEntity: 840000026
     UISliderComponent:
       Value: 48
       MinValue: 12
@@ -201,6 +207,7 @@ Entities:
       Rotation: 0.0
       Anchor: 0
       SortOrder: 55
+      ParentEntity: 840000026
     UIAnimatorComponent:
       Preset: "hover_pulse"
       PlayOnStart: true
@@ -238,6 +245,7 @@ Entities:
       Rotation: 0.0
       Anchor: 0
       SortOrder: 55
+      ParentEntity: 840000026
     UIAnimatorComponent:
       Preset: "hover_pulse"
       PlayOnStart: true
@@ -275,6 +283,7 @@ Entities:
       Rotation: 0.0
       Anchor: 0
       SortOrder: 42
+      ParentEntity: 840000026
     UITextComponent:
       Text: "主音量"
       Color: [0.88, 1.0, 0.9, 1]
@@ -298,6 +307,7 @@ Entities:
       Rotation: 0.0
       Anchor: 0
       SortOrder: 44
+      ParentEntity: 840000026
     UISliderComponent:
       Value: 80
       MinValue: 0
@@ -321,6 +331,7 @@ Entities:
       Rotation: 0.0
       Anchor: 0
       SortOrder: 55
+      ParentEntity: 840000026
     UIAnimatorComponent:
       Preset: "hover_pulse"
       PlayOnStart: true
@@ -358,6 +369,7 @@ Entities:
       Rotation: 0.0
       Anchor: 0
       SortOrder: 55
+      ParentEntity: 840000026
     UIAnimatorComponent:
       Preset: "hover_pulse"
       PlayOnStart: true
@@ -395,6 +407,7 @@ Entities:
       Rotation: 0.0
       Anchor: 0
       SortOrder: 55
+      ParentEntity: 840000026
     UIAnimatorComponent:
       Preset: "hover_pulse"
       PlayOnStart: true
@@ -432,6 +445,7 @@ Entities:
       Rotation: 0.0
       Anchor: 0
       SortOrder: 55
+      ParentEntity: 840000026
     UIAnimatorComponent:
       Preset: "hover_pulse"
       PlayOnStart: true
@@ -469,6 +483,7 @@ Entities:
       Rotation: 0.0
       Anchor: 0
       SortOrder: 42
+      ParentEntity: 840000026
     UITextComponent:
       Text: "设置状态"
       Color: [0.94, 0.98, 0.9, 1]
@@ -492,6 +507,7 @@ Entities:
       Rotation: 0.0
       Anchor: 0
       SortOrder: 55
+      ParentEntity: 840000026
     UIAnimatorComponent:
       Preset: "hover_pulse"
       PlayOnStart: true

@@ -45,8 +45,6 @@ namespace WheatearSandbox
             if (_healthBar != null)
                 _healthBar.Value = Hp;
 
-            Debug.Log($"Enemy hit. HP: {Hp}/{MaxHp}");
-
             if (Hp <= 0.0f)
             {
                 _isDying = true;

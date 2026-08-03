@@ -1,0 +1,31 @@
+defaults:
+  mainDungeon: 'CH02_MAIN_BearAwakening'
+  materialDungeon: 'CH02_MAT_BeastPath'
+  objective: '整理黑熊掉落的材料，确认魔剑和装备的强化方向。'
+  lastResultMessage: '据点已开启。完成黑熊战后，掉落会写入这里。'
+  initialUnlockedSkills:
+    - 'basic_attack'
+    - 'air_basic'
+    - 'launcher'
+    - 'air_chase'
+    - 'vfx_magic_bolt'
+    - 'vfx_ally_support'
+    - 'magic_sword_core'
+    - 'ME-01'
+    - 'ME-02'
+    - 'ME-03'
+    - 'MA-01'
+    - 'MO-01'
+    - 'MO-02'
+  initialOwnedEquipment:
+    - 'traveler_armor'
+    - 'beast_tooth_pendant'
+    - 'old_ward_charm'
+  initialEquippedItems:
+    armor: 'traveler_armor'
+  initialSelectedEquipment: 'traveler_armor'
+  travelerArmorUpgradeEquipment: 'traveler_armor'
+  initialUnlockedDungeons:
+    - 'CH02_MAIN_BearAwakening'
+  initialStoryFlags:
+    - 'FLAG_CH02_SIDE_COMBAT_STARTED'

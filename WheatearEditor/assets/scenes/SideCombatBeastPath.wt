@@ -214,6 +214,7 @@ Entities:
       Rotation: 0
       Anchor: 1
       SortOrder: 18
+      ParentEntity: 946200046
     UIAnimatorComponent:
       Preset: "slide_fade_in"
       PlayOnStart: true
@@ -240,6 +241,7 @@ Entities:
       Rotation: 0
       Anchor: 6
       SortOrder: 18
+      ParentEntity: 946200046
     UIAnimatorComponent:
       Preset: "slide_fade_in"
       PlayOnStart: true
@@ -266,6 +268,7 @@ Entities:
       Rotation: 0
       Anchor: 0
       SortOrder: 18
+      ParentEntity: 946200046
     UIAnimatorComponent:
       Preset: "fade_in"
       PlayOnStart: true
@@ -292,6 +295,7 @@ Entities:
       Rotation: 0
       Anchor: 0
       SortOrder: 20
+      ParentEntity: 946200046
     UIProgressBarComponent:
       Value: 420
       MaxValue: 420
@@ -311,6 +315,7 @@ Entities:
       Rotation: 0
       Anchor: 0
       SortOrder: 21
+      ParentEntity: 946200046
     UITextComponent:
       Text: "生命 420/420"
       Color: [0.9, 0.98, 0.92, 1]
@@ -334,6 +339,7 @@ Entities:
       Rotation: 0
       Anchor: 2
       SortOrder: 20
+      ParentEntity: 946200046
     UIProgressBarComponent:
       Value: 1450
       MaxValue: 1450
@@ -353,6 +359,7 @@ Entities:
       Rotation: 0
       Anchor: 2
       SortOrder: 21
+      ParentEntity: 946200046
     UITextComponent:
       Text: "黑熊丈夫 1450/1450"
       Color: [1, 0.9, 0.86, 1]
@@ -376,6 +383,7 @@ Entities:
       Rotation: 0
       Anchor: 6
       SortOrder: 24
+      ParentEntity: 946200046
     UIAnimatorComponent:
       Preset: "fade_in"
       PlayOnStart: true
@@ -408,6 +416,7 @@ Entities:
       Rotation: 0
       Anchor: 0
       SortOrder: 24
+      ParentEntity: 946200046
     UIAnimatorComponent:
       Preset: "pulse"
       PlayOnStart: true
@@ -440,6 +449,7 @@ Entities:
       Rotation: 0
       Anchor: 6
       SortOrder: 24
+      ParentEntity: 946200046
     UIAnimatorComponent:
       Preset: "fade_in"
       PlayOnStart: true
@@ -472,6 +482,7 @@ Entities:
       Rotation: 0
       Anchor: 6
       SortOrder: 24
+      ParentEntity: 946200046
     UIAnimatorComponent:
       Preset: "fade_in"
       PlayOnStart: true
@@ -504,6 +515,7 @@ Entities:
       Rotation: 0
       Anchor: 4
       SortOrder: 100
+      ParentEntity: 946200046
     UIImageComponent:
       Color: [0, 0, 0, 1]
       TexturePath: ""
@@ -521,6 +533,7 @@ Entities:
       Rotation: 0.0
       Anchor: 0
       SortOrder: 50
+      ParentEntity: 946200046
     UIPanelComponent:
       BackgroundColor: [0.03, 0.045, 0.055, 0.72]
       BorderColor: [0.2, 0.72, 0.78, 0.7]
@@ -539,6 +552,7 @@ Entities:
       Rotation: 0.0
       Anchor: 0
       SortOrder: 51
+      ParentEntity: 946200046
     UIPanelComponent:
       BackgroundColor: [0.025, 0.032, 0.038, 0.88]
       BorderColor: [0.32, 0.7, 0.76, 0.78]
@@ -557,6 +571,7 @@ Entities:
       Rotation: 0.0
       Anchor: 0
       SortOrder: 52
+      ParentEntity: 946200046
     UIImageComponent:
       Color: [1, 1, 1, 1.0]
       TexturePath: assets/vertical_slice/side_combat/ui/icon_skill_uppercut.png
@@ -579,6 +594,7 @@ Entities:
       Rotation: 0.0
       Anchor: 0
       SortOrder: 54
+      ParentEntity: 946200046
     UIProgressBarComponent:
       Value: 0
       MaxValue: 1
@@ -598,6 +614,7 @@ Entities:
       Rotation: 0.0
       Anchor: 0
       SortOrder: 57
+      ParentEntity: 946200046
     UITextComponent:
       Text: ""
       Color: [1, 1, 1, 1]
@@ -621,6 +638,7 @@ Entities:
       Rotation: 0.0
       Anchor: 0
       SortOrder: 57
+      ParentEntity: 946200046
     UITextComponent:
       Text: "S+J"
       Color: [0.9, 0.98, 1, 1]
@@ -644,6 +662,7 @@ Entities:
       Rotation: 0.0
       Anchor: 0
       SortOrder: 51
+      ParentEntity: 946200046
     UIPanelComponent:
       BackgroundColor: [0.025, 0.032, 0.038, 0.88]
       BorderColor: [0.32, 0.7, 0.76, 0.78]
@@ -662,6 +681,7 @@ Entities:
       Rotation: 0.0
       Anchor: 0
       SortOrder: 52
+      ParentEntity: 946200046
     UIImageComponent:
       Color: [1, 1, 1, 1.0]
       TexturePath: assets/vertical_slice/side_combat/ui/icon_skill_magic_bolt.png
@@ -684,6 +704,7 @@ Entities:
       Rotation: 0.0
       Anchor: 0
       SortOrder: 54
+      ParentEntity: 946200046
     UIProgressBarComponent:
       Value: 0
       MaxValue: 1
@@ -703,6 +724,7 @@ Entities:
       Rotation: 0.0
       Anchor: 0
       SortOrder: 57
+      ParentEntity: 946200046
     UITextComponent:
       Text: ""
       Color: [1, 1, 1, 1]
@@ -726,6 +748,7 @@ Entities:
       Rotation: 0.0
       Anchor: 0
       SortOrder: 57
+      ParentEntity: 946200046
     UITextComponent:
       Text: "U"
       Color: [0.9, 0.98, 1, 1]
@@ -749,6 +772,7 @@ Entities:
       Rotation: 0.0
       Anchor: 0
       SortOrder: 51
+      ParentEntity: 946200046
     UIPanelComponent:
       BackgroundColor: [0.025, 0.032, 0.038, 0.88]
       BorderColor: [0.32, 0.7, 0.76, 0.78]
@@ -767,6 +791,7 @@ Entities:
       Rotation: 0.0
       Anchor: 0
       SortOrder: 52
+      ParentEntity: 946200046
     UIImageComponent:
       Color: [1, 1, 1, 1.0]
       TexturePath: assets/vertical_slice/side_combat/ui/icon_skill_ally_support.png
@@ -789,6 +814,7 @@ Entities:
       Rotation: 0.0
       Anchor: 0
       SortOrder: 54
+      ParentEntity: 946200046
     UIProgressBarComponent:
       Value: 0
       MaxValue: 1
@@ -808,6 +834,7 @@ Entities:
       Rotation: 0.0
       Anchor: 0
       SortOrder: 57
+      ParentEntity: 946200046
     UITextComponent:
       Text: ""
       Color: [1, 1, 1, 1]
@@ -831,6 +858,7 @@ Entities:
       Rotation: 0.0
       Anchor: 0
       SortOrder: 57
+      ParentEntity: 946200046
     UITextComponent:
       Text: "I"
       Color: [0.9, 0.98, 1, 1]
@@ -854,6 +882,7 @@ Entities:
       Rotation: 0.0
       Anchor: 0
       SortOrder: 51
+      ParentEntity: 946200046
     UIPanelComponent:
       BackgroundColor: [0.025, 0.032, 0.038, 0.88]
       BorderColor: [0.32, 0.7, 0.76, 0.78]
@@ -872,6 +901,7 @@ Entities:
       Rotation: 0.0
       Anchor: 0
       SortOrder: 52
+      ParentEntity: 946200046
     UIImageComponent:
       Color: [1, 1, 1, 1.0]
       TexturePath: assets/vertical_slice/side_combat/ui/icon_skill_break_limit.png
@@ -894,6 +924,7 @@ Entities:
       Rotation: 0.0
       Anchor: 0
       SortOrder: 54
+      ParentEntity: 946200046
     UIProgressBarComponent:
       Value: 0
       MaxValue: 1
@@ -913,6 +944,7 @@ Entities:
       Rotation: 0.0
       Anchor: 0
       SortOrder: 57
+      ParentEntity: 946200046
     UITextComponent:
       Text: ""
       Color: [1, 1, 1, 1]
@@ -936,6 +968,7 @@ Entities:
       Rotation: 0.0
       Anchor: 0
       SortOrder: 57
+      ParentEntity: 946200046
     UITextComponent:
       Text: "L"
       Color: [0.9, 0.98, 1, 1]
@@ -959,6 +992,7 @@ Entities:
       Rotation: 0.0
       Anchor: 0
       SortOrder: 76
+      ParentEntity: 946200046
     UIPanelComponent:
       BackgroundColor: [0.025, 0.032, 0.038, 0.92]
       BorderColor: [0.28, 0.78, 0.82, 0.82]
@@ -977,6 +1011,7 @@ Entities:
       Rotation: 0.0
       Anchor: 0
       SortOrder: 77
+      ParentEntity: 946200046
     UITextComponent:
       Text: ""
       Color: [0.92, 0.98, 0.96, 1]
@@ -1000,6 +1035,7 @@ Entities:
       Rotation: 0.0
       Anchor: 0
       SortOrder: 58
+      ParentEntity: 946200046
     UIPanelComponent:
       BackgroundColor: [0.025, 0.032, 0.038, 0.82]
       BorderColor: [0.7, 0.58, 0.3, 0.78]
@@ -1018,6 +1054,7 @@ Entities:
       Rotation: 0.0
       Anchor: 0
       SortOrder: 59
+      ParentEntity: 946200046
     UIImageComponent:
       Color: [1, 1, 1, 1.0]
       TexturePath: assets/vertical_slice/side_combat/ui/items/icon_item_heal_potion.png
@@ -1035,6 +1072,7 @@ Entities:
       Rotation: 0.0
       Anchor: 0
       SortOrder: 61
+      ParentEntity: 946200046
     UIButtonComponent:
       NormalColor: [0, 0, 0, 0]
       HoverColor: [0.95, 1, 0.82, 0.14]
@@ -1054,6 +1092,7 @@ Entities:
       Rotation: 0.0
       Anchor: 0
       SortOrder: 62
+      ParentEntity: 946200046
     UITextComponent:
       Text: "1"
       Color: [1.0, 0.92, 0.68, 1]
@@ -1077,6 +1116,7 @@ Entities:
       Rotation: 0.0
       Anchor: 0
       SortOrder: 58
+      ParentEntity: 946200046
     UIPanelComponent:
       BackgroundColor: [0.025, 0.032, 0.038, 0.82]
       BorderColor: [0.7, 0.58, 0.3, 0.78]
@@ -1095,6 +1135,7 @@ Entities:
       Rotation: 0.0
       Anchor: 0
       SortOrder: 59
+      ParentEntity: 946200046
     UIImageComponent:
       Color: [1, 1, 1, 1.0]
       TexturePath: assets/vertical_slice/side_combat/ui/items/icon_item_focus_vial.png
@@ -1112,6 +1153,7 @@ Entities:
       Rotation: 0.0
       Anchor: 0
       SortOrder: 61
+      ParentEntity: 946200046
     UIButtonComponent:
       NormalColor: [0, 0, 0, 0]
       HoverColor: [0.95, 1, 0.82, 0.14]
@@ -1131,6 +1173,7 @@ Entities:
       Rotation: 0.0
       Anchor: 0
       SortOrder: 62
+      ParentEntity: 946200046
     UITextComponent:
       Text: "2"
       Color: [1.0, 0.92, 0.68, 1]
@@ -1154,6 +1197,7 @@ Entities:
       Rotation: 0.0
       Anchor: 0
       SortOrder: 58
+      ParentEntity: 946200046
     UIPanelComponent:
       BackgroundColor: [0.025, 0.032, 0.038, 0.82]
       BorderColor: [0.7, 0.58, 0.3, 0.78]
@@ -1172,6 +1216,7 @@ Entities:
       Rotation: 0.0
       Anchor: 0
       SortOrder: 59
+      ParentEntity: 946200046
     UIImageComponent:
       Color: [1, 1, 1, 1.0]
       TexturePath: assets/vertical_slice/side_combat/ui/items/icon_item_burst_bomb.png
@@ -1189,6 +1234,7 @@ Entities:
       Rotation: 0.0
       Anchor: 0
       SortOrder: 61
+      ParentEntity: 946200046
     UIButtonComponent:
       NormalColor: [0, 0, 0, 0]
       HoverColor: [0.95, 1, 0.82, 0.14]
@@ -1208,6 +1254,7 @@ Entities:
       Rotation: 0.0
       Anchor: 0
       SortOrder: 62
+      ParentEntity: 946200046
     UITextComponent:
       Text: "3"
       Color: [1.0, 0.92, 0.68, 1]

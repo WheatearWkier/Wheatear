@@ -166,6 +166,7 @@
     <ClInclude Include="src\Wheatear\Animation\AnimationClip.h" />
     <ClInclude Include="src\Wheatear\Audio\AudioEngine.h" />
     <ClInclude Include="src\Wheatear\Core\Application.h" />
+    <ClInclude Include="src\Wheatear\Core\AssetAliasRegistry.h" />
     <ClInclude Include="src\Wheatear\Core\AssetPath.h" />
     <ClInclude Include="src\Wheatear\Core\Core.h" />
     <ClInclude Include="src\Wheatear\Core\EngineInfo.h" />
@@ -194,13 +195,13 @@
     <ClInclude Include="src\Wheatear\Gameplay\Action\ActionDatabase.h" />
     <ClInclude Include="src\Wheatear\Gameplay\Action\ActionDebugHistory.h" />
     <ClInclude Include="src\Wheatear\Gameplay\Action\ActionResolver.h" />
+    <ClInclude Include="src\Wheatear\Gameplay\Action\ActionRecipeQueries.h" />
     <ClInclude Include="src\Wheatear\Gameplay\Action\ActionRunner.h" />
     <ClInclude Include="src\Wheatear\Gameplay\Action\ActionSignalRouter.h" />
     <ClInclude Include="src\Wheatear\Gameplay\Action\ActionTypes.h" />
     <ClInclude Include="src\Wheatear\Gameplay\Action\StateRegistry.h" />
     <ClInclude Include="src\Wheatear\ImGui\ImGuiLayer.h" />
     <ClInclude Include="src\Wheatear\Math\Math.h" />
-    <ClInclude Include="src\Wheatear\Modules\ArcadeCombat\ArcadeCombatActionCatalog.h" />
     <ClInclude Include="src\Wheatear\Modules\ArcadeCombat\ArcadeCombatActionResolver.h" />
     <ClInclude Include="src\Wheatear\Modules\ArcadeCombat\ArcadeCombatBossService.h" />
     <ClInclude Include="src\Wheatear\Modules\ArcadeCombat\ArcadeCombatComponents.h" />
@@ -227,6 +228,7 @@
     <ClInclude Include="src\Wheatear\Modules\GameplayModuleRuntime.h" />
     <ClInclude Include="src\Wheatear\Modules\ModuleBootstrap.h" />
     <ClInclude Include="src\Wheatear\Modules\Progression\GameProgress.h" />
+    <ClInclude Include="src\Wheatear\Modules\Progression\ProgressionContent.h" />
     <ClInclude Include="src\Wheatear\Modules\Progression\ProgressionEquipmentPageService.h" />
     <ClInclude Include="src\Wheatear\Modules\Progression\ProgressionResultPageService.h" />
     <ClInclude Include="src\Wheatear\Modules\Progression\ProgressionSaveLoadPageService.h" />
@@ -234,7 +236,6 @@
     <ClInclude Include="src\Wheatear\Modules\Progression\ProgressionSettingsPageService.h" />
     <ClInclude Include="src\Wheatear\Modules\Progression\ProgressionSkillTreePageService.h" />
     <ClInclude Include="src\Wheatear\Modules\Progression\ProgressionSystem.h" />
-    <ClInclude Include="src\Wheatear\Modules\SideCombat\SideCombatActionCatalog.h" />
     <ClInclude Include="src\Wheatear\Modules\SideCombat\SideCombatActionService.h" />
     <ClInclude Include="src\Wheatear\Modules\SideCombat\SideCombatComboService.h" />
     <ClInclude Include="src\Wheatear\Modules\SideCombat\SideCombatComponents.h" />
@@ -256,7 +257,6 @@
     <ClInclude Include="src\Wheatear\Modules\SideCombat\SideCombatTuningService.h" />
     <ClInclude Include="src\Wheatear\Modules\SideCombat\SideCombatVisualService.h" />
     <ClInclude Include="src\Wheatear\Modules\TacticalCombat\TacticalCombatAIService.h" />
-    <ClInclude Include="src\Wheatear\Modules\TacticalCombat\TacticalCombatActionCatalog.h" />
     <ClInclude Include="src\Wheatear\Modules\TacticalCombat\TacticalCombatActionService.h" />
     <ClInclude Include="src\Wheatear\Modules\TacticalCombat\TacticalCombatBoardService.h" />
     <ClInclude Include="src\Wheatear\Modules\TacticalCombat\TacticalCombatCommandService.h" />
@@ -267,7 +267,6 @@
     <ClInclude Include="src\Wheatear\Modules\TacticalCombat\TacticalCombatSystem.h" />
     <ClInclude Include="src\Wheatear\Modules\TacticalCombat\TacticalCombatUIService.h" />
     <ClInclude Include="src\Wheatear\Modules\TacticalCombat\TacticalCombatVisualService.h" />
-    <ClInclude Include="src\Wheatear\Modules\TurnCombat\TurnCombatActionCatalog.h" />
     <ClInclude Include="src\Wheatear\Modules\TurnCombat\TurnCombatActionService.h" />
     <ClInclude Include="src\Wheatear\Modules\TurnCombat\TurnCombatCommandService.h" />
     <ClInclude Include="src\Wheatear\Modules\TurnCombat\TurnCombatComponents.h" />
@@ -719,6 +718,7 @@
     <ClCompile Include="src\Platform\Windows\WindowsWindow.cpp" />
     <ClCompile Include="src\Wheatear\Audio\AudioEngine.cpp" />
     <ClCompile Include="src\Wheatear\Core\Application.cpp" />
+    <ClCompile Include="src\Wheatear\Core\AssetAliasRegistry.cpp" />
     <ClCompile Include="src\Wheatear\Core\AssetPath.cpp" />
     <ClCompile Include="src\Wheatear\Core\FileSystem.cpp" />
     <ClCompile Include="src\Wheatear\Core\InputBindingService.cpp" />
@@ -733,6 +733,7 @@
     <ClCompile Include="src\Wheatear\Gameplay\Action\ActionDatabase.cpp" />
     <ClCompile Include="src\Wheatear\Gameplay\Action\ActionDebugHistory.cpp" />
     <ClCompile Include="src\Wheatear\Gameplay\Action\ActionResolver.cpp" />
+    <ClCompile Include="src\Wheatear\Gameplay\Action\ActionRecipeQueries.cpp" />
     <ClCompile Include="src\Wheatear\Gameplay\Action\ActionRunner.cpp" />
     <ClCompile Include="src\Wheatear\Gameplay\Action\ActionSignalRouter.cpp" />
     <ClCompile Include="src\Wheatear\Gameplay\Action\ActionTypes.cpp" />
@@ -740,7 +741,6 @@
     <ClCompile Include="src\Wheatear\ImGui\ImGuiBuild.cpp" />
     <ClCompile Include="src\Wheatear\ImGui\ImGuiLayer.cpp" />
     <ClCompile Include="src\Wheatear\Math\Math.cpp" />
-    <ClCompile Include="src\Wheatear\Modules\ArcadeCombat\ArcadeCombatActionCatalog.cpp" />
     <ClCompile Include="src\Wheatear\Modules\ArcadeCombat\ArcadeCombatActionResolver.cpp" />
     <ClCompile Include="src\Wheatear\Modules\ArcadeCombat\ArcadeCombatBossService.cpp" />
     <ClCompile Include="src\Wheatear\Modules\ArcadeCombat\ArcadeCombatHudService.cpp" />
@@ -762,6 +762,7 @@
     <ClCompile Include="src\Wheatear\Modules\Common\GameplayVisualService.cpp" />
     <ClCompile Include="src\Wheatear\Modules\ModuleBootstrap.cpp" />
     <ClCompile Include="src\Wheatear\Modules\Progression\GameProgress.cpp" />
+    <ClCompile Include="src\Wheatear\Modules\Progression\ProgressionContent.cpp" />
     <ClCompile Include="src\Wheatear\Modules\Progression\ProgressionEquipmentPageService.cpp" />
     <ClCompile Include="src\Wheatear\Modules\Progression\ProgressionResultPageService.cpp" />
     <ClCompile Include="src\Wheatear\Modules\Progression\ProgressionSaveLoadPageService.cpp" />
@@ -769,7 +770,6 @@
     <ClCompile Include="src\Wheatear\Modules\Progression\ProgressionSettingsPageService.cpp" />
     <ClCompile Include="src\Wheatear\Modules\Progression\ProgressionSkillTreePageService.cpp" />
     <ClCompile Include="src\Wheatear\Modules\Progression\ProgressionSystem.cpp" />
-    <ClCompile Include="src\Wheatear\Modules\SideCombat\SideCombatActionCatalog.cpp" />
     <ClCompile Include="src\Wheatear\Modules\SideCombat\SideCombatActionService.cpp" />
     <ClCompile Include="src\Wheatear\Modules\SideCombat\SideCombatComboService.cpp" />
     <ClCompile Include="src\Wheatear\Modules\SideCombat\SideCombatEnemyAIService.cpp" />
@@ -789,7 +789,6 @@
     <ClCompile Include="src\Wheatear\Modules\SideCombat\SideCombatTuningService.cpp" />
     <ClCompile Include="src\Wheatear\Modules\SideCombat\SideCombatVisualService.cpp" />
     <ClCompile Include="src\Wheatear\Modules\TacticalCombat\TacticalCombatAIService.cpp" />
-    <ClCompile Include="src\Wheatear\Modules\TacticalCombat\TacticalCombatActionCatalog.cpp" />
     <ClCompile Include="src\Wheatear\Modules\TacticalCombat\TacticalCombatActionService.cpp" />
     <ClCompile Include="src\Wheatear\Modules\TacticalCombat\TacticalCombatBoardService.cpp" />
     <ClCompile Include="src\Wheatear\Modules\TacticalCombat\TacticalCombatCommandService.cpp" />
@@ -799,7 +798,6 @@
     <ClCompile Include="src\Wheatear\Modules\TacticalCombat\TacticalCombatSystem.cpp" />
     <ClCompile Include="src\Wheatear\Modules\TacticalCombat\TacticalCombatUIService.cpp" />
     <ClCompile Include="src\Wheatear\Modules\TacticalCombat\TacticalCombatVisualService.cpp" />
-    <ClCompile Include="src\Wheatear\Modules\TurnCombat\TurnCombatActionCatalog.cpp" />
     <ClCompile Include="src\Wheatear\Modules\TurnCombat\TurnCombatActionService.cpp" />
     <ClCompile Include="src\Wheatear\Modules\TurnCombat\TurnCombatCommandService.cpp" />
     <ClCompile Include="src\Wheatear\Modules\TurnCombat\TurnCombatFlowService.cpp" />

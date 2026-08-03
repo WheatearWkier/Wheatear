@@ -379,7 +379,7 @@ namespace Wheatear {
         std::string Text = "Text";
         glm::vec4   Color = { 1.0f, 1.0f, 1.0f, 1.0f };
         float       FontSize = 24.0f;
-        std::string FontPath = "assets/fonts/wqy-microhei.ttc";
+        std::string FontPath = "font.ui_default";
         glm::vec4   ShadowColor = { 0.02f, 0.03f, 0.04f, 0.78f };
         glm::vec2   ShadowOffset = { 2.0f, 2.0f };
         glm::vec4   OutlineColor = { 0.02f, 0.02f, 0.025f, 0.86f };

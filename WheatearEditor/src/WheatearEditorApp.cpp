@@ -3,13 +3,16 @@
 #include "Assets/UITemplateFactory.h"
 #include "Editor/ModeSelectLayer.h"
 #include "Editor/CoreEditorComponents.h"
+#include "Build/AssetDependencyScanner.h"
 #include "Build/PlayerPackager.h"
+#include "Build/ProjectSourceScanner.h"
 #include "Modules/ModuleEditorBootstrap.h"
 
 #include <Wheatear/Core/EngineInfo.h>
 #include <Wheatear/Core/EntryPoint.h>
 
 #include <filesystem>
+#include <cstdlib>
 #include <string>
 
 namespace Wheatear
@@ -47,6 +50,29 @@ namespace Wheatear
             return false;
         }
 
+        static bool IsProjectHealthCommand(ApplicationCommandLineArgs args)
+        {
+            for (int i = 1; i < args.Count; ++i)
+            {
+                const std::string argument = args[i];
+                if (argument == "--health" || argument == "--project-health")
+                    return true;
+            }
+            return false;
+        }
+
+        static std::filesystem::path ReadStartupScene(ApplicationCommandLineArgs args)
+        {
+            for (int i = 1; i < args.Count; ++i)
+            {
+                const std::string argument = args[i];
+                if ((argument == "--startup" || argument == "--startup-scene") && i + 1 < args.Count)
+                    return args[i + 1];
+            }
+
+            return EngineInfo::DefaultStartupScene;
+        }
+
         static std::filesystem::path ReadPackageStartupScene(ApplicationCommandLineArgs args)
         {
             for (int i = 1; i < args.Count; ++i)
@@ -71,6 +97,70 @@ namespace Wheatear
             }
 
             return false;
+        }
+
+        static bool ReadIncludeUnusedAssets(ApplicationCommandLineArgs args)
+        {
+            for (int i = 1; i < args.Count; ++i)
+            {
+                const std::string argument = args[i];
+                if (argument == "--unused" || argument == "--include-unused")
+                    return true;
+                if (argument == "--no-unused")
+                    return false;
+            }
+
+            return false;
+        }
+
+        static int RunProjectHealth(ApplicationCommandLineArgs args)
+        {
+            AssetDependencyScanOptions options;
+            options.ProjectRoot = AssetPath::GetProjectRoot();
+            options.StartupAsset = ReadStartupScene(args);
+            options.EnableScripts = ReadPackageEnableScripts(args);
+            options.IncludeBuiltinAssets = true;
+            options.IncludeUnusedAssets = ReadIncludeUnusedAssets(args);
+
+            const AssetDependencyReport dependencyReport = AssetDependencyScanner::BuildReport(options);
+            const ProjectSourceReport sourceReport = ProjectSourceScanner::BuildReport(options.ProjectRoot);
+            AssetRegistry::Get().Scan(options.ProjectRoot);
+            const bool registryWritten = AssetRegistry::Get().WriteRegistry();
+
+            const size_t sourceSyncIssues = sourceReport.MissingFromProject.size()
+                + sourceReport.StaleProjectEntries.size();
+            const size_t blockingIssues = dependencyReport.MissingReferences.size()
+                + dependencyReport.MissingSceneTransitions.size()
+                + sourceSyncIssues
+                + (registryWritten ? 0 : 1);
+
+            WT_CORE_INFO("Project health startup '{}'", options.StartupAsset.string());
+            WT_CORE_INFO("Project health included assets: {}", dependencyReport.IncludedAssets.size());
+            WT_CORE_INFO("Project health parsed text assets: {}", dependencyReport.ParsedTextAssets.size());
+            WT_CORE_INFO("Project health missing references: {}", dependencyReport.MissingReferences.size());
+            WT_CORE_INFO("Project health missing scene transitions: {}", dependencyReport.MissingSceneTransitions.size());
+            WT_CORE_INFO("Project health source sync issues: {}", sourceSyncIssues);
+            WT_CORE_INFO("Project health registry write: {}", registryWritten ? "ok" : "failed");
+
+            for (const AssetReferenceRecord& record : dependencyReport.MissingReferences)
+                WT_CORE_ERROR("Missing asset reference: '{}' from '{}'", record.Reference, record.SourceAsset);
+            for (const AssetReferenceRecord& record : dependencyReport.MissingSceneTransitions)
+                WT_CORE_ERROR("Missing scene transition: '{}' from '{}'", record.Reference, record.SourceAsset);
+            for (const std::string& warning : dependencyReport.Warnings)
+                WT_CORE_WARN("Project health warning: {}", warning);
+            for (const ProjectSourceRecord& source : sourceReport.MissingFromProject)
+                WT_CORE_ERROR("Source file missing from project: '{}' ({})", source.File.string(), source.ProjectName);
+            for (const ProjectSourceRecord& source : sourceReport.StaleProjectEntries)
+                WT_CORE_ERROR("Stale project entry: '{}' ({})", source.File.string(), source.ProjectName);
+
+            if (blockingIssues == 0)
+            {
+                WT_CORE_INFO("Project health passed.");
+                return 0;
+            }
+
+            WT_CORE_ERROR("Project health failed with {} blocking issue(s).", blockingIssues);
+            return 1;
         }
 
     } // namespace
@@ -132,6 +222,9 @@ namespace Wheatear
 
     Application* CreateApplication(ApplicationCommandLineArgs args)
     {
+        if (IsProjectHealthCommand(args))
+            std::exit(RunProjectHealth(args));
+
         return new WheatearEditor(args);
     }
 

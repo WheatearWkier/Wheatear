@@ -2,6 +2,7 @@
 #include "SideCombatPickupService.h"
 
 #include "SideCombatMath.h"
+#include "Wheatear/Core/AssetAliasRegistry.h"
 #include "Wheatear/Modules/Common/GameplayVisualService.h"
 #include "Wheatear/Modules/Progression/GameProgress.h"
 #include "Wheatear/Renderer/Texture.h"
@@ -56,17 +57,17 @@ namespace Wheatear::SideCombatPickupService {
             CreatePickup(scene, "Drop_MagicCore",
                 transform.Translation + glm::vec3(-0.42f, 0.55f, 0.03f),
                 "MAT-MAGIC-CORE-T0", "魔核碎片", 1,
-                "assets/vertical_slice/side_combat/ui/icon_drop_magic_core.png",
+                AssetAliasRegistry::Path("side.drop.magic_core"),
                 pickupTuning);
             CreatePickup(scene, "Drop_BeastSinew",
                 transform.Translation + glm::vec3(0.0f, 0.72f, 0.03f),
                 "MAT-BEAST-SINEW", "兽筋", 2,
-                "assets/vertical_slice/side_combat/ui/icon_drop_beast_sinew.png",
+                AssetAliasRegistry::Path("side.drop.beast_sinew"),
                 pickupTuning);
             CreatePickup(scene, "Drop_BeastClaw",
                 transform.Translation + glm::vec3(0.42f, 0.55f, 0.03f),
                 "MAT-BEAST-CLAW", "熊爪", 1,
-                "assets/vertical_slice/side_combat/ui/icon_drop_beast_claw.png",
+                AssetAliasRegistry::Path("side.drop.beast_claw"),
                 pickupTuning);
             return;
         }
@@ -74,7 +75,7 @@ namespace Wheatear::SideCombatPickupService {
         CreatePickup(scene, "Drop_BeastSinew",
             transform.Translation + glm::vec3(0.0f, 0.45f, 0.03f),
             "MAT-BEAST-SINEW", "兽筋", 1,
-            "assets/vertical_slice/side_combat/ui/icon_drop_beast_sinew.png",
+            AssetAliasRegistry::Path("side.drop.beast_sinew"),
             pickupTuning);
     }
 

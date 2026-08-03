@@ -79,6 +79,7 @@ namespace Wheatear {
         {
             EditorToolRegistry::Register({
                 "Project Health",
+                EditorToolCategory::Diagnostics,
                 [](const EditorToolContext& context)
                 {
                     GetProjectHealthPanel().Open(context);
@@ -91,6 +92,7 @@ namespace Wheatear {
 
             EditorToolRegistry::Register({
                 "WAO Action Debugger",
+                EditorToolCategory::Gameplay,
                 [](const EditorToolContext& context)
                 {
                     GetWAOActionEditorPanel().Open(context);
@@ -103,6 +105,7 @@ namespace Wheatear {
 
             EditorToolRegistry::Register({
                 "VN Script Editor",
+                EditorToolCategory::Gameplay,
                 [](const EditorToolContext& context)
                 {
                     std::string scriptPath = "assets/vn/vertical_slice_intro.vn";
@@ -119,9 +122,10 @@ namespace Wheatear {
 
             EditorToolRegistry::Register({
                 "Side Combat Tuning Editor",
+                EditorToolCategory::Gameplay,
                 [](const EditorToolContext& context)
                 {
-                    std::string tuningPath = "assets/vertical_slice/data/side_combat_tuning.yaml";
+                    std::string tuningPath = "side.tuning";
                     if (context.SelectedEntity && context.SelectedEntity.HasComponent<SideCombatLevelComponent>())
                         tuningPath = context.SelectedEntity.GetComponent<SideCombatLevelComponent>().TuningPath;
 

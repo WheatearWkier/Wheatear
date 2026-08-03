@@ -50,7 +50,7 @@ Entities:
       Scale: [1, 1, 1]
     SpriteRendererComponent:
       Color: [1, 1, 1, 1]
-      Texture: assets/demo_platformer/characters/protag_platformer_idle_01.png
+      Texture: assets/archive/non_sandbox_demos/demo_platformer/characters/protag_platformer_idle_01.png
       TilingFactor: 1
     SpriteAnimatorComponent:
       DefaultClip: idle
@@ -59,11 +59,11 @@ Entities:
         - Name: idle
           Looping: true
           Frames:
-            - Texture: assets/demo_platformer/characters/protag_platformer_idle_01.png
+            - Texture: assets/archive/non_sandbox_demos/demo_platformer/characters/protag_platformer_idle_01.png
               UVMin: [0, 0]
               UVMax: [1, 1]
               Duration: 0.300000012
-            - Texture: assets/demo_platformer/characters/protag_platformer_idle_02.png
+            - Texture: assets/archive/non_sandbox_demos/demo_platformer/characters/protag_platformer_idle_02.png
               UVMin: [0, 0]
               UVMax: [1, 1]
               Duration: 0.300000012
@@ -72,19 +72,19 @@ Entities:
         - Name: jump
           Looping: false
           Frames:
-            - Texture: assets/demo_platformer/characters/protag_platformer_jump_01.png
+            - Texture: assets/archive/non_sandbox_demos/demo_platformer/characters/protag_platformer_jump_01.png
               UVMin: [0, 0]
               UVMax: [1, 1]
               Duration: 0.100000001
-            - Texture: assets/demo_platformer/characters/protag_platformer_jump_02.png
+            - Texture: assets/archive/non_sandbox_demos/demo_platformer/characters/protag_platformer_jump_02.png
               UVMin: [0, 0]
               UVMax: [1, 1]
               Duration: 0.100000001
-            - Texture: assets/demo_platformer/characters/protag_platformer_jump_03.png
+            - Texture: assets/archive/non_sandbox_demos/demo_platformer/characters/protag_platformer_jump_03.png
               UVMin: [0, 0]
               UVMax: [1, 1]
               Duration: 0.100000001
-            - Texture: assets/demo_platformer/characters/protag_platformer_jump_04.png
+            - Texture: assets/archive/non_sandbox_demos/demo_platformer/characters/protag_platformer_jump_04.png
               UVMin: [0, 0]
               UVMax: [1, 1]
               Duration: 0.100000001
@@ -93,19 +93,19 @@ Entities:
         - Name: fall
           Looping: false
           Frames:
-            - Texture: assets/demo_platformer/characters/protag_platformer_fall_01.png
+            - Texture: assets/archive/non_sandbox_demos/demo_platformer/characters/protag_platformer_fall_01.png
               UVMin: [0, 0]
               UVMax: [1, 1]
               Duration: 0.100000001
-            - Texture: assets/demo_platformer/characters/protag_platformer_fall_02.png
+            - Texture: assets/archive/non_sandbox_demos/demo_platformer/characters/protag_platformer_fall_02.png
               UVMin: [0, 0]
               UVMax: [1, 1]
               Duration: 0.100000001
-            - Texture: assets/demo_platformer/characters/protag_platformer_fall_03.png
+            - Texture: assets/archive/non_sandbox_demos/demo_platformer/characters/protag_platformer_fall_03.png
               UVMin: [0, 0]
               UVMax: [1, 1]
               Duration: 0.100000001
-            - Texture: assets/demo_platformer/characters/protag_platformer_fall_04.png
+            - Texture: assets/archive/non_sandbox_demos/demo_platformer/characters/protag_platformer_fall_04.png
               UVMin: [0, 0]
               UVMax: [1, 1]
               Duration: 0.100000001
@@ -114,11 +114,11 @@ Entities:
         - Name: run
           Looping: true
           Frames:
-            - Texture: assets/demo_platformer/characters/protag_platformer_run_01.png
+            - Texture: assets/archive/non_sandbox_demos/demo_platformer/characters/protag_platformer_run_01.png
               UVMin: [0, 0]
               UVMax: [1, 1]
               Duration: 0.200000003
-            - Texture: assets/demo_platformer/characters/protag_platformer_run_02.png
+            - Texture: assets/archive/non_sandbox_demos/demo_platformer/characters/protag_platformer_run_02.png
               UVMin: [0, 0]
               UVMax: [1, 1]
               Duration: 0.200000003
@@ -169,7 +169,7 @@ Entities:
       Scale: [1, 1, 1]
     SpriteRendererComponent:
       Color: [1, 1, 1, 1]
-      Texture: assets/demo_platformer/effects/vfx_explosion_boom_01.png
+      Texture: assets/archive/non_sandbox_demos/demo_platformer/effects/vfx_explosion_boom_01.png
       TilingFactor: 1
     SpriteAnimatorComponent:
       DefaultClip: ""
@@ -178,11 +178,11 @@ Entities:
         - Name: boom
           Looping: false
           Frames:
-            - Texture: assets/demo_platformer/effects/vfx_explosion_boom_01.png
+            - Texture: assets/archive/non_sandbox_demos/demo_platformer/effects/vfx_explosion_boom_01.png
               UVMin: [0, 0]
               UVMax: [1, 1]
               Duration: 0.5
-            - Texture: assets/demo_platformer/effects/vfx_explosion_boom_05.png
+            - Texture: assets/archive/non_sandbox_demos/demo_platformer/effects/vfx_explosion_boom_05.png
               UVMin: [0, 0]
               UVMax: [1, 1]
               Duration: 0.300000012
@@ -225,5 +225,5 @@ Entities:
       Scale: [20, 10, 1]
     SpriteRendererComponent:
       Color: [1, 1, 1, 1]
-      Texture: assets/placeholders/backgrounds/bg_placeholder_action_splash.png
+      Texture: assets/archive/non_sandbox_demos/placeholders/backgrounds/bg_placeholder_action_splash.png
       TilingFactor: 1

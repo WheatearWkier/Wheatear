@@ -152,8 +152,8 @@ namespace Wheatear::SideCombatTuningService {
     struct SideFeedbackTuning
     {
         float HitPauseTimeScale = 0.12f;
-        std::string JumpSound = "assets/vertical_slice/side_combat/audio/jump.wav";
-        std::string LandSound = "assets/vertical_slice/side_combat/audio/land.wav";
+        std::string JumpSound = "side.audio.jump";
+        std::string LandSound = "side.audio.land";
         float JumpSoundVolume = 0.55f;
         float LandSoundVolume = 0.58f;
     };

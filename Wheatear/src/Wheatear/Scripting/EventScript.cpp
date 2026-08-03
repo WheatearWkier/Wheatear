@@ -59,9 +59,9 @@ namespace Wheatear {
     EventScript EventScript::FromFile(const std::filesystem::path& filepath)
     {
         EventScript script;
-        script.m_SourcePath = filepath.generic_string();
+        const std::filesystem::path resolved = AssetPath::ResolveRuntimeData(filepath);
+        script.m_SourcePath = resolved.generic_string();
 
-        const std::filesystem::path resolved = AssetPath::Resolve(filepath);
         std::ifstream input(resolved, std::ios::binary);
         if (!input)
         {

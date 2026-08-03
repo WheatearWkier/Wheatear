@@ -7,6 +7,8 @@
 #include "Panels/SceneHierarchyPanel.h"
 #include "Panels/SpriteSheetPickerPanel.h"
 
+#include <ImGuizmo.h>
+
 namespace Wheatear {
 
 
@@ -18,7 +20,10 @@ namespace Wheatear {
         , m_ContentBrowserPanel(std::make_unique<ContentBrowserPanel>())
         , m_AnimationEditorPanel(std::make_unique<AnimationEditorPanel>())
         , m_SpriteSheetPickerPanel(std::make_unique<SpriteSheetPickerPanel>())
+        , m_GizmoType(ImGuizmo::OPERATION::TRANSLATE)
     {
+        m_SceneHierarchyPanel->SetEntityActivatedCallback(
+            [this](Entity entity) { ActivateHierarchyEntity(entity); });
     }
 
     EditorLayerBase::~EditorLayerBase() = default;

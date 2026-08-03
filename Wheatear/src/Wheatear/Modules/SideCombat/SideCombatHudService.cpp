@@ -2,6 +2,7 @@
 #include "SideCombatHudService.h"
 
 #include "SideCombatTuningService.h"
+#include "Wheatear/Core/AssetAliasRegistry.h"
 #include "Wheatear/Modules/Common/GameplayTextService.h"
 #include "Wheatear/Scene/Components.h"
 #include "Wheatear/Scene/Scene.h"
@@ -28,11 +29,11 @@ namespace Wheatear::SideCombatHudService {
 
         struct CombatItemSlot
         {
-            const char* Key;
-            const char* Shortcut;
-            const char* IconPath;
-            const char* DisplayName;
-            const char* Usage;
+            std::string Key;
+            std::string Shortcut;
+            std::string IconPath;
+            std::string DisplayName;
+            std::string Usage;
         };
 
         static std::string FormatFloat(float value, int precision = 0)
@@ -169,19 +170,19 @@ namespace Wheatear::SideCombatHudService {
                 CombatItemSlot{
                     "1",
                     "1",
-                    "assets/vertical_slice/side_combat/ui/items/icon_item_heal_potion.png",
+                    AssetAliasRegistry::Path("side.skill.hud.heal_potion"),
                     "治疗药水",
                     "恢复生命。正式消耗品系统完成前的占位道具。" },
                 CombatItemSlot{
                     "2",
                     "2",
-                    "assets/vertical_slice/side_combat/ui/items/icon_item_focus_vial.png",
+                    AssetAliasRegistry::Path("side.skill.hud.focus_vial"),
                     "专注药剂",
                     "正式道具体系中用于提升魔剑槽恢复效率。" },
                 CombatItemSlot{
                     "3",
                     "3",
-                    "assets/vertical_slice/side_combat/ui/items/icon_item_burst_bomb.png",
+                    AssetAliasRegistry::Path("side.skill.hud.burst_bomb"),
                     "破阵爆弹",
                     "正式道具体系中用于打断附近小怪。" }
             };

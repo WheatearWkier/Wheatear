@@ -1,13 +1,12 @@
 #include "wtpch.h"
 #include "SideCombatEnemyAIService.h"
 
-#include "SideCombatActionCatalog.h"
 #include "SideCombatActionService.h"
 #include "SideCombatHitboxService.h"
 #include "SideCombatHitResolutionService.h"
 #include "SideCombatMath.h"
 #include "SideCombatTuningService.h"
-#include "Wheatear/Gameplay/Action/ActionDatabase.h"
+#include "Wheatear/Gameplay/Action/ActionRecipeQueries.h"
 #include "Wheatear/Scene/Components.h"
 #include "Wheatear/Scene/Scene.h"
 
@@ -28,48 +27,9 @@ namespace Wheatear::SideCombatEnemyAIService {
         using SideCombatTuningService::GetAttack;
         using SideCombatTuningService::GetTuning;
 
-        static void ApplyAuthoringRecipeFields(WAO::ActionRecipe& recipe,
-            const WAO::ActionRecipe* authored)
+        static std::string ActionRecipeId(const std::string& attackId)
         {
-            if (!authored)
-                return;
-
-            if (!authored->DisplayName.empty())
-                recipe.DisplayName = authored->DisplayName;
-            if (!authored->Description.empty())
-                recipe.Description = authored->Description;
-            if (!authored->IconPath.empty())
-                recipe.IconPath = authored->IconPath;
-            if (!authored->AnimationId.empty())
-                recipe.AnimationId = authored->AnimationId;
-            if (!authored->SoundPath.empty())
-                recipe.SoundPath = authored->SoundPath;
-            if (!authored->EffectPath.empty())
-                recipe.EffectPath = authored->EffectPath;
-            if (!authored->Tags.empty())
-                recipe.Tags = authored->Tags;
-            if (!authored->Signals.empty())
-                recipe.Signals = authored->Signals;
-        }
-
-        static WAO::ActionRecipe RegisterEnemyRecipe(const std::string& attackId,
-            const SideCombatTuningService::SideAttackTuning& attack,
-            SideAttackKind kind,
-            const std::string& displayName,
-            const std::string& description,
-            float cooldown)
-        {
-            const std::string recipeId = SideCombatActionCatalog::ActionRecipeId(attackId);
-            const WAO::ActionRecipe* authored = WAO::ActionDatabase::Find(recipeId);
-            WAO::ActionRecipe recipe = SideCombatActionCatalog::BuildActionRecipe(attackId,
-                attack,
-                kind,
-                displayName,
-                description,
-                cooldown);
-            ApplyAuthoringRecipeFields(recipe, authored);
-            WAO::ActionDatabase::Register(recipe);
-            return recipe;
+            return WAO::ComposeActionId("side", attackId);
         }
 
         static void UpdateEnemyAction(Scene* scene,
@@ -156,49 +116,29 @@ namespace Wheatear::SideCombatEnemyAIService {
                 if (lowHealth && distance > tuning.Enemy.BearBossChargeDistance)
                 {
                     const auto& attack = GetAttack(tuning, "bear_charge");
-                    const WAO::ActionRecipe recipe = RegisterEnemyRecipe("bear_charge",
-                        attack,
-                        SideAttackKind::EnemyMelee,
-                        "Bear Charge",
-                        "Boss charge action.",
-                        ai.RuntimeAttackTimer);
-                    BeginEnemyAction(ai, attack, "bear_charge", recipe.Id, "Side_BearCharge", SideAttackKind::EnemyMelee, facing);
+                    const std::string recipeId = ActionRecipeId("bear_charge");
+                    BeginEnemyAction(ai, attack, "bear_charge", recipeId, "Side_BearCharge", SideAttackKind::EnemyMelee, facing);
                     return;
                 }
 
                 if (midHealth && distance > tuning.Enemy.BearBossShockwaveDistance)
                 {
                     const auto& attack = GetAttack(tuning, "bear_shockwave");
-                    const WAO::ActionRecipe recipe = RegisterEnemyRecipe("bear_shockwave",
-                        attack,
-                        SideAttackKind::EnemyShockwave,
-                        "Bear Shockwave",
-                        "Boss ranged shockwave action.",
-                        ai.RuntimeAttackTimer);
-                    BeginEnemyAction(ai, attack, "bear_shockwave", recipe.Id, "Side_BearShockwave", SideAttackKind::EnemyShockwave, facing);
+                    const std::string recipeId = ActionRecipeId("bear_shockwave");
+                    BeginEnemyAction(ai, attack, "bear_shockwave", recipeId, "Side_BearShockwave", SideAttackKind::EnemyShockwave, facing);
                     return;
                 }
 
                 const auto& attack = GetAttack(tuning, "enemy_claw");
-                const WAO::ActionRecipe recipe = RegisterEnemyRecipe("enemy_claw",
-                    attack,
-                    SideAttackKind::EnemyMelee,
-                    "Bear Claw",
-                    "Boss close-range claw action.",
-                    ai.RuntimeAttackTimer);
-                BeginEnemyAction(ai, attack, "enemy_claw", recipe.Id, "Side_BearClaw", SideAttackKind::EnemyMelee, facing);
+                const std::string recipeId = ActionRecipeId("enemy_claw");
+                BeginEnemyAction(ai, attack, "enemy_claw", recipeId, "Side_BearClaw", SideAttackKind::EnemyMelee, facing);
                 return;
             }
 
             ai.RuntimeAttackTimer = ai.AttackInterval;
             const auto& attack = GetAttack(tuning, "enemy_claw");
-            const WAO::ActionRecipe recipe = RegisterEnemyRecipe("enemy_claw",
-                attack,
-                SideAttackKind::EnemyMelee,
-                "Enemy Claw",
-                "Basic enemy melee action.",
-                ai.RuntimeAttackTimer);
-            BeginEnemyAction(ai, attack, "enemy_claw", recipe.Id, "Side_EnemyClaw", SideAttackKind::EnemyMelee, facing);
+            const std::string recipeId = ActionRecipeId("enemy_claw");
+            BeginEnemyAction(ai, attack, "enemy_claw", recipeId, "Side_EnemyClaw", SideAttackKind::EnemyMelee, facing);
         }
 
     } // namespace

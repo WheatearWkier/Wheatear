@@ -33,6 +33,7 @@ namespace Wheatear {
 
         static bool IsNativeCommand(const std::string& command);
         static CommandResult Execute(Scene* scene, const std::string& command);
+        static void ClearQueuedCommands();
 
         static void QueueRuntimeCommand(const std::string& command);
         static std::vector<std::string> DrainRuntimeCommands();

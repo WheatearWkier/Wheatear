@@ -19,6 +19,7 @@ namespace Wheatear {
         static std::filesystem::path GetResourceRoot();
 
         static std::filesystem::path Resolve(const std::filesystem::path& path);
+        static std::filesystem::path ResolveRuntimeData(const std::filesystem::path& path);
         static std::filesystem::path ResolveAsset(const std::filesystem::path& path);
         static std::filesystem::path ResolveResource(const std::filesystem::path& path);
 

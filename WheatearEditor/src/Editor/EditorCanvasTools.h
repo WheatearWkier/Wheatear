@@ -12,8 +12,6 @@ namespace Wheatear::EditorCanvasTools {
     struct CanvasToolCallbacks
     {
         std::function<void(Entity)> OpenCanvasEditor;
-        std::function<bool()> IsSceneViewportUIHidden;
-        std::function<void(bool)> SetSceneViewportUIHidden;
     };
 
     inline CanvasToolCallbacks& Callbacks()
@@ -43,13 +41,6 @@ namespace Wheatear::EditorCanvasTools {
 
         if (ImGui::Button("Edit Canvas"))
             callbacks.OpenCanvasEditor(canvasEntity);
-
-        if (callbacks.IsSceneViewportUIHidden && callbacks.SetSceneViewportUIHidden)
-        {
-            bool hidden = callbacks.IsSceneViewportUIHidden();
-            if (ImGui::Checkbox("Hide UI In Scene Viewport", &hidden))
-                callbacks.SetSceneViewportUIHidden(hidden);
-        }
     }
 
 } // namespace Wheatear::EditorCanvasTools

@@ -30,12 +30,12 @@ namespace Wheatear::TurnCombatSkillService {
 
     struct TurnSkillDefinition
     {
-        const char* Id = "";
-        const char* DisplayName = "";
-        const char* Description = "";
-        const char* IconPath = "";
-        const char* SoundPath = "";
-        const char* EffectPath = "";
+        std::string Id;
+        std::string DisplayName;
+        std::string Description;
+        std::string IconPath;
+        std::string SoundPath;
+        std::string EffectPath;
         TurnTargetRule TargetRule = TurnTargetRule::EnemySingle;
         float ManaCost = 0.0f;
         float Power = 1.0f;

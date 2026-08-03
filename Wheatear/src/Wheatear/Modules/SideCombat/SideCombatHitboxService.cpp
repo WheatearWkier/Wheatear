@@ -4,6 +4,7 @@
 #include "SideCombatComboService.h"
 #include "SideCombatFeedbackService.h"
 #include "SideCombatHitResolutionService.h"
+#include "Wheatear/Core/AssetAliasRegistry.h"
 #include "Wheatear/Modules/Common/GameplayTextService.h"
 #include "Wheatear/Modules/Common/GameplayVisualService.h"
 #include "Wheatear/Renderer/Texture.h"
@@ -22,28 +23,28 @@ namespace Wheatear::SideCombatHitboxService {
             return GameplayTextService::FormatFramePath(pattern, frame);
         }
 
-        static const char* ResolveAttackTexture(SideAttackKind kind, int team)
+        static std::string ResolveAttackTexture(SideAttackKind kind, int team)
         {
             if (team == (int)SideCombatTeam::Enemy)
             {
                 if (kind == SideAttackKind::EnemyProjectile || kind == SideAttackKind::EnemyShockwave)
-                    return "assets/vertical_slice/side_combat/effects/vfx_enemy_projectile.png";
-                return "assets/vertical_slice/side_combat/effects/vfx_enemy_claw.png";
+                    return AssetAliasRegistry::Path("side.vfx.enemy_projectile");
+                return AssetAliasRegistry::Path("side.vfx.enemy_claw");
             }
 
             switch (kind)
             {
             case SideAttackKind::Launcher:
-                return "assets/vertical_slice/side_combat/effects/vfx_launcher_slash.png";
+                return AssetAliasRegistry::Path("side.vfx.launcher_slash");
             case SideAttackKind::MagicBolt:
-                return "assets/vertical_slice/side_combat/effects/vfx_magic_bolt.png";
+                return AssetAliasRegistry::Path("side.vfx.magic_bolt");
             case SideAttackKind::AllySupport:
-                return "assets/vertical_slice/side_combat/effects/vfx_ally_support.png";
+                return AssetAliasRegistry::Path("side.vfx.ally_support");
             case SideAttackKind::BreakLimit:
-                return "assets/vertical_slice/side_combat/effects/vfx_ally_support.png";
+                return AssetAliasRegistry::Path("side.vfx.ally_support");
             case SideAttackKind::Basic:
             default:
-                return "assets/vertical_slice/side_combat/effects/vfx_basic_slash.png";
+                return AssetAliasRegistry::Path("side.vfx.basic_slash");
             }
         }
 

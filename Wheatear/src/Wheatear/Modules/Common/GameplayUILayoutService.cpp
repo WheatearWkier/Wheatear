@@ -1,6 +1,7 @@
 #include "wtpch.h"
 #include "GameplayUILayoutService.h"
 
+#include "Wheatear/Core/AssetAliasRegistry.h"
 #include "Wheatear/Scene/Components.h"
 #include "Wheatear/Scene/Scene.h"
 #include "Wheatear/Scene/SceneQueries.h"
@@ -156,7 +157,7 @@ namespace Wheatear::GameplayUILayoutService {
         text.Text = value;
         text.FontSize = fontSize;
         text.Color = color;
-        text.FontPath = "assets/fonts/wqy-microhei.ttc";
+        text.FontPath = AssetAliasRegistry::Path("font.ui_default", "assets/fonts/wqy-microhei.ttc");
         text.ShadowColor = { 0.01f, 0.015f, 0.018f, 0.80f };
         text.ShadowOffset = { 1.6f, 1.6f };
         text.OutlineColor = { 0.0f, 0.0f, 0.0f, 0.86f };

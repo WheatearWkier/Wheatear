@@ -14,9 +14,19 @@ namespace Wheatear {
         Entity SelectedEntity;
     };
 
+    enum class EditorToolCategory
+    {
+        Gameplay = 0,
+        UI,
+        Assets,
+        Diagnostics,
+        Window
+    };
+
     struct EditorToolDescriptor
     {
         std::string MenuLabel;
+        EditorToolCategory Category = EditorToolCategory::Gameplay;
         std::function<void(const EditorToolContext&)> Open;
         std::function<void()> Draw;
     };

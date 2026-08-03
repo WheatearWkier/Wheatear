@@ -5,6 +5,7 @@
 #include "TacticalCombatBoardService.h"
 #include "TacticalCombatFeedbackService.h"
 #include "TacticalCombatSkillService.h"
+#include "Wheatear/Core/AssetAliasRegistry.h"
 
 #include <vector>
 
@@ -64,7 +65,7 @@ namespace Wheatear::TacticalCombatAIService {
                     scene, level, enemyUnit, targetUnit))
             {
                 TacticalCombatFeedbackService::PlaySound(
-                    "assets/vertical_slice/tactical_combat/audio/tac_move.wav", 0.38f);
+                    AssetAliasRegistry::Path("tactical.audio.move"), 0.38f);
             }
             level.RuntimeMessage = enemyUnit.DisplayName + " 正在接近。";
             level.RuntimeEnemyCursor += 1;

@@ -2,6 +2,8 @@
 #include "ProjectHealthPanel.h"
 
 #include "Assets/AssetRegistry.h"
+#include "Editor/EditorFloatingWindow.h"
+#include "Editor/EditorWidgets.h"
 #include "Wheatear/Core/AssetPath.h"
 #include "Wheatear/Core/EngineInfo.h"
 
@@ -9,7 +11,6 @@
 
 #include <array>
 #include <algorithm>
-#include <cstring>
 #include <iomanip>
 #include <sstream>
 #include <vector>
@@ -17,18 +18,6 @@
 namespace Wheatear {
 
     namespace {
-
-        static bool InputString(const char* label, std::string& value, size_t capacity)
-        {
-            std::vector<char> buffer(capacity, 0);
-            strncpy_s(buffer.data(), buffer.size(), value.c_str(), _TRUNCATE);
-            if (ImGui::InputText(label, buffer.data(), buffer.size()))
-            {
-                value = buffer.data();
-                return true;
-            }
-            return false;
-        }
 
         static std::string FormatBytes(uintmax_t bytes)
         {
@@ -94,14 +83,29 @@ namespace Wheatear {
         if (!m_Open)
             return;
 
-        if (!ImGui::Begin("Project Health", &m_Open))
+        if (!EditorFloatingWindow::Begin("Project Health", &m_Open, 0, { 1120.0f, 720.0f }))
         {
-            ImGui::End();
+            EditorFloatingWindow::End();
             return;
         }
 
-        ImGui::TextWrapped("Project-wide validation for package dependencies, missing references, and unused assets.");
-        InputString("Startup Scene", m_StartupScene, 384);
+        const size_t issueCount = m_Report.MissingReferences.size()
+            + m_Report.MissingSceneTransitions.size()
+            + m_SourceReport.MissingFromProject.size()
+            + m_SourceReport.StaleProjectEntries.size();
+        EditorWidgets::PanelHeader("Project Health", "Package dependency, scene transition, registry, and source/project sync validation.");
+        EditorWidgets::StatusBadge(issueCount == 0 ? "Ready" : "Needs Attention",
+            issueCount == 0 ? EditorWidgets::StatusKind::Success : EditorWidgets::StatusKind::Error);
+        ImGui::SameLine();
+        EditorWidgets::StatusBadge((std::to_string(m_Report.IncludedAssets.size()) + " packed assets").c_str(), EditorWidgets::StatusKind::Info);
+        ImGui::SameLine();
+        EditorWidgets::StatusBadge((std::to_string(m_Report.Warnings.size()) + " warning(s)").c_str(),
+            m_Report.Warnings.empty() ? EditorWidgets::StatusKind::Neutral : EditorWidgets::StatusKind::Warning);
+        ImGui::SameLine();
+        EditorFloatingWindow::DrawToggleButton("Project Health");
+
+        EditorWidgets::SectionHeader("Scan Scope", "The startup scene defines the package dependency closure.");
+        EditorWidgets::InputString("Startup Scene", m_StartupScene, 384);
         ImGui::Checkbox("Enable C# Script Assets", &m_EnableScripts);
         ImGui::SameLine();
         ImGui::Checkbox("Scan Unused Assets", &m_IncludeUnusedAssets);
@@ -109,9 +113,9 @@ namespace Wheatear {
         if (ImGui::Button("Refresh"))
             Refresh();
         ImGui::SameLine();
-        ImGui::TextDisabled("%s", m_Status.c_str());
+        EditorWidgets::InlineStatus(m_Status, issueCount == 0 ? EditorWidgets::StatusKind::Success : EditorWidgets::StatusKind::Warning);
 
-        ImGui::Separator();
+        EditorWidgets::SectionHeader("Summary");
         DrawSummary();
         ImGui::Separator();
 
@@ -151,7 +155,7 @@ namespace Wheatear {
             {
                 if (m_Report.Warnings.empty())
                 {
-                    ImGui::TextDisabled("No warnings.");
+                    EditorWidgets::EmptyState("No warnings.", "The current scan did not find legacy commands or package risk notes.");
                 }
                 else
                 {
@@ -168,7 +172,7 @@ namespace Wheatear {
             ImGui::EndTabBar();
         }
 
-        ImGui::End();
+        EditorFloatingWindow::End();
     }
 
     void ProjectHealthPanel::DrawSummary() const
@@ -235,7 +239,7 @@ namespace Wheatear {
     {
         if (m_Report.MissingReferences.empty())
         {
-            ImGui::TextDisabled("No missing asset references found.");
+            EditorWidgets::EmptyState("No missing asset references found.", "All scanned scene, YAML, script, and manifest references resolve.");
             return;
         }
 
@@ -288,7 +292,7 @@ namespace Wheatear {
 
         if (m_Report.SceneTransitions.empty())
         {
-            ImGui::TextDisabled("No scene transition commands found in parsed text assets.");
+            EditorWidgets::EmptyState("No scene transition commands found.", "Parsed text assets did not declare scene/newgame/loadgame targets.");
             return;
         }
 

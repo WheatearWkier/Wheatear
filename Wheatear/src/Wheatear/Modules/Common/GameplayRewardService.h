@@ -11,7 +11,7 @@ namespace Wheatear::GameplayRewardService {
         const char* Key = "";
         const char* ItemId = "";
         const char* DisplayName = "";
-        const char* IconPath = "";
+        std::string IconPath;
         const char* Usage = "";
     };
 

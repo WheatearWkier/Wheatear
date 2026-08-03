@@ -36,6 +36,8 @@ namespace Wheatear {
             bool ShowHistory = false;
             bool ShowSettings = false;
             bool ShowSaveLoad = false;
+            bool SaveLoadSaveMode = true;
+            int PendingOverwriteSlot = 0;
             bool DialogueHidden = false;
             float SystemMessageTimer = 0.0f;
             std::string SystemMessage;
@@ -50,7 +52,6 @@ namespace Wheatear {
         RuntimeState& GetState(UUID id);
         bool LoadRuntime(RuntimeState& state, const VisualNovelComponent& component);
         void UpdateInput(Scene* scene, VisualNovelComponent& component, RuntimeState& state);
-        bool ExecuteHoveredCommand(Scene* scene, VisualNovelComponent& component, RuntimeState& state);
         bool ExecuteCommand(Scene* scene, VisualNovelComponent& component, RuntimeState& state, const std::string& command);
         void UpdateSceneBindings(Scene* scene, const VisualNovelComponent& component, RuntimeState& state);
         void StopBGM(RuntimeState& state);

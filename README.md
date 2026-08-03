@@ -9,7 +9,7 @@ Wheatear/              引擎运行时、渲染、场景、模块系统、资源
 WheatearEditor/        编辑器、示例工程资源、竖切 Demo、打包工具入口
 WheatearSandbox/       独立运行时 Player / Sandbox
 Wheatear-ScriptCore/   C# 脚本桥接层
-docs/                  中文策划、系统设计、竖切实现记录
+docs/                  中文文档入口、策划案、系统设计、引擎架构和编辑器说明
 scripts/               构建脚本
 tools/                 资源生成与工程辅助工具
 vendor/                工程工具，例如 premake
@@ -18,8 +18,8 @@ Wheatear/vendor/       引擎第三方依赖
 
 ## 文档入口
 
-- [文档索引](docs/文档索引.md)：策划、系统设计、竖切和架构文档总入口。
-- [商业游戏化路线图](docs/路线/商业游戏化路线图.md)：当前主路线，先补系统完整性，再统一美术资源，最后接入音频表现。
+- [文档入口](docs/文档入口.md)：策划、系统设计、竖切、架构和编辑器手册的唯一入口。
+- [商业游戏化路线图](docs/00_总览/商业游戏化路线图.md)：当前主路线，先补系统完整性，再统一美术资源，最后接入反馈和内容扩展。
 
 ## Git 管理规则
 
@@ -28,7 +28,7 @@ Wheatear/vendor/       引擎第三方依赖
 - 提交源码、项目文件、文档、必要运行资源和竖切 Demo 资源。
 - 使用 Git LFS 管理图片、字体、音频、预编译库、可执行工具等二进制文件。
 - 不提交 `.vs/`、`bin/`、`bin-int/`、`Builds/`、缓存、日志、调试符号、打包产物。
-- 不提交当前竖切不需要的重型 3D 示例素材，例如 `WheatearEditor/assets/models/` 和 `WheatearEditor/assets/hdr/`。
+- 当前竖切不需要的示例素材统一归档到 `WheatearEditor/assets/archive/non_sandbox_demos/`，发行包默认不包含该目录。
 - `Wheatear/vendor/spdlog` 使用 Git 子模块，clone 时需要拉取 submodule。
 
 ## 克隆
@@ -77,7 +77,13 @@ bin/Debug-windows-x86_64/WheatearSandbox/WheatearSandbox.exe
 ```text
 WheatearEditor/assets/vertical_slice/
 WheatearEditor/assets/scenes/
-WheatearEditor/assets/config/side_combat_tuning.yaml
+WheatearEditor/assets/vertical_slice/data/side_combat_tuning.yaml
+```
+
+中文文档和运行时文本资产统一保存为 UTF-8。Windows PowerShell 5 读取中文文档时建议显式使用：
+
+```powershell
+Get-Content -Encoding UTF8 docs/文档入口.md
 ```
 
 ## GitHub 上传

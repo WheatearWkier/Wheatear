@@ -1,32 +1,57 @@
 actions:
   - id: tactical.sword_slash
-    displayName: Tactical Sword Slash
-    description: Adjacent single target sword action.
-    icon: assets/vertical_slice/tactical_combat/ui/icons/cmd_tac_attack.png
-    sound: assets/vertical_slice/tactical_combat/audio/tac_slash.wav
-    effect: assets/vertical_slice/tactical_combat/effects/vfx_tac_slash_{frame2}.png
+    displayName: '魔剑斩'
+    description: '近战单体斩击。'
+    icon: tactical.icon.attack
+    sound: tactical.audio.slash
+    effect: tactical.vfx.slash
     duration: 0.78
     startup: 0.16
     hitTime: 0.36
     recovery: 0.22
     tags: [Gameplay.TacticalCombat, Gameplay.Combat, Category.Attack, Target.Enemy, Range.Melee]
+    params:
+      category: Attack
+      targetRule: Enemy
+      range: 1
+      power: 1
+      healPower: 0
+      defensePierce: 0.05
+      magic: false
+      guard: false
+      effectFrameCount: 5
+      effectFrameRate: 14
     effects:
       - type: Damage
         attribute: attack
-        value: 1.00
+        value: 1
     signals: [tactical.skill.apply, tactical.skill.vfx, tactical.skill.sfx]
 
   - id: tactical.aether_lance
-    displayName: Aether Lance
-    description: Three tile magic pierce with defense down.
-    icon: assets/vertical_slice/tactical_combat/ui/icons/cmd_tac_magic.png
-    sound: assets/vertical_slice/tactical_combat/audio/tac_magic.wav
-    effect: assets/vertical_slice/tactical_combat/effects/vfx_tac_magic_{frame2}.png
+    displayName: '灵枪'
+    description: '三格射程的魔法突刺，并施加破甲。'
+    icon: tactical.icon.magic
+    sound: tactical.audio.magic
+    effect: tactical.vfx.magic
     duration: 0.96
     startup: 0.20
     hitTime: 0.48
     recovery: 0.28
-    tags: [Gameplay.TacticalCombat, Gameplay.Combat, Category.Skill, Target.Enemy, Range.Three, Element.Aether]
+    tags: [Gameplay.TacticalCombat, Gameplay.Combat, Category.Skill, Target.Enemy, Range.Three, Skill.Magic, Element.Aether]
+    params:
+      category: Skill
+      targetRule: Enemy
+      range: 3
+      power: 1.25
+      healPower: 0
+      defensePierce: 0.22
+      magic: true
+      guard: false
+      effectFrameCount: 6
+      effectFrameRate: 14
+      statusEffect: DefenseDown
+      effectTurns: 2
+      effectPower: 0.22
     effects:
       - type: Damage
         attribute: magic
@@ -39,16 +64,30 @@ actions:
     signals: [tactical.skill.apply, tactical.skill.vfx, tactical.skill.sfx]
 
   - id: tactical.white_pulse
-    displayName: White Pulse
-    description: Three tile ally heal with regeneration.
-    icon: assets/vertical_slice/tactical_combat/ui/icons/cmd_tac_heal.png
-    sound: assets/vertical_slice/tactical_combat/audio/tac_heal.wav
-    effect: assets/vertical_slice/tactical_combat/effects/vfx_tac_heal_{frame2}.png
+    displayName: '白脉'
+    description: '治疗三格内的一名我方单位，并施加再生。'
+    icon: tactical.icon.heal
+    sound: tactical.audio.heal
+    effect: tactical.vfx.heal
     duration: 0.92
     startup: 0.14
     hitTime: 0.42
     recovery: 0.24
-    tags: [Gameplay.TacticalCombat, Gameplay.Combat, Category.Skill, Category.Heal, Target.Ally, Range.Three, Element.White]
+    tags: [Gameplay.TacticalCombat, Gameplay.Combat, Category.Skill, Target.Ally, Range.Three, Skill.Magic, Skill.Heal, Element.White]
+    params:
+      category: Skill
+      targetRule: Ally
+      range: 3
+      power: 0
+      healPower: 1.05
+      defensePierce: 0
+      magic: true
+      guard: false
+      effectFrameCount: 6
+      effectFrameRate: 12
+      statusEffect: Regeneration
+      effectTurns: 2
+      effectPower: 8
     effects:
       - type: Heal
         attribute: magic
@@ -61,16 +100,30 @@ actions:
     signals: [tactical.skill.apply, tactical.skill.vfx, tactical.skill.sfx]
 
   - id: tactical.guard_wait
-    displayName: Tactical Guard
-    description: End action and guard until next turn.
-    icon: assets/vertical_slice/tactical_combat/ui/icons/cmd_tac_guard.png
-    sound: assets/vertical_slice/tactical_combat/audio/tac_guard.wav
-    effect: assets/vertical_slice/tactical_combat/effects/vfx_tac_guard_{frame2}.png
+    displayName: '守备'
+    description: '结束行动并进入防御姿态。'
+    icon: tactical.icon.guard
+    sound: tactical.audio.guard
+    effect: tactical.vfx.guard
     duration: 0.58
     startup: 0.06
     hitTime: 0.24
     recovery: 0.18
-    tags: [Gameplay.TacticalCombat, Gameplay.Combat, Category.Guard, Target.Self]
+    tags: [Gameplay.TacticalCombat, Gameplay.Combat, Category.Guard, Target.Self, Range.Melee, Skill.Guard]
+    params:
+      category: Guard
+      targetRule: Self
+      range: 0
+      power: 0
+      healPower: 0
+      defensePierce: 0
+      magic: false
+      guard: true
+      effectFrameCount: 4
+      effectFrameRate: 10
+      statusEffect: Guard
+      effectTurns: 1
+      effectPower: 0.55
     effects:
       - type: AddState
         state: guard
@@ -80,16 +133,27 @@ actions:
     signals: [tactical.skill.apply, tactical.skill.vfx, tactical.skill.sfx]
 
   - id: tactical.tactical_potion
-    displayName: Tactical Potion
-    description: Consumable three tile ally recovery.
-    icon: assets/vertical_slice/tactical_combat/ui/icons/cmd_tac_item.png
-    sound: assets/vertical_slice/tactical_combat/audio/tac_heal.wav
-    effect: assets/vertical_slice/tactical_combat/effects/vfx_tac_heal_{frame2}.png
+    displayName: '恢复药水'
+    description: '恢复三格内的一名我方单位。'
+    icon: tactical.icon.item
+    sound: tactical.audio.heal
+    effect: tactical.vfx.heal
     duration: 0.72
     startup: 0.10
     hitTime: 0.34
     recovery: 0.20
-    tags: [Gameplay.TacticalCombat, Gameplay.Combat, Category.Item, Category.Heal, Target.Ally, Range.Three]
+    tags: [Gameplay.TacticalCombat, Gameplay.Combat, Category.Item, Target.Ally, Range.Three, Skill.Heal]
+    params:
+      category: Item
+      targetRule: Ally
+      range: 3
+      power: 0
+      healPower: 0.85
+      defensePierce: 0
+      magic: false
+      guard: false
+      effectFrameCount: 6
+      effectFrameRate: 12
     effects:
       - type: Heal
         attribute: item
@@ -97,16 +161,27 @@ actions:
     signals: [tactical.skill.apply, tactical.skill.vfx, tactical.skill.sfx]
 
   - id: tactical.enemy_strike
-    displayName: Tactical Enemy Strike
-    description: Enemy adjacent melee action.
-    icon: assets/vertical_slice/tactical_combat/ui/icons/cmd_tac_enemy.png
-    sound: assets/vertical_slice/tactical_combat/audio/tac_hit.wav
-    effect: assets/vertical_slice/tactical_combat/effects/vfx_tac_slash_{frame2}.png
+    displayName: '敌方斩击'
+    description: '敌方近战攻击。'
+    icon: tactical.icon.enemy
+    sound: tactical.audio.hit
+    effect: tactical.vfx.slash
     duration: 0.72
     startup: 0.16
     hitTime: 0.34
     recovery: 0.22
-    tags: [Gameplay.TacticalCombat, Gameplay.Combat, Category.Attack, Target.Enemy, Faction.Enemy, Range.Melee]
+    tags: [Gameplay.TacticalCombat, Gameplay.Combat, Category.Attack, Target.Enemy, Range.Melee, Faction.Enemy]
+    params:
+      category: Attack
+      targetRule: Enemy
+      range: 1
+      power: 0.95
+      healPower: 0
+      defensePierce: 0
+      magic: false
+      guard: false
+      effectFrameCount: 5
+      effectFrameRate: 14
     effects:
       - type: Damage
         attribute: attack
@@ -114,16 +189,30 @@ actions:
     signals: [tactical.skill.apply, tactical.skill.vfx, tactical.skill.sfx]
 
   - id: tactical.enemy_dark
-    displayName: Tactical Enemy Dark
-    description: Enemy ranged dark magic with burn.
-    icon: assets/vertical_slice/tactical_combat/ui/icons/cmd_tac_enemy_magic.png
-    sound: assets/vertical_slice/tactical_combat/audio/tac_magic.wav
-    effect: assets/vertical_slice/tactical_combat/effects/vfx_tac_dark_{frame2}.png
+    displayName: '敌方暗术'
+    description: '敌方远程暗属性魔法，并施加燃烧。'
+    icon: tactical.icon.enemy_magic
+    sound: tactical.audio.magic
+    effect: tactical.vfx.dark
     duration: 0.90
     startup: 0.20
     hitTime: 0.46
     recovery: 0.24
-    tags: [Gameplay.TacticalCombat, Gameplay.Combat, Category.Skill, Target.Enemy, Faction.Enemy, Range.Three, Element.Dark]
+    tags: [Gameplay.TacticalCombat, Gameplay.Combat, Category.Skill, Target.Enemy, Range.Three, Skill.Magic, Faction.Enemy, Element.Dark]
+    params:
+      category: Skill
+      targetRule: Enemy
+      range: 3
+      power: 1.12
+      healPower: 0
+      defensePierce: 0.18
+      magic: true
+      guard: false
+      effectFrameCount: 6
+      effectFrameRate: 14
+      statusEffect: Burn
+      effectTurns: 2
+      effectPower: 6
     effects:
       - type: Damage
         attribute: magic

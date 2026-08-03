@@ -2,6 +2,7 @@
 #include "UIRenderer.h"
 
 #include "Wheatear/Renderer/Camera.h"
+#include "Wheatear/Core/AssetAliasRegistry.h"
 #include "Wheatear/Renderer/RenderCommand.h"
 #include "Wheatear/Renderer/Renderer2D.h"
 #include "Wheatear/Renderer/TextRenderer.h"
@@ -28,15 +29,16 @@ namespace Wheatear {
         if (fontPath.empty())
             return TextRenderer::GetDefaultFont();
 
-        auto it = s_FontCache.find(fontPath);
+        const std::string resolvedPath = AssetAliasRegistry::Resolve(fontPath);
+        auto it = s_FontCache.find(resolvedPath);
         if (it != s_FontCache.end() && it->second && it->second->IsLoaded())
             return it->second;
 
-        Ref<Font> font = Font::Create(fontPath, 96.0f, 4096, 4096);
+        Ref<Font> font = Font::Create(resolvedPath, 96.0f, 4096, 4096);
         if (!font)
             return TextRenderer::GetDefaultFont();
 
-        s_FontCache[fontPath] = font;
+        s_FontCache[resolvedPath] = font;
         return font;
     }
 
@@ -45,12 +47,13 @@ namespace Wheatear {
         if (texturePath.empty())
             return nullptr;
 
-        auto it = s_UITextureCache.find(texturePath);
+        const std::string resolvedPath = AssetAliasRegistry::Resolve(texturePath);
+        auto it = s_UITextureCache.find(resolvedPath);
         if (it != s_UITextureCache.end())
             return it->second;
 
-        Ref<Texture2D> texture = Texture2D::Create(texturePath);
-        s_UITextureCache[texturePath] = texture;
+        Ref<Texture2D> texture = Texture2D::Create(resolvedPath);
+        s_UITextureCache[resolvedPath] = texture;
         return texture;
     }
 

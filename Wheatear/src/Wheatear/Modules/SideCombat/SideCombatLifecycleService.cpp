@@ -3,6 +3,7 @@
 
 #include "SideCombatTuningService.h"
 #include "SideCombatVisualService.h"
+#include "Wheatear/Core/AssetAliasRegistry.h"
 #include "Wheatear/Modules/Common/GameplayVisualService.h"
 #include "Wheatear/Modules/Progression/GameProgress.h"
 #include "Wheatear/Scene/Components.h"
@@ -86,7 +87,7 @@ namespace Wheatear::SideCombatLifecycleService {
             auto& sprite = shadow.AddComponent<SpriteRendererComponent>();
             sprite.Color = { 0.0f, 0.0f, 0.0f, 0.0f };
             if (Ref<Texture2D> texture = GameplayVisualService::LoadTextureCached(
-                "assets/vertical_slice/side_combat/ui/blob_shadow_soft.png"))
+                AssetAliasRegistry::Path("side.ui.shadow")))
             {
                 sprite.Texture = texture;
             }
@@ -109,7 +110,7 @@ namespace Wheatear::SideCombatLifecycleService {
             auto& sprite = enemy.AddComponent<SpriteRendererComponent>();
             sprite.Color = { 1.0f, 1.0f, 1.0f, 0.0f };
             if (Ref<Texture2D> texture = GameplayVisualService::LoadTextureCached(
-                "assets/vertical_slice/side_combat/enemies/en_claw_beast_idle_01.png"))
+                AssetAliasRegistry::Path("side.enemy.idle")))
             {
                 sprite.Texture = texture;
             }

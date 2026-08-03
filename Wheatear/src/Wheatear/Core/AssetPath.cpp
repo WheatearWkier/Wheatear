@@ -68,6 +68,29 @@ namespace Wheatear {
             return candidates.empty() ? std::filesystem::path{} : candidates.front().lexically_normal();
         }
 
+        static std::filesystem::path FindLooseRuntimeData(const std::filesystem::path& path)
+        {
+            if (path.empty() || path.is_absolute() || !FirstPartEquals(path, "assets"))
+                return {};
+
+            std::error_code error;
+            std::filesystem::path cursor = std::filesystem::current_path(error);
+            while (!error && !cursor.empty())
+            {
+                const std::filesystem::path candidate = (cursor / path).lexically_normal();
+                if (std::filesystem::exists(candidate, error) && !error)
+                    return FileSystem::Normalize(candidate);
+
+                error.clear();
+                const std::filesystem::path parent = cursor.parent_path();
+                if (parent == cursor)
+                    break;
+                cursor = parent;
+            }
+
+            return {};
+        }
+
         static void EnsureInitialized()
         {
             if (s_State.Initialized)
@@ -161,6 +184,21 @@ namespace Wheatear {
         candidates.push_back(std::filesystem::current_path() / path);
 
         return FirstExistingOrFallback(candidates);
+    }
+
+    std::filesystem::path AssetPath::ResolveRuntimeData(const std::filesystem::path& path)
+    {
+        if (path.empty())
+            return {};
+
+        if (path.is_absolute())
+            return std::filesystem::exists(path) ? FileSystem::Normalize(path) : path.lexically_normal();
+
+        const std::filesystem::path loosePath = FindLooseRuntimeData(path);
+        if (!loosePath.empty())
+            return loosePath;
+
+        return Resolve(path);
     }
 
     std::filesystem::path AssetPath::ResolveAsset(const std::filesystem::path& path)

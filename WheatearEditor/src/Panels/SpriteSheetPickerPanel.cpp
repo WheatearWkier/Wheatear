@@ -2,6 +2,7 @@
 #include "SpriteSheetPickerPanel.h"
 
 #include "ContentBrowserPanel.h"
+#include "Editor/EditorFloatingWindow.h"
 #include "Wheatear/Animation/AnimationClip.h"
 #include "Wheatear/Core/AssetPath.h"
 #include "Wheatear/Renderer/Texture.h"
@@ -114,12 +115,14 @@ namespace Wheatear {
             return;
 
         ImGui::SetNextWindowSize(ImVec2(860.0f, 620.0f), ImGuiCond_FirstUseEver);
-        if (!ImGui::Begin("Sprite Sheet Picker", &m_Open))
+        if (!EditorFloatingWindow::Begin("Sprite Sheet Picker", &m_Open, 0, { 980.0f, 700.0f }))
         {
-            ImGui::End();
+            EditorFloatingWindow::End();
             return;
         }
 
+        EditorFloatingWindow::DrawToggleButton("Sprite Sheet Picker");
+        ImGui::Separator();
         DrawTargetSummary();
         ImGui::Separator();
 
@@ -143,7 +146,7 @@ namespace Wheatear {
             ImGui::TextColored(ImVec4(0.42f, 0.88f, 0.72f, 1.0f), "%s", m_LastAction.c_str());
         }
 
-        ImGui::End();
+        EditorFloatingWindow::End();
     }
 
     void SpriteSheetPickerPanel::SetTexture(const Ref<Texture2D>& texture, const std::string& texturePath)

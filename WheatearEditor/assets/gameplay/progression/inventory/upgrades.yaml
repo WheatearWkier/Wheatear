@@ -1,0 +1,26 @@
+upgrades:
+  magicSwordLv2:
+    costs:
+      - item: 'MAT-MAGIC-CORE-T0'
+        name: '魔核碎片'
+        amount: 1
+      - item: 'MAT-BEAST-SINEW'
+        name: '兽筋'
+        amount: 2
+      - item: 'MAT-BEAST-CLAW'
+        name: '熊爪'
+        amount: 1
+    attributeBonus: { ATK: 3, MATK: 3 }
+    unlockSkills:
+      - 'magic_sword_lv2'
+      - 'basic_slash_boost'
+      - 'air_chain_training'
+  travelerArmorLv1:
+    costs:
+      - item: 'MAT-BEAST-SINEW'
+        name: '兽筋'
+        amount: 1
+      - item: 'MAT-BEAST-CLAW'
+        name: '熊爪'
+        amount: 1
+    attributeBonus: { HP: 30, DEF: 2 }

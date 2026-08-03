@@ -95,7 +95,7 @@ void RuntimeSceneLayer::OnEvent(Wheatear::Event& event)
 std::filesystem::path RuntimeSceneLayer::ResolveScenePath(
     const std::filesystem::path& requestedPath) const
 {
-    return Wheatear::AssetPath::Resolve(requestedPath);
+    return Wheatear::AssetPath::ResolveRuntimeData(requestedPath);
 }
 
 void RuntimeSceneLayer::LoadScene(const std::filesystem::path& requestedPath)
@@ -103,6 +103,9 @@ void RuntimeSceneLayer::LoadScene(const std::filesystem::path& requestedPath)
     const std::filesystem::path sceneRequest = requestedPath.empty()
         ? m_DefaultScenePath
         : requestedPath;
+
+    Wheatear::UIInputSystem::Reset();
+    Wheatear::CommandBus::ClearQueuedCommands();
 
     if (m_ActiveScene && m_RuntimeStarted)
     {

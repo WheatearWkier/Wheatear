@@ -1,34 +1,55 @@
 actions:
   - id: turn.slash
-    displayName: Turn Slash
-    description: Basic single target sword action.
-    icon: assets/vertical_slice/turn_combat/ui/icons/cmd_attack.png
-    sound: assets/vertical_slice/turn_combat/audio/turn_slash.wav
-    effect: assets/vertical_slice/turn_combat/effects/vfx_turn_slash.png
+    displayName: '魔剑斩'
+    description: '快速的单体魔剑斩击。'
+    icon: turn.icon.attack
+    sound: turn.audio.slash
+    effect: turn.vfx.slash
     duration: 0.72
     startup: 0.16
     hitTime: 0.36
     recovery: 0.20
     tags: [Gameplay.TurnCombat, Gameplay.Combat, Category.Attack, Target.EnemySingle]
+    params:
+      category: Attack
+      targetRule: EnemySingle
+      manaCost: 0
+      power: 1
+      healPower: 0
+      defensePierce: 0.1
+      magic: false
+      guard: false
     effects:
       - type: Damage
         attribute: attack
-        value: 1.00
+        value: 1
     signals: [turn.skill.apply, turn.skill.vfx, turn.skill.sfx]
 
   - id: turn.aether_edge
-    displayName: Aether Edge
-    description: Magic sword strike with defense down utility.
-    icon: assets/vertical_slice/turn_combat/ui/icons/cmd_magic_sword.png
-    sound: assets/vertical_slice/turn_combat/audio/turn_magic.wav
-    effect: assets/vertical_slice/turn_combat/effects/vfx_turn_magic_sword.png
+    displayName: '灵素剑锋'
+    description: '消耗魔力发动更重的剑与魔法合击。'
+    icon: turn.icon.magic_sword
+    sound: turn.audio.magic
+    effect: turn.vfx.magic_sword
     duration: 0.92
     startup: 0.18
     hitTime: 0.46
     recovery: 0.28
     resourceCost:
       mana: 8
-    tags: [Gameplay.TurnCombat, Gameplay.Combat, Category.Skill, Target.EnemySingle, Element.Aether]
+    tags: [Gameplay.TurnCombat, Gameplay.Combat, Category.Skill, Target.EnemySingle, Skill.Magic, Element.Aether]
+    params:
+      category: Skill
+      targetRule: EnemySingle
+      manaCost: 8
+      power: 1.45
+      healPower: 0
+      defensePierce: 0.22
+      magic: true
+      guard: false
+      statusEffect: DefenseDown
+      effectTurns: 2
+      effectPower: 0.22
     effects:
       - type: Damage
         attribute: magic
@@ -41,18 +62,30 @@ actions:
     signals: [turn.skill.apply, turn.skill.vfx, turn.skill.sfx]
 
   - id: turn.white_vow
-    displayName: White Vow
-    description: Single ally heal with short regeneration.
-    icon: assets/vertical_slice/turn_combat/ui/icons/cmd_heal.png
-    sound: assets/vertical_slice/turn_combat/audio/turn_heal.wav
-    effect: assets/vertical_slice/turn_combat/effects/vfx_turn_heal.png
+    displayName: '白誓治愈'
+    description: '治疗一名我方角色，并施加短暂再生。'
+    icon: turn.icon.heal
+    sound: turn.audio.heal
+    effect: turn.vfx.heal
     duration: 0.90
     startup: 0.14
     hitTime: 0.42
     recovery: 0.24
     resourceCost:
       mana: 7
-    tags: [Gameplay.TurnCombat, Gameplay.Combat, Category.Skill, Category.Heal, Target.AllySingle, Element.White]
+    tags: [Gameplay.TurnCombat, Gameplay.Combat, Category.Skill, Target.AllySingle, Skill.Magic, Skill.Heal, Element.White]
+    params:
+      category: Skill
+      targetRule: AllySingle
+      manaCost: 7
+      power: 0
+      healPower: 1.25
+      defensePierce: 0
+      magic: true
+      guard: false
+      statusEffect: Regeneration
+      effectTurns: 2
+      effectPower: 10
     effects:
       - type: Heal
         attribute: magic
@@ -65,18 +98,30 @@ actions:
     signals: [turn.skill.apply, turn.skill.vfx, turn.skill.sfx]
 
   - id: turn.shield_oath
-    displayName: Shield Oath
-    description: Self guard action for one round.
-    icon: assets/vertical_slice/turn_combat/ui/icons/cmd_guard.png
-    sound: assets/vertical_slice/turn_combat/audio/turn_guard.wav
-    effect: assets/vertical_slice/turn_combat/effects/vfx_turn_guard.png
+    displayName: '守护誓约'
+    description: '本回合进入防御，降低受到的伤害。'
+    icon: turn.icon.guard
+    sound: turn.audio.guard
+    effect: turn.vfx.guard
     duration: 0.62
     startup: 0.08
     hitTime: 0.26
     recovery: 0.18
     resourceCost:
       mana: 4
-    tags: [Gameplay.TurnCombat, Gameplay.Combat, Category.Guard, Target.Self]
+    tags: [Gameplay.TurnCombat, Gameplay.Combat, Category.Guard, Target.Self, Skill.Guard]
+    params:
+      category: Guard
+      targetRule: Self
+      manaCost: 4
+      power: 0
+      healPower: 0
+      defensePierce: 0
+      magic: false
+      guard: true
+      statusEffect: Guard
+      effectTurns: 1
+      effectPower: 0.45
     effects:
       - type: AddState
         state: guard
@@ -86,18 +131,30 @@ actions:
     signals: [turn.skill.apply, turn.skill.vfx, turn.skill.sfx]
 
   - id: turn.black_flare
-    displayName: Black Flare
-    description: Enemy party dark magic with burn pressure.
-    icon: assets/vertical_slice/turn_combat/ui/icons/cmd_dark.png
-    sound: assets/vertical_slice/turn_combat/audio/turn_magic.wav
-    effect: assets/vertical_slice/turn_combat/effects/vfx_turn_dark.png
+    displayName: '黑炎爆发'
+    description: '不稳定的暗魔法，攻击所有敌人并施加燃烧。'
+    icon: turn.icon.dark
+    sound: turn.audio.magic
+    effect: turn.vfx.dark
     duration: 1.04
     startup: 0.24
     hitTime: 0.56
     recovery: 0.28
     resourceCost:
       mana: 12
-    tags: [Gameplay.TurnCombat, Gameplay.Combat, Category.Skill, Target.EnemyAll, Element.Dark]
+    tags: [Gameplay.TurnCombat, Gameplay.Combat, Category.Skill, Target.EnemyAll, Skill.Magic, Element.Dark]
+    params:
+      category: Skill
+      targetRule: EnemyAll
+      manaCost: 12
+      power: 0.86
+      healPower: 0
+      defensePierce: 0.18
+      magic: true
+      guard: false
+      statusEffect: Burn
+      effectTurns: 2
+      effectPower: 8
     effects:
       - type: Damage
         attribute: magic
@@ -110,16 +167,25 @@ actions:
     signals: [turn.skill.apply, turn.skill.vfx, turn.skill.sfx]
 
   - id: turn.healing_potion
-    displayName: Healing Potion
-    description: Consumable ally recovery action.
-    icon: assets/vertical_slice/turn_combat/ui/icons/cmd_item_potion.png
-    sound: assets/vertical_slice/turn_combat/audio/turn_heal.wav
-    effect: assets/vertical_slice/turn_combat/effects/vfx_turn_heal.png
+    displayName: '恢复药水'
+    description: '消耗道具，恢复一名我方角色的生命。'
+    icon: turn.icon.item_potion
+    sound: turn.audio.heal
+    effect: turn.vfx.heal
     duration: 0.72
     startup: 0.10
     hitTime: 0.34
     recovery: 0.20
-    tags: [Gameplay.TurnCombat, Gameplay.Combat, Category.Item, Category.Heal, Target.AllySingle]
+    tags: [Gameplay.TurnCombat, Gameplay.Combat, Category.Item, Target.AllySingle, Skill.Heal]
+    params:
+      category: Item
+      targetRule: AllySingle
+      manaCost: 0
+      power: 0
+      healPower: 0.85
+      defensePierce: 0
+      magic: false
+      guard: false
     effects:
       - type: Heal
         attribute: item
@@ -127,16 +193,25 @@ actions:
     signals: [turn.skill.apply, turn.skill.vfx, turn.skill.sfx]
 
   - id: turn.focus_wait
-    displayName: Focus Wait
-    description: Wait action with mana recovery.
-    icon: assets/vertical_slice/turn_combat/ui/icons/cmd_wait.png
-    sound: assets/vertical_slice/turn_combat/audio/turn_guard.wav
-    effect: assets/vertical_slice/turn_combat/effects/vfx_turn_focus.png
+    displayName: '冥想'
+    description: '跳过回合并恢复魔力。'
+    icon: turn.icon.wait
+    sound: turn.audio.guard
+    effect: turn.vfx.focus
     duration: 0.52
     startup: 0.06
     hitTime: 0.22
     recovery: 0.12
     tags: [Gameplay.TurnCombat, Gameplay.Combat, Category.Wait, Target.Self]
+    params:
+      category: Wait
+      targetRule: Self
+      manaCost: 0
+      power: 0
+      healPower: 0
+      defensePierce: 0
+      magic: false
+      guard: false
     effects:
       - type: ModifyAttribute
         attribute: mana
@@ -144,16 +219,25 @@ actions:
     signals: [turn.skill.apply, turn.skill.vfx, turn.skill.sfx]
 
   - id: turn.claw
-    displayName: Enemy Claw
-    description: Monster single target melee action.
-    icon: assets/vertical_slice/turn_combat/ui/icons/cmd_enemy_claw.png
-    sound: assets/vertical_slice/turn_combat/audio/turn_hit.wav
-    effect: assets/vertical_slice/turn_combat/effects/vfx_turn_claw.png
+    displayName: '爪击'
+    description: '魔物的近身攻击。'
+    icon: turn.icon.enemy_claw
+    sound: turn.audio.hit
+    effect: turn.vfx.claw
     duration: 0.70
     startup: 0.14
     hitTime: 0.32
     recovery: 0.22
     tags: [Gameplay.TurnCombat, Gameplay.Combat, Category.Attack, Target.EnemySingle, Faction.Enemy]
+    params:
+      category: Attack
+      targetRule: EnemySingle
+      manaCost: 0
+      power: 0.95
+      healPower: 0
+      defensePierce: 0
+      magic: false
+      guard: false
     effects:
       - type: Damage
         attribute: attack
@@ -161,16 +245,25 @@ actions:
     signals: [turn.skill.apply, turn.skill.vfx, turn.skill.sfx]
 
   - id: turn.wild_pounce
-    displayName: Wild Pounce
-    description: Heavy monster pounce action.
-    icon: assets/vertical_slice/turn_combat/ui/icons/cmd_enemy_claw.png
-    sound: assets/vertical_slice/turn_combat/audio/turn_hit.wav
-    effect: assets/vertical_slice/turn_combat/effects/vfx_turn_claw.png
+    displayName: '猛扑'
+    description: '魔物的强力突进攻击。'
+    icon: turn.icon.enemy_claw
+    sound: turn.audio.hit
+    effect: turn.vfx.claw
     duration: 0.86
     startup: 0.18
     hitTime: 0.44
     recovery: 0.24
     tags: [Gameplay.TurnCombat, Gameplay.Combat, Category.Attack, Target.EnemySingle, Faction.Enemy]
+    params:
+      category: Attack
+      targetRule: EnemySingle
+      manaCost: 0
+      power: 1.25
+      healPower: 0
+      defensePierce: 0.08
+      magic: false
+      guard: false
     effects:
       - type: Damage
         attribute: attack
@@ -178,16 +271,28 @@ actions:
     signals: [turn.skill.apply, turn.skill.vfx, turn.skill.sfx]
 
   - id: turn.dark_orb
-    displayName: Dark Orb
-    description: Enemy dark magic with burn.
-    icon: assets/vertical_slice/turn_combat/ui/icons/cmd_enemy_orb.png
-    sound: assets/vertical_slice/turn_combat/audio/turn_magic.wav
-    effect: assets/vertical_slice/turn_combat/effects/vfx_turn_dark.png
+    displayName: '暗影魔弹'
+    description: '精英法师发射的暗属性魔法弹。'
+    icon: turn.icon.enemy_orb
+    sound: turn.audio.magic
+    effect: turn.vfx.dark
     duration: 0.92
     startup: 0.20
     hitTime: 0.46
     recovery: 0.26
-    tags: [Gameplay.TurnCombat, Gameplay.Combat, Category.Skill, Target.EnemySingle, Faction.Enemy, Element.Dark]
+    tags: [Gameplay.TurnCombat, Gameplay.Combat, Category.Skill, Target.EnemySingle, Skill.Magic, Faction.Enemy, Element.Dark]
+    params:
+      category: Skill
+      targetRule: EnemySingle
+      manaCost: 0
+      power: 1.18
+      healPower: 0
+      defensePierce: 0.2
+      magic: true
+      guard: false
+      statusEffect: Burn
+      effectTurns: 2
+      effectPower: 7
     effects:
       - type: Damage
         attribute: magic

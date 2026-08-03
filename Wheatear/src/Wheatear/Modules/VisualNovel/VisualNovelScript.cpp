@@ -1,6 +1,7 @@
 #include "wtpch.h"
 #include "VisualNovelScript.h"
 
+#include "Wheatear/Core/AssetPath.h"
 #include "Wheatear/Core/Log.h"
 
 #include <algorithm>
@@ -174,12 +175,13 @@ namespace Wheatear {
     VisualNovelScript VisualNovelScript::FromFile(const std::filesystem::path& filepath)
     {
         VisualNovelScript script;
-        script.m_SourcePath = filepath;
+        const std::filesystem::path resolved = AssetPath::ResolveRuntimeData(filepath);
+        script.m_SourcePath = resolved;
 
-        std::ifstream file(filepath);
+        std::ifstream file(resolved);
         if (!file.is_open())
         {
-            WT_CORE_WARN("VisualNovelScript: cannot open {0}", filepath.string());
+            WT_CORE_WARN("VisualNovelScript: cannot open {0}", resolved.string());
             return script;
         }
 

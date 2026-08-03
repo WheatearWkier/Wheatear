@@ -37,12 +37,12 @@ namespace Wheatear::TacticalCombatSkillService {
 
     struct TacticalSkillDefinition
     {
-        const char* Id = "";
-        const char* DisplayName = "";
-        const char* Description = "";
-        const char* IconPath = "";
-        const char* SoundPath = "";
-        const char* EffectFramePattern = "";
+        std::string Id;
+        std::string DisplayName;
+        std::string Description;
+        std::string IconPath;
+        std::string SoundPath;
+        std::string EffectFramePattern;
         int EffectFrameCount = 1;
         float EffectFrameRate = 12.0f;
         TacticalTargetRule TargetRule = TacticalTargetRule::Enemy;

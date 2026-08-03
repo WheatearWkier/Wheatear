@@ -1,8 +1,8 @@
 #include "wtpch.h"
 #include "ActionResolver.h"
 
-#include "ActionDatabase.h"
 #include "ActionDebugHistory.h"
+#include "ActionRecipeQueries.h"
 #include "ActionSignalRouter.h"
 
 #include <algorithm>
@@ -109,7 +109,7 @@ namespace Wheatear::WAO {
 
     ActionResolveResult ActionOrchestrator::Execute(const ActionResolveContext& context)
     {
-        const ActionRecipe* recipe = ActionDatabase::Find(context.Intent.ActionId);
+        const ActionRecipe* recipe = FindRecipeOrWarn(context.Intent.ActionId, "ActionOrchestrator");
         if (!recipe)
             return MakeFailure(context, "Action recipe not found");
 

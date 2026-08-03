@@ -44,6 +44,17 @@ namespace Wheatear::GameProgress {
         std::string Message;
     };
 
+    struct SaveSlotInfo
+    {
+        int Slot = 1;
+        int SaveVersion = 1;
+        bool Exists = false;
+        int Chapter = 0;
+        int PlayerLevel = 1;
+        int Gold = 0;
+        std::string Objective;
+    };
+
     struct DungeonResult
     {
         bool Valid = false;
@@ -84,7 +95,7 @@ namespace Wheatear::GameProgress {
         std::vector<RelationshipRecord> Relationships;
         std::string ActiveSupportCharacterId = "mentor";
         std::string SelectedSkillNodeId = "magic_sword_core";
-        std::string SelectedEquipmentId = "traveler_armor";
+        std::string SelectedEquipmentId;
         int EquipmentPage = 1;
         float SkillTreePanX = 0.0f;
         float SkillTreePanY = 0.0f;
@@ -96,6 +107,9 @@ namespace Wheatear::GameProgress {
     WHEATEAR_API State& GetState();
     WHEATEAR_API void ResetForNewGame();
     WHEATEAR_API void ApplySettingsToRuntime();
+    WHEATEAR_API int GetMaxSaveSlots();
+    WHEATEAR_API bool IsSaveSlotOccupied(int slot);
+    WHEATEAR_API SaveSlotInfo GetSaveSlotInfo(int slot);
     WHEATEAR_API bool SaveSlot(int slot);
     WHEATEAR_API bool LoadSlot(int slot);
 
@@ -159,6 +173,8 @@ namespace Wheatear::GameProgress {
     WHEATEAR_API std::string BuildSupportStatus();
     WHEATEAR_API std::string BuildSettingsStatus();
     WHEATEAR_API std::string BuildSaveLoadStatus();
+    WHEATEAR_API std::string BuildSaveSlotSummary(int slot);
+    WHEATEAR_API std::string BuildSaveSlotDetails(int slot);
     WHEATEAR_API std::string GetSaveButtonText(int slot);
     WHEATEAR_API std::string GetLoadButtonText(int slot);
 

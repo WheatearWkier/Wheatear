@@ -3,6 +3,7 @@
 #include "ActionTypes.h"
 #include "Wheatear/Core/Core.h"
 
+#include <cstdint>
 #include <string>
 #include <vector>
 
@@ -16,9 +17,11 @@ namespace Wheatear::WAO {
         static bool Has(const std::string& id);
         static std::vector<ActionRecipe> All();
         static void Clear();
+        static uint64_t Revision();
 
     private:
         static std::vector<ActionRecipe>& Recipes();
+        static uint64_t& RevisionCounter();
     };
 
 } // namespace Wheatear::WAO

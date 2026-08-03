@@ -1,6 +1,7 @@
 #include "wepch.h"
 #include "UITemplateFactory.h"
 
+#include "Wheatear/Core/AssetAliasRegistry.h"
 #include "Wheatear/Core/AssetPath.h"
 #include "Wheatear/Core/EngineInfo.h"
 #include "Wheatear/Renderer/Texture.h"
@@ -102,7 +103,7 @@ namespace Wheatear {
             text.Text = value;
             text.FontSize = fontSize;
             text.Color = color;
-            text.FontPath = "assets/fonts/wqy-microhei.ttc";
+            text.FontPath = AssetAliasRegistry::Path("font.ui_default");
             text.ShadowColor = { 0.01f, 0.015f, 0.018f, 0.80f };
             text.ShadowOffset = { 1.5f, 1.5f };
             text.OutlineColor = { 0.0f, 0.0f, 0.0f, 0.84f };
@@ -243,7 +244,7 @@ namespace Wheatear {
 
             Entity icon = CreateNode(context, "_Icon");
             ConfigureWidget(icon, root.GetUUID(), { 0.16f, 0.08f }, { 0.68f, 0.62f }, 42);
-            ConfigureImage(icon, "assets/vertical_slice/ui/icons/icon_skill_slash.png");
+            ConfigureImage(icon, AssetAliasRegistry::Path("ui.template.skill_slash"));
 
             Entity label = CreateNode(context, "_Hotkey");
             ConfigureWidget(label, root.GetUUID(), { 0.08f, 0.74f }, { 0.84f, 0.20f }, 45);
@@ -261,7 +262,7 @@ namespace Wheatear {
 
             Entity icon = CreateNode(context, "_Icon");
             ConfigureWidget(icon, root.GetUUID(), { 0.15f, 0.08f }, { 0.70f, 0.58f }, 42);
-            ConfigureImage(icon, "assets/vertical_slice/ui/icons/icon_equipment_training_blade.png");
+            ConfigureImage(icon, AssetAliasRegistry::Path("ui.template.equipment_training_blade"));
 
             Entity rarity = CreateNode(context, "_Rarity");
             ConfigureWidget(rarity, root.GetUUID(), { 0.09f, 0.72f }, { 0.82f, 0.18f }, 45);
@@ -296,7 +297,7 @@ namespace Wheatear {
 
             Entity icon = CreateNode(context, "_Icon");
             ConfigureWidget(icon, root.GetUUID(), { 0.04f, 0.17f }, { 0.10f, 0.62f }, 42);
-            ConfigureImage(icon, "assets/vertical_slice/ui/icons/icon_save.png");
+            ConfigureImage(icon, AssetAliasRegistry::Path("ui.template.save_slot"));
 
             Entity title = CreateNode(context, "_Title");
             ConfigureWidget(title, root.GetUUID(), { 0.18f, 0.16f }, { 0.72f, 0.26f }, 43);
@@ -318,7 +319,7 @@ namespace Wheatear {
 
             Entity icon = CreateNode(context, "_Icon");
             ConfigureWidget(icon, root.GetUUID(), { 0.17f, 0.11f }, { 0.66f, 0.54f }, 42);
-            ConfigureImage(icon, "assets/vertical_slice/ui/skill_tree/skill_magic_sword_core.png");
+            ConfigureImage(icon, AssetAliasRegistry::Path("ui.template.skill_tree_core"));
 
             Entity name = CreateNode(context, "_Name");
             ConfigureWidget(name, root.GetUUID(), { 0.07f, 0.73f }, { 0.86f, 0.18f }, 43);
@@ -336,7 +337,7 @@ namespace Wheatear {
 
             Entity icon = CreateNode(context, "_Icon");
             ConfigureWidget(icon, root.GetUUID(), { 0.12f, 0.09f }, { 0.76f, 0.58f }, 42);
-            ConfigureImage(icon, "assets/vertical_slice/side_combat/ui/icon_skill_launcher_slash.png");
+            ConfigureImage(icon, AssetAliasRegistry::Path("ui.template.combat_launcher_slash"));
 
             Entity overlay = CreateNode(context, "_CooldownMask");
             ConfigureWidget(overlay, root.GetUUID(), { 0.0f, 0.0f }, { 1.0f, 1.0f }, 44, false);

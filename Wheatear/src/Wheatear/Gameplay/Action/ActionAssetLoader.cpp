@@ -3,6 +3,7 @@
 
 #include "ActionDatabase.h"
 #include "ActionTypes.h"
+#include "Wheatear/Core/AssetAliasRegistry.h"
 #include "Wheatear/Core/AssetPath.h"
 
 #include <yaml-cpp/yaml.h>
@@ -126,6 +127,23 @@ namespace Wheatear::WAO {
             }
         }
 
+        void ReadParams(const YAML::Node& node, ActionRecipe* recipe)
+        {
+            if (!node || !node.IsMap() || !recipe)
+                return;
+
+            for (const auto& entry : node)
+            {
+                if (!entry.first.IsScalar() || !entry.second.IsScalar())
+                    continue;
+
+                const std::string id = entry.first.as<std::string>();
+                const std::string value = entry.second.as<std::string>("");
+                if (!id.empty())
+                    recipe->Params[id] = value;
+            }
+        }
+
         EffectSpec ReadEffect(const YAML::Node& node)
         {
             EffectSpec effect;
@@ -152,10 +170,10 @@ namespace Wheatear::WAO {
 
             parsed.DisplayName = ReadString(node, { "displayName", "DisplayName", "name", "Name" }, parsed.Id);
             parsed.Description = ReadString(node, { "description", "Description" });
-            parsed.IconPath = ReadString(node, { "icon", "iconPath", "IconPath" });
+            parsed.IconPath = AssetAliasRegistry::Resolve(ReadString(node, { "icon", "iconPath", "IconPath" }));
             parsed.AnimationId = ReadString(node, { "animation", "animationId", "AnimationId" });
-            parsed.SoundPath = ReadString(node, { "sound", "soundPath", "SoundPath" });
-            parsed.EffectPath = ReadString(node, { "effect", "effectPath", "EffectPath" });
+            parsed.SoundPath = AssetAliasRegistry::Resolve(ReadString(node, { "sound", "soundPath", "SoundPath" }));
+            parsed.EffectPath = AssetAliasRegistry::Resolve(ReadString(node, { "effect", "effectPath", "EffectPath" }));
             parsed.Cooldown = ReadFloat(node, { "cooldown", "Cooldown" });
             parsed.Duration = ReadFloat(node, { "duration", "Duration" });
             parsed.Startup = ReadFloat(node, { "startup", "Startup" });
@@ -172,6 +190,7 @@ namespace Wheatear::WAO {
             parsed.Signals = ReadStringList(FirstNode(node, { "signals", "Signals" }));
 
             ReadResourceCost(FirstNode(node, { "resourceCost", "ResourceCost", "resources", "Resources" }), &parsed);
+            ReadParams(FirstNode(node, { "params", "Params" }), &parsed);
 
             YAML::Node effects = FirstNode(node, { "effects", "Effects" });
             if (effects && effects.IsSequence())
@@ -216,7 +235,7 @@ namespace Wheatear::WAO {
 
     size_t ActionAssetLoader::LoadFile(const std::filesystem::path& path)
     {
-        const std::filesystem::path resolved = AssetPath::Resolve(path);
+        const std::filesystem::path resolved = AssetPath::ResolveRuntimeData(path);
         if (!std::filesystem::is_regular_file(resolved))
             return 0;
 
@@ -233,7 +252,7 @@ namespace Wheatear::WAO {
 
     size_t ActionAssetLoader::LoadDirectory(const std::filesystem::path& path)
     {
-        const std::filesystem::path resolved = AssetPath::Resolve(path);
+        const std::filesystem::path resolved = AssetPath::ResolveRuntimeData(path);
         if (!std::filesystem::is_directory(resolved))
             return 0;
 
@@ -255,6 +274,56 @@ namespace Wheatear::WAO {
         if (loaded > 0)
             WT_CORE_INFO("ActionAssetLoader: loaded {} action recipe(s) from '{}'", loaded, resolved.string());
         return loaded;
+    }
+
+    size_t ActionAssetLoader::LoadManifest(const std::filesystem::path& path)
+    {
+        const std::filesystem::path resolved = AssetPath::ResolveRuntimeData(path);
+        if (!std::filesystem::is_regular_file(resolved))
+            return 0;
+
+        try
+        {
+            const YAML::Node root = YAML::LoadFile(resolved.string());
+            const YAML::Node sets = root["sets"];
+            if (!sets || !sets.IsSequence())
+                return 0;
+
+            size_t loaded = 0;
+            for (const YAML::Node& set : sets)
+            {
+                const std::string source = ReadString(set, { "path", "file", "directory" });
+                if (source.empty())
+                    continue;
+
+                const std::filesystem::path sourcePath = AssetPath::ResolveRuntimeData(source);
+                if (std::filesystem::is_directory(sourcePath))
+                    loaded += LoadDirectory(source);
+                else
+                    loaded += LoadFile(source);
+            }
+
+            if (loaded > 0)
+                WT_CORE_INFO("ActionAssetLoader: loaded {} action recipe(s) from manifest '{}'", loaded, resolved.string());
+            return loaded;
+        }
+        catch (const YAML::Exception& exception)
+        {
+            WT_CORE_WARN("ActionAssetLoader: failed to load manifest '{}': {}", resolved.string(), exception.what());
+            return 0;
+        }
+    }
+
+    size_t ActionAssetLoader::ReloadDirectory(const std::filesystem::path& path)
+    {
+        ActionDatabase::Clear();
+        return LoadDirectory(path);
+    }
+
+    size_t ActionAssetLoader::ReloadManifest(const std::filesystem::path& path)
+    {
+        ActionDatabase::Clear();
+        return LoadManifest(path);
     }
 
 } // namespace Wheatear::WAO

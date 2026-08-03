@@ -29,6 +29,10 @@ namespace Wheatear {
         void SetViewTransform(const glm::vec3& position,
             const glm::vec3& rotation,
             float orbitDistance = 10.0f);
+        void Frame(const glm::vec3& focalPoint, float orbitDistance);
+        void Frame(const glm::vec3& focalPoint,
+            const glm::vec3& rotation,
+            float orbitDistance);
 
         // Getters
         float GetDistance() const { return m_Distance; }

@@ -170,7 +170,9 @@ namespace Wheatear {
     // Editor update (editor camera)
     // =========================================================================
 
-    void RenderSystem::RenderWithEditorCamera(Scene* scene, EditorCamera& camera)
+    void RenderSystem::RenderWithEditorCamera(Scene* scene,
+        EditorCamera& camera,
+        bool includeUI)
     {
         // Save the currently bound framebuffer so we can restore it after the
         // shadow pass (which binds its own FBO and changes the viewport).
@@ -196,10 +198,48 @@ namespace Wheatear {
         RenderScene3D(scene);
         Renderer3D::EndScene();
 
-        UIRenderer::BeginUIPass(scene->GetViewportWidth(), scene->GetViewportHeight());
-        if (auto* ui = scene->GetSystem<UISystem>())
-            ui->RenderUI(scene);
-        UIRenderer::EndUIPass(camera.GetViewProjection());
+        if (includeUI)
+        {
+            UIRenderer::BeginUIPass(scene->GetViewportWidth(), scene->GetViewportHeight());
+            if (auto* ui = scene->GetSystem<UISystem>())
+                ui->RenderUI(scene);
+            UIRenderer::EndUIPass(camera.GetViewProjection());
+        }
+    }
+
+    void RenderSystem::RenderWithSceneCamera(Scene* scene,
+        const Camera& camera,
+        const glm::mat4& cameraTransform,
+        bool includeUI)
+    {
+        const uint32_t previousFBO = RenderCommand::GetBoundFramebuffer();
+
+        Renderer3D::GetShadowMapFB()->Bind();
+        RenderCommand::Clear();
+        Renderer3D::BeginShadowPass(ComputeLightSpaceMatrix(scene));
+        RenderSceneShadow(scene);
+        Renderer3D::EndShadowPass();
+
+        RenderCommand::BindFramebuffer(previousFBO);
+        RenderCommand::SetViewport(0, 0, scene->GetViewportWidth(), scene->GetViewportHeight());
+
+        Renderer2D::BeginScene(camera, cameraTransform);
+        RenderScene2D(scene);
+        Renderer2D::EndScene();
+
+        Renderer3D::BeginScene(camera, cameraTransform);
+        CollectLights(scene);
+        RenderScene3D(scene);
+        Renderer3D::EndScene();
+
+        if (includeUI)
+        {
+            const glm::mat4 viewProjection = camera.GetProjection() * glm::inverse(cameraTransform);
+            UIRenderer::BeginUIPass(scene->GetViewportWidth(), scene->GetViewportHeight());
+            if (auto* ui = scene->GetSystem<UISystem>())
+                ui->RenderUI(scene);
+            UIRenderer::EndUIPass(viewProjection);
+        }
     }
 
 } // namespace Wheatear

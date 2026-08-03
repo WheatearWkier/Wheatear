@@ -1,11 +1,10 @@
 #include "wtpch.h"
 #include "ArcadeCombatBossService.h"
 
-#include "ArcadeCombatActionCatalog.h"
 #include "ArcadeCombatMath.h"
 #include "ArcadeCombatProjectileService.h"
 #include "ArcadeCombatSignalHandlers.h"
-#include "Wheatear/Gameplay/Action/ActionDatabase.h"
+#include "Wheatear/Gameplay/Action/ActionRecipeQueries.h"
 #include "Wheatear/Gameplay/Action/ActionResolver.h"
 #include "Wheatear/Scene/Components.h"
 #include "Wheatear/Scene/Scene.h"
@@ -19,14 +18,9 @@ namespace Wheatear::ArcadeCombatBossService {
 
         constexpr float Pi = 3.1415926535f;
 
-        static WAO::ActionRecipe ResolveBossShotRecipe()
+        static const WAO::ActionRecipe* ResolveBossShotRecipe()
         {
-            if (const WAO::ActionRecipe* recipe = WAO::ActionDatabase::Find("arcade.boss_bullet"))
-                return *recipe;
-
-            WAO::ActionRecipe recipe = ArcadeCombatActionCatalog::BuildBossShotRecipe();
-            WAO::ActionDatabase::Register(recipe);
-            return recipe;
+            return WAO::FindRecipeOrWarn("arcade.boss_bullet", "ArcadeCombat.Boss");
         }
 
         static void StartBossJump(ArcadeCombatLevelComponent& level,
@@ -101,10 +95,13 @@ namespace Wheatear::ArcadeCombatBossService {
         }
 
         bossComponent.RuntimeShootTimer += dt;
-        const WAO::ActionRecipe shotRecipe = ResolveBossShotRecipe();
+        const WAO::ActionRecipe* shotRecipe = ResolveBossShotRecipe();
+        if (!shotRecipe)
+            return;
+
         const float shootInterval = bossComponent.ShootInterval > 0.0f
             ? bossComponent.ShootInterval
-            : std::max(0.01f, shotRecipe.Cooldown);
+            : std::max(0.01f, shotRecipe->Cooldown);
         if (bossComponent.RuntimeShootTimer >= shootInterval)
         {
             bossComponent.RuntimeShootTimer = 0.0f;
@@ -117,22 +114,22 @@ namespace Wheatear::ArcadeCombatBossService {
             payload.EntityName = "Arcade_BossBullet";
             payload.Position = transform.Translation + glm::vec3(direction * 0.65f, -0.1f);
             payload.Velocity = direction * 4.2f;
-            payload.Damage = ArcadeCombatActionCatalog::PrimaryDamage(shotRecipe, 12.0f);
+            payload.Damage = WAO::PrimaryEffectValue(*shotRecipe, WAO::EffectType::Damage, 12.0f);
             payload.Lifetime = 2.4f;
             payload.Radius = 0.19f;
             payload.Team = (int)ArcadeTeam::Enemy;
             payload.Color = { 0.95f, 0.22f, 0.34f, 1.0f };
 
-            const std::string detail = "fire " + shotRecipe.DisplayName;
+            const std::string detail = "fire " + shotRecipe->DisplayName;
             WAO::ActionResolveContext actionContext;
             actionContext.SceneContext = scene;
             actionContext.Intent.Actor = boss.GetUUID();
             actionContext.Intent.ExplicitTarget = player.GetUUID();
-            actionContext.Intent.ActionId = shotRecipe.Id;
+            actionContext.Intent.ActionId = shotRecipe->Id;
             actionContext.Intent.Source = "ArcadeCombat.Boss";
             actionContext.Detail = detail;
             actionContext.TransientPayload = &payload;
-            WAO::ActionOrchestrator::ExecuteWithRecipe(actionContext, shotRecipe);
+            WAO::ActionOrchestrator::ExecuteWithRecipe(actionContext, *shotRecipe);
         }
     }
 

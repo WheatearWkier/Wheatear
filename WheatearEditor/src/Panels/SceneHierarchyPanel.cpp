@@ -77,6 +77,238 @@ namespace Wheatear {
         SetContext(context);
     }
 
+    Entity SceneHierarchyPanel::FindSingleUICanvas() const
+    {
+        if (!m_Context)
+            return {};
+
+        Entity found;
+        for (auto entityID : m_Context->GetRegistry().view<UICanvasComponent>())
+        {
+            if (found)
+                return {};
+            found = Entity{ entityID, m_Context.get() };
+        }
+
+        return found;
+    }
+
+    UUID SceneHierarchyPanel::ResolveUIParentID(Entity entity) const
+    {
+        if (!entity || !entity.HasComponent<UIWidgetComponent>() || !entity.HasComponent<IDComponent>())
+            return 0;
+
+        return entity.GetUUID();
+    }
+
+    Entity SceneHierarchyPanel::CreateEntityWithUndo(const std::string& name,
+        const std::function<void(Entity)>& configure)
+    {
+        if (!m_Context)
+            return {};
+
+        auto command = std::make_unique<EntityCreateCommand>(m_Context.get(), name);
+        command->SetOnCreate([configure](Entity created)
+        {
+            if (configure)
+                configure(created);
+        });
+        command->Execute();
+
+        Entity created = command->GetEntity();
+        m_SelectionContext = created;
+        m_ScrollToSelection = true;
+        CommandHistory::Get().Push(std::move(command));
+        return created;
+    }
+
+    Entity SceneHierarchyPanel::CreateUITemplateWithUndo(UITemplateKind kind, UUID parentID)
+    {
+        if (!m_Context || static_cast<uint64_t>(parentID) == 0)
+            return {};
+
+        auto command = std::make_unique<UITemplateFactoryCreateCommand>(
+            m_Context.get(),
+            kind,
+            parentID);
+        command->Execute();
+
+        Entity root = command->GetRootEntity();
+        if (!root)
+            return {};
+
+        m_SelectionContext = root;
+        m_ScrollToSelection = true;
+        CommandHistory::Get().Push(std::move(command));
+        return root;
+    }
+
+    void SceneHierarchyPanel::DrawCreateUIMenuItems(UUID parentID, bool includeCanvas)
+    {
+        const bool canCreateUIChild = static_cast<uint64_t>(parentID) != 0;
+
+        if (includeCanvas)
+        {
+            if (ImGui::MenuItem("Canvas"))
+            {
+                CreateEntityWithUndo("UI Canvas", [](Entity e)
+                {
+                    e.AddComponent<UICanvasComponent>();
+                    auto& widget = e.AddComponent<UIWidgetComponent>();
+                    widget.Anchor = UIAnchor::TopLeft;
+                    widget.Position = { 0.0f, 0.0f };
+                    widget.Size = { 1.0f, 1.0f };
+                    widget.SortOrder = 0;
+                });
+            }
+            ImGui::Separator();
+        }
+
+        if (!canCreateUIChild)
+            ImGui::TextDisabled("Select a Canvas or UI child first.");
+
+        ImGui::BeginDisabled(!canCreateUIChild);
+        if (ImGui::MenuItem("Panel"))
+        {
+            CreateEntityWithUndo("UI Panel", [parentID](Entity e)
+            {
+                auto& widget = e.AddComponent<UIWidgetComponent>();
+                widget.Size = { 0.45f, 0.25f };
+                widget.SortOrder = 10;
+                widget.ParentEntity = parentID;
+                e.AddComponent<UIPanelComponent>();
+            });
+        }
+        if (ImGui::MenuItem("Image"))
+        {
+            CreateEntityWithUndo("UI Image", [parentID](Entity e)
+            {
+                auto& widget = e.AddComponent<UIWidgetComponent>();
+                widget.Size = { 0.25f, 0.18f };
+                widget.SortOrder = 20;
+                widget.ParentEntity = parentID;
+                e.AddComponent<UIImageComponent>();
+            });
+        }
+        if (ImGui::MenuItem("Text"))
+        {
+            CreateEntityWithUndo("UI Text", [parentID](Entity e)
+            {
+                auto& widget = e.AddComponent<UIWidgetComponent>();
+                widget.Size = { 0.30f, 0.08f };
+                widget.SortOrder = 30;
+                widget.ParentEntity = parentID;
+                e.AddComponent<UITextComponent>();
+            });
+        }
+        if (ImGui::MenuItem("Button"))
+        {
+            CreateEntityWithUndo("UI Button", [parentID](Entity e)
+            {
+                auto& widget = e.AddComponent<UIWidgetComponent>();
+                widget.Size = { 0.20f, 0.07f };
+                widget.SortOrder = 40;
+                widget.ParentEntity = parentID;
+                e.AddComponent<UIButtonComponent>();
+                auto& text = e.AddComponent<UITextComponent>();
+                text.Text = "Button";
+            });
+        }
+        if (ImGui::MenuItem("Slider"))
+        {
+            CreateEntityWithUndo("UI Slider", [parentID](Entity e)
+            {
+                auto& widget = e.AddComponent<UIWidgetComponent>();
+                widget.Size = { 0.32f, 0.04f };
+                widget.SortOrder = 40;
+                widget.ParentEntity = parentID;
+                e.AddComponent<UISliderComponent>();
+            });
+        }
+        if (ImGui::MenuItem("Checkbox"))
+        {
+            CreateEntityWithUndo("UI Checkbox", [parentID](Entity e)
+            {
+                auto& widget = e.AddComponent<UIWidgetComponent>();
+                widget.Size = { 0.04f, 0.04f };
+                widget.SortOrder = 40;
+                widget.ParentEntity = parentID;
+                e.AddComponent<UICheckboxComponent>();
+            });
+        }
+        if (ImGui::MenuItem("Progress Bar"))
+        {
+            CreateEntityWithUndo("UI Progress Bar", [parentID](Entity e)
+            {
+                auto& widget = e.AddComponent<UIWidgetComponent>();
+                widget.Size = { 0.32f, 0.04f };
+                widget.SortOrder = 35;
+                widget.ParentEntity = parentID;
+                e.AddComponent<UIProgressBarComponent>();
+            });
+        }
+        if (ImGui::MenuItem("Path"))
+        {
+            CreateEntityWithUndo("UI Path", [parentID](Entity e)
+            {
+                auto& widget = e.AddComponent<UIWidgetComponent>();
+                widget.Size = { 0.42f, 0.24f };
+                widget.SortOrder = 25;
+                widget.ParentEntity = parentID;
+                e.AddComponent<UIPathComponent>();
+            });
+        }
+        if (ImGui::MenuItem("Pager"))
+        {
+            CreateEntityWithUndo("UI Pager", [parentID](Entity e)
+            {
+                auto& widget = e.AddComponent<UIWidgetComponent>();
+                widget.Visible = false;
+                widget.Size = { 0.01f, 0.01f };
+                widget.SortOrder = 0;
+                widget.ParentEntity = parentID;
+                e.AddComponent<UIPagerComponent>();
+            });
+        }
+        if (ImGui::MenuItem("Scroll View"))
+        {
+            CreateEntityWithUndo("UI Scroll View", [parentID](Entity e)
+            {
+                auto& widget = e.AddComponent<UIWidgetComponent>();
+                widget.Size = { 0.36f, 0.42f };
+                widget.SortOrder = 10;
+                widget.ParentEntity = parentID;
+                auto& panel = e.AddComponent<UIPanelComponent>();
+                panel.ClipChildren = true;
+                e.AddComponent<UIScrollViewComponent>();
+            });
+        }
+        if (ImGui::BeginMenu("Templates"))
+        {
+            if (ImGui::MenuItem("Titled Scroll Text"))
+                CreateUITemplateWithUndo(UITemplateKind::TitledScrollText, parentID);
+            if (ImGui::MenuItem("Paged Grid"))
+                CreateUITemplateWithUndo(UITemplateKind::PagedGrid, parentID);
+            if (ImGui::MenuItem("Paged Inventory Grid"))
+                CreateUITemplateWithUndo(UITemplateKind::PagedInventoryGrid, parentID);
+            ImGui::Separator();
+            if (ImGui::MenuItem("Skill Button"))
+                CreateUITemplateWithUndo(UITemplateKind::SkillButton, parentID);
+            if (ImGui::MenuItem("Equipment Slot"))
+                CreateUITemplateWithUndo(UITemplateKind::EquipmentSlot, parentID);
+            if (ImGui::MenuItem("Tooltip"))
+                CreateUITemplateWithUndo(UITemplateKind::Tooltip, parentID);
+            if (ImGui::MenuItem("Save Slot"))
+                CreateUITemplateWithUndo(UITemplateKind::SaveSlot, parentID);
+            if (ImGui::MenuItem("Skill Tree Node"))
+                CreateUITemplateWithUndo(UITemplateKind::SkillTreeNode, parentID);
+            if (ImGui::MenuItem("Combat Skill Slot"))
+                CreateUITemplateWithUndo(UITemplateKind::CombatSkillSlot, parentID);
+            ImGui::EndMenu();
+        }
+        ImGui::EndDisabled();
+    }
+
     void SceneHierarchyPanel::SetContext(const Ref<Scene>& context)
     {
         m_Context = context;
@@ -100,6 +332,7 @@ namespace Wheatear {
             UIChildMap uiChildren;
             std::unordered_map<UUID, Entity> uiEntityLookup;
             std::unordered_set<uint32_t> uiChildKeys;
+            Entity fallbackCanvas = FindSingleUICanvas();
 
             for (auto entityID : registry.view<IDComponent>())
             {
@@ -129,11 +362,13 @@ namespace Wheatear {
                 Entity child{ entityID, m_Context.get() };
                 if (!child.HasComponent<UIWidgetComponent>())
                     continue;
+                if (child.HasComponent<UICanvasComponent>())
+                    continue;
 
                 const auto& widget = child.GetComponent<UIWidgetComponent>();
                 Entity parent = resolveUIReference(widget.ParentEntity);
-                if (!parent)
-                    continue;
+                if (!parent && static_cast<uint64_t>(widget.ParentEntity) == 0)
+                    parent = fallbackCanvas;
 
                 if (!parent || parent == child || !parent.HasComponent<UIWidgetComponent>())
                     continue;
@@ -196,17 +431,8 @@ namespace Wheatear {
 
             if (ImGui::BeginPopupContextWindow("##HierarchyCtx", ImGuiPopupFlags_MouseButtonRight | ImGuiPopupFlags_NoOpenOverItems))
             {
-                auto createEntityWithUndo = [&](const std::string& name, auto configure)
-                {
-                    auto command = std::make_unique<EntityCreateCommand>(m_Context.get(), name);
-                    command->SetOnCreate([configure](Entity created) { configure(created); });
-                    command->Execute();
-                    m_SelectionContext = command->GetEntity();
-                    CommandHistory::Get().Push(std::move(command));
-                };
-
                 if (ImGui::MenuItem("Create Empty Entity"))
-                    createEntityWithUndo("Empty Entity", [](Entity) {});
+                    CreateEntityWithUndo("Empty Entity", [](Entity) {});
 
                 ImGui::Separator();
 
@@ -214,14 +440,14 @@ namespace Wheatear {
                 {
                     if (ImGui::MenuItem("Sprite"))
                     {
-                        createEntityWithUndo("Sprite", [](Entity e)
+                        CreateEntityWithUndo("Sprite", [](Entity e)
                         {
                             e.AddComponent<SpriteRendererComponent>();
                         });
                     }
                     if (ImGui::MenuItem("Circle"))
                     {
-                        createEntityWithUndo("Circle", [](Entity e)
+                        CreateEntityWithUndo("Circle", [](Entity e)
                         {
                             e.AddComponent<CircleRendererComponent>();
                         });
@@ -233,7 +459,7 @@ namespace Wheatear {
                 {
                     if (ImGui::MenuItem("Camera"))
                     {
-                        createEntityWithUndo("Camera", [](Entity e)
+                        CreateEntityWithUndo("Camera", [](Entity e)
                         {
                             e.AddComponent<CameraComponent>();
                         });
@@ -244,207 +470,7 @@ namespace Wheatear {
 
                 if (ImGui::BeginMenu("UI"))
                 {
-                    UUID uiParentID = 0;
-
-                    std::function<bool(Entity)> canUseAsUIParent = [&](Entity entity)
-                    {
-                        if (!entity || !entity.HasComponent<UIWidgetComponent>())
-                            return false;
-                        if (entity.HasComponent<UICanvasComponent>())
-                            return true;
-
-                        std::unordered_set<uint32_t> visited;
-                        Entity current = entity;
-                        while (current && current.HasComponent<UIWidgetComponent>())
-                        {
-                            const uint32_t key = EntityKey(current);
-                            if (!visited.insert(key).second)
-                                return false;
-
-                            const auto& widget = current.GetComponent<UIWidgetComponent>();
-                            Entity parent = resolveUIReference(widget.ParentEntity);
-                            if (!parent)
-                                return false;
-                            if (parent.HasComponent<UICanvasComponent>())
-                                return true;
-                            current = parent;
-                        }
-                        return false;
-                    };
-
-                    if (m_SelectionContext
-                        && canUseAsUIParent(m_SelectionContext))
-                    {
-                        uiParentID = m_SelectionContext.GetUUID();
-                    }
-                    const bool canCreateUIChild = static_cast<uint64_t>(uiParentID) != 0;
-                    auto createUITemplateWithUndo = [&](UITemplateKind kind)
-                    {
-                        auto command = std::make_unique<UITemplateFactoryCreateCommand>(
-                            m_Context.get(),
-                            kind,
-                            uiParentID);
-                        command->Execute();
-                        m_SelectionContext = command->GetRootEntity();
-                        m_ScrollToSelection = true;
-                        CommandHistory::Get().Push(std::move(command));
-                    };
-
-                    if (ImGui::MenuItem("Canvas"))
-                    {
-                        createEntityWithUndo("UI Canvas", [](Entity e)
-                        {
-                            e.AddComponent<UICanvasComponent>();
-                            auto& widget = e.AddComponent<UIWidgetComponent>();
-                            widget.Anchor = UIAnchor::TopLeft;
-                            widget.Position = { 0.0f, 0.0f };
-                            widget.Size = { 1.0f, 1.0f };
-                            widget.SortOrder = 0;
-                        });
-                    }
-                    ImGui::Separator();
-                    if (!canCreateUIChild)
-                        ImGui::TextDisabled("Select a Canvas or UI child first.");
-                    ImGui::BeginDisabled(!canCreateUIChild);
-                    if (ImGui::MenuItem("Panel"))
-                    {
-                        createEntityWithUndo("UI Panel", [uiParentID](Entity e)
-                        {
-                            auto& widget = e.AddComponent<UIWidgetComponent>();
-                            widget.Size = { 0.45f, 0.25f };
-                            widget.SortOrder = 10;
-                            widget.ParentEntity = uiParentID;
-                            e.AddComponent<UIPanelComponent>();
-                        });
-                    }
-                    if (ImGui::MenuItem("Image"))
-                    {
-                        createEntityWithUndo("UI Image", [uiParentID](Entity e)
-                        {
-                            auto& widget = e.AddComponent<UIWidgetComponent>();
-                            widget.Size = { 0.25f, 0.18f };
-                            widget.SortOrder = 20;
-                            widget.ParentEntity = uiParentID;
-                            e.AddComponent<UIImageComponent>();
-                        });
-                    }
-                    if (ImGui::MenuItem("Text"))
-                    {
-                        createEntityWithUndo("UI Text", [uiParentID](Entity e)
-                        {
-                            auto& widget = e.AddComponent<UIWidgetComponent>();
-                            widget.Size = { 0.30f, 0.08f };
-                            widget.SortOrder = 30;
-                            widget.ParentEntity = uiParentID;
-                            e.AddComponent<UITextComponent>();
-                        });
-                    }
-                    if (ImGui::MenuItem("Button"))
-                    {
-                        createEntityWithUndo("UI Button", [uiParentID](Entity e)
-                        {
-                            auto& widget = e.AddComponent<UIWidgetComponent>();
-                            widget.Size = { 0.20f, 0.07f };
-                            widget.SortOrder = 40;
-                            widget.ParentEntity = uiParentID;
-                            e.AddComponent<UIButtonComponent>();
-                            auto& text = e.AddComponent<UITextComponent>();
-                            text.Text = "Button";
-                        });
-                    }
-                    if (ImGui::MenuItem("Slider"))
-                    {
-                        createEntityWithUndo("UI Slider", [uiParentID](Entity e)
-                        {
-                            auto& widget = e.AddComponent<UIWidgetComponent>();
-                            widget.Size = { 0.32f, 0.04f };
-                            widget.SortOrder = 40;
-                            widget.ParentEntity = uiParentID;
-                            e.AddComponent<UISliderComponent>();
-                        });
-                    }
-                    if (ImGui::MenuItem("Checkbox"))
-                    {
-                        createEntityWithUndo("UI Checkbox", [uiParentID](Entity e)
-                        {
-                            auto& widget = e.AddComponent<UIWidgetComponent>();
-                            widget.Size = { 0.04f, 0.04f };
-                            widget.SortOrder = 40;
-                            widget.ParentEntity = uiParentID;
-                            e.AddComponent<UICheckboxComponent>();
-                        });
-                    }
-                    if (ImGui::MenuItem("Progress Bar"))
-                    {
-                        createEntityWithUndo("UI Progress Bar", [uiParentID](Entity e)
-                        {
-                            auto& widget = e.AddComponent<UIWidgetComponent>();
-                            widget.Size = { 0.32f, 0.04f };
-                            widget.SortOrder = 35;
-                            widget.ParentEntity = uiParentID;
-                            e.AddComponent<UIProgressBarComponent>();
-                        });
-                    }
-                    if (ImGui::MenuItem("Path"))
-                    {
-                        createEntityWithUndo("UI Path", [uiParentID](Entity e)
-                        {
-                            auto& widget = e.AddComponent<UIWidgetComponent>();
-                            widget.Size = { 0.42f, 0.24f };
-                            widget.SortOrder = 25;
-                            widget.ParentEntity = uiParentID;
-                            e.AddComponent<UIPathComponent>();
-                        });
-                    }
-                    if (ImGui::MenuItem("Pager"))
-                    {
-                        createEntityWithUndo("UI Pager", [uiParentID](Entity e)
-                        {
-                            auto& widget = e.AddComponent<UIWidgetComponent>();
-                            widget.Visible = false;
-                            widget.Size = { 0.01f, 0.01f };
-                            widget.SortOrder = 0;
-                            widget.ParentEntity = uiParentID;
-                            e.AddComponent<UIPagerComponent>();
-                        });
-                    }
-                    if (ImGui::MenuItem("Scroll View"))
-                    {
-                        createEntityWithUndo("UI Scroll View", [uiParentID](Entity e)
-                        {
-                            auto& widget = e.AddComponent<UIWidgetComponent>();
-                            widget.Size = { 0.36f, 0.42f };
-                            widget.SortOrder = 10;
-                            widget.ParentEntity = uiParentID;
-                            auto& panel = e.AddComponent<UIPanelComponent>();
-                            panel.ClipChildren = true;
-                            e.AddComponent<UIScrollViewComponent>();
-                        });
-                    }
-                    if (ImGui::BeginMenu("Templates"))
-                    {
-                        if (ImGui::MenuItem("Titled Scroll Text"))
-                            createUITemplateWithUndo(UITemplateKind::TitledScrollText);
-                        if (ImGui::MenuItem("Paged Grid"))
-                            createUITemplateWithUndo(UITemplateKind::PagedGrid);
-                        if (ImGui::MenuItem("Paged Inventory Grid"))
-                            createUITemplateWithUndo(UITemplateKind::PagedInventoryGrid);
-                        ImGui::Separator();
-                        if (ImGui::MenuItem("Skill Button"))
-                            createUITemplateWithUndo(UITemplateKind::SkillButton);
-                        if (ImGui::MenuItem("Equipment Slot"))
-                            createUITemplateWithUndo(UITemplateKind::EquipmentSlot);
-                        if (ImGui::MenuItem("Tooltip"))
-                            createUITemplateWithUndo(UITemplateKind::Tooltip);
-                        if (ImGui::MenuItem("Save Slot"))
-                            createUITemplateWithUndo(UITemplateKind::SaveSlot);
-                        if (ImGui::MenuItem("Skill Tree Node"))
-                            createUITemplateWithUndo(UITemplateKind::SkillTreeNode);
-                        if (ImGui::MenuItem("Combat Skill Slot"))
-                            createUITemplateWithUndo(UITemplateKind::CombatSkillSlot);
-                        ImGui::EndMenu();
-                    }
-                    ImGui::EndDisabled();
+                    DrawCreateUIMenuItems(ResolveUIParentID(m_SelectionContext), true);
                     ImGui::EndMenu();
                 }
 
@@ -465,6 +491,11 @@ namespace Wheatear {
         if (m_SelectionContext != entity)
             m_ScrollToSelection = true;
         m_SelectionContext = entity;
+    }
+
+    void SceneHierarchyPanel::SetEntityActivatedCallback(std::function<void(Entity)> callback)
+    {
+        m_EntityActivatedCallback = std::move(callback);
     }
 
 } // namespace Wheatear

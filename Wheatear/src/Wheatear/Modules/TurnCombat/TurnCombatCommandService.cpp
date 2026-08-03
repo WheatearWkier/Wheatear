@@ -29,14 +29,16 @@ namespace Wheatear::TurnCombatCommandService {
 
             if (skill.TargetRule == TurnTargetRule::Self)
             {
-                TurnCombatActionService::BeginAction(scene, level, actor, skill.Id, actor);
+                const std::string skillId = skill.Id;
+                TurnCombatActionService::BeginAction(scene, level, actor, skillId, actor);
                 return;
             }
 
             if (skill.TargetRule == TurnTargetRule::EnemyAll
                 || skill.TargetRule == TurnTargetRule::AllyAll)
             {
-                TurnCombatActionService::BeginAction(scene, level, actor, skill.Id, {});
+                const std::string skillId = skill.Id;
+                TurnCombatActionService::BeginAction(scene, level, actor, skillId, {});
                 return;
             }
 
@@ -149,7 +151,8 @@ namespace Wheatear::TurnCombatCommandService {
                 return;
             }
 
-            TurnCombatActionService::BeginAction(scene, level, actor, skill->Id, target);
+            const std::string skillId = skill->Id;
+            TurnCombatActionService::BeginAction(scene, level, actor, skillId, target);
         }
     }
 

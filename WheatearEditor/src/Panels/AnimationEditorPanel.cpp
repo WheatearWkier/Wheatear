@@ -1,6 +1,9 @@
 #include "wtpch.h"
 #include "AnimationEditorPanel.h"
 
+#include "Editor/EditorFloatingWindow.h"
+#include "Editor/EditorWidgets.h"
+
 #include <imgui/imgui.h>
 #include <imgui/imgui_internal.h>
 #include <glm/gtc/type_ptr.hpp>
@@ -16,6 +19,7 @@ namespace Wheatear {
     static constexpr float kLabelWidth = 150.0f;
     static constexpr float kRulerHeight = 36.0f;
 
+    using EditorWidgets::InputString;
 
     static void DrawInterpModeCombo(InterpolationMode& mode)
     {
@@ -36,19 +40,6 @@ namespace Wheatear {
             ImGui::EndCombo();
         }
     }
-
-    static bool InputString(const char* label, std::string& value, size_t capacity = 256)
-    {
-        std::vector<char> buffer(capacity, 0);
-        strncpy_s(buffer.data(), buffer.size(), value.c_str(), _TRUNCATE);
-        if (ImGui::InputText(label, buffer.data(), buffer.size()))
-        {
-            value = buffer.data();
-            return true;
-        }
-        return false;
-    }
-
 
     void AnimationEditorPanel::SetEntity(Entity entity)
     {
@@ -332,12 +323,13 @@ namespace Wheatear {
 
     void AnimationEditorPanel::OnImGuiRender(Timestep ts)
     {
-        ImGui::Begin("Animation Editor");
+        EditorFloatingWindow::Begin("Animation Editor", nullptr, 0, { 1180.0f, 720.0f });
+        EditorFloatingWindow::DrawToggleButton("Animation Editor");
 
         if (!m_Entity || !m_Animator)
         {
             ImGui::TextDisabled("Select an entity with a Sprite Animator component.");
-            ImGui::End();
+            EditorFloatingWindow::End();
             return;
         }
 
@@ -370,7 +362,7 @@ namespace Wheatear {
         ImGui::Separator();
         DrawFramesSection();
 
-        ImGui::End();
+        EditorFloatingWindow::End();
     }
 
 

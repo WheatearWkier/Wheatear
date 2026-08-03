@@ -52,7 +52,7 @@ namespace Wheatear {
     {
         bool        PlayOnStart = true;
         std::string LevelId = "CH02_MAIN_BearAwakening";
-        std::string TuningPath = "assets/vertical_slice/data/side_combat_tuning.yaml";
+        std::string TuningPath = "side.tuning";
         glm::vec2   ArenaMin = { -8.8f, -4.0f };
         glm::vec2   ArenaMax = { 8.8f, 4.6f };
         float       GroundY = -3.25f;

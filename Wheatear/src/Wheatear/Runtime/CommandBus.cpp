@@ -63,6 +63,13 @@ namespace Wheatear {
             return false;
         }
 
+        static bool StartsWithBuiltInGameplayPrefix(const std::string& command)
+        {
+            return StartsWith(command, "vn:")
+                || StartsWith(command, "turn:")
+                || StartsWith(command, "tactic:");
+        }
+
         static void RegisterCommandPrefix(std::vector<std::string>& prefixes, const std::string& prefix)
         {
             if (prefix.empty())
@@ -408,7 +415,8 @@ namespace Wheatear {
         static CommandResult ExecuteGameplayCommand(const std::string& command)
         {
             CommandResult result;
-            if (!StartsWithAnyRegisteredPrefix(command, GameplayCommandPrefixes()))
+            if (!StartsWithAnyRegisteredPrefix(command, GameplayCommandPrefixes())
+                && !StartsWithBuiltInGameplayPrefix(command))
                 return result;
 
             CommandBus::QueueGameplayCommand(command);
@@ -447,7 +455,8 @@ namespace Wheatear {
             || StartsWith(command, "ui:")
             || StartsWith(command, "event:")
             || StartsWithAnyRegisteredPrefix(command, NativeCommandPrefixes())
-            || StartsWithAnyRegisteredPrefix(command, GameplayCommandPrefixes());
+            || StartsWithAnyRegisteredPrefix(command, GameplayCommandPrefixes())
+            || StartsWithBuiltInGameplayPrefix(command);
     }
 
     CommandResult CommandBus::Execute(Scene* scene, const std::string& command)
@@ -480,6 +489,13 @@ namespace Wheatear {
     {
         if (!command.empty())
             RuntimeCommandQueue().push_back(command);
+    }
+
+    void CommandBus::ClearQueuedCommands()
+    {
+        RuntimeCommandQueue().clear();
+        GameplayCommandQueue().clear();
+        EventCommandQueue().clear();
     }
 
     std::vector<std::string> CommandBus::DrainRuntimeCommands()

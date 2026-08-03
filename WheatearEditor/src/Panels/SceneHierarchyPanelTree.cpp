@@ -245,6 +245,13 @@ namespace Wheatear {
         if (ImGui::IsItemClicked())
             m_SelectionContext = entity;
 
+        if (ImGui::IsItemHovered() && ImGui::IsMouseDoubleClicked(ImGuiMouseButton_Left))
+        {
+            m_SelectionContext = entity;
+            if (m_EntityActivatedCallback)
+                m_EntityActivatedCallback(entity);
+        }
+
         if (selected && m_ScrollToSelection)
         {
             ImGui::SetScrollHereY(0.5f);
@@ -255,9 +262,21 @@ namespace Wheatear {
 
         if (ImGui::BeginPopupContextItem())
         {
+            m_SelectionContext = entity;
+
+            const UUID uiParentID = ResolveUIParentID(entity);
+            if (static_cast<uint64_t>(uiParentID) != 0)
+            {
+                if (ImGui::BeginMenu("Create UI"))
+                {
+                    DrawCreateUIMenuItems(uiParentID, false);
+                    ImGui::EndMenu();
+                }
+                ImGui::Separator();
+            }
+
             if (ImGui::MenuItem("Rename"))
             {
-                m_SelectionContext = entity;
                 m_RenameRequested = true;
             }
 

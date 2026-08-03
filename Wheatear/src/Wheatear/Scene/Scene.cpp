@@ -207,7 +207,15 @@ namespace Wheatear {
             system->OnUpdateEditor(this, ts);
 
         if (auto* render = GetSystem<RenderSystem>())
-            render->RenderWithEditorCamera(this, camera);
+            render->RenderWithEditorCamera(this, camera, false);
+    }
+
+    void Scene::RenderWithSceneCamera(const Camera& camera,
+        const glm::mat4& cameraTransform,
+        bool includeUI)
+    {
+        if (auto* render = GetSystem<RenderSystem>())
+            render->RenderWithSceneCamera(this, camera, cameraTransform, includeUI);
     }
 
     void Scene::OnViewportResize(uint32_t width, uint32_t height)

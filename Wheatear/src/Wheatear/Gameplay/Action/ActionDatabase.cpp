@@ -11,6 +11,12 @@ namespace Wheatear::WAO {
         return recipes;
     }
 
+    uint64_t& ActionDatabase::RevisionCounter()
+    {
+        static uint64_t revision = 0;
+        return revision;
+    }
+
     void ActionDatabase::Register(const ActionRecipe& recipe)
     {
         if (recipe.Id.empty())
@@ -26,10 +32,12 @@ namespace Wheatear::WAO {
         if (it != recipes.end())
         {
             *it = recipe;
+            ++RevisionCounter();
             return;
         }
 
         recipes.push_back(recipe);
+        ++RevisionCounter();
     }
 
     const ActionRecipe* ActionDatabase::Find(const std::string& id)
@@ -57,6 +65,12 @@ namespace Wheatear::WAO {
     void ActionDatabase::Clear()
     {
         Recipes().clear();
+        ++RevisionCounter();
+    }
+
+    uint64_t ActionDatabase::Revision()
+    {
+        return RevisionCounter();
     }
 
 } // namespace Wheatear::WAO

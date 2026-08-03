@@ -121,6 +121,15 @@ namespace Wheatear {
             && normMouseY >= rect.Top && normMouseY <= rect.Bottom;
     }
 
+    void UIInputSystem::Reset()
+    {
+        s_MouseWasPressed = false;
+        s_DraggingPanel = entt::null;
+        s_DraggingScrollView = entt::null;
+        s_DraggingSkillTreeView = entt::null;
+        s_DragStartResolved = false;
+    }
+
     static bool PointInPanelDragHandle(const UIWidgetLayout::Rect& rect,
         const UIPanelComponent& panel,
         float normMouseX,

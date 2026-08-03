@@ -1,15 +1,16 @@
 #include "SideCombatDrawer.h"
 
+#include "Editor/EditorWidgets.h"
 #include "Editor/TextAssetEditor.h"
 #include "Modules/SideCombat/SideCombatTuningEditorPanel.h"
 #include "Panels/SceneHierarchy/ComponentDrawers.h"
+#include "Wheatear/Core/AssetAliasRegistry.h"
 #include "Wheatear/Scene/Components.h"
 
 #include <imgui/imgui.h>
 #include <glm/gtc/type_ptr.hpp>
 
 #include <algorithm>
-#include <cstring>
 #include <unordered_map>
 #include <vector>
 
@@ -17,25 +18,8 @@ namespace Wheatear {
 
     namespace {
 
-        static bool InputString(const char* label, std::string& value, size_t capacity = 160)
-        {
-            std::vector<char> buffer(capacity, 0);
-            strncpy_s(buffer.data(), buffer.size(), value.c_str(), _TRUNCATE);
-            if (ImGui::InputText(label, buffer.data(), buffer.size()))
-            {
-                value = buffer.data();
-                return true;
-            }
-            return false;
-        }
-
-        static void DrawTeamCombo(int& team)
-        {
-            static const char* labels[] = { "Neutral", "Player", "Enemy" };
-            int index = std::clamp(team, 0, 2);
-            if (ImGui::Combo("Team", &index, labels, 3))
-                team = index;
-        }
+        using EditorWidgets::DrawTeamCombo;
+        using EditorWidgets::InputString;
 
         static void DrawEnemyKindCombo(SideEnemyKind& kind)
         {
@@ -92,7 +76,7 @@ namespace Wheatear {
             if (ImGui::Button("Open Side Combat Tuning Editor"))
                 SideCombatEditorRequests::RequestOpenTuning(level.TuningPath);
             if (ImGui::CollapsingHeader("Raw Side Combat Tuning YAML"))
-                EditorUI::DrawTextAssetEditor("Side Combat Tuning YAML", "SideCombatTuningEditor", level.TuningPath, s_TuningEditors, 512 * 1024);
+                EditorUI::DrawTextAssetEditor("Side Combat Tuning YAML", "SideCombatTuningEditor", AssetAliasRegistry::Resolve(level.TuningPath), s_TuningEditors, 512 * 1024);
             ImGui::DragFloat2("Arena Min", glm::value_ptr(level.ArenaMin), 0.05f);
             ImGui::DragFloat2("Arena Max", glm::value_ptr(level.ArenaMax), 0.05f);
             ImGui::DragFloat("Ground Y", &level.GroundY, 0.02f, -20.0f, 20.0f);

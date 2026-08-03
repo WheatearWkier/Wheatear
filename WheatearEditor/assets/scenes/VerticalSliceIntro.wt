@@ -116,6 +116,7 @@ Entities:
       Rotation: 0
       Anchor: 4
       SortOrder: 10
+      ParentEntity: 930023401
     UIImageComponent:
       Color: [0.06, 0.07, 0.09, 0.88]
       TexturePath: ""
@@ -133,6 +134,7 @@ Entities:
       Rotation: 0
       Anchor: 0
       SortOrder: 20
+      ParentEntity: 930023401
     UITextComponent:
       Text: "角色"
       Color: [0.62, 0.92, 0.86, 1]
@@ -156,6 +158,7 @@ Entities:
       Rotation: 0
       Anchor: 0
       SortOrder: 21
+      ParentEntity: 930023401
     UITextComponent:
       Text: "对白文本"
       Color: [0.94, 0.92, 0.84, 1]
@@ -179,6 +182,7 @@ Entities:
       Rotation: 0
       Anchor: 0
       SortOrder: 22
+      ParentEntity: 930023401
     UITextComponent:
       Text: "点击 / 空格"
       Color: [0.88, 0.74, 0.42, 1]
@@ -233,6 +237,7 @@ Entities:
       Rotation: 0
       Anchor: 4
       SortOrder: 30
+      ParentEntity: 930023401
     UIButtonComponent:
       NormalColor: [0.1, 0.2, 0.22, 0.9]
       HoverColor: [0.16, 0.35, 0.34, 0.95]
@@ -261,6 +266,7 @@ Entities:
       Rotation: 0
       Anchor: 4
       SortOrder: 31
+      ParentEntity: 930023401
     UIButtonComponent:
       NormalColor: [0.1, 0.2, 0.22, 0.9]
       HoverColor: [0.16, 0.35, 0.34, 0.95]
@@ -289,6 +295,7 @@ Entities:
       Rotation: 0
       Anchor: 4
       SortOrder: 32
+      ParentEntity: 930023401
     UIButtonComponent:
       NormalColor: [0.1, 0.2, 0.22, 0.9]
       HoverColor: [0.16, 0.35, 0.34, 0.95]
@@ -317,6 +324,7 @@ Entities:
       Rotation: 0
       Anchor: 0
       SortOrder: 71
+      ParentEntity: 930023401
     UITextComponent:
       Text: "历史记录"
       Color: [0.88, 0.94, 0.95, 1]
@@ -340,6 +348,7 @@ Entities:
       Rotation: 0
       Anchor: 0
       SortOrder: 41
+      ParentEntity: 930023401
     UITextComponent:
       Text: "自动"
       Color: [0.72, 0.96, 0.74, 1]
@@ -363,6 +372,7 @@ Entities:
       Rotation: 0
       Anchor: 4
       SortOrder: 45
+      ParentEntity: 930023401
     UIAnimatorComponent:
       Preset: "slide_fade_in"
       PlayOnStart: true
@@ -389,6 +399,7 @@ Entities:
       Rotation: 0
       Anchor: 4
       SortOrder: 50
+      ParentEntity: 930023401
     UIAnimatorComponent:
       Preset: "hover_pulse"
       PlayOnStart: true
@@ -426,6 +437,7 @@ Entities:
       Rotation: 0
       Anchor: 4
       SortOrder: 51
+      ParentEntity: 930023401
     UIAnimatorComponent:
       Preset: "hover_pulse"
       PlayOnStart: true
@@ -463,6 +475,7 @@ Entities:
       Rotation: 0
       Anchor: 4
       SortOrder: 52
+      ParentEntity: 930023401
     UIAnimatorComponent:
       Preset: "hover_pulse"
       PlayOnStart: true
@@ -500,6 +513,7 @@ Entities:
       Rotation: 0
       Anchor: 4
       SortOrder: 53
+      ParentEntity: 930023401
     UIAnimatorComponent:
       Preset: "hover_pulse"
       PlayOnStart: true
@@ -537,6 +551,7 @@ Entities:
       Rotation: 0
       Anchor: 4
       SortOrder: 54
+      ParentEntity: 930023401
     UIAnimatorComponent:
       Preset: "hover_pulse"
       PlayOnStart: true
@@ -574,6 +589,7 @@ Entities:
       Rotation: 0
       Anchor: 4
       SortOrder: 55
+      ParentEntity: 930023401
     UIAnimatorComponent:
       Preset: "hover_pulse"
       PlayOnStart: true
@@ -611,6 +627,7 @@ Entities:
       Rotation: 0
       Anchor: 4
       SortOrder: 56
+      ParentEntity: 930023401
     UIAnimatorComponent:
       Preset: "hover_pulse"
       PlayOnStart: true
@@ -648,6 +665,7 @@ Entities:
       Rotation: 0
       Anchor: 4
       SortOrder: 70
+      ParentEntity: 930023401
     UIAnimatorComponent:
       Preset: "slide_fade_in"
       PlayOnStart: true
@@ -674,6 +692,7 @@ Entities:
       Rotation: 0
       Anchor: 4
       SortOrder: 72
+      ParentEntity: 930023401
     UIAnimatorComponent:
       Preset: "hover_pulse"
       PlayOnStart: true
@@ -711,6 +730,7 @@ Entities:
       Rotation: 0
       Anchor: 4
       SortOrder: 80
+      ParentEntity: 930023401
     UIAnimatorComponent:
       Preset: "slide_fade_in"
       PlayOnStart: true
@@ -737,6 +757,7 @@ Entities:
       Rotation: 0
       Anchor: 0
       SortOrder: 81
+      ParentEntity: 930023401
     UITextComponent:
       Text: "系统设置"
       Color: [0.9, 0.95, 0.96, 1]
@@ -760,6 +781,7 @@ Entities:
       Rotation: 0
       Anchor: 4
       SortOrder: 82
+      ParentEntity: 930023401
     UIButtonComponent:
       NormalColor: [0.16, 0.24, 0.31, 0.88]
       HoverColor: [0.24, 0.38, 0.47, 0.96]
@@ -788,6 +810,7 @@ Entities:
       Rotation: 0
       Anchor: 4
       SortOrder: 83
+      ParentEntity: 930023401
     UIButtonComponent:
       NormalColor: [0.16, 0.24, 0.31, 0.88]
       HoverColor: [0.24, 0.38, 0.47, 0.96]
@@ -816,6 +839,7 @@ Entities:
       Rotation: 0
       Anchor: 4
       SortOrder: 84
+      ParentEntity: 930023401
     UIButtonComponent:
       NormalColor: [0.16, 0.24, 0.31, 0.88]
       HoverColor: [0.24, 0.38, 0.47, 0.96]
@@ -844,6 +868,7 @@ Entities:
       Rotation: 0
       Anchor: 4
       SortOrder: 85
+      ParentEntity: 930023401
     UIButtonComponent:
       NormalColor: [0.16, 0.24, 0.31, 0.88]
       HoverColor: [0.24, 0.38, 0.47, 0.96]
@@ -872,6 +897,7 @@ Entities:
       Rotation: 0
       Anchor: 4
       SortOrder: 86
+      ParentEntity: 930023401
     UIAnimatorComponent:
       Preset: "hover_pulse"
       PlayOnStart: true
@@ -909,6 +935,7 @@ Entities:
       Rotation: 0
       Anchor: 4
       SortOrder: 90
+      ParentEntity: 930023401
     UITextComponent:
       Text: "已保存"
       Color: [0.92, 0.98, 0.86, 1]
@@ -932,6 +959,7 @@ Entities:
       Rotation: 0.0
       Anchor: 0
       SortOrder: 80
+      ParentEntity: 930023401
     UIPanelComponent:
       BackgroundColor: [0.04, 0.045, 0.055, 0.88]
       BorderColor: [0.8, 0.64, 0.36, 0.9]
@@ -950,6 +978,7 @@ Entities:
       Rotation: 0.0
       Anchor: 0
       SortOrder: 86
+      ParentEntity: 930023401
     UIImageComponent:
       Color: [1, 1, 1, 1.0]
       TexturePath: assets/vertical_slice/ui/icons/icon_save.png
@@ -967,6 +996,7 @@ Entities:
       Rotation: 0.0
       Anchor: 0
       SortOrder: 86
+      ParentEntity: 930023401
     UITextComponent:
       Text: "存档 / 读取"
       Color: [1.0, 0.94, 0.78, 1]
@@ -990,6 +1020,7 @@ Entities:
       Rotation: 0.0
       Anchor: 0
       SortOrder: 86
+      ParentEntity: 930023401
     UITextComponent:
       Text: "存档 / 读取"
       Color: [0.94, 0.96, 0.88, 1]
@@ -1013,6 +1044,7 @@ Entities:
       Rotation: 0.0
       Anchor: 0
       SortOrder: 90
+      ParentEntity: 930023401
     UIAnimatorComponent:
       Preset: "hover_pulse"
       PlayOnStart: true
@@ -1050,6 +1082,7 @@ Entities:
       Rotation: 0.0
       Anchor: 0
       SortOrder: 90
+      ParentEntity: 930023401
     UIAnimatorComponent:
       Preset: "hover_pulse"
       PlayOnStart: true
@@ -1087,6 +1120,7 @@ Entities:
       Rotation: 0.0
       Anchor: 0
       SortOrder: 90
+      ParentEntity: 930023401
     UIAnimatorComponent:
       Preset: "hover_pulse"
       PlayOnStart: true

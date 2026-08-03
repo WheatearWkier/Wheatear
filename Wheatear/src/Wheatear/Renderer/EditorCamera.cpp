@@ -42,6 +42,24 @@ namespace Wheatear {
         UpdateView();
     }
 
+    void EditorCamera::Frame(const glm::vec3& focalPoint, float orbitDistance)
+    {
+        Frame(focalPoint, glm::vec3(0.0f), orbitDistance);
+    }
+
+    void EditorCamera::Frame(const glm::vec3& focalPoint,
+        const glm::vec3& rotation,
+        float orbitDistance)
+    {
+        m_Mode = Mode::Orbit;
+        m_Pitch = -rotation.x;
+        m_Yaw = -rotation.y;
+        m_FocalPoint = focalPoint;
+        m_Distance = std::max(orbitDistance, 1.0f);
+        UpdateProjection();
+        UpdateView();
+    }
+
     void EditorCamera::UpdateProjection()
     {
         m_AspectRatio = m_ViewportWidth / m_ViewportHeight;

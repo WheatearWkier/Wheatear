@@ -1,14 +1,14 @@
 #include "wtpch.h"
 #include "TacticalCombatActionService.h"
 
-#include "TacticalCombatActionCatalog.h"
 #include "TacticalCombatBoardService.h"
 #include "TacticalCombatFeedbackService.h"
 #include "TacticalCombatSkillService.h"
 #include "TacticalCombatVisualService.h"
-#include "Wheatear/Gameplay/Action/ActionDatabase.h"
 #include "Wheatear/Gameplay/Action/ActionDebugHistory.h"
+#include "Wheatear/Gameplay/Action/ActionRecipeQueries.h"
 #include "Wheatear/Gameplay/Action/StateRegistry.h"
+#include "Wheatear/Core/AssetAliasRegistry.h"
 #include "Wheatear/Modules/Common/GameplayCombatService.h"
 #include "Wheatear/Modules/Common/GameplayEntityService.h"
 
@@ -21,12 +21,7 @@ namespace Wheatear::TacticalCombatActionService {
         static const WAO::ActionRecipe* ResolveRecipe(
             const TacticalCombatSkillService::TacticalSkillDefinition& skill)
         {
-            const std::string recipeId = TacticalCombatActionCatalog::ActionRecipeId(skill.Id);
-            if (const WAO::ActionRecipe* recipe = WAO::ActionDatabase::Find(recipeId))
-                return recipe;
-
-            WAO::ActionDatabase::Register(TacticalCombatActionCatalog::BuildActionRecipe(skill));
-            return WAO::ActionDatabase::Find(recipeId);
+            return WAO::FindRecipeOrWarn(WAO::ComposeActionId("tactical", skill.Id), "TacticalCombat");
         }
 
         static const char* StatusId(TacticalCombatSkillService::TacticalStatusEffectKind effect)
@@ -168,7 +163,7 @@ namespace Wheatear::TacticalCombatActionService {
         const WAO::ActionRecipe* recipe = ResolveRecipe(*skill);
         const std::string actionId = recipe
             ? recipe->Id
-            : TacticalCombatActionCatalog::ActionRecipeId(level.RuntimeActionSkillId);
+            : WAO::ComposeActionId("tactical", level.RuntimeActionSkillId);
         WAO::EffectLedger ledger;
         const WAO::ActionIntent intent = BuildIntent(actor, target, actionId);
         ledger.BeginAction(intent);
@@ -258,7 +253,7 @@ namespace Wheatear::TacticalCombatActionService {
         }
 
         TacticalCombatFeedbackService::PlaySound(
-            "assets/vertical_slice/tactical_combat/audio/tac_hit.wav", 0.44f);
+            AssetAliasRegistry::Path("tactical.audio.hit"), 0.44f);
         WAO::ActionDebugHistory::Record(ledger, true, "Tactical skill applied");
         level.RuntimeMessage = actorUnit.DisplayName + " 对 " + targetUnit.DisplayName
             + " 造成 " + std::to_string((int)applied) + " 伤害。";
@@ -275,7 +270,7 @@ namespace Wheatear::TacticalCombatActionService {
             level.RuntimeResultTimer = 0.0f;
             level.RuntimeMessage = "战斗胜利。";
             TacticalCombatFeedbackService::PlaySound(
-                "assets/vertical_slice/tactical_combat/audio/tac_victory.wav", 0.46f);
+                AssetAliasRegistry::Path("tactical.audio.victory"), 0.46f);
             return;
         }
         if (!TacticalCombatBoardService::HasAliveTeam(
