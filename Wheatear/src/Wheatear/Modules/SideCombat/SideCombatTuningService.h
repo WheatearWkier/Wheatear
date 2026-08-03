@@ -211,7 +211,7 @@ namespace Wheatear::SideCombatTuningService {
         SideEnemyTuning Enemy;
         SidePickupTuning Pickup;
         float LaneMinY = -3.55f;
-        float LaneMaxY = -1.30f;
+        float LaneMaxY = -0.65f;
         float LaneSpeedScale = 0.72f;
         float LaneAcceleration = 28.0f;
         float SortScale = 0.015f;

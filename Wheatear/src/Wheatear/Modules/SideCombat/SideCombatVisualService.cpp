@@ -11,6 +11,7 @@
 
 #include <algorithm>
 #include <cmath>
+#include <cstdint>
 
 namespace Wheatear::SideCombatVisualService {
 
@@ -101,6 +102,35 @@ namespace Wheatear::SideCombatVisualService {
             return "idle";
         }
 
+        static uint32_t SelectVisualActionSequence(
+            entt::registry& registry,
+            entt::entity entity,
+            const SideCombatantComponent& combatant,
+            const std::string& clipKey)
+        {
+            if (combatant.Team == (int)SideCombatTeam::Player &&
+                registry.all_of<SidePlayerControllerComponent>(entity))
+            {
+                const auto& controller = registry.get<SidePlayerControllerComponent>(entity);
+                const bool actionActive = !controller.RuntimeActionAttackId.empty() &&
+                    controller.RuntimeActionTimer < controller.RuntimeActionDuration;
+                if (actionActive && controller.RuntimeActionAttackId == clipKey)
+                    return controller.RuntimeActionSequence;
+            }
+
+            if (combatant.Team == (int)SideCombatTeam::Enemy &&
+                registry.all_of<SideEnemyAIComponent>(entity))
+            {
+                const auto& ai = registry.get<SideEnemyAIComponent>(entity);
+                const bool actionActive = !ai.RuntimeActionAttackId.empty() &&
+                    ai.RuntimeActionTimer < ai.RuntimeActionDuration;
+                if (actionActive && ai.RuntimeActionAttackId == clipKey)
+                    return ai.RuntimeActionSequence;
+            }
+
+            return 0;
+        }
+
         static void ApplyCombatantAnimation(
             entt::registry& registry,
             entt::entity entity,
@@ -111,6 +141,7 @@ namespace Wheatear::SideCombatVisualService {
         {
             const SideAnimationSetTuning& set = SelectAnimationSet(registry, entity, combatant, tuning);
             const std::string clipKey = SelectVisualClipKey(registry, entity, combatant, set);
+            const uint32_t actionSequence = SelectVisualActionSequence(registry, entity, combatant, clipKey);
             auto clipIt = set.Clips.find(clipKey);
             if (clipIt == set.Clips.end())
                 return;
@@ -149,9 +180,11 @@ namespace Wheatear::SideCombatVisualService {
             if (!animator->DefaultClipName.empty() && animator->CurrentClipName.empty())
                 animator->CurrentClipName = animator->DefaultClipName;
 
-            if (combatant.RuntimeVisualClipKey != clipKey)
+            if (combatant.RuntimeVisualClipKey != clipKey ||
+                combatant.RuntimeVisualActionSequence != actionSequence)
             {
                 combatant.RuntimeVisualClipKey = clipKey;
+                combatant.RuntimeVisualActionSequence = actionSequence;
                 combatant.RuntimeVisualTimer = 0.0f;
 
                 if (animator->Clips.find(clipKey) != animator->Clips.end())

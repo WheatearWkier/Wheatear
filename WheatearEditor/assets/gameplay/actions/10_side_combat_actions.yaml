@@ -115,7 +115,7 @@ actions:
     sound: assets/vertical_slice/side_combat/audio/magic_cast.wav
     effect: side.vfx.magic_bolt
     cooldown: 0.64
-    duration: 1.45
+    duration: 0.50
     startup: 0.10
     recovery: 0.20
     hitTime: 0.10

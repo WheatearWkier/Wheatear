@@ -175,7 +175,7 @@ Entities:
       ArenaMax: [8.8, 3.2]
       GroundY: -3.25
       LaneMinY: -3.55
-      LaneMaxY: -1.25
+      LaneMaxY: -0.65
       PlayerEntityName: SC_Player
       BossEntityName: SC_Boss_BearHusband
       FadeEntityName: SC_Fade

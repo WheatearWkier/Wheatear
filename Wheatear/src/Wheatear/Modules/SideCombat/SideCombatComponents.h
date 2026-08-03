@@ -57,7 +57,7 @@ namespace Wheatear {
         glm::vec2   ArenaMax = { 8.8f, 4.6f };
         float       GroundY = -3.25f;
         float       LaneMinY = -3.55f;
-        float       LaneMaxY = -1.30f;
+        float       LaneMaxY = -0.65f;
 
         std::string PlayerEntityName = "SC_Player";
         std::string BossEntityName = "SC_Boss_BearHusband";
@@ -156,6 +156,7 @@ namespace Wheatear {
         float     RuntimeAirVelocity = 0.0f;
         std::string RuntimeVisualClipKey = "";
         float     RuntimeVisualTimer = 0.0f;
+        uint32_t  RuntimeVisualActionSequence = 0;
 
         SideCombatantComponent() = default;
         SideCombatantComponent(const SideCombatantComponent&) = default;
@@ -202,6 +203,7 @@ namespace Wheatear {
         float RuntimeActionCancelEnd = 0.0f;
         float RuntimeActionMovementScale = 1.0f;
         bool  RuntimeActionHitboxSpawned = false;
+        uint32_t RuntimeActionSequence = 0;
 
         SidePlayerControllerComponent() = default;
         SidePlayerControllerComponent(const SidePlayerControllerComponent&) = default;
@@ -231,6 +233,7 @@ namespace Wheatear {
         float RuntimeActionMovementScale = 1.0f;
         float RuntimeActionFacing = 1.0f;
         bool  RuntimeActionHitboxSpawned = false;
+        uint32_t RuntimeActionSequence = 0;
 
         SideEnemyAIComponent() = default;
         SideEnemyAIComponent(const SideEnemyAIComponent&) = default;

@@ -151,6 +151,8 @@ namespace Wheatear::SideCombatActionService {
         controller.RuntimeActionCancelEnd = cancelEnd;
         controller.RuntimeActionMovementScale = ResolveRecipeMovementScale(recipe, attack.MovementScale);
         controller.RuntimeActionHitboxSpawned = false;
+        if (++controller.RuntimeActionSequence == 0)
+            ++controller.RuntimeActionSequence;
         PlaySfx(recipe && !recipe->SoundPath.empty() ? recipe->SoundPath : attack.SwingSound, attack.SoundVolume);
         ResolveRecipeAction(recipe, "SideCombat.Player", "start " + entityName);
     }
@@ -194,6 +196,8 @@ namespace Wheatear::SideCombatActionService {
         ai.RuntimeActionMovementScale = ResolveRecipeMovementScale(recipe, attack.MovementScale);
         ai.RuntimeActionFacing = facing;
         ai.RuntimeActionHitboxSpawned = false;
+        if (++ai.RuntimeActionSequence == 0)
+            ++ai.RuntimeActionSequence;
         PlaySfx(recipe && !recipe->SoundPath.empty() ? recipe->SoundPath : attack.SwingSound, attack.SoundVolume);
         ResolveRecipeAction(recipe, "SideCombat.Enemy", "start " + entityName);
     }

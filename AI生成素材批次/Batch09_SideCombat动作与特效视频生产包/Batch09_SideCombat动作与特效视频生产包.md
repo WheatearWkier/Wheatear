@@ -215,6 +215,8 @@ WheatearEditor/assets/vertical_slice/side_combat/characters/protag_magic_swordsm
 
 本批主角动作清单继承 Batch03。视频文件名、抽帧目录名和最终 strip 名必须使用同一个 clip ID。
 
+> 下面的历史候选清单保留用于动作设计参考。当前 Sandbox 的实际替换任务以 4.3.1 的运行时清单为准；运行时键名、帧数、FPS 和 loop 状态不要再从旧表推断。
+
 | Clip ID | 视频源建议 | 继承 profile | 抽帧建议 | 说明 |
 | --- | --- | --- | ---: | --- |
 | `protag_idle` | `videos/characters/protag_idle.mp4` | `body_512` | 6-8 | 呼吸待机，魔剑微光 |
@@ -227,7 +229,7 @@ WheatearEditor/assets/vertical_slice/side_combat/characters/protag_magic_swordsm
 | `protag_basic2` | `videos/characters/protag_basic2.mp4` | `slash_640` | 5-7 | 第二段反手斩 |
 | `protag_basic3` | `videos/characters/protag_basic3.mp4` | `slash_heavy_768` | 7-9 | 第三段收尾斩 |
 | `protag_air_basic` | `videos/characters/protag_air_basic.mp4` | `slash_640` | 5-7 | 空中跳斩 |
-| `protag_launcher` | `videos/characters/protag_launcher.mp4` | `vertical_640` | 7-10 | 裂空上挑 |
+| `protag_launcher` | `videos/characters/protag_launcher.mp4` | `body_512` | 2（取第 2/4 帧） | 裂空上挑 |
 | `protag_air_chase` | `videos/characters/protag_air_chase.mp4` | `dash_768` | 7-10 | 空中追击 |
 | `protag_magic_bolt` | `videos/characters/protag_magic_bolt.mp4` | `body_512` | 5-7 | 只生施法动作，飞行魔法弹另生 VFX |
 | `protag_ally_support` | `videos/characters/protag_ally_support.mp4` | `slash_640` | 6-8 | 借队友力量支援 |
@@ -294,6 +296,79 @@ WheatearEditor/assets/vertical_slice/side_combat/characters/protag_magic_swordsm
 | `boss_bear_husband_fall` | `videos/enemies_boss/boss_bear_husband_fall.mp4` | `boss_bear_husband` | 4-5 | 下落 |
 | `boss_bear_husband_break_stun` | `videos/enemies_boss/boss_bear_husband_break_stun.mp4` | `boss_bear_husband` | 6-8 | 破防眩晕 |
 | `boss_bear_husband_dead` | `videos/enemies_boss/boss_bear_husband_dead.mp4` | `boss_bear_husband_wide` | 8-10 | 非血腥倒下 |
+
+### 4.3.1 当前 Sandbox 运行时替换清单（2026-08-03）
+
+这张表是下一轮生成和后续替换的唯一执行清单，来自当前
+`WheatearEditor/assets/vertical_slice/data/side_combat_tuning.yaml`、
+`10_side_combat_actions.yaml` 以及 Batch03/Batch04 的 `sheet_params.yaml`。
+
+- `runtime key` 是引擎真正读取的动作名；不要把旧设计名直接当成运行时文件名。
+- `frameCount`、`FPS`、`loop` 是当前默认值。收到新的 sheet 后，如果 JSON 或参数表给出的实际帧数不同，以当前 sheet 为准，再同步 YAML。
+- `profile` 决定每帧固定 canvas、pivot 和 baseline。不要把 `renderScale` 烘焙进图片；它是当前运行时补偿参数。
+- 角色本体只保留身体、武器本体和少量贴身光。剑气、冲击波、魔法弹、魔法阵、尘土和远距离拖尾继续单独做 VFX。
+
+#### 主角
+
+| runtime key | 建议输出 clip ID | Profile / 单帧尺寸 | 帧数 | FPS | loop | 当前状态 |
+| --- | --- | --- | ---: | ---: | --- | --- |
+| `idle` | `protag_idle` | `body_512` / 512x512 | 8 | 8 | true | 已由当前 ZIP 替换 |
+| `run` | `protag_run` | `body_512` / 512x512 | 4 | 8 | true | 已由当前 ZIP 替换 |
+| `jump` | `protag_jump` | `body_512` / 512x512 | 1 | 18 | false | 已由 `jump.zip` 替换 |
+| `fall` | `protag_fall` | `body_512` / 512x512 | 1 | 12 | true | 已由当前 ZIP 替换 |
+| `hit` | `protag_hit` | `body_512` / 512x512 | 4 | 14 | false | 已由当前 ZIP 替换 |
+| `dead` | `protag_dead` | `floor_1024` / 1024x512 | 8 | 12 | false | 待生成 |
+| `basic1` | `protag_basic1` | `body_512` / 512x512 | 4 | 14 | false | 已由当前 ZIP 替换 |
+| `basic2` | `protag_basic2` | `body_512` / 512x512 | 4 | 12 | false | 已由当前 ZIP 替换 |
+| `basic3` | `protag_basic3` | `body_512` / 512x512 | 4 | 10 | false | 已由当前 ZIP 替换 |
+| `air_basic` | `protag_air_basic` | `body_512` / 512x512 | 4 | 14 | false | 已由当前 ZIP 替换 |
+| `launcher` | `protag_launcher` | `body_512` / 512x512 | 2 | 10 | false | 已由 `launcher.zip` 第 2/4 帧替换 |
+| `air_chase` | `protag_air_chase` | `dash_tall_768` / 768x640 | 8 | 24 | false | 待生成 |
+| `magic_bolt` | `protag_magic_bolt` | `body_512` / 512x512 | 9 | 20 | false | 待生成 |
+| `ally_support` | `protag_ally_support` | `slash_640` / 640x512 | 8 | 18 | false | 待生成 |
+| `break_limit` | `protag_break_limit` | `dash_1024` / 1024x512 | 12 | 24 | false | 待生成 |
+
+主角当前剩余 5 个运行时待生成动作：`dead`、`air_chase`、`magic_bolt`、
+`ally_support`、`break_limit`。`jump_loop` 和 `land` 的 sheet 已更新为 1 帧，
+但目前不是 Sandbox 的独立运行时引用；旧表里的 `launched`、`knockdown`、
+`recover` 除非后续状态机新增这些键，否则暂不生成。
+
+#### 爪兽小怪
+
+| runtime key | 建议输出 clip ID | Profile / 单帧尺寸 | 帧数 | FPS | loop | 当前状态 |
+| --- | --- | --- | ---: | ---: | --- | --- |
+| `idle` | `en_claw_beast_idle` | `small_enemy` / 512x384 | 4 | 7 | true | 待生成 |
+| `run` | `en_claw_beast_run` | `small_enemy` / 512x384 | 5 | 11 | true | 待生成 |
+| `hit` | `en_claw_beast_hit` | `small_enemy_wide` / 768x384 | 3 | 12 | false | 待生成 |
+| `fall` | `en_claw_beast_fall` | `small_enemy_air_wide` / 768x512 | 3 | 9 | true | 待生成 |
+| `dead` | `en_claw_beast_dead` | `small_enemy_wide` / 768x384 | 4 | 7 | false | 待生成 |
+| `enemy_claw` | `en_claw_beast_attack` | `small_enemy_wide` / 768x384 | 4 | 14 | false | 待生成 |
+
+#### 黑熊丈夫 Boss
+
+| runtime key | 建议输出 clip ID | Profile / 单帧尺寸 | 帧数 | FPS | loop | 当前状态 |
+| --- | --- | --- | ---: | ---: | --- | --- |
+| `idle` | `boss_bear_husband_idle` | `boss_bear_husband` / 1024x768 | 4 | 6 | true | 待生成 |
+| `run` | `boss_bear_husband_walk` | `boss_bear_husband` / 1024x768 | 5 | 8 | true | 待生成 |
+| `hit` | `boss_bear_husband_hit` | `boss_bear_husband` / 1024x768 | 3 | 10 | false | 待生成 |
+| `fall` | `boss_bear_husband_fall` | `boss_bear_husband` / 1024x768 | 3 | 8 | true | 待生成 |
+| `dead` | `boss_bear_husband_dead` | `boss_bear_husband_wide` / 1280x768 | 4 | 7 | false | 待生成 |
+| `enemy_claw` | `boss_bear_husband_attack` | `boss_bear_husband_wide` / 1280x768 | 4 | 12 | false | 待生成 |
+| `bear_charge` | `boss_bear_husband_charge` | `boss_bear_husband` / 1024x768 | 4 | 12 | false | 待生成 |
+| `bear_shockwave` | `boss_bear_husband_shockwave` | `boss_bear_husband_wide` / 1280x768 | 4 | 12 | false | 待生成 |
+
+#### 交付格式
+
+每个动作建议单独一个 ZIP，至少包含：
+
+```text
+spritesheet_1.png
+spritesheet_1.json
+```
+
+`spritesheet_1.png` 必须是横向固定格 sprite sheet，格子从左到右、从第 0 帧开始；JSON 必须能读出每格的 `x/y/w/h` 和总帧数。不要 trim、不要跨格、不要把相邻帧拼成不等宽图片。若同时提供逐帧 PNG，文件名使用同一个 clip ID 和三位帧号。
+
+实际替换时会按以下顺序处理：读取 sheet JSON/参数表 -> 裁成运行时单帧 PNG -> 更新 `side_combat_tuning.yaml` 的帧数和必要时 FPS -> 清理旧的多余帧 -> 重建 player package -> 做 Sandbox 启动检查。因此文档目标帧数和实际 sheet 帧数不一致时，以实际 sheet 为准。
 
 ### 4.4 动作弧
 

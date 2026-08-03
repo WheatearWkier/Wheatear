@@ -109,7 +109,7 @@ pickup:
 
 movement:
   laneMinY: -3.55
-  laneMaxY: -1.25
+  laneMaxY: -0.65
   laneSpeedScale: 1.0
   laneAcceleration: 30.0
   sortScale: 0.015
@@ -120,17 +120,17 @@ visuals:
   shadowAirFadeHeight: 3.8
   shadowOffset: [0.0, -0.02]
   playerAnimations:
-    idle: { pattern: "assets/vertical_slice/side_combat/characters/protag_idle_{frame2}.png", frameCount: 8, frameRate: 12.0, loop: true, renderScale: [1.0, 1.0], renderOffset: [0.0, 0.3398] }
-    run: { pattern: "assets/vertical_slice/side_combat/characters/protag_run_{frame2}.png", frameCount: 10, frameRate: 18.0, loop: true, renderScale: [1.0, 1.0], renderOffset: [0.0, 0.3398] }
-    jump: { pattern: "assets/vertical_slice/side_combat/characters/protag_jump_{frame2}.png", frameCount: 4, frameRate: 18.0, loop: false, renderScale: [1.0, 1.0], renderOffset: [0.0, 0.3398] }
-    fall: { pattern: "assets/vertical_slice/side_combat/characters/protag_fall_{frame2}.png", frameCount: 4, frameRate: 12.0, loop: true, renderScale: [1.0, 1.25], renderOffset: [0.0, 0.4453] }
-    hit: { pattern: "assets/vertical_slice/side_combat/characters/protag_hit_{frame2}.png", frameCount: 5, frameRate: 18.0, loop: false, renderScale: [1.0, 1.0], renderOffset: [0.0, 0.3398] }
+    idle: { pattern: "assets/vertical_slice/side_combat/characters/protag_idle_{frame2}.png", frameCount: 8, frameRate: 8.0, loop: true, renderScale: [1.0, 1.0], renderOffset: [0.0, 0.3398] }
+    run: { pattern: "assets/vertical_slice/side_combat/characters/protag_run_{frame2}.png", frameCount: 4, frameRate: 8.0, loop: true, renderScale: [1.0, 1.0], renderOffset: [0.0, 0.3398] }
+    jump: { pattern: "assets/vertical_slice/side_combat/characters/protag_jump_{frame2}.png", frameCount: 1, frameRate: 18.0, loop: false, renderScale: [1.0, 1.0], renderOffset: [0.0, 0.3398] }
+    fall: { pattern: "assets/vertical_slice/side_combat/characters/protag_fall_{frame2}.png", frameCount: 1, frameRate: 12.0, loop: true, renderScale: [1.0, 1.0], renderOffset: [0.0, 0.3398] }
+    hit: { pattern: "assets/vertical_slice/side_combat/characters/protag_hit_{frame2}.png", frameCount: 4, frameRate: 14.0, loop: false, renderScale: [1.0, 1.0], renderOffset: [0.0, 0.3398] }
     dead: { pattern: "assets/vertical_slice/side_combat/characters/protag_dead_{frame2}.png", frameCount: 8, frameRate: 12.0, loop: false, renderScale: [2.0, 1.0], renderOffset: [0.0, 0.3398] }
-    basic1: { pattern: "assets/vertical_slice/side_combat/characters/protag_basic1_{frame2}.png", frameCount: 7, frameRate: 24.0, loop: false, renderScale: [1.25, 1.0], renderOffset: [0.0, 0.3398] }
-    basic2: { pattern: "assets/vertical_slice/side_combat/characters/protag_basic2_{frame2}.png", frameCount: 7, frameRate: 24.0, loop: false, renderScale: [1.25, 1.0], renderOffset: [0.0, 0.3398] }
-    basic3: { pattern: "assets/vertical_slice/side_combat/characters/protag_basic3_{frame2}.png", frameCount: 9, frameRate: 24.0, loop: false, renderScale: [2.0, 1.0], renderOffset: [0.0, 0.3398] }
-    air_basic: { pattern: "assets/vertical_slice/side_combat/characters/protag_air_basic_{frame2}.png", frameCount: 7, frameRate: 24.0, loop: false, renderScale: [1.25, 1.25], renderOffset: [0.0, 0.4453] }
-    launcher: { pattern: "assets/vertical_slice/side_combat/characters/protag_launcher_{frame2}.png", frameCount: 9, frameRate: 24.0, loop: false, renderScale: [1.25, 1.5], renderOffset: [0.0, 0.5781] }
+    basic1: { pattern: "assets/vertical_slice/side_combat/characters/protag_basic1_{frame2}.png", frameCount: 4, frameRate: 14.0, loop: false, renderScale: [1.0, 1.0], renderOffset: [0.0, 0.3398] }
+    basic2: { pattern: "assets/vertical_slice/side_combat/characters/protag_basic2_{frame2}.png", frameCount: 4, frameRate: 12.0, loop: false, renderScale: [1.0, 1.0], renderOffset: [0.0, 0.3398] }
+    basic3: { pattern: "assets/vertical_slice/side_combat/characters/protag_basic3_{frame2}.png", frameCount: 4, frameRate: 10.0, loop: false, renderScale: [1.0, 1.0], renderOffset: [0.0, 0.3398] }
+    air_basic: { pattern: "assets/vertical_slice/side_combat/characters/protag_air_basic_{frame2}.png", frameCount: 4, frameRate: 14.0, loop: false, renderScale: [1.0, 1.0], renderOffset: [0.0, 0.3398] }
+    launcher: { pattern: "assets/vertical_slice/side_combat/characters/protag_launcher_{frame2}.png", frameCount: 2, frameRate: 10.0, loop: false, renderScale: [1.0, 1.0], renderOffset: [0.0, 0.3398] }
     air_chase: { pattern: "assets/vertical_slice/side_combat/characters/protag_air_chase_{frame2}.png", frameCount: 8, frameRate: 24.0, loop: false, renderScale: [1.5, 1.25], renderOffset: [0.0, 0.4453] }
     magic_bolt: { pattern: "assets/vertical_slice/side_combat/characters/protag_magic_bolt_{frame2}.png", frameCount: 9, frameRate: 20.0, loop: false, renderScale: [1.0, 1.0], renderOffset: [0.0, 0.3398] }
     ally_support: { pattern: "assets/vertical_slice/side_combat/characters/protag_ally_support_{frame2}.png", frameCount: 8, frameRate: 18.0, loop: false, renderScale: [1.25, 1.0], renderOffset: [0.0, 0.3398] }

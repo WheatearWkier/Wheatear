@@ -268,6 +268,7 @@ namespace Wheatear::SideCombatLifecycleService {
             combatant.RuntimeOnGround = true;
             combatant.RuntimeVisualClipKey.clear();
             combatant.RuntimeVisualTimer = 0.0f;
+            combatant.RuntimeVisualActionSequence = 0;
 
             if (registry.all_of<SidePlayerControllerComponent>(e))
             {
@@ -315,6 +316,7 @@ namespace Wheatear::SideCombatLifecycleService {
             controller.RuntimeActionCancelEnd = 0.0f;
             controller.RuntimeActionMovementScale = 1.0f;
             controller.RuntimeActionHitboxSpawned = false;
+            controller.RuntimeActionSequence = 0;
         }
 
         for (auto e : registry.view<SideEnemyAIComponent>())
@@ -332,6 +334,7 @@ namespace Wheatear::SideCombatLifecycleService {
             ai.RuntimeActionMovementScale = 1.0f;
             ai.RuntimeActionFacing = 1.0f;
             ai.RuntimeActionHitboxSpawned = false;
+            ai.RuntimeActionSequence = 0;
         }
 
         ApplyWaveActivation(scene, level);

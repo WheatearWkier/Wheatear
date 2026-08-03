@@ -110,7 +110,7 @@ profiles:
 clips:
   protag_idle_lowfi_strip:
     frameCount: 8
-    frameRate: 12
+    frameRate: 8
     profile: body_512
     cellWidth: 512
     cellHeight: 512
@@ -123,8 +123,8 @@ clips:
     pivotBaselineStable: true
     weaponHand: right
   protag_run_lowfi_strip:
-    frameCount: 10
-    frameRate: 18
+    frameCount: 4
+    frameRate: 8
     profile: body_512
     cellWidth: 512
     cellHeight: 512
@@ -137,7 +137,7 @@ clips:
     pivotBaselineStable: true
     weaponHand: right
   protag_jump_start_lowfi_strip:
-    frameCount: 4
+    frameCount: 1
     frameRate: 18
     profile: body_512
     cellWidth: 512
@@ -151,11 +151,11 @@ clips:
     pivotBaselineStable: true
     weaponHand: right
   protag_jump_loop_lowfi_strip:
-    frameCount: 4
+    frameCount: 1
     frameRate: 12
-    profile: body_tall_640
+    profile: body_512
     cellWidth: 512
-    cellHeight: 640
+    cellHeight: 512
     sourceFrames: WheatearEditor/assets/vertical_slice/source_frames/protag_jump_loop_lowfi/protag_jump_loop_lowfi_{frame:03}.png
     output: WheatearEditor/assets/vertical_slice/side_combat/sheets/protag_jump_loop_lowfi_strip.png
     loop: true
@@ -165,21 +165,21 @@ clips:
     pivotBaselineStable: true
     weaponHand: right
   protag_fall_lowfi_strip:
-    frameCount: 4
+    frameCount: 1
     frameRate: 12
-    profile: body_tall_640
+    profile: body_512
     cellWidth: 512
-    cellHeight: 640
+    cellHeight: 512
     sourceFrames: WheatearEditor/assets/vertical_slice/source_frames/protag_fall_lowfi/protag_fall_lowfi_{frame:03}.png
     output: WheatearEditor/assets/vertical_slice/side_combat/sheets/protag_fall_lowfi_strip.png
-    loop: false
+    loop: true
     assembledFromSourceFrames: true
     noCrossCellBleed: true
     fixedCanvasPerClip: true
     pivotBaselineStable: true
     weaponHand: right
   protag_land_lowfi_strip:
-    frameCount: 4
+    frameCount: 1
     frameRate: 18
     profile: body_512
     cellWidth: 512
@@ -193,10 +193,10 @@ clips:
     pivotBaselineStable: true
     weaponHand: right
   protag_basic1_lowfi_strip:
-    frameCount: 7
-    frameRate: 24
-    profile: slash_640
-    cellWidth: 640
+    frameCount: 4
+    frameRate: 14
+    profile: body_512
+    cellWidth: 512
     cellHeight: 512
     sourceFrames: WheatearEditor/assets/vertical_slice/source_frames/protag_basic1_lowfi/protag_basic1_lowfi_{frame:03}.png
     output: WheatearEditor/assets/vertical_slice/side_combat/sheets/protag_basic1_lowfi_strip.png
@@ -207,10 +207,10 @@ clips:
     pivotBaselineStable: true
     weaponHand: right
   protag_basic2_lowfi_strip:
-    frameCount: 7
-    frameRate: 24
-    profile: slash_640
-    cellWidth: 640
+    frameCount: 4
+    frameRate: 12
+    profile: body_512
+    cellWidth: 512
     cellHeight: 512
     sourceFrames: WheatearEditor/assets/vertical_slice/source_frames/protag_basic2_lowfi/protag_basic2_lowfi_{frame:03}.png
     output: WheatearEditor/assets/vertical_slice/side_combat/sheets/protag_basic2_lowfi_strip.png
@@ -221,10 +221,10 @@ clips:
     pivotBaselineStable: true
     weaponHand: right
   protag_basic3_lowfi_strip:
-    frameCount: 9
-    frameRate: 24
-    profile: dash_1024
-    cellWidth: 1024
+    frameCount: 4
+    frameRate: 10
+    profile: body_512
+    cellWidth: 512
     cellHeight: 512
     sourceFrames: WheatearEditor/assets/vertical_slice/source_frames/protag_basic3_lowfi/protag_basic3_lowfi_{frame:03}.png
     output: WheatearEditor/assets/vertical_slice/side_combat/sheets/protag_basic3_lowfi_strip.png
@@ -235,11 +235,11 @@ clips:
     pivotBaselineStable: true
     weaponHand: right
   protag_air_basic_lowfi_strip:
-    frameCount: 7
-    frameRate: 24
-    profile: vertical_640
-    cellWidth: 640
-    cellHeight: 640
+    frameCount: 4
+    frameRate: 14
+    profile: body_512
+    cellWidth: 512
+    cellHeight: 512
     sourceFrames: WheatearEditor/assets/vertical_slice/source_frames/protag_air_basic_lowfi/protag_air_basic_lowfi_{frame:03}.png
     output: WheatearEditor/assets/vertical_slice/side_combat/sheets/protag_air_basic_lowfi_strip.png
     loop: false
@@ -249,11 +249,11 @@ clips:
     pivotBaselineStable: true
     weaponHand: right
   protag_launcher_lowfi_strip:
-    frameCount: 9
-    frameRate: 24
-    profile: vertical_tall_768
-    cellWidth: 640
-    cellHeight: 768
+    frameCount: 2
+    frameRate: 10
+    profile: body_512
+    cellWidth: 512
+    cellHeight: 512
     sourceFrames: WheatearEditor/assets/vertical_slice/source_frames/protag_launcher_lowfi/protag_launcher_lowfi_{frame:03}.png
     output: WheatearEditor/assets/vertical_slice/side_combat/sheets/protag_launcher_lowfi_strip.png
     loop: false
@@ -319,8 +319,8 @@ clips:
     pivotBaselineStable: true
     weaponHand: right
   protag_hurt_lowfi_strip:
-    frameCount: 5
-    frameRate: 18
+    frameCount: 4
+    frameRate: 14
     profile: body_512
     cellWidth: 512
     cellHeight: 512

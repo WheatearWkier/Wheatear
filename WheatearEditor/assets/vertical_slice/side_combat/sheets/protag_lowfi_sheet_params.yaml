@@ -27,8 +27,8 @@ profiles:
 
 clips:
   protag_run_lowfi_strip:
-    frameCount: 10
-    frameRate: 18
+    frameCount: 4
+    frameRate: 8
     profile: body_512
     sourceFrames: WheatearEditor/assets/vertical_slice/source_frames/protag_run_lowfi/protag_run_lowfi_{frame:03}.png
     output: WheatearEditor/assets/vertical_slice/side_combat/sheets/protag_run_lowfi_strip.png
@@ -36,9 +36,9 @@ clips:
     assembledFromSourceFrames: true
     noCrossCellBleed: true
   protag_basic1_lowfi_strip:
-    frameCount: 7
-    frameRate: 24
-    profile: slash_640
+    frameCount: 4
+    frameRate: 14
+    profile: body_512
     sourceFrames: WheatearEditor/assets/vertical_slice/source_frames/protag_basic1_lowfi/protag_basic1_lowfi_{frame:03}.png
     output: WheatearEditor/assets/vertical_slice/side_combat/sheets/protag_basic1_lowfi_strip.png
     loop: false

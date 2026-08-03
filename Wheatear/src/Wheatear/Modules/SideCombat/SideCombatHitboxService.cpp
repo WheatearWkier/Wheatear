@@ -48,6 +48,13 @@ namespace Wheatear::SideCombatHitboxService {
             }
         }
 
+        static bool ShouldKeepVisualAfterHit(const SideHitboxComponent& hitbox)
+        {
+            return hitbox.AttackKind == SideAttackKind::Launcher &&
+                !hitbox.TextureFramePattern.empty() &&
+                hitbox.TextureFrameCount > 1;
+        }
+
     } // namespace
 
     Entity CreateHitbox(Scene* scene,
@@ -201,6 +208,9 @@ namespace Wheatear::SideCombatHitboxService {
                 continue;
             }
 
+            if (hitbox.RuntimeHitSomething && hitbox.DestroyOnHit && ShouldKeepVisualAfterHit(hitbox))
+                continue;
+
             for (auto targetEntity : registry.view<TransformComponent, SideCombatantComponent>())
             {
                 auto& target = registry.get<SideCombatantComponent>(targetEntity);
@@ -234,6 +244,9 @@ namespace Wheatear::SideCombatHitboxService {
                 hitbox.RuntimeHitSomething = true;
                 if (hitbox.DestroyOnHit)
                 {
+                    if (ShouldKeepVisualAfterHit(hitbox))
+                        break;
+
                     hitboxesToDestroy.push_back(e);
                     break;
                 }
