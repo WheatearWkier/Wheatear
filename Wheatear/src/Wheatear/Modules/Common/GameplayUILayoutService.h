@@ -77,6 +77,7 @@ namespace Wheatear::GameplayUILayoutService {
 
     WHEATEAR_API void SetPageItem(Scene* scene, const std::string& entityName, Entity pager, int page);
     WHEATEAR_API void SetButtonCommand(Scene* scene, const std::string& entityName, const std::string& command);
+    WHEATEAR_API void SetSliderCommand(Scene* scene, const std::string& entityName, const std::string& command);
     WHEATEAR_API void SetButtonPalette(Scene* scene,
         const std::string& entityName,
         glm::vec4 normal,

@@ -380,6 +380,38 @@ namespace Wheatear {
             return FindOwningCanvas(entity, layout) == canvas;
         }
 
+        static bool IsEditorHidden(Entity entity)
+        {
+            return entity && entity.HasComponent<EditorHiddenComponent>();
+        }
+
+        static bool IsEditorUIHidden(Entity entity,
+            UIWidgetLayout::Context& layout,
+            std::unordered_set<uint32_t>& visiting)
+        {
+            if (!entity || !layout.ScenePtr)
+                return false;
+
+            if (entity.HasComponent<EditorHiddenComponent>())
+                return true;
+
+            if (!entity.HasComponent<UIWidgetComponent>())
+                return false;
+
+            const uint32_t key = static_cast<uint32_t>(static_cast<entt::entity>(entity));
+            if (!visiting.insert(key).second)
+                return false;
+
+            auto& registry = layout.ScenePtr->GetRegistry();
+            const auto& widget = entity.GetComponent<UIWidgetComponent>();
+            const entt::entity parentID = layout.ResolveReference(widget.ParentEntity);
+            const bool hidden = parentID != entt::null && registry.valid(parentID)
+                ? IsEditorUIHidden(Entity{ parentID, layout.ScenePtr }, layout, visiting)
+                : false;
+            visiting.erase(key);
+            return hidden;
+        }
+
         static float EntityFrameRadius(Entity entity)
         {
             if (!entity)
@@ -591,6 +623,8 @@ namespace Wheatear {
         for (auto entityID : registry.view<TransformComponent>())
         {
             Entity entity{ entityID, m_ActiveScene.get() };
+            if (IsEditorHidden(entity))
+                continue;
             if (entity.HasComponent<UIWidgetComponent>() || entity.HasComponent<CameraComponent>())
                 continue;
             if (!entity.HasComponent<SpriteRendererComponent>()
@@ -822,7 +856,7 @@ namespace Wheatear {
     {
         ImGui::Begin("Stats");
 
-        const std::string hoveredName = m_HoveredEntity
+        const std::string hoveredName = m_HoveredEntity && !IsEditorHidden(m_HoveredEntity)
             ? m_HoveredEntity.GetComponent<TagComponent>().Tag
             : "None";
         ImGui::Text("Hovered Entity: %s", hoveredName.c_str());
@@ -1036,7 +1070,10 @@ namespace Wheatear {
         const ImVec2 canvasMax = { regionMin.x + regionSize.x, regionMin.y + regionSize.y };
         UIWidgetLayout::Context layout(m_ActiveScene.get());
         Entity selected = m_SceneHierarchyPanel->GetSelectedEntity();
+        std::unordered_set<uint32_t> selectedHiddenVisiting;
+        const bool selectedHiddenInEditor = IsEditorUIHidden(selected, layout, selectedHiddenVisiting);
         const bool selectedInsideThisCanvas = selected && selected != canvasEntity
+            && !selectedHiddenInEditor
             && BelongsToCanvas(selected, canvasEntity, layout);
         const bool canvasIsSelectionContext = selected == canvasEntity || selectedInsideThisCanvas;
 
@@ -1061,7 +1098,10 @@ namespace Wheatear {
             Entity entity{ entityID, m_ActiveScene.get() };
             if (!BelongsToCanvas(entity, canvasEntity, layout))
                 continue;
-            if (!UIWidgetLayout::ResolveVisible(layout, entityID))
+            std::unordered_set<uint32_t> hiddenVisiting;
+            if (IsEditorUIHidden(entity, layout, hiddenVisiting))
+                continue;
+            if (!UIWidgetLayout::ResolveEditorVisible(layout, entityID))
                 continue;
 
             const UIWidgetLayout::Rect rect = UIWidgetLayout::ResolveRect(layout, entityID);
@@ -1216,6 +1256,13 @@ namespace Wheatear {
         }
 
         if (!selected || !selected.HasComponent<UIWidgetComponent>())
+        {
+            drawList->PopClipRect();
+            return;
+        }
+
+        std::unordered_set<uint32_t> handleHiddenVisiting;
+        if (IsEditorUIHidden(selected, layout, handleHiddenVisiting))
         {
             drawList->PopClipRect();
             return;
@@ -1408,7 +1455,9 @@ namespace Wheatear {
             && ImGui::IsMouseDoubleClicked(ImGuiMouseButton_Left)
             && !Input::IsKeyPressed(WT_KEY_LEFT_ALT))
         {
-            if (m_HoveredEntity && m_HoveredEntity.HasComponent<TransformComponent>())
+            if (m_HoveredEntity
+                && !IsEditorHidden(m_HoveredEntity)
+                && m_HoveredEntity.HasComponent<TransformComponent>())
                 FrameEditorCameraOnEntity(m_HoveredEntity);
             else
                 FrameEditorCameraOnScene();
@@ -1434,9 +1483,10 @@ namespace Wheatear {
 
         Entity selected = m_SceneHierarchyPanel->GetSelectedEntity();
         const bool selectedIsUI = selected && selected.HasComponent<UIWidgetComponent>();
+        const bool selectedHiddenInEditor = selected && IsEditorHidden(selected);
 
         // Gizmo
-        if (selected && !selectedIsUI && m_GizmoType != -1 && m_SceneState == SceneState::Edit)
+        if (selected && !selectedIsUI && !selectedHiddenInEditor && m_GizmoType != -1 && m_SceneState == SceneState::Edit)
         {
             ImGuizmo::SetOrthographic(false);
             ImGuizmo::SetDrawlist();
@@ -1498,7 +1548,7 @@ namespace Wheatear {
                     static_cast<entt::entity>(static_cast<uint32_t>(entity)));
         };
 
-        if (isValidEntity(m_HoveredEntity))
+        if (isValidEntity(m_HoveredEntity) && !IsEditorHidden(m_HoveredEntity))
             return m_HoveredEntity;
 
         return PickSceneSpriteEntityAtViewportPoint(screenMouse);
@@ -1535,7 +1585,10 @@ namespace Wheatear {
             Entity entity{ entityID, m_ActiveScene.get() };
             if (entity == canvasEntity || !BelongsToCanvas(entity, canvasEntity, layout))
                 continue;
-            if (!UIWidgetLayout::ResolveVisible(layout, entityID))
+            std::unordered_set<uint32_t> hiddenVisiting;
+            if (IsEditorUIHidden(entity, layout, hiddenVisiting))
+                continue;
+            if (!UIWidgetLayout::ResolveEditorVisible(layout, entityID))
                 continue;
 
             const UIWidgetLayout::Rect rect = UIWidgetLayout::ResolveRect(layout, entityID);
@@ -1584,6 +1637,10 @@ namespace Wheatear {
 
         for (auto entityID : view)
         {
+            Entity entity{ entityID, m_ActiveScene.get() };
+            if (IsEditorHidden(entity))
+                continue;
+
             auto [transform, sprite] = view.get<TransformComponent, SpriteRendererComponent>(entityID);
             if (sprite.Color.a <= 0.01f)
                 continue;
@@ -1625,7 +1682,7 @@ namespace Wheatear {
                 * std::max(maxPoint.y - minPoint.y, 0.0f);
             if (!picked || z > bestZ || (z == bestZ && area < bestArea))
             {
-                picked = Entity{ entityID, m_ActiveScene.get() };
+                picked = entity;
                 bestZ = z;
                 bestArea = area;
             }

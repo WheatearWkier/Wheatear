@@ -1,5 +1,379 @@
 ﻿Scene: VerticalSlicePostFake
 Entities:
+  - Entity: 990000010
+    TagComponent:
+      Tag: VN_Settings_MasterVolumeLabel
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    UIWidgetComponent:
+      Visible: false
+      EditorVisible: true
+      Position: [0.027778, 0.382759]
+      Size: [0.37037, 0.103448]
+      Rotation: 0
+      Anchor: 0
+      SortOrder: 88
+      ParentEntity: 910000027
+    UITextComponent:
+      Text: "Master 100%"
+      Color: [0.88, 0.98, 0.93, 1]
+      FontSize: 30
+      FontPath: assets/fonts/wqy-microhei.ttc
+      ShadowColor: [0.02, 0.025, 0.03, 0.78]
+      ShadowOffset: [1.4, 1.4]
+      OutlineColor: [0, 0, 0, 0.86]
+      OutlineThickness: 1.05
+  - Entity: 990000011
+    TagComponent:
+      Tag: VN_Settings_MasterVolumeSlider
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    UIWidgetComponent:
+      Visible: false
+      EditorVisible: true
+      Position: [0.444444, 0.394828]
+      Size: [0.37037, 0.051724]
+      Rotation: 0
+      Anchor: 0
+      SortOrder: 89
+      ParentEntity: 910000027
+    UISliderComponent:
+      Value: 100
+      MinValue: 0
+      MaxValue: 100
+      TrackColor: [0.08, 0.10, 0.12, 0.92]
+      FillColor: [0.32, 0.74, 0.78, 0.96]
+      HandleColor: [0.92, 0.98, 0.94, 1]
+      HoverColor: [1, 0.88, 0.48, 1]
+      OnValueChangedFunction: "progression:set_master_volume"
+  - Entity: 990000012
+    TagComponent:
+      Tag: VN_Settings_MasterVolumeDown
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    UIWidgetComponent:
+      Visible: false
+      EditorVisible: true
+      Position: [0.851852, 0.374138]
+      Size: [0.101852, 0.094828]
+      Rotation: 0
+      Anchor: 0
+      SortOrder: 90
+      ParentEntity: 910000027
+    UITextComponent:
+      Text: "-"
+      Color: [0.94, 0.96, 0.92, 1]
+      FontSize: 24
+      FontPath: assets/fonts/wqy-microhei.ttc
+      ShadowColor: [0.02, 0.025, 0.03, 0.78]
+      ShadowOffset: [1.4, 1.4]
+      OutlineColor: [0, 0, 0, 0.86]
+      OutlineThickness: 1.05
+    UIButtonComponent:
+      NormalColor: [0.12, 0.18, 0.22, 0.90]
+      HoverColor: [0.25, 0.42, 0.46, 0.96]
+      PressedColor: [0.08, 0.12, 0.15, 1]
+      OnClickFunction: "progression:master_volume_down"
+  - Entity: 990000013
+    TagComponent:
+      Tag: VN_Settings_MasterVolumeUp
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    UIWidgetComponent:
+      Visible: false
+      EditorVisible: true
+      Position: [0.962963, 0.374138]
+      Size: [0.101852, 0.094828]
+      Rotation: 0
+      Anchor: 0
+      SortOrder: 90
+      ParentEntity: 910000027
+    UITextComponent:
+      Text: "+"
+      Color: [0.94, 0.96, 0.92, 1]
+      FontSize: 24
+      FontPath: assets/fonts/wqy-microhei.ttc
+      ShadowColor: [0.02, 0.025, 0.03, 0.78]
+      ShadowOffset: [1.4, 1.4]
+      OutlineColor: [0, 0, 0, 0.86]
+      OutlineThickness: 1.05
+    UIButtonComponent:
+      NormalColor: [0.12, 0.18, 0.22, 0.90]
+      HoverColor: [0.25, 0.42, 0.46, 0.96]
+      PressedColor: [0.08, 0.12, 0.15, 1]
+      OnClickFunction: "progression:master_volume_up"
+  - Entity: 990000014
+    TagComponent:
+      Tag: VN_Settings_BGMVolumeLabel
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    UIWidgetComponent:
+      Visible: false
+      EditorVisible: true
+      Position: [0.027778, 0.503448]
+      Size: [0.37037, 0.103448]
+      Rotation: 0
+      Anchor: 0
+      SortOrder: 88
+      ParentEntity: 910000027
+    UITextComponent:
+      Text: "BGM 100%"
+      Color: [0.88, 0.98, 0.93, 1]
+      FontSize: 30
+      FontPath: assets/fonts/wqy-microhei.ttc
+      ShadowColor: [0.02, 0.025, 0.03, 0.78]
+      ShadowOffset: [1.4, 1.4]
+      OutlineColor: [0, 0, 0, 0.86]
+      OutlineThickness: 1.05
+  - Entity: 990000015
+    TagComponent:
+      Tag: VN_Settings_BGMVolumeSlider
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    UIWidgetComponent:
+      Visible: false
+      EditorVisible: true
+      Position: [0.444444, 0.515517]
+      Size: [0.37037, 0.051724]
+      Rotation: 0
+      Anchor: 0
+      SortOrder: 89
+      ParentEntity: 910000027
+    UISliderComponent:
+      Value: 100
+      MinValue: 0
+      MaxValue: 100
+      TrackColor: [0.08, 0.10, 0.12, 0.92]
+      FillColor: [0.32, 0.74, 0.78, 0.96]
+      HandleColor: [0.92, 0.98, 0.94, 1]
+      HoverColor: [1, 0.88, 0.48, 1]
+      OnValueChangedFunction: "progression:set_bgm_volume"
+  - Entity: 990000016
+    TagComponent:
+      Tag: VN_Settings_BGMVolumeDown
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    UIWidgetComponent:
+      Visible: false
+      EditorVisible: true
+      Position: [0.851852, 0.494828]
+      Size: [0.101852, 0.094828]
+      Rotation: 0
+      Anchor: 0
+      SortOrder: 90
+      ParentEntity: 910000027
+    UITextComponent:
+      Text: "-"
+      Color: [0.94, 0.96, 0.92, 1]
+      FontSize: 24
+      FontPath: assets/fonts/wqy-microhei.ttc
+      ShadowColor: [0.02, 0.025, 0.03, 0.78]
+      ShadowOffset: [1.4, 1.4]
+      OutlineColor: [0, 0, 0, 0.86]
+      OutlineThickness: 1.05
+    UIButtonComponent:
+      NormalColor: [0.12, 0.18, 0.22, 0.90]
+      HoverColor: [0.25, 0.42, 0.46, 0.96]
+      PressedColor: [0.08, 0.12, 0.15, 1]
+      OnClickFunction: "progression:bgm_volume_down"
+  - Entity: 990000017
+    TagComponent:
+      Tag: VN_Settings_BGMVolumeUp
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    UIWidgetComponent:
+      Visible: false
+      EditorVisible: true
+      Position: [0.962963, 0.494828]
+      Size: [0.101852, 0.094828]
+      Rotation: 0
+      Anchor: 0
+      SortOrder: 90
+      ParentEntity: 910000027
+    UITextComponent:
+      Text: "+"
+      Color: [0.94, 0.96, 0.92, 1]
+      FontSize: 24
+      FontPath: assets/fonts/wqy-microhei.ttc
+      ShadowColor: [0.02, 0.025, 0.03, 0.78]
+      ShadowOffset: [1.4, 1.4]
+      OutlineColor: [0, 0, 0, 0.86]
+      OutlineThickness: 1.05
+    UIButtonComponent:
+      NormalColor: [0.12, 0.18, 0.22, 0.90]
+      HoverColor: [0.25, 0.42, 0.46, 0.96]
+      PressedColor: [0.08, 0.12, 0.15, 1]
+      OnClickFunction: "progression:bgm_volume_up"
+  - Entity: 990000018
+    TagComponent:
+      Tag: VN_Settings_SFXVolumeLabel
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    UIWidgetComponent:
+      Visible: false
+      EditorVisible: true
+      Position: [0.027778, 0.624138]
+      Size: [0.37037, 0.103448]
+      Rotation: 0
+      Anchor: 0
+      SortOrder: 88
+      ParentEntity: 910000027
+    UITextComponent:
+      Text: "SFX 100%"
+      Color: [0.88, 0.98, 0.93, 1]
+      FontSize: 30
+      FontPath: assets/fonts/wqy-microhei.ttc
+      ShadowColor: [0.02, 0.025, 0.03, 0.78]
+      ShadowOffset: [1.4, 1.4]
+      OutlineColor: [0, 0, 0, 0.86]
+      OutlineThickness: 1.05
+  - Entity: 990000019
+    TagComponent:
+      Tag: VN_Settings_SFXVolumeSlider
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    UIWidgetComponent:
+      Visible: false
+      EditorVisible: true
+      Position: [0.444444, 0.636207]
+      Size: [0.37037, 0.051724]
+      Rotation: 0
+      Anchor: 0
+      SortOrder: 89
+      ParentEntity: 910000027
+    UISliderComponent:
+      Value: 100
+      MinValue: 0
+      MaxValue: 100
+      TrackColor: [0.08, 0.10, 0.12, 0.92]
+      FillColor: [0.32, 0.74, 0.78, 0.96]
+      HandleColor: [0.92, 0.98, 0.94, 1]
+      HoverColor: [1, 0.88, 0.48, 1]
+      OnValueChangedFunction: "progression:set_sfx_volume"
+  - Entity: 990000020
+    TagComponent:
+      Tag: VN_Settings_SFXVolumeDown
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    UIWidgetComponent:
+      Visible: false
+      EditorVisible: true
+      Position: [0.851852, 0.615517]
+      Size: [0.101852, 0.094828]
+      Rotation: 0
+      Anchor: 0
+      SortOrder: 90
+      ParentEntity: 910000027
+    UITextComponent:
+      Text: "-"
+      Color: [0.94, 0.96, 0.92, 1]
+      FontSize: 24
+      FontPath: assets/fonts/wqy-microhei.ttc
+      ShadowColor: [0.02, 0.025, 0.03, 0.78]
+      ShadowOffset: [1.4, 1.4]
+      OutlineColor: [0, 0, 0, 0.86]
+      OutlineThickness: 1.05
+    UIButtonComponent:
+      NormalColor: [0.12, 0.18, 0.22, 0.90]
+      HoverColor: [0.25, 0.42, 0.46, 0.96]
+      PressedColor: [0.08, 0.12, 0.15, 1]
+      OnClickFunction: "progression:sfx_volume_down"
+  - Entity: 990000021
+    TagComponent:
+      Tag: VN_Settings_SFXVolumeUp
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    UIWidgetComponent:
+      Visible: false
+      EditorVisible: true
+      Position: [0.962963, 0.615517]
+      Size: [0.101852, 0.094828]
+      Rotation: 0
+      Anchor: 0
+      SortOrder: 90
+      ParentEntity: 910000027
+    UITextComponent:
+      Text: "+"
+      Color: [0.94, 0.96, 0.92, 1]
+      FontSize: 24
+      FontPath: assets/fonts/wqy-microhei.ttc
+      ShadowColor: [0.02, 0.025, 0.03, 0.78]
+      ShadowOffset: [1.4, 1.4]
+      OutlineColor: [0, 0, 0, 0.86]
+      OutlineThickness: 1.05
+    UIButtonComponent:
+      NormalColor: [0.12, 0.18, 0.22, 0.90]
+      HoverColor: [0.25, 0.42, 0.46, 0.96]
+      PressedColor: [0.08, 0.12, 0.15, 1]
+      OnClickFunction: "progression:sfx_volume_up"
+
+  - Entity: 990000001
+    TagComponent:
+      Tag: VN_MusicNoticePanel
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    UIWidgetComponent:
+      Visible: false
+      EditorVisible: true
+      Position: [0.03, 0.047]
+      Size: [0.30, 0.058]
+      Rotation: 0
+      Anchor: 0
+      SortOrder: 5200
+      ParentEntity: 930029741
+    UIPanelComponent:
+      BackgroundColor: [0.025, 0.052, 0.070, 0]
+      BorderColor: [0.45, 0.88, 0.94, 0]
+      BorderThickness: 0
+      ClipChildren: true
+      Draggable: false
+      ConstrainDragToParent: true
+      DragHandleHeight: 0
+    UIImageComponent:
+      Color: [1, 1, 1, 0.92]
+      TexturePath: assets/vertical_slice/ui/atlases/vn_ui_atlas.png
+      UVMin: [0.225, 0]
+      UVMax: [0.575, 0.121212125]
+
+    UITextComponent:
+      Text: "BGM Preview"
+      Color: [0.84, 0.96, 1, 1]
+      FontSize: 24
+      FontPath: assets/fonts/wqy-microhei.ttc
+      Padding: [18, 8, 18, 8]
+      HorizontalAlign: 1
+      VerticalAlign: 1
+      ShadowColor: [0, 0, 0, 0.62]
+      ShadowOffset: [1, 1]
+      OutlineColor: [0.01, 0.02, 0.025, 0.88]
+      OutlineThickness: 0.85
+
   - Entity: 930029742
     TagComponent:
       Tag: FlowController
@@ -13,6 +387,7 @@ Entities:
       RunOnStart: false
       RunOnce: false
       Enabled: true
+
   - Entity: 930029741
     TagComponent:
       Tag: WT_UI_Canvas
@@ -31,6 +406,7 @@ Entities:
       Rotation: 0
       Anchor: 0
       SortOrder: 0
+
   - Entity: 910000001
     TagComponent:
       Tag: VN_Camera
@@ -49,6 +425,7 @@ Entities:
         OrthographicFar: 1
       Primary: true
       FixedAspectRatio: false
+
   - Entity: 910000002
     TagComponent:
       Tag: VN_Background
@@ -60,6 +437,7 @@ Entities:
       Color: [1, 1, 1, 1]
       Texture: assets\vertical_slice\vn\backgrounds\bg_forest_after_bear.png
       TilingFactor: 1
+
   - Entity: 910000003
     TagComponent:
       Tag: VN_Floor
@@ -70,6 +448,7 @@ Entities:
     SpriteRendererComponent:
       Color: [1, 1, 1, 0]
       TilingFactor: 1
+
   - Entity: 910000004
     TagComponent:
       Tag: VN_Window
@@ -80,6 +459,7 @@ Entities:
     SpriteRendererComponent:
       Color: [1, 1, 1, 0]
       TilingFactor: 1
+
   - Entity: 910000005
     TagComponent:
       Tag: VN_Character_Mira
@@ -91,6 +471,7 @@ Entities:
       Color: [1, 1, 1, 1]
       Texture: assets\vertical_slice\vn\portraits\mentor_serious.png
       TilingFactor: 1
+
   - Entity: 910000006
     TagComponent:
       Tag: VN_Character_Leo
@@ -102,6 +483,7 @@ Entities:
       Color: [1, 1, 1, 0.58]
       Texture: assets\vertical_slice\vn\portraits\protag_school_shocked.png
       TilingFactor: 1
+
   - Entity: 910000007
     TagComponent:
       Tag: VN_DialoguePanel
@@ -119,7 +501,10 @@ Entities:
       ParentEntity: 930029741
     UIImageComponent:
       Color: [0.06, 0.07, 0.09, 0.88]
-      TexturePath: ""
+      TexturePath: assets/vertical_slice/ui/atlases/vn_ui_atlas.png
+      UVMin: [0.11, 0.64899]
+      UVMax: [0.889688, 0.948232]
+
   - Entity: 910000008
     TagComponent:
       Tag: VN_SpeakerText
@@ -129,12 +514,12 @@ Entities:
       Scale: [1, 1, 1]
     UIWidgetComponent:
       Visible: true
-      Position: [0.125, 0.645]
-      Size: [0.25, 0.06]
+      Position: [0.042683, 0.104167]
+      Size: [0.304878, 0.25]
       Rotation: 0
       Anchor: 0
       SortOrder: 20
-      ParentEntity: 930029741
+      ParentEntity: 910000007
     UITextComponent:
       Text: "角色"
       Color: [0.62, 0.92, 0.86, 1]
@@ -144,6 +529,7 @@ Entities:
       ShadowOffset: [2.0, 2.0]
       OutlineColor: [0.01, 0.01, 0.012, 0.86]
       OutlineThickness: 1.25
+
   - Entity: 910000009
     TagComponent:
       Tag: VN_BodyText
@@ -153,12 +539,12 @@ Entities:
       Scale: [1, 1, 1]
     UIWidgetComponent:
       Visible: true
-      Position: [0.125, 0.715]
-      Size: [0.7, 0.14]
+      Position: [0.042683, 0.395833]
+      Size: [0.853659, 0.583333]
       Rotation: 0
       Anchor: 0
       SortOrder: 21
-      ParentEntity: 930029741
+      ParentEntity: 910000007
     UITextComponent:
       Text: "对白文本"
       Color: [0.94, 0.92, 0.84, 1]
@@ -168,6 +554,7 @@ Entities:
       ShadowOffset: [2.2, 2.2]
       OutlineColor: [0.01, 0.01, 0.012, 0.94]
       OutlineThickness: 1.8
+
   - Entity: 910000010
     TagComponent:
       Tag: VN_AdvanceHint
@@ -177,12 +564,12 @@ Entities:
       Scale: [1, 1, 1]
     UIWidgetComponent:
       Visible: true
-      Position: [0.53, 0.875]
-      Size: [0.42, 0.045]
+      Position: [0.536585, 1.0625]
+      Size: [0.512195, 0.1875]
       Rotation: 0
       Anchor: 0
       SortOrder: 22
-      ParentEntity: 930029741
+      ParentEntity: 910000007
     UITextComponent:
       Text: "点击 / 空格"
       Color: [0.88, 0.74, 0.42, 1]
@@ -192,6 +579,7 @@ Entities:
       ShadowOffset: [2.0, 2.0]
       OutlineColor: [0.01, 0.01, 0.012, 0.86]
       OutlineThickness: 1.25
+
   - Entity: 910000011
     TagComponent:
       Tag: VN_Controller
@@ -223,6 +611,7 @@ Entities:
       SystemMessageEntityName: VN_SystemMessage
       SaveDirectory: assets/saves
       AutoLoadSlot: 0
+
   - Entity: 910000012
     TagComponent:
       Tag: VN_Choice_1
@@ -238,6 +627,11 @@ Entities:
       Anchor: 4
       SortOrder: 30
       ParentEntity: 930029741
+    UIImageComponent:
+      Color: [1, 1, 1, 0.95]
+      TexturePath: assets/vertical_slice/ui/atlases/vn_ui_atlas.png
+      UVMin: [0.083437, 0.136995]
+      UVMax: [0.479063, 0.256944]
     UIButtonComponent:
       NormalColor: [0.1, 0.2, 0.22, 0.9]
       HoverColor: [0.16, 0.35, 0.34, 0.95]
@@ -252,6 +646,7 @@ Entities:
       ShadowOffset: [2.0, 2.0]
       OutlineColor: [0.01, 0.01, 0.012, 0.86]
       OutlineThickness: 1.25
+
   - Entity: 910000013
     TagComponent:
       Tag: VN_Choice_2
@@ -267,6 +662,11 @@ Entities:
       Anchor: 4
       SortOrder: 31
       ParentEntity: 930029741
+    UIImageComponent:
+      Color: [1, 1, 1, 0.95]
+      TexturePath: assets/vertical_slice/ui/atlases/vn_ui_atlas.png
+      UVMin: [0.083437, 0.136995]
+      UVMax: [0.479063, 0.256944]
     UIButtonComponent:
       NormalColor: [0.1, 0.2, 0.22, 0.9]
       HoverColor: [0.16, 0.35, 0.34, 0.95]
@@ -281,6 +681,7 @@ Entities:
       ShadowOffset: [2.0, 2.0]
       OutlineColor: [0.01, 0.01, 0.012, 0.86]
       OutlineThickness: 1.25
+
   - Entity: 910000014
     TagComponent:
       Tag: VN_Choice_3
@@ -296,6 +697,11 @@ Entities:
       Anchor: 4
       SortOrder: 32
       ParentEntity: 930029741
+    UIImageComponent:
+      Color: [1, 1, 1, 0.95]
+      TexturePath: assets/vertical_slice/ui/atlases/vn_ui_atlas.png
+      UVMin: [0.083437, 0.136995]
+      UVMax: [0.479063, 0.256944]
     UIButtonComponent:
       NormalColor: [0.1, 0.2, 0.22, 0.9]
       HoverColor: [0.16, 0.35, 0.34, 0.95]
@@ -310,6 +716,7 @@ Entities:
       ShadowOffset: [2.0, 2.0]
       OutlineColor: [0.01, 0.01, 0.012, 0.86]
       OutlineThickness: 1.25
+
   - Entity: 910000015
     TagComponent:
       Tag: VN_HistoryText
@@ -319,12 +726,12 @@ Entities:
       Scale: [1, 1, 1]
     UIWidgetComponent:
       Visible: false
-      Position: [0.17, 0.14]
-      Size: [0.66, 0.55]
+      Position: [0.054054, 0.073529]
+      Size: [0.891892, 0.808824]
       Rotation: 0
       Anchor: 0
       SortOrder: 71
-      ParentEntity: 930029741
+      ParentEntity: 910000025
     UITextComponent:
       Text: "历史记录"
       Color: [0.88, 0.94, 0.95, 1]
@@ -334,6 +741,7 @@ Entities:
       ShadowOffset: [2.0, 2.0]
       OutlineColor: [0.01, 0.01, 0.012, 0.86]
       OutlineThickness: 1.25
+
   - Entity: 910000016
     TagComponent:
       Tag: VN_AutoPlayIndicator
@@ -358,6 +766,7 @@ Entities:
       ShadowOffset: [2.0, 2.0]
       OutlineColor: [0.01, 0.01, 0.012, 0.86]
       OutlineThickness: 1.25
+
   - Entity: 910000017
     TagComponent:
       Tag: VN_CommandBar
@@ -367,24 +776,18 @@ Entities:
       Scale: [1, 1, 1]
     UIWidgetComponent:
       Visible: true
-      Position: [0.5, 0.935]
-      Size: [0.78, 0.05]
+      Position: [0.295, 0.884]
+      Size: [0.41, 0.086]
       Rotation: 0
-      Anchor: 4
-      SortOrder: 45
-      ParentEntity: 930029741
-    UIAnimatorComponent:
-      Preset: "slide_fade_in"
-      PlayOnStart: true
-      Loop: false
-      Delay: 0.10
-      Duration: 0.30
-      Amplitude: 0.035
-      Speed: 1.00
-      FromOffset: [0.000, 0.035]
+      Anchor: 0
+      SortOrder: 5050
+      ParentEntity: 930017111
     UIImageComponent:
-      Color: [0.05, 0.07, 0.1, 0.68]
+      Color: [1, 1, 1, 0]
       TexturePath: ""
+      UVMin: [0, 0]
+      UVMax: [1, 1]
+
   - Entity: 910000018
     TagComponent:
       Tag: VN_Command_Skip
@@ -394,35 +797,32 @@ Entities:
       Scale: [1, 1, 1]
     UIWidgetComponent:
       Visible: true
-      Position: [0.2, 0.935]
-      Size: [0.095, 0.034]
+      Position: [0.875, 0.14]
+      Size: [0.085, 0.72]
       Rotation: 0
-      Anchor: 4
-      SortOrder: 50
-      ParentEntity: 930029741
-    UIAnimatorComponent:
-      Preset: "hover_pulse"
-      PlayOnStart: true
-      Loop: false
-      Delay: 0.00
-      Duration: 0.18
-      Amplitude: 0.035
-      Speed: 1.00
-      FromOffset: [0.000, 0.000]
+      Anchor: 0
+      SortOrder: 5067
+      ParentEntity: 910000017
+    UIImageComponent:
+      Color: [1, 1, 1, 1]
+      TexturePath: assets/vertical_slice/ui/atlases/vn_ui_atlas.png
+      UVMin: [0.56, 0.434343]
+      UVMax: [0.64, 0.59596]
     UIButtonComponent:
-      NormalColor: [0.12, 0.18, 0.24, 0.55]
-      HoverColor: [0.2, 0.36, 0.46, 0.86]
-      PressedColor: [0.08, 0.14, 0.2, 0.95]
+      NormalColor: [1, 1, 1, 0]
+      HoverColor: [1, 1, 1, 0]
+      PressedColor: [1, 1, 1, 0]
       OnClickFunction: vn:skip
     UITextComponent:
-      Text: "跳过"
+      Text: ""
       Color: [0.78, 0.84, 0.96, 1]
-      FontSize: 15
+      FontSize: 14
       FontPath: assets/fonts/wqy-microhei.ttc
       ShadowColor: [0.02, 0.02, 0.025, 0.78]
       ShadowOffset: [2.0, 2.0]
       OutlineColor: [0.01, 0.01, 0.012, 0.86]
       OutlineThickness: 1.25
+
   - Entity: 910000019
     TagComponent:
       Tag: VN_Command_Auto
@@ -432,35 +832,32 @@ Entities:
       Scale: [1, 1, 1]
     UIWidgetComponent:
       Visible: true
-      Position: [0.31, 0.935]
-      Size: [0.095, 0.034]
+      Position: [0.755, 0.14]
+      Size: [0.085, 0.72]
       Rotation: 0
-      Anchor: 4
-      SortOrder: 51
-      ParentEntity: 930029741
-    UIAnimatorComponent:
-      Preset: "hover_pulse"
-      PlayOnStart: true
-      Loop: false
-      Delay: 0.00
-      Duration: 0.18
-      Amplitude: 0.035
-      Speed: 1.00
-      FromOffset: [0.000, 0.000]
+      Anchor: 0
+      SortOrder: 5066
+      ParentEntity: 910000017
+    UIImageComponent:
+      Color: [1, 1, 1, 1]
+      TexturePath: assets/vertical_slice/ui/atlases/vn_ui_atlas.png
+      UVMin: [0.48, 0.434343]
+      UVMax: [0.56, 0.59596]
     UIButtonComponent:
-      NormalColor: [0.12, 0.18, 0.24, 0.55]
-      HoverColor: [0.2, 0.36, 0.46, 0.86]
-      PressedColor: [0.08, 0.14, 0.2, 0.95]
+      NormalColor: [1, 1, 1, 0]
+      HoverColor: [1, 1, 1, 0]
+      PressedColor: [1, 1, 1, 0]
       OnClickFunction: vn:auto
     UITextComponent:
-      Text: "自动"
+      Text: ""
       Color: [0.78, 0.84, 0.96, 1]
-      FontSize: 15
+      FontSize: 14
       FontPath: assets/fonts/wqy-microhei.ttc
       ShadowColor: [0.02, 0.02, 0.025, 0.78]
       ShadowOffset: [2.0, 2.0]
       OutlineColor: [0.01, 0.01, 0.012, 0.86]
       OutlineThickness: 1.25
+
   - Entity: 910000020
     TagComponent:
       Tag: VN_Command_Save
@@ -470,35 +867,32 @@ Entities:
       Scale: [1, 1, 1]
     UIWidgetComponent:
       Visible: true
-      Position: [0.42, 0.935]
-      Size: [0.095, 0.034]
+      Position: [0.035, 0.14]
+      Size: [0.085, 0.72]
       Rotation: 0
-      Anchor: 4
-      SortOrder: 52
-      ParentEntity: 930029741
-    UIAnimatorComponent:
-      Preset: "hover_pulse"
-      PlayOnStart: true
-      Loop: false
-      Delay: 0.00
-      Duration: 0.18
-      Amplitude: 0.035
-      Speed: 1.00
-      FromOffset: [0.000, 0.000]
+      Anchor: 0
+      SortOrder: 5060
+      ParentEntity: 910000017
+    UIImageComponent:
+      Color: [1, 1, 1, 1]
+      TexturePath: assets/vertical_slice/ui/atlases/vn_ui_atlas.png
+      UVMin: [0, 0.434343]
+      UVMax: [0.08, 0.59596]
     UIButtonComponent:
-      NormalColor: [0.12, 0.18, 0.24, 0.55]
-      HoverColor: [0.2, 0.36, 0.46, 0.86]
-      PressedColor: [0.08, 0.14, 0.2, 0.95]
+      NormalColor: [1, 1, 1, 0]
+      HoverColor: [1, 1, 1, 0]
+      PressedColor: [1, 1, 1, 0]
       OnClickFunction: vn:savemenu
     UITextComponent:
-      Text: "快存"
+      Text: ""
       Color: [0.78, 0.84, 0.96, 1]
-      FontSize: 15
+      FontSize: 14
       FontPath: assets/fonts/wqy-microhei.ttc
       ShadowColor: [0.02, 0.02, 0.025, 0.78]
       ShadowOffset: [2.0, 2.0]
       OutlineColor: [0.01, 0.01, 0.012, 0.86]
       OutlineThickness: 1.25
+
   - Entity: 910000021
     TagComponent:
       Tag: VN_Command_Load
@@ -508,35 +902,102 @@ Entities:
       Scale: [1, 1, 1]
     UIWidgetComponent:
       Visible: true
-      Position: [0.53, 0.935]
-      Size: [0.095, 0.034]
+      Position: [0.155, 0.14]
+      Size: [0.085, 0.72]
       Rotation: 0
-      Anchor: 4
-      SortOrder: 53
-      ParentEntity: 930029741
-    UIAnimatorComponent:
-      Preset: "hover_pulse"
-      PlayOnStart: true
-      Loop: false
-      Delay: 0.00
-      Duration: 0.18
-      Amplitude: 0.035
-      Speed: 1.00
-      FromOffset: [0.000, 0.000]
+      Anchor: 0
+      SortOrder: 5061
+      ParentEntity: 910000017
+    UIImageComponent:
+      Color: [1, 1, 1, 1]
+      TexturePath: assets/vertical_slice/ui/atlases/vn_ui_atlas.png
+      UVMin: [0.08, 0.434343]
+      UVMax: [0.16, 0.59596]
     UIButtonComponent:
-      NormalColor: [0.12, 0.18, 0.24, 0.55]
-      HoverColor: [0.2, 0.36, 0.46, 0.86]
-      PressedColor: [0.08, 0.14, 0.2, 0.95]
+      NormalColor: [1, 1, 1, 0]
+      HoverColor: [1, 1, 1, 0]
+      PressedColor: [1, 1, 1, 0]
       OnClickFunction: vn:loadmenu
     UITextComponent:
-      Text: "快读"
+      Text: ""
       Color: [0.78, 0.84, 0.96, 1]
-      FontSize: 15
+      FontSize: 14
       FontPath: assets/fonts/wqy-microhei.ttc
       ShadowColor: [0.02, 0.02, 0.025, 0.78]
       ShadowOffset: [2.0, 2.0]
       OutlineColor: [0.01, 0.01, 0.012, 0.86]
       OutlineThickness: 1.25
+
+  - Entity: 910000080
+    TagComponent:
+      Tag: VN_Command_QuickSave
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    UIWidgetComponent:
+      Visible: true
+      Position: [0.275, 0.14]
+      Size: [0.085, 0.72]
+      Rotation: 0
+      Anchor: 0
+      SortOrder: 5062
+      ParentEntity: 910000017
+    UIImageComponent:
+      Color: [1, 1, 1, 1]
+      TexturePath: assets/vertical_slice/ui/atlases/vn_ui_atlas.png
+      UVMin: [0.16, 0.434343]
+      UVMax: [0.24, 0.59596]
+    UIButtonComponent:
+      NormalColor: [1, 1, 1, 0]
+      HoverColor: [1, 1, 1, 0]
+      PressedColor: [1, 1, 1, 0]
+      OnClickFunction: vn:quicksave
+    UITextComponent:
+      Text: ""
+      Color: [0.78, 0.84, 0.96, 1]
+      FontSize: 14
+      FontPath: assets/fonts/wqy-microhei.ttc
+      ShadowColor: [0.02, 0.02, 0.025, 0.78]
+      ShadowOffset: [2.0, 2.0]
+      OutlineColor: [0.01, 0.01, 0.012, 0.86]
+      OutlineThickness: 1.25
+
+  - Entity: 910000081
+    TagComponent:
+      Tag: VN_Command_QuickLoad
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    UIWidgetComponent:
+      Visible: true
+      Position: [0.395, 0.14]
+      Size: [0.085, 0.72]
+      Rotation: 0
+      Anchor: 0
+      SortOrder: 5063
+      ParentEntity: 910000017
+    UIImageComponent:
+      Color: [1, 1, 1, 1]
+      TexturePath: assets/vertical_slice/ui/atlases/vn_ui_atlas.png
+      UVMin: [0.24, 0.434343]
+      UVMax: [0.32, 0.59596]
+    UIButtonComponent:
+      NormalColor: [1, 1, 1, 0]
+      HoverColor: [1, 1, 1, 0]
+      PressedColor: [1, 1, 1, 0]
+      OnClickFunction: vn:quickload
+    UITextComponent:
+      Text: ""
+      Color: [0.78, 0.84, 0.96, 1]
+      FontSize: 14
+      FontPath: assets/fonts/wqy-microhei.ttc
+      ShadowColor: [0.02, 0.02, 0.025, 0.78]
+      ShadowOffset: [2.0, 2.0]
+      OutlineColor: [0.01, 0.01, 0.012, 0.86]
+      OutlineThickness: 1.25
+
   - Entity: 910000022
     TagComponent:
       Tag: VN_Command_History
@@ -546,28 +1007,24 @@ Entities:
       Scale: [1, 1, 1]
     UIWidgetComponent:
       Visible: true
-      Position: [0.64, 0.935]
-      Size: [0.095, 0.034]
+      Position: [0.635, 0.14]
+      Size: [0.085, 0.72]
       Rotation: 0
-      Anchor: 4
-      SortOrder: 54
-      ParentEntity: 930029741
-    UIAnimatorComponent:
-      Preset: "hover_pulse"
-      PlayOnStart: true
-      Loop: false
-      Delay: 0.00
-      Duration: 0.18
-      Amplitude: 0.035
-      Speed: 1.00
-      FromOffset: [0.000, 0.000]
+      Anchor: 0
+      SortOrder: 5065
+      ParentEntity: 910000017
+    UIImageComponent:
+      Color: [1, 1, 1, 1]
+      TexturePath: assets/vertical_slice/ui/atlases/vn_ui_atlas.png
+      UVMin: [0.4, 0.434343]
+      UVMax: [0.48, 0.59596]
     UIButtonComponent:
-      NormalColor: [0.12, 0.18, 0.24, 0.55]
-      HoverColor: [0.2, 0.36, 0.46, 0.86]
-      PressedColor: [0.08, 0.14, 0.2, 0.95]
+      NormalColor: [1, 1, 1, 0]
+      HoverColor: [1, 1, 1, 0]
+      PressedColor: [1, 1, 1, 0]
       OnClickFunction: vn:history
     UITextComponent:
-      Text: "历史"
+      Text: ""
       Color: [0.78, 0.84, 0.96, 1]
       FontSize: 14
       FontPath: assets/fonts/wqy-microhei.ttc
@@ -575,6 +1032,7 @@ Entities:
       ShadowOffset: [2.0, 2.0]
       OutlineColor: [0.01, 0.01, 0.012, 0.86]
       OutlineThickness: 1.25
+
   - Entity: 910000023
     TagComponent:
       Tag: VN_Command_Settings
@@ -584,35 +1042,32 @@ Entities:
       Scale: [1, 1, 1]
     UIWidgetComponent:
       Visible: true
-      Position: [0.75, 0.935]
-      Size: [0.095, 0.034]
+      Position: [0.515, 0.14]
+      Size: [0.085, 0.72]
       Rotation: 0
-      Anchor: 4
-      SortOrder: 55
-      ParentEntity: 930029741
-    UIAnimatorComponent:
-      Preset: "hover_pulse"
-      PlayOnStart: true
-      Loop: false
-      Delay: 0.00
-      Duration: 0.18
-      Amplitude: 0.035
-      Speed: 1.00
-      FromOffset: [0.000, 0.000]
+      Anchor: 0
+      SortOrder: 5064
+      ParentEntity: 910000017
+    UIImageComponent:
+      Color: [1, 1, 1, 1]
+      TexturePath: assets/vertical_slice/ui/atlases/vn_ui_atlas.png
+      UVMin: [0.32, 0.434343]
+      UVMax: [0.4, 0.59596]
     UIButtonComponent:
-      NormalColor: [0.12, 0.18, 0.24, 0.55]
-      HoverColor: [0.2, 0.36, 0.46, 0.86]
-      PressedColor: [0.08, 0.14, 0.2, 0.95]
+      NormalColor: [1, 1, 1, 0]
+      HoverColor: [1, 1, 1, 0]
+      PressedColor: [1, 1, 1, 0]
       OnClickFunction: vn:settings
     UITextComponent:
-      Text: "设置"
+      Text: ""
       Color: [0.78, 0.84, 0.96, 1]
-      FontSize: 15
+      FontSize: 14
       FontPath: assets/fonts/wqy-microhei.ttc
       ShadowColor: [0.02, 0.02, 0.025, 0.78]
       ShadowOffset: [2.0, 2.0]
       OutlineColor: [0.01, 0.01, 0.012, 0.86]
       OutlineThickness: 1.25
+
   - Entity: 910000024
     TagComponent:
       Tag: VN_Command_Hide
@@ -621,36 +1076,28 @@ Entities:
       Rotation: [0, 0, 0]
       Scale: [1, 1, 1]
     UIWidgetComponent:
-      Visible: true
-      Position: [0.86, 0.935]
-      Size: [0.095, 0.034]
+      Visible: false
+      Position: [0.995, 0.14]
+      Size: [0.085, 0.72]
       Rotation: 0
-      Anchor: 4
-      SortOrder: 56
-      ParentEntity: 930029741
-    UIAnimatorComponent:
-      Preset: "hover_pulse"
-      PlayOnStart: true
-      Loop: false
-      Delay: 0.00
-      Duration: 0.18
-      Amplitude: 0.035
-      Speed: 1.00
-      FromOffset: [0.000, 0.000]
+      Anchor: 0
+      SortOrder: 5068
+      ParentEntity: 910000017
     UIButtonComponent:
-      NormalColor: [0.12, 0.18, 0.24, 0.55]
-      HoverColor: [0.2, 0.36, 0.46, 0.86]
-      PressedColor: [0.08, 0.14, 0.2, 0.95]
+      NormalColor: [1, 1, 1, 0]
+      HoverColor: [1, 1, 1, 0]
+      PressedColor: [1, 1, 1, 0]
       OnClickFunction: vn:hide
     UITextComponent:
-      Text: "隐藏"
+      Text: ""
       Color: [0.78, 0.84, 0.96, 1]
-      FontSize: 15
+      FontSize: 14
       FontPath: assets/fonts/wqy-microhei.ttc
       ShadowColor: [0.02, 0.02, 0.025, 0.78]
       ShadowOffset: [2.0, 2.0]
       OutlineColor: [0.01, 0.01, 0.012, 0.86]
       OutlineThickness: 1.25
+
   - Entity: 910000025
     TagComponent:
       Tag: VN_HistoryPanel
@@ -677,7 +1124,10 @@ Entities:
       FromOffset: [0.000, 0.035]
     UIImageComponent:
       Color: [0.04, 0.055, 0.075, 0.93]
-      TexturePath: ""
+      TexturePath: assets/vertical_slice/ui/atlases/vn_ui_atlas.png
+      UVMin: [0.11, 0.648989975]
+      UVMax: [0.889688015, 0.948231995]
+
   - Entity: 910000026
     TagComponent:
       Tag: VN_HistoryClose
@@ -687,12 +1137,12 @@ Entities:
       Scale: [1, 1, 1]
     UIWidgetComponent:
       Visible: false
-      Position: [0.5, 0.78]
-      Size: [0.16, 0.048]
+      Position: [0.391892, 0.979412]
+      Size: [0.216216, 0.070588]
       Rotation: 0
-      Anchor: 4
+      Anchor: 0
       SortOrder: 72
-      ParentEntity: 930029741
+      ParentEntity: 910000025
     UIAnimatorComponent:
       Preset: "hover_pulse"
       PlayOnStart: true
@@ -716,6 +1166,7 @@ Entities:
       ShadowOffset: [2.0, 2.0]
       OutlineColor: [0.01, 0.01, 0.012, 0.86]
       OutlineThickness: 1.25
+
   - Entity: 910000027
     TagComponent:
       Tag: VN_SettingsPanel
@@ -742,7 +1193,10 @@ Entities:
       FromOffset: [0.000, 0.035]
     UIImageComponent:
       Color: [0.04, 0.055, 0.075, 0.94]
-      TexturePath: ""
+      TexturePath: assets/vertical_slice/ui/atlases/vn_ui_atlas.png
+      UVMin: [0.11, 0.648989975]
+      UVMax: [0.889688015, 0.948231995]
+
   - Entity: 910000028
     TagComponent:
       Tag: VN_SettingsText
@@ -752,21 +1206,22 @@ Entities:
       Scale: [1, 1, 1]
     UIWidgetComponent:
       Visible: false
-      Position: [0.29, 0.2]
-      Size: [0.42, 0.25]
+      Position: [0.111111, 0.068966]
+      Size: [0.888889, 0.206897]
       Rotation: 0
       Anchor: 0
       SortOrder: 81
-      ParentEntity: 930029741
+      ParentEntity: 910000027
     UITextComponent:
       Text: "系统设置"
       Color: [0.9, 0.95, 0.96, 1]
-      FontSize: 20
+      FontSize: 30
       FontPath: assets/fonts/wqy-microhei.ttc
       ShadowColor: [0.02, 0.02, 0.025, 0.78]
       ShadowOffset: [2.0, 2.0]
       OutlineColor: [0.01, 0.01, 0.012, 0.86]
       OutlineThickness: 1.25
+
   - Entity: 910000029
     TagComponent:
       Tag: VN_Settings_TextMinus
@@ -776,12 +1231,12 @@ Entities:
       Scale: [1, 1, 1]
     UIWidgetComponent:
       Visible: false
-      Position: [0.42, 0.56]
-      Size: [0.15, 0.048]
+      Position: [0.212963, 0.648276]
+      Size: [0.277778, 0.082759]
       Rotation: 0
-      Anchor: 4
+      Anchor: 0
       SortOrder: 82
-      ParentEntity: 930029741
+      ParentEntity: 910000027
     UIButtonComponent:
       NormalColor: [0.16, 0.24, 0.31, 0.88]
       HoverColor: [0.24, 0.38, 0.47, 0.96]
@@ -796,6 +1251,7 @@ Entities:
       ShadowOffset: [2.0, 2.0]
       OutlineColor: [0.01, 0.01, 0.012, 0.86]
       OutlineThickness: 1.25
+
   - Entity: 910000030
     TagComponent:
       Tag: VN_Settings_TextPlus
@@ -805,12 +1261,12 @@ Entities:
       Scale: [1, 1, 1]
     UIWidgetComponent:
       Visible: false
-      Position: [0.58, 0.56]
-      Size: [0.15, 0.048]
+      Position: [0.509259, 0.648276]
+      Size: [0.277778, 0.082759]
       Rotation: 0
-      Anchor: 4
+      Anchor: 0
       SortOrder: 83
-      ParentEntity: 930029741
+      ParentEntity: 910000027
     UIButtonComponent:
       NormalColor: [0.16, 0.24, 0.31, 0.88]
       HoverColor: [0.24, 0.38, 0.47, 0.96]
@@ -825,6 +1281,7 @@ Entities:
       ShadowOffset: [2.0, 2.0]
       OutlineColor: [0.01, 0.01, 0.012, 0.86]
       OutlineThickness: 1.25
+
   - Entity: 910000031
     TagComponent:
       Tag: VN_Settings_AutoMinus
@@ -834,12 +1291,12 @@ Entities:
       Scale: [1, 1, 1]
     UIWidgetComponent:
       Visible: false
-      Position: [0.42, 0.64]
-      Size: [0.15, 0.048]
+      Position: [0.212963, 0.786207]
+      Size: [0.277778, 0.082759]
       Rotation: 0
-      Anchor: 4
+      Anchor: 0
       SortOrder: 84
-      ParentEntity: 930029741
+      ParentEntity: 910000027
     UIButtonComponent:
       NormalColor: [0.16, 0.24, 0.31, 0.88]
       HoverColor: [0.24, 0.38, 0.47, 0.96]
@@ -854,6 +1311,7 @@ Entities:
       ShadowOffset: [2.0, 2.0]
       OutlineColor: [0.01, 0.01, 0.012, 0.86]
       OutlineThickness: 1.25
+
   - Entity: 910000032
     TagComponent:
       Tag: VN_Settings_AutoPlus
@@ -863,12 +1321,12 @@ Entities:
       Scale: [1, 1, 1]
     UIWidgetComponent:
       Visible: false
-      Position: [0.58, 0.64]
-      Size: [0.15, 0.048]
+      Position: [0.509259, 0.786207]
+      Size: [0.277778, 0.082759]
       Rotation: 0
-      Anchor: 4
+      Anchor: 0
       SortOrder: 85
-      ParentEntity: 930029741
+      ParentEntity: 910000027
     UIButtonComponent:
       NormalColor: [0.16, 0.24, 0.31, 0.88]
       HoverColor: [0.24, 0.38, 0.47, 0.96]
@@ -883,6 +1341,7 @@ Entities:
       ShadowOffset: [2.0, 2.0]
       OutlineColor: [0.01, 0.01, 0.012, 0.86]
       OutlineThickness: 1.25
+
   - Entity: 910000033
     TagComponent:
       Tag: VN_SettingsClose
@@ -892,12 +1351,12 @@ Entities:
       Scale: [1, 1, 1]
     UIWidgetComponent:
       Visible: false
-      Position: [0.5, 0.74]
-      Size: [0.18, 0.052]
+      Position: [0.333333, 0.955172]
+      Size: [0.333333, 0.089655]
       Rotation: 0
-      Anchor: 4
+      Anchor: 0
       SortOrder: 86
-      ParentEntity: 930029741
+      ParentEntity: 910000027
     UIAnimatorComponent:
       Preset: "hover_pulse"
       PlayOnStart: true
@@ -921,6 +1380,7 @@ Entities:
       ShadowOffset: [2.0, 2.0]
       OutlineColor: [0.01, 0.01, 0.012, 0.86]
       OutlineThickness: 1.25
+
   - Entity: 910000034
     TagComponent:
       Tag: VN_SystemMessage
@@ -945,6 +1405,7 @@ Entities:
       ShadowOffset: [2.0, 2.0]
       OutlineColor: [0.01, 0.01, 0.012, 0.86]
       OutlineThickness: 1.25
+
   - Entity: 930029734
     TagComponent:
       Tag: VN_SaveLoadPanel
@@ -964,6 +1425,7 @@ Entities:
       BackgroundColor: [0.04, 0.045, 0.055, 0.88]
       BorderColor: [0.8, 0.64, 0.36, 0.9]
       BorderThickness: 2
+
   - Entity: 930029735
     TagComponent:
       Tag: VN_SaveLoadIcon
@@ -982,6 +1444,7 @@ Entities:
     UIImageComponent:
       Color: [1, 1, 1, 1.0]
       TexturePath: assets/vertical_slice/ui/icons/icon_save.png
+
   - Entity: 930029736
     TagComponent:
       Tag: VN_SaveLoadTitle
@@ -991,21 +1454,22 @@ Entities:
       Scale: [1, 1, 1]
     UIWidgetComponent:
       Visible: false
-      Position: [0.31, 0.205]
-      Size: [0.3, 0.06]
+      Position: [0.203125, 0.098214]
+      Size: [0.59375, 0.142857]
       Rotation: 0.0
       Anchor: 0
       SortOrder: 86
-      ParentEntity: 930029741
+      ParentEntity: 930029734
     UITextComponent:
       Text: "存档 / 读取"
       Color: [1.0, 0.94, 0.78, 1]
-      FontSize: 34
+      FontSize: 40
       FontPath: assets/fonts/wqy-microhei.ttc
       ShadowColor: [0.01, 0.015, 0.018, 0.88]
       ShadowOffset: [2.4, 2.4]
       OutlineColor: [0.0, 0.0, 0.0, 0.94]
       OutlineThickness: 1.8
+
   - Entity: 930029737
     TagComponent:
       Tag: VN_SaveLoadText
@@ -1015,21 +1479,956 @@ Entities:
       Scale: [1, 1, 1]
     UIWidgetComponent:
       Visible: false
-      Position: [0.23, 0.31]
-      Size: [0.52, 0.2]
+      Position: [0.075, 0.205]
+      Size: [0.82, 0.16]
       Rotation: 0.0
       Anchor: 0
       SortOrder: 86
-      ParentEntity: 930029741
+      ParentEntity: 930029734
     UITextComponent:
       Text: "存档 / 读取"
       Color: [0.94, 0.96, 0.88, 1]
-      FontSize: 21
+      FontSize: 30
       FontPath: assets/fonts/wqy-microhei.ttc
       ShadowColor: [0.01, 0.015, 0.018, 0.82]
       ShadowOffset: [2.0, 2.0]
       OutlineColor: [0.0, 0.0, 0.0, 0.88]
       OutlineThickness: 1.35
+
+  - Entity: 930029743
+    TagComponent:
+      Tag: VN_SaveLoadSlotScroll
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    UIWidgetComponent:
+      Visible: false
+      Position: [0.075, 0.365]
+      Size: [0.82, 0.45]
+      Rotation: 0.0
+      Anchor: 0
+      SortOrder: 100
+      ParentEntity: 930029734
+    UIPanelComponent:
+      BackgroundColor: [0.012, 0.014, 0.018, 0.34]
+      BorderColor: [0.64, 0.52, 0.38, 0.34]
+      BorderThickness: 1
+      ClipChildren: true
+    UIScrollViewComponent:
+      OffsetY: 0
+      ContentHeight: 3.06
+      WheelStep: 0.1
+      ScrollbarWidth: 0.018
+      EnableWheel: true
+      ShowScrollbar: true
+      DragScrollbar: true
+      ClampToContent: true
+
+  - Entity: 930029744
+    TagComponent:
+      Tag: VN_SaveLoad_Slot_1
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    UIWidgetComponent:
+      Visible: false
+      Position: [0.035, 0.030]
+      Size: [0.89, 0.140]
+      Rotation: 0.0
+      Anchor: 0
+      SortOrder: 121
+      ParentEntity: 930029743
+    UIAnimatorComponent:
+      Preset: "hover_pulse"
+      PlayOnStart: true
+      Loop: false
+      Delay: 0
+      Duration: 0.16
+      Amplitude: 0.025
+      Speed: 1
+      FromOffset: [0, 0.015]
+    UIButtonComponent:
+      NormalColor: [0.12, 0.18, 0.18, 0.78]
+      HoverColor: [0.22, 0.38, 0.34, 0.92]
+      PressedColor: [0.08, 0.11, 0.12, 0.96]
+      OnClickFunction: vn:saveslot:1
+    UITextComponent:
+      Text: "槽位 01  空槽\n点击保存当前画面"
+      Color: [0.72, 0.78, 0.76, 1]
+      FontSize: 24
+      FontPath: assets/fonts/wqy-microhei.ttc
+      ShadowColor: [0.02, 0.025, 0.03, 0.78]
+      ShadowOffset: [1.4, 1.4]
+      OutlineColor: [0, 0, 0, 0.86]
+      OutlineThickness: 1.05
+
+  - Entity: 930029745
+    TagComponent:
+      Tag: VN_SaveLoad_Slot_2
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    UIWidgetComponent:
+      Visible: false
+      Position: [0.035, 0.180]
+      Size: [0.89, 0.140]
+      Rotation: 0.0
+      Anchor: 0
+      SortOrder: 122
+      ParentEntity: 930029743
+    UIAnimatorComponent:
+      Preset: "hover_pulse"
+      PlayOnStart: true
+      Loop: false
+      Delay: 0
+      Duration: 0.16
+      Amplitude: 0.025
+      Speed: 1
+      FromOffset: [0, 0.015]
+    UIButtonComponent:
+      NormalColor: [0.12, 0.18, 0.18, 0.78]
+      HoverColor: [0.22, 0.38, 0.34, 0.92]
+      PressedColor: [0.08, 0.11, 0.12, 0.96]
+      OnClickFunction: vn:saveslot:2
+    UITextComponent:
+      Text: "槽位 02  空槽\n点击保存当前画面"
+      Color: [0.72, 0.78, 0.76, 1]
+      FontSize: 24
+      FontPath: assets/fonts/wqy-microhei.ttc
+      ShadowColor: [0.02, 0.025, 0.03, 0.78]
+      ShadowOffset: [1.4, 1.4]
+      OutlineColor: [0, 0, 0, 0.86]
+      OutlineThickness: 1.05
+
+  - Entity: 930029746
+    TagComponent:
+      Tag: VN_SaveLoad_Slot_3
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    UIWidgetComponent:
+      Visible: false
+      Position: [0.035, 0.330]
+      Size: [0.89, 0.140]
+      Rotation: 0.0
+      Anchor: 0
+      SortOrder: 123
+      ParentEntity: 930029743
+    UIAnimatorComponent:
+      Preset: "hover_pulse"
+      PlayOnStart: true
+      Loop: false
+      Delay: 0
+      Duration: 0.16
+      Amplitude: 0.025
+      Speed: 1
+      FromOffset: [0, 0.015]
+    UIButtonComponent:
+      NormalColor: [0.12, 0.18, 0.18, 0.78]
+      HoverColor: [0.22, 0.38, 0.34, 0.92]
+      PressedColor: [0.08, 0.11, 0.12, 0.96]
+      OnClickFunction: vn:saveslot:3
+    UITextComponent:
+      Text: "槽位 03  空槽\n点击保存当前画面"
+      Color: [0.72, 0.78, 0.76, 1]
+      FontSize: 24
+      FontPath: assets/fonts/wqy-microhei.ttc
+      ShadowColor: [0.02, 0.025, 0.03, 0.78]
+      ShadowOffset: [1.4, 1.4]
+      OutlineColor: [0, 0, 0, 0.86]
+      OutlineThickness: 1.05
+
+  - Entity: 930029747
+    TagComponent:
+      Tag: VN_SaveLoad_Slot_4
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    UIWidgetComponent:
+      Visible: false
+      Position: [0.035, 0.480]
+      Size: [0.89, 0.140]
+      Rotation: 0.0
+      Anchor: 0
+      SortOrder: 124
+      ParentEntity: 930029743
+    UIAnimatorComponent:
+      Preset: "hover_pulse"
+      PlayOnStart: true
+      Loop: false
+      Delay: 0
+      Duration: 0.16
+      Amplitude: 0.025
+      Speed: 1
+      FromOffset: [0, 0.015]
+    UIButtonComponent:
+      NormalColor: [0.12, 0.18, 0.18, 0.78]
+      HoverColor: [0.22, 0.38, 0.34, 0.92]
+      PressedColor: [0.08, 0.11, 0.12, 0.96]
+      OnClickFunction: vn:saveslot:4
+    UITextComponent:
+      Text: "槽位 04  空槽\n点击保存当前画面"
+      Color: [0.72, 0.78, 0.76, 1]
+      FontSize: 24
+      FontPath: assets/fonts/wqy-microhei.ttc
+      ShadowColor: [0.02, 0.025, 0.03, 0.78]
+      ShadowOffset: [1.4, 1.4]
+      OutlineColor: [0, 0, 0, 0.86]
+      OutlineThickness: 1.05
+
+  - Entity: 930029748
+    TagComponent:
+      Tag: VN_SaveLoad_Slot_5
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    UIWidgetComponent:
+      Visible: false
+      Position: [0.035, 0.630]
+      Size: [0.89, 0.140]
+      Rotation: 0.0
+      Anchor: 0
+      SortOrder: 125
+      ParentEntity: 930029743
+    UIAnimatorComponent:
+      Preset: "hover_pulse"
+      PlayOnStart: true
+      Loop: false
+      Delay: 0
+      Duration: 0.16
+      Amplitude: 0.025
+      Speed: 1
+      FromOffset: [0, 0.015]
+    UIButtonComponent:
+      NormalColor: [0.12, 0.18, 0.18, 0.78]
+      HoverColor: [0.22, 0.38, 0.34, 0.92]
+      PressedColor: [0.08, 0.11, 0.12, 0.96]
+      OnClickFunction: vn:saveslot:5
+    UITextComponent:
+      Text: "槽位 05  空槽\n点击保存当前画面"
+      Color: [0.72, 0.78, 0.76, 1]
+      FontSize: 24
+      FontPath: assets/fonts/wqy-microhei.ttc
+      ShadowColor: [0.02, 0.025, 0.03, 0.78]
+      ShadowOffset: [1.4, 1.4]
+      OutlineColor: [0, 0, 0, 0.86]
+      OutlineThickness: 1.05
+
+  - Entity: 930029749
+    TagComponent:
+      Tag: VN_SaveLoad_Slot_6
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    UIWidgetComponent:
+      Visible: false
+      Position: [0.035, 0.780]
+      Size: [0.89, 0.140]
+      Rotation: 0.0
+      Anchor: 0
+      SortOrder: 126
+      ParentEntity: 930029743
+    UIAnimatorComponent:
+      Preset: "hover_pulse"
+      PlayOnStart: true
+      Loop: false
+      Delay: 0
+      Duration: 0.16
+      Amplitude: 0.025
+      Speed: 1
+      FromOffset: [0, 0.015]
+    UIButtonComponent:
+      NormalColor: [0.12, 0.18, 0.18, 0.78]
+      HoverColor: [0.22, 0.38, 0.34, 0.92]
+      PressedColor: [0.08, 0.11, 0.12, 0.96]
+      OnClickFunction: vn:saveslot:6
+    UITextComponent:
+      Text: "槽位 06  空槽\n点击保存当前画面"
+      Color: [0.72, 0.78, 0.76, 1]
+      FontSize: 24
+      FontPath: assets/fonts/wqy-microhei.ttc
+      ShadowColor: [0.02, 0.025, 0.03, 0.78]
+      ShadowOffset: [1.4, 1.4]
+      OutlineColor: [0, 0, 0, 0.86]
+      OutlineThickness: 1.05
+
+  - Entity: 930029750
+    TagComponent:
+      Tag: VN_SaveLoad_Slot_7
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    UIWidgetComponent:
+      Visible: false
+      Position: [0.035, 0.930]
+      Size: [0.89, 0.140]
+      Rotation: 0.0
+      Anchor: 0
+      SortOrder: 127
+      ParentEntity: 930029743
+    UIAnimatorComponent:
+      Preset: "hover_pulse"
+      PlayOnStart: true
+      Loop: false
+      Delay: 0
+      Duration: 0.16
+      Amplitude: 0.025
+      Speed: 1
+      FromOffset: [0, 0.015]
+    UIButtonComponent:
+      NormalColor: [0.12, 0.18, 0.18, 0.78]
+      HoverColor: [0.22, 0.38, 0.34, 0.92]
+      PressedColor: [0.08, 0.11, 0.12, 0.96]
+      OnClickFunction: vn:saveslot:7
+    UITextComponent:
+      Text: "槽位 07  空槽\n点击保存当前画面"
+      Color: [0.72, 0.78, 0.76, 1]
+      FontSize: 24
+      FontPath: assets/fonts/wqy-microhei.ttc
+      ShadowColor: [0.02, 0.025, 0.03, 0.78]
+      ShadowOffset: [1.4, 1.4]
+      OutlineColor: [0, 0, 0, 0.86]
+      OutlineThickness: 1.05
+
+  - Entity: 930029751
+    TagComponent:
+      Tag: VN_SaveLoad_Slot_8
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    UIWidgetComponent:
+      Visible: false
+      Position: [0.035, 1.080]
+      Size: [0.89, 0.140]
+      Rotation: 0.0
+      Anchor: 0
+      SortOrder: 128
+      ParentEntity: 930029743
+    UIAnimatorComponent:
+      Preset: "hover_pulse"
+      PlayOnStart: true
+      Loop: false
+      Delay: 0
+      Duration: 0.16
+      Amplitude: 0.025
+      Speed: 1
+      FromOffset: [0, 0.015]
+    UIButtonComponent:
+      NormalColor: [0.12, 0.18, 0.18, 0.78]
+      HoverColor: [0.22, 0.38, 0.34, 0.92]
+      PressedColor: [0.08, 0.11, 0.12, 0.96]
+      OnClickFunction: vn:saveslot:8
+    UITextComponent:
+      Text: "槽位 08  空槽\n点击保存当前画面"
+      Color: [0.72, 0.78, 0.76, 1]
+      FontSize: 24
+      FontPath: assets/fonts/wqy-microhei.ttc
+      ShadowColor: [0.02, 0.025, 0.03, 0.78]
+      ShadowOffset: [1.4, 1.4]
+      OutlineColor: [0, 0, 0, 0.86]
+      OutlineThickness: 1.05
+
+  - Entity: 930029752
+    TagComponent:
+      Tag: VN_SaveLoad_Slot_9
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    UIWidgetComponent:
+      Visible: false
+      Position: [0.035, 1.230]
+      Size: [0.89, 0.140]
+      Rotation: 0.0
+      Anchor: 0
+      SortOrder: 129
+      ParentEntity: 930029743
+    UIAnimatorComponent:
+      Preset: "hover_pulse"
+      PlayOnStart: true
+      Loop: false
+      Delay: 0
+      Duration: 0.16
+      Amplitude: 0.025
+      Speed: 1
+      FromOffset: [0, 0.015]
+    UIButtonComponent:
+      NormalColor: [0.12, 0.18, 0.18, 0.78]
+      HoverColor: [0.22, 0.38, 0.34, 0.92]
+      PressedColor: [0.08, 0.11, 0.12, 0.96]
+      OnClickFunction: vn:saveslot:9
+    UITextComponent:
+      Text: "槽位 09  空槽\n点击保存当前画面"
+      Color: [0.72, 0.78, 0.76, 1]
+      FontSize: 24
+      FontPath: assets/fonts/wqy-microhei.ttc
+      ShadowColor: [0.02, 0.025, 0.03, 0.78]
+      ShadowOffset: [1.4, 1.4]
+      OutlineColor: [0, 0, 0, 0.86]
+      OutlineThickness: 1.05
+
+  - Entity: 930029753
+    TagComponent:
+      Tag: VN_SaveLoad_Slot_10
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    UIWidgetComponent:
+      Visible: false
+      Position: [0.035, 1.380]
+      Size: [0.89, 0.140]
+      Rotation: 0.0
+      Anchor: 0
+      SortOrder: 130
+      ParentEntity: 930029743
+    UIAnimatorComponent:
+      Preset: "hover_pulse"
+      PlayOnStart: true
+      Loop: false
+      Delay: 0
+      Duration: 0.16
+      Amplitude: 0.025
+      Speed: 1
+      FromOffset: [0, 0.015]
+    UIButtonComponent:
+      NormalColor: [0.12, 0.18, 0.18, 0.78]
+      HoverColor: [0.22, 0.38, 0.34, 0.92]
+      PressedColor: [0.08, 0.11, 0.12, 0.96]
+      OnClickFunction: vn:saveslot:10
+    UITextComponent:
+      Text: "槽位 10  空槽\n点击保存当前画面"
+      Color: [0.72, 0.78, 0.76, 1]
+      FontSize: 24
+      FontPath: assets/fonts/wqy-microhei.ttc
+      ShadowColor: [0.02, 0.025, 0.03, 0.78]
+      ShadowOffset: [1.4, 1.4]
+      OutlineColor: [0, 0, 0, 0.86]
+      OutlineThickness: 1.05
+
+  - Entity: 930029754
+    TagComponent:
+      Tag: VN_SaveLoad_Slot_11
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    UIWidgetComponent:
+      Visible: false
+      Position: [0.035, 1.530]
+      Size: [0.89, 0.140]
+      Rotation: 0.0
+      Anchor: 0
+      SortOrder: 131
+      ParentEntity: 930029743
+    UIAnimatorComponent:
+      Preset: "hover_pulse"
+      PlayOnStart: true
+      Loop: false
+      Delay: 0
+      Duration: 0.16
+      Amplitude: 0.025
+      Speed: 1
+      FromOffset: [0, 0.015]
+    UIButtonComponent:
+      NormalColor: [0.12, 0.18, 0.18, 0.78]
+      HoverColor: [0.22, 0.38, 0.34, 0.92]
+      PressedColor: [0.08, 0.11, 0.12, 0.96]
+      OnClickFunction: vn:saveslot:11
+    UITextComponent:
+      Text: "槽位 11  空槽\n点击保存当前画面"
+      Color: [0.72, 0.78, 0.76, 1]
+      FontSize: 24
+      FontPath: assets/fonts/wqy-microhei.ttc
+      ShadowColor: [0.02, 0.025, 0.03, 0.78]
+      ShadowOffset: [1.4, 1.4]
+      OutlineColor: [0, 0, 0, 0.86]
+      OutlineThickness: 1.05
+
+  - Entity: 930029755
+    TagComponent:
+      Tag: VN_SaveLoad_Slot_12
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    UIWidgetComponent:
+      Visible: false
+      Position: [0.035, 1.680]
+      Size: [0.89, 0.140]
+      Rotation: 0.0
+      Anchor: 0
+      SortOrder: 132
+      ParentEntity: 930029743
+    UIAnimatorComponent:
+      Preset: "hover_pulse"
+      PlayOnStart: true
+      Loop: false
+      Delay: 0
+      Duration: 0.16
+      Amplitude: 0.025
+      Speed: 1
+      FromOffset: [0, 0.015]
+    UIButtonComponent:
+      NormalColor: [0.12, 0.18, 0.18, 0.78]
+      HoverColor: [0.22, 0.38, 0.34, 0.92]
+      PressedColor: [0.08, 0.11, 0.12, 0.96]
+      OnClickFunction: vn:saveslot:12
+    UITextComponent:
+      Text: "槽位 12  空槽\n点击保存当前画面"
+      Color: [0.72, 0.78, 0.76, 1]
+      FontSize: 24
+      FontPath: assets/fonts/wqy-microhei.ttc
+      ShadowColor: [0.02, 0.025, 0.03, 0.78]
+      ShadowOffset: [1.4, 1.4]
+      OutlineColor: [0, 0, 0, 0.86]
+      OutlineThickness: 1.05
+
+  - Entity: 930029756
+    TagComponent:
+      Tag: VN_SaveLoad_Slot_13
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    UIWidgetComponent:
+      Visible: false
+      Position: [0.035, 1.830]
+      Size: [0.89, 0.140]
+      Rotation: 0.0
+      Anchor: 0
+      SortOrder: 133
+      ParentEntity: 930029743
+    UIAnimatorComponent:
+      Preset: "hover_pulse"
+      PlayOnStart: true
+      Loop: false
+      Delay: 0
+      Duration: 0.16
+      Amplitude: 0.025
+      Speed: 1
+      FromOffset: [0, 0.015]
+    UIButtonComponent:
+      NormalColor: [0.12, 0.18, 0.18, 0.78]
+      HoverColor: [0.22, 0.38, 0.34, 0.92]
+      PressedColor: [0.08, 0.11, 0.12, 0.96]
+      OnClickFunction: vn:saveslot:13
+    UITextComponent:
+      Text: "槽位 13  空槽\n点击保存当前画面"
+      Color: [0.72, 0.78, 0.76, 1]
+      FontSize: 24
+      FontPath: assets/fonts/wqy-microhei.ttc
+      ShadowColor: [0.02, 0.025, 0.03, 0.78]
+      ShadowOffset: [1.4, 1.4]
+      OutlineColor: [0, 0, 0, 0.86]
+      OutlineThickness: 1.05
+
+  - Entity: 930029757
+    TagComponent:
+      Tag: VN_SaveLoad_Slot_14
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    UIWidgetComponent:
+      Visible: false
+      Position: [0.035, 1.980]
+      Size: [0.89, 0.140]
+      Rotation: 0.0
+      Anchor: 0
+      SortOrder: 134
+      ParentEntity: 930029743
+    UIAnimatorComponent:
+      Preset: "hover_pulse"
+      PlayOnStart: true
+      Loop: false
+      Delay: 0
+      Duration: 0.16
+      Amplitude: 0.025
+      Speed: 1
+      FromOffset: [0, 0.015]
+    UIButtonComponent:
+      NormalColor: [0.12, 0.18, 0.18, 0.78]
+      HoverColor: [0.22, 0.38, 0.34, 0.92]
+      PressedColor: [0.08, 0.11, 0.12, 0.96]
+      OnClickFunction: vn:saveslot:14
+    UITextComponent:
+      Text: "槽位 14  空槽\n点击保存当前画面"
+      Color: [0.72, 0.78, 0.76, 1]
+      FontSize: 24
+      FontPath: assets/fonts/wqy-microhei.ttc
+      ShadowColor: [0.02, 0.025, 0.03, 0.78]
+      ShadowOffset: [1.4, 1.4]
+      OutlineColor: [0, 0, 0, 0.86]
+      OutlineThickness: 1.05
+
+  - Entity: 930029758
+    TagComponent:
+      Tag: VN_SaveLoad_Slot_15
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    UIWidgetComponent:
+      Visible: false
+      Position: [0.035, 2.130]
+      Size: [0.89, 0.140]
+      Rotation: 0.0
+      Anchor: 0
+      SortOrder: 135
+      ParentEntity: 930029743
+    UIAnimatorComponent:
+      Preset: "hover_pulse"
+      PlayOnStart: true
+      Loop: false
+      Delay: 0
+      Duration: 0.16
+      Amplitude: 0.025
+      Speed: 1
+      FromOffset: [0, 0.015]
+    UIButtonComponent:
+      NormalColor: [0.12, 0.18, 0.18, 0.78]
+      HoverColor: [0.22, 0.38, 0.34, 0.92]
+      PressedColor: [0.08, 0.11, 0.12, 0.96]
+      OnClickFunction: vn:saveslot:15
+    UITextComponent:
+      Text: "槽位 15  空槽\n点击保存当前画面"
+      Color: [0.72, 0.78, 0.76, 1]
+      FontSize: 24
+      FontPath: assets/fonts/wqy-microhei.ttc
+      ShadowColor: [0.02, 0.025, 0.03, 0.78]
+      ShadowOffset: [1.4, 1.4]
+      OutlineColor: [0, 0, 0, 0.86]
+      OutlineThickness: 1.05
+
+  - Entity: 930029759
+    TagComponent:
+      Tag: VN_SaveLoad_Slot_16
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    UIWidgetComponent:
+      Visible: false
+      Position: [0.035, 2.280]
+      Size: [0.89, 0.140]
+      Rotation: 0.0
+      Anchor: 0
+      SortOrder: 136
+      ParentEntity: 930029743
+    UIAnimatorComponent:
+      Preset: "hover_pulse"
+      PlayOnStart: true
+      Loop: false
+      Delay: 0
+      Duration: 0.16
+      Amplitude: 0.025
+      Speed: 1
+      FromOffset: [0, 0.015]
+    UIButtonComponent:
+      NormalColor: [0.12, 0.18, 0.18, 0.78]
+      HoverColor: [0.22, 0.38, 0.34, 0.92]
+      PressedColor: [0.08, 0.11, 0.12, 0.96]
+      OnClickFunction: vn:saveslot:16
+    UITextComponent:
+      Text: "槽位 16  空槽\n点击保存当前画面"
+      Color: [0.72, 0.78, 0.76, 1]
+      FontSize: 24
+      FontPath: assets/fonts/wqy-microhei.ttc
+      ShadowColor: [0.02, 0.025, 0.03, 0.78]
+      ShadowOffset: [1.4, 1.4]
+      OutlineColor: [0, 0, 0, 0.86]
+      OutlineThickness: 1.05
+
+  - Entity: 930029760
+    TagComponent:
+      Tag: VN_SaveLoad_Slot_17
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    UIWidgetComponent:
+      Visible: false
+      Position: [0.035, 2.430]
+      Size: [0.89, 0.140]
+      Rotation: 0.0
+      Anchor: 0
+      SortOrder: 137
+      ParentEntity: 930029743
+    UIAnimatorComponent:
+      Preset: "hover_pulse"
+      PlayOnStart: true
+      Loop: false
+      Delay: 0
+      Duration: 0.16
+      Amplitude: 0.025
+      Speed: 1
+      FromOffset: [0, 0.015]
+    UIButtonComponent:
+      NormalColor: [0.12, 0.18, 0.18, 0.78]
+      HoverColor: [0.22, 0.38, 0.34, 0.92]
+      PressedColor: [0.08, 0.11, 0.12, 0.96]
+      OnClickFunction: vn:saveslot:17
+    UITextComponent:
+      Text: "槽位 17  空槽\n点击保存当前画面"
+      Color: [0.72, 0.78, 0.76, 1]
+      FontSize: 24
+      FontPath: assets/fonts/wqy-microhei.ttc
+      ShadowColor: [0.02, 0.025, 0.03, 0.78]
+      ShadowOffset: [1.4, 1.4]
+      OutlineColor: [0, 0, 0, 0.86]
+      OutlineThickness: 1.05
+
+  - Entity: 930029761
+    TagComponent:
+      Tag: VN_SaveLoad_Slot_18
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    UIWidgetComponent:
+      Visible: false
+      Position: [0.035, 2.580]
+      Size: [0.89, 0.140]
+      Rotation: 0.0
+      Anchor: 0
+      SortOrder: 138
+      ParentEntity: 930029743
+    UIAnimatorComponent:
+      Preset: "hover_pulse"
+      PlayOnStart: true
+      Loop: false
+      Delay: 0
+      Duration: 0.16
+      Amplitude: 0.025
+      Speed: 1
+      FromOffset: [0, 0.015]
+    UIButtonComponent:
+      NormalColor: [0.12, 0.18, 0.18, 0.78]
+      HoverColor: [0.22, 0.38, 0.34, 0.92]
+      PressedColor: [0.08, 0.11, 0.12, 0.96]
+      OnClickFunction: vn:saveslot:18
+    UITextComponent:
+      Text: "槽位 18  空槽\n点击保存当前画面"
+      Color: [0.72, 0.78, 0.76, 1]
+      FontSize: 24
+      FontPath: assets/fonts/wqy-microhei.ttc
+      ShadowColor: [0.02, 0.025, 0.03, 0.78]
+      ShadowOffset: [1.4, 1.4]
+      OutlineColor: [0, 0, 0, 0.86]
+      OutlineThickness: 1.05
+
+  - Entity: 930029762
+    TagComponent:
+      Tag: VN_SaveLoad_Slot_19
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    UIWidgetComponent:
+      Visible: false
+      Position: [0.035, 2.730]
+      Size: [0.89, 0.140]
+      Rotation: 0.0
+      Anchor: 0
+      SortOrder: 139
+      ParentEntity: 930029743
+    UIAnimatorComponent:
+      Preset: "hover_pulse"
+      PlayOnStart: true
+      Loop: false
+      Delay: 0
+      Duration: 0.16
+      Amplitude: 0.025
+      Speed: 1
+      FromOffset: [0, 0.015]
+    UIButtonComponent:
+      NormalColor: [0.12, 0.18, 0.18, 0.78]
+      HoverColor: [0.22, 0.38, 0.34, 0.92]
+      PressedColor: [0.08, 0.11, 0.12, 0.96]
+      OnClickFunction: vn:saveslot:19
+    UITextComponent:
+      Text: "槽位 19  空槽\n点击保存当前画面"
+      Color: [0.72, 0.78, 0.76, 1]
+      FontSize: 24
+      FontPath: assets/fonts/wqy-microhei.ttc
+      ShadowColor: [0.02, 0.025, 0.03, 0.78]
+      ShadowOffset: [1.4, 1.4]
+      OutlineColor: [0, 0, 0, 0.86]
+      OutlineThickness: 1.05
+
+  - Entity: 930029763
+    TagComponent:
+      Tag: VN_SaveLoad_Slot_20
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    UIWidgetComponent:
+      Visible: false
+      Position: [0.035, 2.880]
+      Size: [0.89, 0.140]
+      Rotation: 0.0
+      Anchor: 0
+      SortOrder: 140
+      ParentEntity: 930029743
+    UIAnimatorComponent:
+      Preset: "hover_pulse"
+      PlayOnStart: true
+      Loop: false
+      Delay: 0
+      Duration: 0.16
+      Amplitude: 0.025
+      Speed: 1
+      FromOffset: [0, 0.015]
+    UIButtonComponent:
+      NormalColor: [0.12, 0.18, 0.18, 0.78]
+      HoverColor: [0.22, 0.38, 0.34, 0.92]
+      PressedColor: [0.08, 0.11, 0.12, 0.96]
+      OnClickFunction: vn:saveslot:20
+    UITextComponent:
+      Text: "槽位 20  空槽\n点击保存当前画面"
+      Color: [0.72, 0.78, 0.76, 1]
+      FontSize: 24
+      FontPath: assets/fonts/wqy-microhei.ttc
+      ShadowColor: [0.02, 0.025, 0.03, 0.78]
+      ShadowOffset: [1.4, 1.4]
+      OutlineColor: [0, 0, 0, 0.86]
+      OutlineThickness: 1.05
+
+  - Entity: 930029764
+    TagComponent:
+      Tag: VN_SaveLoadConfirmPanel
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    UIWidgetComponent:
+      Visible: false
+      Position: [0.2, 0.37]
+      Size: [0.6, 0.23]
+      Rotation: 0.0
+      Anchor: 0
+      SortOrder: 260
+      ParentEntity: 930029734
+    UIPanelComponent:
+      BackgroundColor: [0.018, 0.020, 0.024, 0.96]
+      BorderColor: [0.86, 0.66, 0.34, 0.96]
+      BorderThickness: 2
+      ClipChildren: true
+
+  - Entity: 930029765
+    TagComponent:
+      Tag: VN_SaveLoadConfirmText
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    UIWidgetComponent:
+      Visible: false
+      Position: [0.08, 0.14]
+      Size: [0.84, 0.36]
+      Rotation: 0.0
+      Anchor: 0
+      SortOrder: 261
+      ParentEntity: 930029764
+    UITextComponent:
+      Text: "该槽位已有存档。\n是否覆盖 1 号槽？"
+      Color: [0.98, 0.94, 0.82, 1]
+      FontSize: 24
+      FontPath: assets/fonts/wqy-microhei.ttc
+      ShadowColor: [0.02, 0.025, 0.03, 0.78]
+      ShadowOffset: [1.4, 1.4]
+      OutlineColor: [0, 0, 0, 0.86]
+      OutlineThickness: 1.05
+
+  - Entity: 930029766
+    TagComponent:
+      Tag: VN_SaveLoadConfirmYes
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    UIWidgetComponent:
+      Visible: false
+      Position: [0.16, 0.64]
+      Size: [0.25, 0.24]
+      Rotation: 0.0
+      Anchor: 0
+      SortOrder: 262
+      ParentEntity: 930029764
+    UIAnimatorComponent:
+      Preset: "hover_pulse"
+      PlayOnStart: true
+      Loop: false
+      Delay: 0
+      Duration: 0.16
+      Amplitude: 0.025
+      Speed: 1
+      FromOffset: [0, 0.015]
+    UIButtonComponent:
+      NormalColor: [0.12, 0.18, 0.18, 0.78]
+      HoverColor: [0.22, 0.38, 0.34, 0.92]
+      PressedColor: [0.08, 0.11, 0.12, 0.96]
+      OnClickFunction: vn:confirm_overwrite
+    UITextComponent:
+      Text: "覆盖"
+      Color: [0.98, 0.94, 0.82, 1]
+      FontSize: 24
+      FontPath: assets/fonts/wqy-microhei.ttc
+      ShadowColor: [0.02, 0.025, 0.03, 0.78]
+      ShadowOffset: [1.4, 1.4]
+      OutlineColor: [0, 0, 0, 0.86]
+      OutlineThickness: 1.05
+
+  - Entity: 930029767
+    TagComponent:
+      Tag: VN_SaveLoadConfirmNo
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    UIWidgetComponent:
+      Visible: false
+      Position: [0.58, 0.64]
+      Size: [0.25, 0.24]
+      Rotation: 0.0
+      Anchor: 0
+      SortOrder: 262
+      ParentEntity: 930029764
+    UIAnimatorComponent:
+      Preset: "hover_pulse"
+      PlayOnStart: true
+      Loop: false
+      Delay: 0
+      Duration: 0.16
+      Amplitude: 0.025
+      Speed: 1
+      FromOffset: [0, 0.015]
+    UIButtonComponent:
+      NormalColor: [0.12, 0.18, 0.18, 0.78]
+      HoverColor: [0.22, 0.38, 0.34, 0.92]
+      PressedColor: [0.08, 0.11, 0.12, 0.96]
+      OnClickFunction: vn:cancel_overwrite
+    UITextComponent:
+      Text: "取消"
+      Color: [0.98, 0.94, 0.82, 1]
+      FontSize: 24
+      FontPath: assets/fonts/wqy-microhei.ttc
+      ShadowColor: [0.02, 0.025, 0.03, 0.78]
+      ShadowOffset: [1.4, 1.4]
+      OutlineColor: [0, 0, 0, 0.86]
+      OutlineThickness: 1.05
+
   - Entity: 930029738
     TagComponent:
       Tag: VN_SaveLoad_SaveSlot1
@@ -1038,13 +2437,13 @@ Entities:
       Rotation: [0, 0, 0]
       Scale: [1, 1, 1]
     UIWidgetComponent:
-      Visible: true
-      Position: [0.25, 0.56]
-      Size: [0.15, 0.055]
+      Visible: false
+      Position: [0.109375, 0.732143]
+      Size: [0.265625, 0.116071]
       Rotation: 0.0
       Anchor: 0
       SortOrder: 90
-      ParentEntity: 930029741
+      ParentEntity: 930029734
     UIAnimatorComponent:
       Preset: "hover_pulse"
       PlayOnStart: true
@@ -1062,12 +2461,13 @@ Entities:
     UITextComponent:
       Text: "保存槽 1"
       Color: [1.0, 0.95, 0.78, 1]
-      FontSize: 20
+      FontSize: 24
       FontPath: assets/fonts/wqy-microhei.ttc
       ShadowColor: [0.01, 0.015, 0.018, 0.76]
       ShadowOffset: [1.6, 1.6]
       OutlineColor: [0.0, 0.0, 0.0, 0.82]
       OutlineThickness: 1.1
+
   - Entity: 930029739
     TagComponent:
       Tag: VN_SaveLoad_LoadSlot1
@@ -1076,13 +2476,13 @@ Entities:
       Rotation: [0, 0, 0]
       Scale: [1, 1, 1]
     UIWidgetComponent:
-      Visible: true
-      Position: [0.43, 0.56]
-      Size: [0.15, 0.055]
+      Visible: false
+      Position: [0.390625, 0.732143]
+      Size: [0.265625, 0.116071]
       Rotation: 0.0
       Anchor: 0
       SortOrder: 90
-      ParentEntity: 930029741
+      ParentEntity: 930029734
     UIAnimatorComponent:
       Preset: "hover_pulse"
       PlayOnStart: true
@@ -1100,12 +2500,13 @@ Entities:
     UITextComponent:
       Text: "读取槽 1"
       Color: [0.93, 1.0, 0.92, 1]
-      FontSize: 20
+      FontSize: 24
       FontPath: assets/fonts/wqy-microhei.ttc
       ShadowColor: [0.01, 0.015, 0.018, 0.76]
       ShadowOffset: [1.6, 1.6]
       OutlineColor: [0.0, 0.0, 0.0, 0.82]
       OutlineThickness: 1.1
+
   - Entity: 930029740
     TagComponent:
       Tag: VN_SaveLoad_Close
@@ -1115,12 +2516,12 @@ Entities:
       Scale: [1, 1, 1]
     UIWidgetComponent:
       Visible: true
-      Position: [0.61, 0.56]
-      Size: [0.12, 0.055]
+      Position: [0.79, 0.075]
+      Size: [0.16, 0.075]
       Rotation: 0.0
       Anchor: 0
-      SortOrder: 90
-      ParentEntity: 930029741
+      SortOrder: 265
+      ParentEntity: 930029734
     UIAnimatorComponent:
       Preset: "hover_pulse"
       PlayOnStart: true
@@ -1138,7 +2539,7 @@ Entities:
     UITextComponent:
       Text: "关闭"
       Color: [0.9, 0.96, 0.92, 1]
-      FontSize: 20
+      FontSize: 24
       FontPath: assets/fonts/wqy-microhei.ttc
       ShadowColor: [0.01, 0.015, 0.018, 0.76]
       ShadowOffset: [1.6, 1.6]

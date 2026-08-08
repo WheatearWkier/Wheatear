@@ -17,6 +17,7 @@
 #include <cmath>
 #include <optional>
 #include <string>
+#include <unordered_set>
 #include <vector>
 
 namespace Wheatear {
@@ -57,6 +58,37 @@ namespace Wheatear {
         {
             color.a *= Saturate(alphaScale);
             return color;
+        }
+
+        static bool IsEditorUIHidden(Scene* scene,
+            UIWidgetLayout::Context& layout,
+            entt::entity entity,
+            std::unordered_set<uint32_t>& visiting)
+        {
+            if (!scene || scene->GetExecutionMode() != SceneExecutionMode::Edit)
+                return false;
+
+            auto& registry = scene->GetRegistry();
+            if (!registry.valid(entity))
+                return false;
+
+            if (registry.all_of<EditorHiddenComponent>(entity))
+                return true;
+
+            if (!registry.all_of<UIWidgetComponent>(entity))
+                return false;
+
+            const uint32_t key = static_cast<uint32_t>(entity);
+            if (!visiting.insert(key).second)
+                return false;
+
+            const auto& widget = registry.get<UIWidgetComponent>(entity);
+            const entt::entity parent = layout.ResolveReference(widget.ParentEntity);
+            const bool hidden = parent != entt::null && registry.valid(parent)
+                ? IsEditorUIHidden(scene, layout, parent, visiting)
+                : false;
+            visiting.erase(key);
+            return hidden;
         }
 
         struct UIClipRect
@@ -136,13 +168,18 @@ namespace Wheatear {
             if (!scene)
                 return regions;
 
+            UIWidgetLayout::Context layout(scene);
+            const bool editMode = scene->GetExecutionMode() == SceneExecutionMode::Edit;
             auto& registry = scene->GetRegistry();
             auto view = registry.view<UIWidgetComponent, UIPanelComponent>();
             for (auto entity : view)
             {
                 const auto& widget = view.get<UIWidgetComponent>(entity);
                 const auto& panel = view.get<UIPanelComponent>(entity);
-                if (!widget.Visible || !panel.ClipChildren)
+                const bool visible = editMode
+                    ? UIWidgetLayout::ResolveEditorVisible(layout, entity)
+                    : UIWidgetLayout::ResolveVisible(layout, entity);
+                if (!visible || !panel.ClipChildren)
                     continue;
 
                 UIClipRect rect = WidgetToClipRect(widget);
@@ -522,7 +559,14 @@ namespace Wheatear {
         for (auto [order, e] : entries)
         {
             (void)order;
-            if (!UIWidgetLayout::ResolveVisible(layout, e))
+            std::unordered_set<uint32_t> hiddenVisiting;
+            if (IsEditorUIHidden(scene, layout, e, hiddenVisiting))
+                continue;
+
+            const bool editMode = scene->GetExecutionMode() == SceneExecutionMode::Edit;
+            if (editMode
+                ? !UIWidgetLayout::ResolveEditorVisible(layout, e)
+                : !UIWidgetLayout::ResolveVisible(layout, e))
                 continue;
 
             const UIWidgetLayout::Rect resolvedRect = UIWidgetLayout::ResolveRect(layout, e);
@@ -530,7 +574,9 @@ namespace Wheatear {
                 continue;
 
             const auto parentClipRect = UIWidgetLayout::ResolveParentClipRect(layout, e);
-            const UIWidgetComponent resolvedWidget = UIWidgetLayout::ResolveWidget(layout, e);
+            const UIWidgetComponent resolvedWidget = editMode
+                ? UIWidgetLayout::ResolveEditorWidget(layout, e)
+                : UIWidgetLayout::ResolveWidget(layout, e);
             if (!resolvedWidget.Visible) continue;
             applyClip(parentClipRect);
             int id = static_cast<int>(static_cast<uint32_t>(e));
@@ -557,6 +603,8 @@ namespace Wheatear {
                 UIRenderer::DrawUICheckbox(resolvedWidget, *checkbox, id);
             if (auto* img = registry.try_get<UIImageComponent>(e))
                 UIRenderer::DrawUIImage(resolvedWidget, *img, id);
+            if (auto* radial = registry.try_get<UIRadialCooldownComponent>(e))
+                UIRenderer::DrawUIRadialCooldown(resolvedWidget, *radial, id);
             if (auto* text = registry.try_get<UITextComponent>(e))
                 UIRenderer::DrawUIText(resolvedWidget, *text, id);
         }

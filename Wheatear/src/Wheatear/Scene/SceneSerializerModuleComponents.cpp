@@ -359,6 +359,18 @@ namespace Wheatear {
             o << YAML::Key << "LauncherCooldown" << YAML::Value << c.LauncherCooldown;
             o << YAML::Key << "MagicBoltCooldown" << YAML::Value << c.MagicBoltCooldown;
             o << YAML::Key << "AllySupportCooldown" << YAML::Value << c.AllySupportCooldown;
+            o << YAML::Key << "DashCooldown" << YAML::Value << c.DashCooldown;
+            o << YAML::Key << "DashManaCost" << YAML::Value << c.DashManaCost;
+            o << YAML::Key << "DashSpeed" << YAML::Value << c.DashSpeed;
+            o << YAML::Key << "DashInvulnerableTime" << YAML::Value << c.DashInvulnerableTime;
+            o << YAML::Key << "MaxMana" << YAML::Value << c.MaxMana;
+            o << YAML::Key << "LauncherManaCost" << YAML::Value << c.LauncherManaCost;
+            o << YAML::Key << "MagicBoltManaCost" << YAML::Value << c.MagicBoltManaCost;
+            o << YAML::Key << "AllySupportManaCost" << YAML::Value << c.AllySupportManaCost;
+            o << YAML::Key << "HealItemAmount" << YAML::Value << c.HealItemAmount;
+            o << YAML::Key << "ManaItemAmount" << YAML::Value << c.ManaItemAmount;
+            o << YAML::Key << "AttackBuffMultiplier" << YAML::Value << c.AttackBuffMultiplier;
+            o << YAML::Key << "AttackBuffDuration" << YAML::Value << c.AttackBuffDuration;
             o << YAML::EndMap;
         }
         static void Deserialize(const YAML::Node& n, SidePlayerControllerComponent& c) {
@@ -375,6 +387,18 @@ namespace Wheatear {
             c.LauncherCooldown = n["LauncherCooldown"].as<float>(c.LauncherCooldown);
             c.MagicBoltCooldown = n["MagicBoltCooldown"].as<float>(c.MagicBoltCooldown);
             c.AllySupportCooldown = n["AllySupportCooldown"].as<float>(c.AllySupportCooldown);
+            c.DashCooldown = n["DashCooldown"].as<float>(c.DashCooldown);
+            c.DashManaCost = n["DashManaCost"].as<float>(c.DashManaCost);
+            c.DashSpeed = n["DashSpeed"].as<float>(c.DashSpeed);
+            c.DashInvulnerableTime = n["DashInvulnerableTime"].as<float>(c.DashInvulnerableTime);
+            c.MaxMana = n["MaxMana"].as<float>(c.MaxMana);
+            c.LauncherManaCost = n["LauncherManaCost"].as<float>(c.LauncherManaCost);
+            c.MagicBoltManaCost = n["MagicBoltManaCost"].as<float>(c.MagicBoltManaCost);
+            c.AllySupportManaCost = n["AllySupportManaCost"].as<float>(c.AllySupportManaCost);
+            c.HealItemAmount = n["HealItemAmount"].as<float>(c.HealItemAmount);
+            c.ManaItemAmount = n["ManaItemAmount"].as<float>(c.ManaItemAmount);
+            c.AttackBuffMultiplier = n["AttackBuffMultiplier"].as<float>(c.AttackBuffMultiplier);
+            c.AttackBuffDuration = n["AttackBuffDuration"].as<float>(c.AttackBuffDuration);
         }
     };
 

@@ -143,24 +143,44 @@ actions:
     tags: [Gameplay.SideCombat, Gameplay.Combat, Attack.Support, Affection.Support]
     signals: [side.action.start, side.action.hit]
 
+  - id: side.dash
+    displayName: Dash Attack
+    description: Brief invulnerable dash attack.
+    icon: side.skill.icon.dash
+    animation: side_dash
+    sound: assets/vertical_slice/side_combat/audio/swing_air.wav
+    effect: side.vfx.launcher_slash
+    cooldown: 1.00
+    duration: 0.32
+    startup: 0.05
+    recovery: 0.08
+    hitTime: 0.05
+    cancelStart: 0.14
+    cancelEnd: 0.30
+    movementScale: 0.00
+    resourceCost:
+      mana: 16
+    tags: [Gameplay.SideCombat, Gameplay.Combat, Gameplay.Movement, Skill.Dash, Attack.Dash, Invulnerable]
+    signals: [side.action.start, side.dash.start]
+
   - id: side.break_limit
-    displayName: Break Limit Chase
-    description: Advanced reset that extends air combo resources.
+    displayName: Break Limit
+    description: Clears boss protection during super armor.
     icon: side.skill.icon.break_limit
     animation: side_break_limit
     sound: assets/vertical_slice/side_combat/audio/break_limit.wav
     effect: side.vfx.launcher_slash
     cooldown: 3.00
-    duration: 0.40
+    duration: 0.32
     startup: 0.04
-    recovery: 0.12
+    recovery: 0.10
     hitTime: 0.04
     cancelStart: 0.10
-    cancelEnd: 0.28
-    movementScale: 0.92
+    cancelEnd: 0.24
+    movementScale: 0.70
     resourceCost:
-      magic_sword: 1
-    tags: [Gameplay.SideCombat, Gameplay.Combat, Attack.BreakLimit, Combo.Air, Combo.Advanced]
+      magic_sword: 1.5
+    tags: [Gameplay.SideCombat, Gameplay.Combat, Attack.BreakLimit, Boss.Protection]
     signals: [side.action.start, side.action.hit, side.break_limit.flash]
 
   - id: side.enemy_claw
@@ -204,12 +224,12 @@ actions:
     animation: bear_shockwave
     sound: assets/vertical_slice/side_combat/audio/shockwave_cast.wav
     effect: side.vfx.enemy_projectile
-    duration: 2.67
-    startup: 0.62
-    recovery: 0.55
-    hitTime: 0.62
-    cancelStart: 0.62
-    cancelEnd: 2.67
+    duration: 1.15
+    startup: 0.52
+    recovery: 0.20
+    hitTime: 0.52
+    cancelStart: 0.52
+    cancelEnd: 1.15
     movementScale: 0.05
     tags: [Gameplay.SideCombat, Gameplay.Combat, Enemy, Attack.Shockwave, Boss]
     signals: [side.action.start, side.action.hit]

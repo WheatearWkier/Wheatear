@@ -46,6 +46,16 @@ namespace Wheatear {
         TagComponent(const std::string& tag) : Tag(tag) {}
     };
 
+    // Editor-only marker. It is intentionally omitted from scene serialization
+    // and runtime scene copying, so temporary scene visibility never changes gameplay.
+    struct EditorHiddenComponent
+    {
+        bool Hidden = true;
+
+        EditorHiddenComponent() = default;
+        EditorHiddenComponent(const EditorHiddenComponent&) = default;
+    };
+
     struct TransformComponent
     {
         glm::vec3 Translation = { 0.0f, 0.0f, 0.0f };
@@ -238,6 +248,7 @@ namespace Wheatear {
         std::string DefaultClipName;
         bool PlayOnStart = true;
         bool FireEvents = true;
+        float PlaybackSpeed = 1.0f;
 
         std::string  CurrentClipName;
         int          CurrentFrameIndex = 0;
@@ -302,6 +313,7 @@ namespace Wheatear {
     struct UIWidgetComponent
     {
         bool      Visible = true;
+        bool      EditorVisible = true;
         glm::vec2 Position = { 0.5f, 0.5f };
         glm::vec2 Size = { 0.1f, 0.05f };
         float     Rotation = 0.0f;
@@ -356,6 +368,18 @@ namespace Wheatear {
         UIImageComponent(const UIImageComponent&) = default;
     };
 
+    struct UIRadialCooldownComponent
+    {
+        float     Progress = 0.0f;
+        float     StartAngle = 1.57079632679f;
+        float     Thickness = 1.0f;
+        float     Fade = 0.005f;
+        glm::vec4 Color = { 0.0f, 0.0f, 0.0f, 0.58f };
+
+        UIRadialCooldownComponent() = default;
+        UIRadialCooldownComponent(const UIRadialCooldownComponent&) = default;
+    };
+
     // -- UIPanel: screen-space UI background/window panel.
     struct UIPanelComponent
     {
@@ -374,12 +398,29 @@ namespace Wheatear {
         UIPanelComponent(const UIPanelComponent&) = default;
     };
 
+    enum class UITextHorizontalAlign : int
+    {
+        Left = 0,
+        Center = 1,
+        Right = 2
+    };
+
+    enum class UITextVerticalAlign : int
+    {
+        Top = 0,
+        Middle = 1,
+        Bottom = 2
+    };
+
     struct UITextComponent
     {
         std::string Text = "Text";
         glm::vec4   Color = { 1.0f, 1.0f, 1.0f, 1.0f };
         float       FontSize = 24.0f;
         std::string FontPath = "font.ui_default";
+        glm::vec4   Padding = { -1.0f, -1.0f, -1.0f, -1.0f };
+        UITextHorizontalAlign HorizontalAlign = UITextHorizontalAlign::Left;
+        UITextVerticalAlign VerticalAlign = UITextVerticalAlign::Top;
         glm::vec4   ShadowColor = { 0.02f, 0.03f, 0.04f, 0.78f };
         glm::vec2   ShadowOffset = { 2.0f, 2.0f };
         glm::vec4   OutlineColor = { 0.02f, 0.02f, 0.025f, 0.86f };

@@ -9,6 +9,7 @@
 #include "Wheatear/Scene/EntityReference.h"
 #include "Wheatear/Scene/SceneQueries.h"
 #include "Wheatear/UI/UIRuntimeTools.h"
+#include "Wheatear/UI/UIWidgetLayout.h"
 
 #include <algorithm>
 #include <array>
@@ -52,6 +53,16 @@ namespace Wheatear::ProgressionEquipmentPageService {
             UIRuntimeTools::SetImageTexture(scene, entityName, texturePath, true);
         }
 
+        static glm::vec2 GetWidgetTopLeft(Scene* scene, const std::string& entityName, glm::vec2 fallback)
+        {
+            Entity entity = FindEntityByName(scene, entityName);
+            if (!entity || !entity.HasComponent<UIWidgetComponent>())
+                return fallback;
+
+            const UIWidgetLayout::Rect rect = UIWidgetLayout::WidgetToLocalRect(entity.GetComponent<UIWidgetComponent>());
+            return { rect.Left, rect.Top };
+        }
+
         static constexpr std::array<EquipmentSlotView, 4> kSlots = {
             EquipmentSlotView{ "armor", "Equipment_SlotArmor", "Equipment_SlotArmor_Button", { 0.105f, 0.335f } },
             EquipmentSlotView{ "ring", "Equipment_SlotRing", "Equipment_SlotRing_Button", { 0.205f, 0.335f } },
@@ -78,15 +89,17 @@ namespace Wheatear::ProgressionEquipmentPageService {
         if (!HasEntity(scene, "Equipment_Details"))
             return;
 
-        EnsureScrollView(scene, "Equipment_DetailsScroll", "WT_UI_Canvas",
-            { 0.675f, 0.280f }, { 0.215f, 0.262f }, 34, 1.55f);
-        UIRuntimeTools::SetWidgetParent(scene, "Equipment_Details", "Equipment_DetailsScroll");
-        SetWidgetTopLeft(scene, "Equipment_Details", { 0.025f, 0.025f }, { 0.84f, 1.24f });
+        if (HasEntity(scene, "Equipment_DetailsScroll"))
+        {
+            EnsureScrollView(scene, "Equipment_DetailsScroll", "WT_UI_Canvas",
+                { 0.675f, 0.280f }, { 0.215f, 0.262f }, 34, 1.55f);
+        }
 
-        EnsureScrollView(scene, "Equipment_MaterialsScroll", "WT_UI_Canvas",
-            { 0.675f, 0.555f }, { 0.215f, 0.142f }, 34, 1.35f);
-        UIRuntimeTools::SetWidgetParent(scene, "Equipment_Materials", "Equipment_MaterialsScroll");
-        SetWidgetTopLeft(scene, "Equipment_Materials", { 0.025f, 0.030f }, { 0.84f, 0.92f });
+        if (HasEntity(scene, "Equipment_MaterialsScroll"))
+        {
+            EnsureScrollView(scene, "Equipment_MaterialsScroll", "WT_UI_Canvas",
+                { 0.675f, 0.555f }, { 0.215f, 0.142f }, 34, 1.35f);
+        }
     }
 
     void UpdateItems(Scene* scene)
@@ -94,7 +107,6 @@ namespace Wheatear::ProgressionEquipmentPageService {
         const auto& state = GameProgress::GetState();
         Entity pager = EnsurePager(scene, "Equipment_Pager", 2);
         const glm::vec2 frameSize = { 0.075f, 0.098f };
-        const glm::vec2 iconSize = { 0.055f, 0.075f };
         const glm::vec2 origin = { 0.385f, 0.335f };
         const glm::vec2 step = { 0.105f, 0.135f };
         std::string hoveredEquipmentId;
@@ -115,7 +127,6 @@ namespace Wheatear::ProgressionEquipmentPageService {
         {
             const std::string equipmentId = GameProgress::GetEquippedEquipmentForSlot(slot.SlotId);
             const bool hasEquipment = !equipmentId.empty();
-            SetWidgetTopLeft(scene, slot.ButtonTag, slot.FramePosition, frameSize);
             SetWidgetVisible(scene, slot.ButtonTag, true);
             SetButtonCommand(scene, slot.ButtonTag, std::string("progression:select_equipment_slot:") + slot.SlotId);
             SetWidgetVisible(scene, slot.IconTag, hasEquipment);
@@ -131,7 +142,7 @@ namespace Wheatear::ProgressionEquipmentPageService {
             if (hasEquipment && IsButtonHovered(scene, slot.ButtonTag))
             {
                 hoveredEquipmentId = equipmentId;
-                hoveredPosition = slot.FramePosition;
+                hoveredPosition = GetWidgetTopLeft(scene, slot.ButtonTag, slot.FramePosition);
             }
         }
 
@@ -153,9 +164,6 @@ namespace Wheatear::ProgressionEquipmentPageService {
             SetPageItem(scene, item, pager, page);
             SetPageItem(scene, button, pager, page);
 
-            SetWidgetTopLeft(scene, frame, pos, frameSize);
-            SetWidgetTopLeft(scene, item, pos + glm::vec2(0.010f, 0.011f), iconSize);
-            SetWidgetTopLeft(scene, button, pos, frameSize);
             SetWidgetVisible(scene, frame, hasEquipment);
             SetWidgetVisible(scene, item, hasEquipment);
             SetWidgetVisible(scene, button, hasEquipment);
@@ -176,7 +184,7 @@ namespace Wheatear::ProgressionEquipmentPageService {
             if (hasEquipment && IsButtonHovered(scene, button))
             {
                 hoveredEquipmentId = equipmentId;
-                hoveredPosition = pos;
+                hoveredPosition = GetWidgetTopLeft(scene, button, pos);
             }
         }
 

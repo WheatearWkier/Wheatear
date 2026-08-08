@@ -101,6 +101,62 @@ namespace Wheatear {
         return entity.GetUUID();
     }
 
+    bool SceneHierarchyPanel::IsEntityHiddenInEditor(Entity entity) const
+    {
+        return entity && entity.HasComponent<EditorHiddenComponent>();
+    }
+
+    bool SceneHierarchyPanel::HasHiddenEditorEntities() const
+    {
+        if (!m_Context)
+            return false;
+
+        auto view = m_Context->GetRegistry().view<EditorHiddenComponent>();
+        return view.begin() != view.end();
+    }
+
+    void SceneHierarchyPanel::SetEntityHiddenInEditor(Entity entity, bool hidden)
+    {
+        if (!entity)
+            return;
+
+        const bool currentlyHidden = IsEntityHiddenInEditor(entity);
+        if (currentlyHidden == hidden)
+            return;
+
+        std::unique_ptr<ICommand> command;
+        if (hidden)
+            command = std::make_unique<AddComponentCommand<EditorHiddenComponent>>(entity);
+        else
+            command = std::make_unique<RemoveComponentCommand<EditorHiddenComponent>>(entity);
+        command->Execute();
+        CommandHistory::Get().Push(std::move(command));
+    }
+
+    void SceneHierarchyPanel::ShowAllHiddenEditorEntities()
+    {
+        if (!m_Context)
+            return;
+
+        std::vector<Entity> hiddenEntities;
+        for (auto entityID : m_Context->GetRegistry().view<EditorHiddenComponent>())
+            hiddenEntities.emplace_back(entityID, m_Context.get());
+
+        auto composite = std::make_unique<CompositeCommand>();
+        for (Entity entity : hiddenEntities)
+        {
+            if (!entity || !entity.HasComponent<EditorHiddenComponent>())
+                continue;
+
+            auto command = std::make_unique<RemoveComponentCommand<EditorHiddenComponent>>(entity);
+            command->Execute();
+            composite->Add(std::move(command));
+        }
+
+        if (!composite->Empty())
+            CommandHistory::Get().Push(std::move(composite));
+    }
+
     Entity SceneHierarchyPanel::CreateEntityWithUndo(const std::string& name,
         const std::function<void(Entity)>& configure)
     {
@@ -322,10 +378,17 @@ namespace Wheatear {
 
         if (m_Context)
         {
-            ImGui::SetNextItemWidth(-80.0f);
+            ImGui::SetNextItemWidth(-168.0f);
             ImGui::InputTextWithHint("##HierarchySearch", "Search entity...", m_SearchBuffer, sizeof(m_SearchBuffer));
             ImGui::SameLine();
             ImGui::Checkbox("UI", &m_ShowOnlyUI);
+            ImGui::SameLine();
+            ImGui::BeginDisabled(!HasHiddenEditorEntities());
+            if (ImGui::SmallButton("Show All"))
+                ShowAllHiddenEditorEntities();
+            if (ImGui::IsItemHovered(ImGuiHoveredFlags_AllowWhenDisabled))
+                ImGui::SetTooltip("Show all entities hidden in the editor");
+            ImGui::EndDisabled();
             ImGui::Separator();
 
             auto& registry = m_Context->m_Registry;
@@ -433,6 +496,11 @@ namespace Wheatear {
             {
                 if (ImGui::MenuItem("Create Empty Entity"))
                     CreateEntityWithUndo("Empty Entity", [](Entity) {});
+
+                ImGui::BeginDisabled(!HasHiddenEditorEntities());
+                if (ImGui::MenuItem("Show All Hidden"))
+                    ShowAllHiddenEditorEntities();
+                ImGui::EndDisabled();
 
                 ImGui::Separator();
 

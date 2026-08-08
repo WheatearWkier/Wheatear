@@ -22,6 +22,13 @@ player:
   launcherCooldown: 0.38
   magicBoltCooldown: 0.62
   allySupportCooldown: 4.0
+  dashCooldown: 1.00
+  healItemCooldown: 5.0
+  manaItemCooldown: 5.0
+  attackBuffItemCooldown: 10.0
+  dashManaCost: 16.0
+  dashSpeed: 10.5
+  dashInvulnerableTime: 0.18
   basicChainWindow: 0.76
   launcherChainWindow: 0.86
   magicChainWindow: 0.82
@@ -35,6 +42,10 @@ combat:
 
 feedback:
   hitPauseTimeScale: 0.10
+  breakLimitCinematicDuration: 0.60
+  breakLimitCinematicTimeScale: 0.045
+  breakLimitCameraZoom: 1.30
+  breakLimitCameraOffset: [0.0, 0.25]
   jumpSound: assets/vertical_slice/side_combat/audio/jump.wav
   landSound: assets/vertical_slice/side_combat/audio/land.wav
   jumpSoundVolume: 0.38
@@ -52,7 +63,7 @@ airCombo:
   airChaseCooldown: 0.32
   breakLimitCooldown: 3.0
   breakLimitMinCombo: 4
-  breakLimitGaugeCost: 1.0
+  breakLimitGaugeCost: 1.5
   magicSwordGaugeMax: 3.0
   gaugeGainGroundHit: 0.10
   gaugeGainAirHit: 0.16
@@ -65,42 +76,42 @@ airCombo:
 
 protection:
   bossProtectionMax: 100.0
-  bossProtectionDecayPerSecond: 16.0
+  bossProtectionDecayPerSecond: 36.0
   bossProtectionLimitTime: 1.15
   bossProtectionForceFallVelocity: -6.0
-  bossProtectionBreakLimitThreshold: 35.0
-  breakLimitProtectionReduce: 42.0
+  bossProtectionBreakLimitThreshold: 0.0
+  breakLimitProtectionReduce: 100.0
   groundResetDelay: 0.20
   showBossProtectionHud: false
   showCombatStateHud: false
 
 enemy:
-  initialAttackDelay: 0.45
-  attackRangePadding: 0.45
-  laneAttackPadding: 0.28
-  bossPreferredRangeBonus: 0.45
+  initialAttackDelay: 0.24
+  attackRangePadding: 0.60
+  laneAttackPadding: 0.36
+  bossPreferredRangeBonus: 0.18
   gruntMoveSpeedScale: 0.88
-  bossMoveSpeedScale: 0.62
+  bossMoveSpeedScale: 0.72
   gruntLaneSpeedScale: 0.68
-  bossLaneSpeedScale: 0.46
+  bossLaneSpeedScale: 0.54
   xApproachAcceleration: 24.0
   xBrakeAcceleration: 20.0
   laneApproachAcceleration: 18.0
   laneBrakeAcceleration: 16.0
   bearBoss:
-    moveSpeed: 3.4
-    aggroRange: 12.0
-    attackRange: 1.55
-    preferredRange: 1.2
-    attackInterval: 1.24
-    laneTolerance: 0.58
-    midHealthThreshold: 0.68
-    lowHealthThreshold: 0.36
-    midAttackInterval: 1.02
-    lowAttackInterval: 0.84
-    chargeDistance: 1.8
-    shockwaveDistance: 2.0
-    chargeSpeed: 5.8
+    moveSpeed: 3.75
+    aggroRange: 14.0
+    attackRange: 1.72
+    preferredRange: 1.08
+    attackInterval: 0.82
+    laneTolerance: 0.66
+    midHealthThreshold: 0.74
+    lowHealthThreshold: 0.44
+    midAttackInterval: 0.66
+    lowAttackInterval: 0.52
+    chargeDistance: 2.15
+    shockwaveDistance: 2.35
+    chargeSpeed: 7.20
 
 pickup:
   pickupRadius: 0.45
@@ -132,9 +143,10 @@ visuals:
     air_basic: { pattern: "assets/vertical_slice/side_combat/characters/protag_air_basic_{frame2}.png", frameCount: 4, frameRate: 14.0, loop: false, renderScale: [1.0, 1.0], renderOffset: [0.0, 0.3398] }
     launcher: { pattern: "assets/vertical_slice/side_combat/characters/protag_launcher_{frame2}.png", frameCount: 2, frameRate: 10.0, loop: false, renderScale: [1.0, 1.0], renderOffset: [0.0, 0.3398] }
     air_chase: { pattern: "assets/vertical_slice/side_combat/characters/protag_air_chase_{frame2}.png", frameCount: 8, frameRate: 24.0, loop: false, renderScale: [1.5, 1.25], renderOffset: [0.0, 0.4453] }
+    dash: { pattern: "assets/vertical_slice/side_combat/characters/protag_dash_{frame2}.png", frameCount: 1, frameRate: 8.0, loop: false, renderScale: [1.60, 1.60], renderOffset: [0.0, 0.4453] }
     magic_bolt: { pattern: "assets/vertical_slice/side_combat/characters/protag_magic_bolt_{frame2}.png", frameCount: 9, frameRate: 20.0, loop: false, renderScale: [1.0, 1.0], renderOffset: [0.0, 0.3398] }
     ally_support: { pattern: "assets/vertical_slice/side_combat/characters/protag_ally_support_{frame2}.png", frameCount: 8, frameRate: 18.0, loop: false, renderScale: [1.25, 1.0], renderOffset: [0.0, 0.3398] }
-    break_limit: { pattern: "assets/vertical_slice/side_combat/characters/protag_break_limit_{frame2}.png", frameCount: 12, frameRate: 24.0, loop: false, renderScale: [2.0, 1.0], renderOffset: [0.0, 0.3398] }
+    break_limit: { pattern: "assets/vertical_slice/side_combat/characters/protag_break_limit_{frame2}.png", frameCount: 2, frameRate: 8.0, loop: false, renderScale: [1.60, 1.60], renderOffset: [0.0, 0.4453] }
   gruntAnimations:
     idle: { pattern: "assets/vertical_slice/side_combat/enemies/en_claw_beast_idle_{frame2}.png", frameCount: 4, frameRate: 7.0, loop: true, renderScale: [1.0, 1.0], renderOffset: [0.0, 0.2969] }
     run: { pattern: "assets/vertical_slice/side_combat/enemies/en_claw_beast_run_{frame2}.png", frameCount: 5, frameRate: 11.0, loop: true, renderScale: [1.0, 1.0], renderOffset: [0.0, 0.2969] }
@@ -144,13 +156,14 @@ visuals:
     enemy_claw: { pattern: "assets/vertical_slice/side_combat/enemies/en_claw_beast_attack_{frame2}.png", frameCount: 4, frameRate: 14.0, loop: false, renderScale: [1.5, 1.0], renderOffset: [0.0, 0.2969] }
   bossAnimations:
     idle: { pattern: "assets/vertical_slice/side_combat/enemies/boss_bear_husband_idle_{frame2}.png", frameCount: 4, frameRate: 6.0, loop: true, renderScale: [1.0, 1.0], renderOffset: [0.0, 0.3151] }
-    run: { pattern: "assets/vertical_slice/side_combat/enemies/boss_bear_husband_walk_{frame2}.png", frameCount: 5, frameRate: 8.0, loop: true, renderScale: [1.0, 1.0], renderOffset: [0.0, 0.3151] }
-    hit: { pattern: "assets/vertical_slice/side_combat/enemies/boss_bear_husband_hit_{frame2}.png", frameCount: 3, frameRate: 10.0, loop: false, renderScale: [1.0, 1.0], renderOffset: [0.0, 0.3151] }
-    fall: { pattern: "assets/vertical_slice/side_combat/enemies/boss_bear_husband_fall_{frame2}.png", frameCount: 3, frameRate: 8.0, loop: true, renderScale: [1.0, 1.0], renderOffset: [0.0, 0.3151] }
+    run: { pattern: "assets/vertical_slice/side_combat/enemies/boss_bear_husband_walk_{frame2}.png", frameCount: 4, frameRate: 8.0, loop: true, renderScale: [1.0, 1.0], renderOffset: [0.0, 0.3151] }
+    hit: { pattern: "assets/vertical_slice/side_combat/enemies/boss_bear_husband_hit_{frame2}.png", frameCount: 4, frameRate: 10.0, loop: false, renderScale: [1.30, 1.30], renderOffset: [0.0, 0.4351] }
+    fall: { pattern: "assets/vertical_slice/side_combat/enemies/boss_bear_husband_hit_04.png", frameCount: 1, frameRate: 8.0, loop: false, renderScale: [1.30, 1.30], renderOffset: [0.0, 0.4351] }
     dead: { pattern: "assets/vertical_slice/side_combat/enemies/boss_bear_husband_dead_{frame2}.png", frameCount: 4, frameRate: 7.0, loop: false, renderScale: [1.25, 1.0], renderOffset: [0.0, 0.3151] }
-    enemy_claw: { pattern: "assets/vertical_slice/side_combat/enemies/boss_bear_husband_attack_{frame2}.png", frameCount: 4, frameRate: 12.0, loop: false, renderScale: [1.25, 1.0], renderOffset: [0.0, 0.3151] }
-    bear_charge: { pattern: "assets/vertical_slice/side_combat/enemies/boss_bear_husband_charge_{frame2}.png", frameCount: 4, frameRate: 12.0, loop: false, renderScale: [1.0, 1.0], renderOffset: [0.0, 0.3151] }
-    bear_shockwave: { pattern: "assets/vertical_slice/side_combat/enemies/boss_bear_husband_shockwave_{frame2}.png", frameCount: 4, frameRate: 12.0, loop: false, renderScale: [1.25, 1.0], renderOffset: [0.0, 0.3151] }
+    enemy_claw: { pattern: "assets/vertical_slice/side_combat/enemies/boss_bear_husband_attack_claw_{frame2}.png", frameCount: 3, frameRate: 5.0, loop: false, renderScale: [1.85, 1.85], renderOffset: [0.0, 0.3151] }
+    bear_charge: { pattern: "assets/vertical_slice/side_combat/enemies/boss_bear_husband_charge_{frame2}.png", frameCount: 4, frameRate: 12.0, loop: true, renderScale: [1.0, 1.0], renderOffset: [0.0, 0.3151] }
+    bear_charge_windup: { pattern: "assets/vertical_slice/side_combat/enemies/boss_bear_husband_charge_windup_{frame2}.png", frameCount: 6, frameRate: 12.0, loop: false, renderScale: [1.0, 1.0], renderOffset: [0.0, 0.3151] }
+    bear_shockwave: { pattern: "assets/vertical_slice/side_combat/enemies/boss_bear_husband_shockwave_{frame2}.png", frameCount: 4, frameRate: 12.0, loop: false, renderScale: [1.16, 0.96], renderOffset: [0.0, 0.3151] }
 
 reactions:
   bossLaunchBonus: 1.46
@@ -184,6 +197,13 @@ skills:
     attackIds: [air_chase]
     unlockChapter: 2
     coreMove: true
+  dash:
+    displayName: "冲刺"
+    input: "I"
+    comboRole: "短暂无敌位移"
+    attackIds: [dash]
+    unlockChapter: 2
+    coreMove: true
   magic_bolt:
     displayName: "火球术"
     input: "U"
@@ -193,7 +213,7 @@ skills:
     coreMove: true
   ally_support:
     displayName: "真青梅支援"
-    input: "I"
+    input: "H"
     comboRole: "支援浮空 / 新手容错"
     attackIds: [ally_support]
     unlockChapter: 2
@@ -212,7 +232,7 @@ progression:
     CH02_MAIN_BearAwakening:
       displayName: "第二章：魔剑觉醒"
       chapter: 2
-      unlockedSkills: [basic_attack, air_basic, launcher, air_chase, magic_bolt, ally_support]
+      unlockedSkills: [basic_attack, air_basic, launcher, air_chase, dash, magic_bolt, ally_support]
       debugSkills: [break_limit]
       visibleSystems:
         bossProtectionHud: false
@@ -221,7 +241,7 @@ progression:
     CH02_MAT_BeastPath:
       displayName: "第二章：黑林兽道"
       chapter: 2
-      unlockedSkills: [basic_attack, air_basic, launcher, air_chase, magic_bolt, ally_support]
+      unlockedSkills: [basic_attack, air_basic, launcher, air_chase, dash, magic_bolt, ally_support]
       debugSkills: [break_limit]
       visibleSystems:
         bossProtectionHud: false
@@ -230,7 +250,7 @@ progression:
     CH06_MAIN_MageLair:
       displayName: "第六章：魔法师老巢"
       chapter: 6
-      unlockedSkills: [basic_attack, air_basic, launcher, air_chase, magic_bolt, ally_support]
+      unlockedSkills: [basic_attack, air_basic, launcher, air_chase, dash, magic_bolt, ally_support]
       debugSkills: []
       visibleSystems:
         bossProtectionHud: true
@@ -239,7 +259,7 @@ progression:
     CH07_MAIN_PalaceAssault:
       displayName: "第七章：进攻王宫"
       chapter: 7
-      unlockedSkills: [basic_attack, air_basic, launcher, air_chase, magic_bolt, ally_support, break_limit]
+      unlockedSkills: [basic_attack, air_basic, launcher, air_chase, dash, magic_bolt, ally_support, break_limit]
       debugSkills: []
       visibleSystems:
         bossProtectionHud: true
@@ -264,7 +284,7 @@ attacks:
     movementScale: 0.60
     hitStun: 0.31
     attackerAirImpulse: 0.0
-    protectionGain: 4.0
+    protectionGain: 9.0
     destroyOnHit: true
     textureFramePattern: assets/vertical_slice/side_combat/effects/vfx_basic_slash_{frame2}.png
     textureFrameCount: 4
@@ -293,7 +313,7 @@ attacks:
     movementScale: 0.54
     hitStun: 0.34
     attackerAirImpulse: 0.0
-    protectionGain: 5.0
+    protectionGain: 11.0
     destroyOnHit: true
     textureFramePattern: assets/vertical_slice/side_combat/effects/vfx_basic_slash_{frame2}.png
     textureFrameCount: 4
@@ -322,7 +342,7 @@ attacks:
     movementScale: 0.38
     hitStun: 0.40
     attackerAirImpulse: 0.0
-    protectionGain: 8.0
+    protectionGain: 16.0
     destroyOnHit: true
     textureFramePattern: assets/vertical_slice/side_combat/effects/vfx_basic_slash_{frame2}.png
     textureFrameCount: 4
@@ -353,7 +373,7 @@ attacks:
     attackerAirImpulse: 0.85
     attackerAirFallStep: 0.04
     targetAirFallStep: 0.025
-    protectionGain: 7.0
+    protectionGain: 14.0
     destroyOnHit: true
     textureFramePattern: assets/vertical_slice/side_combat/effects/vfx_basic_slash_{frame2}.png
     textureFrameCount: 4
@@ -382,7 +402,7 @@ attacks:
     movementScale: 0.35
     hitStun: 0.70
     attackerAirImpulse: 0.0
-    protectionGain: 12.0
+    protectionGain: 22.0
     destroyOnHit: true
     textureFramePattern: assets/vertical_slice/side_combat/effects/vfx_launcher_slash_{frame2}.png
     textureFrameCount: 5
@@ -413,7 +433,7 @@ attacks:
     attackerAirImpulse: 2.35
     attackerAirFallStep: 0.045
     targetAirFallStep: 0.02
-    protectionGain: 9.0
+    protectionGain: 18.0
     destroyOnHit: true
     textureFramePattern: assets/vertical_slice/side_combat/effects/vfx_launcher_slash_{frame2}.png
     textureFrameCount: 5
@@ -424,6 +444,35 @@ attacks:
     hitPause: 0.046
     cameraShake: 0.024
     cameraShakeDuration: 0.075
+
+  dash:
+    size: [1.26, 0.74]
+    offset: [0.88, 0.0]
+    velocity: [10.5, 0.0]
+    launchVelocity: [1.35, 1.80]
+    airHeight: 0.56
+    airRange: 1.02
+    damageScale: 0.60
+    damageFlat: 6.0
+    lifetime: 0.24
+    startup: 0.05
+    recovery: 0.08
+    cancelWindowStart: 0.14
+    cancelWindowEnd: 0.30
+    movementScale: 0.0
+    hitStun: 0.34
+    attackerAirImpulse: 0.0
+    protectionGain: 10.0
+    destroyOnHit: true
+    textureFramePattern: assets/vertical_slice/side_combat/effects/vfx_launcher_slash_{frame2}.png
+    textureFrameCount: 5
+    textureFrameRate: 26.0
+    swingSound: assets/vertical_slice/side_combat/audio/swing_air.wav
+    hitSound: assets/vertical_slice/side_combat/audio/hit_launcher.wav
+    soundVolume: 0.50
+    hitPause: 0.040
+    cameraShake: 0.020
+    cameraShakeDuration: 0.070
 
   magic_bolt:
     size: [0.92, 0.58]
@@ -444,7 +493,7 @@ attacks:
     attackerAirImpulse: 0.0
     attackerAirFallStep: 0.02
     targetAirFallStep: 0.02
-    protectionGain: 5.0
+    protectionGain: 12.0
     destroyOnHit: true
     textureFramePattern: assets/vertical_slice/side_combat/effects/vfx_magic_bolt_{frame2}.png
     textureFrameCount: 4
@@ -475,7 +524,7 @@ attacks:
     attackerAirImpulse: 1.10
     attackerAirFallStep: 0.015
     targetAirFallStep: 0.0
-    protectionGain: 10.0
+    protectionGain: 20.0
     destroyOnHit: false
     textureFramePattern: assets/vertical_slice/side_combat/effects/vfx_ally_support_{frame2}.png
     textureFrameCount: 5
@@ -491,19 +540,19 @@ attacks:
     size: [1.72, 1.30]
     offset: [0.62, 0.0]
     velocity: [0.0, 0.0]
-    launchVelocity: [0.35, 7.2]
+    launchVelocity: [0.0, 0.0]
     airHeight: 0.05
     airRange: 1.82
     damageScale: 0.34
     damageFlat: 6.0
     lifetime: 0.24
     startup: 0.035
-    recovery: 0.11
+    recovery: 0.10
     cancelWindowStart: 0.09
-    cancelWindowEnd: 0.27
-    movementScale: 0.94
-    hitStun: 0.66
-    attackerAirImpulse: 3.15
+    cancelWindowEnd: 0.24
+    movementScale: 0.70
+    hitStun: 0.22
+    attackerAirImpulse: 0.0
     attackerAirFallStep: 0.0
     targetAirFallStep: 0.0
     protectionGain: 0.0
@@ -548,18 +597,18 @@ attacks:
   bear_charge:
     size: [1.88, 0.94]
     offset: [1.06, 0.0]
-    velocity: [3.7, 0.0]
+    velocity: [7.2, 0.0]
     launchVelocity: [4.5, 2.5]
     airHeight: 0.58
     airRange: 1.18
     damageScale: 0.82
     damageFlat: 12.0
-    lifetime: 0.34
-    startup: 0.48
-    recovery: 0.70
+    lifetime: 0.88
+    startup: 0.50
+    recovery: 0.26
     cancelWindowStart: 0.0
     cancelWindowEnd: 0.0
-    movementScale: 0.08
+    movementScale: 1.0
     hitStun: 0.46
     destroyOnHit: false
     textureFramePattern: assets/vertical_slice/side_combat/effects/vfx_boss_bear_charge_{frame2}.png
@@ -582,8 +631,8 @@ attacks:
     damageScale: 0.56
     damageFlat: 8.0
     lifetime: 1.50
-    startup: 0.62
-    recovery: 0.55
+    startup: 0.52
+    recovery: 0.20
     cancelWindowStart: 0.0
     cancelWindowEnd: 0.0
     movementScale: 0.05

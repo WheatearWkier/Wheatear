@@ -17,8 +17,6 @@ namespace Wheatear::ProgressionSaveLoadPageService {
 
         using SceneQueries::FindEntityByName;
         using UIRuntimeTools::SetText;
-        using UIRuntimeTools::SetWidgetParent;
-        using UIRuntimeTools::SetWidgetTopLeft;
         using UIRuntimeTools::SetWidgetVisible;
 
         using GameplayUILayoutService::EnsureButton;
@@ -38,10 +36,17 @@ namespace Wheatear::ProgressionSaveLoadPageService {
         if (!HasEntity(scene, "SaveLoad_Status"))
             return;
 
-        EnsureScrollView(scene, "SaveLoad_StatusScroll", "WT_UI_Canvas",
-            { 0.205f, 0.292f }, { 0.50f, 0.124f }, 36, 1.35f);
-        SetWidgetParent(scene, "SaveLoad_Status", "SaveLoad_StatusScroll");
-        SetWidgetTopLeft(scene, "SaveLoad_Status", { 0.025f, 0.025f }, { 0.90f, 1.04f });
+        const bool useStatusScroll = HasEntity(scene, "SaveLoad_StatusScroll");
+        const bool useSlotScroll = HasEntity(scene, "SaveLoad_SlotScroll");
+
+        if (useStatusScroll)
+        {
+            EnsureScrollView(scene, "SaveLoad_StatusScroll", "WT_UI_Canvas",
+                { 0.205f, 0.292f }, { 0.50f, 0.124f }, 36, 1.35f);
+        }
+
+        if (!useSlotScroll)
+            return;
 
         SetWidgetVisible(scene, "SaveLoad_SlotCard_1", false);
         SetWidgetVisible(scene, "SaveLoad_SlotIcon_1", false);

@@ -13,6 +13,8 @@
 #include "Wheatear/Scene/Scene.h"
 
 #include <algorithm>
+#include <cmath>
+#include <limits>
 #include <string>
 
 namespace Wheatear::SideCombatPlayerService {
@@ -26,7 +28,6 @@ namespace Wheatear::SideCombatPlayerService {
         using SideCombatActionService::IsPlayerActionActive;
         using SideCombatHitboxService::CreateHitbox;
         using SideCombatHitResolutionService::IsBossEntity;
-        using SideCombatHitResolutionService::IsControlledAirborne;
         using SideCombatTargetService::FindNearestAliveEnemy;
         using SideCombatTuningService::ApplyPlayerTuning;
         using SideCombatTuningService::GetAttack;
@@ -38,6 +39,109 @@ namespace Wheatear::SideCombatPlayerService {
         static std::string ActionRecipeId(const std::string& attackId)
         {
             return WAO::ComposeActionId("side", attackId);
+        }
+
+        static bool HasMana(const SidePlayerControllerComponent& controller, float cost)
+        {
+            return controller.RuntimeMana + 0.001f >= std::max(0.0f, cost);
+        }
+
+        static bool SpendMana(SidePlayerControllerComponent& controller, float cost)
+        {
+            cost = std::max(0.0f, cost);
+            if (!HasMana(controller, cost))
+                return false;
+
+            controller.RuntimeMana = std::max(0.0f, controller.RuntimeMana - cost);
+            return true;
+        }
+
+        static float RecipeResourceCost(const WAO::ActionRecipe* recipe,
+            const std::string& resourceId,
+            float fallback)
+        {
+            return recipe
+                ? std::max(0.0f, WAO::ResourceCost(*recipe, resourceId, fallback))
+                : std::max(0.0f, fallback);
+        }
+
+        static float BreakLimitGaugeCost(const SideCombatTuningService::SideCombatTuning& tuning,
+            const SidePlayerControllerComponent& controller,
+            const WAO::ActionRecipe* recipe = nullptr)
+        {
+            const float configuredCost = RecipeResourceCost(recipe,
+                "magic_sword",
+                tuning.AirCombo.BreakLimitGaugeCost);
+            return std::max(configuredCost, controller.RuntimeMagicSwordGaugeMax * 0.5f);
+        }
+
+        static Entity FindBreakLimitTarget(Scene* scene, const glm::vec2& origin)
+        {
+            if (!scene)
+                return {};
+
+            auto& registry = scene->GetRegistry();
+            Entity best;
+            float bestDistanceSquared = std::numeric_limits<float>::max();
+            for (auto e : registry.view<SideCombatantComponent, SideEnemyAIComponent>())
+            {
+                const auto& targetCombatant = registry.get<SideCombatantComponent>(e);
+                const auto& ai = registry.get<SideEnemyAIComponent>(e);
+                if (ai.Kind != SideEnemyKind::BearBoss ||
+                    !targetCombatant.Alive ||
+                    targetCombatant.RuntimeState != SideCombatState::SuperArmor ||
+                    targetCombatant.RuntimeProtection <= 0.0f)
+                {
+                    continue;
+                }
+
+                const glm::vec2 delta = targetCombatant.RuntimeGroundPosition - origin;
+                const float distanceSquared = glm::dot(delta, delta);
+                if (distanceSquared < bestDistanceSquared)
+                {
+                    bestDistanceSquared = distanceSquared;
+                    best = { e, scene };
+                }
+            }
+
+            return best;
+        }
+
+        static bool UseCombatItem(const SideCombatTuningService::SideCombatTuning& tuning,
+            int slot,
+            SideCombatantComponent& combatant,
+            SidePlayerControllerComponent& controller)
+        {
+            switch (slot)
+            {
+            case 1:
+                if (controller.RuntimeHealItemCooldown > 0.0f)
+                    return false;
+                if (combatant.Health >= combatant.MaxHealth - 0.001f)
+                    return false;
+                combatant.Health = std::min(combatant.MaxHealth,
+                    combatant.Health + std::max(0.0f, controller.HealItemAmount));
+                controller.RuntimeHealItemCooldown = std::max(0.0f, tuning.Player.HealItemCooldown);
+                return true;
+            case 2:
+                if (controller.RuntimeManaItemCooldown > 0.0f)
+                    return false;
+                if (controller.RuntimeMana >= controller.RuntimeManaMax - 0.001f)
+                    return false;
+                controller.RuntimeMana = std::min(controller.RuntimeManaMax,
+                    controller.RuntimeMana + std::max(0.0f, controller.ManaItemAmount));
+                controller.RuntimeManaItemCooldown = std::max(0.0f, tuning.Player.ManaItemCooldown);
+                return true;
+            case 3:
+                if (controller.RuntimeAttackBuffItemCooldown > 0.0f)
+                    return false;
+                controller.RuntimeAttackBuffMultiplier = std::max(1.0f, controller.AttackBuffMultiplier);
+                controller.RuntimeAttackBuffTimer = std::max(0.0f, controller.AttackBuffDuration);
+                controller.RuntimeAttackBuffItemCooldown = std::max(0.0f, tuning.Player.AttackBuffItemCooldown);
+                return true;
+            default:
+                return false;
+            }
         }
 
         static void UpdatePlayerAction(Scene* scene,
@@ -58,6 +162,45 @@ namespace Wheatear::SideCombatPlayerService {
             const auto& attack = GetAttack(tuning, attackId);
             controller.RuntimeActionTimer += dt;
 
+            if (controller.RuntimeActionKind == SideAttackKind::Dash)
+            {
+                const float dashSpeed = std::max(controller.DashSpeed, std::abs(attack.Velocity.x));
+                combatant.RuntimeVelocity.x = combatant.RuntimeFacing * dashSpeed;
+                if (combatant.RuntimeOnGround)
+                {
+                    combatant.RuntimeVelocity.y = SideCombatMath::Approach(
+                        combatant.RuntimeVelocity.y,
+                        0.0f,
+                        controller.GroundFriction * dt);
+                }
+
+                const float invulnerableRemaining = controller.DashInvulnerableTime - controller.RuntimeActionTimer;
+                if (invulnerableRemaining > 0.0f)
+                    combatant.RuntimeInvulnerableTimer = std::max(combatant.RuntimeInvulnerableTimer, invulnerableRemaining);
+
+                if (!controller.RuntimeActionHitboxSpawned &&
+                    controller.RuntimeActionTimer >= controller.RuntimeActionHitboxTime)
+                {
+                    CreateHitbox(scene,
+                        controller.RuntimeActionEntityName.empty() ? "Side_PlayerDash" : controller.RuntimeActionEntityName,
+                        static_cast<entt::entity>(player),
+                        combatant.RuntimeGroundPosition,
+                        combatant.RuntimeAirHeight,
+                        combatant.RuntimeFacing,
+                        controller.RuntimeActionKind,
+                        controller.RuntimeActionRecipeId,
+                        (int)SideCombatTeam::Player,
+                        attack,
+                        combatant.Attack * std::max(1.0f, controller.RuntimeAttackBuffMultiplier) * attack.DamageScale + attack.DamageFlat,
+                        tuning);
+                    controller.RuntimeActionHitboxSpawned = true;
+                }
+
+                if (controller.RuntimeActionTimer >= controller.RuntimeActionDuration)
+                    ClearPlayerAction(controller);
+                return;
+            }
+
             if (!controller.RuntimeActionHitboxSpawned &&
                 controller.RuntimeActionTimer >= controller.RuntimeActionHitboxTime)
             {
@@ -68,7 +211,9 @@ namespace Wheatear::SideCombatPlayerService {
                 if (controller.RuntimeActionKind == SideAttackKind::AllySupport ||
                     controller.RuntimeActionKind == SideAttackKind::BreakLimit)
                 {
-                    Entity target = FindNearestAliveEnemy(scene, player.GetComponent<TransformComponent>().Translation);
+                    Entity target = controller.RuntimeActionKind == SideAttackKind::BreakLimit
+                        ? FindBreakLimitTarget(scene, combatant.RuntimeGroundPosition)
+                        : FindNearestAliveEnemy(scene, player.GetComponent<TransformComponent>().Translation);
                     if (target && target.HasComponent<SideCombatantComponent>())
                     {
                         const auto& targetCombatant = target.GetComponent<SideCombatantComponent>();
@@ -84,6 +229,11 @@ namespace Wheatear::SideCombatPlayerService {
                     {
                         origin += glm::vec2{ combatant.RuntimeFacing * 2.0f, 0.0f };
                     }
+                    else
+                    {
+                        controller.RuntimeActionHitboxSpawned = true;
+                        return;
+                    }
                 }
 
                 CreateHitbox(scene,
@@ -96,7 +246,7 @@ namespace Wheatear::SideCombatPlayerService {
                     controller.RuntimeActionRecipeId,
                     (int)SideCombatTeam::Player,
                     attack,
-                    combatant.Attack * attack.DamageScale + attack.DamageFlat,
+                    combatant.Attack * std::max(1.0f, controller.RuntimeAttackBuffMultiplier) * attack.DamageScale + attack.DamageFlat,
                     tuning);
                 controller.RuntimeActionHitboxSpawned = true;
             }
@@ -162,6 +312,8 @@ namespace Wheatear::SideCombatPlayerService {
                 return;
             if (airborne && controller.RuntimeAirActionsRemaining <= 0)
                 return;
+            if (!SpendMana(controller, controller.LauncherManaCost))
+                return;
 
             controller.RuntimeAttackChainTimer = tuning.Player.LauncherChainWindow;
 
@@ -185,36 +337,54 @@ namespace Wheatear::SideCombatPlayerService {
                 SideAttackKind::Launcher);
         }
 
+        static void CreatePlayerDash(Scene*,
+            SideCombatLevelComponent& level,
+            Entity,
+            SideCombatantComponent& combatant,
+            SidePlayerControllerComponent& controller)
+        {
+            const auto& tuning = GetTuning(level);
+            if (!IsSkillUnlocked(level, tuning, "dash"))
+                return;
+
+            const auto& attack = GetAttack(tuning, "dash");
+            const std::string recipeId = ActionRecipeId("dash");
+            const WAO::ActionRecipe* recipe = WAO::FindRecipeOrWarn(recipeId, "SideCombat.Player");
+            const float manaCost = RecipeResourceCost(recipe, "mana", controller.DashManaCost);
+            if (!SpendMana(controller, manaCost))
+                return;
+
+            controller.RuntimeDashCooldown = (recipe && recipe->Cooldown > 0.0f)
+                ? recipe->Cooldown
+                : controller.DashCooldown;
+            combatant.RuntimeInvulnerableTimer = std::max(
+                combatant.RuntimeInvulnerableTimer,
+                controller.DashInvulnerableTime);
+            BeginPlayerAction(controller, attack, "dash", recipeId, "Side_PlayerDash", SideAttackKind::Dash);
+        }
+
         static bool CanUseBreakLimit(Scene* scene,
             const SideCombatLevelComponent& level,
             const SideCombatTuningService::SideCombatTuning& tuning,
             Entity target,
-            const SideCombatantComponent& combatant,
             const SidePlayerControllerComponent& controller)
         {
             if (!scene || !target || !target.HasComponent<SideCombatantComponent>())
                 return false;
             if (!IsBreakLimitOfficiallyAvailable(level, tuning) && !IsBreakLimitDebugAvailable(level, tuning))
                 return false;
-            if (combatant.RuntimeOnGround || controller.RuntimeBreakLimitCooldown > 0.0f)
+            if (controller.RuntimeBreakLimitCooldown > 0.0f)
                 return false;
-            if (controller.RuntimeMagicSwordGauge + 0.001f < tuning.AirCombo.BreakLimitGaugeCost)
+            if (controller.RuntimeMagicSwordGauge + 0.001f < BreakLimitGaugeCost(tuning, controller))
                 return false;
             if (level.RuntimeComboCount < tuning.AirCombo.BreakLimitMinCombo)
                 return false;
-            if (combatant.RuntimeAirHeight > tuning.AirCombo.BreakLimitMaxHeight)
-                return false;
-            if (combatant.RuntimeAirVelocity > tuning.AirCombo.BreakLimitFallingVelocity)
-                return false;
 
             auto& targetCombatant = target.GetComponent<SideCombatantComponent>();
-            if (!targetCombatant.Alive || !IsControlledAirborne(targetCombatant))
-                return false;
-            if (targetCombatant.RuntimeAirVelocity > tuning.AirCombo.BreakLimitFallingVelocity)
-                return false;
-
-            if (IsBossEntity(scene, static_cast<entt::entity>(target)) &&
-                targetCombatant.RuntimeProtection < tuning.Protection.BossProtectionBreakLimitThreshold)
+            if (!targetCombatant.Alive ||
+                !IsBossEntity(scene, static_cast<entt::entity>(target)) ||
+                targetCombatant.RuntimeState != SideCombatState::SuperArmor ||
+                targetCombatant.RuntimeProtection <= 0.0f)
             {
                 return false;
             }
@@ -222,15 +392,15 @@ namespace Wheatear::SideCombatPlayerService {
             return true;
         }
 
-        static void CreateBreakLimitChase(Scene* scene,
+        static void CreateBreakLimit(Scene* scene,
             SideCombatLevelComponent& level,
             Entity player,
             SideCombatantComponent& combatant,
             SidePlayerControllerComponent& controller)
         {
             const auto& tuning = GetTuning(level);
-            Entity target = FindNearestAliveEnemy(scene, player.GetComponent<TransformComponent>().Translation);
-            if (!CanUseBreakLimit(scene, level, tuning, target, combatant, controller))
+            Entity target = FindBreakLimitTarget(scene, combatant.RuntimeGroundPosition);
+            if (!CanUseBreakLimit(scene, level, tuning, target, controller))
                 return;
 
             const auto& attack = GetAttack(tuning, "break_limit");
@@ -240,14 +410,8 @@ namespace Wheatear::SideCombatPlayerService {
                 ? recipe->Cooldown
                 : tuning.AirCombo.BreakLimitCooldown;
             controller.RuntimeMagicSwordGauge = std::max(0.0f,
-                controller.RuntimeMagicSwordGauge - (recipe ? WAO::ResourceCost(*recipe, "magic_sword", tuning.AirCombo.BreakLimitGaugeCost) : tuning.AirCombo.BreakLimitGaugeCost));
-            controller.RuntimeJumpsRemaining = std::max(controller.RuntimeJumpsRemaining, 1);
-            controller.RuntimeAirActionsRemaining = tuning.AirCombo.AirActionLimitAfterBreak;
+                controller.RuntimeMagicSwordGauge - BreakLimitGaugeCost(tuning, controller, recipe));
             controller.RuntimeAttackChainTimer = tuning.Player.LauncherChainWindow;
-            combatant.RuntimeAirHeight = std::max(0.05f,
-                combatant.RuntimeAirHeight + tuning.AirCombo.BreakLimitHeightBoost);
-            combatant.RuntimeAirVelocity = std::max(combatant.RuntimeAirVelocity,
-                tuning.AirCombo.BreakLimitHangImpulse);
 
             if (target && target.HasComponent<SideCombatantComponent>())
             {
@@ -255,7 +419,15 @@ namespace Wheatear::SideCombatPlayerService {
                 combatant.RuntimeFacing = SideCombatMath::SignNonZero(targetCombatant.RuntimeGroundPosition.x - combatant.RuntimeGroundPosition.x);
             }
 
-            BeginPlayerAction(controller, attack, "break_limit", recipeId, "Side_BreakLimitChase", SideAttackKind::BreakLimit);
+            BeginPlayerAction(controller, attack, "break_limit", recipeId, "Side_BreakLimit", SideAttackKind::BreakLimit);
+            SideCombatFeedbackService::TriggerCinematicFocus(
+                scene,
+                level,
+                player.GetUUID(),
+                tuning.Feedback.BreakLimitCinematicDuration,
+                tuning.Feedback.BreakLimitCinematicTimeScale,
+                tuning.Feedback.BreakLimitCameraZoom,
+                tuning.Feedback.BreakLimitCameraOffset);
         }
 
         static void CreatePlayerMagicBolt(Scene*,
@@ -266,6 +438,8 @@ namespace Wheatear::SideCombatPlayerService {
         {
             const auto& tuning = GetTuning(level);
             if (!IsSkillUnlocked(level, tuning, "magic_bolt"))
+                return;
+            if (!SpendMana(controller, controller.MagicBoltManaCost))
                 return;
 
             controller.RuntimeAttackChainTimer = tuning.Player.MagicChainWindow;
@@ -287,6 +461,8 @@ namespace Wheatear::SideCombatPlayerService {
         {
             const auto& tuning = GetTuning(level);
             if (!IsSkillUnlocked(level, tuning, "ally_support"))
+                return;
+            if (!SpendMana(controller, controller.AllySupportManaCost))
                 return;
 
             controller.RuntimeAttackChainTimer = tuning.Player.SupportChainWindow;
@@ -336,8 +512,17 @@ namespace Wheatear::SideCombatPlayerService {
         controller.RuntimeLauncherCooldown = std::max(0.0f, controller.RuntimeLauncherCooldown - dt);
         controller.RuntimeMagicBoltCooldown = std::max(0.0f, controller.RuntimeMagicBoltCooldown - dt);
         controller.RuntimeAllySupportCooldown = std::max(0.0f, controller.RuntimeAllySupportCooldown - dt);
+        controller.RuntimeDashCooldown = std::max(0.0f, controller.RuntimeDashCooldown - dt);
+        controller.RuntimeHealItemCooldown = std::max(0.0f, controller.RuntimeHealItemCooldown - dt);
+        controller.RuntimeManaItemCooldown = std::max(0.0f, controller.RuntimeManaItemCooldown - dt);
+        controller.RuntimeAttackBuffItemCooldown = std::max(0.0f, controller.RuntimeAttackBuffItemCooldown - dt);
         controller.RuntimeBreakLimitCooldown = std::max(0.0f, controller.RuntimeBreakLimitCooldown - dt);
         controller.RuntimeAttackChainTimer = std::max(0.0f, controller.RuntimeAttackChainTimer - dt);
+        controller.RuntimeAttackBuffTimer = std::max(0.0f, controller.RuntimeAttackBuffTimer - dt);
+        if (controller.RuntimeAttackBuffTimer <= 0.0f)
+            controller.RuntimeAttackBuffMultiplier = 1.0f;
+        controller.RuntimeManaMax = std::max(1.0f, controller.MaxMana);
+        controller.RuntimeMana = std::clamp(controller.RuntimeMana, 0.0f, controller.RuntimeManaMax);
         controller.RuntimeJumpBufferTimer = std::max(0.0f, controller.RuntimeJumpBufferTimer - dt);
         controller.RuntimeCoyoteTimer = std::max(0.0f, controller.RuntimeCoyoteTimer - dt);
         if (controller.RuntimeAttackChainTimer <= 0.0f)
@@ -348,6 +533,13 @@ namespace Wheatear::SideCombatPlayerService {
 
         if (combatant.ControlsLocked || level.RuntimeVictory || level.RuntimeDefeat)
             return;
+
+        if (input.Item1Pressed && !previousInput.Item1Pressed)
+            UseCombatItem(tuning, 1, combatant, controller);
+        if (input.Item2Pressed && !previousInput.Item2Pressed)
+            UseCombatItem(tuning, 2, combatant, controller);
+        if (input.Item3Pressed && !previousInput.Item3Pressed)
+            UseCombatItem(tuning, 3, combatant, controller);
 
         if (combatant.RuntimeHitStun > 0.0f ||
             combatant.RuntimeState == SideCombatState::Knockdown ||
@@ -362,15 +554,17 @@ namespace Wheatear::SideCombatPlayerService {
         UpdatePlayerAction(scene, level, player, combatant, controller, dt);
         const bool canStartAction = CanStartPlayerAction(controller);
         const float actionMovementScale = GetPlayerActionMovementScale(controller);
+        const bool dashActive = IsPlayerActionActive(controller) &&
+            controller.RuntimeActionKind == SideAttackKind::Dash;
 
-        if (input.Horizontal != 0.0f)
+        if (!dashActive && input.Horizontal != 0.0f)
         {
             combatant.RuntimeFacing = SideCombatMath::SignNonZero(input.Horizontal);
             const float targetSpeed = input.Horizontal * combatant.MoveSpeed * actionMovementScale;
             const float accel = combatant.RuntimeOnGround ? tuning.Player.GroundAcceleration : controller.AirControl;
             combatant.RuntimeVelocity.x = SideCombatMath::Approach(combatant.RuntimeVelocity.x, targetSpeed, accel * dt);
         }
-        else if (combatant.RuntimeOnGround)
+        else if (!dashActive && combatant.RuntimeOnGround)
         {
             combatant.RuntimeVelocity.x = SideCombatMath::Approach(
                 combatant.RuntimeVelocity.x,
@@ -378,7 +572,7 @@ namespace Wheatear::SideCombatPlayerService {
                 controller.GroundFriction * dt);
         }
 
-        if (input.Lane != 0.0f)
+        if (!dashActive && input.Lane != 0.0f)
         {
             const float targetLaneSpeed = input.Lane * combatant.MoveSpeed * controller.LaneSpeedScale * tuning.LaneSpeedScale * actionMovementScale;
             combatant.RuntimeVelocity.y = SideCombatMath::Approach(
@@ -386,7 +580,7 @@ namespace Wheatear::SideCombatPlayerService {
                 targetLaneSpeed,
                 std::max(controller.LaneAcceleration, tuning.LaneAcceleration) * dt);
         }
-        else if (combatant.RuntimeOnGround)
+        else if (!dashActive && combatant.RuntimeOnGround)
         {
             combatant.RuntimeVelocity.y = SideCombatMath::Approach(
                 combatant.RuntimeVelocity.y,
@@ -419,7 +613,9 @@ namespace Wheatear::SideCombatPlayerService {
         }
 
         if (input.BreakLimitPressed && !previousInput.BreakLimitPressed && canStartAction)
-            CreateBreakLimitChase(scene, level, player, combatant, controller);
+            CreateBreakLimit(scene, level, player, combatant, controller);
+        else if (input.DashPressed && !previousInput.DashPressed && controller.RuntimeDashCooldown <= 0.0f && canStartAction)
+            CreatePlayerDash(scene, level, player, combatant, controller);
         else if (input.SupportPressed && !previousInput.SupportPressed && controller.RuntimeAllySupportCooldown <= 0.0f && canStartAction)
             CreateAllySupport(scene, level, player, combatant, controller);
         else if (input.MagicPressed && !previousInput.MagicPressed && controller.RuntimeMagicBoltCooldown <= 0.0f && canStartAction)

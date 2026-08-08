@@ -17,11 +17,11 @@ namespace Wheatear {
             bool includeUI);
 
     private:
-        glm::mat4 ComputeLightSpaceMatrix(Scene* scene);
-        void RenderSceneShadow(Scene* scene);
-        void CollectLights(Scene* scene);
-        void RenderScene2D(Scene* scene);
-        void RenderScene3D(Scene* scene);
+        glm::mat4 ComputeLightSpaceMatrix(Scene* scene, bool respectEditorVisibility);
+        void RenderSceneShadow(Scene* scene, bool respectEditorVisibility);
+        void CollectLights(Scene* scene, bool respectEditorVisibility);
+        void RenderScene2D(Scene* scene, bool respectEditorVisibility);
+        void RenderScene3D(Scene* scene, bool respectEditorVisibility);
     };
 
 } // namespace Wheatear

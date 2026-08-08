@@ -263,10 +263,12 @@ namespace Wheatear {
         YAML::Node root = *m_Root;
         YAML::Node player = EnsureMap(root, "player");
         YAML::Node airCombo = EnsureMap(root, "airCombo");
+        YAML::Node protection = EnsureMap(root, "protection");
         YAML::Node attacks = EnsureMap(root, "attacks");
         YAML::Node launcher = EnsureMap(attacks, "launcher");
         YAML::Node airBasic = EnsureMap(attacks, "air_basic");
         YAML::Node airChase = EnsureMap(attacks, "air_chase");
+        YAML::Node dash = EnsureMap(attacks, "dash");
         YAML::Node breakLimit = EnsureMap(attacks, "break_limit");
 
         if (ImGui::CollapsingHeader("Movement / Jump", ImGuiTreeNodeFlags_DefaultOpen))
@@ -280,6 +282,15 @@ namespace Wheatear {
             if (DrawFloat(player, "airControl", "Air Control", 0.05f, 0.0f, 80.0f)) m_Dirty = true;
             if (DrawFloat(player, "jumpBufferTime", "Jump Buffer", 0.005f, 0.0f, 0.5f)) m_Dirty = true;
             if (DrawFloat(player, "coyoteTime", "Coyote Time", 0.005f, 0.0f, 0.5f)) m_Dirty = true;
+        }
+
+        if (ImGui::CollapsingHeader("冲刺", ImGuiTreeNodeFlags_DefaultOpen))
+        {
+            if (DrawFloat(player, "dashCooldown", "Cooldown", 0.01f, 0.0f, 10.0f)) m_Dirty = true;
+            if (DrawFloat(player, "dashManaCost", "Mana Cost", 0.5f, 0.0f, 100.0f)) m_Dirty = true;
+            if (DrawFloat(player, "dashSpeed", "Speed", 0.05f, 0.0f, 40.0f)) m_Dirty = true;
+            if (DrawFloat(player, "dashInvulnerableTime", "Invulnerable Time", 0.005f, 0.0f, 2.0f)) m_Dirty = true;
+            if (DrawVec2(dash, "velocity", "Dash Velocity", 0.05f)) m_Dirty = true;
         }
 
         if (ImGui::CollapsingHeader("Air Combo", ImGuiTreeNodeFlags_DefaultOpen))
@@ -306,15 +317,15 @@ namespace Wheatear {
             if (DrawFloat(airChase, "attackerAirImpulse", "Air S+J Player Lift", 0.02f, -20.0f, 30.0f)) m_Dirty = true;
         }
 
-        if (ImGui::CollapsingHeader("Break Limit", ImGuiTreeNodeFlags_DefaultOpen))
+        if (ImGui::CollapsingHeader("断限", ImGuiTreeNodeFlags_DefaultOpen))
         {
             if (DrawBool(airCombo, "breakLimitEnabled", "Enable Break Limit")) m_Dirty = true;
             if (DrawInt(airCombo, "breakLimitMinCombo", "Min Combo", 0, 999)) m_Dirty = true;
             if (DrawFloat(airCombo, "breakLimitCooldown", "Cooldown", 0.02f, 0.0f, 30.0f)) m_Dirty = true;
             if (DrawFloat(airCombo, "breakLimitGaugeCost", "Gauge Cost", 0.05f, 0.0f, 10.0f)) m_Dirty = true;
-            if (DrawFloat(airCombo, "breakLimitHeightBoost", "Height Boost", 0.02f, 0.0f, 10.0f)) m_Dirty = true;
-            if (DrawVec2(breakLimit, "launchVelocity", "Break Limit Launch", 0.05f)) m_Dirty = true;
-            if (DrawFloat(breakLimit, "attackerAirImpulse", "Break Limit Player Lift", 0.02f, -20.0f, 30.0f)) m_Dirty = true;
+            if (DrawFloat(protection, "bossProtectionBreakLimitThreshold", "保护阈值", 0.05f, 0.0f, 100.0f)) m_Dirty = true;
+            if (DrawVec2(breakLimit, "launchVelocity", "命中位移", 0.05f)) m_Dirty = true;
+            if (DrawFloat(breakLimit, "hitStun", "破防硬直", 0.01f, 0.0f, 3.0f)) m_Dirty = true;
         }
     }
 

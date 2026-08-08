@@ -10,6 +10,7 @@ namespace Wheatear {
             o << YAML::Key << "DefaultClip" << YAML::Value << c.DefaultClipName;
             o << YAML::Key << "PlayOnStart" << YAML::Value << c.PlayOnStart;
             o << YAML::Key << "FireEvents" << YAML::Value << c.FireEvents;
+            o << YAML::Key << "PlaybackSpeed" << YAML::Value << c.PlaybackSpeed;
             o << YAML::Key << "Clips" << YAML::Value << YAML::BeginSeq;
             for (const auto& [name, clip] : c.Clips)
             {
@@ -114,6 +115,7 @@ namespace Wheatear {
             c.DefaultClipName = n["DefaultClip"].as<std::string>("");
             c.PlayOnStart = n["PlayOnStart"].as<bool>(true);
             c.FireEvents = n["FireEvents"].as<bool>(true);
+            c.PlaybackSpeed = n["PlaybackSpeed"].as<float>(1.0f);
         }
     };
 

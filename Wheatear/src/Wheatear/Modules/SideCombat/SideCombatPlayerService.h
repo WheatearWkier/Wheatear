@@ -19,7 +19,11 @@ namespace Wheatear::SideCombatPlayerService {
         bool LauncherPressed = false;
         bool MagicPressed = false;
         bool SupportPressed = false;
+        bool DashPressed = false;
         bool BreakLimitPressed = false;
+        bool Item1Pressed = false;
+        bool Item2Pressed = false;
+        bool Item3Pressed = false;
         float Horizontal = 0.0f;
         float Lane = 0.0f;
     };

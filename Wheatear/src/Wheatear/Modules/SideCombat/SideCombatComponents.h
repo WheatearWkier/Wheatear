@@ -33,7 +33,8 @@ namespace Wheatear {
         EnemyMelee = 4,
         EnemyProjectile = 5,
         EnemyShockwave = 6,
-        BreakLimit = 7
+        BreakLimit = 7,
+        Dash = 8
     };
 
     enum class SideCombatState
@@ -110,11 +111,19 @@ namespace Wheatear {
         std::string RuntimeResultGrade = "";
         std::string RuntimeResultSummary = "";
         float       RuntimeHitPauseTimer = 0.0f;
+        float       RuntimeCinematicTimer = 0.0f;
+        float       RuntimeCinematicDuration = 0.0f;
+        float       RuntimeCinematicTimeScale = 1.0f;
+        float       RuntimeCinematicCameraZoom = 1.0f;
+        glm::vec2   RuntimeCinematicCameraOffset = { 0.0f, 0.0f };
+        UUID        RuntimeCinematicFocusEntity = 0;
         float       RuntimeCameraShakeTimer = 0.0f;
         float       RuntimeCameraShakeDuration = 0.0f;
         float       RuntimeCameraShakeStrength = 0.0f;
         glm::vec3   RuntimeCameraBaseTranslation = { 0.0f, 0.0f, 0.0f };
+        float       RuntimeCameraBaseOrthographicSize = 0.0f;
         bool        RuntimeCameraBaseCaptured = false;
+        bool        RuntimeCameraProjectionCaptured = false;
         int         RuntimeWaveIndex = 0;
         float       RuntimeWaveRightWall = 8.8f;
         bool        RuntimeWaveSpawnsCreated = false;
@@ -178,14 +187,37 @@ namespace Wheatear {
         float LauncherCooldown = 0.45f;
         float MagicBoltCooldown = 0.70f;
         float AllySupportCooldown = 4.80f;
+        float DashCooldown = 1.0f;
+        float HealItemCooldown = 5.0f;
+        float ManaItemCooldown = 5.0f;
+        float AttackBuffItemCooldown = 10.0f;
+        float DashManaCost = 16.0f;
+        float DashSpeed = 10.5f;
+        float DashInvulnerableTime = 0.18f;
+        float MaxMana = 100.0f;
+        float LauncherManaCost = 12.0f;
+        float MagicBoltManaCost = 20.0f;
+        float AllySupportManaCost = 35.0f;
+        float HealItemAmount = 95.0f;
+        float ManaItemAmount = 55.0f;
+        float AttackBuffMultiplier = 1.35f;
+        float AttackBuffDuration = 8.0f;
 
         float RuntimeBasicCooldown = 0.0f;
         float RuntimeLauncherCooldown = 0.0f;
         float RuntimeMagicBoltCooldown = 0.0f;
         float RuntimeAllySupportCooldown = 0.0f;
+        float RuntimeDashCooldown = 0.0f;
+        float RuntimeHealItemCooldown = 0.0f;
+        float RuntimeManaItemCooldown = 0.0f;
+        float RuntimeAttackBuffItemCooldown = 0.0f;
         float RuntimeBreakLimitCooldown = 0.0f;
+        float RuntimeMana = 100.0f;
+        float RuntimeManaMax = 100.0f;
         float RuntimeMagicSwordGauge = 3.0f;
         float RuntimeMagicSwordGaugeMax = 3.0f;
+        float RuntimeAttackBuffTimer = 0.0f;
+        float RuntimeAttackBuffMultiplier = 1.0f;
         int   RuntimeJumpsRemaining = 1;
         float RuntimeJumpBufferTimer = 0.0f;
         float RuntimeCoyoteTimer = 0.0f;
@@ -234,6 +266,7 @@ namespace Wheatear {
         float RuntimeActionFacing = 1.0f;
         bool  RuntimeActionHitboxSpawned = false;
         uint32_t RuntimeActionSequence = 0;
+        std::string RuntimeLastActionAttackId = "";
 
         SideEnemyAIComponent() = default;
         SideEnemyAIComponent(const SideEnemyAIComponent&) = default;

@@ -428,6 +428,25 @@ namespace Wheatear {
         else
             Renderer2D::DrawQuad(transform, image.Color, entityID);
     }
+
+    void UIRenderer::DrawUIRadialCooldown(
+        const UIWidgetComponent& widget,
+        const UIRadialCooldownComponent& cooldown,
+        int entityID)
+    {
+        if (!widget.Visible || cooldown.Progress <= 0.0001f)
+            return;
+
+        Renderer2D::DrawRadialCircle(
+            WidgetToTransform(widget, s_ViewportWidth, s_ViewportHeight),
+            cooldown.Color,
+            cooldown.Progress,
+            cooldown.StartAngle,
+            cooldown.Thickness,
+            cooldown.Fade,
+            entityID);
+    }
+
     void UIRenderer::DrawUIPanel(
         const UIWidgetComponent& widget,
         const UIPanelComponent& panel,
@@ -805,10 +824,28 @@ namespace Wheatear {
         const float baseScaleY = fontRatio * (2.0f / viewportHeight);
         const float rectWidth = std::max(0.0f, rect.Right - rect.Left);
         const float rectHeight = std::max(0.0f, rect.Top - rect.Bottom);
-        const float paddingX = std::min(rectWidth * 0.16f, 14.0f * 2.0f / viewportWidth);
-        const float paddingY = std::min(rectHeight * 0.22f, 10.0f * 2.0f / viewportHeight);
-        const float contentWidth = std::max(0.0f, rectWidth - paddingX * 2.0f);
-        const float contentHeight = std::max(0.0f, rectHeight - paddingY * 2.0f);
+        const bool useAutoPadding = text.Padding.x < 0.0f
+            && text.Padding.y < 0.0f
+            && text.Padding.z < 0.0f
+            && text.Padding.w < 0.0f;
+        const float paddingLeft = useAutoPadding
+            ? std::min(rectWidth * 0.16f, 14.0f * 2.0f / viewportWidth)
+            : std::max(0.0f, text.Padding.x) * 2.0f / viewportWidth;
+        const float paddingTop = useAutoPadding
+            ? std::min(rectHeight * 0.22f, 10.0f * 2.0f / viewportHeight)
+            : std::max(0.0f, text.Padding.y) * 2.0f / viewportHeight;
+        const float paddingRight = useAutoPadding
+            ? paddingLeft
+            : std::max(0.0f, text.Padding.z) * 2.0f / viewportWidth;
+        const float paddingBottom = useAutoPadding
+            ? paddingTop
+            : std::max(0.0f, text.Padding.w) * 2.0f / viewportHeight;
+        const float contentLeft = rect.Left + paddingLeft;
+        const float contentRight = rect.Right - paddingRight;
+        const float contentTop = rect.Top - paddingTop;
+        const float contentBottom = rect.Bottom + paddingBottom;
+        const float contentWidth = std::max(0.0f, contentRight - contentLeft);
+        const float contentHeight = std::max(0.0f, contentTop - contentBottom);
 
         TextRenderParams params;
         params.ScaleX = baseScaleX;
@@ -840,7 +877,25 @@ namespace Wheatear {
             params.ScaleY *= scale;
         }
 
-        const glm::vec3 textTopLeft = SnapNDCToPixel({ rect.Left + paddingX, rect.Top - paddingY, 0.0f },
+        TextRenderParams finalMeasureParams = params;
+        finalMeasureParams.MaxHeight = 0.0f;
+        finalMeasureParams.Clip = false;
+        const glm::vec2 measured = TextRenderer::MeasureText(font, text.Text, finalMeasureParams);
+        const float remainingX = std::max(0.0f, contentWidth - measured.x);
+        const float remainingY = std::max(0.0f, contentHeight - measured.y);
+        float alignOffsetX = 0.0f;
+        float alignOffsetY = 0.0f;
+        if (text.HorizontalAlign == UITextHorizontalAlign::Center)
+            alignOffsetX = remainingX * 0.5f;
+        else if (text.HorizontalAlign == UITextHorizontalAlign::Right)
+            alignOffsetX = remainingX;
+
+        if (text.VerticalAlign == UITextVerticalAlign::Middle)
+            alignOffsetY = remainingY * 0.5f;
+        else if (text.VerticalAlign == UITextVerticalAlign::Bottom)
+            alignOffsetY = remainingY;
+
+        const glm::vec3 textTopLeft = SnapNDCToPixel({ contentLeft + alignOffsetX, contentTop - alignOffsetY, 0.0f },
             viewportWidth,
             viewportHeight);
 

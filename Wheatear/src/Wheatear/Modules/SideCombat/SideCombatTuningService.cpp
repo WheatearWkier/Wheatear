@@ -147,6 +147,14 @@ namespace Wheatear::SideCombatTuningService {
                 return tuning;
 
             tuning.HitPauseTimeScale = node["hitPauseTimeScale"].as<float>(tuning.HitPauseTimeScale);
+            tuning.BreakLimitCinematicDuration = node["breakLimitCinematicDuration"].as<float>(
+                tuning.BreakLimitCinematicDuration);
+            tuning.BreakLimitCinematicTimeScale = node["breakLimitCinematicTimeScale"].as<float>(
+                tuning.BreakLimitCinematicTimeScale);
+            tuning.BreakLimitCameraZoom = node["breakLimitCameraZoom"].as<float>(
+                tuning.BreakLimitCameraZoom);
+            tuning.BreakLimitCameraOffset = ReadVec2(node["breakLimitCameraOffset"],
+                tuning.BreakLimitCameraOffset);
             tuning.JumpSound = AssetAliasRegistry::Resolve(node["jumpSound"].as<std::string>(tuning.JumpSound));
             tuning.LandSound = AssetAliasRegistry::Resolve(node["landSound"].as<std::string>(tuning.LandSound));
             tuning.JumpSoundVolume = node["jumpSoundVolume"].as<float>(tuning.JumpSoundVolume);
@@ -219,6 +227,13 @@ namespace Wheatear::SideCombatTuningService {
             tuning.LauncherCooldown = node["launcherCooldown"].as<float>(tuning.LauncherCooldown);
             tuning.MagicBoltCooldown = node["magicBoltCooldown"].as<float>(tuning.MagicBoltCooldown);
             tuning.AllySupportCooldown = node["allySupportCooldown"].as<float>(tuning.AllySupportCooldown);
+            tuning.DashCooldown = node["dashCooldown"].as<float>(tuning.DashCooldown);
+            tuning.HealItemCooldown = node["healItemCooldown"].as<float>(tuning.HealItemCooldown);
+            tuning.ManaItemCooldown = node["manaItemCooldown"].as<float>(tuning.ManaItemCooldown);
+            tuning.AttackBuffItemCooldown = node["attackBuffItemCooldown"].as<float>(tuning.AttackBuffItemCooldown);
+            tuning.DashManaCost = node["dashManaCost"].as<float>(tuning.DashManaCost);
+            tuning.DashSpeed = node["dashSpeed"].as<float>(tuning.DashSpeed);
+            tuning.DashInvulnerableTime = node["dashInvulnerableTime"].as<float>(tuning.DashInvulnerableTime);
             tuning.BasicChainWindow = node["basicChainWindow"].as<float>(tuning.BasicChainWindow);
             tuning.LauncherChainWindow = node["launcherChainWindow"].as<float>(tuning.LauncherChainWindow);
             tuning.MagicChainWindow = node["magicChainWindow"].as<float>(tuning.MagicChainWindow);
@@ -481,12 +496,14 @@ namespace Wheatear::SideCombatTuningService {
             AddDefaultSkill(tuning, "air_chase", "空中追斩", "空中 S+J", "空中续连 / 低空补救", { "air_chase" }, 2, true);
             AddDefaultSkill(tuning, "magic_bolt", "火球术", "U", "远程补 hit / 空中魔法续连", { "magic_bolt" }, 2, true);
             AddDefaultSkill(tuning, "ally_support", "真青梅支援", "I", "支援浮空 / 新手容错", { "ally_support" }, 2, true);
-            AddDefaultSkill(tuning, "break_limit", "断限追击", "L", "首领保护临界时刷新空中行动", { "break_limit" }, 7, false);
+            AddDefaultSkill(tuning, "break_limit", "Break Limit", "L", "Clears boss protection during super armor", { "break_limit" }, 7, false);
+            AddDefaultSkill(tuning, "dash", "冲刺", "O", "短暂无敌位移", { "dash" }, 2, true);
             const std::vector<std::string> chapterTwoSkills = {
                 "basic_attack",
                 "air_basic",
                 "launcher",
                 "air_chase",
+                "dash",
                 "magic_bolt",
                 "ally_support"
             };
@@ -544,6 +561,8 @@ namespace Wheatear::SideCombatTuningService {
             const glm::vec2 launcherScale = { 1.25f, 1.5f };
             const glm::vec2 launcherOffset = { 0.0f, 0.5781f };
             const glm::vec2 dashTallScale = { 1.5f, 1.25f };
+            const glm::vec2 actionTallScale = { 1.60f, 1.60f };
+            const glm::vec2 actionTallOffset = { 0.0f, 0.4453f };
             const glm::vec2 floorScale = { 2.0f, 1.0f };
 
             AddAnimationClip(tuning.PlayerAnimations, "idle", characterRoot + "protag_idle_{frame2}.png", 8, 12.0f, true, bodyScale, bodyOffset);
@@ -558,9 +577,10 @@ namespace Wheatear::SideCombatTuningService {
             AddAnimationClip(tuning.PlayerAnimations, "air_basic", characterRoot + "protag_air_basic_{frame2}.png", 7, 24.0f, false, verticalScale, bodyTallOffset);
             AddAnimationClip(tuning.PlayerAnimations, "launcher", characterRoot + "protag_launcher_{frame2}.png", 9, 24.0f, false, launcherScale, launcherOffset);
             AddAnimationClip(tuning.PlayerAnimations, "air_chase", characterRoot + "protag_air_chase_{frame2}.png", 8, 24.0f, false, dashTallScale, bodyTallOffset);
+            AddAnimationClip(tuning.PlayerAnimations, "dash", characterRoot + "protag_dash_{frame2}.png", 1, 8.0f, false, actionTallScale, actionTallOffset);
             AddAnimationClip(tuning.PlayerAnimations, "magic_bolt", characterRoot + "protag_magic_bolt_{frame2}.png", 9, 20.0f, false, bodyScale, bodyOffset);
             AddAnimationClip(tuning.PlayerAnimations, "ally_support", characterRoot + "protag_ally_support_{frame2}.png", 8, 18.0f, false, slashScale, bodyOffset);
-            AddAnimationClip(tuning.PlayerAnimations, "break_limit", characterRoot + "protag_break_limit_{frame2}.png", 12, 24.0f, false, dashWideScale, bodyOffset);
+            AddAnimationClip(tuning.PlayerAnimations, "break_limit", characterRoot + "protag_break_limit_{frame2}.png", 2, 8.0f, false, actionTallScale, actionTallOffset);
 
             const std::string enemyRoot = AssetAliasRegistry::Path("side.path.enemies");
             const glm::vec2 gruntScale = { 1.0f, 1.0f };
@@ -569,7 +589,11 @@ namespace Wheatear::SideCombatTuningService {
             const glm::vec2 gruntAirWideScale = { 1.5f, 1.3333f };
             const glm::vec2 gruntAirOffset = { 0.0f, 0.3516f };
             const glm::vec2 bossScale = { 1.0f, 1.0f };
+            const glm::vec2 bossHitScale = { 1.30f, 1.30f };
             const glm::vec2 bossOffset = { 0.0f, 0.3151f };
+            const glm::vec2 bossHitOffset = { 0.0f, 0.4351f };
+            const glm::vec2 bossClawScale = { 1.85f, 1.85f };
+            const glm::vec2 bossShockwaveScale = { 1.16f, 0.96f };
             const glm::vec2 bossWideScale = { 1.25f, 1.0f };
 
             AddAnimationClip(tuning.GruntAnimations, "idle", enemyRoot + "en_claw_beast_idle_{frame2}.png", 4, 7.0f, true, gruntScale, gruntOffset);
@@ -580,13 +604,14 @@ namespace Wheatear::SideCombatTuningService {
             AddAnimationClip(tuning.GruntAnimations, "enemy_claw", enemyRoot + "en_claw_beast_attack_{frame2}.png", 4, 14.0f, false, gruntWideScale, gruntOffset);
 
             AddAnimationClip(tuning.BossAnimations, "idle", enemyRoot + "boss_bear_husband_idle_{frame2}.png", 4, 6.0f, true, bossScale, bossOffset);
-            AddAnimationClip(tuning.BossAnimations, "run", enemyRoot + "boss_bear_husband_walk_{frame2}.png", 5, 8.0f, true, bossScale, bossOffset);
-            AddAnimationClip(tuning.BossAnimations, "hit", enemyRoot + "boss_bear_husband_hit_{frame2}.png", 3, 10.0f, false, bossScale, bossOffset);
-            AddAnimationClip(tuning.BossAnimations, "fall", enemyRoot + "boss_bear_husband_fall_{frame2}.png", 3, 8.0f, true, bossScale, bossOffset);
+            AddAnimationClip(tuning.BossAnimations, "run", enemyRoot + "boss_bear_husband_walk_{frame2}.png", 4, 8.0f, true, bossScale, bossOffset);
+            AddAnimationClip(tuning.BossAnimations, "hit", enemyRoot + "boss_bear_husband_hit_{frame2}.png", 4, 10.0f, false, bossHitScale, bossHitOffset);
+            AddAnimationClip(tuning.BossAnimations, "fall", enemyRoot + "boss_bear_husband_hit_04.png", 1, 8.0f, false, bossHitScale, bossHitOffset);
             AddAnimationClip(tuning.BossAnimations, "dead", enemyRoot + "boss_bear_husband_dead_{frame2}.png", 4, 7.0f, false, bossWideScale, bossOffset);
-            AddAnimationClip(tuning.BossAnimations, "enemy_claw", enemyRoot + "boss_bear_husband_attack_{frame2}.png", 4, 12.0f, false, bossWideScale, bossOffset);
-            AddAnimationClip(tuning.BossAnimations, "bear_charge", enemyRoot + "boss_bear_husband_charge_{frame2}.png", 4, 12.0f, false, bossScale, bossOffset);
-            AddAnimationClip(tuning.BossAnimations, "bear_shockwave", enemyRoot + "boss_bear_husband_shockwave_{frame2}.png", 4, 12.0f, false, bossWideScale, bossOffset);
+            AddAnimationClip(tuning.BossAnimations, "enemy_claw", enemyRoot + "boss_bear_husband_attack_claw_{frame2}.png", 3, 5.0f, false, bossClawScale, bossOffset);
+            AddAnimationClip(tuning.BossAnimations, "bear_charge", enemyRoot + "boss_bear_husband_charge_{frame2}.png", 4, 12.0f, true, bossScale, bossOffset);
+            AddAnimationClip(tuning.BossAnimations, "bear_charge_windup", enemyRoot + "boss_bear_husband_charge_windup_{frame2}.png", 6, 12.0f, false, bossScale, bossOffset);
+            AddAnimationClip(tuning.BossAnimations, "bear_shockwave", enemyRoot + "boss_bear_husband_shockwave_{frame2}.png", 4, 12.0f, false, bossShockwaveScale, bossOffset);
         }
 
         static void ApplyDefaultAttackFeedback(SideCombatTuning& tuning)
@@ -619,6 +644,7 @@ namespace Wheatear::SideCombatTuningService {
             apply("air_basic", audioRoot + "swing_air.wav", audioRoot + "hit_air.wav", 0.68f, 0.032f, 0.014f, 0.052f);
             apply("launcher", audioRoot + "swing_upper.wav", audioRoot + "hit_launcher.wav", 0.82f, 0.065f, 0.034f, 0.095f);
             apply("air_chase", audioRoot + "swing_air.wav", audioRoot + "hit_air.wav", 0.76f, 0.046f, 0.024f, 0.075f);
+            apply("dash", audioRoot + "swing_air.wav", audioRoot + "hit_launcher.wav", 0.76f, 0.040f, 0.020f, 0.070f);
             apply("magic_bolt", audioRoot + "magic_cast.wav", audioRoot + "magic_hit.wav", 0.78f, 0.040f, 0.018f, 0.070f);
             apply("ally_support", audioRoot + "support_cast.wav", audioRoot + "support_hit.wav", 0.78f, 0.052f, 0.026f, 0.085f);
             apply("break_limit", audioRoot + "break_limit.wav", audioRoot + "hit_launcher.wav", 0.88f, 0.070f, 0.040f, 0.120f);
@@ -650,7 +676,7 @@ namespace Wheatear::SideCombatTuningService {
             basic1.MovementScale = 0.58f;
             basic1.HitStun = 0.30f;
             basic1.LaunchVelocity = { 1.15f, 1.8f };
-            basic1.ProtectionGain = 4.0f;
+            basic1.ProtectionGain = 9.0f;
             tuning.Attacks["basic1"] = basic1;
 
             SideAttackTuning basic2 = basic1;
@@ -663,7 +689,7 @@ namespace Wheatear::SideCombatTuningService {
             basic2.CancelWindowStart = 0.13f;
             basic2.CancelWindowEnd = 0.30f;
             basic2.MovementScale = 0.52f;
-            basic2.ProtectionGain = 5.0f;
+            basic2.ProtectionGain = 11.0f;
             tuning.Attacks["basic2"] = basic2;
 
             SideAttackTuning basic3 = basic1;
@@ -681,7 +707,7 @@ namespace Wheatear::SideCombatTuningService {
             basic3.MovementScale = 0.36f;
             basic3.HitStun = 0.36f;
             basic3.LaunchVelocity = { 2.2f, 4.2f };
-            basic3.ProtectionGain = 8.0f;
+            basic3.ProtectionGain = 16.0f;
             tuning.Attacks["basic3"] = basic3;
 
             SideAttackTuning airBasic = basic1;
@@ -702,7 +728,7 @@ namespace Wheatear::SideCombatTuningService {
             airBasic.AttackerAirImpulse = 0.85f;
             airBasic.AttackerAirFallStep = 0.10f;
             airBasic.TargetAirFallStep = 0.08f;
-            airBasic.ProtectionGain = 7.0f;
+            airBasic.ProtectionGain = 14.0f;
             tuning.Attacks["air_basic"] = airBasic;
 
             SideAttackTuning launcher;
@@ -721,7 +747,7 @@ namespace Wheatear::SideCombatTuningService {
             launcher.HitStun = 0.54f;
             launcher.LaunchVelocity = { 0.95f, 9.8f };
             launcher.AttackerAirImpulse = 0.0f;
-            launcher.ProtectionGain = 12.0f;
+            launcher.ProtectionGain = 22.0f;
             tuning.Attacks["launcher"] = launcher;
 
             SideAttackTuning airChase = launcher;
@@ -742,8 +768,28 @@ namespace Wheatear::SideCombatTuningService {
             airChase.AttackerAirImpulse = 1.20f;
             airChase.AttackerAirFallStep = 0.12f;
             airChase.TargetAirFallStep = 0.06f;
-            airChase.ProtectionGain = 9.0f;
+            airChase.ProtectionGain = 18.0f;
             tuning.Attacks["air_chase"] = airChase;
+
+            SideAttackTuning dash;
+            dash.Size = { 1.26f, 0.74f };
+            dash.Offset = { 0.88f, 0.0f };
+            dash.Velocity = { 10.5f, 0.0f };
+            dash.AirHeight = 0.56f;
+            dash.AirRange = 1.02f;
+            dash.DamageScale = 0.60f;
+            dash.DamageFlat = 6.0f;
+            dash.Lifetime = 0.24f;
+            dash.Startup = 0.05f;
+            dash.Recovery = 0.08f;
+            dash.CancelWindowStart = 0.14f;
+            dash.CancelWindowEnd = 0.30f;
+            dash.MovementScale = 0.0f;
+            dash.HitStun = 0.34f;
+            dash.LaunchVelocity = { 1.35f, 1.80f };
+            dash.ProtectionGain = 10.0f;
+            dash.DestroyOnHit = true;
+            tuning.Attacks["dash"] = dash;
 
             SideAttackTuning magic;
             magic.Size = { 0.86f, 0.56f };
@@ -761,7 +807,7 @@ namespace Wheatear::SideCombatTuningService {
             magic.MovementScale = 0.72f;
             magic.HitStun = 0.34f;
             magic.LaunchVelocity = { 1.2f, 3.1f };
-            magic.ProtectionGain = 5.0f;
+            magic.ProtectionGain = 12.0f;
             tuning.Attacks["magic_bolt"] = magic;
 
             SideAttackTuning support;
@@ -780,7 +826,7 @@ namespace Wheatear::SideCombatTuningService {
             support.HitStun = 0.58f;
             support.LaunchVelocity = { 0.0f, 6.8f };
             support.DestroyOnHit = false;
-            support.ProtectionGain = 10.0f;
+            support.ProtectionGain = 20.0f;
             tuning.Attacks["ally_support"] = support;
 
             SideAttackTuning breakLimit = support;
@@ -796,9 +842,9 @@ namespace Wheatear::SideCombatTuningService {
             breakLimit.CancelWindowStart = 0.10f;
             breakLimit.CancelWindowEnd = 0.28f;
             breakLimit.MovementScale = 0.92f;
-            breakLimit.HitStun = 0.52f;
-            breakLimit.LaunchVelocity = { 0.30f, 5.4f };
-            breakLimit.AttackerAirImpulse = 2.25f;
+            breakLimit.HitStun = 0.22f;
+            breakLimit.LaunchVelocity = { 0.0f, 0.0f };
+            breakLimit.AttackerAirImpulse = 0.0f;
             breakLimit.AttackerAirFallStep = 0.0f;
             breakLimit.TargetAirFallStep = 0.0f;
             breakLimit.DestroyOnHit = false;
@@ -823,13 +869,13 @@ namespace Wheatear::SideCombatTuningService {
             SideAttackTuning bearCharge = enemyClaw;
             bearCharge.Size = { 1.82f, 0.92f };
             bearCharge.Offset = { 1.05f, 0.0f };
-            bearCharge.Velocity = { 3.7f, 0.0f };
+            bearCharge.Velocity = { 7.2f, 0.0f };
             bearCharge.DamageScale = 0.82f;
             bearCharge.DamageFlat = 12.0f;
-            bearCharge.Lifetime = 0.32f;
-            bearCharge.Startup = 0.48f;
-            bearCharge.Recovery = 0.70f;
-            bearCharge.MovementScale = 0.08f;
+            bearCharge.Lifetime = 0.88f;
+            bearCharge.Startup = 0.50f;
+            bearCharge.Recovery = 0.26f;
+            bearCharge.MovementScale = 1.0f;
             bearCharge.HitStun = 0.44f;
             bearCharge.DestroyOnHit = false;
             tuning.Attacks["bear_charge"] = bearCharge;
@@ -843,8 +889,8 @@ namespace Wheatear::SideCombatTuningService {
             shockwave.DamageScale = 0.56f;
             shockwave.DamageFlat = 8.0f;
             shockwave.Lifetime = 1.5f;
-            shockwave.Startup = 0.62f;
-            shockwave.Recovery = 0.55f;
+            shockwave.Startup = 0.52f;
+            shockwave.Recovery = 0.20f;
             shockwave.MovementScale = 0.05f;
             shockwave.HitStun = 0.30f;
             shockwave.LaunchVelocity = { 2.5f, 1.6f };
@@ -1037,6 +1083,7 @@ namespace Wheatear::SideCombatTuningService {
         {
             const SideUnlockProfile* profile = GetUnlockProfile(level, tuning);
             return IsBreakLimitOfficiallyAvailable(level, tuning) ||
+                IsBreakLimitDebugAvailable(level, tuning) ||
                 tuning.AirCombo.ShowBreakLimitHint ||
                 (profile && profile->ShowBreakLimitHint);
         }
@@ -1073,6 +1120,13 @@ namespace Wheatear::SideCombatTuningService {
         controller.LauncherCooldown = tuning.Player.LauncherCooldown;
         controller.MagicBoltCooldown = tuning.Player.MagicBoltCooldown;
         controller.AllySupportCooldown = tuning.Player.AllySupportCooldown;
+        controller.DashCooldown = std::max(0.0f, tuning.Player.DashCooldown);
+        controller.HealItemCooldown = std::max(0.0f, tuning.Player.HealItemCooldown);
+        controller.ManaItemCooldown = std::max(0.0f, tuning.Player.ManaItemCooldown);
+        controller.AttackBuffItemCooldown = std::max(0.0f, tuning.Player.AttackBuffItemCooldown);
+        controller.DashManaCost = std::max(0.0f, tuning.Player.DashManaCost);
+        controller.DashSpeed = std::max(0.0f, tuning.Player.DashSpeed);
+        controller.DashInvulnerableTime = std::max(0.0f, tuning.Player.DashInvulnerableTime);
         controller.RuntimeMagicSwordGaugeMax = std::max(1.0f, tuning.AirCombo.MagicSwordGaugeMax);
         controller.RuntimeMagicSwordGauge = std::clamp(
             controller.RuntimeMagicSwordGauge,

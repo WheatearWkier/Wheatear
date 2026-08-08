@@ -56,6 +56,14 @@ namespace Wheatear {
             float fade = 0.005f,
             int entityID = -1);
 
+        static void DrawRadialCircle(const glm::mat4& transform,
+            const glm::vec4& color,
+            float progress,
+            float startAngle = 1.57079632679f,
+            float thickness = 1.0f,
+            float fade = 0.005f,
+            int entityID = -1);
+
         static void DrawSprite(const glm::mat4& transform,
             SpriteRendererComponent& src,
             int entityID);

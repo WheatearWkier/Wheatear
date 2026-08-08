@@ -116,10 +116,17 @@ namespace Wheatear::SideCombatPhysicsService {
 
             if (combatant.RuntimeState == SideCombatState::SuperArmor)
             {
-                combatant.RuntimeInvulnerableTimer = std::max(combatant.RuntimeInvulnerableTimer, 0.05f);
-                if (combatant.RuntimeStateTimer <= 0.0f && combatant.RuntimeOnGround)
+                if (combatant.RuntimeProtection > 0.0f)
                 {
-                    combatant.RuntimeProtection = 0.0f;
+                    combatant.RuntimeProtection = std::max(
+                        0.0f,
+                        combatant.RuntimeProtection - tuning.Protection.BossProtectionDecayPerSecond * dt);
+                }
+
+                if (combatant.RuntimeProtection <= 0.0f &&
+                    combatant.RuntimeStateTimer <= 0.0f &&
+                    combatant.RuntimeOnGround)
+                {
                     SideCombatHitResolutionService::SetCombatState(combatant, SideCombatState::Recovery, tuning.Protection.GroundResetDelay);
                 }
             }
@@ -155,9 +162,10 @@ namespace Wheatear::SideCombatPhysicsService {
                 combatant.RuntimeState == SideCombatState::Normal &&
                 combatant.RuntimeProtection > 0.0f)
             {
+                constexpr float NormalBossProtectionDecayScale = 0.18f;
                 combatant.RuntimeProtection = std::max(
                     0.0f,
-                    combatant.RuntimeProtection - tuning.Protection.BossProtectionDecayPerSecond * dt);
+                    combatant.RuntimeProtection - tuning.Protection.BossProtectionDecayPerSecond * NormalBossProtectionDecayScale * dt);
             }
 
             SideCombatVisualService::UpdateCombatantVisual(scene, { e, scene }, level, tuning, dt);

@@ -61,6 +61,10 @@ namespace Wheatear {
 
         ImGui::PopItemWidth();
 
+        bool hiddenInEditor = IsEntityHiddenInEditor(entity);
+        if (ImGui::Checkbox("Hidden in Editor", &hiddenInEditor))
+            SetEntityHiddenInEditor(entity, hiddenInEditor);
+
         EditorComponentRegistry::ForEach([entity](const EditorComponentDescriptor& descriptor)
         {
             descriptor.Draw(entity);

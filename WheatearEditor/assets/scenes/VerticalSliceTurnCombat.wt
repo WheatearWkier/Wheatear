@@ -247,8 +247,8 @@ Entities:
       Slot: 0
       DisplayName: 幼熊兽
       RoleName: 魔物
-      MaxHealth: 230
-      Health: 230
+      MaxHealth: 1
+      Health: 1
       MaxMana: 20
       Mana: 20
       Attack: 28
@@ -291,8 +291,8 @@ Entities:
       Slot: 1
       DisplayName: 月狼
       RoleName: 魔物
-      MaxHealth: 115
-      Health: 115
+      MaxHealth: 1
+      Health: 1
       MaxMana: 18
       Mana: 18
       Attack: 24
@@ -335,8 +335,8 @@ Entities:
       Slot: 2
       DisplayName: 学徒法师
       RoleName: 精英
-      MaxHealth: 150
-      Health: 150
+      MaxHealth: 1
+      Health: 1
       MaxMana: 48
       Mana: 48
       Attack: 12

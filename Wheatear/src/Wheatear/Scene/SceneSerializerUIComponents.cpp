@@ -24,6 +24,7 @@ namespace Wheatear {
         static void Serialize(YAML::Emitter& o, const UIWidgetComponent& c) {
             o << YAML::Key << Key << YAML::BeginMap;
             o << YAML::Key << "Visible" << YAML::Value << c.Visible;
+            o << YAML::Key << "EditorVisible" << YAML::Value << c.EditorVisible;
             o << YAML::Key << "Position" << YAML::Value << c.Position;
             o << YAML::Key << "Size" << YAML::Value << c.Size;
             o << YAML::Key << "Rotation" << YAML::Value << c.Rotation;
@@ -34,6 +35,7 @@ namespace Wheatear {
         }
         static void Deserialize(const YAML::Node& n, UIWidgetComponent& c) {
             c.Visible = n["Visible"].as<bool>();
+            c.EditorVisible = n["EditorVisible"].as<bool>(true);
             c.Position = n["Position"].as<glm::vec2>();
             c.Size = n["Size"].as<glm::vec2>();
             c.Rotation = n["Rotation"].as<float>();
@@ -87,6 +89,25 @@ namespace Wheatear {
                 c.Texture = Texture2D::Create(p);
         }
     };
+    template<> struct ComponentSerializer<UIRadialCooldownComponent> {
+        static constexpr const char* Key = "UIRadialCooldownComponent";
+        static void Serialize(YAML::Emitter& o, const UIRadialCooldownComponent& c) {
+            o << YAML::Key << Key << YAML::BeginMap;
+            o << YAML::Key << "Progress" << YAML::Value << c.Progress;
+            o << YAML::Key << "StartAngle" << YAML::Value << c.StartAngle;
+            o << YAML::Key << "Thickness" << YAML::Value << c.Thickness;
+            o << YAML::Key << "Fade" << YAML::Value << c.Fade;
+            o << YAML::Key << "Color" << YAML::Value << c.Color;
+            o << YAML::EndMap;
+        }
+        static void Deserialize(const YAML::Node& n, UIRadialCooldownComponent& c) {
+            c.Progress = n["Progress"].as<float>(c.Progress);
+            c.StartAngle = n["StartAngle"].as<float>(c.StartAngle);
+            c.Thickness = n["Thickness"].as<float>(c.Thickness);
+            c.Fade = n["Fade"].as<float>(c.Fade);
+            c.Color = n["Color"].as<glm::vec4>(c.Color);
+        }
+    };
     template<> struct ComponentSerializer<UIPanelComponent> {
         static constexpr const char* Key = "UIPanelComponent";
         static void Serialize(YAML::Emitter& o, const UIPanelComponent& c) {
@@ -119,6 +140,9 @@ namespace Wheatear {
             o << YAML::Key << "Color" << YAML::Value << c.Color;
             o << YAML::Key << "FontSize" << YAML::Value << c.FontSize;
             o << YAML::Key << "FontPath" << YAML::Value << c.FontPath;
+            o << YAML::Key << "Padding" << YAML::Value << c.Padding;
+            o << YAML::Key << "HorizontalAlign" << YAML::Value << static_cast<int>(c.HorizontalAlign);
+            o << YAML::Key << "VerticalAlign" << YAML::Value << static_cast<int>(c.VerticalAlign);
             o << YAML::Key << "ShadowColor" << YAML::Value << c.ShadowColor;
             o << YAML::Key << "ShadowOffset" << YAML::Value << c.ShadowOffset;
             o << YAML::Key << "OutlineColor" << YAML::Value << c.OutlineColor;
@@ -130,6 +154,11 @@ namespace Wheatear {
             c.Color = n["Color"].as<glm::vec4>(c.Color);
             c.FontSize = n["FontSize"].as<float>(c.FontSize);
             c.FontPath = n["FontPath"].as<std::string>(c.FontPath);
+            c.Padding = n["Padding"].as<glm::vec4>(c.Padding);
+            c.HorizontalAlign = static_cast<UITextHorizontalAlign>(
+                std::clamp(n["HorizontalAlign"].as<int>(static_cast<int>(c.HorizontalAlign)), 0, 2));
+            c.VerticalAlign = static_cast<UITextVerticalAlign>(
+                std::clamp(n["VerticalAlign"].as<int>(static_cast<int>(c.VerticalAlign)), 0, 2));
             c.ShadowColor = n["ShadowColor"].as<glm::vec4>(c.ShadowColor);
             c.ShadowOffset = n["ShadowOffset"].as<glm::vec2>(c.ShadowOffset);
             c.OutlineColor = n["OutlineColor"].as<glm::vec4>(c.OutlineColor);
@@ -419,6 +448,7 @@ namespace Wheatear {
         UIWidgetComponent,
         UIAnimatorComponent,
         UIImageComponent,
+        UIRadialCooldownComponent,
         UIPanelComponent,
         UITextComponent,
         UIButtonComponent,

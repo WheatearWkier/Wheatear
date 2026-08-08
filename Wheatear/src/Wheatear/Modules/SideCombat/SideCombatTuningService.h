@@ -62,6 +62,13 @@ namespace Wheatear::SideCombatTuningService {
         float LauncherCooldown = 0.42f;
         float MagicBoltCooldown = 0.64f;
         float AllySupportCooldown = 4.2f;
+        float DashCooldown = 1.0f;
+        float HealItemCooldown = 5.0f;
+        float ManaItemCooldown = 5.0f;
+        float AttackBuffItemCooldown = 10.0f;
+        float DashManaCost = 16.0f;
+        float DashSpeed = 10.5f;
+        float DashInvulnerableTime = 0.18f;
         float BasicChainWindow = 0.72f;
         float LauncherChainWindow = 0.82f;
         float MagicChainWindow = 0.78f;
@@ -91,7 +98,7 @@ namespace Wheatear::SideCombatTuningService {
         float BreakLimitFallingVelocity = 1.8f;
         float BreakLimitHangImpulse = 2.2f;
         float BreakLimitHeightBoost = 0.22f;
-        float BreakLimitGaugeCost = 1.0f;
+        float BreakLimitGaugeCost = 1.5f;
         float MagicSwordGaugeMax = 3.0f;
         float GaugeGainGroundHit = 0.10f;
         float GaugeGainAirHit = 0.16f;
@@ -102,11 +109,11 @@ namespace Wheatear::SideCombatTuningService {
     struct SideProtectionTuning
     {
         float BossProtectionMax = 100.0f;
-        float BossProtectionDecayPerSecond = 16.0f;
+        float BossProtectionDecayPerSecond = 36.0f;
         float BossProtectionLimitTime = 1.15f;
         float BossProtectionForceFallVelocity = -6.0f;
-        float BossProtectionBreakLimitThreshold = 35.0f;
-        float BreakLimitProtectionReduce = 42.0f;
+        float BossProtectionBreakLimitThreshold = 0.0f;
+        float BreakLimitProtectionReduce = 100.0f;
         float GroundResetDelay = 0.20f;
         bool ShowBossProtectionHud = false;
         bool ShowCombatStateHud = false;
@@ -152,6 +159,10 @@ namespace Wheatear::SideCombatTuningService {
     struct SideFeedbackTuning
     {
         float HitPauseTimeScale = 0.12f;
+        float BreakLimitCinematicDuration = 0.60f;
+        float BreakLimitCinematicTimeScale = 0.09f;
+        float BreakLimitCameraZoom = 1.30f;
+        glm::vec2 BreakLimitCameraOffset = { 0.0f, 0.25f };
         std::string JumpSound = "side.audio.jump";
         std::string LandSound = "side.audio.land";
         float JumpSoundVolume = 0.55f;
@@ -166,12 +177,12 @@ namespace Wheatear::SideCombatTuningService {
 
     struct SideEnemyTuning
     {
-        float InitialAttackDelay = 0.35f;
+        float InitialAttackDelay = 0.24f;
         float AttackRangePadding = 0.45f;
         float LaneAttackPadding = 0.28f;
-        float BossPreferredRangeBonus = 0.45f;
+        float BossPreferredRangeBonus = 0.18f;
         float GruntMoveSpeedScale = 0.88f;
-        float BossMoveSpeedScale = 0.62f;
+        float BossMoveSpeedScale = 0.72f;
         float GruntLaneSpeedScale = 0.68f;
         float BossLaneSpeedScale = 0.46f;
         float XApproachAcceleration = 24.0f;
@@ -179,19 +190,19 @@ namespace Wheatear::SideCombatTuningService {
         float LaneApproachAcceleration = 18.0f;
         float LaneBrakeAcceleration = 16.0f;
 
-        float BearBossMoveSpeed = 3.4f;
-        float BearBossAggroRange = 12.0f;
-        float BearBossAttackRange = 1.55f;
-        float BearBossPreferredRange = 1.2f;
-        float BearBossAttackInterval = 1.18f;
-        float BearBossLaneTolerance = 0.58f;
-        float BearBossMidHealthThreshold = 0.68f;
-        float BearBossLowHealthThreshold = 0.36f;
-        float BearBossMidAttackInterval = 0.96f;
-        float BearBossLowAttackInterval = 0.78f;
-        float BearBossChargeDistance = 1.8f;
-        float BearBossShockwaveDistance = 2.0f;
-        float BearBossChargeSpeed = 5.8f;
+        float BearBossMoveSpeed = 3.75f;
+        float BearBossAggroRange = 14.0f;
+        float BearBossAttackRange = 1.72f;
+        float BearBossPreferredRange = 1.08f;
+        float BearBossAttackInterval = 0.82f;
+        float BearBossLaneTolerance = 0.66f;
+        float BearBossMidHealthThreshold = 0.74f;
+        float BearBossLowHealthThreshold = 0.44f;
+        float BearBossMidAttackInterval = 0.66f;
+        float BearBossLowAttackInterval = 0.52f;
+        float BearBossChargeDistance = 2.15f;
+        float BearBossShockwaveDistance = 2.35f;
+        float BearBossChargeSpeed = 7.20f;
     };
 
     struct SidePickupTuning

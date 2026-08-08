@@ -154,10 +154,8 @@ namespace Wheatear::SideCombatHitResolutionService {
             target.RuntimeProtectionMax = std::max(1.0f, tuning.Protection.BossProtectionMax);
             if (hitbox.AttackKind == SideAttackKind::BreakLimit)
             {
-                target.RuntimeProtection = std::max(
-                    0.0f,
-                    target.RuntimeProtection - tuning.Protection.BreakLimitProtectionReduce);
-                SetCombatState(target, SideCombatState::Broken, std::max(0.18f, hitbox.HitStun * 0.5f));
+                target.RuntimeProtection = 0.0f;
+                SetCombatState(target, SideCombatState::Broken, std::max(0.16f, hitbox.HitStun));
                 return false;
             }
 
@@ -206,9 +204,10 @@ namespace Wheatear::SideCombatHitResolutionService {
     bool CanEnemyAct(const SideCombatantComponent& combatant)
     {
         return combatant.Alive &&
-            combatant.RuntimeState == SideCombatState::Normal &&
             combatant.RuntimeHitStun <= 0.0f &&
-            !IsControlledAirborne(combatant);
+            !IsControlledAirborne(combatant) &&
+            (combatant.RuntimeState == SideCombatState::Normal ||
+                combatant.RuntimeState == SideCombatState::SuperArmor);
     }
 
     void SetCombatState(SideCombatantComponent& combatant,
@@ -224,9 +223,7 @@ namespace Wheatear::SideCombatHitResolutionService {
     {
         boss.RuntimeProtection = boss.RuntimeProtectionMax;
         boss.RuntimeHitStun = 0.0f;
-        boss.RuntimeInvulnerableTimer = std::max(
-            boss.RuntimeInvulnerableTimer,
-            protection.BossProtectionLimitTime);
+        boss.RuntimeInvulnerableTimer = 0.0f;
         boss.RuntimeVelocity = { 0.0f, 0.0f };
         boss.RuntimeAirVelocity = std::min(
             boss.RuntimeAirVelocity,
@@ -246,8 +243,20 @@ namespace Wheatear::SideCombatHitResolutionService {
         const float requestedDamage = CalculateDamage(hitbox.Damage, target.Defense, tuning.Combat);
         result.Damage = GameplayCombatService::ApplyDamage(target.Health, requestedDamage);
         target.Alive = GameplayCombatService::IsAlive(target.Health);
-        target.RuntimeHitStun = std::max(target.RuntimeHitStun, hitbox.HitStun);
         target.RuntimeInvulnerableTimer = tuning.Combat.HitInvulnerableTime;
+
+        const bool bossSuperArmor =
+            scene &&
+            target.Team == (int)SideCombatTeam::Enemy &&
+            IsBossEntity(scene, targetEntity) &&
+            target.RuntimeState == SideCombatState::SuperArmor;
+        const bool suppressControl = bossSuperArmor &&
+            hitbox.AttackKind != SideAttackKind::BreakLimit;
+
+        if (!suppressControl)
+            target.RuntimeHitStun = std::max(target.RuntimeHitStun, hitbox.HitStun);
+        else
+            target.RuntimeHitStun = 0.0f;
 
         result.PlayerWasHit =
             hitbox.Team == (int)SideCombatTeam::Enemy &&
@@ -282,7 +291,8 @@ namespace Wheatear::SideCombatHitResolutionService {
             if (target.Team == (int)SideCombatTeam::Enemy &&
                 registry.all_of<SideEnemyAIComponent>(targetEntity))
             {
-                SideCombatActionService::ClearEnemyAction(registry.get<SideEnemyAIComponent>(targetEntity));
+                if (!suppressControl)
+                    SideCombatActionService::ClearEnemyAction(registry.get<SideEnemyAIComponent>(targetEntity));
             }
             if (target.Team == (int)SideCombatTeam::Player &&
                 registry.all_of<SidePlayerControllerComponent>(targetEntity))
@@ -292,36 +302,46 @@ namespace Wheatear::SideCombatHitResolutionService {
 
             if (target.Alive)
             {
-                const float resistanceScale = std::clamp(1.0f - target.KnockbackResistance, 0.25f, 1.0f);
-                target.RuntimeVelocity.x = hitbox.LaunchVelocity.x * resistanceScale;
-                float launchY = hitbox.LaunchVelocity.y;
-                if (hitbox.Team == (int)SideCombatTeam::Player &&
-                    registry.all_of<SideEnemyAIComponent>(targetEntity) &&
-                    registry.get<SideEnemyAIComponent>(targetEntity).Kind == SideEnemyKind::BearBoss &&
-                    launchY > 0.0f)
+                if (!suppressControl)
                 {
-                    launchY *= tuning.BossLaunchBonus;
-                }
-                target.RuntimeAirVelocity = std::max(target.RuntimeAirVelocity, launchY * resistanceScale);
-                if (launchY > 0.0f)
-                {
-                    launched = true;
-                    appliedLaunchVelocity = launchY * resistanceScale;
-                    target.RuntimeAirHeight = std::max(target.RuntimeAirHeight, 0.05f);
-                    target.RuntimeOnGround = false;
-                    SetCombatState(target, SideCombatState::Launched);
+                    const float resistanceScale = std::clamp(1.0f - target.KnockbackResistance, 0.25f, 1.0f);
+                    target.RuntimeVelocity.x = hitbox.LaunchVelocity.x * resistanceScale;
+                    float launchY = hitbox.LaunchVelocity.y;
+                    if (hitbox.Team == (int)SideCombatTeam::Player &&
+                        registry.all_of<SideEnemyAIComponent>(targetEntity) &&
+                        registry.get<SideEnemyAIComponent>(targetEntity).Kind == SideEnemyKind::BearBoss &&
+                        launchY > 0.0f)
+                    {
+                        launchY *= tuning.BossLaunchBonus;
+                    }
+                    target.RuntimeAirVelocity = std::max(target.RuntimeAirVelocity, launchY * resistanceScale);
+                    if (launchY > 0.0f)
+                    {
+                        launched = true;
+                        appliedLaunchVelocity = launchY * resistanceScale;
+                        target.RuntimeAirHeight = std::max(target.RuntimeAirHeight, 0.05f);
+                        target.RuntimeOnGround = false;
+                        SetCombatState(target, SideCombatState::Launched);
+                    }
+                    else
+                    {
+                        SetCombatState(target, SideCombatState::HitStun, hitbox.HitStun);
+                    }
                 }
                 else
                 {
-                    SetCombatState(target, SideCombatState::HitStun, hitbox.HitStun);
+                    target.RuntimeVelocity = { 0.0f, 0.0f };
                 }
 
-                result.BossProtectionTriggered = ApplyBossProtectionOnHit(scene,
-                    level,
-                    tuning,
-                    targetEntity,
-                    target,
-                    hitbox);
+                if (!suppressControl || hitbox.AttackKind == SideAttackKind::BreakLimit)
+                {
+                    result.BossProtectionTriggered = ApplyBossProtectionOnHit(scene,
+                        level,
+                        tuning,
+                        targetEntity,
+                        target,
+                        hitbox);
+                }
             }
             else
             {

@@ -5,7 +5,6 @@
 #include "Wheatear/Core/UserSettings.h"
 #include "Wheatear/Modules/Common/GameplayUILayoutService.h"
 #include "Wheatear/Scene/SceneQueries.h"
-#include "Wheatear/UI/UIRuntimeTools.h"
 
 #include <string>
 
@@ -14,12 +13,13 @@ namespace Wheatear::ProgressionSettingsPageService {
     namespace {
 
         using SceneQueries::FindEntityByName;
-        using UIRuntimeTools::SetWidgetTopLeft;
 
         using GameplayUILayoutService::EnsureButton;
         using GameplayUILayoutService::EnsureSlider;
         using GameplayUILayoutService::EnsureText;
+        using GameplayUILayoutService::SetButtonCommand;
         using GameplayUILayoutService::SetSlider;
+        using GameplayUILayoutService::SetSliderCommand;
 
         static bool HasEntity(Scene* scene, const std::string& name)
         {
@@ -37,23 +37,42 @@ namespace Wheatear::ProgressionSettingsPageService {
             const glm::vec2 sliderSize = { 0.25f, 0.035f };
             const glm::vec2 buttonSize = { 0.045f, 0.045f };
 
-            EnsureText(scene, "Settings_MasterVolumeLabel", parentTag, { 0.13f, 0.39f }, labelSize, 42, "主音量", 20.0f, labelColor);
-            EnsureSlider(scene, "Settings_MasterVolumeSlider", parentTag, { 0.31f, 0.395f }, sliderSize, 44, 0.0f, 100.0f, "progression:set_master_volume");
-            EnsureButton(scene, "Settings_Button_VolumeDown", parentTag, { 0.58f, 0.38f }, buttonSize, 55, "-", "progression:master_volume_down");
-            EnsureButton(scene, "Settings_Button_VolumeUp", parentTag, { 0.635f, 0.38f }, buttonSize, 55, "+", "progression:master_volume_up");
+            auto ensureTextIfMissing = [&](const std::string& name, glm::vec2 position, const std::string& value)
+            {
+                if (!HasEntity(scene, name))
+                    EnsureText(scene, name, parentTag, position, labelSize, 42, value, 20.0f, labelColor);
+            };
 
-            EnsureText(scene, "Settings_BGMVolumeLabel", parentTag, { 0.13f, 0.47f }, labelSize, 42, "音乐", 20.0f, labelColor);
-            EnsureSlider(scene, "Settings_BGMVolumeSlider", parentTag, { 0.31f, 0.475f }, sliderSize, 44, 0.0f, 100.0f, "progression:set_bgm_volume");
-            EnsureButton(scene, "Settings_Button_BGMDown", parentTag, { 0.58f, 0.46f }, buttonSize, 55, "-", "progression:bgm_volume_down");
-            EnsureButton(scene, "Settings_Button_BGMUp", parentTag, { 0.635f, 0.46f }, buttonSize, 55, "+", "progression:bgm_volume_up");
+            auto ensureSliderOrBind = [&](const std::string& name, glm::vec2 position, const std::string& command)
+            {
+                if (HasEntity(scene, name))
+                    SetSliderCommand(scene, name, command);
+                else
+                    EnsureSlider(scene, name, parentTag, position, sliderSize, 44, 0.0f, 100.0f, command);
+            };
 
-            EnsureText(scene, "Settings_SFXVolumeLabel", parentTag, { 0.13f, 0.55f }, labelSize, 42, "音效", 20.0f, labelColor);
-            EnsureSlider(scene, "Settings_SFXVolumeSlider", parentTag, { 0.31f, 0.555f }, sliderSize, 44, 0.0f, 100.0f, "progression:set_sfx_volume");
-            EnsureButton(scene, "Settings_Button_SFXDown", parentTag, { 0.58f, 0.54f }, buttonSize, 55, "-", "progression:sfx_volume_down");
-            EnsureButton(scene, "Settings_Button_SFXUp", parentTag, { 0.635f, 0.54f }, buttonSize, 55, "+", "progression:sfx_volume_up");
+            auto ensureButtonOrBind = [&](const std::string& name, glm::vec2 position, const std::string& label, const std::string& command)
+            {
+                if (HasEntity(scene, name))
+                    SetButtonCommand(scene, name, command);
+                else
+                    EnsureButton(scene, name, parentTag, position, buttonSize, 55, label, command);
+            };
 
-            SetWidgetTopLeft(scene, "Settings_Button_Shake", { 0.13f, 0.635f }, { 0.22f, 0.052f });
-            SetWidgetTopLeft(scene, "Settings_Button_Fullscreen", { 0.38f, 0.635f }, { 0.22f, 0.052f });
+            ensureTextIfMissing("Settings_MasterVolumeLabel", { 0.13f, 0.39f }, "主音量");
+            ensureSliderOrBind("Settings_MasterVolumeSlider", { 0.31f, 0.395f }, "progression:set_master_volume");
+            ensureButtonOrBind("Settings_Button_VolumeDown", { 0.58f, 0.38f }, "-", "progression:master_volume_down");
+            ensureButtonOrBind("Settings_Button_VolumeUp", { 0.635f, 0.38f }, "+", "progression:master_volume_up");
+
+            ensureTextIfMissing("Settings_BGMVolumeLabel", { 0.13f, 0.47f }, "音乐");
+            ensureSliderOrBind("Settings_BGMVolumeSlider", { 0.31f, 0.475f }, "progression:set_bgm_volume");
+            ensureButtonOrBind("Settings_Button_BGMDown", { 0.58f, 0.46f }, "-", "progression:bgm_volume_down");
+            ensureButtonOrBind("Settings_Button_BGMUp", { 0.635f, 0.46f }, "+", "progression:bgm_volume_up");
+
+            ensureTextIfMissing("Settings_SFXVolumeLabel", { 0.13f, 0.55f }, "音效");
+            ensureSliderOrBind("Settings_SFXVolumeSlider", { 0.31f, 0.555f }, "progression:set_sfx_volume");
+            ensureButtonOrBind("Settings_Button_SFXDown", { 0.58f, 0.54f }, "-", "progression:sfx_volume_down");
+            ensureButtonOrBind("Settings_Button_SFXUp", { 0.635f, 0.54f }, "+", "progression:sfx_volume_up");
         }
 
     } // namespace

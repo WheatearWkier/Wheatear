@@ -17,6 +17,9 @@
 #include "Wheatear/Scene/Scene.h"
 #include "Wheatear/UI/UIRenderer.h"
 #include "Wheatear/UI/UIRuntimeTools.h"
+#include "Wheatear/UI/UIWidgetLayout.h"
+
+#include <yaml-cpp/yaml.h>
 
 #include <algorithm>
 #include <array>
@@ -36,8 +39,12 @@ namespace Wheatear {
         using SceneQueries::FindEntityByName;
         using UIRuntimeTools::IsButtonHovered;
         using UIRuntimeTools::SetText;
-        using UIRuntimeTools::SetWidgetTopLeft;
         using UIRuntimeTools::SetWidgetVisible;
+
+        static constexpr float kVNCommandBarLeft = 0.295f;
+        static constexpr float kVNCommandBarTop = 0.884f;
+        static constexpr float kVNCommandBarWidth = 0.410f;
+        static constexpr float kVNCommandBarHeight = 0.086f;
 
         static bool StartsWith(const std::string& value, const std::string& prefix)
         {
@@ -101,16 +108,20 @@ namespace Wheatear {
             return AssetAliasRegistry::Path("vn.ui." + key, fallback);
         }
 
+        static constexpr float kVNUiAtlasWidth = 3200.0f;
+        static constexpr float kVNUiAtlasHeight = 1584.0f;
+
         struct VNUiAtlasRegion
         {
             float X = 0.0f;
             float Y = 0.0f;
             float Width = 1.0f;
             float Height = 1.0f;
+            float AtlasWidth = kVNUiAtlasWidth;
+            float AtlasHeight = kVNUiAtlasHeight;
+            float CellWidth = 0.0f;
+            float CellHeight = 0.0f;
         };
-
-        static constexpr float kVNUiAtlasWidth = 3200.0f;
-        static constexpr float kVNUiAtlasHeight = 1584.0f;
 
         static std::string VNUiAtlasAsset()
         {
@@ -133,10 +144,82 @@ namespace Wheatear {
             };
         }
 
+        static bool TryReadVNUiAtlasRegion(const YAML::Node& node,
+            float atlasWidth,
+            float atlasHeight,
+            VNUiAtlasRegion* outRegion)
+        {
+            if (!node || !outRegion)
+                return false;
+
+            const YAML::Node rect = node["rect"];
+            if (!rect || !rect.IsSequence() || rect.size() < 4)
+                return false;
+
+            VNUiAtlasRegion region;
+            region.X = rect[0].as<float>(0.0f);
+            region.Y = rect[1].as<float>(0.0f);
+            region.Width = rect[2].as<float>(1.0f);
+            region.Height = rect[3].as<float>(1.0f);
+            region.AtlasWidth = atlasWidth;
+            region.AtlasHeight = atlasHeight;
+            region.CellWidth = node["cellWidth"].as<float>(0.0f);
+            region.CellHeight = node["cellHeight"].as<float>(0.0f);
+            *outRegion = region;
+            return true;
+        }
+
+        static const std::unordered_map<std::string, VNUiAtlasRegion>& VNUiAtlasRegions()
+        {
+            static const std::unordered_map<std::string, VNUiAtlasRegion> regions = []
+            {
+                std::unordered_map<std::string, VNUiAtlasRegion> loadedRegions;
+                const std::string paramsPath = VNUiAsset("atlas_params",
+                    "assets/vertical_slice/ui/atlases/ui_atlas_params.yaml");
+                const std::filesystem::path resolvedPath = AssetPath::ResolveRuntimeData(paramsPath);
+                if (!std::filesystem::is_regular_file(resolvedPath))
+                    return loadedRegions;
+
+                try
+                {
+                    const YAML::Node root = YAML::LoadFile(resolvedPath.string());
+                    const YAML::Node atlas = root["vn_ui_atlas"] ? root["vn_ui_atlas"] : root;
+                    const float atlasWidth = atlas["width"].as<float>(kVNUiAtlasWidth);
+                    const float atlasHeight = atlas["height"].as<float>(kVNUiAtlasHeight);
+                    const YAML::Node regionsNode = atlas["regions"];
+                    if (!regionsNode || !regionsNode.IsMap())
+                        return loadedRegions;
+
+                    for (const auto& entry : regionsNode)
+                    {
+                        if (!entry.first.IsScalar())
+                            continue;
+
+                        VNUiAtlasRegion region;
+                        if (TryReadVNUiAtlasRegion(entry.second, atlasWidth, atlasHeight, &region))
+                            loadedRegions[entry.first.as<std::string>()] = region;
+                    }
+                }
+                catch (const YAML::Exception& exception)
+                {
+                    WT_CORE_WARN("VisualNovelSystem: failed to load VN UI atlas params '{}': {}",
+                        resolvedPath.string(),
+                        exception.what());
+                }
+                return loadedRegions;
+            }();
+            return regions;
+        }
+
         static VNUiAtlasRegion VNUiAtlasRegionFor(const std::string& key)
         {
-            if (key == "textbox_panel") return { 0.0f, 0.0f, 3200.0f, 640.0f };
-            if (key == "choice_panel") return { 0.0f, 1152.0f, 1800.0f, 240.0f };
+            const auto& regions = VNUiAtlasRegions();
+            if (auto it = regions.find(key); it != regions.end())
+                return it->second;
+
+            if (key == "textbox_panel") return { 352.0f, 82.0f, 2495.0f, 474.0f };
+            if (key == "command_icons") return { 0.0f, 640.0f, 2048.0f, 512.0f, kVNUiAtlasWidth, kVNUiAtlasHeight, 256.0f, 256.0f };
+            if (key == "choice_panel") return { 267.0f, 1177.0f, 1266.0f, 190.0f };
             if (key == "nameplate") return { 0.0f, 1392.0f, 720.0f, 192.0f };
             if (key == "bgm_notice_panel") return { 720.0f, 1392.0f, 1120.0f, 192.0f };
             return { 0.0f, 0.0f, kVNUiAtlasWidth, kVNUiAtlasHeight };
@@ -144,12 +227,16 @@ namespace Wheatear {
 
         static VNUiAtlasRegion VNCommandIconRegion(uint32_t atlasColumn, bool highlighted)
         {
-            constexpr float iconSize = 256.0f;
+            const VNUiAtlasRegion commandIcons = VNUiAtlasRegionFor("command_icons");
+            const float iconWidth = commandIcons.CellWidth > 0.0f ? commandIcons.CellWidth : 256.0f;
+            const float iconHeight = commandIcons.CellHeight > 0.0f ? commandIcons.CellHeight : 256.0f;
             return {
-                static_cast<float>(atlasColumn) * iconSize,
-                640.0f + (highlighted ? iconSize : 0.0f),
-                iconSize,
-                iconSize
+                commandIcons.X + static_cast<float>(atlasColumn) * iconWidth,
+                commandIcons.Y + (highlighted ? iconHeight : 0.0f),
+                iconWidth,
+                iconHeight,
+                commandIcons.AtlasWidth,
+                commandIcons.AtlasHeight
             };
         }
 
@@ -176,8 +263,19 @@ namespace Wheatear {
         static void ApplyVNUiAtlasRegion(Scene* scene,
             const std::string& entityName,
             const std::string& regionKey,
-            const glm::vec4& color)
+            const glm::vec4& color,
+            bool onlyIfMissing = false)
         {
+            if (onlyIfMissing)
+            {
+                Entity entity = FindEntityByName(scene, entityName);
+                if (entity && entity.HasComponent<UIImageComponent>() &&
+                    entity.GetComponent<UIImageComponent>().Texture)
+                {
+                    return;
+                }
+            }
+
             const VNUiAtlasRegion region = VNUiAtlasRegionFor(regionKey);
             ApplyUIImage(scene,
                 entityName,
@@ -245,28 +343,37 @@ namespace Wheatear {
             if (!entity)
                 entity = scene->CreateEntity(entityName);
 
-            auto& widget = entity.HasComponent<UIWidgetComponent>()
+            const bool hadWidget = entity.HasComponent<UIWidgetComponent>();
+            auto& widget = hadWidget
                 ? entity.GetComponent<UIWidgetComponent>()
                 : entity.AddComponent<UIWidgetComponent>();
             widget.Visible = true;
-            widget.Anchor = UIAnchor::TopLeft;
-            widget.Position = position;
-            widget.Size = size;
-            widget.SortOrder = 5200;
-            Entity parent = parentTag.empty() ? Entity{} : FindEntityByName(scene, parentTag);
-            widget.ParentEntity = parent ? parent.GetUUID() : UUID(0);
+            if (!hadWidget)
+            {
+                widget.Anchor = UIAnchor::TopLeft;
+                widget.Position = position;
+                widget.Size = size;
+                widget.SortOrder = 5200;
+                Entity parent = parentTag.empty() ? Entity{} : FindEntityByName(scene, parentTag);
+                widget.ParentEntity = parent ? parent.GetUUID() : UUID(0);
+            }
 
-            auto& panel = entity.HasComponent<UIPanelComponent>()
+            const bool hadPanel = entity.HasComponent<UIPanelComponent>();
+            auto& panel = hadPanel
                 ? entity.GetComponent<UIPanelComponent>()
                 : entity.AddComponent<UIPanelComponent>();
-            panel.BackgroundColor = { 0.03f, 0.06f, 0.08f, 0.0f };
-            panel.BorderColor = { 0.45f, 0.86f, 0.92f, 0.0f };
-            panel.BorderThickness = 0.0f;
-            panel.ClipChildren = true;
+            if (!hadPanel)
+            {
+                panel.BackgroundColor = { 0.03f, 0.06f, 0.08f, 0.0f };
+                panel.BorderColor = { 0.45f, 0.86f, 0.92f, 0.0f };
+                panel.BorderThickness = 0.0f;
+                panel.ClipChildren = true;
+            }
             ApplyVNUiAtlasRegion(scene,
                 entityName,
                 "bgm_notice_panel",
-                { 1.0f, 1.0f, 1.0f, 0.92f });
+                { 1.0f, 1.0f, 1.0f, 0.92f },
+                true);
             return entity;
         }
 
@@ -283,24 +390,42 @@ namespace Wheatear {
             if (!entity)
                 entity = scene->CreateEntity(entityName);
 
-            auto& widget = entity.HasComponent<UIWidgetComponent>()
+            const bool hadWidget = entity.HasComponent<UIWidgetComponent>();
+            auto& widget = hadWidget
                 ? entity.GetComponent<UIWidgetComponent>()
                 : entity.AddComponent<UIWidgetComponent>();
             widget.Visible = true;
-            widget.Anchor = UIAnchor::TopLeft;
-            widget.Position = position;
-            widget.Size = size;
-            widget.SortOrder = 5201;
-            Entity parent = parentTag.empty() ? Entity{} : FindEntityByName(scene, parentTag);
-            widget.ParentEntity = parent ? parent.GetUUID() : UUID(0);
+            if (!hadWidget)
+            {
+                widget.Anchor = UIAnchor::TopLeft;
+                widget.Position = position;
+                widget.Size = size;
+                widget.SortOrder = 5201;
+                Entity parent = parentTag.empty() ? Entity{} : FindEntityByName(scene, parentTag);
+                widget.ParentEntity = parent ? parent.GetUUID() : UUID(0);
+            }
 
-            auto& text = entity.HasComponent<UITextComponent>()
+            const bool hadText = entity.HasComponent<UITextComponent>();
+            auto& text = hadText
                 ? entity.GetComponent<UITextComponent>()
                 : entity.AddComponent<UITextComponent>();
-            text.FontSize = 24.0f;
-            text.FontPath = AssetAliasRegistry::Path("font.ui_default", "assets/fonts/wqy-microhei.ttc");
-            text.OutlineThickness = 0.85f;
-            text.ShadowOffset = { 1.0f, 1.0f };
+            if (!hadText)
+            {
+                text.FontSize = 24.0f;
+                text.FontPath = AssetAliasRegistry::Path("font.ui_default", "assets/fonts/wqy-microhei.ttc");
+                text.Padding = { 26.0f, 8.0f, 18.0f, 8.0f };
+                text.HorizontalAlign = UITextHorizontalAlign::Left;
+                text.VerticalAlign = UITextVerticalAlign::Middle;
+                text.OutlineThickness = 0.85f;
+                text.ShadowOffset = { 1.0f, 1.0f };
+            }
+            else
+            {
+                if (text.FontSize <= 0.0f)
+                    text.FontSize = 24.0f;
+                if (text.FontPath.empty())
+                    text.FontPath = AssetAliasRegistry::Path("font.ui_default", "assets/fonts/wqy-microhei.ttc");
+            }
             return entity;
         }
 
@@ -319,18 +444,22 @@ namespace Wheatear {
             if (!entity)
                 entity = scene->CreateEntity(entityName);
 
-            auto& widget = entity.HasComponent<UIWidgetComponent>()
+            const bool hadWidget = entity.HasComponent<UIWidgetComponent>();
+            auto& widget = hadWidget
                 ? entity.GetComponent<UIWidgetComponent>()
                 : entity.AddComponent<UIWidgetComponent>();
             widget.Visible = visible;
-            widget.Anchor = UIAnchor::TopLeft;
-            widget.Position = position;
-            widget.Size = size;
-            widget.Rotation = 0.0f;
-            widget.SortOrder = sortOrder;
+            if (!hadWidget)
+            {
+                widget.Anchor = UIAnchor::TopLeft;
+                widget.Position = position;
+                widget.Size = size;
+                widget.Rotation = 0.0f;
+                widget.SortOrder = sortOrder;
 
-            Entity parent = parentTag.empty() ? Entity{} : FindEntityByName(scene, parentTag);
-            widget.ParentEntity = parent ? parent.GetUUID() : UUID(0);
+                Entity parent = parentTag.empty() ? Entity{} : FindEntityByName(scene, parentTag);
+                widget.ParentEntity = parent ? parent.GetUUID() : UUID(0);
+            }
             return entity;
         }
 
@@ -349,17 +478,28 @@ namespace Wheatear {
             if (!entity)
                 return {};
 
-            auto& text = entity.HasComponent<UITextComponent>()
+            const bool hadText = entity.HasComponent<UITextComponent>();
+            auto& text = hadText
                 ? entity.GetComponent<UITextComponent>()
                 : entity.AddComponent<UITextComponent>();
             text.Text = value;
-            text.FontSize = fontSize;
-            text.Color = color;
-            text.FontPath = AssetAliasRegistry::Path("font.ui_default", "assets/fonts/wqy-microhei.ttc");
-            text.ShadowColor = { 0.02f, 0.025f, 0.030f, 0.78f };
-            text.ShadowOffset = { 1.4f, 1.4f };
-            text.OutlineColor = { 0.0f, 0.0f, 0.0f, 0.86f };
-            text.OutlineThickness = 1.05f;
+            if (!hadText)
+            {
+                text.FontSize = fontSize;
+                text.Color = color;
+                text.FontPath = AssetAliasRegistry::Path("font.ui_default", "assets/fonts/wqy-microhei.ttc");
+                text.ShadowColor = { 0.02f, 0.025f, 0.030f, 0.78f };
+                text.ShadowOffset = { 1.4f, 1.4f };
+                text.OutlineColor = { 0.0f, 0.0f, 0.0f, 0.86f };
+                text.OutlineThickness = 1.05f;
+            }
+            else
+            {
+                if (text.FontSize <= 0.0f)
+                    text.FontSize = fontSize;
+                if (text.FontPath.empty())
+                    text.FontPath = AssetAliasRegistry::Path("font.ui_default", "assets/fonts/wqy-microhei.ttc");
+            }
             UIRenderer::PreloadUIText(text);
             return entity;
         }
@@ -381,19 +521,23 @@ namespace Wheatear {
                 size,
                 sortOrder,
                 label,
-                18.0f,
+                24.0f,
                 { 0.94f, 0.96f, 0.92f, 1.0f },
                 visible);
             if (!entity)
                 return {};
 
-            auto& button = entity.HasComponent<UIButtonComponent>()
+            const bool hadButton = entity.HasComponent<UIButtonComponent>();
+            auto& button = hadButton
                 ? entity.GetComponent<UIButtonComponent>()
                 : entity.AddComponent<UIButtonComponent>();
             button.OnClickFunction = command;
-            button.NormalColor = { 0.12f, 0.18f, 0.22f, 0.90f };
-            button.HoverColor = { 0.25f, 0.42f, 0.46f, 0.96f };
-            button.PressedColor = { 0.08f, 0.12f, 0.15f, 1.0f };
+            if (!hadButton)
+            {
+                button.NormalColor = { 0.12f, 0.18f, 0.22f, 0.90f };
+                button.HoverColor = { 0.25f, 0.42f, 0.46f, 0.96f };
+                button.PressedColor = { 0.08f, 0.12f, 0.15f, 1.0f };
+            }
             return entity;
         }
 
@@ -410,15 +554,19 @@ namespace Wheatear {
             if (!entity)
                 return {};
 
-            auto& slider = entity.HasComponent<UISliderComponent>()
+            const bool hadSlider = entity.HasComponent<UISliderComponent>();
+            auto& slider = hadSlider
                 ? entity.GetComponent<UISliderComponent>()
                 : entity.AddComponent<UISliderComponent>();
             slider.MinValue = 0.0f;
             slider.MaxValue = 100.0f;
-            slider.TrackColor = { 0.08f, 0.10f, 0.12f, 0.92f };
-            slider.FillColor = { 0.32f, 0.74f, 0.78f, 0.96f };
-            slider.HandleColor = { 0.92f, 0.98f, 0.94f, 1.0f };
-            slider.HoverColor = { 1.0f, 0.88f, 0.48f, 1.0f };
+            if (!hadSlider)
+            {
+                slider.TrackColor = { 0.08f, 0.10f, 0.12f, 0.92f };
+                slider.FillColor = { 0.32f, 0.74f, 0.78f, 0.96f };
+                slider.HandleColor = { 0.92f, 0.98f, 0.94f, 1.0f };
+                slider.HoverColor = { 1.0f, 0.88f, 0.48f, 1.0f };
+            }
             slider.OnValueChangedFunction = command;
             return entity;
         }
@@ -448,34 +596,26 @@ namespace Wheatear {
                 return;
 
             const std::string canvasTag = FindFirstCanvasTag(scene);
-            SetWidgetTopLeft(scene, component.SettingsPanelEntityName, { 0.23f, 0.105f }, { 0.54f, 0.70f });
-            SetWidgetTopLeft(scene, component.SettingsTextEntityName, { 0.29f, 0.155f }, { 0.42f, 0.205f });
-            SetWidgetTopLeft(scene, "VN_Settings_TextMinus", { 0.34f, 0.602f }, { 0.15f, 0.048f });
-            SetWidgetTopLeft(scene, "VN_Settings_TextPlus", { 0.51f, 0.602f }, { 0.15f, 0.048f });
-            SetWidgetTopLeft(scene, "VN_Settings_AutoMinus", { 0.34f, 0.665f }, { 0.15f, 0.048f });
-            SetWidgetTopLeft(scene, "VN_Settings_AutoPlus", { 0.51f, 0.665f }, { 0.15f, 0.048f });
-            SetWidgetTopLeft(scene, "VN_SettingsClose", { 0.41f, 0.735f }, { 0.18f, 0.052f });
-
             const auto& settings = UserSettings::Get();
             const glm::vec4 labelColor = { 0.88f, 0.98f, 0.93f, 1.0f };
-            const glm::vec2 labelSize = { 0.13f, 0.035f };
+            const glm::vec2 labelSize = { 0.20f, 0.060f };
             const glm::vec2 sliderSize = { 0.20f, 0.030f };
-            const glm::vec2 buttonSize = { 0.040f, 0.044f };
+            const glm::vec2 buttonSize = { 0.055f, 0.055f };
 
             EnsureVNSettingsText(scene,
                 "VN_Settings_MasterVolumeLabel",
                 canvasTag,
-                { 0.30f, 0.382f },
+                { 0.245f, 0.382f },
                 labelSize,
                 88,
                 "主音量 " + std::to_string(settings.MasterVolume) + "%",
-                16.0f,
+                30.0f,
                 labelColor,
                 visible);
             EnsureVNSettingsSlider(scene,
                 "VN_Settings_MasterVolumeSlider",
                 canvasTag,
-                { 0.43f, 0.389f },
+                { 0.470f, 0.389f },
                 sliderSize,
                 89,
                 "progression:set_master_volume",
@@ -483,7 +623,7 @@ namespace Wheatear {
             EnsureVNSettingsButton(scene,
                 "VN_Settings_MasterVolumeDown",
                 canvasTag,
-                { 0.645f, 0.377f },
+                { 0.690f, 0.377f },
                 buttonSize,
                 90,
                 "-",
@@ -492,7 +632,7 @@ namespace Wheatear {
             EnsureVNSettingsButton(scene,
                 "VN_Settings_MasterVolumeUp",
                 canvasTag,
-                { 0.695f, 0.377f },
+                { 0.750f, 0.377f },
                 buttonSize,
                 90,
                 "+",
@@ -502,17 +642,17 @@ namespace Wheatear {
             EnsureVNSettingsText(scene,
                 "VN_Settings_BGMVolumeLabel",
                 canvasTag,
-                { 0.30f, 0.452f },
+                { 0.245f, 0.452f },
                 labelSize,
                 88,
                 "音乐 " + std::to_string(settings.BGMVolume) + "%",
-                16.0f,
+                30.0f,
                 labelColor,
                 visible);
             EnsureVNSettingsSlider(scene,
                 "VN_Settings_BGMVolumeSlider",
                 canvasTag,
-                { 0.43f, 0.459f },
+                { 0.470f, 0.459f },
                 sliderSize,
                 89,
                 "progression:set_bgm_volume",
@@ -520,7 +660,7 @@ namespace Wheatear {
             EnsureVNSettingsButton(scene,
                 "VN_Settings_BGMVolumeDown",
                 canvasTag,
-                { 0.645f, 0.447f },
+                { 0.690f, 0.447f },
                 buttonSize,
                 90,
                 "-",
@@ -529,7 +669,7 @@ namespace Wheatear {
             EnsureVNSettingsButton(scene,
                 "VN_Settings_BGMVolumeUp",
                 canvasTag,
-                { 0.695f, 0.447f },
+                { 0.750f, 0.447f },
                 buttonSize,
                 90,
                 "+",
@@ -539,17 +679,17 @@ namespace Wheatear {
             EnsureVNSettingsText(scene,
                 "VN_Settings_SFXVolumeLabel",
                 canvasTag,
-                { 0.30f, 0.522f },
+                { 0.245f, 0.522f },
                 labelSize,
                 88,
                 "音效 " + std::to_string(settings.SFXVolume) + "%",
-                16.0f,
+                30.0f,
                 labelColor,
                 visible);
             EnsureVNSettingsSlider(scene,
                 "VN_Settings_SFXVolumeSlider",
                 canvasTag,
-                { 0.43f, 0.529f },
+                { 0.470f, 0.529f },
                 sliderSize,
                 89,
                 "progression:set_sfx_volume",
@@ -557,7 +697,7 @@ namespace Wheatear {
             EnsureVNSettingsButton(scene,
                 "VN_Settings_SFXVolumeDown",
                 canvasTag,
-                { 0.645f, 0.517f },
+                { 0.690f, 0.517f },
                 buttonSize,
                 90,
                 "-",
@@ -566,7 +706,7 @@ namespace Wheatear {
             EnsureVNSettingsButton(scene,
                 "VN_Settings_SFXVolumeUp",
                 canvasTag,
-                { 0.695f, 0.517f },
+                { 0.750f, 0.517f },
                 buttonSize,
                 90,
                 "+",
@@ -601,28 +741,31 @@ namespace Wheatear {
             if (!scene)
                 return;
 
+            Entity speakerText = FindEntityByName(scene, component.SpeakerTextEntityName);
+            if (speakerText && speakerText.HasComponent<UIImageComponent>())
+                speakerText.RemoveComponent<UIImageComponent>();
+
             ApplyVNUiAtlasRegion(scene,
                 "VN_DialoguePanel",
                 "textbox_panel",
-                { 1.0f, 1.0f, 1.0f, 0.96f });
-
-            ApplyVNUiAtlasRegion(scene,
-                component.SpeakerTextEntityName,
-                "nameplate",
-                { 1.0f, 1.0f, 1.0f, 0.94f });
+                { 1.0f, 1.0f, 1.0f, 0.96f },
+                true);
 
             ApplyVNUiAtlasRegion(scene,
                 component.HistoryPanelEntityName,
                 "textbox_panel",
-                { 1.0f, 1.0f, 1.0f, 0.93f });
+                { 1.0f, 1.0f, 1.0f, 0.93f },
+                true);
             ApplyVNUiAtlasRegion(scene,
                 component.SettingsPanelEntityName,
                 "textbox_panel",
-                { 1.0f, 1.0f, 1.0f, 0.93f });
+                { 1.0f, 1.0f, 1.0f, 0.93f },
+                true);
             ApplyVNUiAtlasRegion(scene,
                 component.SaveLoadPanelEntityName,
                 "textbox_panel",
-                { 1.0f, 1.0f, 1.0f, 0.93f });
+                { 1.0f, 1.0f, 1.0f, 0.93f },
+                true);
 
             for (uint32_t i = 0; i < component.MaxVisibleChoices; ++i)
             {
@@ -630,7 +773,8 @@ namespace Wheatear {
                 ApplyVNUiAtlasRegion(scene,
                     entityName,
                     "choice_panel",
-                    { 1.0f, 1.0f, 1.0f, 0.95f });
+                    { 1.0f, 1.0f, 1.0f, 0.95f },
+                    true);
                 SetTransparentButtonChrome(scene, entityName);
             }
         }
@@ -658,8 +802,8 @@ namespace Wheatear {
             Entity bar = EnsureVNSettingsWidget(scene,
                 component.CommandBarEntityName,
                 canvasTag,
-                { 0.315f, 0.884f },
-                { 0.370f, 0.086f },
+                { kVNCommandBarLeft, kVNCommandBarTop },
+                { kVNCommandBarWidth, kVNCommandBarHeight },
                 5050,
                 visible);
             if (!bar)
@@ -734,8 +878,24 @@ namespace Wheatear {
 
             const bool visible = showStoryUi && hoveredSpec != nullptr;
             const std::string canvasTag = FindFirstCanvasTag(scene);
-            const float barLeft = 0.315f;
-            const float barWidth = 0.370f;
+            float barLeft = kVNCommandBarLeft;
+            float barTop = kVNCommandBarTop;
+            float barWidth = kVNCommandBarWidth;
+            float barHeight = kVNCommandBarHeight;
+            if (Entity bar = FindEntityByName(scene, "VN_CommandBar"))
+            {
+                UIWidgetLayout::Context layoutContext(scene);
+                const UIWidgetLayout::Rect barRect = UIWidgetLayout::ResolveRect(layoutContext, bar);
+                const float resolvedWidth = barRect.Right - barRect.Left;
+                const float resolvedHeight = barRect.Bottom - barRect.Top;
+                if (resolvedWidth > 0.001f && resolvedHeight > 0.001f)
+                {
+                    barLeft = barRect.Left;
+                    barTop = barRect.Top;
+                    barWidth = resolvedWidth;
+                    barHeight = resolvedHeight;
+                }
+            }
             const float localGap = 0.035f;
             const float localWidth = 0.085f;
             const float tooltipWidth = 0.118f;
@@ -744,7 +904,9 @@ namespace Wheatear {
             const float tooltipX = std::clamp(barLeft + localCenter * barWidth - tooltipWidth * 0.5f,
                 0.020f,
                 0.980f - tooltipWidth);
-            const float tooltipY = 0.962f;
+            const float tooltipY = std::clamp(barTop + barHeight - tooltipHeight * 0.25f,
+                0.020f,
+                0.980f - tooltipHeight);
 
             Entity panel = EnsureVNSettingsWidget(scene,
                 "VN_Tooltip_CommandPanel",
@@ -1116,14 +1278,11 @@ namespace Wheatear {
             if (!scene)
                 return;
 
-            SetWidgetTopLeft(scene, component.SaveLoadPanelEntityName, { 0.17f, 0.10f }, { 0.66f, 0.76f });
-            SetWidgetTopLeft(scene, "VN_SaveLoadIcon", { 0.21f, 0.145f }, { 0.060f, 0.082f });
-            SetWidgetTopLeft(scene, "VN_SaveLoadTitle", { 0.29f, 0.145f }, { 0.34f, 0.060f });
-            SetWidgetTopLeft(scene, component.SaveLoadTextEntityName, { 0.23f, 0.225f }, { 0.52f, 0.075f });
-            SetWidgetTopLeft(scene, "VN_SaveLoad_Close", { 0.61f, 0.785f }, { 0.12f, 0.050f });
-
-            SetWidgetVisible(scene, "VN_SaveLoad_SaveSlot1", false);
-            SetWidgetVisible(scene, "VN_SaveLoad_LoadSlot1", false);
+            const bool useSlotScroll = static_cast<bool>(FindEntityByName(scene, "VN_SaveLoadSlotScroll"));
+            SetWidgetVisible(scene, "VN_SaveLoad_SaveSlot1", visible && !useSlotScroll && saveMode);
+            SetWidgetVisible(scene, "VN_SaveLoad_LoadSlot1", visible && !useSlotScroll && !saveMode);
+            SetButtonCommand(scene, "VN_SaveLoad_SaveSlot1", "vn:saveslot:1");
+            SetButtonCommand(scene, "VN_SaveLoad_LoadSlot1", "vn:loadslot:1");
 
             SetText(scene, "VN_SaveLoadTitle", saveMode ? "保存" : "读取");
             SetTextVisible(scene,
@@ -1131,78 +1290,98 @@ namespace Wheatear {
                 BuildSaveLoadText(component, runtime, saveMode, pendingOverwriteSlot),
                 visible);
 
-            Entity scroll = EnsureVNSettingsWidget(scene,
-                "VN_SaveLoadSlotScroll",
-                component.SaveLoadPanelEntityName,
-                { 0.075f, 0.285f },
-                { 0.82f, 0.57f },
-                100,
-                visible);
-            if (scroll)
+            if (useSlotScroll)
             {
-                auto& panel = scroll.HasComponent<UIPanelComponent>()
-                    ? scroll.GetComponent<UIPanelComponent>()
-                    : scroll.AddComponent<UIPanelComponent>();
-                panel.BackgroundColor = { 0.012f, 0.014f, 0.018f, 0.34f };
-                panel.BorderColor = { 0.64f, 0.52f, 0.38f, 0.34f };
-                panel.BorderThickness = 1.0f;
-                panel.ClipChildren = true;
-
-                auto& scrollView = scroll.HasComponent<UIScrollViewComponent>()
-                    ? scroll.GetComponent<UIScrollViewComponent>()
-                    : scroll.AddComponent<UIScrollViewComponent>();
-                constexpr float slotStep = 0.150f;
-                scrollView.ContentHeight = 0.060f + static_cast<float>(GameProgress::GetMaxSaveSlots()) * slotStep;
-                scrollView.WheelStep = 0.10f;
-                scrollView.ScrollbarWidth = 0.018f;
-                scrollView.EnableWheel = true;
-                scrollView.ShowScrollbar = true;
-                scrollView.DragScrollbar = true;
-                scrollView.ClampToContent = true;
-                scrollView.ClampOffset();
-            }
-
-            for (int slot = 1; slot <= GameProgress::GetMaxSaveSlots(); ++slot)
-            {
-                constexpr float slotStep = 0.150f;
-                const std::string entityName = "VN_SaveLoad_Slot_" + std::to_string(slot);
-                const bool occupied = HasAnySaveSlotData(component, slot);
-                Entity slotEntity = EnsureVNSettingsButton(scene,
-                    entityName,
+                Entity scroll = EnsureVNSettingsWidget(scene,
                     "VN_SaveLoadSlotScroll",
-                    { 0.035f, 0.030f + static_cast<float>(slot - 1) * slotStep },
-                    { 0.89f, 0.125f },
-                    120 + slot,
-                    BuildVNSaveSlotText(component, slot, saveMode),
-                    saveMode
-                        ? "vn:saveslot:" + std::to_string(slot)
-                        : "vn:loadslot:" + std::to_string(slot),
+                    component.SaveLoadPanelEntityName,
+                    { 0.075f, 0.285f },
+                    { 0.82f, 0.57f },
+                    100,
                     visible);
-                if (!slotEntity)
-                    continue;
-
-                auto& text = slotEntity.GetComponent<UITextComponent>();
-                text.FontSize = 16.0f;
-                text.Color = occupied
-                    ? glm::vec4{ 0.98f, 0.96f, 0.82f, 1.0f }
-                    : glm::vec4{ 0.72f, 0.78f, 0.76f, 1.0f };
-                UIRenderer::PreloadUIText(text);
-
-                if (!occupied)
+                if (scroll)
                 {
-                    SetVNButtonPalette(scene,
-                        entityName,
-                        saveMode ? glm::vec4{ 0.12f, 0.18f, 0.18f, 0.78f } : glm::vec4{ 0.08f, 0.09f, 0.10f, 0.58f },
-                        saveMode ? glm::vec4{ 0.22f, 0.38f, 0.34f, 0.92f } : glm::vec4{ 0.12f, 0.14f, 0.16f, 0.70f },
-                        { 0.08f, 0.11f, 0.12f, 0.96f });
+                    const bool hadPanel = scroll.HasComponent<UIPanelComponent>();
+                    auto& panel = hadPanel
+                        ? scroll.GetComponent<UIPanelComponent>()
+                        : scroll.AddComponent<UIPanelComponent>();
+                    if (!hadPanel)
+                    {
+                        panel.BackgroundColor = { 0.012f, 0.014f, 0.018f, 0.34f };
+                        panel.BorderColor = { 0.64f, 0.52f, 0.38f, 0.34f };
+                        panel.BorderThickness = 1.0f;
+                        panel.ClipChildren = true;
+                    }
+
+                    const bool hadScrollView = scroll.HasComponent<UIScrollViewComponent>();
+                    auto& scrollView = hadScrollView
+                        ? scroll.GetComponent<UIScrollViewComponent>()
+                        : scroll.AddComponent<UIScrollViewComponent>();
+                    constexpr float slotStep = 0.150f;
+                    scrollView.ContentHeight = 0.060f + static_cast<float>(GameProgress::GetMaxSaveSlots()) * slotStep;
+                    if (!hadScrollView)
+                    {
+                        scrollView.WheelStep = 0.10f;
+                        scrollView.ScrollbarWidth = 0.018f;
+                        scrollView.EnableWheel = true;
+                        scrollView.ShowScrollbar = true;
+                        scrollView.DragScrollbar = true;
+                        scrollView.ClampToContent = true;
+                    }
+                    scrollView.ClampOffset();
                 }
-                else
+
+                for (int slot = 1; slot <= GameProgress::GetMaxSaveSlots(); ++slot)
                 {
-                    SetVNButtonPalette(scene,
+                    constexpr float slotStep = 0.150f;
+                    const std::string entityName = "VN_SaveLoad_Slot_" + std::to_string(slot);
+                    Entity existingSlot = FindEntityByName(scene, entityName);
+                    const bool hadSlotText = existingSlot && existingSlot.HasComponent<UITextComponent>();
+                    const bool hadSlotButton = existingSlot && existingSlot.HasComponent<UIButtonComponent>();
+                    const bool occupied = HasAnySaveSlotData(component, slot);
+                    Entity slotEntity = EnsureVNSettingsButton(scene,
                         entityName,
-                        saveMode ? glm::vec4{ 0.26f, 0.18f, 0.10f, 0.90f } : glm::vec4{ 0.10f, 0.25f, 0.24f, 0.90f },
-                        saveMode ? glm::vec4{ 0.50f, 0.34f, 0.16f, 0.98f } : glm::vec4{ 0.18f, 0.46f, 0.42f, 0.98f },
-                        saveMode ? glm::vec4{ 0.18f, 0.11f, 0.06f, 1.0f } : glm::vec4{ 0.06f, 0.16f, 0.16f, 1.0f });
+                        "VN_SaveLoadSlotScroll",
+                        { 0.035f, 0.030f + static_cast<float>(slot - 1) * slotStep },
+                        { 0.89f, 0.140f },
+                        120 + slot,
+                        BuildVNSaveSlotText(component, slot, saveMode),
+                        saveMode
+                            ? "vn:saveslot:" + std::to_string(slot)
+                            : "vn:loadslot:" + std::to_string(slot),
+                        visible);
+                    if (!slotEntity)
+                        continue;
+
+                    auto& text = slotEntity.GetComponent<UITextComponent>();
+                    if (!hadSlotText)
+                    {
+                        text.FontSize = 24.0f;
+                        text.Color = occupied
+                            ? glm::vec4{ 0.98f, 0.96f, 0.82f, 1.0f }
+                            : glm::vec4{ 0.72f, 0.78f, 0.76f, 1.0f };
+                        UIRenderer::PreloadUIText(text);
+                    }
+
+                    if (hadSlotButton)
+                        continue;
+
+                    if (!occupied)
+                    {
+                        SetVNButtonPalette(scene,
+                            entityName,
+                            saveMode ? glm::vec4{ 0.12f, 0.18f, 0.18f, 0.78f } : glm::vec4{ 0.08f, 0.09f, 0.10f, 0.58f },
+                            saveMode ? glm::vec4{ 0.22f, 0.38f, 0.34f, 0.92f } : glm::vec4{ 0.12f, 0.14f, 0.16f, 0.70f },
+                            { 0.08f, 0.11f, 0.12f, 0.96f });
+                    }
+                    else
+                    {
+                        SetVNButtonPalette(scene,
+                            entityName,
+                            saveMode ? glm::vec4{ 0.26f, 0.18f, 0.10f, 0.90f } : glm::vec4{ 0.10f, 0.25f, 0.24f, 0.90f },
+                            saveMode ? glm::vec4{ 0.50f, 0.34f, 0.16f, 0.98f } : glm::vec4{ 0.18f, 0.46f, 0.42f, 0.98f },
+                            saveMode ? glm::vec4{ 0.18f, 0.11f, 0.06f, 1.0f } : glm::vec4{ 0.06f, 0.16f, 0.16f, 1.0f });
+                    }
                 }
             }
 
@@ -1216,32 +1395,36 @@ namespace Wheatear {
                 confirmVisible);
             if (confirmPanel)
             {
-                auto& panel = confirmPanel.HasComponent<UIPanelComponent>()
+                const bool hadPanel = confirmPanel.HasComponent<UIPanelComponent>();
+                auto& panel = hadPanel
                     ? confirmPanel.GetComponent<UIPanelComponent>()
                     : confirmPanel.AddComponent<UIPanelComponent>();
-                panel.BackgroundColor = { 0.018f, 0.020f, 0.024f, 0.96f };
-                panel.BorderColor = { 0.86f, 0.66f, 0.34f, 0.96f };
-                panel.BorderThickness = 2.0f;
-                panel.ClipChildren = true;
+                if (!hadPanel)
+                {
+                    panel.BackgroundColor = { 0.018f, 0.020f, 0.024f, 0.96f };
+                    panel.BorderColor = { 0.86f, 0.66f, 0.34f, 0.96f };
+                    panel.BorderThickness = 2.0f;
+                    panel.ClipChildren = true;
+                }
             }
 
             EnsureVNSettingsText(scene,
                 "VN_SaveLoadConfirmText",
                 "VN_SaveLoadConfirmPanel",
                 { 0.08f, 0.14f },
-                { 0.84f, 0.32f },
+                { 0.84f, 0.36f },
                 261,
                 pendingOverwriteSlot > 0
                     ? "该槽位已有存档。\n是否覆盖 " + std::to_string(pendingOverwriteSlot) + " 号槽？"
                     : "",
-                18.0f,
+                24.0f,
                 { 0.98f, 0.94f, 0.82f, 1.0f },
                 confirmVisible);
             EnsureVNSettingsButton(scene,
                 "VN_SaveLoadConfirmYes",
                 "VN_SaveLoadConfirmPanel",
                 { 0.16f, 0.64f },
-                { 0.25f, 0.22f },
+                { 0.25f, 0.24f },
                 262,
                 "覆盖",
                 "vn:confirm_overwrite",
@@ -1250,7 +1433,7 @@ namespace Wheatear {
                 "VN_SaveLoadConfirmNo",
                 "VN_SaveLoadConfirmPanel",
                 { 0.58f, 0.64f },
-                { 0.25f, 0.22f },
+                { 0.25f, 0.24f },
                 262,
                 "取消",
                 "vn:cancel_overwrite",
@@ -1443,7 +1626,8 @@ namespace Wheatear {
         if (!visible)
         {
             SetWidgetVisible(scene, component.MusicNoticePanelEntityName, false);
-            SetWidgetVisible(scene, component.MusicNoticeTextEntityName, false);
+            if (component.MusicNoticeTextEntityName != component.MusicNoticePanelEntityName)
+                SetWidgetVisible(scene, component.MusicNoticeTextEntityName, false);
             return;
         }
 
@@ -1456,9 +1640,11 @@ namespace Wheatear {
         else if (normalized > 0.76f)
             alpha = std::max(0.0f, (1.0f - normalized) / 0.24f);
 
-        const float slide = (1.0f - alpha) * 0.045f;
-        const glm::vec2 panelPosition = { 0.030f - slide, 0.047f };
         const glm::vec2 panelSize = { 0.300f, 0.058f };
+        const float slide = (1.0f - alpha) * (panelSize.x * 0.72f);
+        const glm::vec2 panelPosition = { 0.030f - slide, 0.047f };
+        const glm::vec2 textPosition = { panelPosition.x + 0.014f, panelPosition.y + 0.012f };
+        const glm::vec2 textSize = { panelSize.x - 0.026f, panelSize.y - 0.016f };
         const std::string parentTag = FindFirstCanvasTag(scene);
 
         Entity panelEntity = EnsureNoticePanel(
@@ -1467,12 +1653,37 @@ namespace Wheatear {
             parentTag,
             panelPosition,
             panelSize);
-        Entity textEntity = EnsureNoticeText(
-            scene,
-            component.MusicNoticeTextEntityName,
-            parentTag,
-            { panelPosition.x + 0.014f, panelPosition.y + 0.012f },
-            { panelSize.x - 0.026f, panelSize.y - 0.016f });
+        const bool textOnPanel = component.MusicNoticeTextEntityName.empty()
+            || component.MusicNoticeTextEntityName == component.MusicNoticePanelEntityName;
+        Entity textEntity = textOnPanel
+            ? EnsureNoticeText(
+                scene,
+                component.MusicNoticePanelEntityName,
+                parentTag,
+                textPosition,
+                textSize)
+            : EnsureNoticeText(
+                scene,
+                component.MusicNoticeTextEntityName,
+                parentTag,
+                textPosition,
+                textSize);
+
+        if (panelEntity && panelEntity.HasComponent<UIWidgetComponent>())
+        {
+            auto& widget = panelEntity.GetComponent<UIWidgetComponent>();
+            widget.Anchor = UIAnchor::TopLeft;
+            widget.Position = panelPosition;
+            widget.Size = panelSize;
+        }
+
+        if (!textOnPanel && textEntity && textEntity.HasComponent<UIWidgetComponent>())
+        {
+            auto& widget = textEntity.GetComponent<UIWidgetComponent>();
+            widget.Anchor = UIAnchor::TopLeft;
+            widget.Position = textPosition;
+            widget.Size = textSize;
+        }
 
         if (panelEntity && panelEntity.HasComponent<UIPanelComponent>())
         {
@@ -1502,7 +1713,8 @@ namespace Wheatear {
         }
 
         SetWidgetVisible(scene, component.MusicNoticePanelEntityName, alpha > 0.02f);
-        SetWidgetVisible(scene, component.MusicNoticeTextEntityName, alpha > 0.02f);
+        if (!textOnPanel)
+            SetWidgetVisible(scene, component.MusicNoticeTextEntityName, alpha > 0.02f);
     }
 
     bool VisualNovelSystem::LoadRuntime(RuntimeState& state, const VisualNovelComponent& component)

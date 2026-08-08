@@ -22,6 +22,8 @@ namespace Wheatear {
         glm::vec4 Color;
         float     Thickness;
         float     Fade;
+        float     Progress;
+        float     StartAngle;
         int       EntityID;
     };
 

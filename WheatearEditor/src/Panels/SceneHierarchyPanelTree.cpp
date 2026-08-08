@@ -197,6 +197,7 @@ namespace Wheatear {
 
         const auto& tag = entity.GetComponent<TagComponent>().Tag;
         const std::string displayName = std::string(EntityKindPrefix(entity)) + " " + tag;
+        bool hiddenInEditor = IsEntityHiddenInEditor(entity);
 
         std::vector<Entity> visibleChildren;
         if (auto it = childMap.find(key); it != childMap.end())
@@ -233,11 +234,30 @@ namespace Wheatear {
             ImGui::PushStyleColor(ImGuiCol_HeaderHovered, ImVec4(0.22f, 0.36f, 0.32f, 0.82f));
         }
 
+        ImGui::PushID(static_cast<int>(key));
+        ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(4.0f, 1.0f));
+        if (ImGui::SmallButton(hiddenInEditor ? "Show" : "Hide"))
+        {
+            SetEntityHiddenInEditor(entity, !hiddenInEditor);
+            hiddenInEditor = !hiddenInEditor;
+        }
+        ImGui::PopStyleVar();
+        if (ImGui::IsItemHovered())
+            ImGui::SetTooltip(hiddenInEditor ? "Show this entity in the editor" : "Hide this entity in the editor");
+        ImGui::PopID();
+        ImGui::SameLine();
+
+        if (hiddenInEditor)
+            ImGui::PushStyleColor(ImGuiCol_Text, ImGui::GetStyleColorVec4(ImGuiCol_TextDisabled));
+
         const bool opened = ImGui::TreeNodeEx(
             reinterpret_cast<void*>(static_cast<uint64_t>(static_cast<uint32_t>(entity))),
             flags,
             "%s", displayName.c_str()
         );
+
+        if (hiddenInEditor)
+            ImGui::PopStyleColor();
 
         if (canvasOwnsSelection && !selected)
             ImGui::PopStyleColor(2);
@@ -278,6 +298,12 @@ namespace Wheatear {
             if (ImGui::MenuItem("Rename"))
             {
                 m_RenameRequested = true;
+            }
+
+            if (ImGui::MenuItem(hiddenInEditor ? "Show in Editor" : "Hide in Editor"))
+            {
+                SetEntityHiddenInEditor(entity, !hiddenInEditor);
+                hiddenInEditor = !hiddenInEditor;
             }
 
             if (ImGui::MenuItem("Duplicate Entity"))

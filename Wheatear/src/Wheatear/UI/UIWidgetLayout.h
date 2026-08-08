@@ -213,12 +213,62 @@ namespace Wheatear::UIWidgetLayout {
         return ResolveVisible(context, entity, visiting);
     }
 
+    inline bool ResolveEditorVisible(Context& context,
+        entt::entity entity,
+        std::unordered_set<uint32_t>& visiting)
+    {
+        if (!context.ScenePtr || entity == entt::null)
+            return false;
+
+        const uint32_t key = EntityKey(entity);
+        if (visiting.find(key) != visiting.end())
+            return false;
+
+        auto& registry = context.ScenePtr->GetRegistry();
+        if (!registry.valid(entity) || !registry.all_of<UIWidgetComponent>(entity))
+            return false;
+
+        visiting.insert(key);
+
+        const auto& widget = registry.get<UIWidgetComponent>(entity);
+        bool visible = widget.EditorVisible;
+        if (visible)
+        {
+            const entt::entity parent = context.ResolveReference(widget.ParentEntity);
+            if (parent != entt::null)
+                visible = parent != entity && ResolveEditorVisible(context, parent, visiting);
+        }
+
+        visiting.erase(key);
+        return visible;
+    }
+
+    inline bool ResolveEditorVisible(Context& context, entt::entity entity)
+    {
+        std::unordered_set<uint32_t> visiting;
+        return ResolveEditorVisible(context, entity, visiting);
+    }
+
     inline UIWidgetComponent ResolveWidget(Context& context, entt::entity entity)
     {
         auto& registry = context.ScenePtr->GetRegistry();
         UIWidgetComponent resolved = registry.get<UIWidgetComponent>(entity);
         const Rect rect = ResolveRect(context, entity);
         resolved.Visible = ResolveVisible(context, entity);
+        resolved.ParentEntity = 0;
+        resolved.Anchor = UIAnchor::TopLeft;
+        resolved.Position = { rect.Left, rect.Top };
+        resolved.Size = { std::max(0.0f, rect.Right - rect.Left),
+                          std::max(0.0f, rect.Bottom - rect.Top) };
+        return resolved;
+    }
+
+    inline UIWidgetComponent ResolveEditorWidget(Context& context, entt::entity entity)
+    {
+        auto& registry = context.ScenePtr->GetRegistry();
+        UIWidgetComponent resolved = registry.get<UIWidgetComponent>(entity);
+        const Rect rect = ResolveRect(context, entity);
+        resolved.Visible = ResolveEditorVisible(context, entity);
         resolved.ParentEntity = 0;
         resolved.Anchor = UIAnchor::TopLeft;
         resolved.Position = { rect.Left, rect.Top };

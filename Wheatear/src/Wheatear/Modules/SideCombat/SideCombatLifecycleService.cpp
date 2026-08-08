@@ -212,11 +212,19 @@ namespace Wheatear::SideCombatLifecycleService {
         level.RuntimeResultGrade.clear();
         level.RuntimeResultSummary.clear();
         level.RuntimeHitPauseTimer = 0.0f;
+        level.RuntimeCinematicTimer = 0.0f;
+        level.RuntimeCinematicDuration = 0.0f;
+        level.RuntimeCinematicTimeScale = 1.0f;
+        level.RuntimeCinematicCameraZoom = 1.0f;
+        level.RuntimeCinematicCameraOffset = { 0.0f, 0.0f };
+        level.RuntimeCinematicFocusEntity = 0;
         level.RuntimeCameraShakeTimer = 0.0f;
         level.RuntimeCameraShakeDuration = 0.0f;
         level.RuntimeCameraShakeStrength = 0.0f;
         level.RuntimeCameraBaseTranslation = { 0.0f, 0.0f, 0.0f };
+        level.RuntimeCameraBaseOrthographicSize = 0.0f;
         level.RuntimeCameraBaseCaptured = false;
+        level.RuntimeCameraProjectionCaptured = false;
         level.RuntimeWaveIndex = 0;
         level.RuntimeWaveRightWall = level.WaveModeEnabled
             ? std::clamp(GetWaveRightWall(level, 0), level.ArenaMin.x, level.ArenaMax.x)
@@ -297,9 +305,17 @@ namespace Wheatear::SideCombatLifecycleService {
             controller.RuntimeLauncherCooldown = 0.0f;
             controller.RuntimeMagicBoltCooldown = 0.0f;
             controller.RuntimeAllySupportCooldown = 0.0f;
+            controller.RuntimeDashCooldown = 0.0f;
+            controller.RuntimeHealItemCooldown = 0.0f;
+            controller.RuntimeManaItemCooldown = 0.0f;
+            controller.RuntimeAttackBuffItemCooldown = 0.0f;
             controller.RuntimeBreakLimitCooldown = 0.0f;
+            controller.RuntimeManaMax = std::max(1.0f, controller.MaxMana);
+            controller.RuntimeMana = controller.RuntimeManaMax;
             controller.RuntimeMagicSwordGaugeMax = std::max(1.0f, tuning.AirCombo.MagicSwordGaugeMax);
-            controller.RuntimeMagicSwordGauge = controller.RuntimeMagicSwordGaugeMax;
+            controller.RuntimeMagicSwordGauge = 0.0f;
+            controller.RuntimeAttackBuffTimer = 0.0f;
+            controller.RuntimeAttackBuffMultiplier = 1.0f;
             controller.RuntimeJumpsRemaining = controller.MaxJumps;
             controller.RuntimeJumpBufferTimer = 0.0f;
             controller.RuntimeCoyoteTimer = 0.0f;
@@ -335,6 +351,7 @@ namespace Wheatear::SideCombatLifecycleService {
             ai.RuntimeActionFacing = 1.0f;
             ai.RuntimeActionHitboxSpawned = false;
             ai.RuntimeActionSequence = 0;
+            ai.RuntimeLastActionAttackId.clear();
         }
 
         ApplyWaveActivation(scene, level);

@@ -39,10 +39,11 @@ namespace Wheatear {
                 "Enemy Melee",
                 "Enemy Projectile",
                 "Enemy Shockwave",
-                "Break Limit"
+                "Break Limit",
+                "Dash"
             };
-            int index = std::clamp((int)kind, 0, 7);
-            if (ImGui::Combo("Attack Kind", &index, labels, 8))
+            int index = std::clamp((int)kind, 0, 8);
+            if (ImGui::Combo("Attack Kind", &index, labels, 9))
                 kind = (SideAttackKind)index;
         }
 
@@ -170,14 +171,19 @@ namespace Wheatear {
             ImGui::DragFloat("Launcher Cooldown", &controller.LauncherCooldown, 0.01f, 0.01f, 10.0f);
             ImGui::DragFloat("Magic Bolt Cooldown", &controller.MagicBoltCooldown, 0.01f, 0.01f, 10.0f);
             ImGui::DragFloat("Ally Support Cooldown", &controller.AllySupportCooldown, 0.01f, 0.01f, 30.0f);
+            ImGui::DragFloat("Dash Cooldown", &controller.DashCooldown, 0.01f, 0.0f, 10.0f);
+            ImGui::DragFloat("Dash Mana Cost", &controller.DashManaCost, 0.5f, 0.0f, 100.0f);
+            ImGui::DragFloat("Dash Speed", &controller.DashSpeed, 0.05f, 0.0f, 40.0f);
+            ImGui::DragFloat("Dash Invulnerable Time", &controller.DashInvulnerableTime, 0.005f, 0.0f, 2.0f);
 
             ImGui::Separator();
             ImGui::TextDisabled("Runtime Cooldowns");
-            ImGui::Text("Basic %.2f / Launcher %.2f / Magic %.2f / Support %.2f",
+            ImGui::Text("Basic %.2f / Launcher %.2f / Magic %.2f / Support %.2f / Dash %.2f",
                 controller.RuntimeBasicCooldown,
                 controller.RuntimeLauncherCooldown,
                 controller.RuntimeMagicBoltCooldown,
-                controller.RuntimeAllySupportCooldown);
+                controller.RuntimeAllySupportCooldown,
+                controller.RuntimeDashCooldown);
             ImGui::Text("Jumps: %d", controller.RuntimeJumpsRemaining);
             ImGui::Text("Jump Buffer %.2f / Coyote %.2f",
                 controller.RuntimeJumpBufferTimer,

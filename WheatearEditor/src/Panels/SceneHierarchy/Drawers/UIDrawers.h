@@ -6,6 +6,7 @@ namespace Wheatear {
     void DrawUIWidgetComponent(Entity entity);
     void DrawUIAnimatorComponent(Entity entity);
     void DrawUIImageComponent(Entity entity);
+    void DrawUIRadialCooldownComponent(Entity entity);
     void DrawUIPanelComponent(Entity entity);
     void DrawUITextComponent(Entity entity);
     void DrawUIButtonComponent(Entity entity);

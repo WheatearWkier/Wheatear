@@ -11,7 +11,9 @@ layout(location = 1) in vec3 a_LocalPosition;
 layout(location = 2) in vec4 a_Color;
 layout(location = 3) in float a_Thickness;
 layout(location = 4) in float a_Fade;
-layout(location = 5) in int a_EntityID;
+layout(location = 5) in float a_Progress;
+layout(location = 6) in float a_StartAngle;
+layout(location = 7) in int a_EntityID;
 
 layout(std140, binding = 0) uniform Camera
 {
@@ -24,10 +26,12 @@ struct VertexOutput
 	vec4 Color;
 	float Thickness;
 	float Fade;
+	float Progress;
+	float StartAngle;
 };
 
 layout (location = 0) out VertexOutput Output;
-layout (location = 4) out flat int v_EntityID;
+layout (location = 6) out flat int v_EntityID;
 
 void main()
 {
@@ -35,6 +39,8 @@ void main()
 	Output.Color = a_Color;
 	Output.Thickness = a_Thickness;
 	Output.Fade = a_Fade;
+	Output.Progress = a_Progress;
+	Output.StartAngle = a_StartAngle;
 
 	v_EntityID = a_EntityID;
 
@@ -53,10 +59,12 @@ struct VertexOutput
 	vec4 Color;
 	float Thickness;
 	float Fade;
+	float Progress;
+	float StartAngle;
 };
 
 layout (location = 0) in VertexOutput Input;
-layout (location = 4) in flat int v_EntityID;
+layout (location = 6) in flat int v_EntityID;
 
 void main()
 {
@@ -67,6 +75,19 @@ void main()
 
 	if (circle == 0.0)
 		discard;
+
+    if (Input.Progress <= 0.0001)
+        discard;
+
+    if (Input.Progress < 0.9999)
+    {
+        const float Tau = 6.28318530718;
+        float angle = atan(Input.LocalPosition.y, Input.LocalPosition.x);
+        float clockwiseSweep = mod(Input.StartAngle - angle + Tau, Tau);
+        float revealedSweep = (1.0 - Input.Progress) * Tau;
+        if (clockwiseSweep < revealedSweep)
+            discard;
+    }
 
     // Set output color
     o_Color = Input.Color;

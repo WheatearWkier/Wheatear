@@ -8,6 +8,7 @@ namespace Wheatear {
     struct UIButtonComponent;
     struct UICheckboxComponent;
     struct UIImageComponent;
+    struct UIRadialCooldownComponent;
     struct UIPanelComponent;
     struct UIPathComponent;
     struct UIProgressBarComponent;
@@ -26,6 +27,11 @@ namespace Wheatear {
         static void DrawUIImage(
             const UIWidgetComponent& widget,
             const UIImageComponent& image,
+            int entityID = -1);
+
+        static void DrawUIRadialCooldown(
+            const UIWidgetComponent& widget,
+            const UIRadialCooldownComponent& cooldown,
             int entityID = -1);
 
 

@@ -37,8 +37,13 @@ namespace Wheatear {
 
         if (m_ShowPhysicsColliders)
         {
+            const bool respectEditorVisibility = GetSceneState() == SceneState::Edit;
+            Ref<Scene> activeScene = GetActiveScene();
             for (auto e : GetActiveScene()->GetAllEntitiesWith<TransformComponent, BoxCollider2DComponent>())
             {
+                if (respectEditorVisibility && activeScene->GetRegistry().all_of<EditorHiddenComponent>(e))
+                    continue;
+
                 auto [tc, bc] = GetActiveScene()->GetRegistry()
                     .get<TransformComponent, BoxCollider2DComponent>(e);
 
@@ -52,6 +57,9 @@ namespace Wheatear {
 
             for (auto e : GetActiveScene()->GetAllEntitiesWith<TransformComponent, CircleCollider2DComponent>())
             {
+                if (respectEditorVisibility && activeScene->GetRegistry().all_of<EditorHiddenComponent>(e))
+                    continue;
+
                 auto [tc, cc] = GetActiveScene()->GetRegistry()
                     .get<TransformComponent, CircleCollider2DComponent>(e);
 

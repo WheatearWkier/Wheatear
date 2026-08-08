@@ -32,17 +32,18 @@ namespace Wheatear::SideCombatEnemyAIService {
             return WAO::ComposeActionId("side", attackId);
         }
 
-        static void UpdateEnemyAction(Scene* scene,
+        static bool UpdateEnemyAction(Scene* scene,
             SideCombatLevelComponent& level,
             Entity enemy,
             SideCombatantComponent& combatant,
             SideEnemyAIComponent& ai,
+            const glm::vec2& playerPosition,
             float dt)
         {
             if (!IsEnemyActionActive(ai))
             {
                 ClearEnemyAction(ai);
-                return;
+                return false;
             }
 
             const auto& tuning = GetTuning(level);
@@ -50,39 +51,85 @@ namespace Wheatear::SideCombatEnemyAIService {
             const auto& attack = GetAttack(tuning, attackId);
             ai.RuntimeActionTimer += dt;
 
-            const float movementScale = std::clamp(ai.RuntimeActionMovementScale, 0.0f, 1.0f);
-            combatant.RuntimeVelocity.x = SideCombatMath::Approach(
-                combatant.RuntimeVelocity.x,
-                combatant.RuntimeVelocity.x * movementScale,
-                tuning.Enemy.XBrakeAcceleration * dt);
-            combatant.RuntimeVelocity.y = SideCombatMath::Approach(
-                combatant.RuntimeVelocity.y,
-                combatant.RuntimeVelocity.y * movementScale,
-                tuning.Enemy.LaneBrakeAcceleration * dt);
-
-            if (!ai.RuntimeActionHitboxSpawned &&
-                ai.RuntimeActionTimer >= ai.RuntimeActionHitboxTime)
+            if (attackId == "bear_charge")
             {
-                if (attackId == "bear_charge")
-                    combatant.RuntimeVelocity.x = ai.RuntimeActionFacing * tuning.Enemy.BearBossChargeSpeed;
+                if (ai.RuntimeActionTimer < ai.RuntimeActionHitboxTime)
+                {
+                    combatant.RuntimeVelocity.x = 0.0f;
+                    combatant.RuntimeVelocity.y = 0.0f;
+                }
+                else
+                {
+                    if (!ai.RuntimeActionHitboxSpawned)
+                    {
+                        const float chargeFacing = SideCombatMath::SignNonZero(playerPosition.x - combatant.RuntimeGroundPosition.x);
+                        if (chargeFacing != 0.0f)
+                        {
+                            ai.RuntimeActionFacing = chargeFacing;
+                            combatant.RuntimeFacing = chargeFacing;
+                        }
 
-                CreateHitbox(scene,
-                    ai.RuntimeActionEntityName.empty() ? "Side_EnemyAction" : ai.RuntimeActionEntityName,
-                    static_cast<entt::entity>(enemy),
-                    combatant.RuntimeGroundPosition,
-                    combatant.RuntimeAirHeight,
-                    ai.RuntimeActionFacing,
-                    ai.RuntimeActionKind,
-                    ai.RuntimeActionRecipeId,
-                    (int)SideCombatTeam::Enemy,
-                    attack,
-                    combatant.Attack * attack.DamageScale + attack.DamageFlat,
-                    tuning);
-                ai.RuntimeActionHitboxSpawned = true;
+                        combatant.RuntimeVelocity.x = ai.RuntimeActionFacing * tuning.Enemy.BearBossChargeSpeed;
+
+                        CreateHitbox(scene,
+                            ai.RuntimeActionEntityName.empty() ? "Side_EnemyAction" : ai.RuntimeActionEntityName,
+                            static_cast<entt::entity>(enemy),
+                            combatant.RuntimeGroundPosition,
+                            combatant.RuntimeAirHeight,
+                            ai.RuntimeActionFacing,
+                            ai.RuntimeActionKind,
+                            ai.RuntimeActionRecipeId,
+                            (int)SideCombatTeam::Enemy,
+                            attack,
+                            combatant.Attack * attack.DamageScale + attack.DamageFlat,
+                            tuning);
+                        ai.RuntimeActionHitboxSpawned = true;
+                    }
+
+                    combatant.RuntimeVelocity.x = ai.RuntimeActionFacing * tuning.Enemy.BearBossChargeSpeed;
+                    combatant.RuntimeVelocity.y = 0.0f;
+                }
+            }
+            else
+            {
+                const float movementScale = std::clamp(ai.RuntimeActionMovementScale, 0.0f, 1.0f);
+                combatant.RuntimeVelocity.x = SideCombatMath::Approach(
+                    combatant.RuntimeVelocity.x,
+                    combatant.RuntimeVelocity.x * movementScale,
+                    tuning.Enemy.XBrakeAcceleration * dt);
+                combatant.RuntimeVelocity.y = SideCombatMath::Approach(
+                    combatant.RuntimeVelocity.y,
+                    combatant.RuntimeVelocity.y * movementScale,
+                    tuning.Enemy.LaneBrakeAcceleration * dt);
+
+                if (!ai.RuntimeActionHitboxSpawned &&
+                    ai.RuntimeActionTimer >= ai.RuntimeActionHitboxTime)
+                {
+                    CreateHitbox(scene,
+                        ai.RuntimeActionEntityName.empty() ? "Side_EnemyAction" : ai.RuntimeActionEntityName,
+                        static_cast<entt::entity>(enemy),
+                        combatant.RuntimeGroundPosition,
+                        combatant.RuntimeAirHeight,
+                        ai.RuntimeActionFacing,
+                        ai.RuntimeActionKind,
+                        ai.RuntimeActionRecipeId,
+                        (int)SideCombatTeam::Enemy,
+                        attack,
+                        combatant.Attack * attack.DamageScale + attack.DamageFlat,
+                        tuning);
+                    ai.RuntimeActionHitboxSpawned = true;
+                }
             }
 
             if (ai.RuntimeActionTimer >= ai.RuntimeActionDuration)
+            {
+                if (attackId == "bear_charge")
+                    ai.RuntimeAttackTimer = 0.0f;
                 ClearEnemyAction(ai);
+                return false;
+            }
+
+            return true;
         }
 
         static void IssueEnemyAttack(Scene* scene,
@@ -113,25 +160,42 @@ namespace Wheatear::SideCombatEnemyAIService {
                     ? tuning.Enemy.BearBossLowAttackInterval
                     : (midHealth ? tuning.Enemy.BearBossMidAttackInterval : ai.AttackInterval);
 
-                if (lowHealth && distance > tuning.Enemy.BearBossChargeDistance)
+                const bool farRange = distance >= tuning.Enemy.BearBossShockwaveDistance;
+                const bool closeRange = distance <= tuning.Enemy.BearBossChargeDistance;
+                const bool alternate = (ai.RuntimeActionSequence % 2u) == 0u;
+
+                const char* attackId = "bear_charge";
+                if (farRange)
                 {
-                    const auto& attack = GetAttack(tuning, "bear_charge");
-                    const std::string recipeId = ActionRecipeId("bear_charge");
-                    BeginEnemyAction(ai, attack, "bear_charge", recipeId, "Side_BearCharge", SideAttackKind::EnemyMelee, facing);
+                    attackId = alternate ? "bear_shockwave" : "bear_charge";
+                    if (ai.RuntimeLastActionAttackId == attackId)
+                        attackId = alternate ? "bear_charge" : "bear_shockwave";
+                }
+                else if (closeRange)
+                {
+                    attackId = alternate ? "enemy_claw" : "bear_charge";
+                    if (ai.RuntimeLastActionAttackId == attackId)
+                        attackId = alternate ? "bear_charge" : "enemy_claw";
+                }
+                else if (ai.RuntimeLastActionAttackId == attackId)
+                {
                     return;
                 }
 
-                if (midHealth && distance > tuning.Enemy.BearBossShockwaveDistance)
-                {
-                    const auto& attack = GetAttack(tuning, "bear_shockwave");
-                    const std::string recipeId = ActionRecipeId("bear_shockwave");
-                    BeginEnemyAction(ai, attack, "bear_shockwave", recipeId, "Side_BearShockwave", SideAttackKind::EnemyShockwave, facing);
-                    return;
-                }
+                const std::string selectedAttackId = attackId;
+                const char* entityName = selectedAttackId == "bear_shockwave"
+                    ? "Side_BearShockwave"
+                    : (selectedAttackId == "enemy_claw" ? "Side_BearClaw" : "Side_BearCharge");
+                const SideAttackKind attackKind = selectedAttackId == "bear_shockwave"
+                    ? SideAttackKind::EnemyShockwave
+                    : SideAttackKind::EnemyMelee;
 
-                const auto& attack = GetAttack(tuning, "enemy_claw");
-                const std::string recipeId = ActionRecipeId("enemy_claw");
-                BeginEnemyAction(ai, attack, "enemy_claw", recipeId, "Side_BearClaw", SideAttackKind::EnemyMelee, facing);
+                const auto& attack = GetAttack(tuning, attackId);
+                const std::string recipeId = ActionRecipeId(selectedAttackId);
+                if (attackKind != SideAttackKind::EnemyShockwave)
+                    combatant.RuntimeVelocity = { 0.0f, 0.0f };
+                BeginEnemyAction(ai, attack, selectedAttackId, recipeId, entityName, attackKind, facing);
+                ai.RuntimeLastActionAttackId = selectedAttackId;
                 return;
             }
 
@@ -139,6 +203,7 @@ namespace Wheatear::SideCombatEnemyAIService {
             const auto& attack = GetAttack(tuning, "enemy_claw");
             const std::string recipeId = ActionRecipeId("enemy_claw");
             BeginEnemyAction(ai, attack, "enemy_claw", recipeId, "Side_EnemyClaw", SideAttackKind::EnemyMelee, facing);
+            ai.RuntimeLastActionAttackId = "enemy_claw";
         }
 
     } // namespace
@@ -193,10 +258,14 @@ namespace Wheatear::SideCombatEnemyAIService {
 
             if (IsEnemyActionActive(ai))
             {
-                UpdateEnemyAction(scene, level, enemy, combatant, ai, dt);
+                const bool actionStillActive = UpdateEnemyAction(scene, level, enemy, combatant, ai, playerPosition, dt);
                 if (enemy.HasComponent<SpriteRendererComponent>())
                     enemy.GetComponent<SpriteRendererComponent>().FlipX = combatant.RuntimeFacing < 0.0f;
-                continue;
+                if (actionStillActive)
+                    continue;
+
+                if (ai.Kind != SideEnemyKind::BearBoss)
+                    continue;
             }
 
             const glm::vec2 delta = playerPosition - combatant.RuntimeGroundPosition;
@@ -250,9 +319,14 @@ namespace Wheatear::SideCombatEnemyAIService {
                     tuning.Enemy.LaneBrakeAcceleration * dt);
             }
 
+            const bool laneReady = laneAbs <= ai.LaneTolerance + tuning.Enemy.LaneAttackPadding;
+            const bool meleeReady = distanceAbs <= ai.AttackRange + tuning.Enemy.AttackRangePadding;
+            const bool bossSpecialReady = ai.Kind == SideEnemyKind::BearBoss &&
+                distanceAbs > tuning.Enemy.BearBossChargeDistance;
+
             if (ai.RuntimeAttackTimer <= 0.0f &&
-                distanceAbs <= ai.AttackRange + tuning.Enemy.AttackRangePadding &&
-                laneAbs <= ai.LaneTolerance + tuning.Enemy.LaneAttackPadding)
+                laneReady &&
+                (meleeReady || bossSpecialReady))
             {
                 IssueEnemyAttack(scene, enemy, player, level, ai, combatant);
             }

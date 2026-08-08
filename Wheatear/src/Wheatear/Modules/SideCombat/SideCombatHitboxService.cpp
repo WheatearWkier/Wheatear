@@ -42,6 +42,8 @@ namespace Wheatear::SideCombatHitboxService {
                 return AssetAliasRegistry::Path("side.vfx.ally_support");
             case SideAttackKind::BreakLimit:
                 return AssetAliasRegistry::Path("side.vfx.ally_support");
+            case SideAttackKind::Dash:
+                return AssetAliasRegistry::Path("side.vfx.launcher_slash");
             case SideAttackKind::Basic:
             default:
                 return AssetAliasRegistry::Path("side.vfx.basic_slash");
@@ -215,8 +217,6 @@ namespace Wheatear::SideCombatHitboxService {
             {
                 auto& target = registry.get<SideCombatantComponent>(targetEntity);
                 if (!target.Alive || target.Team == hitbox.Team || target.Team == (int)SideCombatTeam::Neutral)
-                    continue;
-                if (target.RuntimeState == SideCombatState::SuperArmor)
                     continue;
                 if (target.Invulnerable || target.RuntimeInvulnerableTimer > 0.0f)
                     continue;

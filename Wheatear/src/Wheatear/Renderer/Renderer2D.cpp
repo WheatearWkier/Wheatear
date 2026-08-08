@@ -107,6 +107,8 @@ namespace Wheatear {
                 { "a_Color",         ShaderDataType::Float4 },
                 { "a_Thickness",     ShaderDataType::Float  },
                 { "a_Fade",          ShaderDataType::Float  },
+                { "a_Progress",      ShaderDataType::Float  },
+                { "a_StartAngle",    ShaderDataType::Float  },
                 { "a_EntityID",      ShaderDataType::Int    }
             },
             BatchDrawMode::Triangles,
@@ -331,11 +333,24 @@ namespace Wheatear {
         const glm::vec4& color,
         float thickness, float fade, int entityID)
     {
+        DrawRadialCircle(transform, color, 1.0f, 1.57079632679f,
+            thickness, fade, entityID);
+    }
+
+    void Renderer2D::DrawRadialCircle(const glm::mat4& transform,
+        const glm::vec4& color,
+        float progress,
+        float startAngle,
+        float thickness,
+        float fade,
+        int entityID)
+    {
         WT_PROFILE_FUNCTION();
 
         if (s_Data.CircleBatch->IsFull(4))
             FlushAndReset();
 
+        progress = glm::clamp(progress, 0.0f, 1.0f);
         for (int i = 0; i < 4; i++)
         {
             auto* v = s_Data.CircleBatch->AllocVertex();
@@ -344,6 +359,8 @@ namespace Wheatear {
             v->Color = color;
             v->Thickness = thickness;
             v->Fade = fade;
+            v->Progress = progress;
+            v->StartAngle = startAngle;
             v->EntityID = entityID;
         }
         s_Data.CircleBatch->AddIndexCount(6);

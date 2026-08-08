@@ -168,6 +168,7 @@ namespace Wheatear {
         RegisterUIWidgetComponent();
         RegisterEditorComponent<UIAnimatorComponent>("UI", "UI Animator", DrawUIAnimatorComponent, true);
         RegisterEditorComponent<UIImageComponent>("UI", "UI Image", DrawUIImageComponent, true);
+        RegisterEditorComponent<UIRadialCooldownComponent>("UI", "UI Radial Cooldown", DrawUIRadialCooldownComponent, true);
         RegisterEditorComponent<UIPanelComponent>("UI", "UI Panel", DrawUIPanelComponent, true);
         RegisterEditorComponent<UITextComponent>("UI", "UI Text", DrawUITextComponent, true);
         RegisterEditorComponent<UIButtonComponent>("UI", "UI Button", DrawUIButtonComponent, true);

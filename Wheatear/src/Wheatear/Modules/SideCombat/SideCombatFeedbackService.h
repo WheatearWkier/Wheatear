@@ -15,6 +15,13 @@ namespace Wheatear::SideCombatFeedbackService {
     WHEATEAR_API void TriggerHitFeedback(Scene* scene,
         SideCombatLevelComponent& level,
         const SideHitboxComponent& hitbox);
+    WHEATEAR_API void TriggerCinematicFocus(Scene* scene,
+        SideCombatLevelComponent& level,
+        UUID focusEntity,
+        float duration,
+        float timeScale,
+        float cameraZoom,
+        const glm::vec2& cameraOffset);
     WHEATEAR_API void UpdateCameraFeedback(Scene* scene,
         SideCombatLevelComponent& level,
         float dt);

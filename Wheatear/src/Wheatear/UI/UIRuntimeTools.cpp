@@ -97,6 +97,16 @@ namespace Wheatear::UIRuntimeTools {
         bar.Value = std::clamp(value, 0.0f, bar.MaxValue);
     }
 
+    void SetRadialProgress(Scene* scene, const std::string& entityName, float progress)
+    {
+        Entity entity = SceneQueries::FindEntityByName(scene, entityName);
+        if (!entity || !entity.HasComponent<UIRadialCooldownComponent>())
+            return;
+
+        entity.GetComponent<UIRadialCooldownComponent>().Progress =
+            std::clamp(progress, 0.0f, 1.0f);
+    }
+
     void SetImageAlpha(Scene* scene, const std::string& entityName, float alpha)
     {
         Entity entity = SceneQueries::FindEntityByName(scene, entityName);

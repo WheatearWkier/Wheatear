@@ -25,6 +25,7 @@ namespace Wheatear {
                 ImGui::Checkbox("Play On Start", &c.PlayOnStart);
                 ImGui::SameLine();
                 ImGui::Checkbox("Fire Events", &c.FireEvents);
+                ImGui::DragFloat("Playback Speed", &c.PlaybackSpeed, 0.01f, 0.0f, 8.0f);
 
                 ImGui::Text("Default: %s",
                     c.DefaultClipName.empty() ? "(none)" : c.DefaultClipName.c_str());

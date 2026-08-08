@@ -6,6 +6,7 @@
 #include <imgui/imgui.h>
 #include <glm/gtc/type_ptr.hpp>
 #include <algorithm>
+#include <cmath>
 #include <filesystem>
 #include "Wheatear/Core/AssetPath.h"
 #include "Wheatear/Scene/Components.h"
@@ -215,7 +216,13 @@ namespace Wheatear {
     {
         DrawComponent<UIWidgetComponent>("UI Widget", entity, [entity](auto& widget)
             {
-                ImGui::Checkbox("Visible", &widget.Visible);
+                ImGui::Checkbox("Visible At Runtime", &widget.Visible);
+                ImGui::Checkbox("Show In Editor", &widget.EditorVisible);
+                if (ImGui::Button("Show In Editor"))
+                    widget.EditorVisible = true;
+                ImGui::SameLine();
+                if (ImGui::Button("Hide In Editor"))
+                    widget.EditorVisible = false;
 
                 SectionLabel("Rect");
                 ImGui::TextDisabled("Normalized screen-space values. Drag the widget in Viewport for rough layout.");
@@ -300,10 +307,24 @@ namespace Wheatear {
             {
                 ImGui::ColorEdit4("Color", glm::value_ptr(image.Color));
 
-                const ImVec2      buttonSize = { 80.0f, 80.0f };
+                ImVec2 buttonSize = { 80.0f, 80.0f };
                 const ImTextureID textureID = image.Texture
                     ? static_cast<ImTextureID>(static_cast<uintptr_t>(image.Texture->GetRendererID()))
                     : static_cast<ImTextureID>(0);
+                if (image.Texture)
+                {
+                    const float regionWidth = std::max(1.0f,
+                        std::abs(image.UVMax.x - image.UVMin.x) * static_cast<float>(image.Texture->GetWidth()));
+                    const float regionHeight = std::max(1.0f,
+                        std::abs(image.UVMax.y - image.UVMin.y) * static_cast<float>(image.Texture->GetHeight()));
+                    const float aspect = regionWidth / regionHeight;
+                    constexpr float maxPreviewSide = 160.0f;
+                    constexpr float minPreviewSide = 28.0f;
+                    if (aspect >= 1.0f)
+                        buttonSize = { maxPreviewSide, std::clamp(maxPreviewSide / aspect, minPreviewSide, maxPreviewSide) };
+                    else
+                        buttonSize = { std::clamp(maxPreviewSide * aspect, minPreviewSide, maxPreviewSide), maxPreviewSide };
+                }
 
                 ImGui::PushID(&image);
                 ImGui::ImageButton("##UIImageTexture", textureID, buttonSize,
@@ -369,6 +390,15 @@ namespace Wheatear {
 
                 ImGui::ColorEdit4("Color", glm::value_ptr(text.Color));
                 ImGui::DragFloat("Font Size", &text.FontSize, 0.5f, 1.0f, 256.0f);
+                ImGui::DragFloat4("Padding px", glm::value_ptr(text.Padding), 0.5f, -1.0f, 256.0f);
+                int horizontalAlign = static_cast<int>(text.HorizontalAlign);
+                const char* horizontalItems[] = { "Left", "Center", "Right" };
+                if (ImGui::Combo("Horizontal Align", &horizontalAlign, horizontalItems, IM_ARRAYSIZE(horizontalItems)))
+                    text.HorizontalAlign = static_cast<UITextHorizontalAlign>(horizontalAlign);
+                int verticalAlign = static_cast<int>(text.VerticalAlign);
+                const char* verticalItems[] = { "Top", "Middle", "Bottom" };
+                if (ImGui::Combo("Vertical Align", &verticalAlign, verticalItems, IM_ARRAYSIZE(verticalItems)))
+                    text.VerticalAlign = static_cast<UITextVerticalAlign>(verticalAlign);
                 ImGui::ColorEdit4("Shadow Color", glm::value_ptr(text.ShadowColor));
                 ImGui::DragFloat2("Shadow Offset px", glm::value_ptr(text.ShadowOffset), 0.25f, -32.0f, 32.0f);
                 ImGui::ColorEdit4("Outline Color", glm::value_ptr(text.OutlineColor));
@@ -434,6 +464,18 @@ namespace Wheatear {
 
                 ImGui::ColorEdit4("Foreground", glm::value_ptr(bar.ForegroundColor));
                 ImGui::ColorEdit4("Background", glm::value_ptr(bar.BackgroundColor));
+            });
+    }
+
+    void DrawUIRadialCooldownComponent(Entity entity)
+    {
+        DrawComponent<UIRadialCooldownComponent>("UI Radial Cooldown", entity, [](auto& cooldown)
+            {
+                ImGui::SliderFloat("Progress", &cooldown.Progress, 0.0f, 1.0f);
+                ImGui::DragFloat("Start Angle", &cooldown.StartAngle, 0.01f, -6.283185f, 6.283185f);
+                ImGui::DragFloat("Thickness", &cooldown.Thickness, 0.01f, 0.0f, 1.0f);
+                ImGui::DragFloat("Fade", &cooldown.Fade, 0.001f, 0.0f, 0.25f);
+                ImGui::ColorEdit4("Color", glm::value_ptr(cooldown.Color));
             });
     }
 

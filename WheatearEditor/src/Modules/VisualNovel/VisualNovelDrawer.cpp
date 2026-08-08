@@ -8,6 +8,7 @@
 
 #include <imgui/imgui.h>
 
+#include <algorithm>
 #include <unordered_map>
 #include <vector>
 
@@ -19,11 +20,43 @@ namespace Wheatear {
 
         static std::unordered_map<std::string, EditorUI::TextAssetEditorState> s_ScriptEditors;
 
+        static bool StartsWith(const std::string& value, const std::string& prefix)
+        {
+            return value.rfind(prefix, 0) == 0;
+        }
+
+        static void SetVNEditorPreview(Entity controller,
+            const std::vector<std::string>& visiblePrefixes)
+        {
+            Scene* scene = controller.GetScene();
+            if (!scene)
+                return;
+
+            auto& registry = scene->GetRegistry();
+            for (auto entityID : registry.view<TagComponent, UIWidgetComponent>())
+            {
+                auto& tag = registry.get<TagComponent>(entityID).Tag;
+                if (!StartsWith(tag, "VN_"))
+                    continue;
+
+                bool visible = visiblePrefixes.empty();
+                for (const std::string& prefix : visiblePrefixes)
+                {
+                    if (StartsWith(tag, prefix))
+                    {
+                        visible = true;
+                        break;
+                    }
+                }
+                registry.get<UIWidgetComponent>(entityID).EditorVisible = visible;
+            }
+        }
+
     }
 
     void DrawVisualNovelComponent(Entity entity)
     {
-        DrawComponent<VisualNovelComponent>("Visual Novel", entity, [](auto& component)
+        DrawComponent<VisualNovelComponent>("Visual Novel", entity, [entity](auto& component)
             {
                 InputString("Script Path", component.ScriptPath);
                 if (ImGui::Button("Open VN Script Editor"))
@@ -64,6 +97,36 @@ namespace Wheatear {
                 InputString("Music Notice Text", component.MusicNoticeTextEntityName);
                 InputString("Save Directory", component.SaveDirectory);
                 ImGui::DragInt("Auto Load Slot", &component.AutoLoadSlot, 1.0f, 0, 9);
+
+                ImGui::Separator();
+                ImGui::TextDisabled("Editor UI Preview");
+                if (ImGui::Button("Show All VN UI"))
+                    SetVNEditorPreview(entity, {});
+                ImGui::SameLine();
+                if (ImGui::Button("Hide Auxiliary Pages"))
+                {
+                    SetVNEditorPreview(entity, {
+                        "VN_DialoguePanel",
+                        "VN_SpeakerText",
+                        "VN_BodyText",
+                        "VN_AdvanceHint",
+                        "VN_Choice",
+                        "VN_Command",
+                        "VN_AutoPlayIndicator",
+                        "VN_SystemMessage"
+                    });
+                }
+
+                if (ImGui::Button("Show History Page"))
+                    SetVNEditorPreview(entity, { "VN_History" });
+                ImGui::SameLine();
+                if (ImGui::Button("Show Settings Page"))
+                    SetVNEditorPreview(entity, { "VN_Settings" });
+                ImGui::SameLine();
+                if (ImGui::Button("Show Save/Load Page"))
+                    SetVNEditorPreview(entity, { "VN_SaveLoad" });
+                if (ImGui::Button("Show Music Notice"))
+                    SetVNEditorPreview(entity, { "VN_MusicNotice" });
             });
     }
 

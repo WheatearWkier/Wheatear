@@ -33,7 +33,7 @@ namespace Wheatear {
         std::string SaveLoadTextEntityName = "VN_SaveLoadText";
         std::string SystemMessageEntityName = "VN_SystemMessage";
         std::string MusicNoticePanelEntityName = "VN_MusicNoticePanel";
-        std::string MusicNoticeTextEntityName = "VN_MusicNoticeText";
+        std::string MusicNoticeTextEntityName = "VN_MusicNoticePanel";
         std::string SaveDirectory = "assets/saves";
         int         AutoLoadSlot = 0;
         std::string RuntimeRequestedCommand = "";

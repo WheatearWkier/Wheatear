@@ -23,6 +23,7 @@ namespace Wheatear {
         CommandBus::RegisterGameplayCommandPrefix("vn:");
         CommandBus::RegisterGameplayCommandPrefix("turn:");
         CommandBus::RegisterGameplayCommandPrefix("tactic:");
+        CommandBus::RegisterGameplayCommandPrefix("side:");
 
         ArcadeCombatSignalHandlers::RegisterHandlers();
         ArcadeCombatActionResolver::RegisterResolver();

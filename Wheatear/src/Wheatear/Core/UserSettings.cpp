@@ -113,8 +113,12 @@ namespace Wheatear {
         AddBinding(settings, "side.jump", { WT_KEY_K, WT_KEY_SPACE });
         AddBinding(settings, "side.basic", { WT_KEY_J });
         AddBinding(settings, "side.magic", { WT_KEY_U });
-        AddBinding(settings, "side.support", { WT_KEY_I });
+        AddBinding(settings, "side.support", { WT_KEY_H });
+        AddBinding(settings, "side.dash", { WT_KEY_I });
         AddBinding(settings, "side.break_limit", { WT_KEY_L });
+        AddBinding(settings, "side.item1", { WT_KEY_1 });
+        AddBinding(settings, "side.item2", { WT_KEY_2 });
+        AddBinding(settings, "side.item3", { WT_KEY_3 });
 
         AddBinding(settings, "arcade.attack", { WT_KEY_J, WT_KEY_SPACE });
         AddBinding(settings, "arcade.weapon1", { WT_KEY_1 });

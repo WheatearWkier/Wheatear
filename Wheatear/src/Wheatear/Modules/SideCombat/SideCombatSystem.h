@@ -20,7 +20,11 @@ namespace Wheatear {
         bool m_PreviousLauncherPressed = false;
         bool m_PreviousMagicPressed = false;
         bool m_PreviousSupportPressed = false;
+        bool m_PreviousDashPressed = false;
         bool m_PreviousBreakLimitPressed = false;
+        bool m_PreviousItem1Pressed = false;
+        bool m_PreviousItem2Pressed = false;
+        bool m_PreviousItem3Pressed = false;
     };
 
 } // namespace Wheatear

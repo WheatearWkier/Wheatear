@@ -13,15 +13,29 @@
 
 namespace Wheatear {
 
+    namespace {
+
+        static bool IsHiddenInEditor(Scene* scene, entt::entity entity, bool respectEditorVisibility)
+        {
+            return respectEditorVisibility &&
+                scene &&
+                scene->GetRegistry().all_of<EditorHiddenComponent>(entity);
+        }
+
+    } // namespace
+
     // =========================================================================
     // Helpers
     // =========================================================================
 
-    glm::mat4 RenderSystem::ComputeLightSpaceMatrix(Scene* scene)
+    glm::mat4 RenderSystem::ComputeLightSpaceMatrix(Scene* scene, bool respectEditorVisibility)
     {
         auto& registry = scene->GetRegistry();
         for (auto e : registry.view<TransformComponent, DirectionalLightComponent>())
         {
+            if (IsHiddenInEditor(scene, e, respectEditorVisibility))
+                continue;
+
             auto [tc, dl] = registry.get<TransformComponent, DirectionalLightComponent>(e);
 
             glm::mat4 rot = glm::toMat4(glm::quat(tc.Rotation));
@@ -37,7 +51,7 @@ namespace Wheatear {
         return glm::mat4(1.0f); // No directional light -- identity matrix
     }
 
-    void RenderSystem::CollectLights(Scene* scene)
+    void RenderSystem::CollectLights(Scene* scene, bool respectEditorVisibility)
     {
         auto& registry = scene->GetRegistry();
 
@@ -45,6 +59,9 @@ namespace Wheatear {
         bool hasDirLight = false;
         for (auto e : registry.view<TransformComponent, DirectionalLightComponent>())
         {
+            if (IsHiddenInEditor(scene, e, respectEditorVisibility))
+                continue;
+
             if (hasDirLight) break;
             auto [tc, dl] = registry.get<TransformComponent, DirectionalLightComponent>(e);
 
@@ -57,24 +74,30 @@ namespace Wheatear {
 
         for (auto e : registry.view<TransformComponent, PointLightComponent>())
         {
+            if (IsHiddenInEditor(scene, e, respectEditorVisibility))
+                continue;
+
             auto [tc, pl] = registry.get<TransformComponent, PointLightComponent>(e);
             Renderer3D::AddPointLight(tc.Translation, pl.Color, pl.Intensity,
                 pl.Constant, pl.Linear, pl.Quadratic);
         }
     }
 
-    void RenderSystem::RenderSceneShadow(Scene* scene)
+    void RenderSystem::RenderSceneShadow(Scene* scene, bool respectEditorVisibility)
     {
         auto& registry = scene->GetRegistry();
         for (auto e : registry.view<TransformComponent, MeshRendererComponent>())
         {
+            if (IsHiddenInEditor(scene, e, respectEditorVisibility))
+                continue;
+
             auto [tc, mr] = registry.get<TransformComponent, MeshRendererComponent>(e);
             if (mr.Mesh)
                 Renderer3D::DrawMeshShadow(tc.GetTransform(), mr.Mesh);
         }
     }
 
-    void RenderSystem::RenderScene2D(Scene* scene)
+    void RenderSystem::RenderScene2D(Scene* scene, bool respectEditorVisibility)
     {
         RenderCommand::DisableDepthTest();
         auto& registry = scene->GetRegistry();
@@ -89,12 +112,18 @@ namespace Wheatear {
 
         for (auto e : sprites)
         {
+            if (IsHiddenInEditor(scene, e, respectEditorVisibility))
+                continue;
+
             auto [tc, sr] = group.get<TransformComponent, SpriteRendererComponent>(e);
             Renderer2D::DrawSprite(tc.GetTransform(), sr, static_cast<int>(e));
         }
 
         for (auto e : registry.view<TransformComponent, CircleRendererComponent>())
         {
+            if (IsHiddenInEditor(scene, e, respectEditorVisibility))
+                continue;
+
             auto [tc, cr] = registry.get<TransformComponent, CircleRendererComponent>(e);
             Renderer2D::DrawCircle(tc.GetTransform(), cr.Color,
                 cr.Thickness, cr.Fade, static_cast<int>(e));
@@ -103,13 +132,16 @@ namespace Wheatear {
         RenderCommand::EnableDepthTest();
     }
 
-    void RenderSystem::RenderScene3D(Scene* scene)
+    void RenderSystem::RenderScene3D(Scene* scene, bool respectEditorVisibility)
     {
         RenderCommand::EnableDepthTest();
         auto& registry = scene->GetRegistry();
 
         for (auto e : registry.view<TransformComponent, MeshRendererComponent>())
         {
+            if (IsHiddenInEditor(scene, e, respectEditorVisibility))
+                continue;
+
             auto [tc, mr] = registry.get<TransformComponent, MeshRendererComponent>(e);
             if (mr.Mesh)
                 Renderer3D::DrawMesh(tc.GetTransform(), mr.Mesh,
@@ -144,20 +176,20 @@ namespace Wheatear {
         // Shadow pass
         Renderer3D::GetShadowMapFB()->Bind();
         RenderCommand::Clear();
-        Renderer3D::BeginShadowPass(ComputeLightSpaceMatrix(scene));
-        RenderSceneShadow(scene);
+        Renderer3D::BeginShadowPass(ComputeLightSpaceMatrix(scene, false));
+        RenderSceneShadow(scene, false);
         Renderer3D::EndShadowPass();
         //Renderer3D::GetShadowMapFB()->Unbind();
         RenderCommand::BindFramebuffer(previousFBO);
         RenderCommand::SetViewport(0, 0, scene->GetViewportWidth(), scene->GetViewportHeight());
 
         Renderer2D::BeginScene(*mainCamera, cameraTransform);
-        RenderScene2D(scene);
+        RenderScene2D(scene, false);
         Renderer2D::EndScene();
 
         Renderer3D::BeginScene(*mainCamera, cameraTransform);
-        CollectLights(scene);
-        RenderScene3D(scene);
+        CollectLights(scene, false);
+        RenderScene3D(scene, false);
         Renderer3D::EndScene();
 
         UIRenderer::BeginUIPass(scene->GetViewportWidth(), scene->GetViewportHeight());
@@ -181,8 +213,8 @@ namespace Wheatear {
         // Shadow pass
         Renderer3D::GetShadowMapFB()->Bind();
         RenderCommand::Clear();
-        Renderer3D::BeginShadowPass(ComputeLightSpaceMatrix(scene));
-        RenderSceneShadow(scene);
+        Renderer3D::BeginShadowPass(ComputeLightSpaceMatrix(scene, true));
+        RenderSceneShadow(scene, true);
         Renderer3D::EndShadowPass();
 
         // Restore the editor's framebuffer and viewport.
@@ -190,12 +222,12 @@ namespace Wheatear {
         RenderCommand::SetViewport(0, 0, scene->GetViewportWidth(), scene->GetViewportHeight());
 
         Renderer2D::BeginScene(camera);
-        RenderScene2D(scene);
+        RenderScene2D(scene, true);
         Renderer2D::EndScene();
 
         Renderer3D::BeginScene(camera);
-        CollectLights(scene);
-        RenderScene3D(scene);
+        CollectLights(scene, true);
+        RenderScene3D(scene, true);
         Renderer3D::EndScene();
 
         if (includeUI)
@@ -213,23 +245,24 @@ namespace Wheatear {
         bool includeUI)
     {
         const uint32_t previousFBO = RenderCommand::GetBoundFramebuffer();
+        const bool respectEditorVisibility = scene && scene->GetExecutionMode() == SceneExecutionMode::Edit;
 
         Renderer3D::GetShadowMapFB()->Bind();
         RenderCommand::Clear();
-        Renderer3D::BeginShadowPass(ComputeLightSpaceMatrix(scene));
-        RenderSceneShadow(scene);
+        Renderer3D::BeginShadowPass(ComputeLightSpaceMatrix(scene, respectEditorVisibility));
+        RenderSceneShadow(scene, respectEditorVisibility);
         Renderer3D::EndShadowPass();
 
         RenderCommand::BindFramebuffer(previousFBO);
         RenderCommand::SetViewport(0, 0, scene->GetViewportWidth(), scene->GetViewportHeight());
 
         Renderer2D::BeginScene(camera, cameraTransform);
-        RenderScene2D(scene);
+        RenderScene2D(scene, respectEditorVisibility);
         Renderer2D::EndScene();
 
         Renderer3D::BeginScene(camera, cameraTransform);
-        CollectLights(scene);
-        RenderScene3D(scene);
+        CollectLights(scene, respectEditorVisibility);
+        RenderScene3D(scene, respectEditorVisibility);
         Renderer3D::EndScene();
 
         if (includeUI)

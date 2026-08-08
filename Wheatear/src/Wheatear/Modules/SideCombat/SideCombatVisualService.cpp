@@ -47,6 +47,27 @@ namespace Wheatear::SideCombatVisualService {
             return set.Clips.find(key) != set.Clips.end();
         }
 
+        static std::string SelectActionClipKey(
+            const SideAnimationSetTuning& set,
+            const std::string& attackId,
+            float actionTimer,
+            float hitboxTime)
+        {
+            if (attackId.empty())
+                return {};
+
+            const std::string windupKey = attackId + "_windup";
+            if (actionTimer < hitboxTime && HasAnimationClip(set, windupKey))
+                return windupKey;
+
+            return HasAnimationClip(set, attackId) ? attackId : std::string{};
+        }
+
+        static bool IsActionClipKey(const std::string& attackId, const std::string& clipKey)
+        {
+            return attackId == clipKey || clipKey == attackId + "_windup";
+        }
+
         static float GetRemoveAfterDeathAlpha(const SideCombatantComponent& combatant)
         {
             constexpr float FadeStart = 0.52f;
@@ -69,8 +90,15 @@ namespace Wheatear::SideCombatVisualService {
                 const auto& controller = registry.get<SidePlayerControllerComponent>(entity);
                 const bool actionActive = !controller.RuntimeActionAttackId.empty() &&
                     controller.RuntimeActionTimer < controller.RuntimeActionDuration;
-                if (actionActive && HasAnimationClip(set, controller.RuntimeActionAttackId))
-                    return controller.RuntimeActionAttackId;
+                if (actionActive)
+                {
+                    const std::string actionClip = SelectActionClipKey(set,
+                        controller.RuntimeActionAttackId,
+                        controller.RuntimeActionTimer,
+                        controller.RuntimeActionHitboxTime);
+                    if (!actionClip.empty())
+                        return actionClip;
+                }
             }
 
             if (combatant.Team == (int)SideCombatTeam::Enemy &&
@@ -79,8 +107,15 @@ namespace Wheatear::SideCombatVisualService {
                 const auto& ai = registry.get<SideEnemyAIComponent>(entity);
                 const bool actionActive = !ai.RuntimeActionAttackId.empty() &&
                     ai.RuntimeActionTimer < ai.RuntimeActionDuration;
-                if (actionActive && HasAnimationClip(set, ai.RuntimeActionAttackId))
-                    return ai.RuntimeActionAttackId;
+                if (actionActive)
+                {
+                    const std::string actionClip = SelectActionClipKey(set,
+                        ai.RuntimeActionAttackId,
+                        ai.RuntimeActionTimer,
+                        ai.RuntimeActionHitboxTime);
+                    if (!actionClip.empty())
+                        return actionClip;
+                }
             }
 
             if (combatant.RuntimeHitStun > 0.0f)
@@ -114,7 +149,7 @@ namespace Wheatear::SideCombatVisualService {
                 const auto& controller = registry.get<SidePlayerControllerComponent>(entity);
                 const bool actionActive = !controller.RuntimeActionAttackId.empty() &&
                     controller.RuntimeActionTimer < controller.RuntimeActionDuration;
-                if (actionActive && controller.RuntimeActionAttackId == clipKey)
+                if (actionActive && IsActionClipKey(controller.RuntimeActionAttackId, clipKey))
                     return controller.RuntimeActionSequence;
             }
 
@@ -124,7 +159,7 @@ namespace Wheatear::SideCombatVisualService {
                 const auto& ai = registry.get<SideEnemyAIComponent>(entity);
                 const bool actionActive = !ai.RuntimeActionAttackId.empty() &&
                     ai.RuntimeActionTimer < ai.RuntimeActionDuration;
-                if (actionActive && ai.RuntimeActionAttackId == clipKey)
+                if (actionActive && IsActionClipKey(ai.RuntimeActionAttackId, clipKey))
                     return ai.RuntimeActionSequence;
             }
 
@@ -137,7 +172,8 @@ namespace Wheatear::SideCombatVisualService {
             SideCombatantComponent& combatant,
             SpriteRendererComponent& sprite,
             const SideCombatTuningService::SideCombatTuning& tuning,
-            float dt)
+            float dt,
+            float playbackSpeed)
         {
             const SideAnimationSetTuning& set = SelectAnimationSet(registry, entity, combatant, tuning);
             const std::string clipKey = SelectVisualClipKey(registry, entity, combatant, set);
@@ -158,6 +194,7 @@ namespace Wheatear::SideCombatVisualService {
                 animator->PlayOnStart = false;
                 animator->FireEvents = true;
             }
+            animator->PlaybackSpeed = std::max(0.0f, playbackSpeed);
 
             for (const auto& [key, clipTuning] : set.Clips)
             {
@@ -226,7 +263,7 @@ namespace Wheatear::SideCombatVisualService {
 
     void UpdateCombatantVisual(Scene* scene,
         Entity entity,
-        const SideCombatLevelComponent&,
+        const SideCombatLevelComponent& level,
         const SideCombatTuningService::SideCombatTuning& tuning,
         float dt)
     {
@@ -255,7 +292,10 @@ namespace Wheatear::SideCombatVisualService {
                     combatant,
                     sprite,
                     tuning,
-                    dt);
+                    dt,
+                    level.RuntimeCinematicTimer > 0.0f
+                        ? std::clamp(level.RuntimeCinematicTimeScale, 0.0f, 1.0f)
+                        : 1.0f);
                 sprite.FlipX = combatant.RuntimeFacing < 0.0f;
                 if (!combatant.Alive)
                 {

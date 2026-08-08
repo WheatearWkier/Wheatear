@@ -51,13 +51,16 @@ namespace Wheatear::GameplayUILayoutService {
         if (!entity)
             entity = scene->CreateEntity(entityName);
 
-        auto& widget = entity.HasComponent<UIWidgetComponent>()
+        const bool hadWidget = entity.HasComponent<UIWidgetComponent>();
+        auto& widget = hadWidget
             ? entity.GetComponent<UIWidgetComponent>()
             : entity.AddComponent<UIWidgetComponent>();
-        ConfigureDefaultWidget(widget, position, size, sortOrder, visible);
+        if (!hadWidget)
+            ConfigureDefaultWidget(widget, position, size, sortOrder, visible);
 
         Entity parent = FindEntityByName(scene, parentName);
-        widget.ParentEntity = parent ? parent.GetUUID() : UUID(0);
+        if (!hadWidget)
+            widget.ParentEntity = parent ? parent.GetUUID() : UUID(0);
         return entity;
     }
 
@@ -69,10 +72,12 @@ namespace Wheatear::GameplayUILayoutService {
         if (!pager)
             return {};
 
+        const bool hadWidget = pager.HasComponent<UIWidgetComponent>();
         auto& widget = pager.HasComponent<UIWidgetComponent>()
             ? pager.GetComponent<UIWidgetComponent>()
             : pager.AddComponent<UIWidgetComponent>();
-        ConfigureDefaultWidget(widget, { 0.0f, 0.0f }, { 0.001f, 0.001f }, 0, false);
+        if (!hadWidget)
+            ConfigureDefaultWidget(widget, { 0.0f, 0.0f }, { 0.001f, 0.001f }, 0, false);
 
         auto& pagerComponent = pager.HasComponent<UIPagerComponent>()
             ? pager.GetComponent<UIPagerComponent>()
@@ -97,13 +102,17 @@ namespace Wheatear::GameplayUILayoutService {
         if (!entity)
             return {};
 
-        auto& panel = entity.HasComponent<UIPanelComponent>()
+        const bool hadPanel = entity.HasComponent<UIPanelComponent>();
+        auto& panel = hadPanel
             ? entity.GetComponent<UIPanelComponent>()
             : entity.AddComponent<UIPanelComponent>();
-        panel.BackgroundColor = background;
-        panel.BorderColor = border;
-        panel.BorderThickness = borderThickness;
-        panel.ClipChildren = clipChildren;
+        if (!hadPanel)
+        {
+            panel.BackgroundColor = background;
+            panel.BorderColor = border;
+            panel.BorderThickness = borderThickness;
+            panel.ClipChildren = clipChildren;
+        }
         return entity;
     }
 
@@ -123,16 +132,20 @@ namespace Wheatear::GameplayUILayoutService {
         if (!entity)
             return {};
 
-        auto& scrollView = entity.HasComponent<UIScrollViewComponent>()
+        const bool hadScrollView = entity.HasComponent<UIScrollViewComponent>();
+        auto& scrollView = hadScrollView
             ? entity.GetComponent<UIScrollViewComponent>()
             : entity.AddComponent<UIScrollViewComponent>();
         scrollView.ContentHeight = std::max(contentHeight, 1.0f);
-        scrollView.WheelStep = 0.08f;
-        scrollView.ScrollbarWidth = 0.016f;
-        scrollView.EnableWheel = true;
-        scrollView.ShowScrollbar = true;
-        scrollView.DragScrollbar = true;
-        scrollView.ClampToContent = true;
+        if (!hadScrollView)
+        {
+            scrollView.WheelStep = 0.08f;
+            scrollView.ScrollbarWidth = 0.016f;
+            scrollView.EnableWheel = true;
+            scrollView.ShowScrollbar = true;
+            scrollView.DragScrollbar = true;
+            scrollView.ClampToContent = true;
+        }
         scrollView.ClampOffset();
         return entity;
     }
@@ -151,17 +164,28 @@ namespace Wheatear::GameplayUILayoutService {
         if (!entity)
             return {};
 
-        auto& text = entity.HasComponent<UITextComponent>()
+        const bool hadText = entity.HasComponent<UITextComponent>();
+        auto& text = hadText
             ? entity.GetComponent<UITextComponent>()
             : entity.AddComponent<UITextComponent>();
         text.Text = value;
-        text.FontSize = fontSize;
-        text.Color = color;
-        text.FontPath = AssetAliasRegistry::Path("font.ui_default", "assets/fonts/wqy-microhei.ttc");
-        text.ShadowColor = { 0.01f, 0.015f, 0.018f, 0.80f };
-        text.ShadowOffset = { 1.6f, 1.6f };
-        text.OutlineColor = { 0.0f, 0.0f, 0.0f, 0.86f };
-        text.OutlineThickness = 1.15f;
+        if (!hadText)
+        {
+            text.FontSize = fontSize;
+            text.Color = color;
+            text.FontPath = AssetAliasRegistry::Path("font.ui_default", "assets/fonts/wqy-microhei.ttc");
+            text.ShadowColor = { 0.01f, 0.015f, 0.018f, 0.80f };
+            text.ShadowOffset = { 1.6f, 1.6f };
+            text.OutlineColor = { 0.0f, 0.0f, 0.0f, 0.86f };
+            text.OutlineThickness = 1.15f;
+        }
+        else
+        {
+            if (text.FontSize <= 0.0f)
+                text.FontSize = fontSize;
+            if (text.FontPath.empty())
+                text.FontPath = AssetAliasRegistry::Path("font.ui_default", "assets/fonts/wqy-microhei.ttc");
+        }
         UIRenderer::PreloadUIText(text);
         return entity;
     }
@@ -182,13 +206,17 @@ namespace Wheatear::GameplayUILayoutService {
         if (!entity)
             return {};
 
-        auto& button = entity.HasComponent<UIButtonComponent>()
+        const bool hadButton = entity.HasComponent<UIButtonComponent>();
+        auto& button = hadButton
             ? entity.GetComponent<UIButtonComponent>()
             : entity.AddComponent<UIButtonComponent>();
         button.OnClickFunction = command;
-        button.NormalColor = { 0.10f, 0.11f, 0.13f, 0.86f };
-        button.HoverColor = { 0.35f, 0.55f, 0.50f, 0.96f };
-        button.PressedColor = { 0.06f, 0.08f, 0.09f, 0.98f };
+        if (!hadButton)
+        {
+            button.NormalColor = { 0.10f, 0.11f, 0.13f, 0.86f };
+            button.HoverColor = { 0.35f, 0.55f, 0.50f, 0.96f };
+            button.PressedColor = { 0.06f, 0.08f, 0.09f, 0.98f };
+        }
         return entity;
     }
 
@@ -206,15 +234,19 @@ namespace Wheatear::GameplayUILayoutService {
         if (!entity)
             return {};
 
-        auto& slider = entity.HasComponent<UISliderComponent>()
+        const bool hadSlider = entity.HasComponent<UISliderComponent>();
+        auto& slider = hadSlider
             ? entity.GetComponent<UISliderComponent>()
             : entity.AddComponent<UISliderComponent>();
         slider.MinValue = minValue;
         slider.MaxValue = maxValue <= minValue ? minValue + 1.0f : maxValue;
-        slider.TrackColor = { 0.08f, 0.10f, 0.12f, 0.92f };
-        slider.FillColor = { 0.30f, 0.78f, 0.72f, 0.96f };
-        slider.HandleColor = { 0.92f, 0.98f, 0.92f, 1.0f };
-        slider.HoverColor = { 1.0f, 0.92f, 0.50f, 1.0f };
+        if (!hadSlider)
+        {
+            slider.TrackColor = { 0.08f, 0.10f, 0.12f, 0.92f };
+            slider.FillColor = { 0.30f, 0.78f, 0.72f, 0.96f };
+            slider.HandleColor = { 0.92f, 0.98f, 0.92f, 1.0f };
+            slider.HoverColor = { 1.0f, 0.92f, 0.50f, 1.0f };
+        }
         slider.OnValueChangedFunction = command;
         return entity;
     }
@@ -237,6 +269,13 @@ namespace Wheatear::GameplayUILayoutService {
         Entity entity = FindEntityByName(scene, entityName);
         if (entity && entity.HasComponent<UIButtonComponent>())
             entity.GetComponent<UIButtonComponent>().OnClickFunction = command;
+    }
+
+    void SetSliderCommand(Scene* scene, const std::string& entityName, const std::string& command)
+    {
+        Entity entity = FindEntityByName(scene, entityName);
+        if (entity && entity.HasComponent<UISliderComponent>())
+            entity.GetComponent<UISliderComponent>().OnValueChangedFunction = command;
     }
 
     void SetButtonPalette(Scene* scene,

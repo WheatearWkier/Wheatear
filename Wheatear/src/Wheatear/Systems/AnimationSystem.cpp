@@ -189,7 +189,7 @@ namespace Wheatear {
             if (!clip) continue;
 
             const float previousTime = animator.ElapsedTime;
-            animator.ElapsedTime += ts;
+            animator.ElapsedTime += ts * std::max(0.0f, animator.PlaybackSpeed);
             float totalDur = clip->GetTotalDuration();
 
             FireAnimationEvents(scene, Entity{ e, scene }, animator, *clip, previousTime, animator.ElapsedTime);

@@ -10,6 +10,8 @@ aliases:
       audio: assets/vertical_slice/side_combat/audio/
     ui:
       shadow: assets/vertical_slice/side_combat/ui/blob_shadow_soft.png
+      sheet: assets/vertical_slice/side_combat/ui/sidecombat_ui_sheet.png
+      combo_font: assets/vertical_slice/side_combat/ui/font/sidecombat_combo_font.png
     enemy:
       idle: assets/vertical_slice/side_combat/enemies/en_claw_beast_idle_01.png
     skill:
@@ -18,6 +20,7 @@ aliases:
         launcher: assets/vertical_slice/side_combat/ui/icon_skill_launcher_slash.png
         magic: assets/vertical_slice/side_combat/ui/icon_skill_magic_bolt.png
         support: assets/vertical_slice/side_combat/ui/icon_skill_ally_support.png
+        dash: assets/vertical_slice/side_combat/ui/icon_skill_uppercut.png
         break_limit: assets/vertical_slice/side_combat/ui/icon_skill_break_limit.png
         enemy_shockwave: assets/vertical_slice/side_combat/effects/vfx_enemy_projectile.png
         enemy_claw: assets/vertical_slice/side_combat/effects/vfx_enemy_claw.png

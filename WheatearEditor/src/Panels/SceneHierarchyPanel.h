@@ -56,6 +56,10 @@ namespace Wheatear {
         Entity CreateUITemplateWithUndo(UITemplateKind kind, UUID parentID);
         void DrawCreateUIMenuItems(UUID parentID, bool includeCanvas);
         void DrawComponents(Entity entity);
+        bool IsEntityHiddenInEditor(Entity entity) const;
+        bool HasHiddenEditorEntities() const;
+        void SetEntityHiddenInEditor(Entity entity, bool hidden);
+        void ShowAllHiddenEditorEntities();
 
     private:
         Ref<Scene> m_Context;
