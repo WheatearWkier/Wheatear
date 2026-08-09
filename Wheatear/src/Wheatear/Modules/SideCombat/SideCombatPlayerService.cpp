@@ -528,17 +528,19 @@ namespace Wheatear::SideCombatPlayerService {
         if (controller.RuntimeAttackChainTimer <= 0.0f)
             controller.RuntimeAttackChain = 0;
 
-        if (input.JumpPressed && !previousInput.JumpPressed)
+        const bool inputLockedByCinematic = level.RuntimeCinematicTimer > 0.0f;
+
+        if (!inputLockedByCinematic && input.JumpPressed && !previousInput.JumpPressed)
             controller.RuntimeJumpBufferTimer = std::max(0.0f, controller.JumpBufferTime);
 
         if (combatant.ControlsLocked || level.RuntimeVictory || level.RuntimeDefeat)
             return;
 
-        if (input.Item1Pressed && !previousInput.Item1Pressed)
+        if (!inputLockedByCinematic && input.Item1Pressed && !previousInput.Item1Pressed)
             UseCombatItem(tuning, 1, combatant, controller);
-        if (input.Item2Pressed && !previousInput.Item2Pressed)
+        if (!inputLockedByCinematic && input.Item2Pressed && !previousInput.Item2Pressed)
             UseCombatItem(tuning, 2, combatant, controller);
-        if (input.Item3Pressed && !previousInput.Item3Pressed)
+        if (!inputLockedByCinematic && input.Item3Pressed && !previousInput.Item3Pressed)
             UseCombatItem(tuning, 3, combatant, controller);
 
         if (combatant.RuntimeHitStun > 0.0f ||
@@ -552,6 +554,13 @@ namespace Wheatear::SideCombatPlayerService {
         }
 
         UpdatePlayerAction(scene, level, player, combatant, controller, dt);
+        if (inputLockedByCinematic)
+        {
+            if (player.HasComponent<SpriteRendererComponent>())
+                player.GetComponent<SpriteRendererComponent>().FlipX = combatant.RuntimeFacing < 0.0f;
+            return;
+        }
+
         const bool canStartAction = CanStartPlayerAction(controller);
         const float actionMovementScale = GetPlayerActionMovementScale(controller);
         const bool dashActive = IsPlayerActionActive(controller) &&

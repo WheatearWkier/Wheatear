@@ -305,15 +305,16 @@ clips:
     pivotBaselineStable: true
     weaponHand: right
   protag_break_limit_lowfi_strip:
-    frameCount: 12
-    frameRate: 24
-    profile: dash_1024
-    cellWidth: 1024
+    frameCount: 4
+    frameRate: 8
+    profile: body_512
+    cellWidth: 512
     cellHeight: 512
-    sourceFrames: WheatearEditor/assets/vertical_slice/source_frames/protag_break_limit_lowfi/protag_break_limit_lowfi_{frame:03}.png
+    sourceSheet: WheatearEditor/assets/vertical_slice/side_combat/sheets/protag_break_limit_lowfi_strip.png
+    runtimeFrames: [2, 3]
     output: WheatearEditor/assets/vertical_slice/side_combat/sheets/protag_break_limit_lowfi_strip.png
     loop: false
-    assembledFromSourceFrames: true
+    assembledFromSourceFrames: false
     noCrossCellBleed: true
     fixedCanvasPerClip: true
     pivotBaselineStable: true

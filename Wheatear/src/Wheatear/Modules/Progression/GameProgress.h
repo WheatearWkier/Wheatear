@@ -67,6 +67,7 @@ namespace Wheatear::GameProgress {
         int Experience = 0;
         float ClearTimeSeconds = 0.0f;
         std::string RewardSummary;
+        std::unordered_map<std::string, int> RewardAmounts;
     };
 
     struct State
@@ -127,7 +128,8 @@ namespace Wheatear::GameProgress {
         int hitsTaken,
         float clearTimeSeconds,
         int experience,
-        const std::string& rewardSummary);
+        const std::string& rewardSummary,
+        const std::unordered_map<std::string, int>& rewardAmounts);
     WHEATEAR_API bool IsDungeonUnlocked(const std::string& dungeonId);
     WHEATEAR_API bool IsSkillUnlocked(const std::string& skillId);
 

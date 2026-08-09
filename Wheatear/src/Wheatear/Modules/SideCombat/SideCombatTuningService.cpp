@@ -6,6 +6,7 @@
 #include "Wheatear/Modules/Common/GameplayTextService.h"
 
 #include <algorithm>
+#include <chrono>
 #include <filesystem>
 #include <utility>
 
@@ -80,6 +81,18 @@ namespace Wheatear::SideCombatTuningService {
             return {
                 node[0].as<float>(fallback.x),
                 node[1].as<float>(fallback.y)
+            };
+        }
+
+        static glm::vec4 ReadVec4(const YAML::Node& node, const glm::vec4& fallback)
+        {
+            if (!node || !node.IsSequence() || node.size() < 4)
+                return fallback;
+            return {
+                node[0].as<float>(fallback.r),
+                node[1].as<float>(fallback.g),
+                node[2].as<float>(fallback.b),
+                node[3].as<float>(fallback.a)
             };
         }
 
@@ -563,6 +576,8 @@ namespace Wheatear::SideCombatTuningService {
             const glm::vec2 dashTallScale = { 1.5f, 1.25f };
             const glm::vec2 actionTallScale = { 1.60f, 1.60f };
             const glm::vec2 actionTallOffset = { 0.0f, 0.4453f };
+            const glm::vec2 breakLimitScale = { 1.25f, 1.25f };
+            const glm::vec2 breakLimitOffset = { 0.0f, 0.3398f };
             const glm::vec2 floorScale = { 2.0f, 1.0f };
 
             AddAnimationClip(tuning.PlayerAnimations, "idle", characterRoot + "protag_idle_{frame2}.png", 8, 12.0f, true, bodyScale, bodyOffset);
@@ -580,7 +595,7 @@ namespace Wheatear::SideCombatTuningService {
             AddAnimationClip(tuning.PlayerAnimations, "dash", characterRoot + "protag_dash_{frame2}.png", 1, 8.0f, false, actionTallScale, actionTallOffset);
             AddAnimationClip(tuning.PlayerAnimations, "magic_bolt", characterRoot + "protag_magic_bolt_{frame2}.png", 9, 20.0f, false, bodyScale, bodyOffset);
             AddAnimationClip(tuning.PlayerAnimations, "ally_support", characterRoot + "protag_ally_support_{frame2}.png", 8, 18.0f, false, slashScale, bodyOffset);
-            AddAnimationClip(tuning.PlayerAnimations, "break_limit", characterRoot + "protag_break_limit_{frame2}.png", 2, 8.0f, false, actionTallScale, actionTallOffset);
+            AddAnimationClip(tuning.PlayerAnimations, "break_limit", characterRoot + "protag_break_limit_{frame2}.png", 2, 8.0f, false, breakLimitScale, breakLimitOffset);
 
             const std::string enemyRoot = AssetAliasRegistry::Path("side.path.enemies");
             const glm::vec2 gruntScale = { 1.0f, 1.0f };
@@ -929,6 +944,7 @@ namespace Wheatear::SideCombatTuningService {
                     tuning.ShadowMaxAlpha = visuals["shadowMaxAlpha"].as<float>(tuning.ShadowMaxAlpha);
                     tuning.ShadowAirFadeHeight = visuals["shadowAirFadeHeight"].as<float>(tuning.ShadowAirFadeHeight);
                     tuning.ShadowOffset = ReadVec2(visuals["shadowOffset"], tuning.ShadowOffset);
+                    tuning.ShadowColor = ReadVec4(visuals["shadowColor"], tuning.ShadowColor);
                     tuning.PlayerAnimations = ReadAnimationSet(visuals["playerAnimations"], tuning.PlayerAnimations);
                     tuning.GruntAnimations = ReadAnimationSet(visuals["gruntAnimations"], tuning.GruntAnimations);
                     tuning.BossAnimations = ReadAnimationSet(visuals["bossAnimations"], tuning.BossAnimations);
@@ -976,17 +992,27 @@ namespace Wheatear::SideCombatTuningService {
             std::filesystem::path ResolvedPath;
             std::filesystem::file_time_type WriteTime{};
             bool HasWriteTime = false;
+            std::chrono::steady_clock::time_point LastChecked{};
         };
 
     const SideCombatTuning& GetTuning(const SideCombatLevelComponent& level)
         {
             static std::unordered_map<std::string, SideCombatTuningCacheEntry> cache;
+            static constexpr auto kCheckInterval = std::chrono::milliseconds(500);
             const std::string key = level.TuningPath.empty() ? "__default__" : level.TuningPath;
             const std::filesystem::path resolvedPath = ResolveTuningPath(level.TuningPath);
+            auto it = cache.find(key);
+            const auto now = std::chrono::steady_clock::now();
+            if (it != cache.end() &&
+                it->second.ResolvedPath == resolvedPath &&
+                it->second.LastChecked.time_since_epoch().count() != 0 &&
+                now - it->second.LastChecked < kCheckInterval)
+            {
+                return it->second.Tuning;
+            }
+
             std::filesystem::file_time_type writeTime{};
             const bool hasWriteTime = TryGetWriteTime(resolvedPath, &writeTime);
-
-            auto it = cache.find(key);
             const bool shouldReload =
                 it == cache.end() ||
                 it->second.ResolvedPath != resolvedPath ||
@@ -1000,7 +1026,12 @@ namespace Wheatear::SideCombatTuningService {
                 entry.ResolvedPath = resolvedPath;
                 entry.WriteTime = writeTime;
                 entry.HasWriteTime = hasWriteTime;
+                entry.LastChecked = now;
                 it = cache.insert_or_assign(key, std::move(entry)).first;
+            }
+            else
+            {
+                it->second.LastChecked = now;
             }
             return it->second.Tuning;
         }

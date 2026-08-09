@@ -568,9 +568,10 @@ namespace Wheatear::ProgressionSkillTreePageService {
             if (!treeEntity || !treeEntity.HasComponent<UIWidgetComponent>())
                 return false;
 
-            auto& tree = treeEntity.HasComponent<UISkillTreeViewComponent>()
-                ? treeEntity.GetComponent<UISkillTreeViewComponent>()
-                : treeEntity.AddComponent<UISkillTreeViewComponent>();
+            if (!treeEntity.HasComponent<UISkillTreeViewComponent>())
+                return false;
+
+            auto& tree = treeEntity.GetComponent<UISkillTreeViewComponent>();
 
             if (treeEntity.HasComponent<UIPanelComponent>())
                 treeEntity.GetComponent<UIPanelComponent>().ClipChildren = true;

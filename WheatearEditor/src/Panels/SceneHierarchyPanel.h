@@ -51,6 +51,12 @@ namespace Wheatear {
             const UIChildMap& childMap) const;
         Entity FindSingleUICanvas() const;
         UUID ResolveUIParentID(Entity entity) const;
+        bool CanReparentUI(Entity child,
+            Entity parent,
+            const UIChildMap& childMap) const;
+        void ReparentUIWithUndo(Entity child,
+            Entity parent,
+            const UIChildMap& childMap);
         Entity CreateEntityWithUndo(const std::string& name,
             const std::function<void(Entity)>& configure);
         Entity CreateUITemplateWithUndo(UITemplateKind kind, UUID parentID);

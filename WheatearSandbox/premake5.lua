@@ -12,4 +12,5 @@ project "WheatearSandbox"
     links { "Wheatear" }
     dependson { "Wheatear-ScriptCore" }
 
+    wt_app_linker_defaults()
     wt_configurations()

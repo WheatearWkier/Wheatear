@@ -1,9 +1,11 @@
-#include "wtpch.h"
+﻿#include "wtpch.h"
 #include "SideCombatHudService.h"
 
+#include "SideCombatHudPreset.h"
 #include "SideCombatTuningService.h"
 #include "Wheatear/Core/AssetAliasRegistry.h"
 #include "Wheatear/Core/InputBindingService.h"
+#include "Wheatear/Core/Log.h"
 #include "Wheatear/Modules/Common/GameplayUILayoutService.h"
 #include "Wheatear/Modules/Common/GameplayTextService.h"
 #include "Wheatear/Scene/Components.h"
@@ -16,6 +18,7 @@
 #include <cmath>
 #include <sstream>
 #include <string>
+#include <unordered_set>
 
 namespace Wheatear::SideCombatHudService {
 
@@ -36,21 +39,30 @@ namespace Wheatear::SideCombatHudService {
         static constexpr float kSideUISheetHeight = 1440.0f;
         static constexpr float kComboFontSheetWidth = 512.0f;
         static constexpr float kComboFontSheetHeight = 288.0f;
+        static std::string s_SkillPrefix = "SC_Skill";
+
+        static void WarnMissingAuthoredHud(Scene* scene,
+            const std::string& entityName,
+            const char* missing)
+        {
+            if (!scene || entityName.empty() || !missing)
+                return;
+
+            static std::unordered_set<std::string> warned;
+            std::ostringstream key;
+            key << scene << ':' << entityName << ':' << missing;
+            if (warned.insert(key.str()).second)
+            {
+                WT_CORE_WARN("SideCombatHudService: '{}' is missing {}. Add it to the HUD scene/preset asset; runtime HUD component creation is disabled.",
+                    entityName,
+                    missing);
+            }
+        }
 
         struct SheetUVRect
         {
             glm::vec2 Min = { 0.0f, 0.0f };
             glm::vec2 Max = { 1.0f, 1.0f };
-        };
-
-        struct CombatItemSlot
-        {
-            std::string Key;
-            std::string Shortcut;
-            std::string IconPath;
-            std::string DisplayName;
-            std::string Usage;
-            SheetUVRect IconUV;
         };
 
         struct FontGlyph
@@ -65,6 +77,11 @@ namespace Wheatear::SideCombatHudService {
                 { x0 / kSideUISheetWidth, 1.0f - y1 / kSideUISheetHeight },
                 { x1 / kSideUISheetWidth, 1.0f - y0 / kSideUISheetHeight }
             };
+        }
+
+        static SheetUVRect SheetRect(const glm::vec4& pixels)
+        {
+            return SheetRect(pixels.x, pixels.y, pixels.z, pixels.w);
         }
 
         static FontGlyph FontRect(float x0, float y0, float x1, float y1)
@@ -98,6 +115,71 @@ namespace Wheatear::SideCombatHudService {
                 "assets/vertical_slice/side_combat/ui/icon_skill_break_limit.png");
         }
 
+        static std::string ResolveHudTexturePath(const std::string& pathOrAlias, const std::string& fallback)
+        {
+            if (pathOrAlias.empty())
+                return fallback;
+            return AssetAliasRegistry::Resolve(pathOrAlias);
+        }
+
+        static const SideCombatLevelComponent::SkillHudSlot* FindSkillHudSlot(
+            const SideCombatLevelComponent& level,
+            const std::string& key)
+        {
+            for (const auto& slot : level.SkillHudSlots)
+            {
+                if (slot.Key == key)
+                    return &slot;
+            }
+            return nullptr;
+        }
+
+        static const SideCombatLevelComponent::CombatItemHudSlot* FindCombatItemHudSlot(
+            const SideCombatLevelComponent& level,
+            const std::string& key)
+        {
+            for (const auto& slot : level.CombatItemHudSlots)
+            {
+                if (slot.Key == key)
+                    return &slot;
+            }
+            return nullptr;
+        }
+
+        static std::string GetSkillKeyLabel(const SideCombatLevelComponent& level,
+            const std::string& key,
+            const std::string& fallback)
+        {
+            const auto* slot = FindSkillHudSlot(level, key);
+            if (!slot || slot->KeyLabel.empty())
+                return fallback;
+            return slot->KeyLabel;
+        }
+
+        static void ReplaceAll(std::string& value, const std::string& token, const std::string& replacement)
+        {
+            if (token.empty())
+                return;
+
+            size_t position = 0;
+            while ((position = value.find(token, position)) != std::string::npos)
+            {
+                value.replace(position, token.length(), replacement);
+                position += replacement.length();
+            }
+        }
+
+        static std::string FormatHudTemplate(std::string value,
+            const std::string& valueText = {},
+            const std::string& manaCostText = {},
+            const std::string& comboText = {})
+        {
+            ReplaceAll(value, "{value}", valueText);
+            ReplaceAll(value, "{mana_cost}", manaCostText);
+            ReplaceAll(value, "{combo}", comboText);
+            return value;
+        }
+
         static SheetUVRect PlayerFrameUV() { return SheetRect(257.0f, 32.0f, 1099.0f, 383.0f); }
         static SheetUVRect BossFrameUV() { return SheetRect(1136.0f, 80.0f, 2327.0f, 348.0f); }
         static SheetUVRect ComboFrameUV() { return SheetRect(1270.0f, 363.0f, 2318.0f, 613.0f); }
@@ -108,15 +190,6 @@ namespace Wheatear::SideCombatHudService {
         static SheetUVRect GoldBarUV() { return SheetRect(1645.0f, 968.0f, 2260.0f, 1015.0f); }
         static SheetUVRect JoystickUV() { return SheetRect(492.0f, 787.0f, 701.0f, 996.0f); }
         static SheetUVRect ItemFrameUV() { return SheetRect(298.0f, 807.0f, 470.0f, 979.0f); }
-        static SheetUVRect BasicAttackUV() { return SheetRect(289.0f, 1010.0f, 478.0f, 1194.0f); }
-        static SheetUVRect SkillOneUV() { return SheetRect(509.0f, 1011.0f, 696.0f, 1194.0f); }
-        static SheetUVRect SkillTwoUV() { return SheetRect(726.0f, 1014.0f, 907.0f, 1193.0f); }
-        static SheetUVRect SkillThreeUV() { return SheetRect(934.0f, 1012.0f, 1117.0f, 1194.0f); }
-        static SheetUVRect SkillFourUV() { return SheetRect(1143.0f, 1014.0f, 1325.0f, 1195.0f); }
-        static SheetUVRect SupportSkillUV() { return SheetRect(1354.0f, 1014.0f, 1538.0f, 1195.0f); }
-        static SheetUVRect HealItemUV() { return SheetRect(297.0f, 1239.0f, 429.0f, 1392.0f); }
-        static SheetUVRect ManaItemUV() { return SheetRect(461.0f, 1223.0f, 561.0f, 1391.0f); }
-        static SheetUVRect StatusItemUV() { return SheetRect(600.0f, 1233.0f, 738.0f, 1393.0f); }
         static SheetUVRect BuffAttackUV() { return SheetRect(1575.0f, 1233.0f, 1751.0f, 1408.0f); }
         static SheetUVRect BuffShieldUV() { return SheetRect(1767.0f, 1230.0f, 1913.0f, 1407.0f); }
         static SheetUVRect DebuffStateUV() { return SheetRect(1931.0f, 1230.0f, 2110.0f, 1409.0f); }
@@ -172,6 +245,9 @@ namespace Wheatear::SideCombatHudService {
             bool visible = true,
             bool button = false)
         {
+            if (!scene)
+                return {};
+
             Entity entity = GameplayUILayoutService::EnsureUIWidget(scene,
                 name,
                 kSideCombatCanvasName,
@@ -194,12 +270,8 @@ namespace Wheatear::SideCombatHudService {
 
             if (button)
             {
-                auto& buttonComponent = entity.HasComponent<UIButtonComponent>()
-                    ? entity.GetComponent<UIButtonComponent>()
-                    : entity.AddComponent<UIButtonComponent>();
-                buttonComponent.NormalColor = { 0.0f, 0.0f, 0.0f, 0.0f };
-                buttonComponent.HoverColor = { 0.0f, 0.65f, 1.0f, 0.10f };
-                buttonComponent.PressedColor = { 0.0f, 0.85f, 1.0f, 0.20f };
+                if (!entity.HasComponent<UIButtonComponent>())
+                    WarnMissingAuthoredHud(scene, name, "UIButtonComponent");
             }
 
             return entity;
@@ -222,9 +294,13 @@ namespace Wheatear::SideCombatHudService {
 
             const bool hadAuthoredImage = entity.HasComponent<UIImageComponent>() &&
                 static_cast<bool>(entity.GetComponent<UIImageComponent>().Texture);
-            auto& image = entity.HasComponent<UIImageComponent>()
-                ? entity.GetComponent<UIImageComponent>()
-                : entity.AddComponent<UIImageComponent>();
+            if (!entity.HasComponent<UIImageComponent>())
+            {
+                WarnMissingAuthoredHud(scene, name, "UIImageComponent");
+                return {};
+            }
+
+            auto& image = entity.GetComponent<UIImageComponent>();
             if (forceImage || !hadAuthoredImage)
             {
                 image.Color = color;
@@ -261,9 +337,13 @@ namespace Wheatear::SideCombatHudService {
                 widget.Visible = visible;
             }
 
-            auto& image = entity.HasComponent<UIImageComponent>()
-                ? entity.GetComponent<UIImageComponent>()
-                : entity.AddComponent<UIImageComponent>();
+            if (!entity.HasComponent<UIImageComponent>())
+            {
+                WarnMissingAuthoredHud(scene, name, "UIImageComponent");
+                return {};
+            }
+
+            auto& image = entity.GetComponent<UIImageComponent>();
             image.Color = color;
             image.UVMin = glyph.UV.Min;
             image.UVMax = glyph.UV.Max;
@@ -320,6 +400,9 @@ namespace Wheatear::SideCombatHudService {
             glm::vec4 color,
             bool visible = true)
         {
+            if (!scene)
+                return {};
+
             Entity entity = GameplayUILayoutService::EnsureText(scene,
                 name,
                 kSideCombatCanvasName,
@@ -348,25 +431,25 @@ namespace Wheatear::SideCombatHudService {
         {
             switch (state)
             {
-            case SideCombatState::HitStun: return "受击";
-            case SideCombatState::Launched: return "浮空";
-            case SideCombatState::Knockdown: return "倒地";
-            case SideCombatState::Recovery: return "硬直";
-            case SideCombatState::SuperArmor: return "霸体";
-            case SideCombatState::Broken: return "破防";
-            case SideCombatState::Dead: return "战败";
+            case SideCombatState::HitStun: return "鍙楀嚮";
+            case SideCombatState::Launched: return "娴┖";
+            case SideCombatState::Knockdown: return "鍊掑湴";
+            case SideCombatState::Recovery: return "纭洿";
+            case SideCombatState::SuperArmor: return "闇镐綋";
+            case SideCombatState::Broken: return "鐮撮槻";
+            case SideCombatState::Dead: return "鎴樿触";
             case SideCombatState::Normal:
-            default: return "正常";
+            default: return "姝ｅ父";
             }
         }
 
         static void SetSkillSlotVisible(Scene* scene, const std::string& key, bool visible)
         {
-            SetWidgetVisible(scene, "SC_SkillSlot_" + key, visible);
-            SetWidgetVisible(scene, "SC_SkillIcon_" + key, visible);
-            SetWidgetVisible(scene, "SC_SkillCooldown_" + key, visible);
-            SetWidgetVisible(scene, "SC_SkillCooldownText_" + key, visible);
-            SetWidgetVisible(scene, "SC_SkillKey_" + key, visible);
+            SetWidgetVisible(scene, s_SkillPrefix + "Slot_" + key, visible);
+            SetWidgetVisible(scene, s_SkillPrefix + "Icon_" + key, visible);
+            SetWidgetVisible(scene, s_SkillPrefix + "Cooldown_" + key, visible);
+            SetWidgetVisible(scene, s_SkillPrefix + "CooldownText_" + key, visible);
+            SetWidgetVisible(scene, s_SkillPrefix + "Key_" + key, visible);
         }
 
         static void UpdateCooldownMask(Scene* scene,
@@ -389,13 +472,13 @@ namespace Wheatear::SideCombatHudService {
             bool unlocked,
             float cooldown,
             float maxCooldown,
-            const std::string& unavailableText = "未解锁")
+            const std::string& unavailableText = "")
         {
-            const std::string slot = "SC_SkillSlot_" + key;
-            const std::string icon = "SC_SkillIcon_" + key;
-            const std::string overlay = "SC_SkillCooldown_" + key;
-            const std::string text = "SC_SkillCooldownText_" + key;
-            const std::string keyText = "SC_SkillKey_" + key;
+            const std::string slot = s_SkillPrefix + "Slot_" + key;
+            const std::string icon = s_SkillPrefix + "Icon_" + key;
+            const std::string overlay = s_SkillPrefix + "Cooldown_" + key;
+            const std::string text = s_SkillPrefix + "CooldownText_" + key;
+            const std::string keyText = s_SkillPrefix + "Key_" + key;
 
             if (!FindEntityByName(scene, slot))
                 return;
@@ -417,7 +500,7 @@ namespace Wheatear::SideCombatHudService {
                     SetWidgetTopLeft(scene, overlay, sourceWidget.Position, sourceWidget.Size);
                 }
                 SetProgress(scene, overlay, 1.0f, 1.0f);
-                SetRadialProgress(scene, overlay, 1.0f);
+                SetRadialProgress(scene, overlay, 0.0f);
                 SetWidgetVisible(scene, overlay, true);
                 SetText(scene, text, unavailableText);
                 SetWidgetVisible(scene, text, true);
@@ -428,70 +511,37 @@ namespace Wheatear::SideCombatHudService {
         }
 
         static void UpdateSkillTooltip(Scene* scene,
+            const SideCombatLevelComponent& level,
             const std::string& key,
             const std::string& text)
         {
             const bool visible = !key.empty() && !text.empty();
-            SetWidgetVisible(scene, "SC_SkillTooltipPanel", visible);
-            SetWidgetVisible(scene, "SC_SkillTooltipText", visible);
+            SetWidgetVisible(scene, level.SkillTooltipPanelEntityName, visible);
+            SetWidgetVisible(scene, level.SkillTooltipTextEntityName, visible);
             if (!visible)
                 return;
 
-            float x = 0.705f;
-            float y = 0.690f;
-            if (key == "J")
+            glm::vec2 tooltipPosition = level.SkillTooltipLayout.Position;
+            if (const auto* slot = FindSkillHudSlot(level, key))
             {
-                x = 0.690f;
-                y = 0.790f;
+                tooltipPosition = slot->TooltipPosition;
             }
-            else if (key == "S2")
+            else if (key.rfind("item:", 0) == 0)
             {
-                x = 0.690f;
-                y = 0.735f;
-            }
-            else if (key == "S3")
-            {
-                x = 0.690f;
-                y = 0.685f;
-            }
-            else if (key == "U")
-            {
-                x = 0.690f;
-                y = 0.590f;
-            }
-            else if (key == "I")
-            {
-                x = 0.690f;
-                y = 0.485f;
-            }
-            else if (key == "L")
-                x = 0.705f;
-            else if (key == "ItemSlot1")
-            {
-                x = 0.04f;
-                y = 0.535f;
-            }
-            else if (key == "ItemSlot2")
-            {
-                x = 0.095f;
-                y = 0.535f;
-            }
-            else if (key == "ItemSlot3")
-            {
-                x = 0.150f;
-                y = 0.535f;
+                if (const auto* itemSlot = FindCombatItemHudSlot(level, key.substr(5)))
+                    tooltipPosition = itemSlot->TooltipPosition;
             }
 
-            const glm::vec2 size = { 0.225f, 0.090f };
+            const glm::vec2 size = level.SkillTooltipLayout.Size;
             const glm::vec2 position = {
-                std::clamp(x, 0.04f, 0.96f - size.x),
-                y
+                std::clamp(tooltipPosition.x, 0.04f, 0.96f - size.x),
+                tooltipPosition.y
             };
-            SetWidgetTopLeft(scene, "SC_SkillTooltipPanel", position, size);
-            SetWidgetTopLeft(scene, "SC_SkillTooltipText",
-                position + glm::vec2(0.012f, 0.010f),
-                size - glm::vec2(0.024f, 0.020f));
-            SetText(scene, "SC_SkillTooltipText", text);
+            SetWidgetTopLeft(scene, level.SkillTooltipPanelEntityName, position, size);
+            SetWidgetTopLeft(scene, level.SkillTooltipTextEntityName,
+                position + level.SkillTooltipPadding,
+                size - level.SkillTooltipPadding * 2.0f);
+            SetText(scene, level.SkillTooltipTextEntityName, text);
         }
 
         static void UpdateCooldownMask(Scene* scene,
@@ -513,13 +563,17 @@ namespace Wheatear::SideCombatHudService {
             if (cooldown > 0.05f)
             {
                 const auto& sourceWidget = source.GetComponent<UIWidgetComponent>();
-                const float ratio = std::clamp(cooldown / std::max(0.05f, maxCooldown), 0.0f, 1.0f);
+                const float remainingRatio = std::clamp(
+                    cooldown / std::max(0.05f, maxCooldown),
+                    0.0f,
+                    1.0f);
+                const float completionRatio = 1.0f - remainingRatio;
                 SetWidgetTopLeft(scene,
                     overlayName,
                     sourceWidget.Position,
                     sourceWidget.Size);
-                SetRadialProgress(scene, overlayName, ratio);
-                SetWidgetVisible(scene, overlayName, ratio > 0.001f);
+                SetRadialProgress(scene, overlayName, completionRatio);
+                SetWidgetVisible(scene, overlayName, remainingRatio > 0.001f);
                 SetText(scene, textName, FormatCooldownSeconds(cooldown));
                 SetWidgetVisible(scene, textName, true);
             }
@@ -531,33 +585,6 @@ namespace Wheatear::SideCombatHudService {
             }
         }
 
-        static const std::array<CombatItemSlot, 3>& GetCombatItemSlots()
-        {
-            static const std::array<CombatItemSlot, 3> slots = {
-                CombatItemSlot{
-                    "1",
-                    "1",
-                    SideUISheetPath(),
-                    "生命药水",
-                    "回复生命。按 1 使用。",
-                    HealItemUV() },
-                CombatItemSlot{
-                    "2",
-                    "2",
-                    SideUISheetPath(),
-                    "魔力药水",
-                    "回复蓝量。按 2 使用。",
-                    ManaItemUV() },
-                CombatItemSlot{
-                    "3",
-                    "3",
-                    SideUISheetPath(),
-                    "力量药剂",
-                    "临时提高攻击力。按 3 使用。",
-                    StatusItemUV() }
-            };
-            return slots;
-        }
 
         static float GetCombatItemCooldownRemaining(const SidePlayerControllerComponent* controller, const std::string& key)
         {
@@ -587,9 +614,8 @@ namespace Wheatear::SideCombatHudService {
             return 0.0f;
         }
 
-        static void SetItemSlotVisible(Scene* scene, const CombatItemSlot& slot, bool visible)
+        static void SetItemSlotVisible(Scene* scene, const std::string& prefix, bool visible)
         {
-            const std::string prefix = std::string("SC_ItemSlot_") + slot.Key;
             SetWidgetVisible(scene, prefix + "_Frame", visible);
             SetWidgetVisible(scene, prefix + "_Icon", visible);
             SetWidgetVisible(scene, prefix + "_Button", visible);
@@ -598,38 +624,63 @@ namespace Wheatear::SideCombatHudService {
             SetWidgetVisible(scene, prefix + "_CooldownText", visible);
         }
 
-        static void UpdateCombatItemSlots(Scene* scene, const SidePlayerControllerComponent* controller)
+        static void ConfigureCombatItemSlots(Scene* scene,
+            const SideCombatLevelComponent& level)
         {
-            int index = 0;
-            const std::array<glm::vec2, 3> positions = {
-                glm::vec2{ 0.038f, 0.662f },
-                glm::vec2{ 0.096f, 0.662f },
-                glm::vec2{ 0.154f, 0.662f }
-            };
-            const glm::vec2 frameSize = { 0.052f, 0.092f };
-            const glm::vec2 iconInset = { 0.006f, 0.007f };
-            const glm::vec2 iconSize = { 0.040f, 0.078f };
+            const std::string itemSlotPrefix = level.ItemSlotPrefix.empty()
+                ? "SC_ItemSlot_"
+                : level.ItemSlotPrefix;
 
-            for (const CombatItemSlot& slot : GetCombatItemSlots())
+            for (const auto& slot : level.CombatItemHudSlots)
             {
-                const std::string prefix = std::string("SC_ItemSlot_") + slot.Key;
-                const glm::vec2 framePosition = positions[static_cast<size_t>(index)];
-                SetItemSlotVisible(scene, slot, true);
-                EnsureSheetImage(scene, prefix + "_Frame", framePosition, frameSize, 58, ItemFrameUV());
-                EnsureSheetImage(scene, prefix + "_Icon", framePosition + iconInset, iconSize, 60, slot.IconUV,
-                    glm::vec4(1.0f), true);
-                EnsureTransparentWidget(scene, prefix + "_Button", framePosition, frameSize, 62, true, true);
-                EnsureCooldownOverlay(scene, prefix + "_Cooldown", framePosition + iconInset, iconSize, 61, slot.IconUV);
+                if (!slot.Enabled || slot.Key.empty())
+                    continue;
+
+                const std::string prefix = itemSlotPrefix + slot.Key;
+                const glm::vec2 framePosition = slot.Position;
+                const glm::vec2 iconPosition = framePosition + slot.IconInset;
+                SetItemSlotVisible(scene, prefix, true);
+                EnsureSheetImage(scene, prefix + "_Frame", framePosition, slot.FrameSize, 58, ItemFrameUV());
+                if (slot.UseSheetIcon)
+                {
+                    EnsureSheetImage(scene, prefix + "_Icon", iconPosition, slot.IconSize, 60, SheetRect(slot.IconSheetPixels),
+                        glm::vec4(1.0f), true);
+                }
+                else
+                {
+                    Entity icon = EnsureTransparentWidget(scene, prefix + "_Icon", iconPosition, slot.IconSize, 60, true, true);
+                    if (icon)
+                    {
+                        if (icon.HasComponent<UIImageComponent>())
+                        {
+                            auto& image = icon.GetComponent<UIImageComponent>();
+                            image.Color = glm::vec4(1.0f);
+                            image.UVMin = { 0.0f, 0.0f };
+                            image.UVMax = { 1.0f, 1.0f };
+                        }
+                        else
+                        {
+                            WarnMissingAuthoredHud(scene, prefix + "_Icon", "UIImageComponent");
+                        }
+                    }
+                }
+                EnsureTransparentWidget(scene, prefix + "_Button", framePosition, slot.FrameSize, 62, true, true);
+                EnsureCooldownOverlay(scene, prefix + "_Cooldown", iconPosition, slot.IconSize, 61, slot.UseSheetIcon
+                    ? SheetRect(slot.IconSheetPixels)
+                    : SheetRect(glm::vec4{ 0.0f, 0.0f, 1.0f, 1.0f }));
                 EnsureHudText(scene, prefix + "_CooldownText",
-                    framePosition + iconInset + glm::vec2(0.003f, 0.026f),
+                    iconPosition + glm::vec2(0.003f, 0.026f),
                     { 0.034f, 0.020f },
                     64,
                     "",
                     11.0f,
                     { 0.95f, 0.98f, 1.0f, 1.0f },
                     false);
-                GameplayUILayoutService::SetButtonCommand(scene, prefix + "_Icon", "side:item:" + slot.Key);
-                GameplayUILayoutService::SetButtonCommand(scene, prefix + "_Button", "side:item:" + slot.Key);
+                const std::string command = slot.Command.empty()
+                    ? "side:item:" + slot.Key
+                    : slot.Command;
+                GameplayUILayoutService::SetButtonCommand(scene, prefix + "_Icon", command);
+                GameplayUILayoutService::SetButtonCommand(scene, prefix + "_Button", command);
                 EnsureHudText(scene, prefix + "_Count",
                     framePosition + glm::vec2(0.005f, 0.004f),
                     { 0.018f, 0.018f },
@@ -637,20 +688,38 @@ namespace Wheatear::SideCombatHudService {
                     slot.Shortcut,
                     12.5f,
                     { 0.92f, 0.98f, 1.0f, 1.0f });
-                SetImageTexture(scene, prefix + "_Icon", slot.IconPath);
+                SetImageTexture(scene, prefix + "_Icon", ResolveHudTexturePath(slot.IconTexturePath, SideUISheetPath()));
+                SetImageTexture(scene, prefix + "_Cooldown", ResolveHudTexturePath(slot.IconTexturePath, SideUISheetPath()));
                 SetImageColor(scene, prefix + "_Icon", glm::vec4(1.0f));
                 SetText(scene, prefix + "_Count", slot.Shortcut);
+            }
+        }
+
+        static void UpdateCombatItemSlots(Scene* scene,
+            const SideCombatLevelComponent& level,
+            const SidePlayerControllerComponent* controller)
+        {
+            const std::string itemSlotPrefix = level.ItemSlotPrefix.empty()
+                ? "SC_ItemSlot_"
+                : level.ItemSlotPrefix;
+
+            for (const auto& slot : level.CombatItemHudSlots)
+            {
+                if (!slot.Enabled || slot.Key.empty())
+                    continue;
+
+                const std::string prefix = itemSlotPrefix + slot.Key;
                 UpdateCooldownMask(scene,
                     prefix + "_Icon",
                     prefix + "_Cooldown",
                     prefix + "_CooldownText",
                     GetCombatItemCooldownRemaining(controller, slot.Key),
                     GetCombatItemCooldownDuration(controller, slot.Key));
-                ++index;
             }
         }
 
         static void ApplyCombatItemTooltip(Scene* scene,
+            const SideCombatLevelComponent& level,
             std::string& hoveredKey,
             std::string& tooltip,
             const SidePlayerControllerComponent* controller)
@@ -658,24 +727,28 @@ namespace Wheatear::SideCombatHudService {
             if (!tooltip.empty())
                 return;
 
-            int index = 1;
-            for (const CombatItemSlot& slot : GetCombatItemSlots())
+            const std::string itemSlotPrefix = level.ItemSlotPrefix.empty()
+                ? "SC_ItemSlot_"
+                : level.ItemSlotPrefix;
+            for (const auto& slot : level.CombatItemHudSlots)
             {
-                const std::string prefix = std::string("SC_ItemSlot_") + slot.Key;
+                if (!slot.Enabled || slot.Key.empty())
+                    continue;
+
+                const std::string prefix = itemSlotPrefix + slot.Key;
                 if (!IsButtonHovered(scene, prefix + "_Button") &&
                     !IsButtonHovered(scene, prefix + "_Icon"))
                 {
-                    ++index;
                     continue;
                 }
 
-                hoveredKey = "ItemSlot" + std::to_string(index);
+                hoveredKey = "item:" + slot.Key;
                 std::ostringstream stream;
                 stream << slot.Shortcut << "  " << slot.DisplayName << "\n";
-                stream << slot.Usage;
+                stream << slot.UsageText;
                 const float cooldown = GetCombatItemCooldownRemaining(controller, slot.Key);
                 if (cooldown > 0.05f)
-                    stream << "\n冷却 " << FormatCooldownSeconds(cooldown) << " 秒";
+                    stream << "\n" << level.HudCooldownPrefix << FormatCooldownSeconds(cooldown) << level.HudSecondsSuffix;
                 tooltip = stream.str();
                 return;
             }
@@ -688,6 +761,9 @@ namespace Wheatear::SideCombatHudService {
             int sortOrder,
             const SheetUVRect& uv)
         {
+            if (!scene)
+                return {};
+
             Entity entity = GameplayUILayoutService::EnsureUIWidget(scene,
                 name,
                 kSideCombatCanvasName,
@@ -700,17 +776,24 @@ namespace Wheatear::SideCombatHudService {
 
             ClearPanelVisual(entity);
             ClearProgressVisual(entity);
-            auto& radial = entity.HasComponent<UIRadialCooldownComponent>()
-                ? entity.GetComponent<UIRadialCooldownComponent>()
-                : entity.AddComponent<UIRadialCooldownComponent>();
+            if (!entity.HasComponent<UIRadialCooldownComponent>())
+            {
+                WarnMissingAuthoredHud(scene, name, "UIRadialCooldownComponent");
+                return {};
+            }
+            if (!entity.HasComponent<UIImageComponent>())
+            {
+                WarnMissingAuthoredHud(scene, name, "UIImageComponent");
+                return {};
+            }
+
+            auto& radial = entity.GetComponent<UIRadialCooldownComponent>();
             radial.Color = { 0.0f, 0.0f, 0.0f, 0.58f };
             radial.StartAngle = 1.57079632679f;
             radial.Thickness = 1.0f;
             radial.Fade = 0.005f;
             radial.Progress = 0.0f;
-            auto& image = entity.HasComponent<UIImageComponent>()
-                ? entity.GetComponent<UIImageComponent>()
-                : entity.AddComponent<UIImageComponent>();
+            auto& image = entity.GetComponent<UIImageComponent>();
             image.Color.a = 0.0f;
             image.UVMin = uv.Min;
             image.UVMax = uv.Max;
@@ -727,7 +810,7 @@ namespace Wheatear::SideCombatHudService {
             glm::vec4 iconColor = glm::vec4(1.0f),
             bool visible = true)
         {
-            const std::string prefix = "SC_Skill";
+            const std::string& prefix = s_SkillPrefix;
             EnsureTransparentWidget(scene, prefix + "Slot_" + key, position, size, 61, visible, true);
             EnsureSheetImage(scene, prefix + "Icon_" + key, position, size, 64, uv, iconColor, true, visible);
             EnsureCooldownOverlay(scene, prefix + "Cooldown_" + key, position, size, 66, uv);
@@ -757,7 +840,7 @@ namespace Wheatear::SideCombatHudService {
             const std::string& keyLabel,
             bool visible = true)
         {
-            const std::string prefix = "SC_Skill";
+            const std::string& prefix = s_SkillPrefix;
             EnsureTransparentWidget(scene, prefix + "Slot_" + key, position, size, 61, visible, true);
 
             Entity icon = EnsureTransparentWidget(scene, prefix + "Icon_" + key, position, size, 64, visible, true);
@@ -765,9 +848,13 @@ namespace Wheatear::SideCombatHudService {
             {
                 const bool hadAuthoredImage = icon.HasComponent<UIImageComponent>() &&
                     static_cast<bool>(icon.GetComponent<UIImageComponent>().Texture);
-                auto& image = icon.HasComponent<UIImageComponent>()
-                    ? icon.GetComponent<UIImageComponent>()
-                    : icon.AddComponent<UIImageComponent>();
+                if (!icon.HasComponent<UIImageComponent>())
+                {
+                    WarnMissingAuthoredHud(scene, prefix + "Icon_" + key, "UIImageComponent");
+                    return;
+                }
+
+                auto& image = icon.GetComponent<UIImageComponent>();
                 if (!hadAuthoredImage)
                 {
                     image.Color = { 1.0f, 1.0f, 1.0f, visible ? 1.0f : 0.0f };
@@ -784,16 +871,23 @@ namespace Wheatear::SideCombatHudService {
             Entity overlay = EnsureTransparentWidget(scene, prefix + "Cooldown_" + key, position, size, 66, false, false);
             if (overlay)
             {
-                auto& image = overlay.HasComponent<UIImageComponent>()
-                    ? overlay.GetComponent<UIImageComponent>()
-                    : overlay.AddComponent<UIImageComponent>();
+                if (!overlay.HasComponent<UIImageComponent>())
+                {
+                    WarnMissingAuthoredHud(scene, prefix + "Cooldown_" + key, "UIImageComponent");
+                    return;
+                }
+                if (!overlay.HasComponent<UIRadialCooldownComponent>())
+                {
+                    WarnMissingAuthoredHud(scene, prefix + "Cooldown_" + key, "UIRadialCooldownComponent");
+                    return;
+                }
+
+                auto& image = overlay.GetComponent<UIImageComponent>();
                 image.Color.a = 0.0f;
                 image.UVMin = { 0.0f, 0.0f };
                 image.UVMax = { 1.0f, 1.0f };
                 SetImageTexture(scene, prefix + "Cooldown_" + key, texturePath);
-                auto& radial = overlay.HasComponent<UIRadialCooldownComponent>()
-                    ? overlay.GetComponent<UIRadialCooldownComponent>()
-                    : overlay.AddComponent<UIRadialCooldownComponent>();
+                auto& radial = overlay.GetComponent<UIRadialCooldownComponent>();
                 radial.Color = { 0.0f, 0.0f, 0.0f, 0.58f };
                 radial.StartAngle = 1.57079632679f;
                 radial.Thickness = 1.0f;
@@ -841,13 +935,14 @@ namespace Wheatear::SideCombatHudService {
             const std::string& prefix,
             glm::vec2 buffStart,
             glm::vec2 debuffStart,
+            const SideCombatLevelComponent::StatusBadgeLayout& layout,
             const SideCombatantComponent* combatant,
             const SidePlayerControllerComponent* controller,
             bool playerSide,
             bool visible)
         {
-            const glm::vec2 size = { 0.031f, 0.055f };
-            const float gap = 0.040f;
+            const glm::vec2 size = layout.Size;
+            const float gap = layout.Gap;
             const bool magicBuff = visible && playerSide && controller &&
                 controller->RuntimeAttackBuffTimer > 0.0f;
             const bool shieldBuff = visible && combatant &&
@@ -871,11 +966,11 @@ namespace Wheatear::SideCombatHudService {
                 glm::vec4(1.0f), false, breakDebuff);
         }
 
-        static void UpdateJoystickVisual(Scene* scene)
+        static void UpdateJoystickVisual(Scene* scene, const SideCombatLevelComponent& level)
         {
-            glm::vec2 basePosition = { 0.047f, 0.790f };
-            glm::vec2 baseSize = { 0.080f, 0.142f };
-            const glm::vec2 thumbSize = { 0.033f, 0.059f };
+            glm::vec2 basePosition = level.JoystickBaseLayout.Position;
+            glm::vec2 baseSize = level.JoystickBaseLayout.Size;
+            const glm::vec2 thumbSize = level.JoystickThumbSize;
             glm::vec2 direction = { 0.0f, 0.0f };
             if (InputBindingService::IsActionDown("move.left"))
                 direction.x -= 1.0f;
@@ -890,7 +985,7 @@ namespace Wheatear::SideCombatHudService {
             if (lengthSq > 1.0f)
                 direction /= std::sqrt(lengthSq);
 
-            Entity base = EnsureSheetImage(scene, "SC_JoystickBase", basePosition, baseSize, 58, JoystickUV(),
+            Entity base = EnsureSheetImage(scene, level.JoystickBaseEntityName, basePosition, baseSize, 58, JoystickUV(),
                 { 1.0f, 1.0f, 1.0f, 0.86f });
             if (base && base.HasComponent<UIWidgetComponent>())
             {
@@ -900,9 +995,9 @@ namespace Wheatear::SideCombatHudService {
             }
 
             const glm::vec2 thumbCenter = basePosition + baseSize * 0.5f +
-                direction * glm::vec2(0.022f, 0.039f);
+                direction * level.JoystickThumbTravel;
             Entity thumb = EnsureSheetImage(scene,
-                "SC_JoystickThumb",
+                level.JoystickThumbEntityName,
                 thumbCenter - thumbSize * 0.5f,
                 thumbSize,
                 59,
@@ -920,18 +1015,67 @@ namespace Wheatear::SideCombatHudService {
             }
         }
 
-        static void HideComboCounter(Scene* scene)
+        static void HideComboCounter(Scene* scene, const SideCombatLevelComponent& level)
         {
-            SetWidgetVisible(scene, "SC_ComboFrame", false);
-            SetWidgetVisible(scene, "SC_ComboLabel", false);
-            SetWidgetVisible(scene, "SC_ComboMultiply", false);
+            SetWidgetVisible(scene, level.ComboFrameEntityName, false);
+            SetWidgetVisible(scene, level.ComboLabelEntityName, false);
+            SetWidgetVisible(scene, level.ComboMultiplyEntityName, false);
             for (int i = 0; i < 6; ++i)
-                SetWidgetVisible(scene, "SC_ComboDigit_" + std::to_string(i), false);
+                SetWidgetVisible(scene, level.ComboDigitPrefix + std::to_string(i), false);
         }
 
-        static void GetComboFrameLayout(Scene* scene, glm::vec2& position, glm::vec2& size)
+        static bool IsResultFadeActive(const SideCombatLevelComponent& level)
         {
-            Entity frame = FindEntityByName(scene, "SC_ComboFrame");
+            if (!level.RuntimeVictory && !level.RuntimeDefeat)
+                return false;
+
+            const bool victory = level.RuntimeVictory;
+            const float delay = std::max(0.0f, victory ? level.VictoryReturnDelay : level.DefeatReturnDelay);
+            const float fadeDuration = std::max(0.01f, level.ResultSceneFadeDuration);
+            const float fadeStart = std::max(0.0f, delay - fadeDuration);
+            return level.RuntimeResultTimer >= fadeStart;
+        }
+
+        static void HideResultFadeTextHud(Scene* scene, const SideCombatLevelComponent& level)
+        {
+            SetWidgetVisible(scene, level.MessageTextEntityName, false);
+            SetWidgetVisible(scene, level.SkillTextEntityName, false);
+            SetWidgetVisible(scene, level.RewardTextEntityName, false);
+            SetWidgetVisible(scene, level.PlayerHealthTextEntityName, false);
+            SetWidgetVisible(scene, level.BossHealthTextEntityName, false);
+            SetWidgetVisible(scene, level.ComboTextEntityName, false);
+            SetWidgetVisible(scene, level.SkillTooltipPanelEntityName, false);
+            SetWidgetVisible(scene, level.SkillTooltipTextEntityName, false);
+            HideComboCounter(scene, level);
+
+            const std::string itemSlotPrefix = level.ItemSlotPrefix.empty()
+                ? "SC_ItemSlot_"
+                : level.ItemSlotPrefix;
+            for (const auto& slot : level.CombatItemHudSlots)
+            {
+                if (!slot.Enabled || slot.Key.empty())
+                    continue;
+
+                const std::string prefix = itemSlotPrefix + slot.Key;
+                SetWidgetVisible(scene, prefix + "_Cooldown", false);
+                SetWidgetVisible(scene, prefix + "_Count", false);
+                SetWidgetVisible(scene, prefix + "_CooldownText", false);
+            }
+
+            for (const auto& slot : level.SkillHudSlots)
+            {
+                if (!slot.Enabled || slot.Key.empty())
+                    continue;
+
+                SetWidgetVisible(scene, s_SkillPrefix + "Cooldown_" + slot.Key, false);
+                SetWidgetVisible(scene, s_SkillPrefix + "Key_" + slot.Key, false);
+                SetWidgetVisible(scene, s_SkillPrefix + "CooldownText_" + slot.Key, false);
+            }
+        }
+
+        static void GetComboFrameLayout(Scene* scene, const std::string& frameEntityName, glm::vec2& position, glm::vec2& size)
+        {
+            Entity frame = FindEntityByName(scene, frameEntityName);
             if (!frame || !frame.HasComponent<UIWidgetComponent>())
                 return;
 
@@ -943,17 +1087,17 @@ namespace Wheatear::SideCombatHudService {
             }
         }
 
-        static void UpdateComboCounter(Scene* scene, int comboCount)
+        static void UpdateComboCounter(Scene* scene, const SideCombatLevelComponent& level, int comboCount)
         {
             if (!scene || comboCount <= 0)
             {
-                HideComboCounter(scene);
+                HideComboCounter(scene, level);
                 return;
             }
 
-            glm::vec2 framePosition = { 0.370f, 0.205f };
-            glm::vec2 frameSize = { 0.260f, 0.062f };
-            GetComboFrameLayout(scene, framePosition, frameSize);
+            glm::vec2 framePosition = level.ComboFrameLayout.Position;
+            glm::vec2 frameSize = level.ComboFrameLayout.Size;
+            GetComboFrameLayout(scene, level.ComboFrameEntityName, framePosition, frameSize);
             const float horizontalPadding = frameSize.x * 0.12f;
             const float targetWidth = frameSize.x - horizontalPadding * 2.0f;
             const float gap = 0.0045f;
@@ -980,29 +1124,29 @@ namespace Wheatear::SideCombatHudService {
             const float top = framePosition.y + (frameSize.y - glyphHeight) * 0.50f;
             float x = framePosition.x + (frameSize.x - totalWidth) * 0.50f;
 
-            EnsureSheetImage(scene, "SC_ComboFrame", framePosition, frameSize, 38,
+            EnsureSheetImage(scene, level.ComboFrameEntityName, framePosition, frameSize, 38,
                 ComboFrameUV(), { 1.0f, 1.0f, 1.0f, 0.94f }, false, true);
 
             const float labelWidth = label.Aspect * glyphHeight;
-            EnsureComboFontImage(scene, "SC_ComboLabel", { x, top }, { labelWidth, glyphHeight }, 44, label);
+            EnsureComboFontImage(scene, level.ComboLabelEntityName, { x, top }, { labelWidth, glyphHeight }, 44, label);
             x += labelWidth + gap;
 
             const float multiplyWidth = multiply.Aspect * glyphHeight;
-            EnsureComboFontImage(scene, "SC_ComboMultiply", { x, top }, { multiplyWidth, glyphHeight }, 44, multiply);
+            EnsureComboFontImage(scene, level.ComboMultiplyEntityName, { x, top }, { multiplyWidth, glyphHeight }, 44, multiply);
             x += multiplyWidth + gap;
 
             for (int i = 0; i < 6; ++i)
             {
                 if (i >= static_cast<int>(digits.size()))
                 {
-                    SetWidgetVisible(scene, "SC_ComboDigit_" + std::to_string(i), false);
+                    SetWidgetVisible(scene, level.ComboDigitPrefix + std::to_string(i), false);
                     continue;
                 }
 
                 const FontGlyph digitGlyph = ComboDigitGlyph(digits[static_cast<size_t>(i)]);
                 const float digitWidth = digitGlyph.Aspect * glyphHeight;
                 EnsureComboFontImage(scene,
-                    "SC_ComboDigit_" + std::to_string(i),
+                    level.ComboDigitPrefix + std::to_string(i),
                     { x, top },
                     { digitWidth, glyphHeight },
                     44,
@@ -1012,7 +1156,7 @@ namespace Wheatear::SideCombatHudService {
         }
 
         static void ConfigureSideCombatHudLayout(Scene* scene,
-            const SideCombatLevelComponent& level,
+            SideCombatLevelComponent& level,
             const SideCombatTuningService::SideCombatTuning& tuning,
             Entity boss,
             const SideCombatantComponent* playerCombatant,
@@ -1045,59 +1189,93 @@ namespace Wheatear::SideCombatHudService {
                 : 0.0f;
             const bool breakLimitUiVisible = SideCombatTuningService::ShouldShowBreakLimitUi(level, tuning);
 
-            SetWidgetVisible(scene, "SC_TutorialPanel", false);
-            SetWidgetVisible(scene, "SC_SkillBarPanel", false);
-            SetWidgetVisible(scene, level.MessageTextEntityName, false);
-            SetWidgetVisible(scene, level.SkillTextEntityName, false);
-            SetWidgetVisible(scene, level.RewardTextEntityName, false);
+            if (!level.RuntimeHudLayoutConfigured)
+            {
+                SideCombatHudPreset::CaptureSceneLayout(level, scene);
 
-            EnsureSheetImage(scene, "SC_TopPanel", { 0.018f, 0.020f }, { 0.318f, 0.235f }, 18, PlayerFrameUV());
-            EnsureSheetFill(scene, level.PlayerHealthBarEntityName, { 0.126f, 0.085f }, { 0.184f, 0.024f }, 24,
-                RedBarUV(), playerHealthRatio);
-            EnsureSheetFill(scene, "SC_PlayerMana", { 0.131f, 0.124f }, { 0.174f, 0.020f }, 24,
+                SetWidgetVisible(scene, level.SkillBarPanelEntityName, false);
+                SetWidgetVisible(scene, level.MessageTextEntityName, false);
+                SetWidgetVisible(scene, level.SkillTextEntityName, false);
+                SetWidgetVisible(scene, level.RewardTextEntityName, false);
+
+                EnsureSheetImage(scene, level.TopPanelEntityName, level.TopPanelLayout.Position, level.TopPanelLayout.Size, 18, PlayerFrameUV());
+                EnsureSheetFill(scene, level.PlayerHealthBarEntityName, level.PlayerHealthLayout.Position, level.PlayerHealthLayout.Size, 24,
+                    RedBarUV(), playerHealthRatio);
+                SetWidgetVisible(scene, level.PlayerUltimateFillEntityName, false);
+                EnsureHudText(scene, level.PlayerHealthTextEntityName, level.PlayerHealthTextLayout.Position, level.PlayerHealthTextLayout.Size, 30,
+                    "", 13.0f, { 0.95f, 0.98f, 1.0f, 1.0f });
+
+                EnsureSheetImage(scene, level.ComboPanelEntityName, level.BossPanelLayout.Position, level.BossPanelLayout.Size, 18,
+                    BossFrameUV(), glm::vec4(1.0f), false, bossVisible);
+                EnsureSheetFill(scene, level.BossHealthBarEntityName, level.BossHealthLayout.Position, level.BossHealthLayout.Size, 24,
+                    CyanBarUV(), bossHealthRatio, glm::vec4(1.0f), bossVisible);
+                EnsureHudText(scene, level.BossHealthTextEntityName, level.BossHealthTextLayout.Position, level.BossHealthTextLayout.Size, 30,
+                    "", 13.0f, { 0.91f, 0.99f, 1.0f, 1.0f }, bossVisible);
+                EnsureHudText(scene, level.ComboTextEntityName, level.ComboTextLayout.Position, level.ComboTextLayout.Size, 32,
+                    "", 16.0f, { 0.98f, 0.92f, 0.68f, 1.0f }, false);
+
+                auto configureSkillSlot = [&](const std::string& key, bool visible = true)
+                {
+                    const auto* slot = FindSkillHudSlot(level, key);
+                    if (!slot)
+                        return;
+
+                    const SheetUVRect iconUv = SheetRect(slot->IconSheetPixels);
+                    if (slot->UseSheetIcon)
+                    {
+                        ConfigureSkillButton(scene,
+                            slot->Key,
+                            slot->Position,
+                            slot->Size,
+                            iconUv,
+                            slot->KeyLabel,
+                            glm::vec4(1.0f),
+                            visible && slot->Enabled);
+                    }
+                    else
+                    {
+                        ConfigureImageSkillButton(scene,
+                            slot->Key,
+                            slot->Position,
+                            slot->Size,
+                            ResolveHudTexturePath(slot->IconTexturePath, BreakLimitIconPath()),
+                            slot->KeyLabel,
+                            visible && slot->Enabled);
+                    }
+
+                    const std::string command = slot->Command.empty()
+                        ? "side:skill:" + slot->Key
+                        : slot->Command;
+                    GameplayUILayoutService::SetButtonCommand(scene, s_SkillPrefix + "Slot_" + slot->Key, command);
+                    GameplayUILayoutService::SetButtonCommand(scene, s_SkillPrefix + "Icon_" + slot->Key, command);
+                };
+
+                configureSkillSlot("J");
+                configureSkillSlot("SJ");
+                configureSkillSlot("S2");
+                configureSkillSlot("S3");
+                configureSkillSlot("U");
+                configureSkillSlot("I");
+                configureSkillSlot("L", breakLimitUiVisible);
+
+                ConfigureCombatItemSlots(scene, level);
+                level.RuntimeHudLayoutConfigured = true;
+            }
+
+            EnsureSheetFill(scene, level.PlayerManaEntityName, level.PlayerManaLayout.Position, level.PlayerManaLayout.Size, 24,
                 BlueBarUV(), manaRatio);
-            SetWidgetVisible(scene, "SC_PlayerUltimateFill", false);
-            EnsureSheetFill(scene, "SC_PlayerUltimateMask", { 0.073f, 0.193f }, { 0.225f, 0.073f }, 25,
+            EnsureSheetFill(scene, level.PlayerUltimateMaskEntityName, level.PlayerUltimateLayout.Position, level.PlayerUltimateLayout.Size, 25,
                 SwordMaskUV(), ultimateRatio, { 1.0f, 1.0f, 1.0f, 0.92f });
-            EnsureHudText(scene, level.PlayerHealthTextEntityName, { 0.126f, 0.056f }, { 0.178f, 0.024f }, 30,
-                "", 13.0f, { 0.95f, 0.98f, 1.0f, 1.0f });
-
-            EnsureSheetImage(scene, "SC_ComboPanel", { 0.502f, 0.020f }, { 0.455f, 0.182f }, 18,
-                BossFrameUV(), glm::vec4(1.0f), false, bossVisible);
-            EnsureSheetFill(scene, level.BossHealthBarEntityName, { 0.613f, 0.090f }, { 0.286f, 0.023f }, 24,
-                CyanBarUV(), bossHealthRatio, glm::vec4(1.0f), bossVisible);
-            EnsureSheetFill(scene, "SC_BossProtection", { 0.613f, 0.123f }, { 0.286f, 0.019f }, 25,
+            EnsureSheetFill(scene, level.BossProtectionEntityName, level.BossProtectionLayout.Position, level.BossProtectionLayout.Size, 25,
                 GoldBarUV(), bossProtectionRatio, glm::vec4(1.0f), bossVisible && bossProtectionRatio > 0.002f);
-            EnsureHudText(scene, level.BossHealthTextEntityName, { 0.612f, 0.058f }, { 0.270f, 0.024f }, 30,
-                "", 13.0f, { 0.91f, 0.99f, 1.0f, 1.0f }, bossVisible);
-            EnsureHudText(scene, level.ComboTextEntityName, { 0.392f, 0.038f }, { 0.170f, 0.032f }, 32,
-                "", 16.0f, { 0.98f, 0.92f, 0.68f, 1.0f }, false);
+            SetWidgetVisible(scene, level.ComboPanelEntityName, bossVisible);
 
-            ConfigureSkillButton(scene, "J", { 0.898f, 0.810f }, { 0.072f, 0.128f }, BasicAttackUV(), "J");
-            ConfigureSkillButton(scene, "SJ", { 0.812f, 0.823f }, { 0.056f, 0.099f }, SkillOneUV(), "S+J");
-            ConfigureSkillButton(scene, "S2", { 0.834f, 0.744f }, { 0.054f, 0.096f }, SkillFourUV(), "U");
-            ConfigureSkillButton(scene, "S3", { 0.873f, 0.691f }, { 0.054f, 0.096f }, SkillThreeUV(), "I");
-            ConfigureSkillButton(scene, "U", { 0.916f, 0.677f }, { 0.056f, 0.099f }, SkillTwoUV(), "O");
-            ConfigureSkillButton(scene, "I", { 0.916f, 0.568f }, { 0.052f, 0.092f }, SupportSkillUV(), "H");
-            ConfigureImageSkillButton(scene, "L", { 0.858f, 0.576f }, { 0.052f, 0.092f },
-                BreakLimitIconPath(), "L", breakLimitUiVisible);
-            GameplayUILayoutService::SetButtonCommand(scene, "SC_SkillSlot_J", "side:basic");
-            GameplayUILayoutService::SetButtonCommand(scene, "SC_SkillIcon_J", "side:basic");
-            GameplayUILayoutService::SetButtonCommand(scene, "SC_SkillSlot_SJ", "side:launcher");
-            GameplayUILayoutService::SetButtonCommand(scene, "SC_SkillIcon_SJ", "side:launcher");
-            GameplayUILayoutService::SetButtonCommand(scene, "SC_SkillSlot_S2", "side:magic");
-            GameplayUILayoutService::SetButtonCommand(scene, "SC_SkillIcon_S2", "side:magic");
-            GameplayUILayoutService::SetButtonCommand(scene, "SC_SkillSlot_S3", "side:dash");
-            GameplayUILayoutService::SetButtonCommand(scene, "SC_SkillIcon_S3", "side:dash");
-            GameplayUILayoutService::SetButtonCommand(scene, "SC_SkillSlot_I", "side:support");
-            GameplayUILayoutService::SetButtonCommand(scene, "SC_SkillIcon_I", "side:support");
-            GameplayUILayoutService::SetButtonCommand(scene, "SC_SkillSlot_L", "side:break_limit");
-            GameplayUILayoutService::SetButtonCommand(scene, "SC_SkillIcon_L", "side:break_limit");
-
-            UpdateJoystickVisual(scene);
-            UpdateStatusBadges(scene, "SC_PlayerStatus", { 0.388f, 0.848f }, { 0.388f, 0.908f },
+            UpdateJoystickVisual(scene, level);
+            UpdateStatusBadges(scene, level.PlayerStatusPrefix, level.PlayerStatusLayout.BuffStart, level.PlayerStatusLayout.DebuffStart,
+                level.PlayerStatusLayout,
                 playerCombatant, controller, true, playerCombatant != nullptr);
-            UpdateStatusBadges(scene, "SC_EnemyStatus", { 0.602f, 0.202f }, { 0.602f, 0.260f },
+            UpdateStatusBadges(scene, level.EnemyStatusPrefix, level.EnemyStatusLayout.BuffStart, level.EnemyStatusLayout.DebuffStart,
+                level.EnemyStatusLayout,
                 bossCombatant, nullptr, false, bossVisible);
         }
 
@@ -1110,10 +1288,16 @@ namespace Wheatear::SideCombatHudService {
 
             Entity entity = FindEntityByName(scene, name);
             if (!entity)
-                entity = scene->CreateEntity(name);
+            {
+                WarnMissingAuthoredHud(scene, name, "entity");
+                return {};
+            }
 
             if (!entity.HasComponent<SpriteRendererComponent>())
-                entity.AddComponent<SpriteRendererComponent>();
+            {
+                WarnMissingAuthoredHud(scene, name, "SpriteRendererComponent");
+                return {};
+            }
 
             auto& sprite = entity.GetComponent<SpriteRendererComponent>();
             sprite.Texture = nullptr;
@@ -1206,6 +1390,11 @@ namespace Wheatear::SideCombatHudService {
         Entity player,
         Entity boss)
     {
+        if (!scene)
+            return;
+
+        s_SkillPrefix = level.SkillPrefix.empty() ? "SC_Skill" : level.SkillPrefix;
+
         const SideCombatantComponent* playerCombatant =
             player && player.HasComponent<SideCombatantComponent>()
             ? &player.GetComponent<SideCombatantComponent>()
@@ -1226,7 +1415,7 @@ namespace Wheatear::SideCombatHudService {
         {
             SetProgress(scene, level.PlayerHealthBarEntityName, playerCombatant->Health, playerCombatant->MaxHealth);
             SetText(scene, level.PlayerHealthTextEntityName,
-                "生命 " + FormatFloat(playerCombatant->Health) + "/" + FormatFloat(playerCombatant->MaxHealth));
+                level.HudPlayerHealthLabel + FormatFloat(playerCombatant->Health) + "/" + FormatFloat(playerCombatant->MaxHealth));
         }
         if (bossCombatant)
         {
@@ -1239,12 +1428,12 @@ namespace Wheatear::SideCombatHudService {
             if (bossVisible)
             {
                 SetProgress(scene, level.BossHealthBarEntityName, bossCombatant->Health, bossCombatant->MaxHealth);
-                std::string bossText = "首领生命 " + FormatFloat(bossCombatant->Health) + "/" + FormatFloat(bossCombatant->MaxHealth);
+                std::string bossText = level.HudBossHealthLabel + FormatFloat(bossCombatant->Health) + "/" + FormatFloat(bossCombatant->MaxHealth);
                 if (SideCombatTuningService::ShouldShowCombatStateHud(level, tuning))
                     bossText += "  " + std::string(GetCombatStateLabel(bossCombatant->RuntimeState));
                 if (SideCombatTuningService::ShouldShowBossProtectionHud(level, tuning) && bossCombatant->RuntimeProtectionMax > 0.0f)
                 {
-                    bossText += " 保护 " + FormatFloat(bossCombatant->RuntimeProtection)
+                    bossText += level.HudBossProtectionLabel + FormatFloat(bossCombatant->RuntimeProtection)
                         + "/" + FormatFloat(bossCombatant->RuntimeProtectionMax);
                 }
                 SetText(scene, level.BossHealthTextEntityName, bossText);
@@ -1254,48 +1443,46 @@ namespace Wheatear::SideCombatHudService {
         UpdateEnemyHealthBars(scene, level, tuning);
 
         const bool showBreakLimitUi = SideCombatTuningService::ShouldShowBreakLimitUi(level, tuning);
-        const std::string breakLimitInputText = SideCombatTuningService::IsBreakLimitOfficiallyAvailable(level, tuning)
-            ? "L 断限"
-            : "L 调试断限";
-        std::string message = "A/D 移动  W/S 纵深  K 跳跃  J 攻击  S+J 上挑";
+        const bool breakLimitOfficial = SideCombatTuningService::IsBreakLimitOfficiallyAvailable(level, tuning);
+        std::string message = level.HudDefaultMessage;
         if (SideCombatTuningService::IsSkillUnlocked(level, tuning, "basic_attack") ||
             SideCombatTuningService::IsSkillUnlocked(level, tuning, "air_basic"))
         {
-            message += "  空中 J";
+            message += level.HudAirBasicMessage;
         }
         if (SideCombatTuningService::IsSkillUnlocked(level, tuning, "magic_bolt"))
-            message += "  U 魔法弹";
+            message += level.HudMagicMessage;
         if (SideCombatTuningService::IsSkillUnlocked(level, tuning, "dash"))
-            message += "  I 冲刺";
-        message += "  O 未开放";
+            message += level.HudDashMessage;
+        message += level.HudReservedSkillMessage;
         if (SideCombatTuningService::IsSkillUnlocked(level, tuning, "ally_support"))
-            message += "  H 支援";
+            message += level.HudSupportMessage;
         if (showBreakLimitUi)
-            message += "  " + breakLimitInputText;
+            message += breakLimitOfficial ? level.HudBreakLimitInputMessage : level.HudBreakLimitDebugInputMessage;
         if (level.RuntimeVictory)
-            message = "胜利。奖励正在吸收。";
+            message = level.HudVictoryMessage;
         else if (level.RuntimeDefeat)
-            message = "战败。可以从战斗入口重试。";
+            message = level.HudDefeatMessage;
         else if (playerCombatant && !playerCombatant->RuntimeOnGround &&
             playerCombatant->RuntimeAirHeight >= tuning.AirCombo.HighAirSafetyHeight)
         {
-            message = "高空连击：地面攻击更难打断你。";
+            message = level.HudHighAirMessage;
         }
         else if (playerCombatant && !playerCombatant->RuntimeOnGround &&
             playerCombatant->RuntimeAirHeight <= tuning.AirCombo.GroundThreatHeight)
         {
-            message = "低空连击：注意地面敌人，尽量保持高度。";
+            message = level.HudLowAirMessage;
         }
         else if (level.RuntimeComboCount >= 6 && showBreakLimitUi)
         {
-            message = "断限可以在首领霸体时清空保护条。";
+            message = level.HudBreakLimitHintMessage;
         }
 
         SetText(scene, level.MessageTextEntityName, message);
 
         SetWidgetVisible(scene, level.ComboTextEntityName, false);
-        UpdateComboCounter(scene, level.RuntimeComboCount);
-        UpdateCombatItemSlots(scene, controller);
+        UpdateComboCounter(scene, level, level.RuntimeComboCount);
+        UpdateCombatItemSlots(scene, level, controller);
 
         if (controller)
         {
@@ -1322,42 +1509,42 @@ namespace Wheatear::SideCombatHudService {
                 breakLimitHasGauge &&
                 breakLimitComboReady &&
                 breakLimitBossReady;
-            std::string breakLimitUnavailableText = "条件";
+            std::string breakLimitUnavailableText = level.HudConditionText;
             if (!breakLimitUnlocked)
-                breakLimitUnavailableText = "未解锁";
+                breakLimitUnavailableText = level.HudLockedText;
             else if (!breakLimitHasGauge)
-                breakLimitUnavailableText = "蓝剑";
+                breakLimitUnavailableText = level.HudGaugeText;
             else if (!breakLimitComboReady)
-                breakLimitUnavailableText = "连击";
+                breakLimitUnavailableText = level.HudComboText;
             else if (!breakLimitBossReady)
-                breakLimitUnavailableText = "霸体";
+                breakLimitUnavailableText = level.HudArmorText;
 
-            UpdateSkillSlot(scene, "J", "J", true, controller->RuntimeBasicCooldown,
+            UpdateSkillSlot(scene, "J", GetSkillKeyLabel(level, "J", "J"), true, controller->RuntimeBasicCooldown,
                 controller->BasicCooldown);
             SetSkillSlotVisible(scene, "K", false);
-            UpdateSkillSlot(scene, "SJ", "S+J", launcherUnlocked && launcherHasMana, controller->RuntimeLauncherCooldown,
+            UpdateSkillSlot(scene, "SJ", GetSkillKeyLabel(level, "SJ", "S+J"), launcherUnlocked && launcherHasMana, controller->RuntimeLauncherCooldown,
                 std::max(controller->LauncherCooldown, tuning.AirCombo.AirChaseCooldown),
-                launcherUnlocked ? "缺蓝" : "未解锁");
-            UpdateSkillSlot(scene, "S2", "U", magicUnlocked && magicHasMana, controller->RuntimeMagicBoltCooldown,
+                launcherUnlocked ? level.HudInsufficientManaText : level.HudLockedText);
+            UpdateSkillSlot(scene, "S2", GetSkillKeyLabel(level, "S2", "U"), magicUnlocked && magicHasMana, controller->RuntimeMagicBoltCooldown,
                 controller->MagicBoltCooldown,
-                magicUnlocked ? "缺蓝" : "未解锁");
-            UpdateSkillSlot(scene, "S3", "I", dashUnlocked && dashHasMana, controller->RuntimeDashCooldown,
+                magicUnlocked ? level.HudInsufficientManaText : level.HudLockedText);
+            UpdateSkillSlot(scene, "S3", GetSkillKeyLabel(level, "S3", "I"), dashUnlocked && dashHasMana, controller->RuntimeDashCooldown,
                 controller->DashCooldown,
-                dashUnlocked ? "缺蓝" : "未解锁");
-            UpdateSkillSlot(scene, "U", "O", false, 0.0f, 1.0f, "未开放");
-            UpdateSkillSlot(scene, "I", "H", supportUnlocked && supportHasMana, controller->RuntimeAllySupportCooldown,
+                dashUnlocked ? level.HudInsufficientManaText : level.HudLockedText);
+            UpdateSkillSlot(scene, "U", GetSkillKeyLabel(level, "U", "O"), false, 0.0f, 1.0f, level.HudUnavailableText);
+            UpdateSkillSlot(scene, "I", GetSkillKeyLabel(level, "I", "H"), supportUnlocked && supportHasMana, controller->RuntimeAllySupportCooldown,
                 controller->AllySupportCooldown,
-                supportUnlocked ? "缺蓝" : "未解锁");
+                supportUnlocked ? level.HudInsufficientManaText : level.HudLockedText);
             if (showBreakLimitUi)
             {
                 if (controller->RuntimeBreakLimitCooldown > 0.05f)
                 {
-                    UpdateSkillSlot(scene, "L", "L", true, controller->RuntimeBreakLimitCooldown,
+                    UpdateSkillSlot(scene, "L", GetSkillKeyLabel(level, "L", "L"), true, controller->RuntimeBreakLimitCooldown,
                         tuning.AirCombo.BreakLimitCooldown);
                 }
                 else
                 {
-                    UpdateSkillSlot(scene, "L", "L", breakLimitReady, 0.0f,
+                    UpdateSkillSlot(scene, "L", GetSkillKeyLabel(level, "L", "L"), breakLimitReady, 0.0f,
                         tuning.AirCombo.BreakLimitCooldown,
                         breakLimitUnavailableText);
                 }
@@ -1367,93 +1554,111 @@ namespace Wheatear::SideCombatHudService {
                 SetSkillSlotVisible(scene, "L", false);
             }
             SetText(scene, level.SkillTextEntityName,
-                "蓝剑 " + FormatFloat(controller->RuntimeMagicSwordGauge, 1)
+                level.HudManaGaugeLabel + FormatFloat(controller->RuntimeMagicSwordGauge, 1)
                 + "/" + FormatFloat(controller->RuntimeMagicSwordGaugeMax, 0)
-                + "  空中行动 " + std::to_string(controller->RuntimeAirActionsRemaining));
+                + level.HudAirActionsLabel + std::to_string(controller->RuntimeAirActionsRemaining));
             std::string hoveredKey;
             std::string tooltip;
-            if (IsButtonHovered(scene, "SC_SkillIcon_J"))
+            auto appendTooltipLine = [](std::string& value, const std::string& line)
+            {
+                if (line.empty())
+                    return;
+                if (!value.empty())
+                    value += "\n";
+                value += line;
+            };
+            auto appendCooldownLine = [&](std::string& value, float cooldown)
+            {
+                if (cooldown > 0.05f)
+                    appendTooltipLine(value, level.HudCooldownPrefix + FormatCooldownSeconds(cooldown) + level.HudSecondsSuffix);
+            };
+            auto buildSkillTooltip = [&](const std::string& key, const std::string& manaCost = {})
+            {
+                const auto* slot = FindSkillHudSlot(level, key);
+                if (!slot)
+                    return std::string{};
+                return FormatHudTemplate(slot->TooltipText, {}, manaCost);
+            };
+
+            if (IsButtonHovered(scene, s_SkillPrefix + "Icon_J"))
             {
                 hoveredKey = "J";
-                tooltip = "普通攻击\nJ 或鼠标左键。";
-                if (controller->RuntimeBasicCooldown > 0.05f)
-                    tooltip += "\n冷却 " + FormatCooldownSeconds(controller->RuntimeBasicCooldown) + " 秒";
+                tooltip = buildSkillTooltip("J");
+                appendCooldownLine(tooltip, controller->RuntimeBasicCooldown);
             }
-            else if (IsButtonHovered(scene, "SC_SkillIcon_SJ"))
+            else if (IsButtonHovered(scene, s_SkillPrefix + "Icon_SJ"))
             {
                 hoveredKey = "SJ";
-                tooltip = "上挑\nS+J，消耗蓝量 " + FormatFloat(controller->LauncherManaCost) + "。";
+                tooltip = buildSkillTooltip("SJ", FormatFloat(controller->LauncherManaCost));
                 if (!launcherHasMana)
-                    tooltip += "\n蓝量不足。";
-                if (controller->RuntimeLauncherCooldown > 0.05f)
-                    tooltip += "\n冷却 " + FormatCooldownSeconds(controller->RuntimeLauncherCooldown) + " 秒";
+                    appendTooltipLine(tooltip, level.HudManaNotEnoughTooltip);
+                appendCooldownLine(tooltip, controller->RuntimeLauncherCooldown);
             }
-            else if (IsButtonHovered(scene, "SC_SkillIcon_S2"))
+            else if (IsButtonHovered(scene, s_SkillPrefix + "Icon_S2"))
             {
                 hoveredKey = "S2";
-                tooltip = "魔法弹\nU，消耗蓝量 " + FormatFloat(controller->MagicBoltManaCost) + "。";
+                tooltip = buildSkillTooltip("S2", FormatFloat(controller->MagicBoltManaCost));
                 if (!magicHasMana)
-                    tooltip += "\n蓝量不足。";
-                if (controller->RuntimeMagicBoltCooldown > 0.05f)
-                    tooltip += "\n冷却 " + FormatCooldownSeconds(controller->RuntimeMagicBoltCooldown) + " 秒";
+                    appendTooltipLine(tooltip, level.HudManaNotEnoughTooltip);
+                appendCooldownLine(tooltip, controller->RuntimeMagicBoltCooldown);
             }
-            else if (IsButtonHovered(scene, "SC_SkillIcon_S3"))
+            else if (IsButtonHovered(scene, s_SkillPrefix + "Icon_S3"))
             {
                 hoveredKey = "S3";
-                tooltip = "冲刺攻击\nI，消耗蓝量 " + FormatFloat(controller->DashManaCost) + "。";
-                tooltip += "\n短暂无敌并造成伤害。";
+                tooltip = buildSkillTooltip("S3", FormatFloat(controller->DashManaCost));
                 if (!dashHasMana)
-                    tooltip += "\n蓝量不足。";
-                if (controller->RuntimeDashCooldown > 0.05f)
-                    tooltip += "\n冷却 " + FormatCooldownSeconds(controller->RuntimeDashCooldown) + " 秒";
+                    appendTooltipLine(tooltip, level.HudManaNotEnoughTooltip);
+                appendCooldownLine(tooltip, controller->RuntimeDashCooldown);
             }
-            else if (IsButtonHovered(scene, "SC_SkillIcon_U"))
+            else if (IsButtonHovered(scene, s_SkillPrefix + "Icon_U"))
             {
                 hoveredKey = "U";
-                tooltip = "预留技能\nO，暂未开放。";
+                tooltip = buildSkillTooltip("U");
             }
-            else if (IsButtonHovered(scene, "SC_SkillIcon_I"))
+            else if (IsButtonHovered(scene, s_SkillPrefix + "Icon_I"))
             {
                 hoveredKey = "I";
-                tooltip = "支援技能\nH，消耗蓝量 " + FormatFloat(controller->AllySupportManaCost) + "。";
+                tooltip = buildSkillTooltip("I", FormatFloat(controller->AllySupportManaCost));
                 if (!supportHasMana)
-                    tooltip += "\n蓝量不足。";
-                if (controller->RuntimeAllySupportCooldown > 0.05f)
-                    tooltip += "\n冷却 " + FormatCooldownSeconds(controller->RuntimeAllySupportCooldown) + " 秒";
+                    appendTooltipLine(tooltip, level.HudManaNotEnoughTooltip);
+                appendCooldownLine(tooltip, controller->RuntimeAllySupportCooldown);
             }
-            else if (IsButtonHovered(scene, "SC_SkillIcon_L"))
+            else if (IsButtonHovered(scene, s_SkillPrefix + "Icon_L"))
             {
                 hoveredKey = "L";
-                tooltip = "断限\nL，消耗半条蓝剑，在首领霸体时清空黄条。";
+                tooltip = buildSkillTooltip("L");
                 if (controller->RuntimeBreakLimitCooldown > 0.05f)
-                    tooltip += "\n冷却 " + FormatCooldownSeconds(controller->RuntimeBreakLimitCooldown) + " 秒";
+                    appendCooldownLine(tooltip, controller->RuntimeBreakLimitCooldown);
                 else if (!breakLimitUnlocked)
-                    tooltip += "\n尚未解锁。";
+                    appendTooltipLine(tooltip, level.HudNotUnlockedTooltip);
                 else if (!breakLimitHasGauge)
-                    tooltip += "\n蓝剑不足，需要 " + FormatFloat(breakLimitGaugeCost, 1) + "。";
+                    appendTooltipLine(tooltip, FormatHudTemplate(level.BreakLimitGaugeNotEnoughTooltip, FormatFloat(breakLimitGaugeCost, 1)));
                 else if (!breakLimitComboReady)
-                    tooltip += "\n连击不足，需要 " + std::to_string(tuning.AirCombo.BreakLimitMinCombo) + " 连击。";
+                    appendTooltipLine(tooltip, FormatHudTemplate(level.BreakLimitComboNotEnoughTooltip, std::to_string(tuning.AirCombo.BreakLimitMinCombo)));
                 else if (!breakLimitBossReady)
-                    tooltip += "\n等待首领进入霸体并保留黄条。";
+                    appendTooltipLine(tooltip, level.BreakLimitBossNotReadyTooltip);
             }
-            ApplyCombatItemTooltip(scene, hoveredKey, tooltip, controller);
-            UpdateSkillTooltip(scene, hoveredKey, tooltip);
+            ApplyCombatItemTooltip(scene, level, hoveredKey, tooltip, controller);
+            UpdateSkillTooltip(scene, level, hoveredKey, tooltip);
         }
         else
         {
             std::string hoveredKey;
             std::string tooltip;
-            ApplyCombatItemTooltip(scene, hoveredKey, tooltip, controller);
-            UpdateSkillTooltip(scene, hoveredKey, tooltip);
+            ApplyCombatItemTooltip(scene, level, hoveredKey, tooltip, controller);
+            UpdateSkillTooltip(scene, level, hoveredKey, tooltip);
         }
         std::string reward = level.RuntimeVictory
             ? (level.RuntimeResultSummary.empty()
                 ? level.FirstClearRewardText
                 : level.RuntimeResultSummary)
-            : "主要掉落";
+            : level.HudRewardFallbackText;
         if (level.RuntimeCollectedPickups > 0)
-            reward += "  已吸收 " + std::to_string(level.RuntimeCollectedPickups);
+            reward += level.HudCollectedPrefix + std::to_string(level.RuntimeCollectedPickups);
         SetText(scene, level.RewardTextEntityName, reward);
+
+        if (IsResultFadeActive(level))
+            HideResultFadeTextHud(scene, level);
     }
 
 } // namespace Wheatear::SideCombatHudService

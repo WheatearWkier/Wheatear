@@ -25,14 +25,14 @@ namespace Wheatear::SideCombatFeedbackService {
             return value * value * (3.0f - 2.0f * value);
         }
 
-        static Entity FindFeedbackCamera(Scene* scene)
+        static Entity FindFeedbackCamera(Scene* scene, const SideCombatLevelComponent& level)
         {
             if (!scene)
                 return {};
 
             Entity camera = scene->GetPrimaryCameraEntity();
             if (!camera || !camera.HasComponent<TransformComponent>())
-                camera = FindEntityByName(scene, "SC_Camera");
+                camera = FindEntityByName(scene, level.CameraEntityName);
             return camera;
         }
 
@@ -104,7 +104,7 @@ namespace Wheatear::SideCombatFeedbackService {
         if (!scene || !UserSettings::Get().ScreenShake || hitbox.CameraShake <= 0.0f)
             return;
 
-        Entity camera = FindFeedbackCamera(scene);
+        Entity camera = FindFeedbackCamera(scene, level);
         if (!camera || !camera.HasComponent<TransformComponent>())
             return;
 
@@ -129,7 +129,7 @@ namespace Wheatear::SideCombatFeedbackService {
             return;
         }
 
-        Entity camera = FindFeedbackCamera(scene);
+        Entity camera = FindFeedbackCamera(scene, level);
         if (!camera || !camera.HasComponent<TransformComponent>())
             return;
 
@@ -149,7 +149,7 @@ namespace Wheatear::SideCombatFeedbackService {
         if (!scene)
             return;
 
-        Entity camera = FindFeedbackCamera(scene);
+        Entity camera = FindFeedbackCamera(scene, level);
         if (!camera || !camera.HasComponent<TransformComponent>())
             return;
 
@@ -166,14 +166,9 @@ namespace Wheatear::SideCombatFeedbackService {
         if (hadFocus || hadShake)
             CaptureCameraBase(camera, level);
 
-        const float cinematicTimeScale = std::clamp(
-            level.RuntimeCinematicTimeScale, 0.02f, 1.0f);
         level.RuntimeCinematicTimer = std::max(
             0.0f,
-            level.RuntimeCinematicTimer -
-                (level.RuntimeCinematicTimer > 0.0f
-                    ? dt * cinematicTimeScale
-                    : dt));
+            level.RuntimeCinematicTimer - dt);
         level.RuntimeCameraShakeTimer = std::max(0.0f, level.RuntimeCameraShakeTimer - dt);
 
         const bool focusActive = level.RuntimeCinematicTimer > 0.0f &&

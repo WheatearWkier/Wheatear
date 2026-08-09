@@ -396,6 +396,9 @@
     <ClInclude Include="src\Wheatear\Modules\SideCombat\SideCombatHitboxService.h">
       <Filter>src\Wheatear\Modules\SideCombat</Filter>
     </ClInclude>
+    <ClInclude Include="src\Wheatear\Modules\SideCombat\SideCombatHudPreset.h">
+      <Filter>src\Wheatear\Modules\SideCombat</Filter>
+    </ClInclude>
     <ClInclude Include="src\Wheatear\Modules\SideCombat\SideCombatHudService.h">
       <Filter>src\Wheatear\Modules\SideCombat</Filter>
     </ClInclude>
@@ -1989,6 +1992,9 @@
       <Filter>src\Wheatear\Modules\SideCombat</Filter>
     </ClCompile>
     <ClCompile Include="src\Wheatear\Modules\SideCombat\SideCombatHitboxService.cpp">
+      <Filter>src\Wheatear\Modules\SideCombat</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Wheatear\Modules\SideCombat\SideCombatHudPreset.cpp">
       <Filter>src\Wheatear\Modules\SideCombat</Filter>
     </ClCompile>
     <ClCompile Include="src\Wheatear\Modules\SideCombat\SideCombatHudService.cpp">

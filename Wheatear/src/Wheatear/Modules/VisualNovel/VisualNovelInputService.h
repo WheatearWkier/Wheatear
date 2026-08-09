@@ -9,7 +9,7 @@ namespace Wheatear::VisualNovelInputService {
     struct InputSnapshot
     {
         bool PrimaryMousePressed = false;
-        bool AdvancePressed = false;
+        bool AdvanceActionPressed = false;
         bool AutoPressed = false;
         bool HistoryPressed = false;
         bool SavePressed = false;

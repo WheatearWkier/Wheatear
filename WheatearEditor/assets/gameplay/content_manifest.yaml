@@ -4,6 +4,8 @@ aliases:
     action_directory: assets/gameplay/actions/
   side:
     tuning: assets/vertical_slice/data/side_combat_tuning.yaml
+    hud:
+      preset: assets/vertical_slice/data/side_combat_hud_preset.yaml
     path:
       characters: assets/vertical_slice/side_combat/characters/
       enemies: assets/vertical_slice/side_combat/enemies/

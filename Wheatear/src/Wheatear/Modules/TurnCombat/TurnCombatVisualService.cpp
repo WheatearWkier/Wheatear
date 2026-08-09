@@ -90,9 +90,10 @@ namespace Wheatear::TurnCombatVisualService {
             if (pattern.empty())
                 return;
 
-            auto& animator = entity.HasComponent<SpriteAnimatorComponent>()
-                ? entity.GetComponent<SpriteAnimatorComponent>()
-                : entity.AddComponent<SpriteAnimatorComponent>();
+            if (!entity.HasComponent<SpriteAnimatorComponent>())
+                return;
+
+            auto& animator = entity.GetComponent<SpriteAnimatorComponent>();
             animator.DefaultClipName = animator.DefaultClipName.empty() ? "idle" : animator.DefaultClipName;
             animator.PlayOnStart = false;
             animator.FireEvents = true;

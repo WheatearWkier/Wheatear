@@ -36,52 +36,6 @@ namespace Wheatear::TacticalCombatUIService {
         static std::string CancelIcon() { return AssetAliasRegistry::Path("tactical.icon.cancel"); }
         static std::string ButtonPanelPath() { return AssetAliasRegistry::Path("tactical.panel.button"); }
 
-        static void EnsureWaitButton(Scene* scene)
-        {
-            Entity root = GameplayUILayoutService::EnsureUIWidget(
-                scene,
-                "TK_Command_5_Root",
-                "TK_CommandPanel",
-                { 0.05f, 0.845f },
-                { 0.90f, 0.14f },
-                24,
-                true);
-            if (!root)
-                return;
-
-            auto& image = root.HasComponent<UIImageComponent>()
-                ? root.GetComponent<UIImageComponent>()
-                : root.AddComponent<UIImageComponent>();
-            UIRuntimeTools::SetImageTexture(
-                scene,
-                "TK_Command_5_Root",
-                ButtonPanelPath(),
-                true);
-
-            auto& button = root.HasComponent<UIButtonComponent>()
-                ? root.GetComponent<UIButtonComponent>()
-                : root.AddComponent<UIButtonComponent>();
-            button.NormalColor = { 0.06f, 0.12f, 0.15f, 0.08f };
-            button.HoverColor = { 0.20f, 0.42f, 0.46f, 0.35f };
-            button.PressedColor = { 0.08f, 0.20f, 0.24f, 0.45f };
-
-            Entity icon = GameplayUILayoutService::EnsureUIWidget(
-                scene, "TK_Command_5_Icon", "TK_Command_5_Root",
-                { 0.08f, 0.08f }, { 0.18f, 0.84f }, 27, true);
-            if (icon && !icon.HasComponent<UIImageComponent>())
-                icon.AddComponent<UIImageComponent>();
-            UIRuntimeTools::SetImageTexture(
-                scene,
-                "TK_Command_5_Icon",
-                WaitIcon(),
-                true);
-
-            GameplayUILayoutService::EnsureText(
-                scene, "TK_Command_5_Text", "TK_Command_5_Root",
-                { 0.32f, 0.20f }, { 0.58f, 0.60f }, 28,
-                "待机", 15.0f, { 0.92f, 0.94f, 0.86f, 1.0f });
-        }
-
         static void SetCommandSlot(Scene* scene,
             int index,
             const CommandSlot& slot,
@@ -214,7 +168,6 @@ namespace Wheatear::TacticalCombatUIService {
             const bool commandVisible = level.RuntimePhase == TacticalCombatPhase::AwaitCommand
                 || level.RuntimePhase == TacticalCombatPhase::Targeting;
             UIRuntimeTools::SetWidgetVisible(scene, level.CommandPanelEntityName, commandVisible);
-            EnsureWaitButton(scene);
 
             Entity selected = GameplayEntityService::Resolve(scene, level.RuntimeSelectedUnit);
             if (!selected || !selected.HasComponent<TacticalUnitComponent>())
@@ -237,20 +190,6 @@ namespace Wheatear::TacticalCombatUIService {
                 SetCommandSlot(scene, i + 1, slots[i], commandVisible);
 
             const bool cancelVisible = commandVisible;
-            Entity cancelButton = SceneQueries::FindEntityByName(scene, "TK_CancelButton");
-            if (cancelButton)
-            {
-                Entity cancelIcon = GameplayUILayoutService::EnsureUIWidget(
-                    scene,
-                    "TK_CancelIcon",
-                    "TK_CancelButton",
-                    { 0.08f, 0.10f },
-                    { 0.18f, 0.80f },
-                    27,
-                    cancelVisible);
-                if (cancelIcon && !cancelIcon.HasComponent<UIImageComponent>())
-                    cancelIcon.AddComponent<UIImageComponent>();
-            }
             UIRuntimeTools::SetWidgetVisible(scene, "TK_CancelButton", cancelVisible);
             GameplayUILayoutService::SetButtonCommand(
                 scene,
@@ -260,29 +199,6 @@ namespace Wheatear::TacticalCombatUIService {
                 scene,
                 "TK_CancelText",
                 level.RuntimeCommandMenuPage == "root" ? "取消" : "返回");
-            UIRuntimeTools::SetImageTexture(scene, "TK_CancelIcon", CancelIcon(), true);
-            UIRuntimeTools::SetWidgetVisible(
-                scene,
-                "TK_Command_5_Root",
-                commandVisible
-                    && level.RuntimePhase == TacticalCombatPhase::AwaitCommand
-                    && level.RuntimeCommandMenuPage == "root");
-            UIRuntimeTools::SetWidgetVisible(
-                scene,
-                "TK_Command_5_Icon",
-                commandVisible
-                    && level.RuntimePhase == TacticalCombatPhase::AwaitCommand
-                    && level.RuntimeCommandMenuPage == "root");
-            UIRuntimeTools::SetWidgetVisible(
-                scene,
-                "TK_Command_5_Text",
-                commandVisible
-                    && level.RuntimePhase == TacticalCombatPhase::AwaitCommand
-                    && level.RuntimeCommandMenuPage == "root");
-            GameplayUILayoutService::SetButtonCommand(
-                scene,
-                "TK_Command_5_Root",
-                "tactic:skill:wait");
 
             std::ostringstream detail;
             detail << unit.DisplayName << " / " << unit.ClassName << "\n";

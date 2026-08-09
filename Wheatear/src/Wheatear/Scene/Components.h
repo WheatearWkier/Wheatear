@@ -419,6 +419,7 @@ namespace Wheatear {
         float       FontSize = 24.0f;
         std::string FontPath = "font.ui_default";
         glm::vec4   Padding = { -1.0f, -1.0f, -1.0f, -1.0f };
+        bool        AutoFit = true;
         UITextHorizontalAlign HorizontalAlign = UITextHorizontalAlign::Left;
         UITextVerticalAlign VerticalAlign = UITextVerticalAlign::Top;
         glm::vec4   ShadowColor = { 0.02f, 0.03f, 0.04f, 0.78f };
@@ -441,6 +442,7 @@ namespace Wheatear {
         bool IsPressed = false;
 
         std::string OnClickFunction = "";
+        std::string TooltipText = "";
 
         UIButtonComponent() = default;
         UIButtonComponent(const UIButtonComponent&) = default;

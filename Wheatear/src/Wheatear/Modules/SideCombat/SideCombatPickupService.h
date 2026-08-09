@@ -21,9 +21,11 @@ namespace Wheatear::SideCombatPickupService {
         const std::string& displayName,
         int amount,
         const std::string& texturePath,
+        const glm::vec3& scale,
         const SideCombatTuningService::SidePickupTuning& tuning);
     WHEATEAR_API void SpawnDeathRewards(Scene* scene,
         const SideCombatLevelComponent& level,
+        const std::string& sourceEntityName,
         const TransformComponent& transform,
         const SideEnemyAIComponent* ai);
     WHEATEAR_API void UpdatePickups(Scene* scene,

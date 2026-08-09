@@ -6,6 +6,7 @@ namespace WheatearSandbox
     {
         public float MaxHp = 100.0f;
         public float Hp = 100.0f;
+        public string HealthBarEntityName = "HealthBar";
 
         private UIProgressBarComponent? _healthBar;
         private SpriteAnimatorComponent? _animator;
@@ -15,7 +16,7 @@ namespace WheatearSandbox
         {
             Hp = MaxHp;
 
-            Entity? barEntity = Scene.FindEntityByName("HealthBar");
+            Entity? barEntity = Scene.FindEntityByName(HealthBarEntityName);
             _healthBar = barEntity?.GetComponent<UIProgressBarComponent>();
             if (_healthBar != null)
             {
@@ -24,7 +25,7 @@ namespace WheatearSandbox
             }
             else
             {
-                Debug.LogWarning("Enemy could not find HealthBar entity.");
+                Debug.LogWarning($"Enemy could not find {HealthBarEntityName} entity.");
             }
 
             _animator = GetComponent<SpriteAnimatorComponent>();

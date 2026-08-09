@@ -65,11 +65,14 @@ namespace Wheatear {
 
         uint32_t GetViewportWidth() const { return m_ViewportWidth; }
         uint32_t GetViewportHeight() const { return m_ViewportHeight; }
+        const glm::vec2& GetViewportOffset() const { return m_ViewportOffset; }
         SceneExecutionMode GetExecutionMode() const { return m_ExecutionMode; }
 
         Entity GetPrimaryCameraEntity();
+        Entity FindEntityByUUID(UUID uuid);
         Entity GetEntityByUUID(UUID uuid);
         Entity GetEntityByName(const std::string& name);
+        void InvalidateEntityLookupCache();
 
         entt::registry& GetRegistry() { return m_Registry; }
         const entt::registry& GetRegistry() const { return m_Registry; }
@@ -95,6 +98,7 @@ namespace Wheatear {
         void ConfigureEditorSystems();
         void StartSystems(SceneExecutionMode mode);
         void StopSystems();
+        void RebuildEntityLookupCaches();
 
         template<typename T, typename... Args>
         T& RegisterSystem(Args&&... args)
@@ -110,6 +114,9 @@ namespace Wheatear {
 
     private:
         entt::registry m_Registry;
+        std::unordered_map<std::string, entt::entity> m_EntityNameCache;
+        std::unordered_map<UUID, entt::entity> m_EntityUUIDCache;
+        bool m_EntityLookupCacheDirty = true;
 
         uint32_t m_ViewportWidth = 0;
         uint32_t m_ViewportHeight = 0;

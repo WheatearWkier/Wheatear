@@ -6,6 +6,7 @@
 #include "Wheatear/Core/EngineInfo.h"
 #include "Wheatear/Scene/Components.h"
 #include "Wheatear/Scene/SceneSerializer.h"
+#include "Wheatear/UI/UIWidgetLayout.h"
 
 #include <imgui/imgui.h>
 #include <algorithm>
@@ -48,6 +49,8 @@ namespace Wheatear {
         {
             return static_cast<uint32_t>(static_cast<entt::entity>(entity));
         }
+
+        static constexpr const char* kHierarchyUIEntityPayload = "WT_HIERARCHY_UI_ENTITY";
 
     } // namespace
     bool SceneHierarchyPanel::EntityPassesFilter(Entity entity) const
@@ -120,6 +123,64 @@ namespace Wheatear {
 
         visiting.erase(parentKey);
         return found;
+    }
+
+    bool SceneHierarchyPanel::CanReparentUI(Entity child,
+        Entity parent,
+        const UIChildMap& childMap) const
+    {
+        if (!m_Context || !child || !parent || child == parent)
+            return false;
+        if (!child.HasComponent<UIWidgetComponent>() || !parent.HasComponent<UIWidgetComponent>())
+            return false;
+        if (!child.HasComponent<IDComponent>() || !parent.HasComponent<IDComponent>())
+            return false;
+        if (child.HasComponent<UICanvasComponent>())
+            return false;
+
+        std::unordered_set<uint32_t> visiting;
+        if (IsUIDescendantOf(child, parent, childMap, visiting))
+            return false;
+
+        const auto& currentWidget = child.GetComponent<UIWidgetComponent>();
+        return currentWidget.ParentEntity != parent.GetUUID();
+    }
+
+    void SceneHierarchyPanel::ReparentUIWithUndo(Entity child,
+        Entity parent,
+        const UIChildMap& childMap)
+    {
+        if (!CanReparentUI(child, parent, childMap))
+            return;
+
+        auto& widget = child.GetComponent<UIWidgetComponent>();
+        UIWidgetComponent before = widget;
+        UIWidgetComponent after = before;
+
+        UIWidgetLayout::Context layout(m_Context.get());
+        const UIWidgetLayout::Rect childRect = UIWidgetLayout::ResolveRect(layout, static_cast<entt::entity>(child));
+        const UIWidgetLayout::Rect parentRect = UIWidgetLayout::ResolveRect(layout, static_cast<entt::entity>(parent));
+        const float parentWidth = parentRect.Right - parentRect.Left;
+        const float parentHeight = parentRect.Bottom - parentRect.Top;
+        if (parentWidth <= 0.0001f || parentHeight <= 0.0001f)
+            return;
+
+        after.Anchor = UIAnchor::TopLeft;
+        after.ParentEntity = parent.GetUUID();
+        after.Position = {
+            (childRect.Left - parentRect.Left) / parentWidth,
+            (childRect.Top - parentRect.Top) / parentHeight
+        };
+        after.Size = {
+            std::max(0.001f, (childRect.Right - childRect.Left) / parentWidth),
+            std::max(0.001f, (childRect.Bottom - childRect.Top) / parentHeight)
+        };
+
+        auto command = MakeComponentValueCommand(child, before, after);
+        command->Execute();
+        CommandHistory::Get().Push(std::move(command));
+        m_SelectionContext = child;
+        m_ScrollToSelection = true;
     }
 
     std::vector<Entity> SceneHierarchyPanel::CollectUIChildrenRecursive(Entity entity,
@@ -264,6 +325,43 @@ namespace Wheatear {
 
         if (ImGui::IsItemClicked())
             m_SelectionContext = entity;
+
+        if (entity.HasComponent<UIWidgetComponent>()
+            && entity.HasComponent<IDComponent>()
+            && !entity.HasComponent<UICanvasComponent>())
+        {
+            if (ImGui::BeginDragDropSource(ImGuiDragDropFlags_SourceAllowNullID))
+            {
+                const uint64_t payload = static_cast<uint64_t>(entity.GetUUID());
+                ImGui::SetDragDropPayload(kHierarchyUIEntityPayload, &payload, sizeof(payload));
+                ImGui::TextUnformatted(displayName.c_str());
+                ImGui::EndDragDropSource();
+            }
+        }
+
+        if (entity.HasComponent<UIWidgetComponent>() && entity.HasComponent<IDComponent>())
+        {
+            if (ImGui::BeginDragDropTarget())
+            {
+                const ImGuiPayload* previewPayload = ImGui::GetDragDropPayload();
+                if (previewPayload
+                    && previewPayload->IsDataType(kHierarchyUIEntityPayload)
+                    && previewPayload->DataSize == sizeof(uint64_t))
+                {
+                    const uint64_t childID = *static_cast<const uint64_t*>(previewPayload->Data);
+                    Entity child = m_Context ? m_Context->GetEntityByUUID(UUID(childID)) : Entity{};
+                    if (CanReparentUI(child, entity, childMap))
+                    {
+                        const ImGuiPayload* payload = ImGui::AcceptDragDropPayload(
+                            kHierarchyUIEntityPayload,
+                            ImGuiDragDropFlags_AcceptBeforeDelivery);
+                        if (payload && payload->IsDelivery())
+                            ReparentUIWithUndo(child, entity, childMap);
+                    }
+                }
+                ImGui::EndDragDropTarget();
+            }
+        }
 
         if (ImGui::IsItemHovered() && ImGui::IsMouseDoubleClicked(ImGuiMouseButton_Left))
         {

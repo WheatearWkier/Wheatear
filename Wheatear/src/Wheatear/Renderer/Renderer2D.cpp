@@ -333,7 +333,7 @@ namespace Wheatear {
         const glm::vec4& color,
         float thickness, float fade, int entityID)
     {
-        DrawRadialCircle(transform, color, 1.0f, 1.57079632679f,
+        DrawRadialCircle(transform, color, -1.0f, 1.57079632679f,
             thickness, fade, entityID);
     }
 
@@ -350,7 +350,7 @@ namespace Wheatear {
         if (s_Data.CircleBatch->IsFull(4))
             FlushAndReset();
 
-        progress = glm::clamp(progress, 0.0f, 1.0f);
+        progress = glm::clamp(progress, -1.0f, 1.0f);
         for (int i = 0; i < 4; i++)
         {
             auto* v = s_Data.CircleBatch->AllocVertex();

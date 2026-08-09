@@ -93,6 +93,26 @@ namespace Wheatear {
                 std::filesystem::create_directories(cacheDirectory);
         }
 
+        static bool IsCacheFresh(
+            const std::filesystem::path& sourcePath,
+            const std::filesystem::path& cachedPath)
+        {
+            std::error_code error;
+            if (!std::filesystem::exists(sourcePath, error) || error)
+                return false;
+            if (!std::filesystem::exists(cachedPath, error) || error)
+                return false;
+
+            const auto sourceWriteTime = std::filesystem::last_write_time(sourcePath, error);
+            if (error)
+                return false;
+            const auto cachedWriteTime = std::filesystem::last_write_time(cachedPath, error);
+            if (error)
+                return false;
+
+            return cachedWriteTime >= sourceWriteTime;
+        }
+
         // adding the Vulkan backend later doesn't invalidate OpenGL caches.
         static const char* GLShaderStageCachedOpenGLFileExtension(uint32_t stage)
         {
@@ -272,7 +292,10 @@ namespace Wheatear {
                 cacheDir / (shaderFilePath.filename().string()
                     + Utils::GLShaderStageCachedOpenGLFileExtension(stage));
 
-            std::ifstream in(cachedPath, std::ios::in | std::ios::binary);
+            std::ifstream in;
+            if (Utils::IsCacheFresh(shaderFilePath, cachedPath))
+                in.open(cachedPath, std::ios::in | std::ios::binary);
+
             if (in.is_open())
             {
                 in.seekg(0, std::ios::end);

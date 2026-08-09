@@ -218,10 +218,10 @@ namespace Wheatear {
             {
                 ImGui::Checkbox("Visible At Runtime", &widget.Visible);
                 ImGui::Checkbox("Show In Editor", &widget.EditorVisible);
-                if (ImGui::Button("Show In Editor"))
+                if (ImGui::Button("Show In Editor##UIWidgetShowInEditor"))
                     widget.EditorVisible = true;
                 ImGui::SameLine();
-                if (ImGui::Button("Hide In Editor"))
+                if (ImGui::Button("Hide In Editor##UIWidgetHideInEditor"))
                     widget.EditorVisible = false;
 
                 SectionLabel("Rect");
@@ -391,6 +391,7 @@ namespace Wheatear {
                 ImGui::ColorEdit4("Color", glm::value_ptr(text.Color));
                 ImGui::DragFloat("Font Size", &text.FontSize, 0.5f, 1.0f, 256.0f);
                 ImGui::DragFloat4("Padding px", glm::value_ptr(text.Padding), 0.5f, -1.0f, 256.0f);
+                ImGui::Checkbox("Auto Fit", &text.AutoFit);
                 int horizontalAlign = static_cast<int>(text.HorizontalAlign);
                 const char* horizontalItems[] = { "Left", "Center", "Right" };
                 if (ImGui::Combo("Horizontal Align", &horizontalAlign, horizontalItems, IM_ARRAYSIZE(horizontalItems)))
@@ -436,6 +437,13 @@ namespace Wheatear {
                 ImGui::PushID((int)(uint32_t)entity);
                 if (ImGui::InputText("On Click", funcBuffer, sizeof(funcBuffer)))
                     button.OnClickFunction = funcBuffer;
+
+                char tooltipBuffer[128];
+                memset(tooltipBuffer, 0, sizeof(tooltipBuffer));
+                strncpy_s(tooltipBuffer, sizeof(tooltipBuffer), button.TooltipText.c_str(), _TRUNCATE);
+
+                if (ImGui::InputText("Tooltip Text", tooltipBuffer, sizeof(tooltipBuffer)))
+                    button.TooltipText = tooltipBuffer;
                 ImGui::PopID();
 
                 ImGui::PushItemFlag(ImGuiItemFlags_Disabled, true);

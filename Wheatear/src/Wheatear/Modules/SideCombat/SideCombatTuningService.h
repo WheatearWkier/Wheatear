@@ -159,8 +159,8 @@ namespace Wheatear::SideCombatTuningService {
     struct SideFeedbackTuning
     {
         float HitPauseTimeScale = 0.12f;
-        float BreakLimitCinematicDuration = 0.60f;
-        float BreakLimitCinematicTimeScale = 0.09f;
+        float BreakLimitCinematicDuration = 3.0f;
+        float BreakLimitCinematicTimeScale = 0.12f;
         float BreakLimitCameraZoom = 1.30f;
         glm::vec2 BreakLimitCameraOffset = { 0.0f, 0.25f };
         std::string JumpSound = "side.audio.jump";
@@ -226,10 +226,11 @@ namespace Wheatear::SideCombatTuningService {
         float LaneSpeedScale = 0.72f;
         float LaneAcceleration = 28.0f;
         float SortScale = 0.015f;
-        float ShadowMinAlpha = 0.22f;
-        float ShadowMaxAlpha = 0.46f;
+        float ShadowMinAlpha = 0.34f;
+        float ShadowMaxAlpha = 0.68f;
         float ShadowAirFadeHeight = 3.8f;
-        glm::vec2 ShadowOffset = { 0.0f, -0.10f };
+        glm::vec2 ShadowOffset = { 0.0f, -0.04f };
+        glm::vec4 ShadowColor = { 0.0f, 0.0f, 0.0f, 1.0f };
         float BossLaunchBonus = 1.35f;
         SideFeedbackTuning Feedback;
         SideAnimationSetTuning PlayerAnimations;

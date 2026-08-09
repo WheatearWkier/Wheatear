@@ -99,3 +99,10 @@ function wt_app_includes()
         "%{IncludeDir.entt}",
     }
 end
+
+function wt_app_linker_defaults()
+    filter "system:windows"
+        -- Vulkan SDK debug SPIRV-Cross libs do not ship their referenced PDB files.
+        linkoptions { "/ignore:4099" }
+    filter {}
+end

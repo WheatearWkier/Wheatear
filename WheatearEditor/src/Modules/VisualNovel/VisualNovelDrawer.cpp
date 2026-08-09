@@ -87,7 +87,11 @@ namespace Wheatear {
                 InputString("History Text", component.HistoryTextEntityName);
                 InputString("Auto Play Indicator", component.AutoPlayIndicatorEntityName);
                 InputString("Command Bar", component.CommandBarEntityName);
+                InputString("Command Tooltip", component.CommandTooltipEntityName);
+                ImGui::Checkbox("Command Tooltip Follow Mouse", &component.CommandTooltipFollowMouse);
+                ImGui::DragFloat2("Command Tooltip Mouse Offset", &component.CommandTooltipMouseOffset.x, 0.001f, -1.0f, 1.0f, "%.3f");
                 InputString("History Panel", component.HistoryPanelEntityName);
+                InputString("History Scroll", component.HistoryScrollEntityName);
                 InputString("Settings Panel", component.SettingsPanelEntityName);
                 InputString("Settings Text", component.SettingsTextEntityName);
                 InputString("Save Load Panel", component.SaveLoadPanelEntityName);

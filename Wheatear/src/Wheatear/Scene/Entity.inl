@@ -6,6 +6,7 @@
 #include "Scene.h"
 #include "Wheatear/Core/Log.h"
 
+#include <type_traits>
 #include <utility>
 
 namespace Wheatear {
@@ -16,6 +17,8 @@ namespace Wheatear {
         WT_CORE_ASSERT(!HasComponent<T>(), "Entity already has component");
         T& component = m_Scene->m_Registry.emplace<T>(
             m_EntityHandle, std::forward<Args>(args)...);
+        if constexpr (std::is_same_v<T, IDComponent> || std::is_same_v<T, TagComponent>)
+            m_Scene->InvalidateEntityLookupCache();
         return component;
     }
 
@@ -24,6 +27,8 @@ namespace Wheatear {
     {
         T& component = m_Scene->m_Registry.emplace_or_replace<T>(
             m_EntityHandle, std::forward<Args>(args)...);
+        if constexpr (std::is_same_v<T, IDComponent> || std::is_same_v<T, TagComponent>)
+            m_Scene->InvalidateEntityLookupCache();
         return component;
     }
 
@@ -52,6 +57,8 @@ namespace Wheatear {
     {
         WT_CORE_ASSERT(HasComponent<T>(), "Entity does not have component");
         m_Scene->m_Registry.remove<T>(m_EntityHandle);
+        if constexpr (std::is_same_v<T, IDComponent> || std::is_same_v<T, TagComponent>)
+            m_Scene->InvalidateEntityLookupCache();
     }
 
 } // namespace Wheatear

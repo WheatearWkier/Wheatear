@@ -12,6 +12,7 @@
 
 #include <algorithm>
 #include <string>
+#include <unordered_map>
 #include <vector>
 
 namespace Wheatear::SideCombatOutcomeService {
@@ -49,6 +50,9 @@ namespace Wheatear::SideCombatOutcomeService {
                 return 0;
 
             auto& registry = scene->GetRegistry();
+            if (ai.WaveIndex >= 0)
+                return std::clamp(ai.WaveIndex, 0, GetWaveCount(level) - 1);
+
             if (ai.Kind == SideEnemyKind::BearBoss)
                 return GetWaveCount(level) - 1;
 
@@ -162,6 +166,25 @@ namespace Wheatear::SideCombatOutcomeService {
             ApplyWaveActivation(scene, level);
         }
 
+        static std::unordered_map<std::string, int> BuildResultRewardAmounts(
+            const SideCombatLevelComponent& level)
+        {
+            std::unordered_map<std::string, int> amounts;
+            for (const auto& reward : level.DeathRewards)
+            {
+                if (!reward.Enabled ||
+                    reward.ItemId.empty() ||
+                    reward.Amount <= 0 ||
+                    reward.EnemyKind != static_cast<int>(SideEnemyKind::BearBoss))
+                {
+                    continue;
+                }
+
+                amounts[reward.ItemId] += reward.Amount;
+            }
+            return amounts;
+        }
+
     } // namespace
 
     void UpdateDeathsAndVictory(Scene* scene,
@@ -222,7 +245,10 @@ namespace Wheatear::SideCombatOutcomeService {
 
             combatant.RuntimeDeathProcessed = true;
             combatant.RuntimeVelocity = { 0.0f, 0.0f };
-            SideCombatPickupService::SpawnDeathRewards(scene, level, transform, ai);
+            const std::string sourceName = registry.all_of<TagComponent>(e)
+                ? registry.get<TagComponent>(e).Tag
+                : std::string{};
+            SideCombatPickupService::SpawnDeathRewards(scene, level, sourceName, transform, ai);
 
             if (!removeAfterDeath && registry.all_of<SpriteRendererComponent>(e))
                 registry.get<SpriteRendererComponent>(e).Color.a = 0.18f;
@@ -265,7 +291,8 @@ namespace Wheatear::SideCombatOutcomeService {
                 level.RuntimePlayerHitsTaken,
                 level.RuntimeElapsed,
                 level.RuntimeResultFirstClear ? level.RuntimeResultExperience : level.RuntimeResultRepeatExperience,
-                level.FirstClearRewardText);
+                level.FirstClearRewardText,
+                BuildResultRewardAmounts(level));
             if (player && player.HasComponent<SideCombatantComponent>())
                 player.GetComponent<SideCombatantComponent>().ControlsLocked = true;
         }

@@ -12,7 +12,7 @@ namespace Wheatear::VisualNovelInputService {
     {
         InputSnapshot snapshot;
         snapshot.PrimaryMousePressed = Input::IsMouseButtonPressed(WT_MOUSE_BUTTON_LEFT);
-        snapshot.AdvancePressed = snapshot.PrimaryMousePressed || InputBindingService::IsActionDown("vn.advance");
+        snapshot.AdvanceActionPressed = InputBindingService::IsActionDown("vn.advance");
         snapshot.AutoPressed = InputBindingService::IsActionDown("vn.auto");
         snapshot.HistoryPressed = InputBindingService::IsActionDown("vn.history");
         snapshot.SavePressed = InputBindingService::IsActionDown("vn.save");

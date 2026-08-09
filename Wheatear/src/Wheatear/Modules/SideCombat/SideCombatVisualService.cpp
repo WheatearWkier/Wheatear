@@ -18,6 +18,7 @@ namespace Wheatear::SideCombatVisualService {
     namespace {
 
         using SideAnimationSetTuning = SideCombatTuningService::SideAnimationSetTuning;
+        using SideAnimationClipTuning = SideCombatTuningService::SideAnimationClipTuning;
 
         static std::string FormatFramePath(const std::string& pattern, int frame)
         {
@@ -68,11 +69,43 @@ namespace Wheatear::SideCombatVisualService {
             return attackId == clipKey || clipKey == attackId + "_windup";
         }
 
+        static void EnsureAnimationClipLoaded(SpriteAnimatorComponent& animator,
+            const std::string& key,
+            const SideAnimationClipTuning& clipTuning)
+        {
+            if (key.empty() || animator.Clips.find(key) != animator.Clips.end())
+                return;
+
+            auto animationClip = AnimationClip::Create(key, clipTuning.Loop);
+            const float duration = 1.0f / std::max(1.0f, clipTuning.FrameRate);
+            const int frameCount = std::max(1, clipTuning.FrameCount);
+            for (int frame = 1; frame <= frameCount; ++frame)
+            {
+                if (Ref<Texture2D> texture = GameplayVisualService::LoadTextureCached(FormatFramePath(clipTuning.Pattern, frame)))
+                    animationClip->AddFrame({ texture, duration });
+            }
+
+            if (animationClip->GetFrameCount() > 0)
+                animator.AddClip(animationClip);
+        }
+
         static float GetRemoveAfterDeathAlpha(const SideCombatantComponent& combatant)
         {
             constexpr float FadeStart = 0.52f;
             constexpr float FadeDuration = 0.24f;
             return 1.0f - std::clamp((combatant.RuntimeDeathTimer - FadeStart) / FadeDuration, 0.0f, 1.0f);
+        }
+
+        static void ApplyAnimatorCurrentFrame(SpriteRendererComponent& sprite,
+            const SpriteAnimatorComponent& animator)
+        {
+            const AnimationFrame* frame = animator.GetCurrentFrame();
+            if (!frame || !frame->Texture)
+                return;
+
+            sprite.Texture = frame->Texture;
+            sprite.UVMin = frame->TexCoordMin;
+            sprite.UVMax = frame->TexCoordMax;
         }
 
         static std::string SelectVisualClipKey(
@@ -196,23 +229,8 @@ namespace Wheatear::SideCombatVisualService {
             }
             animator->PlaybackSpeed = std::max(0.0f, playbackSpeed);
 
-            for (const auto& [key, clipTuning] : set.Clips)
-            {
-                if (animator->Clips.find(key) != animator->Clips.end())
-                    continue;
-
-                auto animationClip = AnimationClip::Create(key, clipTuning.Loop);
-                const float duration = 1.0f / std::max(1.0f, clipTuning.FrameRate);
-                const int frameCount = std::max(1, clipTuning.FrameCount);
-                for (int frame = 1; frame <= frameCount; ++frame)
-                {
-                    if (Ref<Texture2D> texture = GameplayVisualService::LoadTextureCached(FormatFramePath(clipTuning.Pattern, frame)))
-                        animationClip->AddFrame({ texture, duration });
-                }
-
-                if (animationClip->GetFrameCount() > 0)
-                    animator->AddClip(animationClip);
-            }
+            if (const auto loadedClip = set.Clips.find(clipKey); loadedClip != set.Clips.end())
+                EnsureAnimationClipLoaded(*animator, clipKey, loadedClip->second);
 
             if (!animator->DefaultClipName.empty() && animator->CurrentClipName.empty())
                 animator->CurrentClipName = animator->DefaultClipName;
@@ -228,6 +246,7 @@ namespace Wheatear::SideCombatVisualService {
                 {
                     animator->CurrentClipName.clear();
                     animator->Play(clipKey);
+                    ApplyAnimatorCurrentFrame(sprite, *animator);
                 }
             }
             else
@@ -237,6 +256,7 @@ namespace Wheatear::SideCombatVisualService {
                 {
                     animator->CurrentClipName.clear();
                     animator->Play(clipKey);
+                    ApplyAnimatorCurrentFrame(sprite, *animator);
                 }
             }
 
@@ -345,6 +365,7 @@ namespace Wheatear::SideCombatVisualService {
             return;
 
         auto& shadowTransform = shadow.GetComponent<TransformComponent>();
+        auto& shadowSprite = shadow.GetComponent<SpriteRendererComponent>();
         shadowTransform.Translation = {
             combatant.RuntimeGroundPosition.x + tuning.ShadowOffset.x,
             combatant.RuntimeGroundPosition.y + tuning.ShadowOffset.y,
@@ -355,21 +376,23 @@ namespace Wheatear::SideCombatVisualService {
             !entity.GetComponent<SideEnemyAIComponent>().RuntimeAwake &&
             combatant.Alive)
         {
-            shadow.GetComponent<SpriteRendererComponent>().Color.a = 0.0f;
+            shadowSprite.Color = tuning.ShadowColor;
+            shadowSprite.Color.a = 0.0f;
             return;
         }
 
         const float airFade = 1.0f - std::clamp(combatant.RuntimeAirHeight / std::max(0.01f, tuning.ShadowAirFadeHeight), 0.0f, 1.0f);
         const float alpha = tuning.ShadowMinAlpha + (tuning.ShadowMaxAlpha - tuning.ShadowMinAlpha) * airFade;
+        shadowSprite.Color = tuning.ShadowColor;
         if (!combatant.Alive)
         {
-            shadow.GetComponent<SpriteRendererComponent>().Color.a = combatant.RuntimeRemoveAfterDeath
+            shadowSprite.Color.a *= combatant.RuntimeRemoveAfterDeath
                 ? alpha * GetRemoveAfterDeathAlpha(combatant)
                 : 0.0f;
             return;
         }
 
-        shadow.GetComponent<SpriteRendererComponent>().Color.a = alpha;
+        shadowSprite.Color.a *= alpha;
     }
 
 } // namespace Wheatear::SideCombatVisualService

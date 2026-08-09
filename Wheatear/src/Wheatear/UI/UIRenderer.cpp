@@ -434,7 +434,7 @@ namespace Wheatear {
         const UIRadialCooldownComponent& cooldown,
         int entityID)
     {
-        if (!widget.Visible || cooldown.Progress <= 0.0001f)
+        if (!widget.Visible)
             return;
 
         Renderer2D::DrawRadialCircle(
@@ -860,7 +860,7 @@ namespace Wheatear {
         params.EdgeSoftness = 0.42f;
         params.EntityID = entityID;
 
-        for (int i = 0; i < 4 && contentHeight > 0.0f; ++i)
+        for (int i = 0; text.AutoFit && i < 4 && contentHeight > 0.0f; ++i)
         {
             TextRenderParams measureParams = params;
             measureParams.MaxHeight = 0.0f;

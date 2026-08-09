@@ -5,6 +5,7 @@
 #include "Wheatear/Audio/AudioEngine.h"
 #include "Wheatear/Core/AssetAliasRegistry.h"
 #include "Wheatear/Core/AssetPath.h"
+#include "Wheatear/Core/Input.h"
 #include "Wheatear/Core/Log.h"
 #include "Wheatear/Core/UserSettings.h"
 #include "Wheatear/Modules/Common/GameplayAudioService.h"
@@ -17,7 +18,6 @@
 #include "Wheatear/Scene/Scene.h"
 #include "Wheatear/UI/UIRenderer.h"
 #include "Wheatear/UI/UIRuntimeTools.h"
-#include "Wheatear/UI/UIWidgetLayout.h"
 
 #include <yaml-cpp/yaml.h>
 
@@ -76,6 +76,43 @@ namespace Wheatear {
             {
                 return fallback;
             }
+        }
+
+        static void WarnMissingAuthoredVNUI(Scene* scene,
+            const std::string& entityName,
+            const char* missing)
+        {
+            if (!scene || entityName.empty() || !missing)
+                return;
+
+            static std::unordered_set<std::string> warned;
+            std::ostringstream key;
+            key << scene << ':' << entityName << ':' << missing;
+            if (warned.insert(key.str()).second)
+            {
+                WT_CORE_WARN("VisualNovelSystem: '{}' is missing {}. Add it to the scene asset; runtime UI creation is disabled.",
+                    entityName,
+                    missing);
+            }
+        }
+
+        static Entity FindAuthoredVNUIWidget(Scene* scene, const std::string& entityName)
+        {
+            if (!scene || entityName.empty())
+                return {};
+
+            Entity entity = FindEntityByName(scene, entityName);
+            if (!entity)
+            {
+                WarnMissingAuthoredVNUI(scene, entityName, "entity");
+                return {};
+            }
+            if (!entity.HasComponent<UIWidgetComponent>())
+            {
+                WarnMissingAuthoredVNUI(scene, entityName, "UIWidgetComponent");
+                return {};
+            }
+            return entity;
         }
 
         static void SetWidgetsWithPrefixVisible(Scene* scene, const std::string& prefix, bool visible)
@@ -250,10 +287,13 @@ namespace Wheatear {
             Entity entity = FindEntityByName(scene, entityName);
             if (!entity)
                 return;
+            if (!entity.HasComponent<UIImageComponent>())
+            {
+                WarnMissingAuthoredVNUI(scene, entityName, "UIImageComponent");
+                return;
+            }
 
-            auto& image = entity.HasComponent<UIImageComponent>()
-                ? entity.GetComponent<UIImageComponent>()
-                : entity.AddComponent<UIImageComponent>();
+            auto& image = entity.GetComponent<UIImageComponent>();
             image.Color = color;
             image.UVMin = uvMin;
             image.UVMax = uvMax;
@@ -285,37 +325,23 @@ namespace Wheatear {
                 VNUiAtlasUVMax(region));
         }
 
-        static void SetTransparentButtonChrome(Scene* scene, const std::string& entityName)
-        {
-            Entity entity = FindEntityByName(scene, entityName);
-            if (!entity || !entity.HasComponent<UIButtonComponent>())
-                return;
-
-            auto& button = entity.GetComponent<UIButtonComponent>();
-            button.NormalColor = { 1.0f, 1.0f, 1.0f, 0.0f };
-            button.HoverColor = { 1.0f, 1.0f, 1.0f, 0.0f };
-            button.PressedColor = { 1.0f, 1.0f, 1.0f, 0.0f };
-        }
-
         struct VNCommandButtonSpec
         {
             const char* EntityName;
-            const char* Command;
-            const char* Tooltip;
             uint32_t AtlasColumn;
         };
 
         static const std::array<VNCommandButtonSpec, 8>& VNCommandButtonSpecs()
         {
             static const std::array<VNCommandButtonSpec, 8> specs = {{
-                { "VN_Command_Save", "vn:savemenu", "存档", 0 },
-                { "VN_Command_Load", "vn:loadmenu", "读取", 1 },
-                { "VN_Command_QuickSave", "vn:quicksave", "快速存档", 2 },
-                { "VN_Command_QuickLoad", "vn:quickload", "快速读取", 3 },
-                { "VN_Command_Settings", "vn:settings", "系统设置", 4 },
-                { "VN_Command_History", "vn:history", "历史记录", 5 },
-                { "VN_Command_Auto", "vn:auto", "自动播放", 6 },
-                { "VN_Command_Skip", "vn:skip", "快进 / 跳过", 7 },
+                { "VN_Command_Save", 0 },
+                { "VN_Command_Load", 1 },
+                { "VN_Command_QuickSave", 2 },
+                { "VN_Command_QuickLoad", 3 },
+                { "VN_Command_Settings", 4 },
+                { "VN_Command_History", 5 },
+                { "VN_Command_Auto", 6 },
+                { "VN_Command_Skip", 7 },
             }};
             return specs;
         }
@@ -336,38 +362,22 @@ namespace Wheatear {
             const glm::vec2& position,
             const glm::vec2& size)
         {
-            if (!scene || entityName.empty())
+            (void)parentTag;
+            (void)position;
+            (void)size;
+
+            Entity entity = FindAuthoredVNUIWidget(scene, entityName);
+            if (!entity)
                 return {};
 
-            Entity entity = FindEntityByName(scene, entityName);
-            if (!entity)
-                entity = scene->CreateEntity(entityName);
-
-            const bool hadWidget = entity.HasComponent<UIWidgetComponent>();
-            auto& widget = hadWidget
-                ? entity.GetComponent<UIWidgetComponent>()
-                : entity.AddComponent<UIWidgetComponent>();
+            auto& widget = entity.GetComponent<UIWidgetComponent>();
             widget.Visible = true;
-            if (!hadWidget)
-            {
-                widget.Anchor = UIAnchor::TopLeft;
-                widget.Position = position;
-                widget.Size = size;
-                widget.SortOrder = 5200;
-                Entity parent = parentTag.empty() ? Entity{} : FindEntityByName(scene, parentTag);
-                widget.ParentEntity = parent ? parent.GetUUID() : UUID(0);
-            }
 
-            const bool hadPanel = entity.HasComponent<UIPanelComponent>();
-            auto& panel = hadPanel
-                ? entity.GetComponent<UIPanelComponent>()
-                : entity.AddComponent<UIPanelComponent>();
-            if (!hadPanel)
+            if (entity.HasComponent<UIPanelComponent>())
             {
+                auto& panel = entity.GetComponent<UIPanelComponent>();
                 panel.BackgroundColor = { 0.03f, 0.06f, 0.08f, 0.0f };
                 panel.BorderColor = { 0.45f, 0.86f, 0.92f, 0.0f };
-                panel.BorderThickness = 0.0f;
-                panel.ClipChildren = true;
             }
             ApplyVNUiAtlasRegion(scene,
                 entityName,
@@ -383,49 +393,22 @@ namespace Wheatear {
             const glm::vec2& position,
             const glm::vec2& size)
         {
-            if (!scene || entityName.empty())
+            (void)parentTag;
+            (void)position;
+            (void)size;
+
+            Entity entity = FindAuthoredVNUIWidget(scene, entityName);
+            if (!entity)
                 return {};
 
-            Entity entity = FindEntityByName(scene, entityName);
-            if (!entity)
-                entity = scene->CreateEntity(entityName);
-
-            const bool hadWidget = entity.HasComponent<UIWidgetComponent>();
-            auto& widget = hadWidget
-                ? entity.GetComponent<UIWidgetComponent>()
-                : entity.AddComponent<UIWidgetComponent>();
+            auto& widget = entity.GetComponent<UIWidgetComponent>();
             widget.Visible = true;
-            if (!hadWidget)
+            if (!entity.HasComponent<UITextComponent>())
             {
-                widget.Anchor = UIAnchor::TopLeft;
-                widget.Position = position;
-                widget.Size = size;
-                widget.SortOrder = 5201;
-                Entity parent = parentTag.empty() ? Entity{} : FindEntityByName(scene, parentTag);
-                widget.ParentEntity = parent ? parent.GetUUID() : UUID(0);
+                WarnMissingAuthoredVNUI(scene, entityName, "UITextComponent");
+                return {};
             }
 
-            const bool hadText = entity.HasComponent<UITextComponent>();
-            auto& text = hadText
-                ? entity.GetComponent<UITextComponent>()
-                : entity.AddComponent<UITextComponent>();
-            if (!hadText)
-            {
-                text.FontSize = 24.0f;
-                text.FontPath = AssetAliasRegistry::Path("font.ui_default", "assets/fonts/wqy-microhei.ttc");
-                text.Padding = { 26.0f, 8.0f, 18.0f, 8.0f };
-                text.HorizontalAlign = UITextHorizontalAlign::Left;
-                text.VerticalAlign = UITextVerticalAlign::Middle;
-                text.OutlineThickness = 0.85f;
-                text.ShadowOffset = { 1.0f, 1.0f };
-            }
-            else
-            {
-                if (text.FontSize <= 0.0f)
-                    text.FontSize = 24.0f;
-                if (text.FontPath.empty())
-                    text.FontPath = AssetAliasRegistry::Path("font.ui_default", "assets/fonts/wqy-microhei.ttc");
-            }
             return entity;
         }
 
@@ -437,29 +420,17 @@ namespace Wheatear {
             int sortOrder,
             bool visible)
         {
-            if (!scene || entityName.empty())
+            (void)parentTag;
+            (void)position;
+            (void)size;
+            (void)sortOrder;
+
+            Entity entity = FindAuthoredVNUIWidget(scene, entityName);
+            if (!entity)
                 return {};
 
-            Entity entity = FindEntityByName(scene, entityName);
-            if (!entity)
-                entity = scene->CreateEntity(entityName);
-
-            const bool hadWidget = entity.HasComponent<UIWidgetComponent>();
-            auto& widget = hadWidget
-                ? entity.GetComponent<UIWidgetComponent>()
-                : entity.AddComponent<UIWidgetComponent>();
+            auto& widget = entity.GetComponent<UIWidgetComponent>();
             widget.Visible = visible;
-            if (!hadWidget)
-            {
-                widget.Anchor = UIAnchor::TopLeft;
-                widget.Position = position;
-                widget.Size = size;
-                widget.Rotation = 0.0f;
-                widget.SortOrder = sortOrder;
-
-                Entity parent = parentTag.empty() ? Entity{} : FindEntityByName(scene, parentTag);
-                widget.ParentEntity = parent ? parent.GetUUID() : UUID(0);
-            }
             return entity;
         }
 
@@ -474,32 +445,21 @@ namespace Wheatear {
             const glm::vec4& color,
             bool visible)
         {
+            (void)fontSize;
+            (void)color;
+
             Entity entity = EnsureVNSettingsWidget(scene, entityName, parentTag, position, size, sortOrder, visible);
             if (!entity)
                 return {};
 
-            const bool hadText = entity.HasComponent<UITextComponent>();
-            auto& text = hadText
-                ? entity.GetComponent<UITextComponent>()
-                : entity.AddComponent<UITextComponent>();
+            if (!entity.HasComponent<UITextComponent>())
+            {
+                WarnMissingAuthoredVNUI(scene, entityName, "UITextComponent");
+                return {};
+            }
+
+            auto& text = entity.GetComponent<UITextComponent>();
             text.Text = value;
-            if (!hadText)
-            {
-                text.FontSize = fontSize;
-                text.Color = color;
-                text.FontPath = AssetAliasRegistry::Path("font.ui_default", "assets/fonts/wqy-microhei.ttc");
-                text.ShadowColor = { 0.02f, 0.025f, 0.030f, 0.78f };
-                text.ShadowOffset = { 1.4f, 1.4f };
-                text.OutlineColor = { 0.0f, 0.0f, 0.0f, 0.86f };
-                text.OutlineThickness = 1.05f;
-            }
-            else
-            {
-                if (text.FontSize <= 0.0f)
-                    text.FontSize = fontSize;
-                if (text.FontPath.empty())
-                    text.FontPath = AssetAliasRegistry::Path("font.ui_default", "assets/fonts/wqy-microhei.ttc");
-            }
             UIRenderer::PreloadUIText(text);
             return entity;
         }
@@ -527,17 +487,14 @@ namespace Wheatear {
             if (!entity)
                 return {};
 
-            const bool hadButton = entity.HasComponent<UIButtonComponent>();
-            auto& button = hadButton
-                ? entity.GetComponent<UIButtonComponent>()
-                : entity.AddComponent<UIButtonComponent>();
-            button.OnClickFunction = command;
-            if (!hadButton)
+            if (!entity.HasComponent<UIButtonComponent>())
             {
-                button.NormalColor = { 0.12f, 0.18f, 0.22f, 0.90f };
-                button.HoverColor = { 0.25f, 0.42f, 0.46f, 0.96f };
-                button.PressedColor = { 0.08f, 0.12f, 0.15f, 1.0f };
+                WarnMissingAuthoredVNUI(scene, entityName, "UIButtonComponent");
+                return entity;
             }
+
+            auto& button = entity.GetComponent<UIButtonComponent>();
+            button.OnClickFunction = command;
             return entity;
         }
 
@@ -554,19 +511,13 @@ namespace Wheatear {
             if (!entity)
                 return {};
 
-            const bool hadSlider = entity.HasComponent<UISliderComponent>();
-            auto& slider = hadSlider
-                ? entity.GetComponent<UISliderComponent>()
-                : entity.AddComponent<UISliderComponent>();
-            slider.MinValue = 0.0f;
-            slider.MaxValue = 100.0f;
-            if (!hadSlider)
+            if (!entity.HasComponent<UISliderComponent>())
             {
-                slider.TrackColor = { 0.08f, 0.10f, 0.12f, 0.92f };
-                slider.FillColor = { 0.32f, 0.74f, 0.78f, 0.96f };
-                slider.HandleColor = { 0.92f, 0.98f, 0.94f, 1.0f };
-                slider.HoverColor = { 1.0f, 0.88f, 0.48f, 1.0f };
+                WarnMissingAuthoredVNUI(scene, entityName, "UISliderComponent");
+                return entity;
             }
+
+            auto& slider = entity.GetComponent<UISliderComponent>();
             slider.OnValueChangedFunction = command;
             return entity;
         }
@@ -578,8 +529,6 @@ namespace Wheatear {
                 return;
 
             auto& slider = entity.GetComponent<UISliderComponent>();
-            slider.MinValue = 0.0f;
-            slider.MaxValue = 100.0f;
             if (!slider.IsDragging)
                 slider.Value = std::clamp(value, slider.MinValue, slider.MaxValue);
         }
@@ -736,49 +685,6 @@ namespace Wheatear {
                 entity.GetComponent<UIButtonComponent>().OnClickFunction = command;
         }
 
-        static void ApplyVNStaticUISkin(Scene* scene, const VisualNovelComponent& component)
-        {
-            if (!scene)
-                return;
-
-            Entity speakerText = FindEntityByName(scene, component.SpeakerTextEntityName);
-            if (speakerText && speakerText.HasComponent<UIImageComponent>())
-                speakerText.RemoveComponent<UIImageComponent>();
-
-            ApplyVNUiAtlasRegion(scene,
-                "VN_DialoguePanel",
-                "textbox_panel",
-                { 1.0f, 1.0f, 1.0f, 0.96f },
-                true);
-
-            ApplyVNUiAtlasRegion(scene,
-                component.HistoryPanelEntityName,
-                "textbox_panel",
-                { 1.0f, 1.0f, 1.0f, 0.93f },
-                true);
-            ApplyVNUiAtlasRegion(scene,
-                component.SettingsPanelEntityName,
-                "textbox_panel",
-                { 1.0f, 1.0f, 1.0f, 0.93f },
-                true);
-            ApplyVNUiAtlasRegion(scene,
-                component.SaveLoadPanelEntityName,
-                "textbox_panel",
-                { 1.0f, 1.0f, 1.0f, 0.93f },
-                true);
-
-            for (uint32_t i = 0; i < component.MaxVisibleChoices; ++i)
-            {
-                const std::string entityName = component.ChoiceEntityPrefix + std::to_string(i + 1);
-                ApplyVNUiAtlasRegion(scene,
-                    entityName,
-                    "choice_panel",
-                    { 1.0f, 1.0f, 1.0f, 0.95f },
-                    true);
-                SetTransparentButtonChrome(scene, entityName);
-            }
-        }
-
         static bool IsVNCommandActive(const VNCommandButtonSpec& spec,
             bool autoPlay,
             bool showSettings,
@@ -808,13 +714,6 @@ namespace Wheatear {
                 visible);
             if (!bar)
                 return;
-
-            auto& image = bar.HasComponent<UIImageComponent>()
-                ? bar.GetComponent<UIImageComponent>()
-                : bar.AddComponent<UIImageComponent>();
-            image.Color = { 1.0f, 1.0f, 1.0f, 0.0f };
-            image.UVMin = { 0.0f, 0.0f };
-            image.UVMax = { 1.0f, 1.0f };
         }
 
         static void ConfigureVNCommandButton(Scene* scene,
@@ -837,20 +736,15 @@ namespace Wheatear {
             if (!entity)
                 return;
 
-            auto& button = entity.HasComponent<UIButtonComponent>()
-                ? entity.GetComponent<UIButtonComponent>()
-                : entity.AddComponent<UIButtonComponent>();
-            button.OnClickFunction = spec.Command;
-            button.NormalColor = { 1.0f, 1.0f, 1.0f, 0.0f };
-            button.HoverColor = { 1.0f, 1.0f, 1.0f, 0.0f };
-            button.PressedColor = { 1.0f, 1.0f, 1.0f, 0.0f };
+            if (!entity.HasComponent<UIButtonComponent>())
+            {
+                WarnMissingAuthoredVNUI(scene, spec.EntityName, "UIButtonComponent");
+                return;
+            }
 
-            if (entity.HasComponent<UIAnimatorComponent>())
-                entity.RemoveComponent<UIAnimatorComponent>();
-
-            if (!entity.HasComponent<UITextComponent>())
-                entity.AddComponent<UITextComponent>();
-            SetText(scene, spec.EntityName, "");
+            auto& button = entity.GetComponent<UIButtonComponent>();
+            if (entity.HasComponent<UITextComponent>())
+                SetText(scene, spec.EntityName, "");
 
             const bool useHighlightedRow = highlighted || button.IsHovered || button.IsPressed;
             ApplyUIImage(scene,
@@ -859,87 +753,6 @@ namespace Wheatear {
                 { 1.0f, 1.0f, 1.0f, visible ? 1.0f : 0.0f },
                 VNCommandIconUVMin(spec.AtlasColumn, useHighlightedRow),
                 VNCommandIconUVMax(spec.AtlasColumn, useHighlightedRow));
-        }
-
-        static void UpdateVNCommandTooltip(Scene* scene, bool showStoryUi)
-        {
-            const VNCommandButtonSpec* hoveredSpec = nullptr;
-            size_t hoveredIndex = 0;
-            const auto& specs = VNCommandButtonSpecs();
-            for (size_t i = 0; i < specs.size(); ++i)
-            {
-                if (IsButtonHovered(scene, specs[i].EntityName))
-                {
-                    hoveredSpec = &specs[i];
-                    hoveredIndex = i;
-                    break;
-                }
-            }
-
-            const bool visible = showStoryUi && hoveredSpec != nullptr;
-            const std::string canvasTag = FindFirstCanvasTag(scene);
-            float barLeft = kVNCommandBarLeft;
-            float barTop = kVNCommandBarTop;
-            float barWidth = kVNCommandBarWidth;
-            float barHeight = kVNCommandBarHeight;
-            if (Entity bar = FindEntityByName(scene, "VN_CommandBar"))
-            {
-                UIWidgetLayout::Context layoutContext(scene);
-                const UIWidgetLayout::Rect barRect = UIWidgetLayout::ResolveRect(layoutContext, bar);
-                const float resolvedWidth = barRect.Right - barRect.Left;
-                const float resolvedHeight = barRect.Bottom - barRect.Top;
-                if (resolvedWidth > 0.001f && resolvedHeight > 0.001f)
-                {
-                    barLeft = barRect.Left;
-                    barTop = barRect.Top;
-                    barWidth = resolvedWidth;
-                    barHeight = resolvedHeight;
-                }
-            }
-            const float localGap = 0.035f;
-            const float localWidth = 0.085f;
-            const float tooltipWidth = 0.118f;
-            const float tooltipHeight = 0.034f;
-            const float localCenter = localGap + static_cast<float>(hoveredIndex) * (localWidth + localGap) + localWidth * 0.5f;
-            const float tooltipX = std::clamp(barLeft + localCenter * barWidth - tooltipWidth * 0.5f,
-                0.020f,
-                0.980f - tooltipWidth);
-            const float tooltipY = std::clamp(barTop + barHeight - tooltipHeight * 0.25f,
-                0.020f,
-                0.980f - tooltipHeight);
-
-            Entity panel = EnsureVNSettingsWidget(scene,
-                "VN_Tooltip_CommandPanel",
-                canvasTag,
-                { tooltipX, tooltipY },
-                { tooltipWidth, tooltipHeight },
-                6200,
-                visible);
-            if (panel)
-            {
-                auto& panelStyle = panel.HasComponent<UIPanelComponent>()
-                    ? panel.GetComponent<UIPanelComponent>()
-                    : panel.AddComponent<UIPanelComponent>();
-                panelStyle.BackgroundColor = { 0.0f, 0.0f, 0.0f, 0.0f };
-                panelStyle.BorderColor = { 0.0f, 0.0f, 0.0f, 0.0f };
-                panelStyle.BorderThickness = 0.0f;
-                panelStyle.ClipChildren = true;
-                ApplyVNUiAtlasRegion(scene,
-                    "VN_Tooltip_CommandPanel",
-                    "bgm_notice_panel",
-                    { 1.0f, 1.0f, 1.0f, visible ? 0.92f : 0.0f });
-            }
-
-            EnsureVNSettingsText(scene,
-                "VN_Tooltip_CommandText",
-                canvasTag,
-                { tooltipX + 0.012f, tooltipY + 0.005f },
-                { tooltipWidth - 0.024f, tooltipHeight - 0.008f },
-                6201,
-                visible ? hoveredSpec->Tooltip : "",
-                14.0f,
-                { 0.96f, 0.98f, 0.93f, 1.0f },
-                visible);
         }
 
         static void ApplyVNCommandBar(Scene* scene,
@@ -968,8 +781,6 @@ namespace Wheatear {
 
             SetWidgetVisible(scene, "VN_Command_Hide", false);
             SetText(scene, "VN_Command_Hide", "");
-            SetButtonCommand(scene, "VN_Command_Hide", "vn:hide");
-            UpdateVNCommandTooltip(scene, showStoryUi);
         }
 
         static void SetTextVisible(Scene* scene,
@@ -1187,6 +998,167 @@ namespace Wheatear {
                 && entity.GetComponent<UIButtonComponent>().IsHovered;
         }
 
+        static bool TryGetHoveredButtonTooltip(Scene* scene, const std::string& entityName, std::string& tooltipText)
+        {
+            Entity entity = FindEntityByName(scene, entityName);
+            if (!entity
+                || !entity.HasComponent<UIWidgetComponent>()
+                || !entity.GetComponent<UIWidgetComponent>().Visible
+                || !entity.HasComponent<UIButtonComponent>())
+                return false;
+
+            const auto& button = entity.GetComponent<UIButtonComponent>();
+            if (!button.IsHovered || button.TooltipText.empty())
+                return false;
+
+            tooltipText = button.TooltipText;
+            return true;
+        }
+
+        static bool TryGetNormalizedMousePosition(Scene* scene, glm::vec2& position)
+        {
+            if (!scene || scene->GetViewportWidth() == 0 || scene->GetViewportHeight() == 0)
+                return false;
+
+            const auto [mouseX, mouseY] = Input::GetMousePosition();
+            const glm::vec2 viewportOffset = scene->GetViewportOffset();
+            position = {
+                (mouseX - viewportOffset.x) / static_cast<float>(scene->GetViewportWidth()),
+                (mouseY - viewportOffset.y) / static_cast<float>(scene->GetViewportHeight())
+            };
+            return true;
+        }
+
+        static float ClampTooltipAxis(float value, float minValue, float maxValue)
+        {
+            if (maxValue < minValue)
+                return (minValue + maxValue) * 0.5f;
+            return std::clamp(value, minValue, maxValue);
+        }
+
+        static glm::vec2 ClampTooltipPosition(const UIWidgetComponent& widget, glm::vec2 position)
+        {
+            const float width = std::max(widget.Size.x, 0.0f);
+            const float height = std::max(widget.Size.y, 0.0f);
+            const float halfWidth = width * 0.5f;
+            const float halfHeight = height * 0.5f;
+
+            float minX = 0.0f;
+            float maxX = 1.0f;
+            float minY = 0.0f;
+            float maxY = 1.0f;
+
+            switch (widget.Anchor)
+            {
+            case UIAnchor::TopLeft:
+                maxX = 1.0f - width;
+                maxY = 1.0f - height;
+                break;
+            case UIAnchor::TopCenter:
+                minX = halfWidth;
+                maxX = 1.0f - halfWidth;
+                maxY = 1.0f - height;
+                break;
+            case UIAnchor::TopRight:
+                minX = width;
+                maxY = 1.0f - height;
+                break;
+            case UIAnchor::MiddleLeft:
+                maxX = 1.0f - width;
+                minY = halfHeight;
+                maxY = 1.0f - halfHeight;
+                break;
+            case UIAnchor::MiddleCenter:
+                minX = halfWidth;
+                maxX = 1.0f - halfWidth;
+                minY = halfHeight;
+                maxY = 1.0f - halfHeight;
+                break;
+            case UIAnchor::MiddleRight:
+                minX = width;
+                minY = halfHeight;
+                maxY = 1.0f - halfHeight;
+                break;
+            case UIAnchor::BottomLeft:
+                maxX = 1.0f - width;
+                minY = height;
+                break;
+            case UIAnchor::BottomCenter:
+                minX = halfWidth;
+                maxX = 1.0f - halfWidth;
+                minY = height;
+                break;
+            case UIAnchor::BottomRight:
+                minX = width;
+                minY = height;
+                break;
+            }
+
+            position.x = ClampTooltipAxis(position.x, minX, maxX);
+            position.y = ClampTooltipAxis(position.y, minY, maxY);
+            return position;
+        }
+
+        static void MoveVNCommandTooltipToMouse(Scene* scene, const VisualNovelComponent& component)
+        {
+            if (!scene || component.CommandTooltipEntityName.empty())
+                return;
+
+            Entity tooltip = FindEntityByName(scene, component.CommandTooltipEntityName);
+            if (!tooltip || !tooltip.HasComponent<UIWidgetComponent>())
+                return;
+
+            glm::vec2 mousePosition;
+            if (!TryGetNormalizedMousePosition(scene, mousePosition))
+                return;
+
+            auto& widget = tooltip.GetComponent<UIWidgetComponent>();
+            widget.Position = ClampTooltipPosition(widget, mousePosition + component.CommandTooltipMouseOffset);
+        }
+
+        static bool IsAnyVNCommandButtonHovered(Scene* scene)
+        {
+            for (const auto& spec : VNCommandButtonSpecs())
+            {
+                if (IsEntityHoveredButton(scene, spec.EntityName))
+                    return true;
+            }
+
+            return IsEntityHoveredButton(scene, "VN_Command_Hide");
+        }
+
+        static void UpdateVNCommandTooltip(Scene* scene,
+            const VisualNovelComponent& component,
+            bool showStoryUi)
+        {
+            if (!scene || component.CommandTooltipEntityName.empty())
+                return;
+
+            std::string tooltipText;
+            if (showStoryUi)
+            {
+                for (const auto& spec : VNCommandButtonSpecs())
+                {
+                    if (TryGetHoveredButtonTooltip(scene, spec.EntityName, tooltipText))
+                        break;
+                }
+
+                if (tooltipText.empty())
+                    TryGetHoveredButtonTooltip(scene, "VN_Command_Hide", tooltipText);
+            }
+
+            if (!tooltipText.empty())
+            {
+                if (component.CommandTooltipFollowMouse)
+                    MoveVNCommandTooltipToMouse(scene, component);
+                SetTextVisible(scene, component.CommandTooltipEntityName, tooltipText, true);
+                return;
+            }
+
+            if (component.CommandTooltipEntityName != component.SystemMessageEntityName)
+                SetTextVisible(scene, component.CommandTooltipEntityName, "", false);
+        }
+
         static std::filesystem::path BuildSavePath(const VisualNovelComponent& component, int slot)
         {
             std::filesystem::path directory = AssetPath::Resolve(component.SaveDirectory);
@@ -1207,22 +1179,6 @@ namespace Wheatear {
         static bool HasAnySaveSlotData(const VisualNovelComponent& component, int slot)
         {
             return HasVNSaveSlot(component, slot) || GameProgress::IsSaveSlotOccupied(slot);
-        }
-
-        static void SetVNButtonPalette(Scene* scene,
-            const std::string& entityName,
-            const glm::vec4& normal,
-            const glm::vec4& hover,
-            const glm::vec4& pressed)
-        {
-            Entity entity = FindEntityByName(scene, entityName);
-            if (!entity || !entity.HasComponent<UIButtonComponent>())
-                return;
-
-            auto& button = entity.GetComponent<UIButtonComponent>();
-            button.NormalColor = normal;
-            button.HoverColor = hover;
-            button.PressedColor = pressed;
         }
 
         static std::string BuildVNSaveSlotText(const VisualNovelComponent& component,
@@ -1295,55 +1251,27 @@ namespace Wheatear {
                 Entity scroll = EnsureVNSettingsWidget(scene,
                     "VN_SaveLoadSlotScroll",
                     component.SaveLoadPanelEntityName,
-                    { 0.075f, 0.285f },
-                    { 0.82f, 0.57f },
+                    { 0.055f, 0.325f },
+                    { 0.890f, 0.585f },
                     100,
                     visible);
                 if (scroll)
                 {
-                    const bool hadPanel = scroll.HasComponent<UIPanelComponent>();
-                    auto& panel = hadPanel
-                        ? scroll.GetComponent<UIPanelComponent>()
-                        : scroll.AddComponent<UIPanelComponent>();
-                    if (!hadPanel)
-                    {
-                        panel.BackgroundColor = { 0.012f, 0.014f, 0.018f, 0.34f };
-                        panel.BorderColor = { 0.64f, 0.52f, 0.38f, 0.34f };
-                        panel.BorderThickness = 1.0f;
-                        panel.ClipChildren = true;
-                    }
-
-                    const bool hadScrollView = scroll.HasComponent<UIScrollViewComponent>();
-                    auto& scrollView = hadScrollView
-                        ? scroll.GetComponent<UIScrollViewComponent>()
-                        : scroll.AddComponent<UIScrollViewComponent>();
-                    constexpr float slotStep = 0.150f;
-                    scrollView.ContentHeight = 0.060f + static_cast<float>(GameProgress::GetMaxSaveSlots()) * slotStep;
-                    if (!hadScrollView)
-                    {
-                        scrollView.WheelStep = 0.10f;
-                        scrollView.ScrollbarWidth = 0.018f;
-                        scrollView.EnableWheel = true;
-                        scrollView.ShowScrollbar = true;
-                        scrollView.DragScrollbar = true;
-                        scrollView.ClampToContent = true;
-                    }
-                    scrollView.ClampOffset();
+                    if (scroll.HasComponent<UIScrollViewComponent>())
+                        scroll.GetComponent<UIScrollViewComponent>().ClampOffset();
+                    else
+                        WarnMissingAuthoredVNUI(scene, "VN_SaveLoadSlotScroll", "UIScrollViewComponent");
                 }
 
                 for (int slot = 1; slot <= GameProgress::GetMaxSaveSlots(); ++slot)
                 {
-                    constexpr float slotStep = 0.150f;
+                    constexpr float slotStep = 0.195f;
                     const std::string entityName = "VN_SaveLoad_Slot_" + std::to_string(slot);
-                    Entity existingSlot = FindEntityByName(scene, entityName);
-                    const bool hadSlotText = existingSlot && existingSlot.HasComponent<UITextComponent>();
-                    const bool hadSlotButton = existingSlot && existingSlot.HasComponent<UIButtonComponent>();
-                    const bool occupied = HasAnySaveSlotData(component, slot);
                     Entity slotEntity = EnsureVNSettingsButton(scene,
                         entityName,
                         "VN_SaveLoadSlotScroll",
-                        { 0.035f, 0.030f + static_cast<float>(slot - 1) * slotStep },
-                        { 0.89f, 0.140f },
+                        { 0.025f, 0.025f + static_cast<float>(slot - 1) * slotStep },
+                        { 0.940f, 0.180f },
                         120 + slot,
                         BuildVNSaveSlotText(component, slot, saveMode),
                         saveMode
@@ -1352,61 +1280,17 @@ namespace Wheatear {
                         visible);
                     if (!slotEntity)
                         continue;
-
-                    auto& text = slotEntity.GetComponent<UITextComponent>();
-                    if (!hadSlotText)
-                    {
-                        text.FontSize = 24.0f;
-                        text.Color = occupied
-                            ? glm::vec4{ 0.98f, 0.96f, 0.82f, 1.0f }
-                            : glm::vec4{ 0.72f, 0.78f, 0.76f, 1.0f };
-                        UIRenderer::PreloadUIText(text);
-                    }
-
-                    if (hadSlotButton)
-                        continue;
-
-                    if (!occupied)
-                    {
-                        SetVNButtonPalette(scene,
-                            entityName,
-                            saveMode ? glm::vec4{ 0.12f, 0.18f, 0.18f, 0.78f } : glm::vec4{ 0.08f, 0.09f, 0.10f, 0.58f },
-                            saveMode ? glm::vec4{ 0.22f, 0.38f, 0.34f, 0.92f } : glm::vec4{ 0.12f, 0.14f, 0.16f, 0.70f },
-                            { 0.08f, 0.11f, 0.12f, 0.96f });
-                    }
-                    else
-                    {
-                        SetVNButtonPalette(scene,
-                            entityName,
-                            saveMode ? glm::vec4{ 0.26f, 0.18f, 0.10f, 0.90f } : glm::vec4{ 0.10f, 0.25f, 0.24f, 0.90f },
-                            saveMode ? glm::vec4{ 0.50f, 0.34f, 0.16f, 0.98f } : glm::vec4{ 0.18f, 0.46f, 0.42f, 0.98f },
-                            saveMode ? glm::vec4{ 0.18f, 0.11f, 0.06f, 1.0f } : glm::vec4{ 0.06f, 0.16f, 0.16f, 1.0f });
-                    }
                 }
             }
 
             const bool confirmVisible = visible && saveMode && pendingOverwriteSlot > 0;
-            Entity confirmPanel = EnsureVNSettingsWidget(scene,
+            EnsureVNSettingsWidget(scene,
                 "VN_SaveLoadConfirmPanel",
                 component.SaveLoadPanelEntityName,
                 { 0.20f, 0.37f },
                 { 0.60f, 0.23f },
                 260,
                 confirmVisible);
-            if (confirmPanel)
-            {
-                const bool hadPanel = confirmPanel.HasComponent<UIPanelComponent>();
-                auto& panel = hadPanel
-                    ? confirmPanel.GetComponent<UIPanelComponent>()
-                    : confirmPanel.AddComponent<UIPanelComponent>();
-                if (!hadPanel)
-                {
-                    panel.BackgroundColor = { 0.018f, 0.020f, 0.024f, 0.96f };
-                    panel.BorderColor = { 0.86f, 0.66f, 0.34f, 0.96f };
-                    panel.BorderThickness = 2.0f;
-                    panel.ClipChildren = true;
-                }
-            }
 
             EnsureVNSettingsText(scene,
                 "VN_SaveLoadConfirmText",
@@ -1465,9 +1349,7 @@ namespace Wheatear {
 
             std::ostringstream stream;
             stream << "历史记录\n\n";
-            const size_t maxLines = 10;
-            const size_t start = history.size() > maxLines ? history.size() - maxLines : 0;
-            for (size_t i = start; i < history.size(); ++i)
+            for (size_t i = 0; i < history.size(); ++i)
             {
                 const auto& entry = history[i];
                 if (entry.IsChoice)
@@ -1481,6 +1363,57 @@ namespace Wheatear {
                     stream << "\n\n";
             }
             return stream.str();
+        }
+
+        static size_t CountTextLines(const std::string& text)
+        {
+            if (text.empty())
+                return 0;
+            return static_cast<size_t>(std::count(text.begin(), text.end(), '\n')) + 1;
+        }
+
+        static size_t EstimateHistoryLineCount(const VisualNovelRuntime& runtime,
+            const std::string& historyText)
+        {
+            const size_t explicitLines = CountTextLines(historyText);
+            const size_t entryLines = runtime.GetHistory().empty()
+                ? 4
+                : 3 + runtime.GetHistory().size() * 2;
+            return std::max(explicitLines, entryLines);
+        }
+
+        static void UpdateHistoryScroll(Scene* scene,
+            const VisualNovelComponent& component,
+            const VisualNovelRuntime& runtime,
+            const std::string& historyText,
+            bool visible)
+        {
+            if (!scene || component.HistoryScrollEntityName.empty())
+                return;
+
+            Entity scrollEntity = FindEntityByName(scene, component.HistoryScrollEntityName);
+            if (!scrollEntity || !scrollEntity.HasComponent<UIWidgetComponent>())
+                return;
+
+            SetWidgetVisible(scene, component.HistoryScrollEntityName, visible);
+
+            const size_t lineCount = std::max<size_t>(EstimateHistoryLineCount(runtime, historyText), 4);
+            const float contentHeight = std::max(1.0f, 0.16f + static_cast<float>(lineCount) * 0.07f);
+
+            if (scrollEntity.HasComponent<UIScrollViewComponent>())
+            {
+                auto& scroll = scrollEntity.GetComponent<UIScrollViewComponent>();
+                scroll.ContentHeight = contentHeight;
+                scroll.ClampOffset();
+            }
+            else
+            {
+                WarnMissingAuthoredVNUI(scene, component.HistoryScrollEntityName, "UIScrollViewComponent");
+            }
+
+            Entity textEntity = FindEntityByName(scene, component.HistoryTextEntityName);
+            if (textEntity && textEntity.HasComponent<UIWidgetComponent>())
+                textEntity.GetComponent<UIWidgetComponent>().Size.y = contentHeight;
         }
 
         static std::string BuildSettingsText(const VisualNovelComponent& component,
@@ -1970,12 +1903,14 @@ namespace Wheatear {
             state.PreviousChoicePressed.assign(9, false);
 
         const VisualNovelInputService::InputSnapshot input = VisualNovelInputService::Sample();
+        const bool commandButtonMousePressed = input.PrimaryMousePressed && IsAnyVNCommandButtonHovered(scene);
+        const bool advancePressed = input.AdvanceActionPressed || (input.PrimaryMousePressed && !commandButtonMousePressed);
         const bool commandPressed = input.PrimaryMousePressed;
         state.PreviousCommandPressed = commandPressed;
 
         if (state.DialogueHidden)
         {
-            const bool pressed = input.AdvancePressed;
+            const bool pressed = advancePressed;
             if (pressed && !state.PreviousAdvancePressed)
                 state.DialogueHidden = false;
             state.PreviousAdvancePressed = pressed;
@@ -2004,7 +1939,7 @@ namespace Wheatear {
 
         if (state.ShowHistory || state.ShowSettings || state.ShowSaveLoad)
         {
-            state.PreviousAdvancePressed = input.AdvancePressed;
+            state.PreviousAdvancePressed = advancePressed;
             return;
         }
 
@@ -2027,7 +1962,7 @@ namespace Wheatear {
                 state.PreviousChoicePressed[i] = pressed;
             }
 
-            const bool mousePressed = input.PrimaryMousePressed;
+            const bool mousePressed = input.PrimaryMousePressed && !commandButtonMousePressed;
             if (mousePressed && !state.PreviousAdvancePressed)
             {
                 for (size_t i = 0; i < maxChoices; ++i)
@@ -2043,11 +1978,11 @@ namespace Wheatear {
                 }
             }
 
-            state.PreviousAdvancePressed = input.AdvancePressed;
+            state.PreviousAdvancePressed = advancePressed;
             return;
         }
 
-        const bool pressed = input.AdvancePressed;
+        const bool pressed = advancePressed;
         if (pressed && !state.PreviousAdvancePressed)
         {
             if (component.RestartOnFinish || !state.Runtime.IsFinished())
@@ -2064,7 +1999,6 @@ namespace Wheatear {
         const bool showStoryUi = !state.DialogueHidden && !state.ShowHistory && !state.ShowSettings && !state.ShowSaveLoad;
         const bool waitingForChoice = showStoryUi && state.Runtime.IsWaitingForChoice();
 
-        ApplyVNStaticUISkin(scene, component);
         UpdateVNSettingsAudioControls(scene, component, state.ShowSettings);
 
         SetWidgetsWithPrefixVisible(scene, "VN_Command", showStoryUi);
@@ -2085,8 +2019,10 @@ namespace Wheatear {
             state.ShowSettings,
             state.ShowHistory);
 
+        const std::string historyText = BuildHistoryText(state.Runtime);
+        UpdateHistoryScroll(scene, component, state.Runtime, historyText, state.ShowHistory);
         SetTextVisible(scene, component.HistoryTextEntityName,
-            BuildHistoryText(state.Runtime),
+            historyText,
             state.ShowHistory);
         SetTextVisible(scene, component.SettingsTextEntityName,
             BuildSettingsText(component, state.Runtime),
@@ -2102,6 +2038,7 @@ namespace Wheatear {
             component.SystemMessageEntityName,
             state.SystemMessage,
             state.SystemMessageTimer > 0.0f && !state.DialogueHidden);
+        UpdateVNCommandTooltip(scene, component, showStoryUi);
 
         if (!line)
         {

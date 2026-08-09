@@ -1,13 +1,15 @@
 #include "wtpch.h"
 #include "GameplayUILayoutService.h"
 
-#include "Wheatear/Core/AssetAliasRegistry.h"
+#include "Wheatear/Core/Log.h"
 #include "Wheatear/Scene/Components.h"
 #include "Wheatear/Scene/Scene.h"
 #include "Wheatear/Scene/SceneQueries.h"
 #include "Wheatear/UI/UIRenderer.h"
 
 #include <algorithm>
+#include <sstream>
+#include <unordered_set>
 
 namespace Wheatear::GameplayUILayoutService {
 
@@ -15,18 +17,22 @@ namespace Wheatear::GameplayUILayoutService {
 
         using SceneQueries::FindEntityByName;
 
-        void ConfigureDefaultWidget(UIWidgetComponent& widget,
-            glm::vec2 position,
-            glm::vec2 size,
-            int sortOrder,
-            bool visible)
+        void WarnMissingAuthoredUI(Scene* scene,
+            const std::string& entityName,
+            const char* missing)
         {
-            widget.Visible = visible;
-            widget.Anchor = UIAnchor::TopLeft;
-            widget.Position = position;
-            widget.Size = size;
-            widget.Rotation = 0.0f;
-            widget.SortOrder = sortOrder;
+            if (!scene || entityName.empty() || !missing)
+                return;
+
+            static std::unordered_set<std::string> warned;
+            std::ostringstream key;
+            key << scene << ':' << entityName << ':' << missing;
+            if (warned.insert(key.str()).second)
+            {
+                WT_CORE_WARN("GameplayUILayoutService: '{}' is missing {}. Add it to the scene asset; runtime UI creation is disabled.",
+                    entityName,
+                    missing);
+            }
         }
 
     } // namespace
@@ -44,47 +50,21 @@ namespace Wheatear::GameplayUILayoutService {
         int sortOrder,
         bool visible)
     {
-        if (!scene || entityName.empty())
-            return {};
+        (void)parentName;
+        (void)position;
+        (void)size;
+        (void)sortOrder;
 
-        Entity entity = FindEntityByName(scene, entityName);
-        if (!entity)
-            entity = scene->CreateEntity(entityName);
-
-        const bool hadWidget = entity.HasComponent<UIWidgetComponent>();
-        auto& widget = hadWidget
-            ? entity.GetComponent<UIWidgetComponent>()
-            : entity.AddComponent<UIWidgetComponent>();
-        if (!hadWidget)
-            ConfigureDefaultWidget(widget, position, size, sortOrder, visible);
-
-        Entity parent = FindEntityByName(scene, parentName);
-        if (!hadWidget)
-            widget.ParentEntity = parent ? parent.GetUUID() : UUID(0);
+        Entity entity = FindAuthoredUIWidget(scene, entityName);
+        if (entity && entity.HasComponent<UIWidgetComponent>())
+            entity.GetComponent<UIWidgetComponent>().Visible = visible;
         return entity;
     }
 
     Entity EnsurePager(Scene* scene, const std::string& pagerName, int pageCount)
     {
-        Entity pager = FindEntityByName(scene, pagerName);
-        if (!pager && scene)
-            pager = scene->CreateEntity(pagerName);
-        if (!pager)
-            return {};
-
-        const bool hadWidget = pager.HasComponent<UIWidgetComponent>();
-        auto& widget = pager.HasComponent<UIWidgetComponent>()
-            ? pager.GetComponent<UIWidgetComponent>()
-            : pager.AddComponent<UIWidgetComponent>();
-        if (!hadWidget)
-            ConfigureDefaultWidget(widget, { 0.0f, 0.0f }, { 0.001f, 0.001f }, 0, false);
-
-        auto& pagerComponent = pager.HasComponent<UIPagerComponent>()
-            ? pager.GetComponent<UIPagerComponent>()
-            : pager.AddComponent<UIPagerComponent>();
-        pagerComponent.PageCount = std::max(pageCount, 1);
-        pagerComponent.CurrentPage = std::clamp(pagerComponent.CurrentPage, 1, pagerComponent.PageCount);
-        return pager;
+        (void)pageCount;
+        return FindAuthoredPager(scene, pagerName);
     }
 
     Entity EnsurePanel(Scene* scene,
@@ -98,22 +78,15 @@ namespace Wheatear::GameplayUILayoutService {
         float borderThickness,
         bool clipChildren)
     {
-        Entity entity = EnsureUIWidget(scene, entityName, parentName, position, size, sortOrder);
-        if (!entity)
-            return {};
-
-        const bool hadPanel = entity.HasComponent<UIPanelComponent>();
-        auto& panel = hadPanel
-            ? entity.GetComponent<UIPanelComponent>()
-            : entity.AddComponent<UIPanelComponent>();
-        if (!hadPanel)
-        {
-            panel.BackgroundColor = background;
-            panel.BorderColor = border;
-            panel.BorderThickness = borderThickness;
-            panel.ClipChildren = clipChildren;
-        }
-        return entity;
+        (void)parentName;
+        (void)position;
+        (void)size;
+        (void)sortOrder;
+        (void)background;
+        (void)border;
+        (void)borderThickness;
+        (void)clipChildren;
+        return FindAuthoredPanel(scene, entityName);
     }
 
     Entity EnsureScrollView(Scene* scene,
@@ -124,30 +97,12 @@ namespace Wheatear::GameplayUILayoutService {
         int sortOrder,
         float contentHeight)
     {
-        Entity entity = EnsurePanel(scene, entityName, parentName, position, size, sortOrder,
-            { 0.012f, 0.015f, 0.018f, 0.36f },
-            { 0.44f, 0.58f, 0.50f, 0.42f },
-            1.0f,
-            true);
-        if (!entity)
-            return {};
-
-        const bool hadScrollView = entity.HasComponent<UIScrollViewComponent>();
-        auto& scrollView = hadScrollView
-            ? entity.GetComponent<UIScrollViewComponent>()
-            : entity.AddComponent<UIScrollViewComponent>();
-        scrollView.ContentHeight = std::max(contentHeight, 1.0f);
-        if (!hadScrollView)
-        {
-            scrollView.WheelStep = 0.08f;
-            scrollView.ScrollbarWidth = 0.016f;
-            scrollView.EnableWheel = true;
-            scrollView.ShowScrollbar = true;
-            scrollView.DragScrollbar = true;
-            scrollView.ClampToContent = true;
-        }
-        scrollView.ClampOffset();
-        return entity;
+        (void)parentName;
+        (void)position;
+        (void)size;
+        (void)sortOrder;
+        (void)contentHeight;
+        return FindAuthoredScrollView(scene, entityName);
     }
 
     Entity EnsureText(Scene* scene,
@@ -160,32 +115,19 @@ namespace Wheatear::GameplayUILayoutService {
         float fontSize,
         glm::vec4 color)
     {
-        Entity entity = EnsureUIWidget(scene, entityName, parentName, position, size, sortOrder);
+        (void)parentName;
+        (void)position;
+        (void)size;
+        (void)sortOrder;
+        (void)fontSize;
+        (void)color;
+
+        Entity entity = FindAuthoredText(scene, entityName);
         if (!entity)
             return {};
 
-        const bool hadText = entity.HasComponent<UITextComponent>();
-        auto& text = hadText
-            ? entity.GetComponent<UITextComponent>()
-            : entity.AddComponent<UITextComponent>();
+        auto& text = entity.GetComponent<UITextComponent>();
         text.Text = value;
-        if (!hadText)
-        {
-            text.FontSize = fontSize;
-            text.Color = color;
-            text.FontPath = AssetAliasRegistry::Path("font.ui_default", "assets/fonts/wqy-microhei.ttc");
-            text.ShadowColor = { 0.01f, 0.015f, 0.018f, 0.80f };
-            text.ShadowOffset = { 1.6f, 1.6f };
-            text.OutlineColor = { 0.0f, 0.0f, 0.0f, 0.86f };
-            text.OutlineThickness = 1.15f;
-        }
-        else
-        {
-            if (text.FontSize <= 0.0f)
-                text.FontSize = fontSize;
-            if (text.FontPath.empty())
-                text.FontPath = AssetAliasRegistry::Path("font.ui_default", "assets/fonts/wqy-microhei.ttc");
-        }
         UIRenderer::PreloadUIText(text);
         return entity;
     }
@@ -199,24 +141,20 @@ namespace Wheatear::GameplayUILayoutService {
         const std::string& label,
         const std::string& command)
     {
-        Entity entity = EnsureText(scene, entityName, parentName, position, size, sortOrder,
+        Entity entity = EnsureText(scene,
+            entityName,
+            parentName,
+            position,
+            size,
+            sortOrder,
             label,
             18.0f,
             { 0.95f, 0.93f, 0.82f, 1.0f });
         if (!entity)
             return {};
 
-        const bool hadButton = entity.HasComponent<UIButtonComponent>();
-        auto& button = hadButton
-            ? entity.GetComponent<UIButtonComponent>()
-            : entity.AddComponent<UIButtonComponent>();
-        button.OnClickFunction = command;
-        if (!hadButton)
-        {
-            button.NormalColor = { 0.10f, 0.11f, 0.13f, 0.86f };
-            button.HoverColor = { 0.35f, 0.55f, 0.50f, 0.96f };
-            button.PressedColor = { 0.06f, 0.08f, 0.09f, 0.98f };
-        }
+        if (entity.HasComponent<UIButtonComponent>())
+            entity.GetComponent<UIButtonComponent>().OnClickFunction = command;
         return entity;
     }
 
@@ -230,24 +168,131 @@ namespace Wheatear::GameplayUILayoutService {
         float maxValue,
         const std::string& command)
     {
-        Entity entity = EnsureUIWidget(scene, entityName, parentName, position, size, sortOrder);
+        (void)parentName;
+        (void)position;
+        (void)size;
+        (void)sortOrder;
+        (void)minValue;
+        (void)maxValue;
+
+        Entity entity = FindAuthoredSlider(scene, entityName);
+        if (entity && entity.HasComponent<UISliderComponent>())
+            entity.GetComponent<UISliderComponent>().OnValueChangedFunction = command;
+        return entity;
+    }
+
+    Entity FindAuthoredUIWidget(Scene* scene, const std::string& entityName)
+    {
+        if (!scene || entityName.empty())
+            return {};
+
+        Entity entity = FindEntityByName(scene, entityName);
+        if (!entity)
+        {
+            WarnMissingAuthoredUI(scene, entityName, "entity");
+            return {};
+        }
+        if (!entity.HasComponent<UIWidgetComponent>())
+        {
+            WarnMissingAuthoredUI(scene, entityName, "UIWidgetComponent");
+            return {};
+        }
+
+        return entity;
+    }
+
+    Entity FindAuthoredPager(Scene* scene, const std::string& pagerName)
+    {
+        Entity pager = FindEntityByName(scene, pagerName);
+        if (!pager)
+        {
+            WarnMissingAuthoredUI(scene, pagerName, "entity");
+            return {};
+        }
+        if (!pager.HasComponent<UIWidgetComponent>())
+        {
+            WarnMissingAuthoredUI(scene, pagerName, "UIWidgetComponent");
+            return {};
+        }
+        if (!pager.HasComponent<UIPagerComponent>())
+        {
+            WarnMissingAuthoredUI(scene, pagerName, "UIPagerComponent");
+            return {};
+        }
+        return pager;
+    }
+
+    Entity FindAuthoredPanel(Scene* scene, const std::string& entityName)
+    {
+        Entity entity = FindAuthoredUIWidget(scene, entityName);
         if (!entity)
             return {};
 
-        const bool hadSlider = entity.HasComponent<UISliderComponent>();
-        auto& slider = hadSlider
-            ? entity.GetComponent<UISliderComponent>()
-            : entity.AddComponent<UISliderComponent>();
-        slider.MinValue = minValue;
-        slider.MaxValue = maxValue <= minValue ? minValue + 1.0f : maxValue;
-        if (!hadSlider)
+        if (!entity.HasComponent<UIPanelComponent>())
         {
-            slider.TrackColor = { 0.08f, 0.10f, 0.12f, 0.92f };
-            slider.FillColor = { 0.30f, 0.78f, 0.72f, 0.96f };
-            slider.HandleColor = { 0.92f, 0.98f, 0.92f, 1.0f };
-            slider.HoverColor = { 1.0f, 0.92f, 0.50f, 1.0f };
+            WarnMissingAuthoredUI(scene, entityName, "UIPanelComponent");
+            return {};
         }
-        slider.OnValueChangedFunction = command;
+        return entity;
+    }
+
+    Entity FindAuthoredScrollView(Scene* scene, const std::string& entityName)
+    {
+        Entity entity = FindAuthoredPanel(scene, entityName);
+        if (!entity)
+            return {};
+
+        if (!entity.HasComponent<UIScrollViewComponent>())
+        {
+            WarnMissingAuthoredUI(scene, entityName, "UIScrollViewComponent");
+            return {};
+        }
+        entity.GetComponent<UIScrollViewComponent>().ClampOffset();
+        return entity;
+    }
+
+    Entity FindAuthoredText(Scene* scene, const std::string& entityName)
+    {
+        Entity entity = FindAuthoredUIWidget(scene, entityName);
+        if (!entity)
+            return {};
+
+        if (!entity.HasComponent<UITextComponent>())
+        {
+            WarnMissingAuthoredUI(scene, entityName, "UITextComponent");
+            return {};
+        }
+
+        return entity;
+    }
+
+    Entity FindAuthoredButton(Scene* scene, const std::string& entityName)
+    {
+        Entity entity = FindAuthoredText(scene, entityName);
+        if (!entity)
+            return {};
+
+        if (!entity.HasComponent<UIButtonComponent>())
+        {
+            WarnMissingAuthoredUI(scene, entityName, "UIButtonComponent");
+            return {};
+        }
+
+        return entity;
+    }
+
+    Entity FindAuthoredSlider(Scene* scene, const std::string& entityName)
+    {
+        Entity entity = FindAuthoredUIWidget(scene, entityName);
+        if (!entity)
+            return {};
+
+        if (!entity.HasComponent<UISliderComponent>())
+        {
+            WarnMissingAuthoredUI(scene, entityName, "UISliderComponent");
+            return {};
+        }
+
         return entity;
     }
 
@@ -257,9 +302,13 @@ namespace Wheatear::GameplayUILayoutService {
         if (!entity || !pager)
             return;
 
-        auto& pageItem = entity.HasComponent<UIPageItemComponent>()
-            ? entity.GetComponent<UIPageItemComponent>()
-            : entity.AddComponent<UIPageItemComponent>();
+        if (!entity.HasComponent<UIPageItemComponent>())
+        {
+            WarnMissingAuthoredUI(scene, entityName, "UIPageItemComponent");
+            return;
+        }
+
+        auto& pageItem = entity.GetComponent<UIPageItemComponent>();
         pageItem.PagerEntity = pager.GetUUID();
         pageItem.Page = std::max(page, 1);
     }
@@ -315,22 +364,27 @@ namespace Wheatear::GameplayUILayoutService {
             entity.GetComponent<UIPanelComponent>().ClipChildren = clipChildren;
     }
 
-    void SetSlider(Scene* scene,
-        const std::string& entityName,
-        float value,
-        float minValue,
-        float maxValue)
+    void SetSliderValue(Scene* scene, const std::string& entityName, float value)
     {
         Entity entity = FindEntityByName(scene, entityName);
         if (!entity || !entity.HasComponent<UISliderComponent>())
             return;
 
         auto& slider = entity.GetComponent<UISliderComponent>();
-        slider.MinValue = minValue;
-        slider.MaxValue = maxValue <= minValue ? minValue + 1.0f : maxValue;
         if (slider.IsDragging)
             return;
         slider.Value = std::clamp(value, slider.MinValue, slider.MaxValue);
+    }
+
+    void SetSlider(Scene* scene,
+        const std::string& entityName,
+        float value,
+        float minValue,
+        float maxValue)
+    {
+        (void)minValue;
+        (void)maxValue;
+        SetSliderValue(scene, entityName, value);
     }
 
 } // namespace Wheatear::GameplayUILayoutService

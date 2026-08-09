@@ -6,12 +6,13 @@ namespace WheatearSandbox
     {
         private ArcadeCombatLevelComponent? _level;
         private UITextComponent? _directorText;
+        public string DirectorTextEntityName = "Battle_ScriptDirectorText";
 
         public override void OnCreate()
         {
             _level = GetComponent<ArcadeCombatLevelComponent>();
 
-            Entity? textEntity = Scene.FindEntityByName("Battle_ScriptDirectorText");
+            Entity? textEntity = Scene.FindEntityByName(DirectorTextEntityName);
             _directorText = textEntity?.GetComponent<UITextComponent>();
 
             SetDirectorText("C# 导演脚本已启动。原生战斗系统负责战斗，脚本负责节奏提示。");

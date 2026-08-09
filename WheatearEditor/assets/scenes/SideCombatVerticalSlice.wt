@@ -60,26 +60,15 @@ Entities:
       Color: [1, 1, 1, 1]
       Texture: assets/vertical_slice/side_combat/backgrounds/bg_black_forest_stage.png
       TilingFactor: 1
-  - Entity: 940000003
-    TagComponent:
-      Tag: SC_Ground
-    TransformComponent:
-      Translation: [0, -2.45, -0.25]
-      Rotation: [0, 0, 0]
-      Scale: [18.4, 2.45, 1]
-    SpriteRendererComponent:
-      Color: [1, 1, 1, 0.16]
-      Texture: ""
-      TilingFactor: 1
   - Entity: 940000020
     TagComponent:
       Tag: SC_Player_Shadow
     TransformComponent:
       Translation: [-5.2, -2.72, -0.07]
       Rotation: [0, 0, 0]
-      Scale: [1.05, 0.36, 1]
+      Scale: [1.28, 0.42, 1]
     SpriteRendererComponent:
-      Color: [0, 0, 0, 0.38]
+      Color: [0, 0, 0, 0.56]
       Texture: assets/vertical_slice/side_combat/ui/blob_shadow_soft.png
       TilingFactor: 1
   - Entity: 940000021
@@ -88,9 +77,9 @@ Entities:
     TransformComponent:
       Translation: [4.4, -2.68, -0.06]
       Rotation: [0, 0, 0]
-      Scale: [2.15, 0.58, 1]
+      Scale: [2.65, 0.76, 1]
     SpriteRendererComponent:
-      Color: [0, 0, 0, 0.42]
+      Color: [0, 0, 0, 0.62]
       Texture: assets/vertical_slice/side_combat/ui/blob_shadow_soft.png
       TilingFactor: 1
   - Entity: 940000004
@@ -153,6 +142,7 @@ Entities:
       Invulnerable: false
     SideEnemyAIComponent:
       Kind: 3
+      WaveIndex: 2
       AggroRange: 12
       AttackRange: 1.55
       PreferredRange: 1.2
@@ -160,6 +150,226 @@ Entities:
       PatrolMinX: -7.8
       PatrolMaxX: 7.8
       LaneTolerance: 0.58
+  - Entity: 940000030
+    TagComponent:
+      Tag: SC_Wave1_Claw_A_Shadow
+    TransformComponent:
+      Translation: [-3.95, -2.66, -0.07]
+      Rotation: [0, 0, 0]
+      Scale: [1.22, 0.40, 1]
+    SpriteRendererComponent:
+      Color: [0, 0, 0, 0.54]
+      Texture: assets/vertical_slice/side_combat/ui/blob_shadow_soft.png
+      TilingFactor: 1
+  - Entity: 940000031
+    TagComponent:
+      Tag: SC_Wave1_Claw_A
+    TransformComponent:
+      Translation: [-3.95, -2.64, -0.04]
+      Rotation: [0, 0, 0]
+      Scale: [1.72, 1.72, 1]
+    SpriteRendererComponent:
+      Color: [1, 1, 1, 1]
+      Texture: assets/vertical_slice/side_combat/enemies/en_claw_beast_idle_01.png
+      TilingFactor: 1
+    SideCombatantComponent:
+      Team: 2
+      MaxHealth: 260
+      Health: 260
+      Attack: 28
+      Defense: 8
+      MoveSpeed: 3.9
+      CollisionSize: [0.86, 0.48]
+      CollisionHeight: 1.05
+      GravityScale: 1
+      KnockbackResistance: 0.04
+      Invulnerable: false
+    SideEnemyAIComponent:
+      Kind: 0
+      WaveIndex: 0
+      AggroRange: 8
+      AttackRange: 1.18
+      PreferredRange: 0.95
+      AttackInterval: 1.25
+      PatrolMinX: -5.55
+      PatrolMaxX: -2.35
+      LaneTolerance: 0.42
+  - Entity: 940000032
+    TagComponent:
+      Tag: SC_Wave1_Claw_B_Shadow
+    TransformComponent:
+      Translation: [-2.55, -2.20, -0.07]
+      Rotation: [0, 0, 0]
+      Scale: [1.22, 0.40, 1]
+    SpriteRendererComponent:
+      Color: [0, 0, 0, 0.54]
+      Texture: assets/vertical_slice/side_combat/ui/blob_shadow_soft.png
+      TilingFactor: 1
+  - Entity: 940000033
+    TagComponent:
+      Tag: SC_Wave1_Claw_B
+    TransformComponent:
+      Translation: [-2.55, -2.18, -0.04]
+      Rotation: [0, 0, 0]
+      Scale: [1.72, 1.72, 1]
+    SpriteRendererComponent:
+      Color: [1, 1, 1, 1]
+      Texture: assets/vertical_slice/side_combat/enemies/en_claw_beast_idle_01.png
+      TilingFactor: 1
+    SideCombatantComponent:
+      Team: 2
+      MaxHealth: 245
+      Health: 245
+      Attack: 27
+      Defense: 8
+      MoveSpeed: 3.9
+      CollisionSize: [0.86, 0.48]
+      CollisionHeight: 1.05
+      GravityScale: 1
+      KnockbackResistance: 0.04
+      Invulnerable: false
+    SideEnemyAIComponent:
+      Kind: 0
+      WaveIndex: 0
+      AggroRange: 8
+      AttackRange: 1.18
+      PreferredRange: 0.95
+      AttackInterval: 1.25
+      PatrolMinX: -4.15
+      PatrolMaxX: -0.95
+      LaneTolerance: 0.42
+  - Entity: 940000034
+    TagComponent:
+      Tag: SC_Wave2_Claw_A_Shadow
+    TransformComponent:
+      Translation: [0.3, -2.64, -0.07]
+      Rotation: [0, 0, 0]
+      Scale: [1.22, 0.40, 1]
+    SpriteRendererComponent:
+      Color: [0, 0, 0, 0.54]
+      Texture: assets/vertical_slice/side_combat/ui/blob_shadow_soft.png
+      TilingFactor: 1
+  - Entity: 940000035
+    TagComponent:
+      Tag: SC_Wave2_Claw_A
+    TransformComponent:
+      Translation: [0.3, -2.62, -0.04]
+      Rotation: [0, 0, 0]
+      Scale: [1.72, 1.72, 1]
+    SpriteRendererComponent:
+      Color: [1, 1, 1, 1]
+      Texture: assets/vertical_slice/side_combat/enemies/en_claw_beast_idle_01.png
+      TilingFactor: 1
+    SideCombatantComponent:
+      Team: 2
+      MaxHealth: 290
+      Health: 290
+      Attack: 31
+      Defense: 8
+      MoveSpeed: 3.9
+      CollisionSize: [0.86, 0.48]
+      CollisionHeight: 1.05
+      GravityScale: 1
+      KnockbackResistance: 0.04
+      Invulnerable: false
+    SideEnemyAIComponent:
+      Kind: 0
+      WaveIndex: 1
+      AggroRange: 8
+      AttackRange: 1.18
+      PreferredRange: 0.95
+      AttackInterval: 1.25
+      PatrolMinX: -1.3
+      PatrolMaxX: 1.9
+      LaneTolerance: 0.42
+  - Entity: 940000036
+    TagComponent:
+      Tag: SC_Wave2_Claw_B_Shadow
+    TransformComponent:
+      Translation: [1.65, -2.10, -0.07]
+      Rotation: [0, 0, 0]
+      Scale: [1.22, 0.40, 1]
+    SpriteRendererComponent:
+      Color: [0, 0, 0, 0.54]
+      Texture: assets/vertical_slice/side_combat/ui/blob_shadow_soft.png
+      TilingFactor: 1
+  - Entity: 940000037
+    TagComponent:
+      Tag: SC_Wave2_Claw_B
+    TransformComponent:
+      Translation: [1.65, -2.08, -0.04]
+      Rotation: [0, 0, 0]
+      Scale: [1.72, 1.72, 1]
+    SpriteRendererComponent:
+      Color: [1, 1, 1, 1]
+      Texture: assets/vertical_slice/side_combat/enemies/en_claw_beast_idle_01.png
+      TilingFactor: 1
+    SideCombatantComponent:
+      Team: 2
+      MaxHealth: 275
+      Health: 275
+      Attack: 30
+      Defense: 8
+      MoveSpeed: 3.9
+      CollisionSize: [0.86, 0.48]
+      CollisionHeight: 1.05
+      GravityScale: 1
+      KnockbackResistance: 0.04
+      Invulnerable: false
+    SideEnemyAIComponent:
+      Kind: 0
+      WaveIndex: 1
+      AggroRange: 8
+      AttackRange: 1.18
+      PreferredRange: 0.95
+      AttackInterval: 1.25
+      PatrolMinX: 0.05
+      PatrolMaxX: 3.25
+      LaneTolerance: 0.42
+  - Entity: 940000038
+    TagComponent:
+      Tag: SC_Wave2_Claw_C_Shadow
+    TransformComponent:
+      Translation: [2.75, -2.80, -0.07]
+      Rotation: [0, 0, 0]
+      Scale: [1.22, 0.40, 1]
+    SpriteRendererComponent:
+      Color: [0, 0, 0, 0.54]
+      Texture: assets/vertical_slice/side_combat/ui/blob_shadow_soft.png
+      TilingFactor: 1
+  - Entity: 940000039
+    TagComponent:
+      Tag: SC_Wave2_Claw_C
+    TransformComponent:
+      Translation: [2.75, -2.78, -0.04]
+      Rotation: [0, 0, 0]
+      Scale: [1.72, 1.72, 1]
+    SpriteRendererComponent:
+      Color: [1, 1, 1, 1]
+      Texture: assets/vertical_slice/side_combat/enemies/en_claw_beast_idle_01.png
+      TilingFactor: 1
+    SideCombatantComponent:
+      Team: 2
+      MaxHealth: 300
+      Health: 300
+      Attack: 32
+      Defense: 8
+      MoveSpeed: 3.9
+      CollisionSize: [0.86, 0.48]
+      CollisionHeight: 1.05
+      GravityScale: 1
+      KnockbackResistance: 0.04
+      Invulnerable: false
+    SideEnemyAIComponent:
+      Kind: 0
+      WaveIndex: 1
+      AggroRange: 8
+      AttackRange: 1.18
+      PreferredRange: 0.95
+      AttackInterval: 1.25
+      PatrolMinX: 1.15
+      PatrolMaxX: 4.35
+      LaneTolerance: 0.42
   - Entity: 940000006
     TagComponent:
       Tag: SC_Controller
@@ -171,22 +381,13 @@ Entities:
       PlayOnStart: true
       LevelId: CH02_MAIN_BearAwakening
       TuningPath: assets/vertical_slice/data/side_combat_tuning.yaml
+      HudPresetPath: side.hud.preset
+      HudPresetOverridesEnabled: false
       ArenaMin: [-8.8, -3.75]
       ArenaMax: [8.8, 3.2]
       GroundY: -3.25
       LaneMinY: -3.55
-      LaneMaxY: -0.65
-      PlayerEntityName: SC_Player
-      BossEntityName: SC_Boss_BearHusband
-      FadeEntityName: SC_Fade
-      MessageTextEntityName: SC_Message
-      ComboTextEntityName: SC_ComboText
-      SkillTextEntityName: SC_SkillText
-      RewardTextEntityName: SC_RewardText
-      PlayerHealthBarEntityName: SC_PlayerHealth
-      PlayerHealthTextEntityName: SC_PlayerHealthText
-      BossHealthBarEntityName: SC_BossHealth
-      BossHealthTextEntityName: SC_BossHealthText
+      LaneMaxY: 0.25
       StartFadeDuration: 0.65
       VictoryReturnDelay: 4
       DefeatReturnDelay: 2.5
@@ -199,7 +400,48 @@ Entities:
       Wave1RightWall: -2.2
       Wave2RightWall: 3.2
       Wave3RightWall: 8.8
-      FirstClearRewardText: "获得: 魔核碎片 x1 / 兽筋 x2 / 熊爪 x1"
+      FirstClearRewardText: "閼惧嘲绶? 姒勬梹鐗崇喊搴ｅ x1 / 閸忕晫鐡?x2 / 閻斿﹦鍩?x1"
+      DeathRewards:
+        - Enabled: true
+          EnemyKind: 3
+          SourceEntityName: ""
+          SpawnEntityName: Drop_MagicCore
+          ItemId: MAT-MAGIC-CORE-T0
+          DisplayName: "Magic Core"
+          Amount: 1
+          Offset: [-0.42, 0.55, 0.03]
+          Scale: [0.38, 0.38, 1]
+          TexturePath: side.drop.magic_core
+        - Enabled: true
+          EnemyKind: 3
+          SourceEntityName: ""
+          SpawnEntityName: Drop_BeastSinew
+          ItemId: MAT-BEAST-SINEW
+          DisplayName: "Beast Sinew"
+          Amount: 2
+          Offset: [0, 0.72, 0.03]
+          Scale: [0.38, 0.38, 1]
+          TexturePath: side.drop.beast_sinew
+        - Enabled: true
+          EnemyKind: 3
+          SourceEntityName: ""
+          SpawnEntityName: Drop_BeastClaw
+          ItemId: MAT-BEAST-CLAW
+          DisplayName: "Bear Claw"
+          Amount: 1
+          Offset: [0.42, 0.55, 0.03]
+          Scale: [0.38, 0.38, 1]
+          TexturePath: side.drop.beast_claw
+        - Enabled: true
+          EnemyKind: 0
+          SourceEntityName: ""
+          SpawnEntityName: Drop_BeastSinew
+          ItemId: MAT-BEAST-SINEW
+          DisplayName: "Beast Sinew"
+          Amount: 1
+          Offset: [0, 0.45, 0.03]
+          Scale: [0.38, 0.38, 1]
+          TexturePath: side.drop.beast_sinew
   - Entity: 940000007
     TagComponent:
       Tag: SC_TopPanel
@@ -229,33 +471,6 @@ Entities:
       TexturePath: assets/vertical_slice/side_combat/ui/sidecombat_ui_sheet.png
       UVMin: [0.100391, 0.734028]
       UVMax: [0.429297, 0.977778]
-  - Entity: 940000008
-    TagComponent:
-      Tag: SC_TutorialPanel
-    TransformComponent:
-      Translation: [0, 0, 0]
-      Rotation: [0, 0, 0]
-      Scale: [1, 1, 1]
-    UIWidgetComponent:
-      Visible: true
-      Position: [0.035, 0.835]
-      Size: [0.60, 0.145]
-      Rotation: 0
-      Anchor: 6
-      SortOrder: 18
-      ParentEntity: 946100046
-    UIAnimatorComponent:
-      Preset: "slide_fade_in"
-      PlayOnStart: true
-      Loop: false
-      Delay: 0.12
-      Duration: 0.30
-      Amplitude: 0.035
-      Speed: 1
-      FromOffset: [0, 0.035]
-    UIImageComponent:
-      Color: [1, 1, 1, 0.82]
-      TexturePath: assets/vertical_slice/ui/panels/panel_dark.png
   - Entity: 940000009
     TagComponent:
       Tag: SC_ComboPanel
@@ -326,7 +541,7 @@ Entities:
       SortOrder: 30
       ParentEntity: 946100046
     UITextComponent:
-      Text: "生命 420/420"
+      Text: "閻㈢喎鎳?420/420"
       Color: [0.9, 0.98, 0.92, 1]
       FontSize: 18
       FontPath: assets/fonts/wqy-microhei.ttc
@@ -415,7 +630,7 @@ Entities:
       SortOrder: 30
       ParentEntity: 946100046
     UITextComponent:
-      Text: "黑熊丈夫 1450/1450"
+      Text: "姒涙垹鍞烘稉鍫濄亱 1450/1450"
       Color: [1, 0.9, 0.86, 1]
       FontSize: 18
       FontPath: assets/fonts/wqy-microhei.ttc
@@ -443,6 +658,166 @@ Entities:
       TexturePath: assets/vertical_slice/side_combat/ui/sidecombat_ui_sheet.png
       UVMin: [0.642578, 0.295139]
       UVMax: [0.882813, 0.327778]
+  - Entity: 946101400
+    TagComponent:
+      Tag: SC_PlayerStatus_Buff_0
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    UIWidgetComponent:
+      Visible: true
+      Position: [0.388, 0.848]
+      Size: [0.031, 0.055]
+      Rotation: 0
+      Anchor: 0
+      SortOrder: 70
+      ParentEntity: 946100046
+    UIImageComponent:
+      Color: [1, 1, 1, 1]
+      TexturePath: assets/vertical_slice/side_combat/ui/sidecombat_ui_sheet.png
+      UVMin: [0.615234, 0.022222]
+      UVMax: [0.683984, 0.14375]
+  - Entity: 946101401
+    TagComponent:
+      Tag: SC_PlayerStatus_Buff_1
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    UIWidgetComponent:
+      Visible: true
+      Position: [0.428, 0.848]
+      Size: [0.031, 0.055]
+      Rotation: 0
+      Anchor: 0
+      SortOrder: 70
+      ParentEntity: 946100046
+    UIImageComponent:
+      Color: [1, 1, 1, 1]
+      TexturePath: assets/vertical_slice/side_combat/ui/sidecombat_ui_sheet.png
+      UVMin: [0.690234, 0.022917]
+      UVMax: [0.747266, 0.145833]
+  - Entity: 946101402
+    TagComponent:
+      Tag: SC_PlayerStatus_Debuff_0
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    UIWidgetComponent:
+      Visible: true
+      Position: [0.388, 0.908]
+      Size: [0.031, 0.055]
+      Rotation: 0
+      Anchor: 0
+      SortOrder: 70
+      ParentEntity: 946100046
+    UIImageComponent:
+      Color: [1, 1, 1, 1]
+      TexturePath: assets/vertical_slice/side_combat/ui/sidecombat_ui_sheet.png
+      UVMin: [0.754297, 0.021528]
+      UVMax: [0.824219, 0.145833]
+  - Entity: 946101403
+    TagComponent:
+      Tag: SC_PlayerStatus_Debuff_1
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    UIWidgetComponent:
+      Visible: true
+      Position: [0.428, 0.908]
+      Size: [0.031, 0.055]
+      Rotation: 0
+      Anchor: 0
+      SortOrder: 70
+      ParentEntity: 946100046
+    UIImageComponent:
+      Color: [1, 1, 1, 1]
+      TexturePath: assets/vertical_slice/side_combat/ui/sidecombat_ui_sheet.png
+      UVMin: [0.830078, 0.022222]
+      UVMax: [0.898047, 0.144444]
+  - Entity: 946101404
+    TagComponent:
+      Tag: SC_EnemyStatus_Buff_0
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    UIWidgetComponent:
+      Visible: true
+      Position: [0.602, 0.202]
+      Size: [0.031, 0.055]
+      Rotation: 0
+      Anchor: 0
+      SortOrder: 70
+      ParentEntity: 946100046
+    UIImageComponent:
+      Color: [1, 1, 1, 1]
+      TexturePath: assets/vertical_slice/side_combat/ui/sidecombat_ui_sheet.png
+      UVMin: [0.615234, 0.022222]
+      UVMax: [0.683984, 0.14375]
+  - Entity: 946101405
+    TagComponent:
+      Tag: SC_EnemyStatus_Buff_1
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    UIWidgetComponent:
+      Visible: true
+      Position: [0.642, 0.202]
+      Size: [0.031, 0.055]
+      Rotation: 0
+      Anchor: 0
+      SortOrder: 70
+      ParentEntity: 946100046
+    UIImageComponent:
+      Color: [1, 1, 1, 1]
+      TexturePath: assets/vertical_slice/side_combat/ui/sidecombat_ui_sheet.png
+      UVMin: [0.690234, 0.022917]
+      UVMax: [0.747266, 0.145833]
+  - Entity: 946101406
+    TagComponent:
+      Tag: SC_EnemyStatus_Debuff_0
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    UIWidgetComponent:
+      Visible: true
+      Position: [0.602, 0.260]
+      Size: [0.031, 0.055]
+      Rotation: 0
+      Anchor: 0
+      SortOrder: 70
+      ParentEntity: 946100046
+    UIImageComponent:
+      Color: [1, 1, 1, 1]
+      TexturePath: assets/vertical_slice/side_combat/ui/sidecombat_ui_sheet.png
+      UVMin: [0.754297, 0.021528]
+      UVMax: [0.824219, 0.145833]
+  - Entity: 946101407
+    TagComponent:
+      Tag: SC_EnemyStatus_Debuff_1
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    UIWidgetComponent:
+      Visible: true
+      Position: [0.642, 0.260]
+      Size: [0.031, 0.055]
+      Rotation: 0
+      Anchor: 0
+      SortOrder: 70
+      ParentEntity: 946100046
+    UIImageComponent:
+      Color: [1, 1, 1, 1]
+      TexturePath: assets/vertical_slice/side_combat/ui/sidecombat_ui_sheet.png
+      UVMin: [0.830078, 0.022222]
+      UVMax: [0.898047, 0.144444]
   - Entity: 940000014
     TagComponent:
       Tag: SC_Message
@@ -468,7 +843,7 @@ Entities:
       Speed: 1
       FromOffset: [0, 0]
     UITextComponent:
-      Text: "A/D移动  W/S纵深  K跳跃  J斩击  S+J上挑  U魔法  I支援"
+      Text: "A/D缁夎濮? W/S缁惧灚绻? K鐠哄疇绌? J閺傗晛鍤? S+J娑撳﹥瀵? U姒勬梹纭? I閺€顖涘胶"
       Color: [0.92, 0.96, 0.9, 1]
       FontSize: 18
       FontPath: assets/fonts/wqy-microhei.ttc
@@ -501,7 +876,7 @@ Entities:
       Speed: 0.85
       FromOffset: [0, 0]
     UITextComponent:
-      Text: "最佳连击 x0"
+      Text: "閺堚偓娴ｅ疇绻涢崙?x0"
       Color: [0.98, 0.88, 0.42, 1]
       FontSize: 18
       FontPath: assets/fonts/wqy-microhei.ttc
@@ -714,7 +1089,7 @@ Entities:
       Speed: 1
       FromOffset: [0, 0]
     UITextComponent:
-      Text: "魔剑槽 3.0/3  空中动作 3"
+      Text: "姒勬柨澧ゅΣ?3.0/3  缁岃桨鑵戦崝銊ょ稊 3"
       Color: [0.76, 0.94, 1, 1]
       FontSize: 18
       FontPath: assets/fonts/wqy-microhei.ttc
@@ -747,7 +1122,7 @@ Entities:
       Speed: 1
       FromOffset: [0, 0]
     UITextComponent:
-      Text: "主要掉落"
+      Text: "娑撴槒顩﹂幒澶庢儰"
       Color: [0.92, 0.82, 0.64, 1]
       FontSize: 17
       FontPath: assets/fonts/wqy-microhei.ttc
@@ -857,6 +1232,13 @@ Entities:
       TexturePath: assets/vertical_slice/side_combat/ui/sidecombat_ui_sheet.png
       UVMin: [0.112891, 0.170833]
       UVMax: [0.186719, 0.298611]
+    UIRadialCooldownComponent:
+      Progress: 0
+      StartAngle: 1.57079637
+      Thickness: 1
+      Fade: 0.005
+      Color: [0, 0, 0, 0.58]
+
   - Entity: 946201003
     TagComponent:
       Tag: SC_SkillCooldownText_J
@@ -875,8 +1257,12 @@ Entities:
     UITextComponent:
       Text: ""
       Color: [0.9, 0.98, 1, 1]
-      FontSize: 16
+      FontSize: 25
       FontPath: assets/fonts/wqy-microhei.ttc
+      Padding: [-1, -1, -1, -1]
+      AutoFit: false
+      HorizontalAlign: 1
+      VerticalAlign: 1
       ShadowColor: [0.01, 0.015, 0.018, 0.78]
       ShadowOffset: [1.6, 1.6]
       OutlineColor: [0.0, 0.0, 0.0, 0.86]
@@ -974,6 +1360,13 @@ Entities:
       MaxValue: 1
       ForegroundColor: [0.02, 0.02, 0.025, 0.68]
       BackgroundColor: [0.02, 0.02, 0.025, 0.28]
+    UIRadialCooldownComponent:
+      Progress: 0
+      StartAngle: 1.57079637
+      Thickness: 1
+      Fade: 0.005
+      Color: [0, 0, 0, 0.58]
+
   - Entity: 946100004
     TagComponent:
       Tag: SC_SkillCooldownText_SJ
@@ -992,8 +1385,12 @@ Entities:
     UITextComponent:
       Text: ""
       Color: [1, 1, 1, 1]
-      FontSize: 16
+      FontSize: 25
       FontPath: assets/fonts/wqy-microhei.ttc
+      Padding: [-1, -1, -1, -1]
+      AutoFit: false
+      HorizontalAlign: 1
+      VerticalAlign: 1
       ShadowColor: [0.01, 0.015, 0.018, 0.78]
       ShadowOffset: [1.6, 1.6]
       OutlineColor: [0.0, 0.0, 0.0, 0.86]
@@ -1087,6 +1484,13 @@ Entities:
       TexturePath: assets/vertical_slice/side_combat/ui/sidecombat_ui_sheet.png
       UVMin: [0.446484, 0.170139]
       UVMax: [0.517578, 0.295833]
+    UIRadialCooldownComponent:
+      Progress: 0
+      StartAngle: 1.57079637
+      Thickness: 1
+      Fade: 0.005
+      Color: [0, 0, 0, 0.58]
+
   - Entity: 946201013
     TagComponent:
       Tag: SC_SkillCooldownText_S2
@@ -1105,8 +1509,12 @@ Entities:
     UITextComponent:
       Text: ""
       Color: [0.9, 0.98, 1, 1]
-      FontSize: 16
+      FontSize: 25
       FontPath: assets/fonts/wqy-microhei.ttc
+      Padding: [-1, -1, -1, -1]
+      AutoFit: false
+      HorizontalAlign: 1
+      VerticalAlign: 1
       ShadowColor: [0.01, 0.015, 0.018, 0.78]
       ShadowOffset: [1.6, 1.6]
       OutlineColor: [0.0, 0.0, 0.0, 0.86]
@@ -1200,6 +1608,13 @@ Entities:
       TexturePath: assets/vertical_slice/side_combat/ui/sidecombat_ui_sheet.png
       UVMin: [0.364844, 0.170833]
       UVMax: [0.436328, 0.297222]
+    UIRadialCooldownComponent:
+      Progress: 0
+      StartAngle: 1.57079637
+      Thickness: 1
+      Fade: 0.005
+      Color: [0, 0, 0, 0.58]
+
   - Entity: 946201023
     TagComponent:
       Tag: SC_SkillCooldownText_S3
@@ -1218,8 +1633,12 @@ Entities:
     UITextComponent:
       Text: ""
       Color: [0.9, 0.98, 1, 1]
-      FontSize: 16
+      FontSize: 25
       FontPath: assets/fonts/wqy-microhei.ttc
+      Padding: [-1, -1, -1, -1]
+      AutoFit: false
+      HorizontalAlign: 1
+      VerticalAlign: 1
       ShadowColor: [0.01, 0.015, 0.018, 0.78]
       ShadowOffset: [1.6, 1.6]
       OutlineColor: [0.0, 0.0, 0.0, 0.86]
@@ -1317,6 +1736,13 @@ Entities:
       MaxValue: 1
       ForegroundColor: [0.02, 0.02, 0.025, 0.68]
       BackgroundColor: [0.02, 0.02, 0.025, 0.28]
+    UIRadialCooldownComponent:
+      Progress: 0
+      StartAngle: 1.57079637
+      Thickness: 1
+      Fade: 0.005
+      Color: [0, 0, 0, 0.58]
+
   - Entity: 946100014
     TagComponent:
       Tag: SC_SkillCooldownText_U
@@ -1335,8 +1761,12 @@ Entities:
     UITextComponent:
       Text: ""
       Color: [1, 1, 1, 1]
-      FontSize: 16
+      FontSize: 25
       FontPath: assets/fonts/wqy-microhei.ttc
+      Padding: [-1, -1, -1, -1]
+      AutoFit: false
+      HorizontalAlign: 1
+      VerticalAlign: 1
       ShadowColor: [0.01, 0.015, 0.018, 0.78]
       ShadowOffset: [1.6, 1.6]
       OutlineColor: [0.0, 0.0, 0.0, 0.86]
@@ -1434,6 +1864,13 @@ Entities:
       MaxValue: 1
       ForegroundColor: [0.02, 0.02, 0.025, 0.68]
       BackgroundColor: [0.02, 0.02, 0.025, 0.28]
+    UIRadialCooldownComponent:
+      Progress: 0
+      StartAngle: 1.57079637
+      Thickness: 1
+      Fade: 0.005
+      Color: [0, 0, 0, 0.58]
+
   - Entity: 946100024
     TagComponent:
       Tag: SC_SkillCooldownText_I
@@ -1452,8 +1889,12 @@ Entities:
     UITextComponent:
       Text: ""
       Color: [1, 1, 1, 1]
-      FontSize: 16
+      FontSize: 25
       FontPath: assets/fonts/wqy-microhei.ttc
+      Padding: [-1, -1, -1, -1]
+      AutoFit: false
+      HorizontalAlign: 1
+      VerticalAlign: 1
       ShadowColor: [0.01, 0.015, 0.018, 0.78]
       ShadowOffset: [1.6, 1.6]
       OutlineColor: [0.0, 0.0, 0.0, 0.86]
@@ -1551,6 +1992,13 @@ Entities:
       MaxValue: 1
       ForegroundColor: [0.02, 0.02, 0.025, 0.68]
       BackgroundColor: [0.02, 0.02, 0.025, 0.28]
+    UIRadialCooldownComponent:
+      Progress: 0
+      StartAngle: 1.57079637
+      Thickness: 1
+      Fade: 0.005
+      Color: [0, 0, 0, 0.58]
+
   - Entity: 946100034
     TagComponent:
       Tag: SC_SkillCooldownText_L
@@ -1569,8 +2017,12 @@ Entities:
     UITextComponent:
       Text: ""
       Color: [1, 1, 1, 1]
-      FontSize: 16
+      FontSize: 25
       FontPath: assets/fonts/wqy-microhei.ttc
+      Padding: [-1, -1, -1, -1]
+      AutoFit: false
+      HorizontalAlign: 1
+      VerticalAlign: 1
       ShadowColor: [0.01, 0.015, 0.018, 0.78]
       ShadowOffset: [1.6, 1.6]
       OutlineColor: [0.0, 0.0, 0.0, 0.86]
@@ -1706,6 +2158,60 @@ Entities:
       HoverColor: [1, 1, 1, 0]
       PressedColor: [1, 1, 1, 0]
       OnClickFunction: side:item:1
+  - Entity: 946100704
+    TagComponent:
+      Tag: SC_ItemSlot_1_Cooldown
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    UIWidgetComponent:
+      Visible: false
+      Position: [0.044, 0.669]
+      Size: [0.040, 0.078]
+      Rotation: 0.0
+      Anchor: 0
+      SortOrder: 61
+      ParentEntity: 946100046
+    UIImageComponent:
+      Color: [0, 0, 0, 0]
+      TexturePath: assets/vertical_slice/side_combat/ui/sidecombat_ui_sheet.png
+      UVMin: [0.116016, 0.033333]
+      UVMax: [0.167578, 0.139583]
+    UIRadialCooldownComponent:
+      Progress: 0
+      StartAngle: 1.57079637
+      Thickness: 1
+      Fade: 0.005
+      Color: [0, 0, 0, 0.58]
+  - Entity: 946100705
+    TagComponent:
+      Tag: SC_ItemSlot_1_CooldownText
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    UIWidgetComponent:
+      Visible: false
+      Position: [0.047, 0.695]
+      Size: [0.034, 0.020]
+      Rotation: 0.0
+      Anchor: 0
+      SortOrder: 64
+      ParentEntity: 946100046
+    UITextComponent:
+      Text: ""
+      Color: [0.95, 0.98, 1, 1]
+      FontSize: 25
+      FontPath: assets/fonts/wqy-microhei.ttc
+      Padding: [-1, -1, -1, -1]
+      AutoFit: false
+      HorizontalAlign: 1
+      VerticalAlign: 1
+      ShadowColor: [0.01, 0.015, 0.018, 0.78]
+      ShadowOffset: [1.4, 1.4]
+      OutlineColor: [0, 0, 0, 0.86]
+      OutlineThickness: 1.1
   - Entity: 946100703
     TagComponent:
       Tag: SC_ItemSlot_1_Count
@@ -1794,6 +2300,60 @@ Entities:
       HoverColor: [1, 1, 1, 0]
       PressedColor: [1, 1, 1, 0]
       OnClickFunction: side:item:2
+  - Entity: 946100714
+    TagComponent:
+      Tag: SC_ItemSlot_2_Cooldown
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    UIWidgetComponent:
+      Visible: false
+      Position: [0.102, 0.669]
+      Size: [0.040, 0.078]
+      Rotation: 0.0
+      Anchor: 0
+      SortOrder: 61
+      ParentEntity: 946100046
+    UIImageComponent:
+      Color: [0, 0, 0, 0]
+      TexturePath: assets/vertical_slice/side_combat/ui/sidecombat_ui_sheet.png
+      UVMin: [0.180078, 0.034028]
+      UVMax: [0.219141, 0.150694]
+    UIRadialCooldownComponent:
+      Progress: 0
+      StartAngle: 1.57079637
+      Thickness: 1
+      Fade: 0.005
+      Color: [0, 0, 0, 0.58]
+  - Entity: 946100715
+    TagComponent:
+      Tag: SC_ItemSlot_2_CooldownText
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    UIWidgetComponent:
+      Visible: false
+      Position: [0.105, 0.695]
+      Size: [0.034, 0.020]
+      Rotation: 0.0
+      Anchor: 0
+      SortOrder: 64
+      ParentEntity: 946100046
+    UITextComponent:
+      Text: ""
+      Color: [0.95, 0.98, 1, 1]
+      FontSize: 25
+      FontPath: assets/fonts/wqy-microhei.ttc
+      Padding: [-1, -1, -1, -1]
+      AutoFit: false
+      HorizontalAlign: 1
+      VerticalAlign: 1
+      ShadowColor: [0.01, 0.015, 0.018, 0.78]
+      ShadowOffset: [1.4, 1.4]
+      OutlineColor: [0, 0, 0, 0.86]
+      OutlineThickness: 1.1
   - Entity: 946100713
     TagComponent:
       Tag: SC_ItemSlot_2_Count
@@ -1882,6 +2442,60 @@ Entities:
       HoverColor: [1, 1, 1, 0]
       PressedColor: [1, 1, 1, 0]
       OnClickFunction: side:item:3
+  - Entity: 946100724
+    TagComponent:
+      Tag: SC_ItemSlot_3_Cooldown
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    UIWidgetComponent:
+      Visible: false
+      Position: [0.160, 0.669]
+      Size: [0.040, 0.078]
+      Rotation: 0.0
+      Anchor: 0
+      SortOrder: 61
+      ParentEntity: 946100046
+    UIImageComponent:
+      Color: [0, 0, 0, 0]
+      TexturePath: assets/vertical_slice/side_combat/ui/sidecombat_ui_sheet.png
+      UVMin: [0.234375, 0.032639]
+      UVMax: [0.288281, 0.143750]
+    UIRadialCooldownComponent:
+      Progress: 0
+      StartAngle: 1.57079637
+      Thickness: 1
+      Fade: 0.005
+      Color: [0, 0, 0, 0.58]
+  - Entity: 946100725
+    TagComponent:
+      Tag: SC_ItemSlot_3_CooldownText
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    UIWidgetComponent:
+      Visible: false
+      Position: [0.163, 0.695]
+      Size: [0.034, 0.020]
+      Rotation: 0.0
+      Anchor: 0
+      SortOrder: 64
+      ParentEntity: 946100046
+    UITextComponent:
+      Text: ""
+      Color: [0.95, 0.98, 1, 1]
+      FontSize: 25
+      FontPath: assets/fonts/wqy-microhei.ttc
+      Padding: [-1, -1, -1, -1]
+      AutoFit: false
+      HorizontalAlign: 1
+      VerticalAlign: 1
+      ShadowColor: [0.01, 0.015, 0.018, 0.78]
+      ShadowOffset: [1.4, 1.4]
+      OutlineColor: [0, 0, 0, 0.86]
+      OutlineThickness: 1.1
   - Entity: 946100723
     TagComponent:
       Tag: SC_ItemSlot_3_Count

@@ -76,17 +76,20 @@ void main()
 	if (circle == 0.0)
 		discard;
 
-    if (Input.Progress <= 0.0001)
-        discard;
-
-    if (Input.Progress < 0.9999)
+    if (Input.Progress >= 0.0)
     {
-        const float Tau = 6.28318530718;
-        float angle = atan(Input.LocalPosition.y, Input.LocalPosition.x);
-        float clockwiseSweep = mod(Input.StartAngle - angle + Tau, Tau);
-        float revealedSweep = (1.0 - Input.Progress) * Tau;
-        if (clockwiseSweep < revealedSweep)
+        if (Input.Progress >= 0.9999)
             discard;
+
+        if (Input.Progress > 0.0001)
+        {
+            const float Tau = 6.28318530718;
+            float angle = atan(Input.LocalPosition.y, Input.LocalPosition.x);
+            float clockwiseSweep = mod(Input.StartAngle - angle + Tau, Tau);
+            float revealedSweep = Input.Progress * Tau;
+            if (clockwiseSweep < revealedSweep)
+                discard;
+        }
     }
 
     // Set output color

@@ -22,4 +22,5 @@ project "WheatearEditor"
     links { "Wheatear", "yaml-cpp" }
     dependson { "Wheatear-ScriptCore" }
 
+    wt_app_linker_defaults()
     wt_configurations()

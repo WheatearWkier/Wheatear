@@ -3,15 +3,12 @@
 
 #include "SideCombatTuningService.h"
 #include "SideCombatVisualService.h"
-#include "Wheatear/Core/AssetAliasRegistry.h"
-#include "Wheatear/Modules/Common/GameplayVisualService.h"
 #include "Wheatear/Modules/Progression/GameProgress.h"
 #include "Wheatear/Scene/Components.h"
 #include "Wheatear/Scene/Scene.h"
 #include "Wheatear/UI/UIRuntimeTools.h"
 
 #include <algorithm>
-#include <array>
 
 namespace Wheatear::SideCombatLifecycleService {
 
@@ -46,6 +43,9 @@ namespace Wheatear::SideCombatLifecycleService {
                 return 0;
 
             auto& registry = scene->GetRegistry();
+            if (ai.WaveIndex >= 0)
+                return std::clamp(ai.WaveIndex, 0, GetWaveCount(level) - 1);
+
             if (ai.Kind == SideEnemyKind::BearBoss)
                 return GetWaveCount(level) - 1;
 
@@ -69,87 +69,6 @@ namespace Wheatear::SideCombatLifecycleService {
             Entity entity = scene->GetEntityByName(name);
             if (entity && entity.HasComponent<SpriteRendererComponent>())
                 entity.GetComponent<SpriteRendererComponent>().Color.a = alpha;
-        }
-
-        static void CreateWaveShadow(Scene* scene,
-            const std::string& name,
-            const glm::vec2& position,
-            const glm::vec2& scale)
-        {
-            if (!scene || scene->GetEntityByName(name))
-                return;
-
-            Entity shadow = scene->CreateEntity(name);
-            auto& transform = shadow.GetComponent<TransformComponent>();
-            transform.Translation = { position.x, position.y - 0.02f, -0.07f };
-            transform.Scale = { scale.x, scale.y, 1.0f };
-
-            auto& sprite = shadow.AddComponent<SpriteRendererComponent>();
-            sprite.Color = { 0.0f, 0.0f, 0.0f, 0.0f };
-            if (Ref<Texture2D> texture = GameplayVisualService::LoadTextureCached(
-                AssetAliasRegistry::Path("side.ui.shadow")))
-            {
-                sprite.Texture = texture;
-            }
-        }
-
-        static void CreateWaveGrunt(Scene* scene,
-            const std::string& name,
-            const glm::vec2& position,
-            float health,
-            float attack)
-        {
-            if (!scene || scene->GetEntityByName(name))
-                return;
-
-            Entity enemy = scene->CreateEntity(name);
-            auto& transform = enemy.GetComponent<TransformComponent>();
-            transform.Translation = { position.x, position.y, -0.04f };
-            transform.Scale = { 1.72f, 1.72f, 1.0f };
-
-            auto& sprite = enemy.AddComponent<SpriteRendererComponent>();
-            sprite.Color = { 1.0f, 1.0f, 1.0f, 0.0f };
-            if (Ref<Texture2D> texture = GameplayVisualService::LoadTextureCached(
-                AssetAliasRegistry::Path("side.enemy.idle")))
-            {
-                sprite.Texture = texture;
-            }
-
-            auto& combatant = enemy.AddComponent<SideCombatantComponent>();
-            combatant.Team = (int)SideCombatTeam::Enemy;
-            combatant.MaxHealth = health;
-            combatant.Health = health;
-            combatant.Attack = attack;
-            combatant.Defense = 8.0f;
-            combatant.MoveSpeed = 3.9f;
-            combatant.CollisionSize = { 0.86f, 0.48f };
-            combatant.CollisionHeight = 1.05f;
-            combatant.KnockbackResistance = 0.04f;
-
-            auto& ai = enemy.AddComponent<SideEnemyAIComponent>();
-            ai.Kind = SideEnemyKind::Grunt;
-            ai.AggroRange = 8.0f;
-            ai.AttackRange = 1.18f;
-            ai.PreferredRange = 0.95f;
-            ai.AttackInterval = 1.25f;
-            ai.PatrolMinX = position.x - 1.6f;
-            ai.PatrolMaxX = position.x + 1.6f;
-            ai.LaneTolerance = 0.42f;
-
-            CreateWaveShadow(scene, name + "_Shadow", position, { 1.05f, 0.34f });
-        }
-
-        static void EnsureWaveEnemies(Scene* scene, SideCombatLevelComponent& level)
-        {
-            if (!scene || !level.WaveModeEnabled || level.RuntimeWaveSpawnsCreated)
-                return;
-
-            CreateWaveGrunt(scene, "SC_Wave1_Claw_A", { -3.95f, -2.64f }, 260.0f, 28.0f);
-            CreateWaveGrunt(scene, "SC_Wave1_Claw_B", { -2.55f, -2.18f }, 245.0f, 27.0f);
-            CreateWaveGrunt(scene, "SC_Wave2_Claw_A", { 0.30f, -2.62f }, 290.0f, 31.0f);
-            CreateWaveGrunt(scene, "SC_Wave2_Claw_B", { 1.65f, -2.08f }, 275.0f, 30.0f);
-            CreateWaveGrunt(scene, "SC_Wave2_Claw_C", { 2.75f, -2.78f }, 300.0f, 32.0f);
-            level.RuntimeWaveSpawnsCreated = true;
         }
 
         static void ApplyWaveActivation(Scene* scene,
@@ -229,7 +148,7 @@ namespace Wheatear::SideCombatLifecycleService {
         level.RuntimeWaveRightWall = level.WaveModeEnabled
             ? std::clamp(GetWaveRightWall(level, 0), level.ArenaMin.x, level.ArenaMax.x)
             : level.ArenaMax.x;
-        level.RuntimeWaveSpawnsCreated = false;
+        level.RuntimeHudLayoutConfigured = false;
 
         UIRuntimeTools::SetImageAlpha(scene, level.FadeEntityName, 1.0f);
     }
@@ -240,7 +159,6 @@ namespace Wheatear::SideCombatLifecycleService {
             return;
 
         const auto& tuning = SideCombatTuningService::GetTuning(level);
-        EnsureWaveEnemies(scene, level);
         auto& registry = scene->GetRegistry();
         for (auto e : registry.view<TransformComponent, SideCombatantComponent>())
         {

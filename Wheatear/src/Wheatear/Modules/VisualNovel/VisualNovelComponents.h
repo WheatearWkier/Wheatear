@@ -3,6 +3,8 @@
 #include <cstdint>
 #include <string>
 
+#include <glm/glm.hpp>
+
 namespace Wheatear {
 
     struct VisualNovelComponent
@@ -26,7 +28,11 @@ namespace Wheatear {
         std::string HistoryTextEntityName = "VN_HistoryText";
         std::string AutoPlayIndicatorEntityName = "VN_AutoPlayIndicator";
         std::string CommandBarEntityName = "VN_CommandBar";
+        std::string CommandTooltipEntityName = "VN_CommandTooltip";
+        bool        CommandTooltipFollowMouse = true;
+        glm::vec2   CommandTooltipMouseOffset = { 0.018f, -0.064f };
         std::string HistoryPanelEntityName = "VN_HistoryPanel";
+        std::string HistoryScrollEntityName = "VN_HistoryScroll";
         std::string SettingsPanelEntityName = "VN_SettingsPanel";
         std::string SettingsTextEntityName = "VN_SettingsText";
         std::string SaveLoadPanelEntityName = "VN_SaveLoadPanel";

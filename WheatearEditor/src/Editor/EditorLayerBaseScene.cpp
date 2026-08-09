@@ -443,7 +443,10 @@ namespace Wheatear {
         }
 
         if (Entity found = m_EditorScene->GetEntityByName(finalName))
+        {
             found.GetComponent<TagComponent>().Tag = finalName;
+            m_EditorScene->InvalidateEntityLookupCache();
+        }
 
         m_SceneHierarchyPanel->SetSelectedEntity(e);
     }

@@ -4,6 +4,7 @@
 
 #include <cstdint>
 #include <string>
+#include <vector>
 
 #include <glm/glm.hpp>
 
@@ -54,23 +55,149 @@ namespace Wheatear {
         bool        PlayOnStart = true;
         std::string LevelId = "CH02_MAIN_BearAwakening";
         std::string TuningPath = "side.tuning";
+        std::string HudPresetPath = "side.hud.preset";
+        bool        HudPresetOverridesEnabled = false;
         glm::vec2   ArenaMin = { -8.8f, -4.0f };
         glm::vec2   ArenaMax = { 8.8f, 4.6f };
         float       GroundY = -3.25f;
         float       LaneMinY = -3.55f;
         float       LaneMaxY = -0.65f;
 
-        std::string PlayerEntityName = "SC_Player";
-        std::string BossEntityName = "SC_Boss_BearHusband";
-        std::string FadeEntityName = "SC_Fade";
-        std::string MessageTextEntityName = "SC_Message";
-        std::string ComboTextEntityName = "SC_ComboText";
-        std::string SkillTextEntityName = "SC_SkillText";
-        std::string RewardTextEntityName = "SC_RewardText";
-        std::string PlayerHealthBarEntityName = "SC_PlayerHealth";
-        std::string PlayerHealthTextEntityName = "SC_PlayerHealthText";
-        std::string BossHealthBarEntityName = "SC_BossHealth";
-        std::string BossHealthTextEntityName = "SC_BossHealthText";
+        std::string PlayerEntityName;
+        std::string BossEntityName;
+        std::string FadeEntityName;
+        std::string MessageTextEntityName;
+        std::string ComboTextEntityName;
+        std::string SkillTextEntityName;
+        std::string RewardTextEntityName;
+        std::string PlayerHealthBarEntityName;
+        std::string PlayerHealthTextEntityName;
+        std::string BossHealthBarEntityName;
+        std::string BossHealthTextEntityName;
+        std::string CameraEntityName;
+        std::string TopPanelEntityName;
+        std::string ComboPanelEntityName;
+        std::string ComboFrameEntityName;
+        std::string ComboLabelEntityName;
+        std::string ComboMultiplyEntityName;
+        std::string ComboDigitPrefix;
+        std::string SkillBarPanelEntityName;
+        std::string SkillTooltipPanelEntityName;
+        std::string SkillTooltipTextEntityName;
+        std::string JoystickBaseEntityName;
+        std::string JoystickThumbEntityName;
+        std::string PlayerManaEntityName;
+        std::string PlayerUltimateFillEntityName;
+        std::string PlayerUltimateMaskEntityName;
+        std::string BossProtectionEntityName;
+        std::string PlayerStatusPrefix;
+        std::string EnemyStatusPrefix;
+        std::string SkillPrefix;
+        std::string ItemSlotPrefix;
+
+        struct HudRect
+        {
+            glm::vec2 Position = { 0.0f, 0.0f };
+            glm::vec2 Size = { 0.0f, 0.0f };
+        };
+
+        struct StatusBadgeLayout
+        {
+            glm::vec2 BuffStart = { 0.0f, 0.0f };
+            glm::vec2 DebuffStart = { 0.0f, 0.0f };
+            glm::vec2 Size = { 0.0f, 0.0f };
+            float Gap = 0.0f;
+        };
+
+        struct SkillHudSlot
+        {
+            bool        Enabled = true;
+            std::string Key;
+            std::string KeyLabel;
+            std::string Command;
+            glm::vec2   Position = { 0.0f, 0.0f };
+            glm::vec2   Size = { 0.0f, 0.0f };
+            glm::vec2   TooltipPosition = { 0.0f, 0.0f };
+            bool        UseSheetIcon = true;
+            glm::vec4   IconSheetPixels = { 0.0f, 0.0f, 1.0f, 1.0f };
+            std::string IconTexturePath;
+            std::string TooltipText;
+        };
+
+        struct CombatItemHudSlot
+        {
+            bool        Enabled = true;
+            std::string Key;
+            std::string Shortcut;
+            std::string Command;
+            glm::vec2   Position = { 0.0f, 0.0f };
+            glm::vec2   FrameSize = { 0.0f, 0.0f };
+            glm::vec2   IconInset = { 0.0f, 0.0f };
+            glm::vec2   IconSize = { 0.0f, 0.0f };
+            glm::vec2   TooltipPosition = { 0.0f, 0.0f };
+            bool        UseSheetIcon = true;
+            glm::vec4   IconSheetPixels = { 0.0f, 0.0f, 1.0f, 1.0f };
+            std::string IconTexturePath;
+            std::string DisplayName;
+            std::string UsageText;
+        };
+
+        HudRect TopPanelLayout;
+        HudRect PlayerHealthLayout;
+        HudRect PlayerManaLayout;
+        HudRect PlayerUltimateLayout;
+        HudRect PlayerHealthTextLayout;
+        HudRect BossPanelLayout;
+        HudRect BossHealthLayout;
+        HudRect BossProtectionLayout;
+        HudRect BossHealthTextLayout;
+        HudRect ComboTextLayout;
+        HudRect ComboFrameLayout;
+        HudRect SkillTooltipLayout;
+        glm::vec2 SkillTooltipPadding = { 0.0f, 0.0f };
+        HudRect JoystickBaseLayout;
+        glm::vec2 JoystickThumbSize = { 0.0f, 0.0f };
+        glm::vec2 JoystickThumbTravel = { 0.0f, 0.0f };
+        StatusBadgeLayout PlayerStatusLayout;
+        StatusBadgeLayout EnemyStatusLayout;
+
+        std::vector<SkillHudSlot> SkillHudSlots;
+        std::vector<CombatItemHudSlot> CombatItemHudSlots;
+
+        std::string HudLockedText;
+        std::string HudUnavailableText;
+        std::string HudInsufficientManaText;
+        std::string HudConditionText;
+        std::string HudGaugeText;
+        std::string HudComboText;
+        std::string HudArmorText;
+        std::string HudCooldownPrefix;
+        std::string HudSecondsSuffix;
+        std::string HudManaNotEnoughTooltip;
+        std::string HudNotUnlockedTooltip;
+        std::string BreakLimitGaugeNotEnoughTooltip;
+        std::string BreakLimitComboNotEnoughTooltip;
+        std::string BreakLimitBossNotReadyTooltip;
+        std::string HudDefaultMessage;
+        std::string HudAirBasicMessage;
+        std::string HudMagicMessage;
+        std::string HudDashMessage;
+        std::string HudReservedSkillMessage;
+        std::string HudSupportMessage;
+        std::string HudBreakLimitInputMessage;
+        std::string HudBreakLimitDebugInputMessage;
+        std::string HudVictoryMessage;
+        std::string HudDefeatMessage;
+        std::string HudHighAirMessage;
+        std::string HudLowAirMessage;
+        std::string HudBreakLimitHintMessage;
+        std::string HudPlayerHealthLabel;
+        std::string HudBossHealthLabel;
+        std::string HudBossProtectionLabel;
+        std::string HudManaGaugeLabel;
+        std::string HudAirActionsLabel;
+        std::string HudRewardFallbackText;
+        std::string HudCollectedPrefix;
 
         float       StartFadeDuration = 0.65f;
         float       VictoryReturnDelay = 4.0f;
@@ -81,6 +208,21 @@ namespace Wheatear {
 
         float       ComboDropDelay = 1.15f;
         std::string FirstClearRewardText = "获得: 魔核碎片 x1 / 兽筋 x2 / 熊爪 x1";
+
+        struct DeathReward
+        {
+            bool        Enabled = true;
+            int         EnemyKind = -1;
+            std::string SourceEntityName;
+            std::string SpawnEntityName;
+            std::string ItemId = "MAT-BEAST-SINEW";
+            std::string DisplayName = "Beast Sinew";
+            int         Amount = 1;
+            glm::vec3   Offset = { 0.0f, 0.45f, 0.03f };
+            glm::vec3   Scale = { 0.38f, 0.38f, 1.0f };
+            std::string TexturePath = "side.drop.beast_sinew";
+        };
+        std::vector<DeathReward> DeathRewards;
 
         bool        WaveModeEnabled = false;
         int         WaveCount = 3;
@@ -126,9 +268,9 @@ namespace Wheatear {
         bool        RuntimeCameraProjectionCaptured = false;
         int         RuntimeWaveIndex = 0;
         float       RuntimeWaveRightWall = 8.8f;
-        bool        RuntimeWaveSpawnsCreated = false;
+        bool        RuntimeHudLayoutConfigured = false;
 
-        SideCombatLevelComponent() = default;
+        SideCombatLevelComponent();
         SideCombatLevelComponent(const SideCombatLevelComponent&) = default;
     };
 
@@ -244,6 +386,7 @@ namespace Wheatear {
     struct SideEnemyAIComponent
     {
         SideEnemyKind Kind = SideEnemyKind::Grunt;
+        int WaveIndex = -1;
         float AggroRange = 8.0f;
         float AttackRange = 1.35f;
         float PreferredRange = 1.05f;

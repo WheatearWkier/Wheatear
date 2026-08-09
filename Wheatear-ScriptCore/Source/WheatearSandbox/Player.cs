@@ -6,6 +6,7 @@ namespace WheatearSandbox
     {
         public float Speed = 6.0f;
         public float JumpForce = 6.0f;
+        public string BulletPrefabPath = "assets/prefabs/Bullet.wtprefab";
 
         private Rigidbody2DComponent? _rigidbody;
         private SpriteAnimatorComponent? _animator;
@@ -79,7 +80,7 @@ namespace WheatearSandbox
             float direction = (_sprite != null && _sprite.FlipX) ? -1.0f : 1.0f;
             spawnPos.X += 0.5f * direction;
 
-            Entity? bulletEntity = Scene.InstantiatePrefab("assets/prefabs/Bullet.wtprefab", spawnPos);
+            Entity? bulletEntity = Scene.InstantiatePrefab(BulletPrefabPath, spawnPos);
             Bullet? bullet = bulletEntity?.GetScript<Bullet>();
             if (bullet != null)
                 bullet.Direction = direction;

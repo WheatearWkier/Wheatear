@@ -738,7 +738,8 @@ namespace Wheatear::GameProgress {
         int hitsTaken,
         float clearTimeSeconds,
         int experience,
-        const std::string& rewardSummary)
+        const std::string& rewardSummary,
+        const std::unordered_map<std::string, int>& rewardAmounts)
     {
         if (dungeonId.empty())
             return;
@@ -754,6 +755,7 @@ namespace Wheatear::GameProgress {
         state.LastDungeonResult.ClearTimeSeconds = clearTimeSeconds;
         state.LastDungeonResult.Experience = experience;
         state.LastDungeonResult.RewardSummary = rewardSummary;
+        state.LastDungeonResult.RewardAmounts = rewardAmounts;
 
         std::ostringstream stream;
         stream << state.LastDungeonResult.DungeonName

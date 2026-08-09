@@ -141,6 +141,7 @@ namespace Wheatear {
             o << YAML::Key << "FontSize" << YAML::Value << c.FontSize;
             o << YAML::Key << "FontPath" << YAML::Value << c.FontPath;
             o << YAML::Key << "Padding" << YAML::Value << c.Padding;
+            o << YAML::Key << "AutoFit" << YAML::Value << c.AutoFit;
             o << YAML::Key << "HorizontalAlign" << YAML::Value << static_cast<int>(c.HorizontalAlign);
             o << YAML::Key << "VerticalAlign" << YAML::Value << static_cast<int>(c.VerticalAlign);
             o << YAML::Key << "ShadowColor" << YAML::Value << c.ShadowColor;
@@ -155,6 +156,7 @@ namespace Wheatear {
             c.FontSize = n["FontSize"].as<float>(c.FontSize);
             c.FontPath = n["FontPath"].as<std::string>(c.FontPath);
             c.Padding = n["Padding"].as<glm::vec4>(c.Padding);
+            c.AutoFit = n["AutoFit"].as<bool>(c.AutoFit);
             c.HorizontalAlign = static_cast<UITextHorizontalAlign>(
                 std::clamp(n["HorizontalAlign"].as<int>(static_cast<int>(c.HorizontalAlign)), 0, 2));
             c.VerticalAlign = static_cast<UITextVerticalAlign>(
@@ -174,13 +176,15 @@ namespace Wheatear {
             o << YAML::Key << "HoverColor" << YAML::Value << c.HoverColor;
             o << YAML::Key << "PressedColor" << YAML::Value << c.PressedColor;
             o << YAML::Key << "OnClickFunction" << YAML::Value << YAML::DoubleQuoted << c.OnClickFunction;
+            o << YAML::Key << "TooltipText" << YAML::Value << YAML::DoubleQuoted << c.TooltipText;
             o << YAML::EndMap;
         }
         static void Deserialize(const YAML::Node& n, UIButtonComponent& c) {
-            c.NormalColor = n["NormalColor"].as<glm::vec4>();
-            c.HoverColor = n["HoverColor"].as<glm::vec4>();
-            c.PressedColor = n["PressedColor"].as<glm::vec4>();
-            c.OnClickFunction = n["OnClickFunction"].as<std::string>();
+            c.NormalColor = n["NormalColor"].as<glm::vec4>(c.NormalColor);
+            c.HoverColor = n["HoverColor"].as<glm::vec4>(c.HoverColor);
+            c.PressedColor = n["PressedColor"].as<glm::vec4>(c.PressedColor);
+            c.OnClickFunction = n["OnClickFunction"].as<std::string>(c.OnClickFunction);
+            c.TooltipText = n["TooltipText"].as<std::string>(c.TooltipText);
         }
     };
 

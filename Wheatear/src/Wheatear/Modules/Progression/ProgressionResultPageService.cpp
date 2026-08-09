@@ -74,6 +74,21 @@ namespace Wheatear::ProgressionResultPageService {
             SetWidgetVisible(scene, prefix + "_Count", visible);
         }
 
+        static std::string GetResultDropAmount(
+            const GameProgress::DungeonResult& result,
+            const ResultDropIcon& icon)
+        {
+            if (const auto it = result.RewardAmounts.find(icon.ItemId);
+                it != result.RewardAmounts.end())
+            {
+                return std::to_string(std::max(0, it->second));
+            }
+
+            return GameplayRewardService::ExtractRewardAmount(
+                result.RewardSummary,
+                icon.DisplayName);
+        }
+
     } // namespace
 
     void UpdateDrops(Scene* scene)
@@ -91,7 +106,7 @@ namespace Wheatear::ProgressionResultPageService {
         {
             const std::string prefix = std::string("Result_Drop_") + icon.Key;
             const std::string amount = hasResult
-                ? GameplayRewardService::ExtractRewardAmount(state.LastDungeonResult.RewardSummary, icon.DisplayName)
+                ? GetResultDropAmount(state.LastDungeonResult, icon)
                 : "0";
             const bool visible = hasResult && (!GameplayRewardService::IsZeroAmount(amount) || std::string(icon.Key) == "Core");
             SetResultDropVisible(scene, icon, visible);

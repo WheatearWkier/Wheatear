@@ -2,6 +2,7 @@
 #include "SceneHierarchyPanel.h"
 
 #include "Wheatear/Scene/Components.h"
+#include "Wheatear/Scene/Scene.h"
 #include "Editor/EditorComponentRegistry.h"
 
 #include <imgui/imgui.h>
@@ -25,7 +26,11 @@ namespace Wheatear {
             }
 
             if (ImGui::InputText("##Tag", buffer, sizeof(buffer)))
+            {
                 tag = buffer;
+                if (Scene* scene = entity.GetScene())
+                    scene->InvalidateEntityLookupCache();
+            }
         }
 
         ImGui::SameLine();

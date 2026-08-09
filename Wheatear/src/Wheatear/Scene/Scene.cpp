@@ -46,17 +46,20 @@ namespace Wheatear {
         entity.AddComponent<IDComponent>(uuid);
         entity.AddComponent<TransformComponent>();
         entity.AddComponent<TagComponent>().Tag = name.empty() ? "Entity" : name;
+        InvalidateEntityLookupCache();
         return entity;
     }
 
     void Scene::DestroyEntityImmediate(Entity entity)
     {
         m_Registry.destroy(entity);
+        InvalidateEntityLookupCache();
     }
 
     void Scene::DestroyEntity(Entity entity)
     {
         m_DestroyQueue.insert(static_cast<entt::entity>(entity));
+        InvalidateEntityLookupCache();
     }
 
     Entity Scene::InstantiateFromPrefab(const std::filesystem::path& prefabPath,
@@ -86,14 +89,21 @@ namespace Wheatear {
 
     void Scene::FlushDestroyQueueEditor()
     {
+        if (m_DestroyQueue.empty())
+            return;
+
         for (entt::entity e : m_DestroyQueue)
             if (m_Registry.valid(e))
                 m_Registry.destroy(e);
         m_DestroyQueue.clear();
+        InvalidateEntityLookupCache();
     }
 
     void Scene::FlushDestroyQueue()
     {
+        if (m_DestroyQueue.empty())
+            return;
+
         for (entt::entity e : m_DestroyQueue)
         {
             if (!m_Registry.valid(e)) continue;
@@ -105,6 +115,7 @@ namespace Wheatear {
             m_Registry.destroy(e);
         }
         m_DestroyQueue.clear();
+        InvalidateEntityLookupCache();
     }
 
 
@@ -255,20 +266,93 @@ namespace Wheatear {
         return {};
     }
 
+    void Scene::InvalidateEntityLookupCache()
+    {
+        m_EntityLookupCacheDirty = true;
+    }
+
+    void Scene::RebuildEntityLookupCaches()
+    {
+        m_EntityNameCache.clear();
+        m_EntityUUIDCache.clear();
+
+        for (auto e : m_Registry.view<IDComponent>())
+        {
+            const UUID uuid = m_Registry.get<IDComponent>(e).ID;
+            if (static_cast<uint64_t>(uuid) != 0)
+                m_EntityUUIDCache.try_emplace(uuid, e);
+        }
+
+        for (auto e : m_Registry.view<TagComponent>())
+        {
+            const std::string& tag = m_Registry.get<TagComponent>(e).Tag;
+            if (!tag.empty())
+                m_EntityNameCache.try_emplace(tag, e);
+        }
+
+        m_EntityLookupCacheDirty = false;
+    }
+
+    Entity Scene::FindEntityByUUID(UUID uuid)
+    {
+        if (static_cast<uint64_t>(uuid) == 0)
+            return {};
+
+        if (m_EntityLookupCacheDirty)
+            RebuildEntityLookupCaches();
+
+        auto it = m_EntityUUIDCache.find(uuid);
+        if (it == m_EntityUUIDCache.end())
+            return {};
+
+        const entt::entity entity = it->second;
+        if (!m_Registry.valid(entity) ||
+            !m_Registry.all_of<IDComponent>(entity) ||
+            m_Registry.get<IDComponent>(entity).ID != uuid)
+        {
+            InvalidateEntityLookupCache();
+            RebuildEntityLookupCaches();
+            it = m_EntityUUIDCache.find(uuid);
+            if (it == m_EntityUUIDCache.end())
+                return {};
+        }
+
+        return { it->second, this };
+    }
+
     Entity Scene::GetEntityByUUID(UUID uuid)
     {
-        for (auto e : m_Registry.view<IDComponent>())
-            if (m_Registry.get<IDComponent>(e).ID == uuid)
-                return { e, this };
+        if (Entity entity = FindEntityByUUID(uuid))
+            return entity;
+
         WT_CORE_WARN("GetEntityByUUID: entity {} not found", (uint64_t)uuid);
         return {};
     }
 
     Entity Scene::GetEntityByName(const std::string& name)
     {
-        for (auto e : m_Registry.view<TagComponent>())
-            if (m_Registry.get<TagComponent>(e).Tag == name)
-                return { e, this };
-        return {};
+        if (name.empty())
+            return {};
+
+        if (m_EntityLookupCacheDirty)
+            RebuildEntityLookupCaches();
+
+        auto it = m_EntityNameCache.find(name);
+        if (it == m_EntityNameCache.end())
+            return {};
+
+        const entt::entity entity = it->second;
+        if (!m_Registry.valid(entity) ||
+            !m_Registry.all_of<TagComponent>(entity) ||
+            m_Registry.get<TagComponent>(entity).Tag != name)
+        {
+            InvalidateEntityLookupCache();
+            RebuildEntityLookupCaches();
+            it = m_EntityNameCache.find(name);
+            if (it == m_EntityNameCache.end())
+                return {};
+        }
+
+        return { it->second, this };
     }
 } // namespace Wheatear

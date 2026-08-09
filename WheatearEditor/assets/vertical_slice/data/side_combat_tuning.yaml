@@ -42,8 +42,8 @@ combat:
 
 feedback:
   hitPauseTimeScale: 0.10
-  breakLimitCinematicDuration: 0.60
-  breakLimitCinematicTimeScale: 0.045
+  breakLimitCinematicDuration: 3.0
+  breakLimitCinematicTimeScale: 0.12
   breakLimitCameraZoom: 1.30
   breakLimitCameraOffset: [0.0, 0.25]
   jumpSound: assets/vertical_slice/side_combat/audio/jump.wav
@@ -120,16 +120,17 @@ pickup:
 
 movement:
   laneMinY: -3.55
-  laneMaxY: -0.65
+  laneMaxY: 0.25
   laneSpeedScale: 1.0
   laneAcceleration: 30.0
   sortScale: 0.015
 
 visuals:
-  shadowMinAlpha: 0.20
-  shadowMaxAlpha: 0.44
+  shadowColor: [0.0, 0.0, 0.0, 1.0]
+  shadowMinAlpha: 0.34
+  shadowMaxAlpha: 0.68
   shadowAirFadeHeight: 3.8
-  shadowOffset: [0.0, -0.02]
+  shadowOffset: [0.0, -0.04]
   playerAnimations:
     idle: { pattern: "assets/vertical_slice/side_combat/characters/protag_idle_{frame2}.png", frameCount: 8, frameRate: 8.0, loop: true, renderScale: [1.0, 1.0], renderOffset: [0.0, 0.3398] }
     run: { pattern: "assets/vertical_slice/side_combat/characters/protag_run_{frame2}.png", frameCount: 4, frameRate: 8.0, loop: true, renderScale: [1.0, 1.0], renderOffset: [0.0, 0.3398] }
@@ -146,7 +147,7 @@ visuals:
     dash: { pattern: "assets/vertical_slice/side_combat/characters/protag_dash_{frame2}.png", frameCount: 1, frameRate: 8.0, loop: false, renderScale: [1.60, 1.60], renderOffset: [0.0, 0.4453] }
     magic_bolt: { pattern: "assets/vertical_slice/side_combat/characters/protag_magic_bolt_{frame2}.png", frameCount: 9, frameRate: 20.0, loop: false, renderScale: [1.0, 1.0], renderOffset: [0.0, 0.3398] }
     ally_support: { pattern: "assets/vertical_slice/side_combat/characters/protag_ally_support_{frame2}.png", frameCount: 8, frameRate: 18.0, loop: false, renderScale: [1.25, 1.0], renderOffset: [0.0, 0.3398] }
-    break_limit: { pattern: "assets/vertical_slice/side_combat/characters/protag_break_limit_{frame2}.png", frameCount: 2, frameRate: 8.0, loop: false, renderScale: [1.60, 1.60], renderOffset: [0.0, 0.4453] }
+    break_limit: { pattern: "assets/vertical_slice/side_combat/characters/protag_break_limit_{frame2}.png", frameCount: 2, frameRate: 8.0, loop: false, renderScale: [1.25, 1.25], renderOffset: [0.0, 0.3398] }
   gruntAnimations:
     idle: { pattern: "assets/vertical_slice/side_combat/enemies/en_claw_beast_idle_{frame2}.png", frameCount: 4, frameRate: 7.0, loop: true, renderScale: [1.0, 1.0], renderOffset: [0.0, 0.2969] }
     run: { pattern: "assets/vertical_slice/side_combat/enemies/en_claw_beast_run_{frame2}.png", frameCount: 5, frameRate: 11.0, loop: true, renderScale: [1.0, 1.0], renderOffset: [0.0, 0.2969] }

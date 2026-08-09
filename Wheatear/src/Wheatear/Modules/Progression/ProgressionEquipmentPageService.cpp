@@ -28,12 +28,10 @@ namespace Wheatear::ProgressionEquipmentPageService {
         using UIRuntimeTools::SetWidgetTopLeft;
         using UIRuntimeTools::SetWidgetVisible;
 
-        using GameplayUILayoutService::EnsurePager;
-        using GameplayUILayoutService::EnsureScrollView;
+        using GameplayUILayoutService::FindAuthoredPager;
+        using GameplayUILayoutService::FindAuthoredScrollView;
         using GameplayUILayoutService::SetButtonCommand;
-        using GameplayUILayoutService::SetButtonPalette;
         using GameplayUILayoutService::SetPageItem;
-        using GameplayUILayoutService::SetPanelColors;
 
         struct EquipmentSlotView
         {
@@ -74,7 +72,13 @@ namespace Wheatear::ProgressionEquipmentPageService {
 
     int SyncPager(Scene* scene)
     {
-        Entity pager = EnsurePager(scene, "Equipment_Pager", 2);
+        if (!HasEntity(scene, "Equipment_Pager"))
+            return GameProgress::GetState().EquipmentPage;
+
+        Entity pager = FindAuthoredPager(scene, "Equipment_Pager");
+        if (!pager)
+            return GameProgress::GetState().EquipmentPage;
+
         auto& pagerComponent = pager.GetComponent<UIPagerComponent>();
         pagerComponent.PageCount = 2;
         pagerComponent.CurrentPage = std::clamp(pagerComponent.CurrentPage, 1, pagerComponent.PageCount);
@@ -91,21 +95,21 @@ namespace Wheatear::ProgressionEquipmentPageService {
 
         if (HasEntity(scene, "Equipment_DetailsScroll"))
         {
-            EnsureScrollView(scene, "Equipment_DetailsScroll", "WT_UI_Canvas",
-                { 0.675f, 0.280f }, { 0.215f, 0.262f }, 34, 1.55f);
+            FindAuthoredScrollView(scene, "Equipment_DetailsScroll");
         }
 
         if (HasEntity(scene, "Equipment_MaterialsScroll"))
         {
-            EnsureScrollView(scene, "Equipment_MaterialsScroll", "WT_UI_Canvas",
-                { 0.675f, 0.555f }, { 0.215f, 0.142f }, 34, 1.35f);
+            FindAuthoredScrollView(scene, "Equipment_MaterialsScroll");
         }
     }
 
     void UpdateItems(Scene* scene)
     {
         const auto& state = GameProgress::GetState();
-        Entity pager = EnsurePager(scene, "Equipment_Pager", 2);
+        Entity pager = HasEntity(scene, "Equipment_Pager")
+            ? FindAuthoredPager(scene, "Equipment_Pager")
+            : Entity{};
         const glm::vec2 frameSize = { 0.075f, 0.098f };
         const glm::vec2 origin = { 0.385f, 0.335f };
         const glm::vec2 step = { 0.105f, 0.135f };
@@ -160,9 +164,12 @@ namespace Wheatear::ProgressionEquipmentPageService {
             const std::string equipmentId = hasEquipment ? bagEquipment[itemIndex] : std::string{};
             const bool selected = hasEquipment && state.SelectedEquipmentId == equipmentId;
 
-            SetPageItem(scene, frame, pager, page);
-            SetPageItem(scene, item, pager, page);
-            SetPageItem(scene, button, pager, page);
+            if (pager)
+            {
+                SetPageItem(scene, frame, pager, page);
+                SetPageItem(scene, item, pager, page);
+                SetPageItem(scene, button, pager, page);
+            }
 
             SetWidgetVisible(scene, frame, hasEquipment);
             SetWidgetVisible(scene, item, hasEquipment);
@@ -177,10 +184,6 @@ namespace Wheatear::ProgressionEquipmentPageService {
                     ? glm::vec4(1.0f, 0.95f, 0.68f, 1.0f)
                     : glm::vec4(1.0f));
             }
-            SetPanelColors(scene, frame,
-                selected ? glm::vec4(0.18f, 0.15f, 0.09f, 0.86f) : glm::vec4(0.025f, 0.03f, 0.035f, 0.78f),
-                selected ? glm::vec4(0.98f, 0.78f, 0.30f, 0.96f) : glm::vec4(0.58f, 0.48f, 0.31f, 0.78f));
-
             if (hasEquipment && IsButtonHovered(scene, button))
             {
                 hoveredEquipmentId = equipmentId;
@@ -188,23 +191,15 @@ namespace Wheatear::ProgressionEquipmentPageService {
             }
         }
 
-        const bool pageOne = state.EquipmentPage == 1;
-        SetButtonPalette(scene, "Equipment_Button_Page1",
-            pageOne ? glm::vec4(0.80f, 0.58f, 0.22f, 0.94f) : glm::vec4(0.10f, 0.11f, 0.13f, 0.86f),
-            glm::vec4(0.95f, 0.78f, 0.36f, 0.96f),
-            glm::vec4(0.58f, 0.38f, 0.16f, 0.96f));
-        SetButtonPalette(scene, "Equipment_Button_Page2",
-            !pageOne ? glm::vec4(0.80f, 0.58f, 0.22f, 0.94f) : glm::vec4(0.10f, 0.11f, 0.13f, 0.86f),
-            glm::vec4(0.95f, 0.78f, 0.36f, 0.96f),
-            glm::vec4(0.58f, 0.38f, 0.16f, 0.96f));
         Entity equipmentPager = FindEntityByName(scene, "Equipment_Pager");
         const std::string pagerSelector = equipmentPager
             ? EntityReferences::MakeUUIDSelector(equipmentPager.GetUUID())
             : std::string{};
-        SetButtonCommand(scene, "Equipment_Button_Page1",
-            pagerSelector.empty() ? std::string{} : "ui:pager:" + pagerSelector + ":page:1");
-        SetButtonCommand(scene, "Equipment_Button_Page2",
-            pagerSelector.empty() ? std::string{} : "ui:pager:" + pagerSelector + ":page:2");
+        if (!pagerSelector.empty())
+        {
+            SetButtonCommand(scene, "Equipment_Button_Page1", "ui:pager:" + pagerSelector + ":page:1");
+            SetButtonCommand(scene, "Equipment_Button_Page2", "ui:pager:" + pagerSelector + ":page:2");
+        }
         SetWidgetVisible(scene, "Equipment_PageSlider", false);
 
         SetText(scene, "Equipment_Button_Toggle", GameProgress::GetEquipmentToggleButtonText());

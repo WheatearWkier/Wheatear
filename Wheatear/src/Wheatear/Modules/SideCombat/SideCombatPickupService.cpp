@@ -1,4 +1,4 @@
-#include "wtpch.h"
+﻿#include "wtpch.h"
 #include "SideCombatPickupService.h"
 
 #include "SideCombatMath.h"
@@ -9,9 +9,28 @@
 #include "Wheatear/Scene/Components.h"
 #include "Wheatear/Scene/Scene.h"
 
+#include <algorithm>
 #include <vector>
 
 namespace Wheatear::SideCombatPickupService {
+
+    namespace {
+
+        static bool MatchesDeathReward(
+            const SideCombatLevelComponent::DeathReward& reward,
+            const std::string& sourceEntityName,
+            const SideEnemyAIComponent* ai)
+        {
+            if (!reward.Enabled)
+                return false;
+            if (reward.EnemyKind >= 0 && (!ai || reward.EnemyKind != static_cast<int>(ai->Kind)))
+                return false;
+            if (!reward.SourceEntityName.empty() && reward.SourceEntityName != sourceEntityName)
+                return false;
+            return true;
+        }
+
+    } // namespace
 
     Entity CreatePickup(Scene* scene,
         const std::string& name,
@@ -20,6 +39,7 @@ namespace Wheatear::SideCombatPickupService {
         const std::string& displayName,
         int amount,
         const std::string& texturePath,
+        const glm::vec3& scale,
         const SideCombatTuningService::SidePickupTuning& tuning)
     {
         if (!scene)
@@ -28,7 +48,7 @@ namespace Wheatear::SideCombatPickupService {
         Entity pickup = scene->CreateEntity(name);
         auto& transform = pickup.GetComponent<TransformComponent>();
         transform.Translation = position;
-        transform.Scale = { 0.38f, 0.38f, 1.0f };
+        transform.Scale = scale;
 
         auto& sprite = pickup.AddComponent<SpriteRendererComponent>();
         sprite.Color = { 1.0f, 1.0f, 1.0f, 1.0f };
@@ -47,36 +67,36 @@ namespace Wheatear::SideCombatPickupService {
 
     void SpawnDeathRewards(Scene* scene,
         const SideCombatLevelComponent& level,
+        const std::string& sourceEntityName,
         const TransformComponent& transform,
         const SideEnemyAIComponent* ai)
     {
-        const bool boss = ai && ai->Kind == SideEnemyKind::BearBoss;
-        const auto& pickupTuning = SideCombatTuningService::GetTuning(level).Pickup;
-        if (boss)
-        {
-            CreatePickup(scene, "Drop_MagicCore",
-                transform.Translation + glm::vec3(-0.42f, 0.55f, 0.03f),
-                "MAT-MAGIC-CORE-T0", "魔核碎片", 1,
-                AssetAliasRegistry::Path("side.drop.magic_core"),
-                pickupTuning);
-            CreatePickup(scene, "Drop_BeastSinew",
-                transform.Translation + glm::vec3(0.0f, 0.72f, 0.03f),
-                "MAT-BEAST-SINEW", "兽筋", 2,
-                AssetAliasRegistry::Path("side.drop.beast_sinew"),
-                pickupTuning);
-            CreatePickup(scene, "Drop_BeastClaw",
-                transform.Translation + glm::vec3(0.42f, 0.55f, 0.03f),
-                "MAT-BEAST-CLAW", "熊爪", 1,
-                AssetAliasRegistry::Path("side.drop.beast_claw"),
-                pickupTuning);
+        if (!scene)
             return;
-        }
 
-        CreatePickup(scene, "Drop_BeastSinew",
-            transform.Translation + glm::vec3(0.0f, 0.45f, 0.03f),
-            "MAT-BEAST-SINEW", "兽筋", 1,
-            AssetAliasRegistry::Path("side.drop.beast_sinew"),
-            pickupTuning);
+        const auto& pickupTuning = SideCombatTuningService::GetTuning(level).Pickup;
+        for (const auto& reward : level.DeathRewards)
+        {
+            if (!MatchesDeathReward(reward, sourceEntityName, ai))
+                continue;
+
+            const std::string spawnName = reward.SpawnEntityName.empty()
+                ? reward.ItemId + "_Drop"
+                : reward.SpawnEntityName;
+            const std::string sourceSuffix = sourceEntityName.empty()
+                ? std::string{}
+                : "_" + sourceEntityName;
+
+            CreatePickup(scene,
+                spawnName + sourceSuffix,
+                transform.Translation + reward.Offset,
+                reward.ItemId,
+                reward.DisplayName,
+                std::max(1, reward.Amount),
+                AssetAliasRegistry::Resolve(reward.TexturePath),
+                reward.Scale,
+                pickupTuning);
+        }
     }
 
     void UpdatePickups(Scene* scene,
