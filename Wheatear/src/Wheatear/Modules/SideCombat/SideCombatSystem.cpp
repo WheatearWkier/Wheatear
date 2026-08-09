@@ -5,6 +5,8 @@
 #include "Wheatear/Core/InputBindingService.h"
 #include "Wheatear/Core/KeyCodes.h"
 #include "Wheatear/Core/MouseButtonCodes.h"
+#include "Wheatear/Modules/Progression/GameProgress.h"
+#include "Wheatear/Modules/Progression/ProgressionContent.h"
 #include "Wheatear/Modules/SideCombat/SideCombatComboService.h"
 #include "Wheatear/Modules/SideCombat/SideCombatEnemyAIService.h"
 #include "Wheatear/Modules/SideCombat/SideCombatEntityReferenceService.h"
@@ -27,6 +29,26 @@
 
 namespace Wheatear {
 
+    namespace {
+
+        static void ApplyActiveDungeonProfile(SideCombatLevelComponent& level)
+        {
+            const std::string& dungeonId = GameProgress::GetActiveSideCombatDungeonId();
+            if (dungeonId.empty())
+                return;
+
+            level.LevelId = dungeonId;
+            level.VictorySceneCommand = "event:side_combat_victory";
+            level.DefeatSceneCommand = "event:side_combat_retry";
+
+            if (const auto* dungeon = ProgressionContent::FindDungeon(dungeonId);
+                dungeon && !dungeon->FirstClearRewardText.empty())
+            {
+                level.FirstClearRewardText = dungeon->FirstClearRewardText;
+            }
+        }
+
+    } // namespace
 
     void SideCombatSystem::ResetInputState()
     {
@@ -56,6 +78,7 @@ namespace Wheatear {
             if (!level.PlayOnStart)
                 continue;
 
+            ApplyActiveDungeonProfile(level);
             SideCombatLifecycleService::ResetLevelRuntime(scene, level);
             SideCombatLifecycleService::ResetCombatants(scene, level);
         }

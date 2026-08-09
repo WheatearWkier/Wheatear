@@ -753,7 +753,6 @@ def main() -> None:
     (SCENE_ROOT / "VerticalSliceSkillTree.wt").write_text(skill_tree_scene(), encoding="utf-8", newline="\n")
     (SCENE_ROOT / "VerticalSliceEquipment.wt").write_text(equipment_scene(), encoding="utf-8", newline="\n")
     patch_settings_scene(SCENE_ROOT / "VerticalSliceSettings.wt")
-    patch_side_combat_scene(SCENE_ROOT / "SideCombatVerticalSlice.wt", 946100000)
     patch_side_combat_scene(SCENE_ROOT / "SideCombatBeastPath.wt", 946200000)
     patch_result_scene(SCENE_ROOT / "VerticalSliceResult.wt")
     update_manifest()

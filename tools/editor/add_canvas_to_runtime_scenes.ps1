@@ -8,7 +8,6 @@ $sceneRelativePaths = @(
     "WheatearEditor/assets/scenes/VerticalSliceIntro.wt",
     "WheatearEditor/assets/scenes/VisualNovelBattle.wt",
     "WheatearEditor/assets/scenes/VerticalSlicePostFake.wt",
-    "WheatearEditor/assets/scenes/SideCombatVerticalSlice.wt",
     "WheatearEditor/assets/scenes/VerticalSliceResult.wt",
     "WheatearEditor/assets/scenes/VerticalSliceHub.wt",
     "WheatearEditor/assets/scenes/VerticalSliceSkillTree.wt",

@@ -101,6 +101,7 @@ namespace Wheatear::GameProgress {
         float SkillTreePanX = 0.0f;
         float SkillTreePanY = 0.0f;
 
+        std::string ActiveSideCombatDungeonId;
         DungeonResult LastDungeonResult;
         std::string LastResultMessage;
     };
@@ -120,6 +121,8 @@ namespace Wheatear::GameProgress {
     WHEATEAR_API bool SpendMaterials(const std::vector<MaterialCost>& costs);
 
     WHEATEAR_API void AddExperience(int amount);
+    WHEATEAR_API void SetActiveSideCombatDungeon(const std::string& dungeonId);
+    WHEATEAR_API const std::string& GetActiveSideCombatDungeonId();
     WHEATEAR_API bool RecordDungeonClear(const std::string& dungeonId, int bestCombo, int firstClearExperience, int repeatExperience);
     WHEATEAR_API void RecordLastDungeonResult(const std::string& dungeonId,
         const std::string& grade,

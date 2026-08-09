@@ -317,8 +317,8 @@ def generate_pages() -> None:
         "Dungeon_Subtitle",
         "副本状态会显示在这里。",
         [
-            ("挑战黑熊丈夫", "scene:assets/scenes/SideCombatVerticalSlice.wt", "blue"),
-            ("重刷黑林兽道", "scene:assets/scenes/SideCombatBeastPath.wt", "green"),
+            ("挑战黑熊丈夫", "event:tutorial_side_combat_start", "blue"),
+            ("重刷黑林兽道", "event:go_beast_path", "green"),
             ("魔剑技能树", "scene:assets/scenes/VerticalSliceSkillTree.wt", "violet"),
             ("返回据点", "scene:assets/scenes/VerticalSliceHub.wt", "gold"),
         ],
@@ -402,17 +402,6 @@ def generate_pages() -> None:
         ensure(path)
         path.write_text(content, encoding="utf-8", newline="\n")
 
-    source = SCENE_ROOT / "SideCombatVerticalSlice.wt"
-    beast_path = SCENE_ROOT / "SideCombatBeastPath.wt"
-    content = source.read_text(encoding="utf-8")
-    content = content.replace("Scene: SideCombatVerticalSlice", "Scene: SideCombatBeastPath", 1)
-    content = content.replace("LevelId: CH02_MAIN_BearAwakening", "LevelId: CH02_MAT_BeastPath", 1)
-    content = content.replace(
-        'FirstClearRewardText: "获得: 魔核碎片 x1 / 兽筋 x2 / 熊爪 x1"',
-        'FirstClearRewardText: "获得: 兽筋 x2 / 熊爪 x2 / 魔核碎片 x0-1"'
-    )
-    beast_path.write_text(content, encoding="utf-8", newline="\n")
-
 
 def style_existing_text() -> None:
     scene_paths = [
@@ -421,7 +410,6 @@ def style_existing_text() -> None:
         SCENE_ROOT / "VerticalSlicePostFake.wt",
         SCENE_ROOT / "VerticalSliceChapter3Preview.wt",
         SCENE_ROOT / "VisualNovelMainMenu.wt",
-        SCENE_ROOT / "SideCombatVerticalSlice.wt",
         SCENE_ROOT / "SideCombatBeastPath.wt",
         SCENE_ROOT / "VerticalSliceResult.wt",
         SCENE_ROOT / "VerticalSliceSkillTree.wt",

@@ -7,7 +7,6 @@
     "assets/scenes/VisualNovelBattle.wt",
     "assets/scenes/VerticalSliceTurnCombat.wt",
     "assets/scenes/VerticalSlicePostFake.wt",
-    "assets/scenes/SideCombatVerticalSlice.wt",
     "assets/scenes/VerticalSliceResult.wt",
     "assets/scenes/VerticalSliceHub.wt",
     "assets/scenes/VerticalSliceSkillTree.wt",
@@ -70,7 +69,7 @@
     }
   ],
   "sideCombat": {
-    "levelScene": "assets/scenes/SideCombatVerticalSlice.wt",
+    "levelScene": "assets/scenes/SideCombatBeastPath.wt",
     "tuning": "assets/vertical_slice/data/side_combat_tuning.yaml",
     "background": "assets/vertical_slice/side_combat/backgrounds/bg_black_forest_stage.png",
     "player": "assets/vertical_slice/side_combat/characters/protag_magic_swordsman.png",

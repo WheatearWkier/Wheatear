@@ -48,7 +48,8 @@ event turn_combat_retry:
 end
 
 event go_side_combat:
-    scene:assets/scenes/SideCombatVerticalSlice.wt
+    progression:set_active_dungeon:CH02_MAIN_BearAwakening
+    scene:assets/scenes/SideCombatBeastPath.wt
 end
 
 event go_tactical_combat:
@@ -68,33 +69,36 @@ end
 
 event tutorial_side_combat_start:
     progression:set_flag:FLAG_CH02_TUTORIAL_STARTED
+    progression:set_active_dungeon:CH02_MAIN_BearAwakening
     progression:save_1
-    scene:assets/scenes/SideCombatVerticalSlice.wt
+    scene:assets/scenes/SideCombatBeastPath.wt
 end
 
 event go_beast_path:
+    progression:set_active_dungeon:CH02_MAT_BeastPath
     scene:assets/scenes/SideCombatBeastPath.wt
 end
 
 event side_combat_victory:
-    progression:set_flag:FLAG_CH02_TUTORIAL_CLEARED
+    if last_dungeon CH02_MAIN_BearAwakening
+        progression:set_flag:FLAG_CH02_TUTORIAL_CLEARED
+    endif
     progression:save_1
     wait 0.10
     scene:assets/scenes/VerticalSliceResult.wt
 end
 
 event side_combat_retry:
-    scene:assets/scenes/SideCombatVerticalSlice.wt
+    scene:assets/scenes/SideCombatBeastPath.wt
 end
 
 event beast_path_victory:
-    progression:save_1
-    wait 0.10
-    scene:assets/scenes/VerticalSliceResult.wt
+    event:side_combat_victory
 end
 
 event beast_path_retry:
-    scene:assets/scenes/SideCombatBeastPath.wt
+    progression:set_active_dungeon:CH02_MAT_BeastPath
+    event:side_combat_retry
 end
 
 event go_hub:
@@ -115,9 +119,11 @@ end
 
 event result_retry_last_dungeon:
     if last_dungeon CH02_MAIN_BearAwakening
-        scene:assets/scenes/SideCombatVerticalSlice.wt
+        progression:set_active_dungeon:CH02_MAIN_BearAwakening
+        scene:assets/scenes/SideCombatBeastPath.wt
     endif
     if last_dungeon CH02_MAT_BeastPath
+        progression:set_active_dungeon:CH02_MAT_BeastPath
         scene:assets/scenes/SideCombatBeastPath.wt
     endif
 end

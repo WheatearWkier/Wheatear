@@ -204,7 +204,7 @@ namespace Wheatear {
         float       DefeatReturnDelay = 2.5f;
         float       ResultSceneFadeDuration = 0.65f;
         std::string VictorySceneCommand = "scene:assets/scenes/VerticalSliceHub.wt";
-        std::string DefeatSceneCommand = "scene:assets/scenes/SideCombatVerticalSlice.wt";
+        std::string DefeatSceneCommand = "scene:assets/scenes/SideCombatBeastPath.wt";
 
         float       ComboDropDelay = 1.15f;
         std::string FirstClearRewardText = "获得: 魔核碎片 x1 / 兽筋 x2 / 熊爪 x1";

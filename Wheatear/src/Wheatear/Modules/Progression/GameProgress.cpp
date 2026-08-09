@@ -697,6 +697,17 @@ namespace Wheatear::GameProgress {
         state.LastResultMessage = stream.str();
     }
 
+    void SetActiveSideCombatDungeon(const std::string& dungeonId)
+    {
+        State& state = GetState();
+        state.ActiveSideCombatDungeonId = dungeonId;
+    }
+
+    const std::string& GetActiveSideCombatDungeonId()
+    {
+        return GetState().ActiveSideCombatDungeonId;
+    }
+
     bool RecordDungeonClear(const std::string& dungeonId, int bestCombo, int firstClearExperience, int repeatExperience)
     {
         if (dungeonId.empty())
@@ -1077,6 +1088,21 @@ namespace Wheatear::GameProgress {
                 state.LastResultMessage = "剧情标记已清除: " + flag;
                 result.Success = true;
             }
+        }
+        else if (action.rfind("set_active_dungeon:", 0) == 0)
+        {
+            const std::string dungeonId = action.substr(19);
+            State& state = GetState();
+            result.Changed = state.ActiveSideCombatDungeonId != dungeonId;
+            SetActiveSideCombatDungeon(dungeonId);
+            result.Success = true;
+        }
+        else if (action == "clear_active_dungeon")
+        {
+            State& state = GetState();
+            result.Changed = !state.ActiveSideCombatDungeonId.empty();
+            SetActiveSideCombatDungeon({});
+            result.Success = true;
         }
         else if (action.rfind("set_chapter:", 0) == 0)
         {

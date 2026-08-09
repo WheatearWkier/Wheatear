@@ -885,13 +885,12 @@ Assets:
     Path: "assets/events/vertical_slice_flow.wts"
     Type: "EventScript"
     DisplayName: "vertical_slice_flow.wts"
-    SizeBytes: 3914
-    LastWriteTime: 134300903697012444
+    SizeBytes: 4230
+    LastWriteTime: 134307685733431802
     Tags:
       []
     References:
       - "assets/scenes/SideCombatBeastPath.wt"
-      - "assets/scenes/SideCombatVerticalSlice.wt"
       - "assets/scenes/VerticalSliceChapter3Preview.wt"
       - "assets/scenes/VerticalSliceDungeonSelect.wt"
       - "assets/scenes/VerticalSliceEquipment.wt"
@@ -910,7 +909,6 @@ Assets:
       - "assets/scenes/VisualNovelMainMenu.wt"
     ReferencedBy:
       - "assets/scenes/SideCombatBeastPath.wt"
-      - "assets/scenes/SideCombatVerticalSlice.wt"
       - "assets/scenes/VerticalSliceChapter3Preview.wt"
       - "assets/scenes/VerticalSliceDungeonSelect.wt"
       - "assets/scenes/VerticalSliceEquipment.wt"
@@ -1055,7 +1053,6 @@ Assets:
     ReferencedBy:
       - "assets/gameplay/content_manifest.yaml"
       - "assets/scenes/SideCombatBeastPath.wt"
-      - "assets/scenes/SideCombatVerticalSlice.wt"
       - "assets/scenes/VerticalSliceChapter3Preview.wt"
       - "assets/scenes/VerticalSliceDungeonSelect.wt"
       - "assets/scenes/VerticalSliceEquipment.wt"
@@ -1115,8 +1112,8 @@ Assets:
     Path: "assets/gameplay/actions/10_side_combat_actions.yaml"
     Type: "Data"
     DisplayName: "10_side_combat_actions.yaml"
-    SizeBytes: 6753
-    LastWriteTime: 134301365205768590
+    SizeBytes: 7337
+    LastWriteTime: 134303974134424432
     Tags:
       []
     References:
@@ -1183,8 +1180,8 @@ Assets:
     Path: "assets/gameplay/content_manifest.yaml"
     Type: "Data"
     DisplayName: "content_manifest.yaml"
-    SizeBytes: 8922
-    LastWriteTime: 134301486273767487
+    SizeBytes: 9235
+    LastWriteTime: 134307326722530430
     Tags:
       []
     References:
@@ -1199,6 +1196,7 @@ Assets:
       - "assets/vertical_slice/arcade_combat/projectiles/proj_arcade_player_bolt.png"
       - "assets/vertical_slice/audio/bgm"
       - "assets/vertical_slice/audio/bgm/vn_school_morning.wav"
+      - "assets/vertical_slice/data/side_combat_hud_preset.yaml"
       - "assets/vertical_slice/data/side_combat_tuning.yaml"
       - "assets/vertical_slice/side_combat/audio/"
       - "assets/vertical_slice/side_combat/audio/hit_heavy.wav"
@@ -1217,6 +1215,7 @@ Assets:
       - "assets/vertical_slice/side_combat/enemies/"
       - "assets/vertical_slice/side_combat/enemies/en_claw_beast_idle_01.png"
       - "assets/vertical_slice/side_combat/ui/blob_shadow_soft.png"
+      - "assets/vertical_slice/side_combat/ui/font/sidecombat_combo_font.png"
       - "assets/vertical_slice/side_combat/ui/icon_drop_beast_claw.png"
       - "assets/vertical_slice/side_combat/ui/icon_drop_beast_sinew.png"
       - "assets/vertical_slice/side_combat/ui/icon_drop_magic_core.png"
@@ -1225,9 +1224,11 @@ Assets:
       - "assets/vertical_slice/side_combat/ui/icon_skill_break_limit.png"
       - "assets/vertical_slice/side_combat/ui/icon_skill_launcher_slash.png"
       - "assets/vertical_slice/side_combat/ui/icon_skill_magic_bolt.png"
+      - "assets/vertical_slice/side_combat/ui/icon_skill_uppercut.png"
       - "assets/vertical_slice/side_combat/ui/items/icon_item_burst_bomb.png"
       - "assets/vertical_slice/side_combat/ui/items/icon_item_focus_vial.png"
       - "assets/vertical_slice/side_combat/ui/items/icon_item_heal_potion.png"
+      - "assets/vertical_slice/side_combat/ui/sidecombat_ui_sheet.png"
       - "assets/vertical_slice/tactical_combat/audio/tac_guard.wav"
       - "assets/vertical_slice/tactical_combat/audio/tac_heal.wav"
       - "assets/vertical_slice/tactical_combat/audio/tac_hit.wav"
@@ -1560,8 +1561,8 @@ Assets:
     Path: "assets/scenes/SideCombatBeastPath.wt"
     Type: "Scene"
     DisplayName: "SideCombatBeastPath.wt"
-    SizeBytes: 33723
-    LastWriteTime: 134299836293293053
+    SizeBytes: 86167
+    LastWriteTime: 134307668461314486
     Tags:
       []
     References:
@@ -1571,44 +1572,11 @@ Assets:
       - "assets/vertical_slice/side_combat/backgrounds/bg_black_forest_stage.png"
       - "assets/vertical_slice/side_combat/characters/protag_magic_swordsman.png"
       - "assets/vertical_slice/side_combat/enemies/boss_bear_husband.png"
+      - "assets/vertical_slice/side_combat/enemies/en_claw_beast_idle_01.png"
       - "assets/vertical_slice/side_combat/ui/blob_shadow_soft.png"
-      - "assets/vertical_slice/side_combat/ui/icon_skill_ally_support.png"
+      - "assets/vertical_slice/side_combat/ui/font/sidecombat_combo_font.png"
       - "assets/vertical_slice/side_combat/ui/icon_skill_break_limit.png"
-      - "assets/vertical_slice/side_combat/ui/icon_skill_magic_bolt.png"
-      - "assets/vertical_slice/side_combat/ui/icon_skill_uppercut.png"
-      - "assets/vertical_slice/side_combat/ui/items/icon_item_burst_bomb.png"
-      - "assets/vertical_slice/side_combat/ui/items/icon_item_focus_vial.png"
-      - "assets/vertical_slice/side_combat/ui/items/icon_item_heal_potion.png"
-      - "assets/vertical_slice/ui/panels/panel_dark.png"
-    ReferencedBy:
-      - "assets/events/vertical_slice_flow.wts"
-      - "assets/vertical_slice/data/vertical_slice_manifest.json"
-    Import:
-      {}
-  - ID: 4283671693258001471
-    Path: "assets/scenes/SideCombatVerticalSlice.wt"
-    Type: "Scene"
-    DisplayName: "SideCombatVerticalSlice.wt"
-    SizeBytes: 33732
-    LastWriteTime: 134299836096848805
-    Tags:
-      []
-    References:
-      - "assets/events/vertical_slice_flow.wts"
-      - "assets/fonts/wqy-microhei.ttc"
-      - "assets/vertical_slice/data/side_combat_tuning.yaml"
-      - "assets/vertical_slice/side_combat/backgrounds/bg_black_forest_stage.png"
-      - "assets/vertical_slice/side_combat/characters/protag_magic_swordsman.png"
-      - "assets/vertical_slice/side_combat/enemies/boss_bear_husband.png"
-      - "assets/vertical_slice/side_combat/ui/blob_shadow_soft.png"
-      - "assets/vertical_slice/side_combat/ui/icon_skill_ally_support.png"
-      - "assets/vertical_slice/side_combat/ui/icon_skill_break_limit.png"
-      - "assets/vertical_slice/side_combat/ui/icon_skill_magic_bolt.png"
-      - "assets/vertical_slice/side_combat/ui/icon_skill_uppercut.png"
-      - "assets/vertical_slice/side_combat/ui/items/icon_item_burst_bomb.png"
-      - "assets/vertical_slice/side_combat/ui/items/icon_item_focus_vial.png"
-      - "assets/vertical_slice/side_combat/ui/items/icon_item_heal_potion.png"
-      - "assets/vertical_slice/ui/panels/panel_dark.png"
+      - "assets/vertical_slice/side_combat/ui/sidecombat_ui_sheet.png"
     ReferencedBy:
       - "assets/events/vertical_slice_flow.wts"
       - "assets/vertical_slice/data/vertical_slice_manifest.json"
@@ -1618,13 +1586,14 @@ Assets:
     Path: "assets/scenes/VerticalSliceChapter3Preview.wt"
     Type: "Scene"
     DisplayName: "VerticalSliceChapter3Preview.wt"
-    SizeBytes: 31349
-    LastWriteTime: 134299615810663157
+    SizeBytes: 92794
+    LastWriteTime: 134307524672415628
     Tags:
       []
     References:
       - "assets/events/vertical_slice_flow.wts"
       - "assets/fonts/wqy-microhei.ttc"
+      - "assets/vertical_slice/ui/atlases/vn_ui_atlas.png"
       - "assets/vertical_slice/ui/icons/icon_save.png"
       - "assets/vertical_slice/vn/backgrounds/bg_chapter3_road.png"
       - "assets/vertical_slice/vn/portraits/mentor_neutral.png"
@@ -1639,8 +1608,8 @@ Assets:
     Path: "assets/scenes/VerticalSliceDungeonSelect.wt"
     Type: "Scene"
     DisplayName: "VerticalSliceDungeonSelect.wt"
-    SizeBytes: 10692
-    LastWriteTime: 134299615810913218
+    SizeBytes: 11002
+    LastWriteTime: 134302199146825423
     Tags:
       []
     References:
@@ -1658,8 +1627,8 @@ Assets:
     Path: "assets/scenes/VerticalSliceEquipment.wt"
     Type: "Scene"
     DisplayName: "VerticalSliceEquipment.wt"
-    SizeBytes: 36742
-    LastWriteTime: 134299615811163268
+    SizeBytes: 38633
+    LastWriteTime: 134302199146955448
     Tags:
       []
     References:
@@ -1683,8 +1652,8 @@ Assets:
     Path: "assets/scenes/VerticalSliceHub.wt"
     Type: "Scene"
     DisplayName: "VerticalSliceHub.wt"
-    SizeBytes: 21616
-    LastWriteTime: 134299615811423330
+    SizeBytes: 22329
+    LastWriteTime: 134302199147025464
     Tags:
       []
     References:
@@ -1713,13 +1682,14 @@ Assets:
     Path: "assets/scenes/VerticalSliceIntro.wt"
     Type: "Scene"
     DisplayName: "VerticalSliceIntro.wt"
-    SizeBytes: 31335
-    LastWriteTime: 134299615811683386
+    SizeBytes: 93476
+    LastWriteTime: 134307524672395623
     Tags:
       []
     References:
       - "assets/events/vertical_slice_flow.wts"
       - "assets/fonts/wqy-microhei.ttc"
+      - "assets/vertical_slice/ui/atlases/vn_ui_atlas.png"
       - "assets/vertical_slice/ui/icons/icon_save.png"
       - "assets/vertical_slice/vn/backgrounds/bg_modern_schoolroad_morning.png"
       - "assets/vertical_slice/vn/portraits/aoba_smile.png"
@@ -1734,13 +1704,14 @@ Assets:
     Path: "assets/scenes/VerticalSlicePostFake.wt"
     Type: "Scene"
     DisplayName: "VerticalSlicePostFake.wt"
-    SizeBytes: 31338
-    LastWriteTime: 134299615811943448
+    SizeBytes: 92783
+    LastWriteTime: 134307524672405624
     Tags:
       []
     References:
       - "assets/events/vertical_slice_flow.wts"
       - "assets/fonts/wqy-microhei.ttc"
+      - "assets/vertical_slice/ui/atlases/vn_ui_atlas.png"
       - "assets/vertical_slice/ui/icons/icon_save.png"
       - "assets/vertical_slice/vn/backgrounds/bg_forest_after_bear.png"
       - "assets/vertical_slice/vn/portraits/mentor_serious.png"
@@ -1755,8 +1726,8 @@ Assets:
     Path: "assets/scenes/VerticalSliceRelationship.wt"
     Type: "Scene"
     DisplayName: "VerticalSliceRelationship.wt"
-    SizeBytes: 8830
-    LastWriteTime: 134299615812193507
+    SizeBytes: 9078
+    LastWriteTime: 134302199147295525
     Tags:
       []
     References:
@@ -1774,8 +1745,8 @@ Assets:
     Path: "assets/scenes/VerticalSliceResult.wt"
     Type: "Scene"
     DisplayName: "VerticalSliceResult.wt"
-    SizeBytes: 18756
-    LastWriteTime: 134299615812440386
+    SizeBytes: 19531
+    LastWriteTime: 134302199147365540
     Tags:
       []
     References:
@@ -1798,8 +1769,8 @@ Assets:
     Path: "assets/scenes/VerticalSliceSaveLoad.wt"
     Type: "Scene"
     DisplayName: "VerticalSliceSaveLoad.wt"
-    SizeBytes: 11046
-    LastWriteTime: 134299615812690442
+    SizeBytes: 11449
+    LastWriteTime: 134302199147415550
     Tags:
       []
     References:
@@ -1817,8 +1788,8 @@ Assets:
     Path: "assets/scenes/VerticalSliceSettings.wt"
     Type: "Scene"
     DisplayName: "VerticalSliceSettings.wt"
-    SizeBytes: 14546
-    LastWriteTime: 134299615812940494
+    SizeBytes: 25475
+    LastWriteTime: 134306694096900262
     Tags:
       []
     References:
@@ -1835,8 +1806,8 @@ Assets:
     Path: "assets/scenes/VerticalSliceSkillTree.wt"
     Type: "Scene"
     DisplayName: "VerticalSliceSkillTree.wt"
-    SizeBytes: 30450
-    LastWriteTime: 134299615813196603
+    SizeBytes: 33293
+    LastWriteTime: 134306674231385151
     Tags:
       []
     References:
@@ -1914,8 +1885,8 @@ Assets:
     Path: "assets/scenes/VerticalSliceSupport.wt"
     Type: "Scene"
     DisplayName: "VerticalSliceSupport.wt"
-    SizeBytes: 10920
-    LastWriteTime: 134299615813456656
+    SizeBytes: 13080
+    LastWriteTime: 134306671670641079
     Tags:
       []
     References:
@@ -1991,8 +1962,8 @@ Assets:
     Path: "assets/scenes/VerticalSliceTurnCombat.wt"
     Type: "Scene"
     DisplayName: "VerticalSliceTurnCombat.wt"
-    SizeBytes: 49983
-    LastWriteTime: 134300299872899315
+    SizeBytes: 49967
+    LastWriteTime: 134303297461054741
     Tags:
       []
     References:
@@ -2059,8 +2030,8 @@ Assets:
     Path: "assets/scenes/VisualNovelBattle.wt"
     Type: "Scene"
     DisplayName: "VisualNovelBattle.wt"
-    SizeBytes: 11064
-    LastWriteTime: 134299616691022593
+    SizeBytes: 11343
+    LastWriteTime: 134302199148135714
     Tags:
       []
     References:
@@ -2080,8 +2051,8 @@ Assets:
     Path: "assets/scenes/VisualNovelDemo.wt"
     Type: "Scene"
     DisplayName: "VisualNovelDemo.wt"
-    SizeBytes: 31351
-    LastWriteTime: 134301467657422691
+    SizeBytes: 92799
+    LastWriteTime: 134307524672395623
     Tags:
       []
     References:
@@ -2090,6 +2061,7 @@ Assets:
       - "assets/archive/non_sandbox_demos/demo_vn/portraits/char_mira_happy.png"
       - "assets/events/vertical_slice_flow.wts"
       - "assets/fonts/wqy-microhei.ttc"
+      - "assets/vertical_slice/ui/atlases/vn_ui_atlas.png"
       - "assets/vertical_slice/ui/icons/icon_save.png"
       - "assets/vn/demo.vn"
     ReferencedBy:
@@ -2100,8 +2072,8 @@ Assets:
     Path: "assets/scenes/VisualNovelMainMenu.wt"
     Type: "Scene"
     DisplayName: "VisualNovelMainMenu.wt"
-    SizeBytes: 8981
-    LastWriteTime: 134299615814746952
+    SizeBytes: 10065
+    LastWriteTime: 134302199148315753
     Tags:
       []
     References:
@@ -2148,7 +2120,7 @@ Assets:
     Type: "Unknown"
     DisplayName: "Wheatear-ScriptCore.dll"
     SizeBytes: 27648
-    LastWriteTime: 134301309152025285
+    LastWriteTime: 134307222468643217
     Tags:
       []
     References:
@@ -2161,8 +2133,8 @@ Assets:
     Path: "assets/scripts/Wheatear-ScriptCore.pdb"
     Type: "Unknown"
     DisplayName: "Wheatear-ScriptCore.pdb"
-    SizeBytes: 18568
-    LastWriteTime: 134301309152025285
+    SizeBytes: 18600
+    LastWriteTime: 134307222468623213
     Tags:
       []
     References:
@@ -2245,8 +2217,8 @@ Assets:
     Path: "assets/shaders/Renderer2D_Circle.glsl"
     Type: "Shader"
     DisplayName: "Renderer2D_Circle.glsl"
-    SizeBytes: 1576
-    LastWriteTime: 134295588787851454
+    SizeBytes: 2290
+    LastWriteTime: 134307624090781957
     Tags:
       []
     References:
@@ -2874,12 +2846,26 @@ Assets:
         Usage: "SFX"
         DefaultVolume: 0.349999994
         Loop: false
+  - ID: 4348761212909324064
+    Path: "assets/vertical_slice/data/side_combat_hud_preset.yaml"
+    Type: "Data"
+    DisplayName: "side_combat_hud_preset.yaml"
+    SizeBytes: 7984
+    LastWriteTime: 134307637312846398
+    Tags:
+      []
+    References:
+      []
+    ReferencedBy:
+      - "assets/gameplay/content_manifest.yaml"
+    Import:
+      {}
   - ID: 1125725672854018824
     Path: "assets/vertical_slice/data/side_combat_tuning.yaml"
     Type: "Data"
     DisplayName: "side_combat_tuning.yaml"
-    SizeBytes: 21734
-    LastWriteTime: 134299835388770570
+    SizeBytes: 23479
+    LastWriteTime: 134307632442416567
     Tags:
       []
     References:
@@ -2909,6 +2895,7 @@ Assets:
       - "assets/vertical_slice/side_combat/characters/protag_basic2_{frame2}.png"
       - "assets/vertical_slice/side_combat/characters/protag_basic3_{frame2}.png"
       - "assets/vertical_slice/side_combat/characters/protag_break_limit_{frame2}.png"
+      - "assets/vertical_slice/side_combat/characters/protag_dash_{frame2}.png"
       - "assets/vertical_slice/side_combat/characters/protag_dead_{frame2}.png"
       - "assets/vertical_slice/side_combat/characters/protag_fall_{frame2}.png"
       - "assets/vertical_slice/side_combat/characters/protag_hit_{frame2}.png"
@@ -2924,10 +2911,11 @@ Assets:
       - "assets/vertical_slice/side_combat/effects/vfx_enemy_claw_{frame2}.png"
       - "assets/vertical_slice/side_combat/effects/vfx_launcher_slash_{frame2}.png"
       - "assets/vertical_slice/side_combat/effects/vfx_magic_bolt_{frame2}.png"
-      - "assets/vertical_slice/side_combat/enemies/boss_bear_husband_attack_{frame2}.png"
+      - "assets/vertical_slice/side_combat/enemies/boss_bear_husband_attack_claw_{frame2}.png"
+      - "assets/vertical_slice/side_combat/enemies/boss_bear_husband_charge_windup_{frame2}.png"
       - "assets/vertical_slice/side_combat/enemies/boss_bear_husband_charge_{frame2}.png"
       - "assets/vertical_slice/side_combat/enemies/boss_bear_husband_dead_{frame2}.png"
-      - "assets/vertical_slice/side_combat/enemies/boss_bear_husband_fall_{frame2}.png"
+      - "assets/vertical_slice/side_combat/enemies/boss_bear_husband_hit_04.png"
       - "assets/vertical_slice/side_combat/enemies/boss_bear_husband_hit_{frame2}.png"
       - "assets/vertical_slice/side_combat/enemies/boss_bear_husband_idle_{frame2}.png"
       - "assets/vertical_slice/side_combat/enemies/boss_bear_husband_shockwave_{frame2}.png"
@@ -2941,7 +2929,6 @@ Assets:
     ReferencedBy:
       - "assets/gameplay/content_manifest.yaml"
       - "assets/scenes/SideCombatBeastPath.wt"
-      - "assets/scenes/SideCombatVerticalSlice.wt"
       - "assets/vertical_slice/data/vertical_slice_manifest.json"
     Import:
       {}
@@ -2949,13 +2936,12 @@ Assets:
     Path: "assets/vertical_slice/data/vertical_slice_manifest.json"
     Type: "Data"
     DisplayName: "vertical_slice_manifest.json"
-    SizeBytes: 10371
-    LastWriteTime: 134298803995418437
+    SizeBytes: 10320
+    LastWriteTime: 134307689884048044
     Tags:
       []
     References:
       - "assets/scenes/SideCombatBeastPath.wt"
-      - "assets/scenes/SideCombatVerticalSlice.wt"
       - "assets/scenes/VerticalSliceChapter3Preview.wt"
       - "assets/scenes/VerticalSliceDungeonSelect.wt"
       - "assets/scenes/VerticalSliceEquipment.wt"
@@ -3422,15 +3408,14 @@ Assets:
     Path: "assets/vertical_slice/side_combat/backgrounds/bg_black_forest_stage.png"
     Type: "Texture"
     DisplayName: "bg_black_forest_stage.png"
-    SizeBytes: 60964
-    LastWriteTime: 134297870841913613
+    SizeBytes: 5667695
+    LastWriteTime: 134302371880186607
     Tags:
       []
     References:
       []
     ReferencedBy:
       - "assets/scenes/SideCombatBeastPath.wt"
-      - "assets/scenes/SideCombatVerticalSlice.wt"
       - "assets/vertical_slice/data/vertical_slice_manifest.json"
     Import:
       Texture:
@@ -3446,8 +3431,8 @@ Assets:
     Path: "assets/vertical_slice/side_combat/characters/protag_air_basic_01.png"
     Type: "Texture"
     DisplayName: "protag_air_basic_01.png"
-    SizeBytes: 6388
-    LastWriteTime: 134299658858998051
+    SizeBytes: 74942
+    LastWriteTime: 134302363611055207
     Tags:
       []
     References:
@@ -3468,8 +3453,8 @@ Assets:
     Path: "assets/vertical_slice/side_combat/characters/protag_air_basic_02.png"
     Type: "Texture"
     DisplayName: "protag_air_basic_02.png"
-    SizeBytes: 6416
-    LastWriteTime: 134299658859068066
+    SizeBytes: 86466
+    LastWriteTime: 134302363611185238
     Tags:
       []
     References:
@@ -3490,8 +3475,8 @@ Assets:
     Path: "assets/vertical_slice/side_combat/characters/protag_air_basic_03.png"
     Type: "Texture"
     DisplayName: "protag_air_basic_03.png"
-    SizeBytes: 6845
-    LastWriteTime: 134299658859128079
+    SizeBytes: 89102
+    LastWriteTime: 134302363611295268
     Tags:
       []
     References:
@@ -3512,74 +3497,8 @@ Assets:
     Path: "assets/vertical_slice/side_combat/characters/protag_air_basic_04.png"
     Type: "Texture"
     DisplayName: "protag_air_basic_04.png"
-    SizeBytes: 7047
-    LastWriteTime: 134299658859198095
-    Tags:
-      []
-    References:
-      []
-    ReferencedBy:
-      []
-    Import:
-      Texture:
-        Filter: "Linear"
-        PixelsPerUnit: 100
-        Columns: 1
-        Rows: 1
-        CellWidth: 0
-        CellHeight: 0
-        PaddingX: 0
-        PaddingY: 0
-  - ID: 5198867043713398107
-    Path: "assets/vertical_slice/side_combat/characters/protag_air_basic_05.png"
-    Type: "Texture"
-    DisplayName: "protag_air_basic_05.png"
-    SizeBytes: 7376
-    LastWriteTime: 134299658859268111
-    Tags:
-      []
-    References:
-      []
-    ReferencedBy:
-      []
-    Import:
-      Texture:
-        Filter: "Linear"
-        PixelsPerUnit: 100
-        Columns: 1
-        Rows: 1
-        CellWidth: 0
-        CellHeight: 0
-        PaddingX: 0
-        PaddingY: 0
-  - ID: 11761275385894920679
-    Path: "assets/vertical_slice/side_combat/characters/protag_air_basic_06.png"
-    Type: "Texture"
-    DisplayName: "protag_air_basic_06.png"
-    SizeBytes: 7084
-    LastWriteTime: 134299658859338127
-    Tags:
-      []
-    References:
-      []
-    ReferencedBy:
-      []
-    Import:
-      Texture:
-        Filter: "Linear"
-        PixelsPerUnit: 100
-        Columns: 1
-        Rows: 1
-        CellWidth: 0
-        CellHeight: 0
-        PaddingX: 0
-        PaddingY: 0
-  - ID: 9732971805889011298
-    Path: "assets/vertical_slice/side_combat/characters/protag_air_basic_07.png"
-    Type: "Texture"
-    DisplayName: "protag_air_basic_07.png"
-    SizeBytes: 7201
-    LastWriteTime: 134299658859408144
+    SizeBytes: 79466
+    LastWriteTime: 134302363611415296
     Tags:
       []
     References:
@@ -3952,8 +3871,8 @@ Assets:
     Path: "assets/vertical_slice/side_combat/characters/protag_basic1_01.png"
     Type: "Texture"
     DisplayName: "protag_basic1_01.png"
-    SizeBytes: 6020
-    LastWriteTime: 134299658857167638
+    SizeBytes: 121408
+    LastWriteTime: 134302363608932350
     Tags:
       []
     References:
@@ -3974,8 +3893,8 @@ Assets:
     Path: "assets/vertical_slice/side_combat/characters/protag_basic1_02.png"
     Type: "Texture"
     DisplayName: "protag_basic1_02.png"
-    SizeBytes: 5936
-    LastWriteTime: 134299658857227650
+    SizeBytes: 152332
+    LastWriteTime: 134302363609082390
     Tags:
       []
     References:
@@ -3996,8 +3915,8 @@ Assets:
     Path: "assets/vertical_slice/side_combat/characters/protag_basic1_03.png"
     Type: "Texture"
     DisplayName: "protag_basic1_03.png"
-    SizeBytes: 6296
-    LastWriteTime: 134299658857297670
+    SizeBytes: 141973
+    LastWriteTime: 134302363609212413
     Tags:
       []
     References:
@@ -4018,74 +3937,8 @@ Assets:
     Path: "assets/vertical_slice/side_combat/characters/protag_basic1_04.png"
     Type: "Texture"
     DisplayName: "protag_basic1_04.png"
-    SizeBytes: 6004
-    LastWriteTime: 134299658857357680
-    Tags:
-      []
-    References:
-      []
-    ReferencedBy:
-      []
-    Import:
-      Texture:
-        Filter: "Linear"
-        PixelsPerUnit: 100
-        Columns: 1
-        Rows: 1
-        CellWidth: 0
-        CellHeight: 0
-        PaddingX: 0
-        PaddingY: 0
-  - ID: 17460840284137758082
-    Path: "assets/vertical_slice/side_combat/characters/protag_basic1_05.png"
-    Type: "Texture"
-    DisplayName: "protag_basic1_05.png"
-    SizeBytes: 6305
-    LastWriteTime: 134299658857417694
-    Tags:
-      []
-    References:
-      []
-    ReferencedBy:
-      []
-    Import:
-      Texture:
-        Filter: "Linear"
-        PixelsPerUnit: 100
-        Columns: 1
-        Rows: 1
-        CellWidth: 0
-        CellHeight: 0
-        PaddingX: 0
-        PaddingY: 0
-  - ID: 15876702465869620048
-    Path: "assets/vertical_slice/side_combat/characters/protag_basic1_06.png"
-    Type: "Texture"
-    DisplayName: "protag_basic1_06.png"
-    SizeBytes: 5916
-    LastWriteTime: 134299658857487710
-    Tags:
-      []
-    References:
-      []
-    ReferencedBy:
-      []
-    Import:
-      Texture:
-        Filter: "Linear"
-        PixelsPerUnit: 100
-        Columns: 1
-        Rows: 1
-        CellWidth: 0
-        CellHeight: 0
-        PaddingX: 0
-        PaddingY: 0
-  - ID: 18137662840187497963
-    Path: "assets/vertical_slice/side_combat/characters/protag_basic1_07.png"
-    Type: "Texture"
-    DisplayName: "protag_basic1_07.png"
-    SizeBytes: 6072
-    LastWriteTime: 134299658857547724
+    SizeBytes: 123866
+    LastWriteTime: 134302363609352448
     Tags:
       []
     References:
@@ -4106,8 +3959,8 @@ Assets:
     Path: "assets/vertical_slice/side_combat/characters/protag_basic2_01.png"
     Type: "Texture"
     DisplayName: "protag_basic2_01.png"
-    SizeBytes: 5989
-    LastWriteTime: 134299658857607755
+    SizeBytes: 120065
+    LastWriteTime: 134302363609612509
     Tags:
       []
     References:
@@ -4128,8 +3981,8 @@ Assets:
     Path: "assets/vertical_slice/side_combat/characters/protag_basic2_02.png"
     Type: "Texture"
     DisplayName: "protag_basic2_02.png"
-    SizeBytes: 5994
-    LastWriteTime: 134299658857677759
+    SizeBytes: 111111
+    LastWriteTime: 134302363609732534
     Tags:
       []
     References:
@@ -4150,8 +4003,8 @@ Assets:
     Path: "assets/vertical_slice/side_combat/characters/protag_basic2_03.png"
     Type: "Texture"
     DisplayName: "protag_basic2_03.png"
-    SizeBytes: 6328
-    LastWriteTime: 134299658857737766
+    SizeBytes: 160192
+    LastWriteTime: 134302363609872562
     Tags:
       []
     References:
@@ -4172,74 +4025,8 @@ Assets:
     Path: "assets/vertical_slice/side_combat/characters/protag_basic2_04.png"
     Type: "Texture"
     DisplayName: "protag_basic2_04.png"
-    SizeBytes: 6008
-    LastWriteTime: 134299658857797780
-    Tags:
-      []
-    References:
-      []
-    ReferencedBy:
-      []
-    Import:
-      Texture:
-        Filter: "Linear"
-        PixelsPerUnit: 100
-        Columns: 1
-        Rows: 1
-        CellWidth: 0
-        CellHeight: 0
-        PaddingX: 0
-        PaddingY: 0
-  - ID: 2666379437650560031
-    Path: "assets/vertical_slice/side_combat/characters/protag_basic2_05.png"
-    Type: "Texture"
-    DisplayName: "protag_basic2_05.png"
-    SizeBytes: 6304
-    LastWriteTime: 134299658857857794
-    Tags:
-      []
-    References:
-      []
-    ReferencedBy:
-      []
-    Import:
-      Texture:
-        Filter: "Linear"
-        PixelsPerUnit: 100
-        Columns: 1
-        Rows: 1
-        CellWidth: 0
-        CellHeight: 0
-        PaddingX: 0
-        PaddingY: 0
-  - ID: 18128716955174580051
-    Path: "assets/vertical_slice/side_combat/characters/protag_basic2_06.png"
-    Type: "Texture"
-    DisplayName: "protag_basic2_06.png"
-    SizeBytes: 6038
-    LastWriteTime: 134299658857927816
-    Tags:
-      []
-    References:
-      []
-    ReferencedBy:
-      []
-    Import:
-      Texture:
-        Filter: "Linear"
-        PixelsPerUnit: 100
-        Columns: 1
-        Rows: 1
-        CellWidth: 0
-        CellHeight: 0
-        PaddingX: 0
-        PaddingY: 0
-  - ID: 3169701281773820274
-    Path: "assets/vertical_slice/side_combat/characters/protag_basic2_07.png"
-    Type: "Texture"
-    DisplayName: "protag_basic2_07.png"
-    SizeBytes: 6075
-    LastWriteTime: 134299658857987823
+    SizeBytes: 118754
+    LastWriteTime: 134302363609997925
     Tags:
       []
     References:
@@ -4260,8 +4047,8 @@ Assets:
     Path: "assets/vertical_slice/side_combat/characters/protag_basic3_01.png"
     Type: "Texture"
     DisplayName: "protag_basic3_01.png"
-    SizeBytes: 7536
-    LastWriteTime: 134299658858077849
+    SizeBytes: 104513
+    LastWriteTime: 134302363610274762
     Tags:
       []
     References:
@@ -4282,8 +4069,8 @@ Assets:
     Path: "assets/vertical_slice/side_combat/characters/protag_basic3_02.png"
     Type: "Texture"
     DisplayName: "protag_basic3_02.png"
-    SizeBytes: 7462
-    LastWriteTime: 134299658858157861
+    SizeBytes: 207367
+    LastWriteTime: 134302363610445075
     Tags:
       []
     References:
@@ -4304,8 +4091,8 @@ Assets:
     Path: "assets/vertical_slice/side_combat/characters/protag_basic3_03.png"
     Type: "Texture"
     DisplayName: "protag_basic3_03.png"
-    SizeBytes: 7502
-    LastWriteTime: 134299658858247883
+    SizeBytes: 248315
+    LastWriteTime: 134302363610625112
     Tags:
       []
     References:
@@ -4326,118 +4113,8 @@ Assets:
     Path: "assets/vertical_slice/side_combat/characters/protag_basic3_04.png"
     Type: "Texture"
     DisplayName: "protag_basic3_04.png"
-    SizeBytes: 8226
-    LastWriteTime: 134299658858387913
-    Tags:
-      []
-    References:
-      []
-    ReferencedBy:
-      []
-    Import:
-      Texture:
-        Filter: "Linear"
-        PixelsPerUnit: 100
-        Columns: 1
-        Rows: 1
-        CellWidth: 0
-        CellHeight: 0
-        PaddingX: 0
-        PaddingY: 0
-  - ID: 10441138558851715806
-    Path: "assets/vertical_slice/side_combat/characters/protag_basic3_05.png"
-    Type: "Texture"
-    DisplayName: "protag_basic3_05.png"
-    SizeBytes: 8025
-    LastWriteTime: 134299658858477939
-    Tags:
-      []
-    References:
-      []
-    ReferencedBy:
-      []
-    Import:
-      Texture:
-        Filter: "Linear"
-        PixelsPerUnit: 100
-        Columns: 1
-        Rows: 1
-        CellWidth: 0
-        CellHeight: 0
-        PaddingX: 0
-        PaddingY: 0
-  - ID: 892854014226750626
-    Path: "assets/vertical_slice/side_combat/characters/protag_basic3_06.png"
-    Type: "Texture"
-    DisplayName: "protag_basic3_06.png"
-    SizeBytes: 8238
-    LastWriteTime: 134299658858617965
-    Tags:
-      []
-    References:
-      []
-    ReferencedBy:
-      []
-    Import:
-      Texture:
-        Filter: "Linear"
-        PixelsPerUnit: 100
-        Columns: 1
-        Rows: 1
-        CellWidth: 0
-        CellHeight: 0
-        PaddingX: 0
-        PaddingY: 0
-  - ID: 12676781639708791377
-    Path: "assets/vertical_slice/side_combat/characters/protag_basic3_07.png"
-    Type: "Texture"
-    DisplayName: "protag_basic3_07.png"
-    SizeBytes: 7948
-    LastWriteTime: 134299658858707986
-    Tags:
-      []
-    References:
-      []
-    ReferencedBy:
-      []
-    Import:
-      Texture:
-        Filter: "Linear"
-        PixelsPerUnit: 100
-        Columns: 1
-        Rows: 1
-        CellWidth: 0
-        CellHeight: 0
-        PaddingX: 0
-        PaddingY: 0
-  - ID: 6237566874530968589
-    Path: "assets/vertical_slice/side_combat/characters/protag_basic3_08.png"
-    Type: "Texture"
-    DisplayName: "protag_basic3_08.png"
-    SizeBytes: 7257
-    LastWriteTime: 134299658858798005
-    Tags:
-      []
-    References:
-      []
-    ReferencedBy:
-      []
-    Import:
-      Texture:
-        Filter: "Linear"
-        PixelsPerUnit: 100
-        Columns: 1
-        Rows: 1
-        CellWidth: 0
-        CellHeight: 0
-        PaddingX: 0
-        PaddingY: 0
-  - ID: 17150333428983437879
-    Path: "assets/vertical_slice/side_combat/characters/protag_basic3_09.png"
-    Type: "Texture"
-    DisplayName: "protag_basic3_09.png"
-    SizeBytes: 7248
-    LastWriteTime: 134299658858888032
+    SizeBytes: 128764
+    LastWriteTime: 134302363610755141
     Tags:
       []
     References:
@@ -4458,8 +4135,8 @@ Assets:
     Path: "assets/vertical_slice/side_combat/characters/protag_break_limit_01.png"
     Type: "Texture"
     DisplayName: "protag_break_limit_01.png"
-    SizeBytes: 7321
-    LastWriteTime: 134299658861968739
+    SizeBytes: 77944
+    LastWriteTime: 134303783365163735
     Tags:
       []
     References:
@@ -4480,8 +4157,8 @@ Assets:
     Path: "assets/vertical_slice/side_combat/characters/protag_break_limit_02.png"
     Type: "Texture"
     DisplayName: "protag_break_limit_02.png"
-    SizeBytes: 7541
-    LastWriteTime: 134299658862058759
+    SizeBytes: 72421
+    LastWriteTime: 134303783365323838
     Tags:
       []
     References:
@@ -4498,210 +4175,12 @@ Assets:
         CellHeight: 0
         PaddingX: 0
         PaddingY: 0
-  - ID: 696079886282938426
-    Path: "assets/vertical_slice/side_combat/characters/protag_break_limit_03.png"
+  - ID: 2536677454511126566
+    Path: "assets/vertical_slice/side_combat/characters/protag_dash_01.png"
     Type: "Texture"
-    DisplayName: "protag_break_limit_03.png"
-    SizeBytes: 7803
-    LastWriteTime: 134299658862148779
-    Tags:
-      []
-    References:
-      []
-    ReferencedBy:
-      []
-    Import:
-      Texture:
-        Filter: "Linear"
-        PixelsPerUnit: 100
-        Columns: 1
-        Rows: 1
-        CellWidth: 0
-        CellHeight: 0
-        PaddingX: 0
-        PaddingY: 0
-  - ID: 13634910629595115456
-    Path: "assets/vertical_slice/side_combat/characters/protag_break_limit_04.png"
-    Type: "Texture"
-    DisplayName: "protag_break_limit_04.png"
-    SizeBytes: 8107
-    LastWriteTime: 134299658862238797
-    Tags:
-      []
-    References:
-      []
-    ReferencedBy:
-      []
-    Import:
-      Texture:
-        Filter: "Linear"
-        PixelsPerUnit: 100
-        Columns: 1
-        Rows: 1
-        CellWidth: 0
-        CellHeight: 0
-        PaddingX: 0
-        PaddingY: 0
-  - ID: 603608129419835651
-    Path: "assets/vertical_slice/side_combat/characters/protag_break_limit_05.png"
-    Type: "Texture"
-    DisplayName: "protag_break_limit_05.png"
-    SizeBytes: 8029
-    LastWriteTime: 134299658862325119
-    Tags:
-      []
-    References:
-      []
-    ReferencedBy:
-      []
-    Import:
-      Texture:
-        Filter: "Linear"
-        PixelsPerUnit: 100
-        Columns: 1
-        Rows: 1
-        CellWidth: 0
-        CellHeight: 0
-        PaddingX: 0
-        PaddingY: 0
-  - ID: 13860112680171033724
-    Path: "assets/vertical_slice/side_combat/characters/protag_break_limit_06.png"
-    Type: "Texture"
-    DisplayName: "protag_break_limit_06.png"
-    SizeBytes: 7804
-    LastWriteTime: 134299658862415142
-    Tags:
-      []
-    References:
-      []
-    ReferencedBy:
-      []
-    Import:
-      Texture:
-        Filter: "Linear"
-        PixelsPerUnit: 100
-        Columns: 1
-        Rows: 1
-        CellWidth: 0
-        CellHeight: 0
-        PaddingX: 0
-        PaddingY: 0
-  - ID: 1660521078591872401
-    Path: "assets/vertical_slice/side_combat/characters/protag_break_limit_07.png"
-    Type: "Texture"
-    DisplayName: "protag_break_limit_07.png"
-    SizeBytes: 7977
-    LastWriteTime: 134299658862555171
-    Tags:
-      []
-    References:
-      []
-    ReferencedBy:
-      []
-    Import:
-      Texture:
-        Filter: "Linear"
-        PixelsPerUnit: 100
-        Columns: 1
-        Rows: 1
-        CellWidth: 0
-        CellHeight: 0
-        PaddingX: 0
-        PaddingY: 0
-  - ID: 6433041879728699950
-    Path: "assets/vertical_slice/side_combat/characters/protag_break_limit_08.png"
-    Type: "Texture"
-    DisplayName: "protag_break_limit_08.png"
-    SizeBytes: 8066
-    LastWriteTime: 134299658862695203
-    Tags:
-      []
-    References:
-      []
-    ReferencedBy:
-      []
-    Import:
-      Texture:
-        Filter: "Linear"
-        PixelsPerUnit: 100
-        Columns: 1
-        Rows: 1
-        CellWidth: 0
-        CellHeight: 0
-        PaddingX: 0
-        PaddingY: 0
-  - ID: 12667361652457285921
-    Path: "assets/vertical_slice/side_combat/characters/protag_break_limit_09.png"
-    Type: "Texture"
-    DisplayName: "protag_break_limit_09.png"
-    SizeBytes: 8287
-    LastWriteTime: 134299658862835234
-    Tags:
-      []
-    References:
-      []
-    ReferencedBy:
-      []
-    Import:
-      Texture:
-        Filter: "Linear"
-        PixelsPerUnit: 100
-        Columns: 1
-        Rows: 1
-        CellWidth: 0
-        CellHeight: 0
-        PaddingX: 0
-        PaddingY: 0
-  - ID: 1973910829411738742
-    Path: "assets/vertical_slice/side_combat/characters/protag_break_limit_10.png"
-    Type: "Texture"
-    DisplayName: "protag_break_limit_10.png"
-    SizeBytes: 8083
-    LastWriteTime: 134299658862925255
-    Tags:
-      []
-    References:
-      []
-    ReferencedBy:
-      []
-    Import:
-      Texture:
-        Filter: "Linear"
-        PixelsPerUnit: 100
-        Columns: 1
-        Rows: 1
-        CellWidth: 0
-        CellHeight: 0
-        PaddingX: 0
-        PaddingY: 0
-  - ID: 7529968256217227878
-    Path: "assets/vertical_slice/side_combat/characters/protag_break_limit_11.png"
-    Type: "Texture"
-    DisplayName: "protag_break_limit_11.png"
-    SizeBytes: 8002
-    LastWriteTime: 134299658863015279
-    Tags:
-      []
-    References:
-      []
-    ReferencedBy:
-      []
-    Import:
-      Texture:
-        Filter: "Linear"
-        PixelsPerUnit: 100
-        Columns: 1
-        Rows: 1
-        CellWidth: 0
-        CellHeight: 0
-        PaddingX: 0
-        PaddingY: 0
-  - ID: 15040329352171770563
-    Path: "assets/vertical_slice/side_combat/characters/protag_break_limit_12.png"
-    Type: "Texture"
-    DisplayName: "protag_break_limit_12.png"
-    SizeBytes: 7785
-    LastWriteTime: 134299658863105300
+    DisplayName: "protag_dash_01.png"
+    SizeBytes: 61844
+    LastWriteTime: 134303783364976138
     Tags:
       []
     References:
@@ -4898,74 +4377,8 @@ Assets:
     Path: "assets/vertical_slice/side_combat/characters/protag_fall_01.png"
     Type: "Texture"
     DisplayName: "protag_fall_01.png"
-    SizeBytes: 6397
-    LastWriteTime: 134299658856707534
-    Tags:
-      []
-    References:
-      []
-    ReferencedBy:
-      []
-    Import:
-      Texture:
-        Filter: "Linear"
-        PixelsPerUnit: 100
-        Columns: 1
-        Rows: 1
-        CellWidth: 0
-        CellHeight: 0
-        PaddingX: 0
-        PaddingY: 0
-  - ID: 5784692997167473895
-    Path: "assets/vertical_slice/side_combat/characters/protag_fall_02.png"
-    Type: "Texture"
-    DisplayName: "protag_fall_02.png"
-    SizeBytes: 6376
-    LastWriteTime: 134299658856767553
-    Tags:
-      []
-    References:
-      []
-    ReferencedBy:
-      []
-    Import:
-      Texture:
-        Filter: "Linear"
-        PixelsPerUnit: 100
-        Columns: 1
-        Rows: 1
-        CellWidth: 0
-        CellHeight: 0
-        PaddingX: 0
-        PaddingY: 0
-  - ID: 6203725858268873140
-    Path: "assets/vertical_slice/side_combat/characters/protag_fall_03.png"
-    Type: "Texture"
-    DisplayName: "protag_fall_03.png"
-    SizeBytes: 6392
-    LastWriteTime: 134299658856827571
-    Tags:
-      []
-    References:
-      []
-    ReferencedBy:
-      []
-    Import:
-      Texture:
-        Filter: "Linear"
-        PixelsPerUnit: 100
-        Columns: 1
-        Rows: 1
-        CellWidth: 0
-        CellHeight: 0
-        PaddingX: 0
-        PaddingY: 0
-  - ID: 13770654201374290783
-    Path: "assets/vertical_slice/side_combat/characters/protag_fall_04.png"
-    Type: "Texture"
-    DisplayName: "protag_fall_04.png"
-    SizeBytes: 6397
-    LastWriteTime: 134299658856887573
+    SizeBytes: 109092
+    LastWriteTime: 134302363613595787
     Tags:
       []
     References:
@@ -4986,8 +4399,8 @@ Assets:
     Path: "assets/vertical_slice/side_combat/characters/protag_hit_01.png"
     Type: "Texture"
     DisplayName: "protag_hit_01.png"
-    SizeBytes: 6084
-    LastWriteTime: 134299658863455377
+    SizeBytes: 111793
+    LastWriteTime: 134302363612465527
     Tags:
       []
     References:
@@ -5008,8 +4421,8 @@ Assets:
     Path: "assets/vertical_slice/side_combat/characters/protag_hit_02.png"
     Type: "Texture"
     DisplayName: "protag_hit_02.png"
-    SizeBytes: 5949
-    LastWriteTime: 134299658863515389
+    SizeBytes: 134604
+    LastWriteTime: 134302363612665571
     Tags:
       []
     References:
@@ -5030,8 +4443,8 @@ Assets:
     Path: "assets/vertical_slice/side_combat/characters/protag_hit_03.png"
     Type: "Texture"
     DisplayName: "protag_hit_03.png"
-    SizeBytes: 5995
-    LastWriteTime: 134299658863585410
+    SizeBytes: 127072
+    LastWriteTime: 134302363612845612
     Tags:
       []
     References:
@@ -5052,30 +4465,8 @@ Assets:
     Path: "assets/vertical_slice/side_combat/characters/protag_hit_04.png"
     Type: "Texture"
     DisplayName: "protag_hit_04.png"
-    SizeBytes: 5949
-    LastWriteTime: 134299658863645418
-    Tags:
-      []
-    References:
-      []
-    ReferencedBy:
-      []
-    Import:
-      Texture:
-        Filter: "Linear"
-        PixelsPerUnit: 100
-        Columns: 1
-        Rows: 1
-        CellWidth: 0
-        CellHeight: 0
-        PaddingX: 0
-        PaddingY: 0
-  - ID: 10477035715341135341
-    Path: "assets/vertical_slice/side_combat/characters/protag_hit_05.png"
-    Type: "Texture"
-    DisplayName: "protag_hit_05.png"
-    SizeBytes: 6056
-    LastWriteTime: 134299658863695429
+    SizeBytes: 113124
+    LastWriteTime: 134302367455941994
     Tags:
       []
     References:
@@ -5096,8 +4487,8 @@ Assets:
     Path: "assets/vertical_slice/side_combat/characters/protag_hurt_01.png"
     Type: "Texture"
     DisplayName: "protag_hurt_01.png"
-    SizeBytes: 6084
-    LastWriteTime: 134299658863165309
+    SizeBytes: 111793
+    LastWriteTime: 134302363612415515
     Tags:
       []
     References:
@@ -5118,8 +4509,8 @@ Assets:
     Path: "assets/vertical_slice/side_combat/characters/protag_hurt_02.png"
     Type: "Texture"
     DisplayName: "protag_hurt_02.png"
-    SizeBytes: 5949
-    LastWriteTime: 134299658863215321
+    SizeBytes: 134604
+    LastWriteTime: 134302363612605563
     Tags:
       []
     References:
@@ -5140,8 +4531,8 @@ Assets:
     Path: "assets/vertical_slice/side_combat/characters/protag_hurt_03.png"
     Type: "Texture"
     DisplayName: "protag_hurt_03.png"
-    SizeBytes: 5995
-    LastWriteTime: 134299658863265331
+    SizeBytes: 127072
+    LastWriteTime: 134302363612795607
     Tags:
       []
     References:
@@ -5162,30 +4553,8 @@ Assets:
     Path: "assets/vertical_slice/side_combat/characters/protag_hurt_04.png"
     Type: "Texture"
     DisplayName: "protag_hurt_04.png"
-    SizeBytes: 5949
-    LastWriteTime: 134299658863325347
-    Tags:
-      []
-    References:
-      []
-    ReferencedBy:
-      []
-    Import:
-      Texture:
-        Filter: "Linear"
-        PixelsPerUnit: 100
-        Columns: 1
-        Rows: 1
-        CellWidth: 0
-        CellHeight: 0
-        PaddingX: 0
-        PaddingY: 0
-  - ID: 121537304903160317
-    Path: "assets/vertical_slice/side_combat/characters/protag_hurt_05.png"
-    Type: "Texture"
-    DisplayName: "protag_hurt_05.png"
-    SizeBytes: 6056
-    LastWriteTime: 134299658863385362
+    SizeBytes: 113124
+    LastWriteTime: 134302367455851981
     Tags:
       []
     References:
@@ -5206,8 +4575,8 @@ Assets:
     Path: "assets/vertical_slice/side_combat/characters/protag_idle_01.png"
     Type: "Texture"
     DisplayName: "protag_idle_01.png"
-    SizeBytes: 5996
-    LastWriteTime: 134299658854804677
+    SizeBytes: 115189
+    LastWriteTime: 134302363606841508
     Tags:
       []
     References:
@@ -5228,8 +4597,8 @@ Assets:
     Path: "assets/vertical_slice/side_combat/characters/protag_idle_02.png"
     Type: "Texture"
     DisplayName: "protag_idle_02.png"
-    SizeBytes: 6094
-    LastWriteTime: 134299658854901836
+    SizeBytes: 121837
+    LastWriteTime: 134302363607001545
     Tags:
       []
     References:
@@ -5250,8 +4619,8 @@ Assets:
     Path: "assets/vertical_slice/side_combat/characters/protag_idle_03.png"
     Type: "Texture"
     DisplayName: "protag_idle_03.png"
-    SizeBytes: 6047
-    LastWriteTime: 134299658854961848
+    SizeBytes: 117827
+    LastWriteTime: 134302363607141585
     Tags:
       []
     References:
@@ -5272,8 +4641,8 @@ Assets:
     Path: "assets/vertical_slice/side_combat/characters/protag_idle_04.png"
     Type: "Texture"
     DisplayName: "protag_idle_04.png"
-    SizeBytes: 6094
-    LastWriteTime: 134299658855011865
+    SizeBytes: 120012
+    LastWriteTime: 134302363607281612
     Tags:
       []
     References:
@@ -5294,8 +4663,8 @@ Assets:
     Path: "assets/vertical_slice/side_combat/characters/protag_idle_05.png"
     Type: "Texture"
     DisplayName: "protag_idle_05.png"
-    SizeBytes: 5996
-    LastWriteTime: 134299658855071870
+    SizeBytes: 117913
+    LastWriteTime: 134302363607421639
     Tags:
       []
     References:
@@ -5316,8 +4685,8 @@ Assets:
     Path: "assets/vertical_slice/side_combat/characters/protag_idle_06.png"
     Type: "Texture"
     DisplayName: "protag_idle_06.png"
-    SizeBytes: 6036
-    LastWriteTime: 134299658855121885
+    SizeBytes: 123315
+    LastWriteTime: 134302363607561677
     Tags:
       []
     References:
@@ -5338,8 +4707,8 @@ Assets:
     Path: "assets/vertical_slice/side_combat/characters/protag_idle_07.png"
     Type: "Texture"
     DisplayName: "protag_idle_07.png"
-    SizeBytes: 6016
-    LastWriteTime: 134299658855231906
+    SizeBytes: 117998
+    LastWriteTime: 134302363607701714
     Tags:
       []
     References:
@@ -5360,8 +4729,8 @@ Assets:
     Path: "assets/vertical_slice/side_combat/characters/protag_idle_08.png"
     Type: "Texture"
     DisplayName: "protag_idle_08.png"
-    SizeBytes: 6036
-    LastWriteTime: 134299658855281927
+    SizeBytes: 119706
+    LastWriteTime: 134302363607841734
     Tags:
       []
     References:
@@ -5382,74 +4751,8 @@ Assets:
     Path: "assets/vertical_slice/side_combat/characters/protag_jump_01.png"
     Type: "Texture"
     DisplayName: "protag_jump_01.png"
-    SizeBytes: 5740
-    LastWriteTime: 134299658856207425
-    Tags:
-      []
-    References:
-      []
-    ReferencedBy:
-      []
-    Import:
-      Texture:
-        Filter: "Linear"
-        PixelsPerUnit: 100
-        Columns: 1
-        Rows: 1
-        CellWidth: 0
-        CellHeight: 0
-        PaddingX: 0
-        PaddingY: 0
-  - ID: 1790515102770758389
-    Path: "assets/vertical_slice/side_combat/characters/protag_jump_02.png"
-    Type: "Texture"
-    DisplayName: "protag_jump_02.png"
-    SizeBytes: 5762
-    LastWriteTime: 134299658856267432
-    Tags:
-      []
-    References:
-      []
-    ReferencedBy:
-      []
-    Import:
-      Texture:
-        Filter: "Linear"
-        PixelsPerUnit: 100
-        Columns: 1
-        Rows: 1
-        CellWidth: 0
-        CellHeight: 0
-        PaddingX: 0
-        PaddingY: 0
-  - ID: 15936350639624382401
-    Path: "assets/vertical_slice/side_combat/characters/protag_jump_03.png"
-    Type: "Texture"
-    DisplayName: "protag_jump_03.png"
-    SizeBytes: 5757
-    LastWriteTime: 134299658856317451
-    Tags:
-      []
-    References:
-      []
-    ReferencedBy:
-      []
-    Import:
-      Texture:
-        Filter: "Linear"
-        PixelsPerUnit: 100
-        Columns: 1
-        Rows: 1
-        CellWidth: 0
-        CellHeight: 0
-        PaddingX: 0
-        PaddingY: 0
-  - ID: 6973495059756394243
-    Path: "assets/vertical_slice/side_combat/characters/protag_jump_04.png"
-    Type: "Texture"
-    DisplayName: "protag_jump_04.png"
-    SizeBytes: 5734
-    LastWriteTime: 134299658856367463
+    SizeBytes: 106789
+    LastWriteTime: 134302375638879600
     Tags:
       []
     References:
@@ -5470,74 +4773,8 @@ Assets:
     Path: "assets/vertical_slice/side_combat/characters/protag_jump_loop_01.png"
     Type: "Texture"
     DisplayName: "protag_jump_loop_01.png"
-    SizeBytes: 5657
-    LastWriteTime: 134299658856417468
-    Tags:
-      []
-    References:
-      []
-    ReferencedBy:
-      []
-    Import:
-      Texture:
-        Filter: "Linear"
-        PixelsPerUnit: 100
-        Columns: 1
-        Rows: 1
-        CellWidth: 0
-        CellHeight: 0
-        PaddingX: 0
-        PaddingY: 0
-  - ID: 10096031956249092819
-    Path: "assets/vertical_slice/side_combat/characters/protag_jump_loop_02.png"
-    Type: "Texture"
-    DisplayName: "protag_jump_loop_02.png"
-    SizeBytes: 5663
-    LastWriteTime: 134299658856477488
-    Tags:
-      []
-    References:
-      []
-    ReferencedBy:
-      []
-    Import:
-      Texture:
-        Filter: "Linear"
-        PixelsPerUnit: 100
-        Columns: 1
-        Rows: 1
-        CellWidth: 0
-        CellHeight: 0
-        PaddingX: 0
-        PaddingY: 0
-  - ID: 10769773906096406309
-    Path: "assets/vertical_slice/side_combat/characters/protag_jump_loop_03.png"
-    Type: "Texture"
-    DisplayName: "protag_jump_loop_03.png"
-    SizeBytes: 5634
-    LastWriteTime: 134299658856527496
-    Tags:
-      []
-    References:
-      []
-    ReferencedBy:
-      []
-    Import:
-      Texture:
-        Filter: "Linear"
-        PixelsPerUnit: 100
-        Columns: 1
-        Rows: 1
-        CellWidth: 0
-        CellHeight: 0
-        PaddingX: 0
-        PaddingY: 0
-  - ID: 1796278555207276048
-    Path: "assets/vertical_slice/side_combat/characters/protag_jump_loop_04.png"
-    Type: "Texture"
-    DisplayName: "protag_jump_loop_04.png"
-    SizeBytes: 5653
-    LastWriteTime: 134299658856647520
+    SizeBytes: 106789
+    LastWriteTime: 134302363613425740
     Tags:
       []
     References:
@@ -5558,74 +4795,8 @@ Assets:
     Path: "assets/vertical_slice/side_combat/characters/protag_jump_start_01.png"
     Type: "Texture"
     DisplayName: "protag_jump_start_01.png"
-    SizeBytes: 5740
-    LastWriteTime: 134299658855977375
-    Tags:
-      []
-    References:
-      []
-    ReferencedBy:
-      []
-    Import:
-      Texture:
-        Filter: "Linear"
-        PixelsPerUnit: 100
-        Columns: 1
-        Rows: 1
-        CellWidth: 0
-        CellHeight: 0
-        PaddingX: 0
-        PaddingY: 0
-  - ID: 12453092678060755103
-    Path: "assets/vertical_slice/side_combat/characters/protag_jump_start_02.png"
-    Type: "Texture"
-    DisplayName: "protag_jump_start_02.png"
-    SizeBytes: 5762
-    LastWriteTime: 134299658856027383
-    Tags:
-      []
-    References:
-      []
-    ReferencedBy:
-      []
-    Import:
-      Texture:
-        Filter: "Linear"
-        PixelsPerUnit: 100
-        Columns: 1
-        Rows: 1
-        CellWidth: 0
-        CellHeight: 0
-        PaddingX: 0
-        PaddingY: 0
-  - ID: 11056113647376196002
-    Path: "assets/vertical_slice/side_combat/characters/protag_jump_start_03.png"
-    Type: "Texture"
-    DisplayName: "protag_jump_start_03.png"
-    SizeBytes: 5757
-    LastWriteTime: 134299658856087394
-    Tags:
-      []
-    References:
-      []
-    ReferencedBy:
-      []
-    Import:
-      Texture:
-        Filter: "Linear"
-        PixelsPerUnit: 100
-        Columns: 1
-        Rows: 1
-        CellWidth: 0
-        CellHeight: 0
-        PaddingX: 0
-        PaddingY: 0
-  - ID: 1773518074041395692
-    Path: "assets/vertical_slice/side_combat/characters/protag_jump_start_04.png"
-    Type: "Texture"
-    DisplayName: "protag_jump_start_04.png"
-    SizeBytes: 5734
-    LastWriteTime: 134299658856147408
+    SizeBytes: 107359
+    LastWriteTime: 134302363613205694
     Tags:
       []
     References:
@@ -5756,74 +4927,8 @@ Assets:
     Path: "assets/vertical_slice/side_combat/characters/protag_land_01.png"
     Type: "Texture"
     DisplayName: "protag_land_01.png"
-    SizeBytes: 5870
-    LastWriteTime: 134299658856937585
-    Tags:
-      []
-    References:
-      []
-    ReferencedBy:
-      []
-    Import:
-      Texture:
-        Filter: "Linear"
-        PixelsPerUnit: 100
-        Columns: 1
-        Rows: 1
-        CellWidth: 0
-        CellHeight: 0
-        PaddingX: 0
-        PaddingY: 0
-  - ID: 8157054663196490915
-    Path: "assets/vertical_slice/side_combat/characters/protag_land_02.png"
-    Type: "Texture"
-    DisplayName: "protag_land_02.png"
-    SizeBytes: 5860
-    LastWriteTime: 134299658856997605
-    Tags:
-      []
-    References:
-      []
-    ReferencedBy:
-      []
-    Import:
-      Texture:
-        Filter: "Linear"
-        PixelsPerUnit: 100
-        Columns: 1
-        Rows: 1
-        CellWidth: 0
-        CellHeight: 0
-        PaddingX: 0
-        PaddingY: 0
-  - ID: 2200983089379463562
-    Path: "assets/vertical_slice/side_combat/characters/protag_land_03.png"
-    Type: "Texture"
-    DisplayName: "protag_land_03.png"
-    SizeBytes: 5870
-    LastWriteTime: 134299658857047611
-    Tags:
-      []
-    References:
-      []
-    ReferencedBy:
-      []
-    Import:
-      Texture:
-        Filter: "Linear"
-        PixelsPerUnit: 100
-        Columns: 1
-        Rows: 1
-        CellWidth: 0
-        CellHeight: 0
-        PaddingX: 0
-        PaddingY: 0
-  - ID: 974338035144946772
-    Path: "assets/vertical_slice/side_combat/characters/protag_land_04.png"
-    Type: "Texture"
-    DisplayName: "protag_land_04.png"
-    SizeBytes: 5858
-    LastWriteTime: 134299658857107624
+    SizeBytes: 104972
+    LastWriteTime: 134302363613775826
     Tags:
       []
     References:
@@ -5932,8 +5037,8 @@ Assets:
     Path: "assets/vertical_slice/side_combat/characters/protag_launcher_01.png"
     Type: "Texture"
     DisplayName: "protag_launcher_01.png"
-    SizeBytes: 6617
-    LastWriteTime: 134299658859478165
+    SizeBytes: 142968
+    LastWriteTime: 134302375639500493
     Tags:
       []
     References:
@@ -5954,162 +5059,8 @@ Assets:
     Path: "assets/vertical_slice/side_combat/characters/protag_launcher_02.png"
     Type: "Texture"
     DisplayName: "protag_launcher_02.png"
-    SizeBytes: 6651
-    LastWriteTime: 134299658859548175
-    Tags:
-      []
-    References:
-      []
-    ReferencedBy:
-      []
-    Import:
-      Texture:
-        Filter: "Linear"
-        PixelsPerUnit: 100
-        Columns: 1
-        Rows: 1
-        CellWidth: 0
-        CellHeight: 0
-        PaddingX: 0
-        PaddingY: 0
-  - ID: 9538821921731707931
-    Path: "assets/vertical_slice/side_combat/characters/protag_launcher_03.png"
-    Type: "Texture"
-    DisplayName: "protag_launcher_03.png"
-    SizeBytes: 7030
-    LastWriteTime: 134299658859628193
-    Tags:
-      []
-    References:
-      []
-    ReferencedBy:
-      []
-    Import:
-      Texture:
-        Filter: "Linear"
-        PixelsPerUnit: 100
-        Columns: 1
-        Rows: 1
-        CellWidth: 0
-        CellHeight: 0
-        PaddingX: 0
-        PaddingY: 0
-  - ID: 9109970725909444213
-    Path: "assets/vertical_slice/side_combat/characters/protag_launcher_04.png"
-    Type: "Texture"
-    DisplayName: "protag_launcher_04.png"
-    SizeBytes: 7042
-    LastWriteTime: 134299658859708212
-    Tags:
-      []
-    References:
-      []
-    ReferencedBy:
-      []
-    Import:
-      Texture:
-        Filter: "Linear"
-        PixelsPerUnit: 100
-        Columns: 1
-        Rows: 1
-        CellWidth: 0
-        CellHeight: 0
-        PaddingX: 0
-        PaddingY: 0
-  - ID: 675933907473285644
-    Path: "assets/vertical_slice/side_combat/characters/protag_launcher_05.png"
-    Type: "Texture"
-    DisplayName: "protag_launcher_05.png"
-    SizeBytes: 7129
-    LastWriteTime: 134299658859778234
-    Tags:
-      []
-    References:
-      []
-    ReferencedBy:
-      []
-    Import:
-      Texture:
-        Filter: "Linear"
-        PixelsPerUnit: 100
-        Columns: 1
-        Rows: 1
-        CellWidth: 0
-        CellHeight: 0
-        PaddingX: 0
-        PaddingY: 0
-  - ID: 16919301548959763005
-    Path: "assets/vertical_slice/side_combat/characters/protag_launcher_06.png"
-    Type: "Texture"
-    DisplayName: "protag_launcher_06.png"
-    SizeBytes: 7383
-    LastWriteTime: 134299658859908256
-    Tags:
-      []
-    References:
-      []
-    ReferencedBy:
-      []
-    Import:
-      Texture:
-        Filter: "Linear"
-        PixelsPerUnit: 100
-        Columns: 1
-        Rows: 1
-        CellWidth: 0
-        CellHeight: 0
-        PaddingX: 0
-        PaddingY: 0
-  - ID: 15208611588124890324
-    Path: "assets/vertical_slice/side_combat/characters/protag_launcher_07.png"
-    Type: "Texture"
-    DisplayName: "protag_launcher_07.png"
-    SizeBytes: 6529
-    LastWriteTime: 134299658859978278
-    Tags:
-      []
-    References:
-      []
-    ReferencedBy:
-      []
-    Import:
-      Texture:
-        Filter: "Linear"
-        PixelsPerUnit: 100
-        Columns: 1
-        Rows: 1
-        CellWidth: 0
-        CellHeight: 0
-        PaddingX: 0
-        PaddingY: 0
-  - ID: 14114762116096821213
-    Path: "assets/vertical_slice/side_combat/characters/protag_launcher_08.png"
-    Type: "Texture"
-    DisplayName: "protag_launcher_08.png"
-    SizeBytes: 6468
-    LastWriteTime: 134299658860048305
-    Tags:
-      []
-    References:
-      []
-    ReferencedBy:
-      []
-    Import:
-      Texture:
-        Filter: "Linear"
-        PixelsPerUnit: 100
-        Columns: 1
-        Rows: 1
-        CellWidth: 0
-        CellHeight: 0
-        PaddingX: 0
-        PaddingY: 0
-  - ID: 4167597367876537353
-    Path: "assets/vertical_slice/side_combat/characters/protag_launcher_09.png"
-    Type: "Texture"
-    DisplayName: "protag_launcher_09.png"
-    SizeBytes: 6704
-    LastWriteTime: 134299658860118321
+    SizeBytes: 149076
+    LastWriteTime: 134302375639715462
     Tags:
       []
     References:
@@ -6336,7 +5287,6 @@ Assets:
       []
     ReferencedBy:
       - "assets/scenes/SideCombatBeastPath.wt"
-      - "assets/scenes/SideCombatVerticalSlice.wt"
       - "assets/vertical_slice/data/vertical_slice_manifest.json"
     Import:
       Texture:
@@ -6484,8 +5434,8 @@ Assets:
     Path: "assets/vertical_slice/side_combat/characters/protag_run_01.png"
     Type: "Texture"
     DisplayName: "protag_run_01.png"
-    SizeBytes: 5327
-    LastWriteTime: 134299658855341938
+    SizeBytes: 117676
+    LastWriteTime: 134302363608241822
     Tags:
       []
     References:
@@ -6506,8 +5456,8 @@ Assets:
     Path: "assets/vertical_slice/side_combat/characters/protag_run_02.png"
     Type: "Texture"
     DisplayName: "protag_run_02.png"
-    SizeBytes: 5470
-    LastWriteTime: 134299658855411949
+    SizeBytes: 113462
+    LastWriteTime: 134302363608372224
     Tags:
       []
     References:
@@ -6528,8 +5478,8 @@ Assets:
     Path: "assets/vertical_slice/side_combat/characters/protag_run_03.png"
     Type: "Texture"
     DisplayName: "protag_run_03.png"
-    SizeBytes: 5635
-    LastWriteTime: 134299658855461961
+    SizeBytes: 98844
+    LastWriteTime: 134302363608492250
     Tags:
       []
     References:
@@ -6550,140 +5500,8 @@ Assets:
     Path: "assets/vertical_slice/side_combat/characters/protag_run_04.png"
     Type: "Texture"
     DisplayName: "protag_run_04.png"
-    SizeBytes: 5604
-    LastWriteTime: 134299658855511972
-    Tags:
-      []
-    References:
-      []
-    ReferencedBy:
-      []
-    Import:
-      Texture:
-        Filter: "Linear"
-        PixelsPerUnit: 100
-        Columns: 1
-        Rows: 1
-        CellWidth: 0
-        CellHeight: 0
-        PaddingX: 0
-        PaddingY: 0
-  - ID: 17957340852558179755
-    Path: "assets/vertical_slice/side_combat/characters/protag_run_05.png"
-    Type: "Texture"
-    DisplayName: "protag_run_05.png"
-    SizeBytes: 5522
-    LastWriteTime: 134299658855597283
-    Tags:
-      []
-    References:
-      []
-    ReferencedBy:
-      []
-    Import:
-      Texture:
-        Filter: "Linear"
-        PixelsPerUnit: 100
-        Columns: 1
-        Rows: 1
-        CellWidth: 0
-        CellHeight: 0
-        PaddingX: 0
-        PaddingY: 0
-  - ID: 4994385641880082
-    Path: "assets/vertical_slice/side_combat/characters/protag_run_06.png"
-    Type: "Texture"
-    DisplayName: "protag_run_06.png"
-    SizeBytes: 5334
-    LastWriteTime: 134299658855647300
-    Tags:
-      []
-    References:
-      []
-    ReferencedBy:
-      []
-    Import:
-      Texture:
-        Filter: "Linear"
-        PixelsPerUnit: 100
-        Columns: 1
-        Rows: 1
-        CellWidth: 0
-        CellHeight: 0
-        PaddingX: 0
-        PaddingY: 0
-  - ID: 2713568239328417343
-    Path: "assets/vertical_slice/side_combat/characters/protag_run_07.png"
-    Type: "Texture"
-    DisplayName: "protag_run_07.png"
-    SizeBytes: 5457
-    LastWriteTime: 134299658855757319
-    Tags:
-      []
-    References:
-      []
-    ReferencedBy:
-      []
-    Import:
-      Texture:
-        Filter: "Linear"
-        PixelsPerUnit: 100
-        Columns: 1
-        Rows: 1
-        CellWidth: 0
-        CellHeight: 0
-        PaddingX: 0
-        PaddingY: 0
-  - ID: 15855162948191906921
-    Path: "assets/vertical_slice/side_combat/characters/protag_run_08.png"
-    Type: "Texture"
-    DisplayName: "protag_run_08.png"
-    SizeBytes: 5572
-    LastWriteTime: 134299658855817329
-    Tags:
-      []
-    References:
-      []
-    ReferencedBy:
-      []
-    Import:
-      Texture:
-        Filter: "Linear"
-        PixelsPerUnit: 100
-        Columns: 1
-        Rows: 1
-        CellWidth: 0
-        CellHeight: 0
-        PaddingX: 0
-        PaddingY: 0
-  - ID: 4155358865125751793
-    Path: "assets/vertical_slice/side_combat/characters/protag_run_09.png"
-    Type: "Texture"
-    DisplayName: "protag_run_09.png"
-    SizeBytes: 5542
-    LastWriteTime: 134299658855867345
-    Tags:
-      []
-    References:
-      []
-    ReferencedBy:
-      []
-    Import:
-      Texture:
-        Filter: "Linear"
-        PixelsPerUnit: 100
-        Columns: 1
-        Rows: 1
-        CellWidth: 0
-        CellHeight: 0
-        PaddingX: 0
-        PaddingY: 0
-  - ID: 15528287818421334755
-    Path: "assets/vertical_slice/side_combat/characters/protag_run_10.png"
-    Type: "Texture"
-    DisplayName: "protag_run_10.png"
-    SizeBytes: 5475
-    LastWriteTime: 134299658855927357
+    SizeBytes: 111422
+    LastWriteTime: 134302363608622280
     Tags:
       []
     References:
@@ -7504,7 +6322,6 @@ Assets:
       []
     ReferencedBy:
       - "assets/scenes/SideCombatBeastPath.wt"
-      - "assets/scenes/SideCombatVerticalSlice.wt"
       - "assets/vertical_slice/data/vertical_slice_manifest.json"
     Import:
       Texture:
@@ -7520,8 +6337,8 @@ Assets:
     Path: "assets/vertical_slice/side_combat/enemies/boss_bear_husband_attack_01.png"
     Type: "Texture"
     DisplayName: "boss_bear_husband_attack_01.png"
-    SizeBytes: 12639
-    LastWriteTime: 134299813830319119
+    SizeBytes: 99316
+    LastWriteTime: 134303149677636631
     Tags:
       []
     References:
@@ -7542,8 +6359,8 @@ Assets:
     Path: "assets/vertical_slice/side_combat/enemies/boss_bear_husband_attack_02.png"
     Type: "Texture"
     DisplayName: "boss_bear_husband_attack_02.png"
-    SizeBytes: 13553
-    LastWriteTime: 134299813830609182
+    SizeBytes: 110865
+    LastWriteTime: 134303149677766657
     Tags:
       []
     References:
@@ -7564,8 +6381,8 @@ Assets:
     Path: "assets/vertical_slice/side_combat/enemies/boss_bear_husband_attack_03.png"
     Type: "Texture"
     DisplayName: "boss_bear_husband_attack_03.png"
-    SizeBytes: 13772
-    LastWriteTime: 134299813830859243
+    SizeBytes: 122083
+    LastWriteTime: 134303149677886689
     Tags:
       []
     References:
@@ -7586,8 +6403,74 @@ Assets:
     Path: "assets/vertical_slice/side_combat/enemies/boss_bear_husband_attack_04.png"
     Type: "Texture"
     DisplayName: "boss_bear_husband_attack_04.png"
-    SizeBytes: 12255
-    LastWriteTime: 134299813831109300
+    SizeBytes: 94546
+    LastWriteTime: 134303149678006715
+    Tags:
+      []
+    References:
+      []
+    ReferencedBy:
+      []
+    Import:
+      Texture:
+        Filter: "Linear"
+        PixelsPerUnit: 100
+        Columns: 1
+        Rows: 1
+        CellWidth: 0
+        CellHeight: 0
+        PaddingX: 0
+        PaddingY: 0
+  - ID: 4450598352736944415
+    Path: "assets/vertical_slice/side_combat/enemies/boss_bear_husband_attack_claw_01.png"
+    Type: "Texture"
+    DisplayName: "boss_bear_husband_attack_claw_01.png"
+    SizeBytes: 110865
+    LastWriteTime: 134303149677766657
+    Tags:
+      []
+    References:
+      []
+    ReferencedBy:
+      []
+    Import:
+      Texture:
+        Filter: "Linear"
+        PixelsPerUnit: 100
+        Columns: 1
+        Rows: 1
+        CellWidth: 0
+        CellHeight: 0
+        PaddingX: 0
+        PaddingY: 0
+  - ID: 15103970748080558911
+    Path: "assets/vertical_slice/side_combat/enemies/boss_bear_husband_attack_claw_02.png"
+    Type: "Texture"
+    DisplayName: "boss_bear_husband_attack_claw_02.png"
+    SizeBytes: 122083
+    LastWriteTime: 134303149677886689
+    Tags:
+      []
+    References:
+      []
+    ReferencedBy:
+      []
+    Import:
+      Texture:
+        Filter: "Linear"
+        PixelsPerUnit: 100
+        Columns: 1
+        Rows: 1
+        CellWidth: 0
+        CellHeight: 0
+        PaddingX: 0
+        PaddingY: 0
+  - ID: 17196117753799893572
+    Path: "assets/vertical_slice/side_combat/enemies/boss_bear_husband_attack_claw_03.png"
+    Type: "Texture"
+    DisplayName: "boss_bear_husband_attack_claw_03.png"
+    SizeBytes: 94546
+    LastWriteTime: 134303149678006715
     Tags:
       []
     References:
@@ -7608,8 +6491,8 @@ Assets:
     Path: "assets/vertical_slice/side_combat/enemies/boss_bear_husband_charge_01.png"
     Type: "Texture"
     DisplayName: "boss_bear_husband_charge_01.png"
-    SizeBytes: 11918
-    LastWriteTime: 134299813832366529
+    SizeBytes: 257943
+    LastWriteTime: 134302941875271962
     Tags:
       []
     References:
@@ -7630,8 +6513,8 @@ Assets:
     Path: "assets/vertical_slice/side_combat/enemies/boss_bear_husband_charge_02.png"
     Type: "Texture"
     DisplayName: "boss_bear_husband_charge_02.png"
-    SizeBytes: 11521
-    LastWriteTime: 134299813832596580
+    SizeBytes: 237696
+    LastWriteTime: 134302941875422000
     Tags:
       []
     References:
@@ -7652,8 +6535,8 @@ Assets:
     Path: "assets/vertical_slice/side_combat/enemies/boss_bear_husband_charge_03.png"
     Type: "Texture"
     DisplayName: "boss_bear_husband_charge_03.png"
-    SizeBytes: 11579
-    LastWriteTime: 134299813832816630
+    SizeBytes: 233991
+    LastWriteTime: 134302941875572032
     Tags:
       []
     References:
@@ -7674,8 +6557,140 @@ Assets:
     Path: "assets/vertical_slice/side_combat/enemies/boss_bear_husband_charge_04.png"
     Type: "Texture"
     DisplayName: "boss_bear_husband_charge_04.png"
-    SizeBytes: 11671
-    LastWriteTime: 134299813833036680
+    SizeBytes: 237629
+    LastWriteTime: 134302941875732064
+    Tags:
+      []
+    References:
+      []
+    ReferencedBy:
+      []
+    Import:
+      Texture:
+        Filter: "Linear"
+        PixelsPerUnit: 100
+        Columns: 1
+        Rows: 1
+        CellWidth: 0
+        CellHeight: 0
+        PaddingX: 0
+        PaddingY: 0
+  - ID: 8983423343511929678
+    Path: "assets/vertical_slice/side_combat/enemies/boss_bear_husband_charge_windup_01.png"
+    Type: "Texture"
+    DisplayName: "boss_bear_husband_charge_windup_01.png"
+    SizeBytes: 295833
+    LastWriteTime: 134302941876042127
+    Tags:
+      []
+    References:
+      []
+    ReferencedBy:
+      []
+    Import:
+      Texture:
+        Filter: "Linear"
+        PixelsPerUnit: 100
+        Columns: 1
+        Rows: 1
+        CellWidth: 0
+        CellHeight: 0
+        PaddingX: 0
+        PaddingY: 0
+  - ID: 3958213947324076440
+    Path: "assets/vertical_slice/side_combat/enemies/boss_bear_husband_charge_windup_02.png"
+    Type: "Texture"
+    DisplayName: "boss_bear_husband_charge_windup_02.png"
+    SizeBytes: 258641
+    LastWriteTime: 134302941876212168
+    Tags:
+      []
+    References:
+      []
+    ReferencedBy:
+      []
+    Import:
+      Texture:
+        Filter: "Linear"
+        PixelsPerUnit: 100
+        Columns: 1
+        Rows: 1
+        CellWidth: 0
+        CellHeight: 0
+        PaddingX: 0
+        PaddingY: 0
+  - ID: 4859492597755713322
+    Path: "assets/vertical_slice/side_combat/enemies/boss_bear_husband_charge_windup_03.png"
+    Type: "Texture"
+    DisplayName: "boss_bear_husband_charge_windup_03.png"
+    SizeBytes: 243841
+    LastWriteTime: 134302941876372204
+    Tags:
+      []
+    References:
+      []
+    ReferencedBy:
+      []
+    Import:
+      Texture:
+        Filter: "Linear"
+        PixelsPerUnit: 100
+        Columns: 1
+        Rows: 1
+        CellWidth: 0
+        CellHeight: 0
+        PaddingX: 0
+        PaddingY: 0
+  - ID: 13680363286597590014
+    Path: "assets/vertical_slice/side_combat/enemies/boss_bear_husband_charge_windup_04.png"
+    Type: "Texture"
+    DisplayName: "boss_bear_husband_charge_windup_04.png"
+    SizeBytes: 245944
+    LastWriteTime: 134302941876522241
+    Tags:
+      []
+    References:
+      []
+    ReferencedBy:
+      []
+    Import:
+      Texture:
+        Filter: "Linear"
+        PixelsPerUnit: 100
+        Columns: 1
+        Rows: 1
+        CellWidth: 0
+        CellHeight: 0
+        PaddingX: 0
+        PaddingY: 0
+  - ID: 13102936723630883431
+    Path: "assets/vertical_slice/side_combat/enemies/boss_bear_husband_charge_windup_05.png"
+    Type: "Texture"
+    DisplayName: "boss_bear_husband_charge_windup_05.png"
+    SizeBytes: 249183
+    LastWriteTime: 134302941876662272
+    Tags:
+      []
+    References:
+      []
+    ReferencedBy:
+      []
+    Import:
+      Texture:
+        Filter: "Linear"
+        PixelsPerUnit: 100
+        Columns: 1
+        Rows: 1
+        CellWidth: 0
+        CellHeight: 0
+        PaddingX: 0
+        PaddingY: 0
+  - ID: 15026219786067301219
+    Path: "assets/vertical_slice/side_combat/enemies/boss_bear_husband_charge_windup_06.png"
+    Type: "Texture"
+    DisplayName: "boss_bear_husband_charge_windup_06.png"
+    SizeBytes: 246589
+    LastWriteTime: 134302941876812304
     Tags:
       []
     References:
@@ -7850,8 +6865,8 @@ Assets:
     Path: "assets/vertical_slice/side_combat/enemies/boss_bear_husband_hit_01.png"
     Type: "Texture"
     DisplayName: "boss_bear_husband_hit_01.png"
-    SizeBytes: 11875
-    LastWriteTime: 134299813825920997
+    SizeBytes: 194722
+    LastWriteTime: 134302941873796421
     Tags:
       []
     References:
@@ -7872,8 +6887,8 @@ Assets:
     Path: "assets/vertical_slice/side_combat/enemies/boss_bear_husband_hit_02.png"
     Type: "Texture"
     DisplayName: "boss_bear_husband_hit_02.png"
-    SizeBytes: 12128
-    LastWriteTime: 134299813826148200
+    SizeBytes: 181051
+    LastWriteTime: 134302941873916451
     Tags:
       []
     References:
@@ -7894,8 +6909,8 @@ Assets:
     Path: "assets/vertical_slice/side_combat/enemies/boss_bear_husband_hit_03.png"
     Type: "Texture"
     DisplayName: "boss_bear_husband_hit_03.png"
-    SizeBytes: 12027
-    LastWriteTime: 134299813826358229
+    SizeBytes: 166838
+    LastWriteTime: 134302941874026478
     Tags:
       []
     References:
@@ -7912,12 +6927,34 @@ Assets:
         CellHeight: 0
         PaddingX: 0
         PaddingY: 0
+  - ID: 6198182399190297365
+    Path: "assets/vertical_slice/side_combat/enemies/boss_bear_husband_hit_04.png"
+    Type: "Texture"
+    DisplayName: "boss_bear_husband_hit_04.png"
+    SizeBytes: 167396
+    LastWriteTime: 134302941874146507
+    Tags:
+      []
+    References:
+      []
+    ReferencedBy:
+      - "assets/vertical_slice/data/side_combat_tuning.yaml"
+    Import:
+      Texture:
+        Filter: "Linear"
+        PixelsPerUnit: 100
+        Columns: 1
+        Rows: 1
+        CellWidth: 0
+        CellHeight: 0
+        PaddingX: 0
+        PaddingY: 0
   - ID: 10290705006693312650
     Path: "assets/vertical_slice/side_combat/enemies/boss_bear_husband_idle_01.png"
     Type: "Texture"
     DisplayName: "boss_bear_husband_idle_01.png"
-    SizeBytes: 11826
-    LastWriteTime: 134299813822110640
+    SizeBytes: 294949
+    LastWriteTime: 134302941872336100
     Tags:
       []
     References:
@@ -7938,8 +6975,8 @@ Assets:
     Path: "assets/vertical_slice/side_combat/enemies/boss_bear_husband_idle_02.png"
     Type: "Texture"
     DisplayName: "boss_bear_husband_idle_02.png"
-    SizeBytes: 11800
-    LastWriteTime: 134299813822330688
+    SizeBytes: 298614
+    LastWriteTime: 134302941872506138
     Tags:
       []
     References:
@@ -7960,8 +6997,8 @@ Assets:
     Path: "assets/vertical_slice/side_combat/enemies/boss_bear_husband_idle_03.png"
     Type: "Texture"
     DisplayName: "boss_bear_husband_idle_03.png"
-    SizeBytes: 11826
-    LastWriteTime: 134299813822530734
+    SizeBytes: 293326
+    LastWriteTime: 134302941872676176
     Tags:
       []
     References:
@@ -7982,8 +7019,8 @@ Assets:
     Path: "assets/vertical_slice/side_combat/enemies/boss_bear_husband_idle_04.png"
     Type: "Texture"
     DisplayName: "boss_bear_husband_idle_04.png"
-    SizeBytes: 11890
-    LastWriteTime: 134299813822740785
+    SizeBytes: 296274
+    LastWriteTime: 134302941872846214
     Tags:
       []
     References:
@@ -8004,8 +7041,8 @@ Assets:
     Path: "assets/vertical_slice/side_combat/enemies/boss_bear_husband_shockwave_01.png"
     Type: "Texture"
     DisplayName: "boss_bear_husband_shockwave_01.png"
-    SizeBytes: 12731
-    LastWriteTime: 134299813834399542
+    SizeBytes: 289621
+    LastWriteTime: 134303149678296781
     Tags:
       []
     References:
@@ -8026,8 +7063,8 @@ Assets:
     Path: "assets/vertical_slice/side_combat/enemies/boss_bear_husband_shockwave_02.png"
     Type: "Texture"
     DisplayName: "boss_bear_husband_shockwave_02.png"
-    SizeBytes: 12720
-    LastWriteTime: 134299813834673346
+    SizeBytes: 284107
+    LastWriteTime: 134303149678476816
     Tags:
       []
     References:
@@ -8048,8 +7085,8 @@ Assets:
     Path: "assets/vertical_slice/side_combat/enemies/boss_bear_husband_shockwave_03.png"
     Type: "Texture"
     DisplayName: "boss_bear_husband_shockwave_03.png"
-    SizeBytes: 12252
-    LastWriteTime: 134299813834951894
+    SizeBytes: 293067
+    LastWriteTime: 134303149678646854
     Tags:
       []
     References:
@@ -8070,8 +7107,8 @@ Assets:
     Path: "assets/vertical_slice/side_combat/enemies/boss_bear_husband_shockwave_04.png"
     Type: "Texture"
     DisplayName: "boss_bear_husband_shockwave_04.png"
-    SizeBytes: 12195
-    LastWriteTime: 134299813835208547
+    SizeBytes: 264180
+    LastWriteTime: 134303149678816905
     Tags:
       []
     References:
@@ -8092,8 +7129,8 @@ Assets:
     Path: "assets/vertical_slice/side_combat/enemies/boss_bear_husband_walk_01.png"
     Type: "Texture"
     DisplayName: "boss_bear_husband_walk_01.png"
-    SizeBytes: 11806
-    LastWriteTime: 134299813823805080
+    SizeBytes: 232745
+    LastWriteTime: 134302941873106272
     Tags:
       []
     References:
@@ -8114,8 +7151,8 @@ Assets:
     Path: "assets/vertical_slice/side_combat/enemies/boss_bear_husband_walk_02.png"
     Type: "Texture"
     DisplayName: "boss_bear_husband_walk_02.png"
-    SizeBytes: 11912
-    LastWriteTime: 134299813824015131
+    SizeBytes: 246837
+    LastWriteTime: 134302941873276310
     Tags:
       []
     References:
@@ -8136,8 +7173,8 @@ Assets:
     Path: "assets/vertical_slice/side_combat/enemies/boss_bear_husband_walk_03.png"
     Type: "Texture"
     DisplayName: "boss_bear_husband_walk_03.png"
-    SizeBytes: 11853
-    LastWriteTime: 134299813824225177
+    SizeBytes: 248024
+    LastWriteTime: 134302941873426344
     Tags:
       []
     References:
@@ -8158,30 +7195,8 @@ Assets:
     Path: "assets/vertical_slice/side_combat/enemies/boss_bear_husband_walk_04.png"
     Type: "Texture"
     DisplayName: "boss_bear_husband_walk_04.png"
-    SizeBytes: 11758
-    LastWriteTime: 134299813824425226
-    Tags:
-      []
-    References:
-      []
-    ReferencedBy:
-      []
-    Import:
-      Texture:
-        Filter: "Linear"
-        PixelsPerUnit: 100
-        Columns: 1
-        Rows: 1
-        CellWidth: 0
-        CellHeight: 0
-        PaddingX: 0
-        PaddingY: 0
-  - ID: 9465892951856536767
-    Path: "assets/vertical_slice/side_combat/enemies/boss_bear_husband_walk_05.png"
-    Type: "Texture"
-    DisplayName: "boss_bear_husband_walk_05.png"
-    SizeBytes: 11535
-    LastWriteTime: 134299813824625269
+    SizeBytes: 239429
+    LastWriteTime: 134302941873576378
     Tags:
       []
     References:
@@ -8518,6 +7533,7 @@ Assets:
       []
     ReferencedBy:
       - "assets/gameplay/content_manifest.yaml"
+      - "assets/scenes/SideCombatBeastPath.wt"
     Import:
       Texture:
         Filter: "Linear"
@@ -9065,8 +8081,8 @@ Assets:
     Path: "assets/vertical_slice/side_combat/sheets/protag_air_basic_lowfi_strip.png"
     Type: "Texture"
     DisplayName: "protag_air_basic_lowfi_strip.png"
-    SizeBytes: 29626
-    LastWriteTime: 134299836733210911
+    SizeBytes: 328254
+    LastWriteTime: 134302363610785147
     Tags:
       []
     References:
@@ -9131,8 +8147,8 @@ Assets:
     Path: "assets/vertical_slice/side_combat/sheets/protag_basic1_lowfi_strip.png"
     Type: "Texture"
     DisplayName: "protag_basic1_lowfi_strip.png"
-    SizeBytes: 41221
-    LastWriteTime: 134299836727292616
+    SizeBytes: 530572
+    LastWriteTime: 134302363608642280
     Tags:
       []
     References:
@@ -9154,8 +8170,8 @@ Assets:
     Path: "assets/vertical_slice/side_combat/sheets/protag_basic2_lowfi_strip.png"
     Type: "Texture"
     DisplayName: "protag_basic2_lowfi_strip.png"
-    SizeBytes: 40339
-    LastWriteTime: 134299836728689899
+    SizeBytes: 492195
+    LastWriteTime: 134302363609382448
     Tags:
       []
     References:
@@ -9176,8 +8192,8 @@ Assets:
     Path: "assets/vertical_slice/side_combat/sheets/protag_basic3_lowfi_strip.png"
     Type: "Texture"
     DisplayName: "protag_basic3_lowfi_strip.png"
-    SizeBytes: 68023
-    LastWriteTime: 134299836730790362
+    SizeBytes: 649966
+    LastWriteTime: 134302363610017929
     Tags:
       []
     References:
@@ -9198,8 +8214,8 @@ Assets:
     Path: "assets/vertical_slice/side_combat/sheets/protag_batch03_lowfi_sheet_params.yaml"
     Type: "Data"
     DisplayName: "protag_batch03_lowfi_sheet_params.yaml"
-    SizeBytes: 13249
-    LastWriteTime: 134299836753001957
+    SizeBytes: 13149
+    LastWriteTime: 134307588989808575
     Tags:
       []
     References:
@@ -9231,8 +8247,8 @@ Assets:
     Path: "assets/vertical_slice/side_combat/sheets/protag_break_limit_lowfi_strip.png"
     Type: "Texture"
     DisplayName: "protag_break_limit_lowfi_strip.png"
-    SizeBytes: 69027
-    LastWriteTime: 134299836744577831
+    SizeBytes: 284082
+    LastWriteTime: 134303484820000000
     Tags:
       []
     References:
@@ -9275,8 +8291,8 @@ Assets:
     Path: "assets/vertical_slice/side_combat/sheets/protag_fall_lowfi_strip.png"
     Type: "Texture"
     DisplayName: "protag_fall_lowfi_strip.png"
-    SizeBytes: 22131
-    LastWriteTime: 134299836725562257
+    SizeBytes: 109388
+    LastWriteTime: 134302363613435743
     Tags:
       []
     References:
@@ -9297,8 +8313,8 @@ Assets:
     Path: "assets/vertical_slice/side_combat/sheets/protag_hurt_lowfi_strip.png"
     Type: "Texture"
     DisplayName: "protag_hurt_lowfi_strip.png"
-    SizeBytes: 20816
-    LastWriteTime: 134299836746963588
+    SizeBytes: 486102
+    LastWriteTime: 134302367456312080
     Tags:
       []
     References:
@@ -9319,8 +8335,8 @@ Assets:
     Path: "assets/vertical_slice/side_combat/sheets/protag_idle_lowfi_strip.png"
     Type: "Texture"
     DisplayName: "protag_idle_lowfi_strip.png"
-    SizeBytes: 28434
-    LastWriteTime: 134299836721308967
+    SizeBytes: 931064
+    LastWriteTime: 134302363606211366
     Tags:
       []
     References:
@@ -9341,8 +8357,8 @@ Assets:
     Path: "assets/vertical_slice/side_combat/sheets/protag_jump_loop_lowfi_strip.png"
     Type: "Texture"
     DisplayName: "protag_jump_loop_lowfi_strip.png"
-    SizeBytes: 17462
-    LastWriteTime: 134299836724826897
+    SizeBytes: 109235
+    LastWriteTime: 134302363613275705
     Tags:
       []
     References:
@@ -9363,8 +8379,8 @@ Assets:
     Path: "assets/vertical_slice/side_combat/sheets/protag_jump_start_lowfi_strip.png"
     Type: "Texture"
     DisplayName: "protag_jump_start_lowfi_strip.png"
-    SizeBytes: 18977
-    LastWriteTime: 134299836724177819
+    SizeBytes: 109247
+    LastWriteTime: 134302363613025651
     Tags:
       []
     References:
@@ -9407,8 +8423,8 @@ Assets:
     Path: "assets/vertical_slice/side_combat/sheets/protag_land_lowfi_strip.png"
     Type: "Texture"
     DisplayName: "protag_land_lowfi_strip.png"
-    SizeBytes: 18344
-    LastWriteTime: 134299836726282391
+    SizeBytes: 106932
+    LastWriteTime: 134302363613615783
     Tags:
       []
     References:
@@ -9451,8 +8467,8 @@ Assets:
     Path: "assets/vertical_slice/side_combat/sheets/protag_launcher_lowfi_strip.png"
     Type: "Texture"
     DisplayName: "protag_launcher_lowfi_strip.png"
-    SizeBytes: 64445
-    LastWriteTime: 134299836735251374
+    SizeBytes: 290468
+    LastWriteTime: 134302375639832722
     Tags:
       []
     References:
@@ -9473,8 +8489,8 @@ Assets:
     Path: "assets/vertical_slice/side_combat/sheets/protag_lowfi_sheet_params.yaml"
     Type: "Data"
     DisplayName: "protag_lowfi_sheet_params.yaml"
-    SizeBytes: 1623
-    LastWriteTime: 134299573106806200
+    SizeBytes: 1613
+    LastWriteTime: 134302246113258399
     Tags:
       []
     References:
@@ -9532,8 +8548,8 @@ Assets:
     Path: "assets/vertical_slice/side_combat/sheets/protag_run_lowfi_strip.png"
     Type: "Texture"
     DisplayName: "protag_run_lowfi_strip.png"
-    SizeBytes: 38179
-    LastWriteTime: 134299836723051576
+    SizeBytes: 445855
+    LastWriteTime: 134302363607921751
     Tags:
       []
     References:
@@ -9564,8 +8580,30 @@ Assets:
     ReferencedBy:
       - "assets/gameplay/content_manifest.yaml"
       - "assets/scenes/SideCombatBeastPath.wt"
-      - "assets/scenes/SideCombatVerticalSlice.wt"
       - "assets/vertical_slice/data/vertical_slice_manifest.json"
+    Import:
+      Texture:
+        Filter: "Linear"
+        PixelsPerUnit: 100
+        Columns: 1
+        Rows: 1
+        CellWidth: 0
+        CellHeight: 0
+        PaddingX: 0
+        PaddingY: 0
+  - ID: 16289243632163504465
+    Path: "assets/vertical_slice/side_combat/ui/font/sidecombat_combo_font.png"
+    Type: "Texture"
+    DisplayName: "sidecombat_combo_font.png"
+    SizeBytes: 67309
+    LastWriteTime: 134303991940456586
+    Tags:
+      []
+    References:
+      []
+    ReferencedBy:
+      - "assets/gameplay/content_manifest.yaml"
+      - "assets/scenes/SideCombatBeastPath.wt"
     Import:
       Texture:
         Filter: "Linear"
@@ -9682,8 +8720,6 @@ Assets:
       []
     ReferencedBy:
       - "assets/gameplay/content_manifest.yaml"
-      - "assets/scenes/SideCombatBeastPath.wt"
-      - "assets/scenes/SideCombatVerticalSlice.wt"
       - "assets/vertical_slice/data/vertical_slice_manifest.json"
     Import:
       Texture:
@@ -9731,7 +8767,6 @@ Assets:
     ReferencedBy:
       - "assets/gameplay/content_manifest.yaml"
       - "assets/scenes/SideCombatBeastPath.wt"
-      - "assets/scenes/SideCombatVerticalSlice.wt"
       - "assets/vertical_slice/data/vertical_slice_manifest.json"
     Import:
       Texture:
@@ -9778,8 +8813,6 @@ Assets:
       []
     ReferencedBy:
       - "assets/gameplay/content_manifest.yaml"
-      - "assets/scenes/SideCombatBeastPath.wt"
-      - "assets/scenes/SideCombatVerticalSlice.wt"
       - "assets/vertical_slice/data/vertical_slice_manifest.json"
     Import:
       Texture:
@@ -9802,8 +8835,7 @@ Assets:
     References:
       []
     ReferencedBy:
-      - "assets/scenes/SideCombatBeastPath.wt"
-      - "assets/scenes/SideCombatVerticalSlice.wt"
+      - "assets/gameplay/content_manifest.yaml"
       - "assets/vertical_slice/data/vertical_slice_manifest.json"
     Import:
       Texture:
@@ -9827,8 +8859,6 @@ Assets:
       []
     ReferencedBy:
       - "assets/gameplay/content_manifest.yaml"
-      - "assets/scenes/SideCombatBeastPath.wt"
-      - "assets/scenes/SideCombatVerticalSlice.wt"
     Import:
       Texture:
         Filter: "Linear"
@@ -9851,8 +8881,6 @@ Assets:
       []
     ReferencedBy:
       - "assets/gameplay/content_manifest.yaml"
-      - "assets/scenes/SideCombatBeastPath.wt"
-      - "assets/scenes/SideCombatVerticalSlice.wt"
     Import:
       Texture:
         Filter: "Linear"
@@ -9875,8 +8903,29 @@ Assets:
       []
     ReferencedBy:
       - "assets/gameplay/content_manifest.yaml"
+    Import:
+      Texture:
+        Filter: "Linear"
+        PixelsPerUnit: 100
+        Columns: 1
+        Rows: 1
+        CellWidth: 0
+        CellHeight: 0
+        PaddingX: 0
+        PaddingY: 0
+  - ID: 13353832304644389576
+    Path: "assets/vertical_slice/side_combat/ui/sidecombat_ui_sheet.png"
+    Type: "Texture"
+    DisplayName: "sidecombat_ui_sheet.png"
+    SizeBytes: 2732443
+    LastWriteTime: 134302821370166943
+    Tags:
+      []
+    References:
+      []
+    ReferencedBy:
+      - "assets/gameplay/content_manifest.yaml"
       - "assets/scenes/SideCombatBeastPath.wt"
-      - "assets/scenes/SideCombatVerticalSlice.wt"
     Import:
       Texture:
         Filter: "Linear"
@@ -16030,8 +15079,8 @@ Assets:
     Path: "assets/vertical_slice/ui/atlases/ui_atlas_params.yaml"
     Type: "Data"
     DisplayName: "ui_atlas_params.yaml"
-    SizeBytes: 1465
-    LastWriteTime: 134301486548160348
+    SizeBytes: 1470
+    LastWriteTime: 134306853708051205
     Tags:
       []
     References:
@@ -16052,6 +15101,10 @@ Assets:
       []
     ReferencedBy:
       - "assets/gameplay/content_manifest.yaml"
+      - "assets/scenes/VerticalSliceChapter3Preview.wt"
+      - "assets/scenes/VerticalSliceIntro.wt"
+      - "assets/scenes/VerticalSlicePostFake.wt"
+      - "assets/scenes/VisualNovelDemo.wt"
       - "assets/vertical_slice/ui/atlases/ui_atlas_params.yaml"
     Import:
       Texture:
@@ -16901,8 +15954,6 @@ Assets:
     References:
       []
     ReferencedBy:
-      - "assets/scenes/SideCombatBeastPath.wt"
-      - "assets/scenes/SideCombatVerticalSlice.wt"
       - "assets/scenes/VerticalSliceHub.wt"
       - "assets/scenes/VerticalSliceResult.wt"
       - "assets/vertical_slice/data/vertical_slice_manifest.json"
