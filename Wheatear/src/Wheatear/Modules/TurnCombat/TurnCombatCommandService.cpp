@@ -1,4 +1,4 @@
-#include "wtpch.h"
+﻿#include "wtpch.h"
 #include "TurnCombatCommandService.h"
 
 #include "TurnCombatActionService.h"

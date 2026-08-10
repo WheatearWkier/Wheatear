@@ -1,4 +1,4 @@
-#include "wtpch.h"
+﻿#include "wtpch.h"
 #include "GameProgress.h"
 
 #include "ProgressionContent.h"
@@ -20,7 +20,9 @@ namespace Wheatear::GameProgress {
     namespace {
 
         static constexpr int kMaxSaveSlots = 20;
-        static constexpr int kCurrentSaveVersion = 2;
+        static constexpr int kCurrentSaveVersion = 3;
+        static constexpr const char* kDefaultLoadScenePath = "assets/scenes/VerticalSliceIntro.wt";
+        static constexpr const char* kSaveLoadScenePath = "assets/scenes/VerticalSliceSaveLoad.wt";
 
         static int ClampSaveSlot(int slot)
         {
@@ -33,11 +35,171 @@ namespace Wheatear::GameProgress {
             return AssetPath::Resolve("assets/saves/progression_slot" + std::to_string(safeSlot) + ".wtsave");
         }
 
+        static std::filesystem::path GameRuntimeSavePathForSlot(int slot, const std::string& saveDirectory)
+        {
+            const int safeSlot = ClampSaveSlot(slot);
+            const std::string directory = saveDirectory.empty() ? "assets/saves" : saveDirectory;
+            return AssetPath::Resolve(directory) / ("slot" + std::to_string(safeSlot) + ".vnstate");
+        }
+
+        static std::string FormatSaveSlotNumber(int slot)
+        {
+            const int safeSlot = ClampSaveSlot(slot);
+            return safeSlot < 10
+                ? "0" + std::to_string(safeSlot)
+                : std::to_string(safeSlot);
+        }
+
         static std::string PayloadAfter(const std::string& value, const std::string& prefix)
         {
             return value.rfind(prefix, 0) == 0 ? value.substr(prefix.size()) : std::string{};
         }
 
+        static std::string ToLowerCopy(std::string value)
+        {
+            std::transform(value.begin(), value.end(), value.begin(),
+                [](unsigned char c) { return static_cast<char>(std::tolower(c)); });
+            return value;
+        }
+
+        static std::string NormalizeAssetLikePath(std::string value)
+        {
+            std::replace(value.begin(), value.end(), '\\', '/');
+            value.erase(std::remove(value.begin(), value.end(), '\r'), value.end());
+            value.erase(std::remove(value.begin(), value.end(), '\n'), value.end());
+
+            while (!value.empty() && (value.front() == '/' || value.front() == '.'))
+            {
+                if (value.rfind("./", 0) == 0)
+                {
+                    value.erase(0, 2);
+                    continue;
+                }
+                if (value.front() == '/')
+                {
+                    value.erase(value.begin());
+                    continue;
+                }
+                break;
+            }
+
+            const std::string marker = "assets/";
+            const size_t markerPos = ToLowerCopy(value).find(marker);
+            if (markerPos != std::string::npos)
+                value = value.substr(markerPos);
+
+            return value;
+        }
+
+        static std::string NormalizeScenePathString(const std::filesystem::path& path)
+        {
+            return NormalizeAssetLikePath(path.generic_string());
+        }
+
+        static bool IsSaveLoadScenePath(const std::string& scenePath)
+        {
+            return ToLowerCopy(NormalizeAssetLikePath(scenePath)) == ToLowerCopy(kSaveLoadScenePath);
+        }
+
+        static std::string UnescapeSavedField(const std::string& value)
+        {
+            std::string result;
+            result.reserve(value.size());
+            bool escaping = false;
+            for (char c : value)
+            {
+                if (escaping)
+                {
+                    switch (c)
+                    {
+                    case 'n': result += '\n'; break;
+                    case '|': result += '|'; break;
+                    case '\\': result += '\\'; break;
+                    default: result += c; break;
+                    }
+                    escaping = false;
+                    continue;
+                }
+
+                if (c == '\\')
+                {
+                    escaping = true;
+                    continue;
+                }
+
+                result += c;
+            }
+            if (escaping)
+                result += '\\';
+            return result;
+        }
+
+        static std::string ReadVNScriptSourceForSlot(int slot, const std::string& saveDirectory = "assets/saves")
+        {
+            std::ifstream input(GameRuntimeSavePathForSlot(slot, saveDirectory), std::ios::binary);
+            if (!input.is_open())
+                return {};
+
+            std::string line;
+            while (std::getline(input, line))
+            {
+                if (line.rfind("SOURCE ", 0) == 0)
+                    return UnescapeSavedField(line.substr(7));
+            }
+            return {};
+        }
+
+        static std::string ScenePathFromVNScriptPath(const std::string& scriptPath)
+        {
+            const std::string normalized = ToLowerCopy(NormalizeAssetLikePath(scriptPath));
+            if (normalized.find("vertical_slice_chapter3_preview.vn") != std::string::npos)
+                return "assets/scenes/VerticalSliceChapter3Preview.wt";
+            if (normalized.find("vertical_slice_post_fake.vn") != std::string::npos)
+                return "assets/scenes/VerticalSlicePostFake.wt";
+            if (normalized.find("vertical_slice_intro.vn") != std::string::npos)
+                return "assets/scenes/VerticalSliceIntro.wt";
+            return {};
+        }
+
+        static std::string ResolveScenePathForSave()
+        {
+            const State& state = GetState();
+            const std::string current = NormalizeAssetLikePath(state.CurrentScenePath);
+            const std::string previous = NormalizeAssetLikePath(state.PreviousScenePath);
+
+            if (IsSaveLoadScenePath(current) && !previous.empty())
+                return previous;
+            if (!current.empty())
+                return current;
+            if (!previous.empty() && !IsSaveLoadScenePath(previous))
+                return previous;
+            return kDefaultLoadScenePath;
+        }
+
+        static std::string ResolveLoadScenePathForSlot(int slot, const std::string& requestedScenePath)
+        {
+            const std::string requested = NormalizeAssetLikePath(requestedScenePath);
+            if (!requested.empty())
+                return requested;
+
+            const int safeSlot = ClampSaveSlot(slot);
+            const SaveSlotInfo info = GetSaveSlotInfo(safeSlot);
+            if (!info.ScenePath.empty())
+                return info.ScenePath;
+
+            const std::string vnScene = ScenePathFromVNScriptPath(ReadVNScriptSourceForSlot(safeSlot));
+            if (!vnScene.empty())
+                return vnScene;
+
+            const State& state = GetState();
+            const std::string current = NormalizeAssetLikePath(state.CurrentScenePath);
+            const std::string previous = NormalizeAssetLikePath(state.PreviousScenePath);
+            if (IsSaveLoadScenePath(current) && !previous.empty())
+                return previous;
+            if (!current.empty() && !IsSaveLoadScenePath(current))
+                return current;
+            return kDefaultLoadScenePath;
+        }
         static std::string JoinSet(const std::unordered_set<std::string>& values)
         {
             std::vector<std::string> sorted(values.begin(), values.end());
@@ -435,6 +597,31 @@ namespace Wheatear::GameProgress {
         ApplySettingsToRuntime();
     }
 
+    void SetSceneTransitionContext(const std::filesystem::path& previousScenePath, const std::filesystem::path& currentScenePath)
+    {
+        State& state = GetState();
+        const std::string previous = NormalizeScenePathString(previousScenePath);
+        std::string current = NormalizeScenePathString(currentScenePath);
+        if (current.empty())
+            current = kDefaultLoadScenePath;
+
+        if (!previous.empty() && previous != current)
+            state.PreviousScenePath = previous;
+        else if (!state.CurrentScenePath.empty() && state.CurrentScenePath != current)
+            state.PreviousScenePath = state.CurrentScenePath;
+
+        state.CurrentScenePath = current;
+    }
+
+    std::string GetCurrentScenePath()
+    {
+        return NormalizeAssetLikePath(GetState().CurrentScenePath);
+    }
+
+    std::string GetScenePathForSave()
+    {
+        return ResolveScenePathForSave();
+    }
     void ApplySettingsToRuntime()
     {
         ProgressionSettingsCommandService::ApplyToRuntime();
@@ -445,9 +632,43 @@ namespace Wheatear::GameProgress {
         return kMaxSaveSlots;
     }
 
+    std::filesystem::path GetProgressSavePath(int slot)
+    {
+        return SavePathForSlot(slot);
+    }
+
+    std::filesystem::path GetGameRuntimeSavePath(int slot, const std::string& saveDirectory)
+    {
+        return GameRuntimeSavePathForSlot(slot, saveDirectory);
+    }
+
+    bool ClearGameRuntimeSaveSlot(int slot, const std::string& saveDirectory)
+    {
+        std::error_code error;
+        const std::filesystem::path path = GameRuntimeSavePathForSlot(slot, saveDirectory);
+        const bool exists = std::filesystem::exists(path, error);
+        if (error)
+            return false;
+        if (!exists)
+            return true;
+
+        std::filesystem::remove(path, error);
+        return !error;
+    }
+
     bool IsSaveSlotOccupied(int slot)
     {
         return std::filesystem::exists(SavePathForSlot(slot));
+    }
+
+    bool IsGameRuntimeSaveSlotOccupied(int slot, const std::string& saveDirectory)
+    {
+        return std::filesystem::exists(GameRuntimeSavePathForSlot(slot, saveDirectory));
+    }
+
+    bool IsGameSaveSlotOccupied(int slot, const std::string& saveDirectory)
+    {
+        return IsSaveSlotOccupied(slot) || IsGameRuntimeSaveSlotOccupied(slot, saveDirectory);
     }
 
     SaveSlotInfo GetSaveSlotInfo(int slot)
@@ -479,6 +700,8 @@ namespace Wheatear::GameProgress {
                 info.PlayerLevel = ParseInt(value, info.PlayerLevel);
             else if (key == "gold")
                 info.Gold = ParseInt(value, info.Gold);
+            else if (key == "scenePath")
+                info.ScenePath = NormalizeAssetLikePath(value);
         }
 
         return info;
@@ -499,8 +722,9 @@ namespace Wheatear::GameProgress {
             return false;
         }
 
-        output << "schema=wheatear.progress.v2\n";
+        output << "schema=wheatear.progress.v3\n";
         output << "saveVersion=" << kCurrentSaveVersion << "\n";
+        output << "scenePath=" << ResolveScenePathForSave() << "\n";
         output << "chapter=" << state.CurrentChapter << "\n";
         output << "objective=" << state.Objective << "\n";
         output << "playerLevel=" << state.PlayerLevel << "\n";
@@ -563,6 +787,7 @@ namespace Wheatear::GameProgress {
 
             if (key == "chapter") loaded.CurrentChapter = ParseInt(value, loaded.CurrentChapter);
             else if (key == "objective") loaded.Objective = value;
+            else if (key == "scenePath") loaded.CurrentScenePath = NormalizeAssetLikePath(value);
             else if (key == "playerLevel") loaded.PlayerLevel = ParseInt(value, loaded.PlayerLevel);
             else if (key == "experience") loaded.Experience = ParseInt(value, loaded.Experience);
             else if (key == "experienceToNext") loaded.ExperienceToNext = ParseInt(value, loaded.ExperienceToNext);
@@ -1112,26 +1337,6 @@ namespace Wheatear::GameProgress {
             state.CurrentChapter = chapter;
             state.LastResultMessage = "当前章节切换到第 " + std::to_string(chapter) + " 章。";
             result.Success = true;
-        }
-        else if (action == "save_1" || action == "save_slot1")
-        {
-            result.Changed = SaveSlot(1);
-            result.Success = result.Changed;
-        }
-        else if (auto slot = ParseTrailingSlot(action, "save_slot"))
-        {
-            result.Changed = SaveSlot(*slot);
-            result.Success = result.Changed;
-        }
-        else if (action == "load_1" || action == "load_slot1")
-        {
-            result.Changed = LoadSlot(1);
-            result.Success = result.Changed;
-        }
-        else if (auto slot = ParseTrailingSlot(action, "load_slot"))
-        {
-            result.Changed = LoadSlot(*slot);
-            result.Success = result.Changed;
         }
         else if (action == "select_support_mentor")
         {
@@ -1694,14 +1899,11 @@ namespace Wheatear::GameProgress {
     {
         const State& state = GetState();
         std::ostringstream stream;
-        stream << "当前进度\n";
-        stream << "章节: 第" << state.CurrentChapter << "章\n";
-        stream << "主角: Lv" << state.PlayerLevel << "  经验 "
-               << state.Experience << "/" << state.ExperienceToNext << "\n";
-        stream << "魔剑: Lv" << state.MagicSwordLevel << "  旅人护衣 +" << state.TravelerArmorLevel << "\n";
-        stream << "材料: " << BuildMaterialInventoryText() << "\n";
-        stream << "支援: " << state.ActiveSupportCharacterId << "\n\n";
-        stream << state.LastResultMessage;
+        stream << "游戏公共存档\n";
+        stream << "保存和读取在整个 Sandbox 内共用同一套槽位。VN 槽位会记录剧情位置，其他场景会记录当前场景和成长进度。\n";
+        stream << "当前：第 " << state.CurrentChapter << " 章 / 主角 Lv" << state.PlayerLevel
+               << " / 魔剑 Lv" << state.MagicSwordLevel << "\n";
+        stream << (state.LastResultMessage.empty() ? "请选择槽位继续。" : state.LastResultMessage);
         return stream.str();
     }
 
@@ -1714,7 +1916,7 @@ namespace Wheatear::GameProgress {
 
         std::ostringstream stream;
         stream << "槽位 " << safeSlot
-               << "  第" << info.Chapter << "章"
+               << "  第 " << info.Chapter << " 章"
                << "  Lv" << info.PlayerLevel
                << "  金币 " << info.Gold;
         return stream.str();
@@ -1728,7 +1930,54 @@ namespace Wheatear::GameProgress {
 
         if (!info.Objective.empty())
             return info.Objective;
-        return "已有成长进度，可读取或覆盖。";
+        return "已有游戏进度，可读取或覆盖。";
+    }
+
+    std::string BuildGameSaveSlotButtonText(int slot, bool saveMode, const std::string& saveDirectory)
+    {
+        const int safeSlot = ClampSaveSlot(slot);
+        const bool hasRuntimeState = IsGameRuntimeSaveSlotOccupied(safeSlot, saveDirectory);
+        const bool hasProgress = IsSaveSlotOccupied(safeSlot);
+        const bool occupied = hasRuntimeState || hasProgress;
+
+        std::ostringstream stream;
+        stream << "槽位 " << FormatSaveSlotNumber(safeSlot)
+               << "  " << (occupied ? "已有存档" : "空槽") << "\n";
+
+        if (!occupied)
+            stream << (saveMode ? "点击保存当前进度" : "没有可读取的存档");
+        else if (saveMode)
+            stream << "点击后确认是否覆盖";
+        else if (hasProgress)
+            stream << BuildSaveSlotSummary(safeSlot);
+        else
+            stream << "已有剧情位置存档";
+
+        return stream.str();
+    }
+
+    std::string BuildGameSaveSlotDetails(int slot, const std::string& saveDirectory)
+    {
+        const int safeSlot = ClampSaveSlot(slot);
+        const bool hasRuntimeState = IsGameRuntimeSaveSlotOccupied(safeSlot, saveDirectory);
+        const bool hasProgress = IsSaveSlotOccupied(safeSlot);
+        if (!hasRuntimeState && !hasProgress)
+            return "空槽。";
+
+        const SaveSlotInfo info = GetSaveSlotInfo(safeSlot);
+        if (info.Exists && !info.Objective.empty())
+            return info.Objective;
+        if (hasRuntimeState && !hasProgress)
+            return "已有剧情位置状态，可从同槽读取。";
+        if (hasRuntimeState)
+            return "已有完整存档，可读取或覆盖。";
+        return "已有成长进度存档，可读取或覆盖。";
+    }
+
+    std::string BuildLoadGameCommand(int slot, const std::string& scenePath)
+    {
+        const std::string targetScene = ResolveLoadScenePathForSlot(slot, scenePath);
+        return "loadgame:" + targetScene + ":" + std::to_string(ClampSaveSlot(slot));
     }
 
     std::string GetSaveButtonText(int slot)
@@ -1739,9 +1988,8 @@ namespace Wheatear::GameProgress {
     std::string GetLoadButtonText(int slot)
     {
         const int safeSlot = ClampSaveSlot(slot);
-        return std::filesystem::exists(SavePathForSlot(safeSlot))
+        return IsGameSaveSlotOccupied(safeSlot)
             ? "读取 " + std::to_string(safeSlot) + " 号槽"
             : std::to_string(safeSlot) + " 号槽为空";
     }
-
 } // namespace Wheatear::GameProgress

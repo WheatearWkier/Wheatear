@@ -1,4 +1,4 @@
-#include "RuntimeSceneLayer.h"
+﻿#include "RuntimeSceneLayer.h"
 
 #include "Wheatear/Core/Application.h"
 #include "Wheatear/Core/AssetPath.h"
@@ -113,6 +113,7 @@ void RuntimeSceneLayer::LoadScene(const std::filesystem::path& requestedPath)
         m_RuntimeStarted = false;
     }
 
+    const std::filesystem::path previousScenePath = m_ScenePath;
     m_ScenePath = ResolveScenePath(sceneRequest);
     m_ActiveScene = Wheatear::CreateRef<Wheatear::Scene>();
 
@@ -123,6 +124,8 @@ void RuntimeSceneLayer::LoadScene(const std::filesystem::path& requestedPath)
         m_ActiveScene = nullptr;
         return;
     }
+
+    Wheatear::GameProgress::SetSceneTransitionContext(previousScenePath, sceneRequest);
 
     ApplyPendingVisualNovelLoad();
 

@@ -42,6 +42,7 @@ namespace Wheatear {
                 || StartsWith(line, "newgame:")
                 || StartsWith(line, "loadgame:")
                 || StartsWith(line, "progression:")
+                || StartsWith(line, "gamesave:")
                 || StartsWith(line, "ui:")
                 || StartsWith(line, "event:");
         }

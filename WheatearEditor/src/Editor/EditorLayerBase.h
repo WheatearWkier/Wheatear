@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 #include "Wheatear/Core/Core.h"
 #include "Wheatear/Core/Layer.h"
@@ -152,6 +152,7 @@ namespace Wheatear {
         Ref<Scene> m_ActiveScene;
         Ref<Scene> m_EditorScene;
         std::filesystem::path m_EditorScenePath;
+        std::filesystem::path m_PlayScenePath;
         SceneState m_SceneState = SceneState::Edit;
 
         Entity m_HoveredEntity;

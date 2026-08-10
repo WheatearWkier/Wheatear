@@ -333,6 +333,9 @@ namespace Wheatear::TurnCombatActionService {
                         true);
                 }
                 TurnCombatVisualService::MarkHit(target);
+                PlayTurnSound(
+                    AssetAliasRegistry::Path("turn.audio.hit"),
+                    actorCombatant.Team == (int)TurnCombatTeam::Enemy ? 0.88f : 1.00f);
             }
         }
 
@@ -343,7 +346,8 @@ namespace Wheatear::TurnCombatActionService {
         else
             stream << "，造成 " << (int)total << " 伤害";
         level.RuntimeMessage = stream.str();
-        PlayTurnSound(ResolveSkillSound(*skill, actorCombatant), 0.52f);
+        if (skill->HealPower > 0.0f)
+            PlayTurnSound(ResolveSkillSound(*skill, actorCombatant), 0.56f);
         WAO::ActionDebugHistory::Record(ledger, true, "Turn skill applied");
     }
 

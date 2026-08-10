@@ -39,6 +39,8 @@ namespace Wheatear {
             bool SaveLoadSaveMode = true;
             int PendingOverwriteSlot = 0;
             bool DialogueHidden = false;
+            bool SkipMode = false;
+            float SkipTimer = 0.0f;
             float SystemMessageTimer = 0.0f;
             std::string SystemMessage;
             int LoadedAutoLoadSlot = 0;
@@ -54,6 +56,8 @@ namespace Wheatear {
         void UpdateInput(Scene* scene, VisualNovelComponent& component, RuntimeState& state);
         bool ExecuteCommand(Scene* scene, VisualNovelComponent& component, RuntimeState& state, const std::string& command);
         void UpdateSceneBindings(Scene* scene, const VisualNovelComponent& component, RuntimeState& state);
+        void StopSkip(RuntimeState& state);
+        void UpdateSkip(RuntimeState& state, float deltaSeconds);
         void StopBGM(RuntimeState& state);
         void UpdateBGM(Scene* scene, const VisualNovelComponent& component, RuntimeState& state);
         void UpdateMusicNotice(Scene* scene, const VisualNovelComponent& component, RuntimeState& state, float deltaSeconds);

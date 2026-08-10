@@ -18,7 +18,6 @@ namespace Wheatear::ProgressionSaveLoadPageService {
 
         using GameplayUILayoutService::FindAuthoredButton;
         using GameplayUILayoutService::FindAuthoredScrollView;
-        using GameplayUILayoutService::FindAuthoredText;
         using GameplayUILayoutService::SetButtonCommand;
 
         static bool HasEntity(Scene* scene, const std::string& name)
@@ -26,53 +25,58 @@ namespace Wheatear::ProgressionSaveLoadPageService {
             return static_cast<bool>(FindEntityByName(scene, name));
         }
 
-        static void HideLegacyPagedSlots(Scene* scene)
+        static void UpdateConfirmPanel(Scene* scene, bool visible, int pendingOverwriteSlot)
         {
-            SetWidgetVisible(scene, "SaveLoad_SlotCard_1", false);
-            SetWidgetVisible(scene, "SaveLoad_SlotIcon_1", false);
-            SetWidgetVisible(scene, "SaveLoad_Button_1", false);
-            SetWidgetVisible(scene, "SaveLoad_Button_2", false);
-            SetWidgetVisible(scene, "SaveLoad_SlotCard_2", false);
-            SetWidgetVisible(scene, "SaveLoad_EmptySlotText", false);
-            SetWidgetVisible(scene, "SaveLoad_Button_3", false);
-            SetWidgetVisible(scene, "SaveLoad_Button_4", false);
-            SetWidgetVisible(scene, "SaveLoad_PageText", false);
-            SetWidgetVisible(scene, "SaveLoad_PagePrev", false);
-            SetWidgetVisible(scene, "SaveLoad_PageNext", false);
-            SetWidgetVisible(scene, "SaveLoad_LockedScroll", false);
+            SetWidgetVisible(scene, "SaveLoad_ConfirmPanel", visible);
+            SetWidgetVisible(scene, "SaveLoad_ConfirmText", visible);
+            SetWidgetVisible(scene, "SaveLoad_ConfirmYes", visible);
+            SetWidgetVisible(scene, "SaveLoad_ConfirmNo", visible);
+
+            if (!visible)
+                return;
+
+            SetText(scene, "SaveLoad_ConfirmText",
+                pendingOverwriteSlot > 0
+                    ? "该槽位已有存档。\n是否覆盖 " + std::to_string(pendingOverwriteSlot) + " 号槽？"
+                    : "");
+            SetButtonCommand(scene, "SaveLoad_ConfirmYes", "gamesave:confirm_overwrite");
+            SetButtonCommand(scene, "SaveLoad_ConfirmNo", "gamesave:cancel_overwrite");
         }
 
     } // namespace
 
-    void EnsureLayout(Scene* scene)
+    void EnsureLayout(Scene* scene, bool saveMode, int pendingOverwriteSlot)
     {
-        if (!HasEntity(scene, "SaveLoad_Status"))
-            return;
-
-        if (HasEntity(scene, "SaveLoad_StatusScroll"))
-            FindAuthoredScrollView(scene, "SaveLoad_StatusScroll");
-
         if (!HasEntity(scene, "SaveLoad_SlotScroll"))
             return;
 
-        HideLegacyPagedSlots(scene);
+        SetWidgetVisible(scene, "SaveLoad_MainPanel", true);
+        SetWidgetVisible(scene, "SaveLoad_Icon", true);
+        SetWidgetVisible(scene, "SaveLoad_Title", true);
+        SetWidgetVisible(scene, "SaveLoad_Close", true);
+        SetWidgetVisible(scene, "SaveLoad_SlotScroll", true);
         FindAuthoredScrollView(scene, "SaveLoad_SlotScroll");
+        FindAuthoredButton(scene, "SaveLoad_Close");
+
+        SetText(scene, "SaveLoad_Title", saveMode ? "保存" : "读取");
+        SetText(scene, "SaveLoad_Close", "关闭");
+        SetButtonCommand(scene, "SaveLoad_Close", "gamesave:close");
 
         for (int slot = 1; slot <= GameProgress::GetMaxSaveSlots(); ++slot)
         {
-            const std::string prefix = "SaveLoad_Slot_" + std::to_string(slot);
-            if (FindAuthoredText(scene, prefix + "_Summary"))
-            {
-                SetText(scene,
-                    prefix + "_Summary",
-                    GameProgress::BuildSaveSlotSummary(slot) + "\n" + GameProgress::BuildSaveSlotDetails(slot));
-            }
+            const std::string entityName = "SaveLoad_Slot_" + std::to_string(slot);
+            if (!FindAuthoredButton(scene, entityName))
+                continue;
 
-            if (FindAuthoredButton(scene, prefix + "_Save"))
-                SetButtonCommand(scene, prefix + "_Save", "progression:save_slot" + std::to_string(slot));
-            if (FindAuthoredButton(scene, prefix + "_Load"))
-                SetButtonCommand(scene, prefix + "_Load", "progression:load_slot" + std::to_string(slot));
+            SetWidgetVisible(scene, entityName, true);
+            SetText(scene, entityName, GameProgress::BuildGameSaveSlotButtonText(slot, saveMode));
+            SetButtonCommand(scene, entityName,
+                saveMode
+                    ? "gamesave:slot_save_" + std::to_string(slot)
+                    : "gamesave:load_" + std::to_string(slot));
         }
+
+        UpdateConfirmPanel(scene, saveMode && pendingOverwriteSlot > 0, pendingOverwriteSlot);
     }
 
 } // namespace Wheatear::ProgressionSaveLoadPageService

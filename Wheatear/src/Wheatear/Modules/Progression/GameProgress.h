@@ -1,7 +1,8 @@
-#pragma once
+﻿#pragma once
 
 #include "Wheatear/Core/Core.h"
 
+#include <filesystem>
 #include <string>
 #include <unordered_map>
 #include <unordered_set>
@@ -53,6 +54,7 @@ namespace Wheatear::GameProgress {
         int PlayerLevel = 1;
         int Gold = 0;
         std::string Objective;
+        std::string ScenePath;
     };
 
     struct DungeonResult
@@ -74,6 +76,8 @@ namespace Wheatear::GameProgress {
     {
         int CurrentChapter = 2;
         std::string Objective;
+        std::string CurrentScenePath;
+        std::string PreviousScenePath;
 
         int PlayerLevel = 1;
         int Experience = 0;
@@ -108,9 +112,17 @@ namespace Wheatear::GameProgress {
 
     WHEATEAR_API State& GetState();
     WHEATEAR_API void ResetForNewGame();
+    WHEATEAR_API void SetSceneTransitionContext(const std::filesystem::path& previousScenePath, const std::filesystem::path& currentScenePath);
+    WHEATEAR_API std::string GetCurrentScenePath();
+    WHEATEAR_API std::string GetScenePathForSave();
     WHEATEAR_API void ApplySettingsToRuntime();
     WHEATEAR_API int GetMaxSaveSlots();
+    WHEATEAR_API std::filesystem::path GetProgressSavePath(int slot);
+    WHEATEAR_API std::filesystem::path GetGameRuntimeSavePath(int slot, const std::string& saveDirectory = "assets/saves");
+    WHEATEAR_API bool ClearGameRuntimeSaveSlot(int slot, const std::string& saveDirectory = "assets/saves");
     WHEATEAR_API bool IsSaveSlotOccupied(int slot);
+    WHEATEAR_API bool IsGameRuntimeSaveSlotOccupied(int slot, const std::string& saveDirectory = "assets/saves");
+    WHEATEAR_API bool IsGameSaveSlotOccupied(int slot, const std::string& saveDirectory = "assets/saves");
     WHEATEAR_API SaveSlotInfo GetSaveSlotInfo(int slot);
     WHEATEAR_API bool SaveSlot(int slot);
     WHEATEAR_API bool LoadSlot(int slot);
@@ -180,6 +192,9 @@ namespace Wheatear::GameProgress {
     WHEATEAR_API std::string BuildSaveLoadStatus();
     WHEATEAR_API std::string BuildSaveSlotSummary(int slot);
     WHEATEAR_API std::string BuildSaveSlotDetails(int slot);
+    WHEATEAR_API std::string BuildGameSaveSlotButtonText(int slot, bool saveMode, const std::string& saveDirectory = "assets/saves");
+    WHEATEAR_API std::string BuildGameSaveSlotDetails(int slot, const std::string& saveDirectory = "assets/saves");
+    WHEATEAR_API std::string BuildLoadGameCommand(int slot, const std::string& scenePath = "");
     WHEATEAR_API std::string GetSaveButtonText(int slot);
     WHEATEAR_API std::string GetLoadButtonText(int slot);
 

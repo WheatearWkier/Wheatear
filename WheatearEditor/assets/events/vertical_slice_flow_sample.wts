@@ -15,9 +15,9 @@ event open_skill_tree:
 end
 
 event save_slot_1:
-    progression:save_1
+    gamesave:slot_save_1
 end
 
 event load_slot_1:
-    progression:load_1
+    gamesave:load_1
 end

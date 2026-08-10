@@ -7,11 +7,17 @@
 #include "ProgressionSaveLoadPageService.h"
 #include "ProgressionSkillTreePageService.h"
 #include "ProgressionSettingsPageService.h"
+#include "Wheatear/Modules/VisualNovel/VisualNovelComponents.h"
+#include "Wheatear/Runtime/CommandBus.h"
+#include "Wheatear/Runtime/SceneTransitionService.h"
 #include "Wheatear/Scene/Entity.h"
 #include "Wheatear/Scene/SceneQueries.h"
 #include "Wheatear/Scene/Scene.h"
 #include "Wheatear/UI/UIRuntimeTools.h"
 
+#include <algorithm>
+#include <cctype>
+#include <optional>
 #include <string>
 
 namespace Wheatear {
@@ -22,11 +28,159 @@ namespace Wheatear {
         using UIRuntimeTools::SetProgress;
         using UIRuntimeTools::SetText;
 
+        static constexpr const char* kSaveLoadScenePath = "assets/scenes/VerticalSliceSaveLoad.wt";
+
+        static bool s_SaveLoadSaveMode = true;
+        static int s_PendingOverwriteSlot = 0;
+        static std::optional<bool> s_PendingSaveLoadMode;
+
         static bool HasEntity(Scene* scene, const std::string& name)
         {
             return static_cast<bool>(FindEntityByName(scene, name));
         }
 
+        static bool HasVisualNovelComponent(Scene* scene)
+        {
+            return scene && !scene->GetRegistry().view<VisualNovelComponent>().empty();
+        }
+
+        static std::string ToLower(std::string value)
+        {
+            std::transform(value.begin(), value.end(), value.begin(),
+                [](unsigned char c) { return static_cast<char>(std::tolower(c)); });
+            return value;
+        }
+
+        static bool IsSaveLoadScenePath(const std::string& scenePath)
+        {
+            const std::string normalized = ToLower(scenePath);
+            return normalized.find("verticalslicesaveload.wt") != std::string::npos;
+        }
+
+        static std::string GetSaveLoadCloseTargetScene()
+        {
+            const auto& state = GameProgress::GetState();
+            if (!state.PreviousScenePath.empty() && !IsSaveLoadScenePath(state.PreviousScenePath))
+                return state.PreviousScenePath;
+            if (!state.CurrentScenePath.empty() && !IsSaveLoadScenePath(state.CurrentScenePath))
+                return state.CurrentScenePath;
+            return "assets/scenes/VerticalSliceIntro.wt";
+        }
+
+        static std::optional<int> ParseTrailingSlot(const std::string& action, const std::string& prefix)
+        {
+            if (action.rfind(prefix, 0) != 0)
+                return std::nullopt;
+
+            const std::string payload = action.substr(prefix.size());
+            if (payload.empty())
+                return std::nullopt;
+
+            for (char c : payload)
+            {
+                if (!std::isdigit(static_cast<unsigned char>(c)))
+                    return std::nullopt;
+            }
+
+            return std::clamp(std::stoi(payload), 1, GameProgress::GetMaxSaveSlots());
+        }
+
+        static bool SaveProgressionOnlySlot(int slot)
+        {
+            if (!GameProgress::ClearGameRuntimeSaveSlot(slot))
+            {
+                GameProgress::GetState().LastResultMessage = "存档失败：无法清理旧剧情状态。";
+                return false;
+            }
+
+            return GameProgress::SaveSlot(slot);
+        }
+
+        static void UpdateGameSaveCommands(Scene* scene)
+        {
+            if (!scene || HasVisualNovelComponent(scene))
+                return;
+
+            for (const std::string& command : CommandBus::DrainGameplayCommands("gamesave:"))
+            {
+                const std::string action = ToLower(command.substr(9));
+                if (action == "open_save_menu" || action == "open_save_load" || action == "open_menu")
+                {
+                    s_SaveLoadSaveMode = true;
+                    s_PendingSaveLoadMode = true;
+                    s_PendingOverwriteSlot = 0;
+                    SceneTransitionService::RequestLoadScene(kSaveLoadScenePath, command);
+                    continue;
+                }
+
+                if (action == "open_load_menu")
+                {
+                    s_SaveLoadSaveMode = false;
+                    s_PendingSaveLoadMode = false;
+                    s_PendingOverwriteSlot = 0;
+                    SceneTransitionService::RequestLoadScene(kSaveLoadScenePath, command);
+                    continue;
+                }
+
+                if (action == "close")
+                {
+                    s_PendingOverwriteSlot = 0;
+                    s_PendingSaveLoadMode.reset();
+                    SceneTransitionService::RequestLoadScene(GetSaveLoadCloseTargetScene(), command);
+                    continue;
+                }
+
+                if (action == "confirm_overwrite")
+                {
+                    if (s_PendingOverwriteSlot > 0)
+                        SaveProgressionOnlySlot(s_PendingOverwriteSlot);
+                    s_PendingOverwriteSlot = 0;
+                    continue;
+                }
+
+                if (action == "cancel_overwrite")
+                {
+                    s_PendingOverwriteSlot = 0;
+                    GameProgress::GetState().LastResultMessage = "已取消覆盖。";
+                    continue;
+                }
+
+                if (const auto slot = ParseTrailingSlot(action, "slot_save_"))
+                {
+                    s_SaveLoadSaveMode = true;
+                    if (GameProgress::IsGameSaveSlotOccupied(*slot))
+                    {
+                        s_PendingOverwriteSlot = *slot;
+                        GameProgress::GetState().LastResultMessage =
+                            "该槽位已有存档。\n是否覆盖 " + std::to_string(*slot) + " 号槽？";
+                    }
+                    else
+                    {
+                        s_PendingOverwriteSlot = 0;
+                        SaveProgressionOnlySlot(*slot);
+                    }
+                    continue;
+                }
+
+                if (const auto slot = ParseTrailingSlot(action, "load_"))
+                {
+                    s_SaveLoadSaveMode = false;
+                    s_PendingOverwriteSlot = 0;
+                    if (GameProgress::IsGameSaveSlotOccupied(*slot))
+                    {
+                        GameProgress::GetState().LastResultMessage =
+                            "已读取 " + std::to_string(*slot) + " 号槽。";
+                        CommandBus::Execute(scene, GameProgress::BuildLoadGameCommand(*slot));
+                    }
+                    else
+                    {
+                        GameProgress::GetState().LastResultMessage =
+                            std::to_string(*slot) + " 号槽没有存档。";
+                    }
+                    continue;
+                }
+            }
+        }
         static void UpdateHub(Scene* scene)
         {
             if (!HasEntity(scene, "Hub_Status"))
@@ -48,7 +202,7 @@ namespace Wheatear {
             SetText(scene, "Result_Title", GameProgress::BuildResultTitle());
             SetText(scene, "Result_Stats", GameProgress::BuildResultStats());
             SetText(scene, "Result_Rewards", state.LastDungeonResult.Valid
-                ? "掉落奖励\n悬停图标查看用途与背包数量。\n下一步：回据点升级，或重刷练习连击。"
+                ? "掉落奖励\n悬停图标查看用途与数量。\n下一步：回据点升级，或者重刷练习连击。"
                 : "还没有掉落记录。\n完成一个地下城后，这里会显示材料图标。");
             SetProgress(scene, "Result_EXPBar",
                 static_cast<float>(state.Experience),
@@ -137,14 +291,10 @@ namespace Wheatear {
 
         static void UpdateSaveLoad(Scene* scene)
         {
-            if (!HasEntity(scene, "SaveLoad_Status"))
+            if (!HasEntity(scene, "SaveLoad_SlotScroll"))
                 return;
 
-            ProgressionSaveLoadPageService::EnsureLayout(scene);
-            SetText(scene, "SaveLoad_Subtitle", GameProgress::BuildHubSubtitle());
-            SetText(scene, "SaveLoad_Status", GameProgress::BuildSaveLoadStatus());
-            SetText(scene, "SaveLoad_Button_1", GameProgress::GetSaveButtonText(1));
-            SetText(scene, "SaveLoad_Button_2", GameProgress::GetLoadButtonText(1));
+            ProgressionSaveLoadPageService::EnsureLayout(scene, s_SaveLoadSaveMode, s_PendingOverwriteSlot);
         }
 
         static void UpdateProgressionPages(Scene* scene)
@@ -164,12 +314,24 @@ namespace Wheatear {
 
     void ProgressionSystem::OnRuntimeStart(Scene* scene)
     {
+        if (s_PendingSaveLoadMode)
+        {
+            s_SaveLoadSaveMode = *s_PendingSaveLoadMode;
+            s_PendingSaveLoadMode.reset();
+        }
+        else
+        {
+            s_SaveLoadSaveMode = true;
+        }
+
+        s_PendingOverwriteSlot = 0;
         ProgressionSkillTreePageService::ResetCache();
         UpdateProgressionPages(scene);
     }
 
     void ProgressionSystem::OnUpdateRuntime(Scene* scene, Timestep)
     {
+        UpdateGameSaveCommands(scene);
         UpdateProgressionPages(scene);
     }
 

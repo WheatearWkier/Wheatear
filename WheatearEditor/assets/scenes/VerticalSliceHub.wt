@@ -610,7 +610,7 @@ Entities:
       TexturePath: assets/vertical_slice/ui/icons/icon_save.png
   - Entity: 950000125
     TagComponent:
-      Tag: Hub_Button_SaveLoad
+      Tag: Hub_Button_Save
     TransformComponent:
       Translation: [0, 0, 0]
       Rotation: [0, 0, 0]
@@ -618,7 +618,7 @@ Entities:
     UIWidgetComponent:
       Visible: true
       Position: [0.128, 0.7630000000000002]
-      Size: [0.3, 0.044]
+      Size: [0.142, 0.044]
       Rotation: 0
       Anchor: 0
       SortOrder: 40
@@ -638,8 +638,46 @@ Entities:
       PressedColor: [0.22, 0.16, 0.09, 1]
       OnClickFunction: event:go_save_load
     UITextComponent:
-      Text: "保存读取"
+      Text: "保存"
       Color: [1, 0.94, 0.82, 1]
+      FontSize: 23
+      FontPath: assets/fonts/wqy-microhei.ttc
+      ShadowColor: [0.02, 0.02, 0.025, 0.72]
+      ShadowOffset: [1.8, 1.8]
+      OutlineColor: [0.01, 0.01, 0.012, 0.82]
+      OutlineThickness: 1.2
+  - Entity: 950001001
+    TagComponent:
+      Tag: Hub_Button_Load
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    UIWidgetComponent:
+      Visible: true
+      Position: [0.286, 0.7630000000000002]
+      Size: [0.142, 0.044]
+      Rotation: 0
+      Anchor: 0
+      SortOrder: 40
+      ParentEntity: 950009002
+    UIAnimatorComponent:
+      Preset: "hover_pulse"
+      PlayOnStart: true
+      Loop: false
+      Delay: 0.0
+      Duration: 0.18
+      Amplitude: 0.035
+      Speed: 1
+      FromOffset: [0, 0.035]
+    UIButtonComponent:
+      NormalColor: [0.1, 0.29, 0.28, 0.92]
+      HoverColor: [0.17, 0.45, 0.42, 0.98]
+      PressedColor: [0.07, 0.18, 0.18, 1]
+      OnClickFunction: event:go_load_save
+    UITextComponent:
+      Text: "读取"
+      Color: [0.93, 1.0, 0.92, 1]
       FontSize: 23
       FontPath: assets/fonts/wqy-microhei.ttc
       ShadowColor: [0.02, 0.02, 0.025, 0.72]

@@ -9,7 +9,7 @@ event menu_new_game:
 end
 
 event menu_load_game:
-    loadgame:assets/scenes/VerticalSliceIntro.wt:1
+    gamesave:open_load_menu
 end
 
 event menu_quit:
@@ -31,14 +31,12 @@ end
 
 event fake_combat_victory:
     progression:set_flag:FLAG_CH01_FAKE_COMBAT_CLEARED
-    progression:save_1
     wait 0.10
     scene:assets/scenes/VerticalSliceTurnCombat.wt
 end
 
 event turn_combat_victory:
     progression:set_flag:FLAG_CH01_TURN_COMBAT_CLEARED
-    progression:save_1
     wait 0.10
     scene:assets/scenes/VerticalSlicePostFake.wt
 end
@@ -58,7 +56,6 @@ end
 
 event tactical_combat_victory:
     progression:set_flag:FLAG_CH01_TACTICAL_COMBAT_CLEARED
-    progression:save_1
     wait 0.10
     scene:assets/scenes/VerticalSliceHub.wt
 end
@@ -70,7 +67,6 @@ end
 event tutorial_side_combat_start:
     progression:set_flag:FLAG_CH02_TUTORIAL_STARTED
     progression:set_active_dungeon:CH02_MAIN_BearAwakening
-    progression:save_1
     scene:assets/scenes/SideCombatBeastPath.wt
 end
 
@@ -83,7 +79,6 @@ event side_combat_victory:
     if last_dungeon CH02_MAIN_BearAwakening
         progression:set_flag:FLAG_CH02_TUTORIAL_CLEARED
     endif
-    progression:save_1
     wait 0.10
     scene:assets/scenes/VerticalSliceResult.wt
 end
@@ -106,13 +101,11 @@ event go_hub:
 end
 
 event go_hub_save:
-    progression:save_1
     wait 0.05
     scene:assets/scenes/VerticalSliceHub.wt
 end
 
 event result_go_hub:
-    progression:save_1
     wait 0.05
     scene:assets/scenes/VerticalSliceHub.wt
 end
@@ -149,7 +142,11 @@ event go_support:
 end
 
 event go_save_load:
-    scene:assets/scenes/VerticalSliceSaveLoad.wt
+    gamesave:open_save_menu
+end
+
+event go_load_save:
+    gamesave:open_load_menu
 end
 
 event go_settings:
@@ -164,7 +161,6 @@ event go_next_story:
     if flag FLAG_CH02_BOSS_DEFEATED
         progression:set_flag:FLAG_CH03_PREVIEW_STARTED
         progression:set_chapter:3
-        progression:save_1
         scene:assets/scenes/VerticalSliceChapter3Preview.wt
     endif
 end
@@ -176,15 +172,15 @@ event route_after_result:
 end
 
 event save_slot_1:
-    progression:save_1
+    gamesave:slot_save_1
 end
 
 event load_slot_1:
-    progression:load_1
+    gamesave:load_1
 end
 
 event save_slot_1_then_hub:
-    progression:save_1
+    gamesave:slot_save_1
     wait 0.05
     scene:assets/scenes/VerticalSliceHub.wt
 end

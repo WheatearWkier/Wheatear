@@ -949,7 +949,7 @@ Entities:
       HoverColor: [1, 1, 1, 0]
       PressedColor: [1, 1, 1, 0]
       OnClickFunction: "vn:skip"
-      TooltipText: "跳过"
+      TooltipText: "快进至选项"
   - Entity: 910000019
     TagComponent:
       Tag: VN_Command_Auto
@@ -1677,7 +1677,7 @@ Entities:
       Scale: [1, 1, 1]
     UIWidgetComponent:
       Visible: false
-      EditorVisible: true
+      EditorVisible: false
       Position: [0.201169074, 0.137655526]
       Size: [0.754777074, 0.190413654]
       Rotation: 0
@@ -1685,7 +1685,7 @@ Entities:
       SortOrder: 86
       ParentEntity: 930029734
     UITextComponent:
-      Text: "存档 / 读取"
+      Text: ""
       Color: [0.939999998, 0.959999979, 0.879999995, 1]
       FontSize: 30
       FontPath: assets/fonts/wqy-microhei.ttc

@@ -21,6 +21,7 @@ namespace Wheatear {
     void RegisterDefaultGameplayModules()
     {
         CommandBus::RegisterGameplayCommandPrefix("vn:");
+        CommandBus::RegisterGameplayCommandPrefix("gamesave:");
         CommandBus::RegisterGameplayCommandPrefix("turn:");
         CommandBus::RegisterGameplayCommandPrefix("tactic:");
         CommandBus::RegisterGameplayCommandPrefix("side:");

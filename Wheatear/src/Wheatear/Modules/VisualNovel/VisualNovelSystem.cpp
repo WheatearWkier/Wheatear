@@ -1,4 +1,4 @@
-#include "wtpch.h"
+﻿#include "wtpch.h"
 #include "VisualNovelSystem.h"
 
 #include "VisualNovelInputService.h"
@@ -45,6 +45,8 @@ namespace Wheatear {
         static constexpr float kVNCommandBarTop = 0.884f;
         static constexpr float kVNCommandBarWidth = 0.410f;
         static constexpr float kVNCommandBarHeight = 0.086f;
+        static constexpr float kVNSkipStepInterval = 0.020f;
+        static constexpr int kVNMaxSkipStepsPerFrame = 16;
 
         static bool StartsWith(const std::string& value, const std::string& prefix)
         {
@@ -557,7 +559,7 @@ namespace Wheatear {
                 { 0.245f, 0.382f },
                 labelSize,
                 88,
-                "主音量 " + std::to_string(settings.MasterVolume) + "%",
+                "总音量 " + std::to_string(settings.MasterVolume) + "%",
                 30.0f,
                 labelColor,
                 visible);
@@ -687,12 +689,15 @@ namespace Wheatear {
 
         static bool IsVNCommandActive(const VNCommandButtonSpec& spec,
             bool autoPlay,
+            bool skipMode,
             bool showSettings,
             bool showHistory)
         {
             const std::string name = spec.EntityName;
             if (name == "VN_Command_Auto")
                 return autoPlay;
+            if (name == "VN_Command_Skip")
+                return skipMode;
             if (name == "VN_Command_Settings")
                 return showSettings;
             if (name == "VN_Command_History")
@@ -759,6 +764,7 @@ namespace Wheatear {
             const VisualNovelComponent& component,
             bool showStoryUi,
             bool autoPlay,
+            bool skipMode,
             bool showSettings,
             bool showHistory)
         {
@@ -776,7 +782,7 @@ namespace Wheatear {
                     specs[i],
                     i,
                     showStoryUi,
-                    IsVNCommandActive(specs[i], autoPlay, showSettings, showHistory));
+                    IsVNCommandActive(specs[i], autoPlay, skipMode, showSettings, showHistory));
             }
 
             SetWidgetVisible(scene, "VN_Command_Hide", false);
@@ -1161,9 +1167,7 @@ namespace Wheatear {
 
         static std::filesystem::path BuildSavePath(const VisualNovelComponent& component, int slot)
         {
-            std::filesystem::path directory = AssetPath::Resolve(component.SaveDirectory);
-            const int safeSlot = std::clamp(slot, 1, GameProgress::GetMaxSaveSlots());
-            return directory / ("slot" + std::to_string(safeSlot) + ".vnstate");
+            return GameProgress::GetGameRuntimeSavePath(slot, component.SaveDirectory);
         }
 
         static int ParseVNSaveSlot(const std::string& value, int fallback = 1)
@@ -1178,7 +1182,7 @@ namespace Wheatear {
 
         static bool HasAnySaveSlotData(const VisualNovelComponent& component, int slot)
         {
-            return HasVNSaveSlot(component, slot) || GameProgress::IsSaveSlotOccupied(slot);
+            return HasVNSaveSlot(component, slot) || GameProgress::IsGameSaveSlotOccupied(slot, component.SaveDirectory);
         }
 
         static std::string BuildVNSaveSlotText(const VisualNovelComponent& component,
@@ -1186,44 +1190,8 @@ namespace Wheatear {
             bool saveMode)
         {
             const int safeSlot = std::clamp(slot, 1, GameProgress::GetMaxSaveSlots());
-            const bool occupied = HasAnySaveSlotData(component, safeSlot);
-            std::ostringstream stream;
-            stream << "槽位 ";
-            if (safeSlot < 10)
-                stream << "0";
-            stream << safeSlot << "  " << (occupied ? "已有存档" : "空槽") << "\n";
-
-            if (!occupied)
-                stream << (saveMode ? "点击保存当前画面" : "没有可读取的存档");
-            else if (saveMode)
-                stream << "点击后确认是否覆盖";
-            else
-                stream << GameProgress::BuildSaveSlotSummary(safeSlot);
-
-            return stream.str();
+            return GameProgress::BuildGameSaveSlotButtonText(safeSlot, saveMode, component.SaveDirectory);
         }
-
-        static std::string BuildSaveLoadText(const VisualNovelComponent& component,
-            const VisualNovelRuntime& runtime,
-            bool saveMode,
-            int pendingOverwriteSlot)
-        {
-            std::ostringstream stream;
-            stream << (saveMode ? "存档" : "读取") << "\n";
-            if (saveMode)
-            {
-                stream << "选择一个槽位保存当前画面和成长进度。空槽直接保存；已有存档会先确认覆盖。";
-                if (pendingOverwriteSlot > 0)
-                    stream << "\n正在确认是否覆盖 " << pendingOverwriteSlot << " 号槽。";
-            }
-            else
-            {
-                stream << "选择已有槽位读取 VN 画面和成长进度。";
-            }
-            stream << "\n当前脚本: " << runtime.GetScript().GetSourcePath().filename().generic_string();
-            return stream.str();
-        }
-
         static void EnsureVNSaveLoadLayout(Scene* scene,
             const VisualNovelComponent& component,
             const VisualNovelRuntime& runtime,
@@ -1234,17 +1202,19 @@ namespace Wheatear {
             if (!scene)
                 return;
 
+            (void)runtime;
+
             const bool useSlotScroll = static_cast<bool>(FindEntityByName(scene, "VN_SaveLoadSlotScroll"));
             SetWidgetVisible(scene, "VN_SaveLoad_SaveSlot1", visible && !useSlotScroll && saveMode);
             SetWidgetVisible(scene, "VN_SaveLoad_LoadSlot1", visible && !useSlotScroll && !saveMode);
-            SetButtonCommand(scene, "VN_SaveLoad_SaveSlot1", "vn:saveslot:1");
-            SetButtonCommand(scene, "VN_SaveLoad_LoadSlot1", "vn:loadslot:1");
+            SetButtonCommand(scene, "VN_SaveLoad_SaveSlot1", "gamesave:slot_save_1");
+            SetButtonCommand(scene, "VN_SaveLoad_LoadSlot1", "gamesave:load_1");
 
             SetText(scene, "VN_SaveLoadTitle", saveMode ? "保存" : "读取");
             SetTextVisible(scene,
                 component.SaveLoadTextEntityName,
-                BuildSaveLoadText(component, runtime, saveMode, pendingOverwriteSlot),
-                visible);
+                "",
+                false);
 
             if (useSlotScroll)
             {
@@ -1275,8 +1245,8 @@ namespace Wheatear {
                         120 + slot,
                         BuildVNSaveSlotText(component, slot, saveMode),
                         saveMode
-                            ? "vn:saveslot:" + std::to_string(slot)
-                            : "vn:loadslot:" + std::to_string(slot),
+                            ? "gamesave:slot_save_" + std::to_string(slot)
+                            : "gamesave:load_" + std::to_string(slot),
                         visible);
                     if (!slotEntity)
                         continue;
@@ -1336,7 +1306,7 @@ namespace Wheatear {
             }
 
             if (speaker == "Choice")
-                return "选择";
+                return "选项";
 
             return speaker;
         }
@@ -1345,10 +1315,10 @@ namespace Wheatear {
         {
             const auto& history = runtime.GetHistory();
             if (history.empty())
-                return "历史记录\n\n还没有读过的对白。";
+                return "剧情回顾\n\n暂无记录。";
 
             std::ostringstream stream;
-            stream << "历史记录\n\n";
+            stream << "剧情回顾\n\n";
             for (size_t i = 0; i < history.size(); ++i)
             {
                 const auto& entry = history[i];
@@ -1420,12 +1390,11 @@ namespace Wheatear {
             const VisualNovelRuntime& runtime)
         {
             std::ostringstream stream;
-            stream << std::fixed << std::setprecision(2);
-            stream << "系统设置\n\n";
+            stream << "视觉小说设置\n\n";
             stream << "文字速度: " << static_cast<int>(component.CharactersPerSecond) << " 字/秒\n";
-            stream << "自动等待: " << runtime.GetAutoPlayDelay() << " 秒\n";
-            stream << "自动播放: " << (runtime.IsAutoPlay() ? "开" : "关") << "\n";
-            stream << "消息窗口: 开";
+            stream << "自动播放延迟: " << runtime.GetAutoPlayDelay() << " 秒\n";
+            stream << "自动播放: " << (runtime.IsAutoPlay() ? "开启" : "关闭") << "\n";
+            stream << "滚轮、空格和命令栏会跟随全局输入设置。";
             return stream.str();
         }
 
@@ -1475,12 +1444,24 @@ namespace Wheatear {
 
             for (const std::string& command : CommandBus::DrainGameplayCommands("vn:"))
                 ExecuteCommand(scene, component, state, command);
+            for (const std::string& command : CommandBus::DrainGameplayCommands("gamesave:"))
+                ExecuteCommand(scene, component, state, command);
 
             UpdateInput(scene, component, state);
 
             const bool uiBlocksStory = state.ShowHistory || state.ShowSettings || state.ShowSaveLoad || state.DialogueHidden;
-            if (!uiBlocksStory)
+            if (uiBlocksStory)
+            {
+                StopSkip(state);
+            }
+            else if (state.SkipMode)
+            {
+                UpdateSkip(state, deltaSeconds);
+            }
+            else
+            {
                 state.Runtime.Update(deltaSeconds);
+            }
 
             UpdateBGM(scene, component, state);
             UpdateSceneBindings(scene, component, state);
@@ -1491,6 +1472,49 @@ namespace Wheatear {
     VisualNovelSystem::RuntimeState& VisualNovelSystem::GetState(UUID id)
     {
         return m_RuntimeStates[id];
+    }
+
+    void VisualNovelSystem::StopSkip(RuntimeState& state)
+    {
+        state.SkipMode = false;
+        state.SkipTimer = 0.0f;
+    }
+
+    void VisualNovelSystem::UpdateSkip(RuntimeState& state, float deltaSeconds)
+    {
+        if (!state.SkipMode || !state.Loaded)
+            return;
+
+        if (state.Runtime.IsFinished() || state.Runtime.IsWaitingForChoice())
+        {
+            StopSkip(state);
+            return;
+        }
+
+        state.SkipTimer += std::max(0.0f, deltaSeconds);
+        int steps = 0;
+        while (state.SkipTimer >= kVNSkipStepInterval && steps < kVNMaxSkipStepsPerFrame)
+        {
+            state.SkipTimer -= kVNSkipStepInterval;
+
+            if (state.Runtime.IsFinished() || state.Runtime.IsWaitingForChoice())
+            {
+                StopSkip(state);
+                break;
+            }
+
+            state.Runtime.Advance();
+            ++steps;
+
+            if (state.Runtime.IsFinished() || state.Runtime.IsWaitingForChoice())
+            {
+                StopSkip(state);
+                break;
+            }
+        }
+
+        if (steps >= kVNMaxSkipStepsPerFrame)
+            state.SkipTimer = std::min(state.SkipTimer, kVNSkipStepInterval);
     }
 
     void VisualNovelSystem::StopBGM(RuntimeState& state)
@@ -1634,7 +1658,7 @@ namespace Wheatear {
         if (textEntity && textEntity.HasComponent<UITextComponent>())
         {
             auto& text = textEntity.GetComponent<UITextComponent>();
-            const std::string notice = "音乐  " + state.CurrentBGMTitle;
+            const std::string notice = "音乐 " + state.CurrentBGMTitle;
             if (text.Text != notice)
             {
                 text.Text = notice;
@@ -1664,6 +1688,7 @@ namespace Wheatear {
         state.SaveLoadSaveMode = true;
         state.PendingOverwriteSlot = 0;
         state.DialogueHidden = false;
+        StopSkip(state);
         state.PreviousChoicePressed.assign(9, false);
 
         if (!state.Loaded)
@@ -1677,7 +1702,9 @@ namespace Wheatear {
         if (component.AutoLoadSlot > 0)
         {
             const std::filesystem::path savePath = BuildSavePath(component, component.AutoLoadSlot);
-            state.Runtime.LoadState(savePath);
+            const bool runtimeLoaded = state.Runtime.LoadState(savePath);
+            if (runtimeLoaded || GameProgress::IsGameSaveSlotOccupied(component.AutoLoadSlot, component.SaveDirectory))
+                GameProgress::LoadSlot(component.AutoLoadSlot);
         }
 
         return true;
@@ -1688,22 +1715,29 @@ namespace Wheatear {
         RuntimeState& state,
         const std::string& command)
     {
-        if (!StartsWith(command, "vn:"))
+        const bool isVNCommand = StartsWith(command, "vn:");
+        const bool isGameSaveCommand = StartsWith(command, "gamesave:");
+        if (!isVNCommand && !isGameSaveCommand)
             return false;
 
-        const std::string action = ToLower(command.substr(3));
+        const std::string action = ToLower(command.substr(isGameSaveCommand ? 9 : 3));
         auto pushMessage = [&](const std::string& message)
         {
             state.SystemMessage = message;
             state.SystemMessageTimer = 2.0f;
         };
+        auto stopSkip = [&]()
+        {
+            StopSkip(state);
+        };
         auto saveToSlot = [&](int slot, bool allowOverwrite)
         {
+            stopSkip();
             const int safeSlot = std::clamp(slot, 1, GameProgress::GetMaxSaveSlots());
             if (!allowOverwrite && HasAnySaveSlotData(component, safeSlot))
             {
                 state.PendingOverwriteSlot = safeSlot;
-                pushMessage("请确认是否覆盖 " + std::to_string(safeSlot) + " 号槽");
+                pushMessage("该槽位已有存档，是否覆盖 " + std::to_string(safeSlot) + " 号槽？");
                 return;
             }
 
@@ -1715,48 +1749,49 @@ namespace Wheatear {
             if (vnSaved && progressSaved)
             {
                 state.ShowSaveLoad = false;
-                pushMessage("已保存到 " + std::to_string(safeSlot) + " 号槽");
+                pushMessage("已保存到 " + std::to_string(safeSlot) + " 号槽。");
             }
             else if (vnSaved)
             {
-                pushMessage("VN 已保存，成长进度保存失败");
+                pushMessage("已保存到 " + std::to_string(safeSlot) + " 号槽。");
             }
             else
             {
-                pushMessage("存档失败");
+                pushMessage("保存失败。");
             }
         };
         auto loadFromSlot = [&](int slot)
         {
+            stopSkip();
             const int safeSlot = std::clamp(slot, 1, GameProgress::GetMaxSaveSlots());
-            const std::filesystem::path savePath = BuildSavePath(component, safeSlot);
-            if (state.Runtime.LoadState(savePath))
+            if (!GameProgress::IsGameSaveSlotOccupied(safeSlot, component.SaveDirectory))
             {
-                GameProgress::LoadSlot(safeSlot);
-                state.ShowSaveLoad = false;
-                state.PendingOverwriteSlot = 0;
-                pushMessage("已读取 " + std::to_string(safeSlot) + " 号槽");
+                pushMessage("槽位 " + std::to_string(safeSlot) + " 没有存档。");
+                return;
             }
-            else
-            {
-                pushMessage(std::to_string(safeSlot) + " 号槽没有存档");
-            }
+
+            state.ShowSaveLoad = false;
+            state.PendingOverwriteSlot = 0;
+            CommandBus::Execute(scene, GameProgress::BuildLoadGameCommand(safeSlot));
+            pushMessage("正在读取 " + std::to_string(safeSlot) + " 号槽。");
         };
 
         if (action == "auto")
         {
+            stopSkip();
             state.Runtime.ToggleAutoPlay();
             state.DialogueHidden = false;
             state.ShowHistory = false;
             state.ShowSettings = false;
             state.ShowSaveLoad = false;
             state.PendingOverwriteSlot = 0;
-            pushMessage(state.Runtime.IsAutoPlay() ? "自动播放已开启" : "自动播放已关闭");
+            pushMessage(state.Runtime.IsAutoPlay() ? "自动播放已开启。" : "自动播放已关闭。");
             return true;
         }
 
         if (action == "history")
         {
+            stopSkip();
             state.ShowHistory = !state.ShowHistory;
             state.ShowSettings = false;
             state.ShowSaveLoad = false;
@@ -1767,6 +1802,7 @@ namespace Wheatear {
 
         if (action == "settings")
         {
+            stopSkip();
             state.ShowSettings = !state.ShowSettings;
             state.ShowHistory = false;
             state.ShowSaveLoad = false;
@@ -1777,6 +1813,7 @@ namespace Wheatear {
 
         if (action == "close")
         {
+            stopSkip();
             state.ShowHistory = false;
             state.ShowSettings = false;
             state.ShowSaveLoad = false;
@@ -1786,6 +1823,7 @@ namespace Wheatear {
 
         if (action == "hide")
         {
+            stopSkip();
             state.DialogueHidden = true;
             state.ShowHistory = false;
             state.ShowSettings = false;
@@ -1796,6 +1834,7 @@ namespace Wheatear {
 
         if (action == "savemenu" || action == "loadmenu")
         {
+            stopSkip();
             state.ShowSaveLoad = true;
             state.SaveLoadSaveMode = action == "savemenu";
             state.PendingOverwriteSlot = 0;
@@ -1817,8 +1856,31 @@ namespace Wheatear {
             return true;
         }
 
-        if (action.rfind("saveslot:", 0) == 0)
+        if (isGameSaveCommand)
         {
+            if (action.rfind("slot_save_", 0) == 0)
+            {
+                state.SaveLoadSaveMode = true;
+                saveToSlot(ParseVNSaveSlot(action.substr(10)), false);
+                return true;
+            }
+
+            if (action.rfind("save_", 0) == 0)
+            {
+                saveToSlot(ParseVNSaveSlot(action.substr(5)), true);
+                return true;
+            }
+
+            if (action.rfind("load_", 0) == 0)
+            {
+                state.SaveLoadSaveMode = false;
+                state.PendingOverwriteSlot = 0;
+                loadFromSlot(ParseVNSaveSlot(action.substr(5)));
+                return true;
+            }
+        }
+
+        if (action.rfind("saveslot:", 0) == 0)        {
             state.SaveLoadSaveMode = true;
             saveToSlot(ParseVNSaveSlot(action.substr(9)), false);
             return true;
@@ -1841,8 +1903,9 @@ namespace Wheatear {
 
         if (action == "cancel_overwrite")
         {
+            stopSkip();
             state.PendingOverwriteSlot = 0;
-            pushMessage("已取消覆盖");
+            pushMessage("Overwrite canceled.");
             return true;
         }
 
@@ -1853,7 +1916,7 @@ namespace Wheatear {
             UserSettings::Save();
             UserSettings::ApplyToRuntime();
             component.CharactersPerSecond = static_cast<float>(settings.TextSpeed);
-            pushMessage("文字速度提高");
+            pushMessage("文字速度已提高。");
             return true;
         }
 
@@ -1864,28 +1927,56 @@ namespace Wheatear {
             UserSettings::Save();
             UserSettings::ApplyToRuntime();
             component.CharactersPerSecond = static_cast<float>(settings.TextSpeed);
-            pushMessage("文字速度降低");
+            pushMessage("文字速度已降低。");
             return true;
         }
 
         if (action == "autodelay+")
         {
             component.AutoPlayDelay = std::min(6.0f, component.AutoPlayDelay + 0.25f);
-            pushMessage("自动等待变长");
+            pushMessage("自动播放延迟已增加。");
             return true;
         }
 
         if (action == "autodelay-")
         {
             component.AutoPlayDelay = std::max(0.4f, component.AutoPlayDelay - 0.25f);
-            pushMessage("自动等待变短");
+            pushMessage("自动播放延迟已减少。");
             return true;
         }
 
-        if (action == "advance" || action == "skip")
+        if (action == "advance")
         {
+            stopSkip();
             if (component.RestartOnFinish || !state.Runtime.IsFinished())
                 state.Runtime.Advance();
+            return true;
+        }
+
+        if (action == "skip")
+        {
+            if (state.SkipMode)
+            {
+                stopSkip();
+                pushMessage("快进已关闭。");
+                return true;
+            }
+
+            if (state.Runtime.IsFinished() || state.Runtime.IsWaitingForChoice())
+            {
+                stopSkip();
+                return true;
+            }
+
+            state.Runtime.SetAutoPlay(false);
+            state.DialogueHidden = false;
+            state.ShowHistory = false;
+            state.ShowSettings = false;
+            state.ShowSaveLoad = false;
+            state.PendingOverwriteSlot = 0;
+            state.SkipMode = true;
+            state.SkipTimer = kVNSkipStepInterval;
+            pushMessage("快进已开启，遇到选项会自动停止。");
             return true;
         }
 
@@ -1910,6 +2001,7 @@ namespace Wheatear {
 
         if (state.DialogueHidden)
         {
+            StopSkip(state);
             const bool pressed = advancePressed;
             if (pressed && !state.PreviousAdvancePressed)
                 state.DialogueHidden = false;
@@ -1939,12 +2031,14 @@ namespace Wheatear {
 
         if (state.ShowHistory || state.ShowSettings || state.ShowSaveLoad)
         {
+            StopSkip(state);
             state.PreviousAdvancePressed = advancePressed;
             return;
         }
 
         if (state.Runtime.IsWaitingForChoice())
         {
+            StopSkip(state);
             const auto& choices = state.Runtime.GetCurrentChoices();
             const size_t maxChoices = std::min<size_t>(choices.size(), 9);
 
@@ -1982,6 +2076,15 @@ namespace Wheatear {
             return;
         }
 
+        if (state.SkipMode)
+        {
+            const bool pressed = advancePressed;
+            if (pressed && !state.PreviousAdvancePressed)
+                StopSkip(state);
+            state.PreviousAdvancePressed = pressed;
+            return;
+        }
+
         const bool pressed = advancePressed;
         if (pressed && !state.PreviousAdvancePressed)
         {
@@ -2010,12 +2113,13 @@ namespace Wheatear {
         SetWidgetVisible(scene, component.HistoryPanelEntityName, state.ShowHistory);
         SetWidgetVisible(scene, component.SettingsPanelEntityName, state.ShowSettings);
         SetWidgetVisible(scene, component.SaveLoadPanelEntityName, state.ShowSaveLoad);
-        SetText(scene, "VN_Command_Auto", state.Runtime.IsAutoPlay() ? "自动中" : "自动");
+        SetText(scene, "VN_Command_Auto", state.Runtime.IsAutoPlay() ? "自动开" : "自动");
 
         ApplyVNCommandBar(scene,
             component,
             showStoryUi,
             state.Runtime.IsAutoPlay(),
+            state.SkipMode,
             state.ShowSettings,
             state.ShowHistory);
 
@@ -2064,10 +2168,12 @@ namespace Wheatear {
         SetText(scene, component.BodyTextEntityName, state.Runtime.GetVisibleText());
 
         std::string hint;
-        if (waitingForChoice)
-            hint = "请选择";
+        if (state.SkipMode)
+            hint = "快进中";
+        else if (waitingForChoice)
+            hint = "选项";
         else if (state.Runtime.IsLineComplete())
-            hint = "点击 / 空格";
+            hint = "继续";
         SetText(scene, component.AdvanceHintEntityName, hint);
 
         const auto& choices = state.Runtime.GetCurrentChoices();
@@ -2094,10 +2200,13 @@ namespace Wheatear {
             }
         }
 
+        const std::string playModeIndicator = state.SkipMode
+            ? "快进中"
+            : (state.Runtime.IsAutoPlay() ? "自动" : "");
         SetTextVisible(scene,
             component.AutoPlayIndicatorEntityName,
-            state.Runtime.IsAutoPlay() ? "自动" : "",
-            state.Runtime.IsAutoPlay() && showStoryUi);
+            playModeIndicator,
+            !playModeIndicator.empty() && showStoryUi);
 
         const std::string& background = state.Runtime.GetCurrentBackground();
         const bool backgroundHasTexture = TrySetSpriteTexture(scene, component.BackgroundEntityName, background);

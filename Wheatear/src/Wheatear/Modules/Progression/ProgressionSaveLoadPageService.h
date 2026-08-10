@@ -10,6 +10,6 @@ namespace Wheatear {
 
 namespace Wheatear::ProgressionSaveLoadPageService {
 
-    WHEATEAR_API void EnsureLayout(Scene* scene);
+    void EnsureLayout(Scene* scene, bool saveMode, int pendingOverwriteSlot);
 
 } // namespace Wheatear::ProgressionSaveLoadPageService

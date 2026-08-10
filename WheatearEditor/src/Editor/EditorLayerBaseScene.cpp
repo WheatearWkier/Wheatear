@@ -1,4 +1,4 @@
-#include "wtpch.h"
+﻿#include "wtpch.h"
 #include "EditorLayerBase.h"
 
 #include "Wheatear/Core/Application.h"
@@ -106,8 +106,11 @@ namespace Wheatear {
         m_PlayModeViewportMouseDown = false;
         CommandBus::ClearQueuedCommands();
         SceneTransitionService::DrainRequests();
-        m_SceneState  = SceneState::Play;
+        m_SceneState = SceneState::Play;
+        const std::filesystem::path previousPlayScenePath = m_PlayScenePath;
         m_ActiveScene = Scene::Copy(m_EditorScene);
+        m_PlayScenePath = m_EditorScenePath;
+        GameProgress::SetSceneTransitionContext(previousPlayScenePath, m_PlayScenePath);
         m_EditorScene->OnEditorStop();
         m_ActiveScene->OnRuntimeStart();
 
@@ -129,13 +132,12 @@ namespace Wheatear {
         CommandBus::ClearQueuedCommands();
         ClearEntitySelection();
 
-        m_SceneState  = SceneState::Edit;
+        m_SceneState = SceneState::Edit;
         m_ActiveScene = m_EditorScene;
         m_ActiveScene->OnEditorStart();
 
         SyncPanels();
     }
-
     void EditorLayerBase::LoadPlayScene(const std::filesystem::path& scenePath)
     {
         if (m_SceneState != SceneState::Play)
@@ -150,6 +152,7 @@ namespace Wheatear {
             return;
         }
 
+        const std::filesystem::path previousPlayScenePath = m_PlayScenePath;
         ClearEntitySelection();
         UIInputSystem::Reset();
         Input::ClearMouseInputBounds();
@@ -164,6 +167,8 @@ namespace Wheatear {
         }
 
         m_ActiveScene = newScene;
+        m_PlayScenePath = scenePath;
+        GameProgress::SetSceneTransitionContext(previousPlayScenePath, m_PlayScenePath);
         ApplyPendingVisualNovelLoad();
 
         if (m_ViewportSize.x > 0.0f && m_ViewportSize.y > 0.0f)
