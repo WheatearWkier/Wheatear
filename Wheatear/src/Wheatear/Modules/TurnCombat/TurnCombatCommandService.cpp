@@ -4,15 +4,25 @@
 #include "TurnCombatActionService.h"
 #include "TurnCombatSkillService.h"
 #include "TurnCombatTargetService.h"
+#include "Wheatear/Core/AssetAliasRegistry.h"
+#include "Wheatear/Modules/Common/GameplayAudioService.h"
 #include "Wheatear/Modules/Common/GameplayEntityService.h"
 #include "Wheatear/Modules/Common/GameplayTextService.h"
 
 #include <optional>
+#include <string>
 #include <vector>
 
 namespace Wheatear::TurnCombatCommandService {
 
     namespace {
+
+        static void PlayTurnUiSound(const char* alias, float volume = 0.30f)
+        {
+            const std::string path = AssetAliasRegistry::Path(alias);
+            if (!path.empty())
+                GameplayAudioService::PlaySFX(path, volume);
+        }
 
         static void BeginSkillOrTarget(Scene* scene,
             TurnCombatLevelComponent& level,
@@ -24,8 +34,11 @@ namespace Wheatear::TurnCombatCommandService {
             if (actorCombatant.Mana < skill.ManaCost)
             {
                 level.RuntimeMessage = "魔力不足。";
+                PlayTurnUiSound("turn.audio.denied", 0.34f);
                 return;
             }
+
+            PlayTurnUiSound("turn.audio.select");
 
             if (skill.TargetRule == TurnTargetRule::Self)
             {
@@ -70,6 +83,7 @@ namespace Wheatear::TurnCombatCommandService {
         {
             level.RuntimeCommandMenuPage = parts[2];
             level.RuntimeSelectedSkillId.clear();
+            PlayTurnUiSound("turn.audio.select");
             level.RuntimeMessage = actorCombatant.DisplayName + "：请选择行动。";
             return;
         }
@@ -80,6 +94,7 @@ namespace Wheatear::TurnCombatCommandService {
                 level.RuntimePhase = TurnCombatPhase::AwaitCommand;
             level.RuntimeCommandMenuPage = "root";
             level.RuntimeSelectedSkillId.clear();
+            PlayTurnUiSound("turn.audio.select", 0.28f);
             level.RuntimeMessage = actorCombatant.DisplayName + " 的回合。";
             return;
         }
@@ -92,12 +107,14 @@ namespace Wheatear::TurnCombatCommandService {
 
         if (parts[1] == "wait" && level.RuntimePhase == TurnCombatPhase::AwaitCommand)
         {
+            PlayTurnUiSound("turn.audio.select");
             TurnCombatActionService::BeginAction(scene, level, actor, "focus_wait", actor);
             return;
         }
 
         if (parts[1] == "guard" && level.RuntimePhase == TurnCombatPhase::AwaitCommand)
         {
+            PlayTurnUiSound("turn.audio.select");
             TurnCombatActionService::BeginAction(scene, level, actor, "shield_oath", actor);
             return;
         }
@@ -111,6 +128,7 @@ namespace Wheatear::TurnCombatCommandService {
             if (!item)
             {
                 level.RuntimeMessage = "这个道具栏没有可用道具。";
+                PlayTurnUiSound("turn.audio.denied", 0.34f);
                 return;
             }
 
@@ -128,6 +146,7 @@ namespace Wheatear::TurnCombatCommandService {
             if (!skill)
             {
                 level.RuntimeMessage = "这个技能槽没有可用技能。";
+                PlayTurnUiSound("turn.audio.denied", 0.34f);
                 return;
             }
 
@@ -148,9 +167,11 @@ namespace Wheatear::TurnCombatCommandService {
                     *skill, actorCombatant, target.GetComponent<TurnCombatantComponent>()))
             {
                 level.RuntimeMessage = "目标无效。";
+                PlayTurnUiSound("turn.audio.denied", 0.34f);
                 return;
             }
 
+            PlayTurnUiSound("turn.audio.select");
             const std::string skillId = skill->Id;
             TurnCombatActionService::BeginAction(scene, level, actor, skillId, target);
         }

@@ -179,6 +179,19 @@ Entities:
       FlipX: false
       DrawOffset: [0, 0]
       DrawScale: [1, 1]
+
+  - Entity: 940000003
+    TagComponent:
+      Tag: SC_BGM
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    AudioSourceComponent:
+      AudioFilePath: assets/vertical_slice/side_combat/audio/side_battle_bgm.wav
+      Volume: 0.34
+      Loop: true
+      PlayOnStart: true
   - Entity: 940000020
     TagComponent:
       Tag: SC_Player_Shadow

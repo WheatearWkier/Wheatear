@@ -4,6 +4,7 @@
 #include "TurnCombatSkillService.h"
 #include "TurnCombatTargetService.h"
 #include "TurnCombatVisualService.h"
+#include "Wheatear/Core/AssetAliasRegistry.h"
 #include "Wheatear/Gameplay/Action/ActionDebugHistory.h"
 #include "Wheatear/Gameplay/Action/ActionRecipeQueries.h"
 #include "Wheatear/Gameplay/Action/StateRegistry.h"
@@ -24,6 +25,31 @@ namespace Wheatear::TurnCombatActionService {
         {
             if (!path.empty())
                 GameplayAudioService::PlaySFX(path, volume);
+        }
+
+        static std::string ResolveSkillSound(
+            const TurnCombatSkillService::TurnSkillDefinition& skill,
+            const TurnCombatantComponent& actor)
+        {
+            if (!skill.SoundPath.empty())
+                return skill.SoundPath;
+
+            if (actor.Team == (int)TurnCombatTeam::Enemy)
+            {
+                if (skill.Magic)
+                    return AssetAliasRegistry::Path("turn.audio.enemy_dark");
+                if (skill.Power >= 1.15f)
+                    return AssetAliasRegistry::Path("turn.audio.enemy_pounce");
+                return AssetAliasRegistry::Path("turn.audio.enemy_claw");
+            }
+
+            if (skill.HealPower > 0.0f)
+                return AssetAliasRegistry::Path("turn.audio.heal");
+            if (skill.Guard)
+                return AssetAliasRegistry::Path("turn.audio.guard");
+            if (skill.Magic)
+                return AssetAliasRegistry::Path("turn.audio.magic");
+            return AssetAliasRegistry::Path("turn.audio.slash");
         }
 
         static const WAO::ActionRecipe* ResolveRecipe(
@@ -167,7 +193,7 @@ namespace Wheatear::TurnCombatActionService {
                 actorCombatant.Mana - before,
                 true);
             level.RuntimeMessage = actorCombatant.DisplayName + " 冥想并恢复魔力。";
-            PlayTurnSound(skill->SoundPath, 0.42f);
+            PlayTurnSound(ResolveSkillSound(*skill, actorCombatant), 0.42f);
             WAO::ActionDebugHistory::Record(ledger, true, "Turn skill applied");
             return;
         }
@@ -196,7 +222,7 @@ namespace Wheatear::TurnCombatActionService {
                 3.0f,
                 true);
             level.RuntimeMessage = actorCombatant.DisplayName + " 进入防御。";
-            PlayTurnSound(skill->SoundPath, 0.45f);
+            PlayTurnSound(ResolveSkillSound(*skill, actorCombatant), 0.45f);
             WAO::ActionDebugHistory::Record(ledger, true, "Turn skill applied");
             return;
         }
@@ -317,7 +343,7 @@ namespace Wheatear::TurnCombatActionService {
         else
             stream << "，造成 " << (int)total << " 伤害";
         level.RuntimeMessage = stream.str();
-        PlayTurnSound(skill->SoundPath, 0.52f);
+        PlayTurnSound(ResolveSkillSound(*skill, actorCombatant), 0.52f);
         WAO::ActionDebugHistory::Record(ledger, true, "Turn skill applied");
     }
 

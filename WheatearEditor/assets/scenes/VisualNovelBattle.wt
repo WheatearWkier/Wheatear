@@ -108,6 +108,19 @@ Entities:
       Color: [1, 1, 1, 1]
       Texture: assets/vertical_slice/arcade_combat/backgrounds/bg_arcade_arena_grid.png
       TilingFactor: 1
+
+  - Entity: 930000030
+    TagComponent:
+      Tag: Battle_BGM
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    AudioSourceComponent:
+      AudioFilePath: assets/vertical_slice/arcade_combat/audio/arcade_battle_bgm.wav
+      Volume: 0.34
+      Loop: true
+      PlayOnStart: true
   - Entity: 930000003
     TagComponent:
       Tag: Battle_ArenaFloor

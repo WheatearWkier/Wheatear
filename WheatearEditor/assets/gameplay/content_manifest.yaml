@@ -44,6 +44,7 @@ aliases:
     audio:
       jump: assets/vertical_slice/side_combat/audio/jump.wav
       land: assets/vertical_slice/side_combat/audio/land.wav
+      battle_bgm: assets/vertical_slice/side_combat/audio/side_battle_bgm.wav
   turn:
     icon:
       attack: assets/vertical_slice/turn_combat/ui/icons/cmd_attack.png
@@ -63,6 +64,11 @@ aliases:
       heal: assets/vertical_slice/turn_combat/audio/turn_heal.wav
       guard: assets/vertical_slice/turn_combat/audio/turn_guard.wav
       hit: assets/vertical_slice/turn_combat/audio/turn_hit.wav
+      select: assets/vertical_slice/turn_combat/audio/turn_select.wav
+      denied: assets/vertical_slice/turn_combat/audio/turn_denied.wav
+      enemy_claw: assets/vertical_slice/turn_combat/audio/turn_enemy_claw.wav
+      enemy_pounce: assets/vertical_slice/turn_combat/audio/turn_enemy_pounce.wav
+      enemy_dark: assets/vertical_slice/turn_combat/audio/turn_enemy_dark.wav
     vfx:
       slash: assets/vertical_slice/turn_combat/sheets/effects/vfx_turn_slash_sheet.png
       magic_sword: assets/vertical_slice/turn_combat/sheets/effects/vfx_turn_magic_sword_sheet.png
@@ -127,10 +133,13 @@ aliases:
       katana: assets/vertical_slice/arcade_combat/sheets/static_effects/vfx_arcade_katana_slash_sheet.png
       boss_bullet: assets/vertical_slice/arcade_combat/sheets/static_effects/proj_arcade_boss_orb_sheet.png
     audio:
-      gun: assets/vertical_slice/side_combat/audio/hit_light.wav
-      cannon: assets/vertical_slice/side_combat/audio/hit_heavy.wav
-      katana: assets/vertical_slice/side_combat/audio/swing_heavy.wav
-      boss_bullet: assets/vertical_slice/side_combat/audio/magic_cast.wav
+      gun: assets/vertical_slice/arcade_combat/audio/arcade_gun.wav
+      cannon: assets/vertical_slice/arcade_combat/audio/arcade_cannon.wav
+      katana: assets/vertical_slice/arcade_combat/audio/arcade_katana.wav
+      boss_bullet: assets/vertical_slice/arcade_combat/audio/arcade_boss_bullet.wav
+      hit: assets/vertical_slice/arcade_combat/audio/arcade_hit.wav
+      cover_hit: assets/vertical_slice/arcade_combat/audio/arcade_cover_hit.wav
+      battle_bgm: assets/vertical_slice/arcade_combat/audio/arcade_battle_bgm.wav
     projectile:
       player_bolt: assets/vertical_slice/arcade_combat/sheets/static_effects/proj_arcade_player_bolt_sheet.png
       boss_orb: assets/vertical_slice/arcade_combat/sheets/static_effects/proj_arcade_boss_orb_sheet.png

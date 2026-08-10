@@ -271,7 +271,7 @@ actions:
     displayName: '爪击'
     description: '魔物的近身攻击。'
     icon: turn.icon.enemy_claw
-    sound: turn.audio.hit
+    sound: turn.audio.enemy_claw
     effect: turn.vfx.claw
     duration: 0.70
     startup: 0.14
@@ -304,7 +304,7 @@ actions:
     displayName: '猛扑'
     description: '魔物的强力突进攻击。'
     icon: turn.icon.enemy_claw
-    sound: turn.audio.hit
+    sound: turn.audio.enemy_pounce
     effect: turn.vfx.claw
     duration: 0.86
     startup: 0.18
@@ -337,7 +337,7 @@ actions:
     displayName: '暗影魔弹'
     description: '精英法师发射的暗属性魔法弹。'
     icon: turn.icon.enemy_orb
-    sound: turn.audio.magic
+    sound: turn.audio.enemy_dark
     effect: turn.vfx.dark
     duration: 0.92
     startup: 0.20

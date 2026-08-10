@@ -4,6 +4,7 @@
 #include "ArcadeCombatComponents.h"
 #include "Wheatear/Core/AssetAliasRegistry.h"
 #include "Wheatear/Modules/Common/GameplayCombatService.h"
+#include "Wheatear/Modules/Common/GameplayAudioService.h"
 #include "Wheatear/Modules/Common/GameplayVisualService.h"
 #include "Wheatear/Renderer/Texture.h"
 #include "Wheatear/Scene/Components.h"
@@ -34,6 +35,17 @@ namespace Wheatear::ArcadeCombatProjectileService {
 
             GameplayCombatService::ApplyDamage(target.Health, damage);
             target.Alive = GameplayCombatService::IsAlive(target.Health);
+        }
+
+        static void PlayImpactSound(const ArcadeProjectileComponent& projectile,
+            const char* alias,
+            float volume)
+        {
+            const std::string path = AssetAliasRegistry::Path(alias);
+            if (path.empty())
+                return;
+
+            GameplayAudioService::PlaySFX(path, projectile.Heavy ? volume + 0.10f : volume);
         }
 
         static GameplayVisualService::TextureAtlasFrameSpec ResolveProjectileAtlas(int team, bool heavy, bool melee)
@@ -83,6 +95,7 @@ namespace Wheatear::ArcadeCombatProjectileService {
                     GameplayCombatService::ApplyDamage(
                         cover.Health,
                         projectile.Damage * (projectile.Heavy ? 0.75f : 0.35f));
+                    PlayImpactSound(projectile, "arcade.audio.cover_hit", 0.34f);
                     if (auto* sprite = registry.try_get<SpriteRendererComponent>(coverEntity))
                     {
                         const float normalized = cover.MaxHealth <= 0.0f ? 0.0f : cover.Health / cover.MaxHealth;
@@ -112,6 +125,7 @@ namespace Wheatear::ArcadeCombatProjectileService {
                 if (Distance2D(projectileTransform.Translation, targetTransform.Translation) <= projectile.Radius + target.CollisionRadius)
                 {
                     ApplyDamage(target, projectile.Damage);
+                    PlayImpactSound(projectile, "arcade.audio.hit", projectile.Team == (int)ArcadeTeam::Enemy ? 0.44f : 0.38f);
                     scene->DestroyEntity(projectileEntity);
                     return true;
                 }

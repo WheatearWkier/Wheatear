@@ -2,9 +2,11 @@
 #include "ArcadeCombatActionResolver.h"
 
 #include "ArcadeCombatSignalHandlers.h"
+#include "ArcadeCombatComponents.h"
 #include "Wheatear/Gameplay/Action/ActionRecipeQueries.h"
 #include "Wheatear/Gameplay/Action/ActionResolver.h"
 #include "Wheatear/Gameplay/Action/ActionSignalRouter.h"
+#include "Wheatear/Modules/Common/GameplayAudioService.h"
 
 namespace Wheatear::ArcadeCombatActionResolver {
 
@@ -26,6 +28,17 @@ namespace Wheatear::ArcadeCombatActionResolver {
                 value,
                 applied
             });
+        }
+
+        float ProjectileSoundVolume(const ArcadeCombatSignalHandlers::ProjectileSpawnPayload& payload)
+        {
+            if (payload.Melee)
+                return 0.48f;
+            if (payload.Heavy)
+                return 0.46f;
+            if (payload.Team == (int)ArcadeTeam::Enemy)
+                return 0.36f;
+            return 0.34f;
         }
 
         WAO::ActionResolveResult ResolveProjectileAction(const WAO::ActionResolveContext& context,
@@ -59,6 +72,8 @@ namespace Wheatear::ArcadeCombatActionResolver {
                 "Projectile carries damage",
                 damage,
                 true);
+
+            GameplayAudioService::PlaySFX(recipe.SoundPath, ProjectileSoundVolume(*payload));
 
             for (const std::string& signal : recipe.Signals)
             {
