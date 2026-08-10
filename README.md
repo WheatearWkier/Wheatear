@@ -4,18 +4,13 @@
 
 Wheatear 不是单纯的引擎样例，而是把剧情、战斗、成长、UI、脚本、渲染和打包串成一条完整链路，方便展示，也方便面试时快速说明“做了什么、为什么这样做”。
 
-<p align="center">
-  <video controls preload="metadata" width="49%">
-    <source src="https://raw.githubusercontent.com/WheatearWkier/Wheatear/main/docs/readme-media/editor_demo_preview.mp4" type="video/mp4" />
-  </video>
-  <video controls preload="metadata" width="49%">
-    <source src="https://raw.githubusercontent.com/WheatearWkier/Wheatear/main/docs/readme-media/sandbox_demo_preview.mp4" type="video/mp4" />
-  </video>
-</p>
+**编辑器演示**
 
-<p align="center">
-  上方为 README 专用压缩预览版，可在 GitHub 页面直接播放；原始录屏仍保留在 `docs/readme-media`。
-</p>
+https://github.com/user-attachments/assets/2d08f3e8-6c46-4bae-82af-4a9c0884c037
+
+**Sandbox 演示**
+
+https://github.com/user-attachments/assets/594114a5-ba8b-4847-9f34-6be1f15181f7
 
 ## 一眼看完
 
