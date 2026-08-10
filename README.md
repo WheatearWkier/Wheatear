@@ -24,13 +24,13 @@ https://github.com/user-attachments/assets/594114a5-ba8b-4847-9f34-6be1f15181f7
 ### 剧情和分支
 
 <p align="center">
-  <a href="https://github.com/WheatearWkier/Wheatear/raw/refs/heads/main/docs/readme-media/game_start.png"><img src="https://github.com/WheatearWkier/Wheatear/raw/refs/heads/main/docs/readme-media/game_start.png" width="49%" alt="Wheatear 游戏开始界面" /></a>
-  <a href="https://github.com/WheatearWkier/Wheatear/raw/refs/heads/main/docs/readme-media/visual_novel.png"><img src="https://github.com/WheatearWkier/Wheatear/raw/refs/heads/main/docs/readme-media/visual_novel.png" width="49%" alt="视觉小说界面" /></a>
+  <a href="https://github.com/user-attachments/assets/8f44f7e8-6d2d-4ffd-b467-301e4dd0911c"><img src="https://github.com/user-attachments/assets/8f44f7e8-6d2d-4ffd-b467-301e4dd0911c" width="49%" alt="Wheatear 游戏开始界面" /></a>
+  <a href="https://github.com/user-attachments/assets/6142e531-143e-4349-92ae-79fd42b39280"><img src="https://github.com/user-attachments/assets/6142e531-143e-4349-92ae-79fd42b39280" width="49%" alt="视觉小说界面" /></a>
 </p>
 
 <p align="center">
-  <a href="https://github.com/WheatearWkier/Wheatear/raw/refs/heads/main/docs/readme-media/story_branching.png"><img src="https://github.com/WheatearWkier/Wheatear/raw/refs/heads/main/docs/readme-media/story_branching.png" width="49%" alt="剧情分支选项" /></a>
-  <a href="https://github.com/WheatearWkier/Wheatear/raw/refs/heads/main/docs/readme-media/history.png"><img src="https://github.com/WheatearWkier/Wheatear/raw/refs/heads/main/docs/readme-media/history.png" width="49%" alt="剧情历史记录" /></a>
+  <a href="https://github.com/user-attachments/assets/c594f9ee-1472-4b32-8694-d25082232801"><img src="https://github.com/user-attachments/assets/c594f9ee-1472-4b32-8694-d25082232801" width="49%" alt="剧情分支选项" /></a>
+  <a href="https://github.com/user-attachments/assets/5eb35f07-469a-4cff-9517-4926327411a0"><img src="https://github.com/user-attachments/assets/5eb35f07-469a-4cff-9517-4926327411a0" width="49%" alt="剧情历史记录" /></a>
 </p>
 
 VN 负责序章、章节推进、角色对话和轻量分支。它的目标不是把剧情做得很重，而是把“剧情怎么接战斗、战斗怎么回到成长”这条链路跑顺。
@@ -38,20 +38,20 @@ VN 负责序章、章节推进、角色对话和轻量分支。它的目标不�
 ### 战斗和成长
 
 <p align="center">
-  <a href="https://github.com/WheatearWkier/Wheatear/raw/refs/heads/main/docs/readme-media/side_combat_1.png"><img src="https://github.com/WheatearWkier/Wheatear/raw/refs/heads/main/docs/readme-media/side_combat_1.png" width="49%" alt="2D 横板战斗" /></a>
-  <a href="https://github.com/WheatearWkier/Wheatear/raw/refs/heads/main/docs/readme-media/side_combat_2.png"><img src="https://github.com/WheatearWkier/Wheatear/raw/refs/heads/main/docs/readme-media/side_combat_2.png" width="49%" alt="2D 横板战斗技能与反馈" /></a>
+  <a href="https://github.com/user-attachments/assets/e9bbcf58-05ef-413f-bc7a-f8772f93bdec"><img src="https://github.com/user-attachments/assets/e9bbcf58-05ef-413f-bc7a-f8772f93bdec" width="49%" alt="2D 横板战斗" /></a>
+  <a href="https://github.com/user-attachments/assets/8c51dbee-8b5c-4618-9ed7-d10548ad8e10"><img src="https://github.com/user-attachments/assets/8c51dbee-8b5c-4618-9ed7-d10548ad8e10" width="49%" alt="2D 横板战斗技能与反馈" /></a>
 </p>
 
 <p align="center">
-  <a href="https://github.com/WheatearWkier/Wheatear/raw/refs/heads/main/docs/readme-media/arcade_combat.png"><img src="https://github.com/WheatearWkier/Wheatear/raw/refs/heads/main/docs/readme-media/arcade_combat.png" width="32%" alt="弹幕玩法" /></a>
-  <a href="https://github.com/WheatearWkier/Wheatear/raw/refs/heads/main/docs/readme-media/turn_combat.png"><img src="https://github.com/WheatearWkier/Wheatear/raw/refs/heads/main/docs/readme-media/turn_combat.png" width="32%" alt="回合制玩法" /></a>
-  <a href="https://github.com/WheatearWkier/Wheatear/raw/refs/heads/main/docs/readme-media/result.png"><img src="https://github.com/WheatearWkier/Wheatear/raw/refs/heads/main/docs/readme-media/result.png" width="32%" alt="战斗结算" /></a>
+  <a href="https://github.com/user-attachments/assets/4318ce15-1140-44bf-a003-7f7afd2388b4"><img src="https://github.com/user-attachments/assets/4318ce15-1140-44bf-a003-7f7afd2388b4" width="32%" alt="弹幕玩法" /></a>
+  <a href="https://github.com/user-attachments/assets/ef228f74-7bf0-4738-8e82-8f9417eca908"><img src="https://github.com/user-attachments/assets/ef228f74-7bf0-4738-8e82-8f9417eca908" width="32%" alt="回合制玩法" /></a>
+  <a href="https://github.com/user-attachments/assets/bcb6f328-18f2-465f-9f8e-163160b775d0"><img src="https://github.com/user-attachments/assets/bcb6f328-18f2-465f-9f8e-163160b775d0" width="32%" alt="战斗结算" /></a>
 </p>
 
 <p align="center">
-  <a href="https://github.com/WheatearWkier/Wheatear/raw/refs/heads/main/docs/readme-media/hub.png"><img src="https://github.com/WheatearWkier/Wheatear/raw/refs/heads/main/docs/readme-media/hub.png" width="32%" alt="据点页面" /></a>
-  <a href="https://github.com/WheatearWkier/Wheatear/raw/refs/heads/main/docs/readme-media/skill_tree.png"><img src="https://github.com/WheatearWkier/Wheatear/raw/refs/heads/main/docs/readme-media/skill_tree.png" width="32%" alt="技能树界面" /></a>
-  <a href="https://github.com/WheatearWkier/Wheatear/raw/refs/heads/main/docs/readme-media/equipment.png"><img src="https://github.com/WheatearWkier/Wheatear/raw/refs/heads/main/docs/readme-media/equipment.png" width="32%" alt="装备界面" /></a>
+  <a href="https://github.com/user-attachments/assets/615b1f66-ed21-4310-b2ac-3c4f26f36071"><img src="https://github.com/user-attachments/assets/615b1f66-ed21-4310-b2ac-3c4f26f36071" width="32%" alt="据点页面" /></a>
+  <a href="https://github.com/user-attachments/assets/4a9c4fbc-12a0-4064-b91c-44f7a86ab796"><img src="https://github.com/user-attachments/assets/4a9c4fbc-12a0-4064-b91c-44f7a86ab796" width="32%" alt="技能树界面" /></a>
+  <a href="https://github.com/user-attachments/assets/0f8d6367-3582-455e-92be-b64c5c39b05b"><img src="https://github.com/user-attachments/assets/0f8d6367-3582-455e-92be-b64c5c39b05b" width="32%" alt="装备界面" /></a>
 </p>
 
 横板战斗是当前最核心的展示点；弹幕、回合制和战棋则用来验证多玩法架构。战后会回到据点，在结算、技能树、装备、关系和存档之间形成可玩的循环。
@@ -119,20 +119,20 @@ Sprite、UI 和特效共用同一套图集与动画工作流，角色动作、�
 - IBL / SSAO
 
 <p align="center">
-  <a href="https://github.com/WheatearWkier/Wheatear/raw/refs/heads/main/docs/readme-media/render_3d_skybox.png"><img src="https://github.com/WheatearWkier/Wheatear/raw/refs/heads/main/docs/readme-media/render_3d_skybox.png" width="49%" alt="3D 天空盒渲染" /></a>
-  <a href="https://github.com/WheatearWkier/Wheatear/raw/refs/heads/main/docs/readme-media/render_3d_shadow.png"><img src="https://github.com/WheatearWkier/Wheatear/raw/refs/heads/main/docs/readme-media/render_3d_shadow.png" width="49%" alt="3D 阴影渲染" /></a>
+  <a href="https://github.com/user-attachments/assets/5ee8ff00-50bd-4f69-87a2-b80730bc6c85"><img src="https://github.com/user-attachments/assets/5ee8ff00-50bd-4f69-87a2-b80730bc6c85" width="49%" alt="3D 天空盒渲染" /></a>
+  <a href="https://github.com/user-attachments/assets/1611b0b9-04c0-49aa-9939-332014c540ea"><img src="https://github.com/user-attachments/assets/1611b0b9-04c0-49aa-9939-332014c540ea" width="49%" alt="3D 阴影渲染" /></a>
 </p>
 
 ## 编辑器
 
 <p align="center">
-  <a href="https://github.com/WheatearWkier/Wheatear/raw/refs/heads/main/docs/readme-media/editor_overview.png"><img src="https://github.com/WheatearWkier/Wheatear/raw/refs/heads/main/docs/readme-media/editor_overview.png" width="49%" alt="Wheatear 编辑器总览" /></a>
-  <a href="https://github.com/WheatearWkier/Wheatear/raw/refs/heads/main/docs/readme-media/vn_script_editor.png"><img src="https://github.com/WheatearWkier/Wheatear/raw/refs/heads/main/docs/readme-media/vn_script_editor.png" width="49%" alt="视觉小说脚本编辑器" /></a>
+  <a href="https://github.com/user-attachments/assets/d4d3ce10-222f-4d1e-9c0d-584c67f6003d"><img src="https://github.com/user-attachments/assets/d4d3ce10-222f-4d1e-9c0d-584c67f6003d" width="49%" alt="Wheatear 编辑器总览" /></a>
+  <a href="https://github.com/user-attachments/assets/e10d6915-ef1c-4401-9717-33e0ecfbb5dd"><img src="https://github.com/user-attachments/assets/e10d6915-ef1c-4401-9717-33e0ecfbb5dd" width="49%" alt="视觉小说脚本编辑器" /></a>
 </p>
 
 <p align="center">
-  <a href="https://github.com/WheatearWkier/Wheatear/raw/refs/heads/main/docs/readme-media/side_combat_tuning_editor.png"><img src="https://github.com/WheatearWkier/Wheatear/raw/refs/heads/main/docs/readme-media/side_combat_tuning_editor.png" width="49%" alt="横板战斗参数编辑器" /></a>
-  <a href="https://github.com/WheatearWkier/Wheatear/raw/refs/heads/main/docs/readme-media/wao_action_debugger.png"><img src="https://github.com/WheatearWkier/Wheatear/raw/refs/heads/main/docs/readme-media/wao_action_debugger.png" width="49%" alt="WAO Action Debugger" /></a>
+  <a href="https://github.com/user-attachments/assets/8322c832-2b47-400c-a794-8b9389ebc47d"><img src="https://github.com/user-attachments/assets/8322c832-2b47-400c-a794-8b9389ebc47d" width="49%" alt="横板战斗参数编辑器" /></a>
+  <a href="https://github.com/user-attachments/assets/244b9731-6880-49f3-8ef0-dd3549f387ab"><img src="https://github.com/user-attachments/assets/244b9731-6880-49f3-8ef0-dd3549f387ab" width="49%" alt="WAO Action Debugger" /></a>
 </p>
 
 编辑器围绕内容生产效率设计，当前重点工具包括：
