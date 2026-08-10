@@ -553,16 +553,9 @@ def main() -> None:
             save(frame, EFFECT_ROOT / f"{name}_{index + 1:02}.png")
             runtime_count += 1
 
-        alias_index = min(frame_count - 1, max(0, int(spec["alias_frame"])))
-        save(frames[alias_index], EFFECT_ROOT / f"{name}.png")
         save_strip(frames, SHEET_ROOT / f"{name}_strip.png")
         preview = checker_preview(frames, PREVIEW_ROOT / f"{name}_preview.png")
         preview_rows.append((name, preview))
-
-    # Single-file fallback used by older enemy projectile/shockwave paths.
-    fallback = EFFECT_ROOT / "vfx_boss_bear_shockwave_03.png"
-    if fallback.exists():
-        shutil.copy2(fallback, EFFECT_ROOT / "vfx_enemy_projectile.png")
 
     write_params()
     combined_preview(preview_rows)

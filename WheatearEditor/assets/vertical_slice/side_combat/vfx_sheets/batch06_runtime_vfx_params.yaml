@@ -21,7 +21,7 @@ clips:
     pivotX: 160
     pivotY: 96
     attach: player sword arc
-    runtimePattern: assets/vertical_slice/side_combat/effects/vfx_basic_slash_{frame2}.png
+    runtimeSheet: assets/vertical_slice/side_combat/vfx_sheets/runtime_effects/vfx_basic_slash_sheet.png
     sourceFrames: WheatearEditor/assets/vertical_slice/source_frames/batch06_runtime_vfx/vfx_basic_slash/vfx_basic_slash_{frame:03}.png
     stripOutput: WheatearEditor/assets/vertical_slice/side_combat/vfx_sheets/vfx_basic_slash_strip.png
   vfx_launcher_slash:
@@ -32,7 +32,7 @@ clips:
     pivotX: 120
     pivotY: 160
     attach: player uppercut arc
-    runtimePattern: assets/vertical_slice/side_combat/effects/vfx_launcher_slash_{frame2}.png
+    runtimeSheet: assets/vertical_slice/side_combat/vfx_sheets/runtime_effects/vfx_launcher_slash_sheet.png
     sourceFrames: WheatearEditor/assets/vertical_slice/source_frames/batch06_runtime_vfx/vfx_launcher_slash/vfx_launcher_slash_{frame:03}.png
     stripOutput: WheatearEditor/assets/vertical_slice/side_combat/vfx_sheets/vfx_launcher_slash_strip.png
   vfx_magic_bolt:
@@ -43,7 +43,7 @@ clips:
     pivotX: 144
     pivotY: 80
     attach: player magic projectile
-    runtimePattern: assets/vertical_slice/side_combat/effects/vfx_magic_bolt_{frame2}.png
+    runtimeSheet: assets/vertical_slice/side_combat/vfx_sheets/runtime_effects/vfx_magic_bolt_sheet.png
     sourceFrames: WheatearEditor/assets/vertical_slice/source_frames/batch06_runtime_vfx/vfx_magic_bolt/vfx_magic_bolt_{frame:03}.png
     stripOutput: WheatearEditor/assets/vertical_slice/side_combat/vfx_sheets/vfx_magic_bolt_strip.png
   vfx_ally_support:
@@ -54,7 +54,7 @@ clips:
     pivotX: 128
     pivotY: 160
     attach: support/break-limit target burst
-    runtimePattern: assets/vertical_slice/side_combat/effects/vfx_ally_support_{frame2}.png
+    runtimeSheet: assets/vertical_slice/side_combat/vfx_sheets/runtime_effects/vfx_ally_support_sheet.png
     sourceFrames: WheatearEditor/assets/vertical_slice/source_frames/batch06_runtime_vfx/vfx_ally_support/vfx_ally_support_{frame:03}.png
     stripOutput: WheatearEditor/assets/vertical_slice/side_combat/vfx_sheets/vfx_ally_support_strip.png
   vfx_enemy_claw:
@@ -65,7 +65,7 @@ clips:
     pivotX: 128
     pivotY: 96
     attach: grunt and boss melee fallback
-    runtimePattern: assets/vertical_slice/side_combat/effects/vfx_enemy_claw_{frame2}.png
+    runtimeSheet: assets/vertical_slice/side_combat/vfx_sheets/runtime_effects/vfx_enemy_claw_sheet.png
     sourceFrames: WheatearEditor/assets/vertical_slice/source_frames/batch06_runtime_vfx/vfx_enemy_claw/vfx_enemy_claw_{frame:03}.png
     stripOutput: WheatearEditor/assets/vertical_slice/side_combat/vfx_sheets/vfx_enemy_claw_strip.png
   vfx_boss_bear_charge:
@@ -76,7 +76,7 @@ clips:
     pivotX: 160
     pivotY: 96
     attach: boss charge dust
-    runtimePattern: assets/vertical_slice/side_combat/effects/vfx_boss_bear_charge_{frame2}.png
+    runtimeSheet: assets/vertical_slice/side_combat/vfx_sheets/runtime_effects/vfx_boss_bear_charge_sheet.png
     sourceFrames: WheatearEditor/assets/vertical_slice/source_frames/batch06_runtime_vfx/vfx_boss_bear_charge/vfx_boss_bear_charge_{frame:03}.png
     stripOutput: WheatearEditor/assets/vertical_slice/side_combat/vfx_sheets/vfx_boss_bear_charge_strip.png
   vfx_boss_bear_shockwave:
@@ -87,6 +87,6 @@ clips:
     pivotX: 192
     pivotY: 96
     attach: boss ground shockwave
-    runtimePattern: assets/vertical_slice/side_combat/effects/vfx_boss_bear_shockwave_{frame2}.png
+    runtimeSheet: assets/vertical_slice/side_combat/vfx_sheets/runtime_effects/vfx_boss_bear_shockwave_sheet.png
     sourceFrames: WheatearEditor/assets/vertical_slice/source_frames/batch06_runtime_vfx/vfx_boss_bear_shockwave/vfx_boss_bear_shockwave_{frame:03}.png
     stripOutput: WheatearEditor/assets/vertical_slice/side_combat/vfx_sheets/vfx_boss_bear_shockwave_strip.png

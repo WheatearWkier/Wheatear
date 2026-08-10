@@ -452,9 +452,6 @@ def main() -> None:
         save_strip(frames, SHEET_ROOT / f"{entity}_{action}_lowfi_strip.png")
         checker_preview(frames, PROFILES[profile]["pivot"][1], PREVIEW_ROOT / f"{entity}_{action}_preview.png")
 
-    shutil.copy2(DEST_ROOT / "en_claw_beast_idle_01.png", DEST_ROOT / "en_claw_beast_small.png")
-    shutil.copy2(DEST_ROOT / "boss_bear_husband_idle_01.png", DEST_ROOT / "boss_bear_husband.png")
-    all_written += [DEST_ROOT / "en_claw_beast_small.png", DEST_ROOT / "boss_bear_husband.png"]
     write_params()
     print(f"Backed up old enemy PNGs: {copied}")
     print(f"Runtime enemy frames written: {len(all_written)}")

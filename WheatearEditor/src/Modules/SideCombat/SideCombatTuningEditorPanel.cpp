@@ -496,6 +496,12 @@ namespace Wheatear {
         if (DrawString(attack, "textureFramePattern", "Texture Frame Pattern")) m_Dirty = true;
         if (DrawInt(attack, "textureFrameCount", "Texture Frame Count", 1, 120)) m_Dirty = true;
         if (DrawFloat(attack, "textureFrameRate", "Texture Frame Rate", 0.5f, 1.0f, 120.0f)) m_Dirty = true;
+        YAML::Node textureAtlas = EnsureMap(attack, "textureAtlas");
+        if (DrawString(textureAtlas, "sheet", "Texture Sheet")) m_Dirty = true;
+        if (DrawInt(textureAtlas, "cellWidth", "Sheet Cell Width", 0, 8192)) m_Dirty = true;
+        if (DrawInt(textureAtlas, "cellHeight", "Sheet Cell Height", 0, 8192)) m_Dirty = true;
+        if (DrawInt(textureAtlas, "columns", "Sheet Columns", 0, 256)) m_Dirty = true;
+        if (DrawInt(textureAtlas, "startFrame", "Sheet Start Frame", 0, 4096)) m_Dirty = true;
         if (DrawString(attack, "swingSound", "Swing Sound")) m_Dirty = true;
         if (DrawString(attack, "hitSound", "Hit Sound")) m_Dirty = true;
         if (DrawFloat(attack, "soundVolume", "Sound Volume", 0.01f, 0.0f, 2.0f)) m_Dirty = true;

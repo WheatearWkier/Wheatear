@@ -132,39 +132,39 @@ visuals:
   shadowAirFadeHeight: 3.8
   shadowOffset: [0.0, -0.04]
   playerAnimations:
-    idle: { pattern: "assets/vertical_slice/side_combat/characters/protag_idle_{frame2}.png", frameCount: 8, frameRate: 8.0, loop: true, renderScale: [1.0, 1.0], renderOffset: [0.0, 0.3398] }
-    run: { pattern: "assets/vertical_slice/side_combat/characters/protag_run_{frame2}.png", frameCount: 4, frameRate: 8.0, loop: true, renderScale: [1.0, 1.0], renderOffset: [0.0, 0.3398] }
-    jump: { pattern: "assets/vertical_slice/side_combat/characters/protag_jump_{frame2}.png", frameCount: 1, frameRate: 18.0, loop: false, renderScale: [1.0, 1.0], renderOffset: [0.0, 0.3398] }
-    fall: { pattern: "assets/vertical_slice/side_combat/characters/protag_fall_{frame2}.png", frameCount: 1, frameRate: 12.0, loop: true, renderScale: [1.0, 1.0], renderOffset: [0.0, 0.3398] }
-    hit: { pattern: "assets/vertical_slice/side_combat/characters/protag_hit_{frame2}.png", frameCount: 4, frameRate: 14.0, loop: false, renderScale: [1.0, 1.0], renderOffset: [0.0, 0.3398] }
-    dead: { pattern: "assets/vertical_slice/side_combat/characters/protag_dead_{frame2}.png", frameCount: 8, frameRate: 12.0, loop: false, renderScale: [2.0, 1.0], renderOffset: [0.0, 0.3398] }
-    basic1: { pattern: "assets/vertical_slice/side_combat/characters/protag_basic1_{frame2}.png", frameCount: 4, frameRate: 14.0, loop: false, renderScale: [1.0, 1.0], renderOffset: [0.0, 0.3398] }
-    basic2: { pattern: "assets/vertical_slice/side_combat/characters/protag_basic2_{frame2}.png", frameCount: 4, frameRate: 12.0, loop: false, renderScale: [1.0, 1.0], renderOffset: [0.0, 0.3398] }
-    basic3: { pattern: "assets/vertical_slice/side_combat/characters/protag_basic3_{frame2}.png", frameCount: 4, frameRate: 10.0, loop: false, renderScale: [1.0, 1.0], renderOffset: [0.0, 0.3398] }
-    air_basic: { pattern: "assets/vertical_slice/side_combat/characters/protag_air_basic_{frame2}.png", frameCount: 4, frameRate: 14.0, loop: false, renderScale: [1.0, 1.0], renderOffset: [0.0, 0.3398] }
-    launcher: { pattern: "assets/vertical_slice/side_combat/characters/protag_launcher_{frame2}.png", frameCount: 2, frameRate: 10.0, loop: false, renderScale: [1.0, 1.0], renderOffset: [0.0, 0.3398] }
-    air_chase: { pattern: "assets/vertical_slice/side_combat/characters/protag_air_chase_{frame2}.png", frameCount: 8, frameRate: 24.0, loop: false, renderScale: [1.5, 1.25], renderOffset: [0.0, 0.4453] }
-    dash: { pattern: "assets/vertical_slice/side_combat/characters/protag_dash_{frame2}.png", frameCount: 1, frameRate: 8.0, loop: false, renderScale: [1.60, 1.60], renderOffset: [0.0, 0.4453] }
-    magic_bolt: { pattern: "assets/vertical_slice/side_combat/characters/protag_magic_bolt_{frame2}.png", frameCount: 9, frameRate: 20.0, loop: false, renderScale: [1.0, 1.0], renderOffset: [0.0, 0.3398] }
-    ally_support: { pattern: "assets/vertical_slice/side_combat/characters/protag_ally_support_{frame2}.png", frameCount: 8, frameRate: 18.0, loop: false, renderScale: [1.25, 1.0], renderOffset: [0.0, 0.3398] }
-    break_limit: { pattern: "assets/vertical_slice/side_combat/characters/protag_break_limit_{frame2}.png", frameCount: 2, frameRate: 8.0, loop: false, renderScale: [1.25, 1.25], renderOffset: [0.0, 0.3398] }
+    idle: { pattern: "", atlas: { sheet: "assets/vertical_slice/side_combat/sheets/runtime_characters/protag_idle_sheet.png", cellWidth: 512, cellHeight: 512, columns: 8, startFrame: 0 }, frameCount: 8, frameRate: 8.0, loop: true, renderScale: [1.0, 1.0], renderOffset: [0.0, 0.3398] }
+    run: { pattern: "", atlas: { sheet: "assets/vertical_slice/side_combat/sheets/runtime_characters/protag_run_sheet.png", cellWidth: 512, cellHeight: 512, columns: 4, startFrame: 0 }, frameCount: 4, frameRate: 8.0, loop: true, renderScale: [1.0, 1.0], renderOffset: [0.0, 0.3398] }
+    jump: { pattern: "", atlas: { sheet: "assets/vertical_slice/side_combat/sheets/runtime_characters/protag_jump_sheet.png", cellWidth: 512, cellHeight: 512, columns: 1, startFrame: 0 }, frameCount: 1, frameRate: 18.0, loop: false, renderScale: [1.0, 1.0], renderOffset: [0.0, 0.3398] }
+    fall: { pattern: "", atlas: { sheet: "assets/vertical_slice/side_combat/sheets/runtime_characters/protag_fall_sheet.png", cellWidth: 512, cellHeight: 512, columns: 1, startFrame: 0 }, frameCount: 1, frameRate: 12.0, loop: true, renderScale: [1.0, 1.0], renderOffset: [0.0, 0.3398] }
+    hit: { pattern: "", atlas: { sheet: "assets/vertical_slice/side_combat/sheets/runtime_characters/protag_hit_sheet.png", cellWidth: 512, cellHeight: 512, columns: 4, startFrame: 0 }, frameCount: 4, frameRate: 14.0, loop: false, renderScale: [1.0, 1.0], renderOffset: [0.0, 0.3398] }
+    dead: { pattern: "", atlas: { sheet: "assets/vertical_slice/side_combat/sheets/runtime_characters/protag_dead_sheet.png", cellWidth: 1024, cellHeight: 512, columns: 8, startFrame: 0 }, frameCount: 8, frameRate: 12.0, loop: false, renderScale: [2.0, 1.0], renderOffset: [0.0, 0.3398] }
+    basic1: { pattern: "", atlas: { sheet: "assets/vertical_slice/side_combat/sheets/runtime_characters/protag_basic1_sheet.png", cellWidth: 512, cellHeight: 512, columns: 4, startFrame: 0 }, frameCount: 4, frameRate: 14.0, loop: false, renderScale: [1.0, 1.0], renderOffset: [0.0, 0.3398] }
+    basic2: { pattern: "", atlas: { sheet: "assets/vertical_slice/side_combat/sheets/runtime_characters/protag_basic2_sheet.png", cellWidth: 512, cellHeight: 512, columns: 4, startFrame: 0 }, frameCount: 4, frameRate: 12.0, loop: false, renderScale: [1.0, 1.0], renderOffset: [0.0, 0.3398] }
+    basic3: { pattern: "", atlas: { sheet: "assets/vertical_slice/side_combat/sheets/runtime_characters/protag_basic3_sheet.png", cellWidth: 512, cellHeight: 512, columns: 4, startFrame: 0 }, frameCount: 4, frameRate: 10.0, loop: false, renderScale: [1.0, 1.0], renderOffset: [0.0, 0.3398] }
+    air_basic: { pattern: "", atlas: { sheet: "assets/vertical_slice/side_combat/sheets/runtime_characters/protag_air_basic_sheet.png", cellWidth: 512, cellHeight: 512, columns: 4, startFrame: 0 }, frameCount: 4, frameRate: 14.0, loop: false, renderScale: [1.15, 1.15], renderOffset: [0.0, 0.3398] }
+    launcher: { pattern: "", atlas: { sheet: "assets/vertical_slice/side_combat/sheets/runtime_characters/protag_launcher_sheet.png", cellWidth: 512, cellHeight: 512, columns: 2, startFrame: 0 }, frameCount: 2, frameRate: 10.0, loop: false, renderScale: [1.0, 1.0], renderOffset: [0.0, 0.3398] }
+    air_chase: { pattern: "", atlas: { sheet: "assets/vertical_slice/side_combat/sheets/runtime_characters/protag_air_chase_sheet.png", cellWidth: 768, cellHeight: 640, columns: 8, startFrame: 0 }, frameCount: 8, frameRate: 24.0, loop: false, renderScale: [1.5, 1.25], renderOffset: [0.0, 0.4453] }
+    dash: { pattern: "", atlas: { sheet: "assets/vertical_slice/side_combat/sheets/runtime_characters/protag_dash_sheet.png", cellWidth: 512, cellHeight: 512, columns: 1, startFrame: 0 }, frameCount: 1, frameRate: 8.0, loop: false, renderScale: [1.60, 1.60], renderOffset: [0.0, 0.4453] }
+    magic_bolt: { pattern: "", atlas: { sheet: "assets/vertical_slice/side_combat/sheets/runtime_characters/protag_magic_bolt_sheet.png", cellWidth: 512, cellHeight: 512, columns: 9, startFrame: 0 }, frameCount: 9, frameRate: 20.0, loop: false, renderScale: [1.0, 1.0], renderOffset: [0.0, 0.3398] }
+    ally_support: { pattern: "", atlas: { sheet: "assets/vertical_slice/side_combat/sheets/runtime_characters/protag_ally_support_sheet.png", cellWidth: 640, cellHeight: 512, columns: 8, startFrame: 0 }, frameCount: 8, frameRate: 18.0, loop: false, renderScale: [1.25, 1.0], renderOffset: [0.0, 0.3398] }
+    break_limit: { pattern: "", atlas: { sheet: "assets/vertical_slice/side_combat/sheets/runtime_characters/protag_break_limit_sheet.png", cellWidth: 512, cellHeight: 512, columns: 2, startFrame: 0 }, frameCount: 2, frameRate: 8.0, loop: false, renderScale: [1.25, 1.25], renderOffset: [0.0, 0.3398] }
   gruntAnimations:
-    idle: { pattern: "assets/vertical_slice/side_combat/enemies/en_claw_beast_idle_{frame2}.png", frameCount: 4, frameRate: 7.0, loop: true, renderScale: [1.0, 1.0], renderOffset: [0.0, 0.2969] }
-    run: { pattern: "assets/vertical_slice/side_combat/enemies/en_claw_beast_run_{frame2}.png", frameCount: 5, frameRate: 11.0, loop: true, renderScale: [1.0, 1.0], renderOffset: [0.0, 0.2969] }
-    hit: { pattern: "assets/vertical_slice/side_combat/enemies/en_claw_beast_hit_{frame2}.png", frameCount: 3, frameRate: 12.0, loop: false, renderScale: [1.5, 1.0], renderOffset: [0.0, 0.2969] }
-    fall: { pattern: "assets/vertical_slice/side_combat/enemies/en_claw_beast_fall_{frame2}.png", frameCount: 3, frameRate: 9.0, loop: true, renderScale: [1.5, 1.3333], renderOffset: [0.0, 0.3516] }
-    dead: { pattern: "assets/vertical_slice/side_combat/enemies/en_claw_beast_dead_{frame2}.png", frameCount: 4, frameRate: 7.0, loop: false, renderScale: [1.5, 1.0], renderOffset: [0.0, 0.2969] }
-    enemy_claw: { pattern: "assets/vertical_slice/side_combat/enemies/en_claw_beast_attack_{frame2}.png", frameCount: 4, frameRate: 14.0, loop: false, renderScale: [1.5, 1.0], renderOffset: [0.0, 0.2969] }
+    idle: { pattern: "", atlas: { sheet: "assets/vertical_slice/side_combat/sheets/runtime_enemies/en_claw_beast_idle_sheet.png", cellWidth: 512, cellHeight: 384, columns: 4, startFrame: 0 }, frameCount: 4, frameRate: 7.0, loop: true, renderScale: [1.0, 1.0], renderOffset: [0.0, 0.2969] }
+    run: { pattern: "", atlas: { sheet: "assets/vertical_slice/side_combat/sheets/runtime_enemies/en_claw_beast_run_sheet.png", cellWidth: 512, cellHeight: 384, columns: 5, startFrame: 0 }, frameCount: 5, frameRate: 11.0, loop: true, renderScale: [1.0, 1.0], renderOffset: [0.0, 0.2969] }
+    hit: { pattern: "", atlas: { sheet: "assets/vertical_slice/side_combat/sheets/runtime_enemies/en_claw_beast_hit_sheet.png", cellWidth: 768, cellHeight: 384, columns: 3, startFrame: 0 }, frameCount: 3, frameRate: 12.0, loop: false, renderScale: [1.5, 1.0], renderOffset: [0.0, 0.2969] }
+    fall: { pattern: "", atlas: { sheet: "assets/vertical_slice/side_combat/sheets/runtime_enemies/en_claw_beast_fall_sheet.png", cellWidth: 768, cellHeight: 512, columns: 3, startFrame: 0 }, frameCount: 3, frameRate: 9.0, loop: true, renderScale: [1.5, 1.3333], renderOffset: [0.0, 0.3516] }
+    dead: { pattern: "", atlas: { sheet: "assets/vertical_slice/side_combat/sheets/runtime_enemies/en_claw_beast_dead_sheet.png", cellWidth: 768, cellHeight: 384, columns: 4, startFrame: 0 }, frameCount: 4, frameRate: 7.0, loop: false, renderScale: [1.5, 1.0], renderOffset: [0.0, 0.2969] }
+    enemy_claw: { pattern: "", atlas: { sheet: "assets/vertical_slice/side_combat/sheets/runtime_enemies/en_claw_beast_attack_sheet.png", cellWidth: 768, cellHeight: 384, columns: 4, startFrame: 0 }, frameCount: 4, frameRate: 14.0, loop: false, renderScale: [1.5, 1.0], renderOffset: [0.0, 0.2969] }
   bossAnimations:
-    idle: { pattern: "assets/vertical_slice/side_combat/enemies/boss_bear_husband_idle_{frame2}.png", frameCount: 4, frameRate: 6.0, loop: true, renderScale: [1.0, 1.0], renderOffset: [0.0, 0.3151] }
-    run: { pattern: "assets/vertical_slice/side_combat/enemies/boss_bear_husband_walk_{frame2}.png", frameCount: 4, frameRate: 8.0, loop: true, renderScale: [1.0, 1.0], renderOffset: [0.0, 0.3151] }
-    hit: { pattern: "assets/vertical_slice/side_combat/enemies/boss_bear_husband_hit_{frame2}.png", frameCount: 4, frameRate: 10.0, loop: false, renderScale: [1.30, 1.30], renderOffset: [0.0, 0.4351] }
-    fall: { pattern: "assets/vertical_slice/side_combat/enemies/boss_bear_husband_hit_04.png", frameCount: 1, frameRate: 8.0, loop: false, renderScale: [1.30, 1.30], renderOffset: [0.0, 0.4351] }
-    dead: { pattern: "assets/vertical_slice/side_combat/enemies/boss_bear_husband_dead_{frame2}.png", frameCount: 4, frameRate: 7.0, loop: false, renderScale: [1.25, 1.0], renderOffset: [0.0, 0.3151] }
-    enemy_claw: { pattern: "assets/vertical_slice/side_combat/enemies/boss_bear_husband_attack_claw_{frame2}.png", frameCount: 3, frameRate: 5.0, loop: false, renderScale: [1.85, 1.85], renderOffset: [0.0, 0.3151] }
-    bear_charge: { pattern: "assets/vertical_slice/side_combat/enemies/boss_bear_husband_charge_{frame2}.png", frameCount: 4, frameRate: 12.0, loop: true, renderScale: [1.0, 1.0], renderOffset: [0.0, 0.3151] }
-    bear_charge_windup: { pattern: "assets/vertical_slice/side_combat/enemies/boss_bear_husband_charge_windup_{frame2}.png", frameCount: 6, frameRate: 12.0, loop: false, renderScale: [1.0, 1.0], renderOffset: [0.0, 0.3151] }
-    bear_shockwave: { pattern: "assets/vertical_slice/side_combat/enemies/boss_bear_husband_shockwave_{frame2}.png", frameCount: 4, frameRate: 12.0, loop: false, renderScale: [1.16, 0.96], renderOffset: [0.0, 0.3151] }
+    idle: { pattern: "", atlas: { sheet: "assets/vertical_slice/side_combat/sheets/runtime_enemies/boss_bear_husband_idle_sheet.png", cellWidth: 512, cellHeight: 512, columns: 4, startFrame: 0 }, frameCount: 4, frameRate: 6.0, loop: true, renderScale: [1.0, 1.0], renderOffset: [0.0, 0.3151] }
+    run: { pattern: "", atlas: { sheet: "assets/vertical_slice/side_combat/sheets/runtime_enemies/boss_bear_husband_walk_sheet.png", cellWidth: 512, cellHeight: 512, columns: 4, startFrame: 0 }, frameCount: 4, frameRate: 8.0, loop: true, renderScale: [1.0, 1.0], renderOffset: [0.0, 0.3151] }
+    hit: { pattern: "", atlas: { sheet: "assets/vertical_slice/side_combat/sheets/runtime_enemies/boss_bear_husband_hit_sheet.png", cellWidth: 512, cellHeight: 512, columns: 4, startFrame: 0 }, frameCount: 4, frameRate: 10.0, loop: false, renderScale: [1.30, 1.30], renderOffset: [0.0, 0.4351] }
+    fall: { pattern: "", atlas: { sheet: "assets/vertical_slice/side_combat/sheets/runtime_enemies/boss_bear_husband_fall_sheet.png", cellWidth: 512, cellHeight: 512, columns: 4, startFrame: 0 }, frameCount: 4, frameRate: 10.0, loop: false, renderScale: [1.30, 1.30], renderOffset: [0.0, 0.4351] }
+    dead: { pattern: "", atlas: { sheet: "assets/vertical_slice/side_combat/sheets/runtime_enemies/boss_bear_husband_dead_sheet.png", cellWidth: 1280, cellHeight: 768, columns: 4, startFrame: 0 }, frameCount: 4, frameRate: 7.0, loop: false, renderScale: [1.25, 1.0], renderOffset: [0.0, 0.3151] }
+    enemy_claw: { pattern: "", atlas: { sheet: "assets/vertical_slice/side_combat/sheets/runtime_enemies/boss_bear_husband_attack_claw_sheet.png", cellWidth: 512, cellHeight: 512, columns: 3, startFrame: 0 }, frameCount: 3, frameRate: 5.0, loop: false, renderScale: [1.85, 1.85], renderOffset: [0.0, 0.3151] }
+    bear_charge: { pattern: "", atlas: { sheet: "assets/vertical_slice/side_combat/sheets/runtime_enemies/boss_bear_husband_charge_sheet.png", cellWidth: 512, cellHeight: 512, columns: 4, startFrame: 0 }, frameCount: 4, frameRate: 12.0, loop: true, renderScale: [1.0, 1.0], renderOffset: [0.0, 0.3151] }
+    bear_charge_windup: { pattern: "", atlas: { sheet: "assets/vertical_slice/side_combat/sheets/runtime_enemies/boss_bear_husband_charge_windup_sheet.png", cellWidth: 512, cellHeight: 512, columns: 6, startFrame: 0 }, frameCount: 6, frameRate: 12.0, loop: false, renderScale: [1.0, 1.0], renderOffset: [0.0, 0.3151] }
+    bear_shockwave: { pattern: "", atlas: { sheet: "assets/vertical_slice/side_combat/sheets/runtime_enemies/boss_bear_husband_shockwave_sheet.png", cellWidth: 512, cellHeight: 512, columns: 4, startFrame: 0 }, frameCount: 4, frameRate: 12.0, loop: false, renderScale: [1.16, 0.96], renderOffset: [0.0, 0.3151] }
 
 reactions:
   bossLaunchBonus: 1.46
@@ -287,7 +287,13 @@ attacks:
     attackerAirImpulse: 0.0
     protectionGain: 9.0
     destroyOnHit: true
-    textureFramePattern: assets/vertical_slice/side_combat/effects/vfx_basic_slash_{frame2}.png
+    textureFramePattern: ""
+    textureAtlas:
+      sheet: assets/vertical_slice/side_combat/vfx_sheets/runtime_effects/vfx_basic_slash_sheet.png
+      cellWidth: 320
+      cellHeight: 192
+      columns: 4
+      startFrame: 0
     textureFrameCount: 4
     textureFrameRate: 26.0
     swingSound: assets/vertical_slice/side_combat/audio/swing_light.wav
@@ -316,7 +322,13 @@ attacks:
     attackerAirImpulse: 0.0
     protectionGain: 11.0
     destroyOnHit: true
-    textureFramePattern: assets/vertical_slice/side_combat/effects/vfx_basic_slash_{frame2}.png
+    textureFramePattern: ""
+    textureAtlas:
+      sheet: assets/vertical_slice/side_combat/vfx_sheets/runtime_effects/vfx_basic_slash_sheet.png
+      cellWidth: 320
+      cellHeight: 192
+      columns: 4
+      startFrame: 0
     textureFrameCount: 4
     textureFrameRate: 26.0
     swingSound: assets/vertical_slice/side_combat/audio/swing_light.wav
@@ -345,7 +357,13 @@ attacks:
     attackerAirImpulse: 0.0
     protectionGain: 16.0
     destroyOnHit: true
-    textureFramePattern: assets/vertical_slice/side_combat/effects/vfx_basic_slash_{frame2}.png
+    textureFramePattern: ""
+    textureAtlas:
+      sheet: assets/vertical_slice/side_combat/vfx_sheets/runtime_effects/vfx_basic_slash_sheet.png
+      cellWidth: 320
+      cellHeight: 192
+      columns: 4
+      startFrame: 0
     textureFrameCount: 4
     textureFrameRate: 26.0
     swingSound: assets/vertical_slice/side_combat/audio/swing_heavy.wav
@@ -376,7 +394,13 @@ attacks:
     targetAirFallStep: 0.025
     protectionGain: 14.0
     destroyOnHit: true
-    textureFramePattern: assets/vertical_slice/side_combat/effects/vfx_basic_slash_{frame2}.png
+    textureFramePattern: ""
+    textureAtlas:
+      sheet: assets/vertical_slice/side_combat/vfx_sheets/runtime_effects/vfx_basic_slash_sheet.png
+      cellWidth: 320
+      cellHeight: 192
+      columns: 4
+      startFrame: 0
     textureFrameCount: 4
     textureFrameRate: 28.0
     swingSound: assets/vertical_slice/side_combat/audio/swing_air.wav
@@ -405,7 +429,13 @@ attacks:
     attackerAirImpulse: 0.0
     protectionGain: 22.0
     destroyOnHit: true
-    textureFramePattern: assets/vertical_slice/side_combat/effects/vfx_launcher_slash_{frame2}.png
+    textureFramePattern: ""
+    textureAtlas:
+      sheet: assets/vertical_slice/side_combat/vfx_sheets/runtime_effects/vfx_launcher_slash_sheet.png
+      cellWidth: 240
+      cellHeight: 320
+      columns: 5
+      startFrame: 0
     textureFrameCount: 5
     textureFrameRate: 26.0
     swingSound: assets/vertical_slice/side_combat/audio/swing_upper.wav
@@ -436,7 +466,13 @@ attacks:
     targetAirFallStep: 0.02
     protectionGain: 18.0
     destroyOnHit: true
-    textureFramePattern: assets/vertical_slice/side_combat/effects/vfx_launcher_slash_{frame2}.png
+    textureFramePattern: ""
+    textureAtlas:
+      sheet: assets/vertical_slice/side_combat/vfx_sheets/runtime_effects/vfx_launcher_slash_sheet.png
+      cellWidth: 240
+      cellHeight: 320
+      columns: 5
+      startFrame: 0
     textureFrameCount: 5
     textureFrameRate: 26.0
     swingSound: assets/vertical_slice/side_combat/audio/swing_air.wav
@@ -465,7 +501,13 @@ attacks:
     attackerAirImpulse: 0.0
     protectionGain: 10.0
     destroyOnHit: true
-    textureFramePattern: assets/vertical_slice/side_combat/effects/vfx_launcher_slash_{frame2}.png
+    textureFramePattern: ""
+    textureAtlas:
+      sheet: assets/vertical_slice/side_combat/vfx_sheets/runtime_effects/vfx_launcher_slash_sheet.png
+      cellWidth: 240
+      cellHeight: 320
+      columns: 5
+      startFrame: 0
     textureFrameCount: 5
     textureFrameRate: 26.0
     swingSound: assets/vertical_slice/side_combat/audio/swing_air.wav
@@ -496,7 +538,13 @@ attacks:
     targetAirFallStep: 0.02
     protectionGain: 12.0
     destroyOnHit: true
-    textureFramePattern: assets/vertical_slice/side_combat/effects/vfx_magic_bolt_{frame2}.png
+    textureFramePattern: ""
+    textureAtlas:
+      sheet: assets/vertical_slice/side_combat/vfx_sheets/runtime_effects/vfx_magic_bolt_sheet.png
+      cellWidth: 288
+      cellHeight: 160
+      columns: 4
+      startFrame: 0
     textureFrameCount: 4
     textureFrameRate: 18.0
     swingSound: assets/vertical_slice/side_combat/audio/magic_cast.wav
@@ -527,7 +575,13 @@ attacks:
     targetAirFallStep: 0.0
     protectionGain: 20.0
     destroyOnHit: false
-    textureFramePattern: assets/vertical_slice/side_combat/effects/vfx_ally_support_{frame2}.png
+    textureFramePattern: ""
+    textureAtlas:
+      sheet: assets/vertical_slice/side_combat/vfx_sheets/runtime_effects/vfx_ally_support_sheet.png
+      cellWidth: 256
+      cellHeight: 320
+      columns: 5
+      startFrame: 0
     textureFrameCount: 5
     textureFrameRate: 18.0
     swingSound: assets/vertical_slice/side_combat/audio/support_cast.wav
@@ -558,7 +612,13 @@ attacks:
     targetAirFallStep: 0.0
     protectionGain: 0.0
     destroyOnHit: false
-    textureFramePattern: assets/vertical_slice/side_combat/effects/vfx_ally_support_{frame2}.png
+    textureFramePattern: ""
+    textureAtlas:
+      sheet: assets/vertical_slice/side_combat/vfx_sheets/runtime_effects/vfx_ally_support_sheet.png
+      cellWidth: 256
+      cellHeight: 320
+      columns: 5
+      startFrame: 0
     textureFrameCount: 5
     textureFrameRate: 22.0
     swingSound: assets/vertical_slice/side_combat/audio/break_limit.wav
@@ -585,7 +645,13 @@ attacks:
     movementScale: 0.12
     hitStun: 0.34
     destroyOnHit: true
-    textureFramePattern: assets/vertical_slice/side_combat/effects/vfx_enemy_claw_{frame2}.png
+    textureFramePattern: ""
+    textureAtlas:
+      sheet: assets/vertical_slice/side_combat/vfx_sheets/runtime_effects/vfx_enemy_claw_sheet.png
+      cellWidth: 256
+      cellHeight: 192
+      columns: 3
+      startFrame: 0
     textureFrameCount: 3
     textureFrameRate: 18.0
     swingSound: assets/vertical_slice/side_combat/audio/enemy_swing.wav
@@ -612,7 +678,13 @@ attacks:
     movementScale: 1.0
     hitStun: 0.46
     destroyOnHit: false
-    textureFramePattern: assets/vertical_slice/side_combat/effects/vfx_boss_bear_charge_{frame2}.png
+    textureFramePattern: ""
+    textureAtlas:
+      sheet: assets/vertical_slice/side_combat/vfx_sheets/runtime_effects/vfx_boss_bear_charge_sheet.png
+      cellWidth: 320
+      cellHeight: 192
+      columns: 3
+      startFrame: 0
     textureFrameCount: 3
     textureFrameRate: 16.0
     swingSound: assets/vertical_slice/side_combat/audio/bear_charge.wav
@@ -639,7 +711,13 @@ attacks:
     movementScale: 0.05
     hitStun: 0.30
     destroyOnHit: true
-    textureFramePattern: assets/vertical_slice/side_combat/effects/vfx_boss_bear_shockwave_{frame2}.png
+    textureFramePattern: ""
+    textureAtlas:
+      sheet: assets/vertical_slice/side_combat/vfx_sheets/runtime_effects/vfx_boss_bear_shockwave_sheet.png
+      cellWidth: 384
+      cellHeight: 192
+      columns: 4
+      startFrame: 0
     textureFrameCount: 4
     textureFrameRate: 16.0
     swingSound: assets/vertical_slice/side_combat/audio/shockwave_cast.wav

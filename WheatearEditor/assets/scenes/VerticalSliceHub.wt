@@ -31,6 +31,38 @@ Entities:
       Rotation: 0
       Anchor: 0
       SortOrder: 0
+  - Entity: 950009001
+    TagComponent:
+      Tag: Hub_HeaderGroup
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    UIWidgetComponent:
+      Visible: true
+      EditorVisible: true
+      Position: [0, 0]
+      Size: [1, 1]
+      Rotation: 0
+      Anchor: 0
+      SortOrder: 1
+      ParentEntity: 950000128
+  - Entity: 950009002
+    TagComponent:
+      Tag: Hub_NavigationGroup
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    UIWidgetComponent:
+      Visible: true
+      EditorVisible: true
+      Position: [0, 0]
+      Size: [1, 1]
+      Rotation: 0
+      Anchor: 0
+      SortOrder: 1
+      ParentEntity: 950000128
   - Entity: 950000001
     TagComponent:
       Tag: Hub_Camera
@@ -85,7 +117,7 @@ Entities:
       Rotation: 0
       Anchor: 0
       SortOrder: 8
-      ParentEntity: 950000128
+      ParentEntity: 950009001
     UIAnimatorComponent:
       Preset: "slide_fade_in"
       PlayOnStart: true
@@ -112,7 +144,7 @@ Entities:
       Rotation: 0
       Anchor: 0
       SortOrder: 8
-      ParentEntity: 950000128
+      ParentEntity: 950009002
     UIAnimatorComponent:
       Preset: "slide_fade_in"
       PlayOnStart: true
@@ -139,7 +171,7 @@ Entities:
       Rotation: 0
       Anchor: 0
       SortOrder: 20
-      ParentEntity: 950000128
+      ParentEntity: 950009001
     UIAnimatorComponent:
       Preset: "fade_in"
       PlayOnStart: true
@@ -172,7 +204,7 @@ Entities:
       Rotation: 0
       Anchor: 0
       SortOrder: 20
-      ParentEntity: 950000128
+      ParentEntity: 950009001
     UIAnimatorComponent:
       Preset: "fade_in"
       PlayOnStart: true
@@ -205,7 +237,7 @@ Entities:
       Rotation: 0
       Anchor: 0
       SortOrder: 20
-      ParentEntity: 950000128
+      ParentEntity: 950009001
     UIAnimatorComponent:
       Preset: "fade_in"
       PlayOnStart: true
@@ -238,7 +270,7 @@ Entities:
       Rotation: 0
       Anchor: 0
       SortOrder: 35
-      ParentEntity: 950000128
+      ParentEntity: 950009002
     UIAnimatorComponent:
       Preset: "slide_fade_in"
       PlayOnStart: true
@@ -265,7 +297,7 @@ Entities:
       Rotation: 0
       Anchor: 0
       SortOrder: 40
-      ParentEntity: 950000128
+      ParentEntity: 950009002
     UIAnimatorComponent:
       Preset: "hover_pulse"
       PlayOnStart: true
@@ -303,7 +335,7 @@ Entities:
       Rotation: 0
       Anchor: 0
       SortOrder: 35
-      ParentEntity: 950000128
+      ParentEntity: 950009002
     UIAnimatorComponent:
       Preset: "slide_fade_in"
       PlayOnStart: true
@@ -330,7 +362,7 @@ Entities:
       Rotation: 0
       Anchor: 0
       SortOrder: 40
-      ParentEntity: 950000128
+      ParentEntity: 950009002
     UIAnimatorComponent:
       Preset: "hover_pulse"
       PlayOnStart: true
@@ -368,7 +400,7 @@ Entities:
       Rotation: 0
       Anchor: 0
       SortOrder: 35
-      ParentEntity: 950000128
+      ParentEntity: 950009002
     UIAnimatorComponent:
       Preset: "slide_fade_in"
       PlayOnStart: true
@@ -395,7 +427,7 @@ Entities:
       Rotation: 0
       Anchor: 0
       SortOrder: 40
-      ParentEntity: 950000128
+      ParentEntity: 950009002
     UIAnimatorComponent:
       Preset: "hover_pulse"
       PlayOnStart: true
@@ -433,7 +465,7 @@ Entities:
       Rotation: 0
       Anchor: 0
       SortOrder: 35
-      ParentEntity: 950000128
+      ParentEntity: 950009002
     UIAnimatorComponent:
       Preset: "slide_fade_in"
       PlayOnStart: true
@@ -460,7 +492,7 @@ Entities:
       Rotation: 0
       Anchor: 0
       SortOrder: 40
-      ParentEntity: 950000128
+      ParentEntity: 950009002
     UIAnimatorComponent:
       Preset: "hover_pulse"
       PlayOnStart: true
@@ -498,7 +530,7 @@ Entities:
       Rotation: 0
       Anchor: 0
       SortOrder: 35
-      ParentEntity: 950000128
+      ParentEntity: 950009002
     UIAnimatorComponent:
       Preset: "slide_fade_in"
       PlayOnStart: true
@@ -525,7 +557,7 @@ Entities:
       Rotation: 0
       Anchor: 0
       SortOrder: 40
-      ParentEntity: 950000128
+      ParentEntity: 950009002
     UIAnimatorComponent:
       Preset: "hover_pulse"
       PlayOnStart: true
@@ -563,7 +595,7 @@ Entities:
       Rotation: 0
       Anchor: 0
       SortOrder: 35
-      ParentEntity: 950000128
+      ParentEntity: 950009002
     UIAnimatorComponent:
       Preset: "slide_fade_in"
       PlayOnStart: true
@@ -590,7 +622,7 @@ Entities:
       Rotation: 0
       Anchor: 0
       SortOrder: 40
-      ParentEntity: 950000128
+      ParentEntity: 950009002
     UIAnimatorComponent:
       Preset: "hover_pulse"
       PlayOnStart: true
@@ -628,7 +660,7 @@ Entities:
       Rotation: 0
       Anchor: 0
       SortOrder: 35
-      ParentEntity: 950000128
+      ParentEntity: 950009002
     UIAnimatorComponent:
       Preset: "slide_fade_in"
       PlayOnStart: true
@@ -655,7 +687,7 @@ Entities:
       Rotation: 0
       Anchor: 0
       SortOrder: 40
-      ParentEntity: 950000128
+      ParentEntity: 950009002
     UIAnimatorComponent:
       Preset: "hover_pulse"
       PlayOnStart: true
@@ -693,7 +725,7 @@ Entities:
       Rotation: 0
       Anchor: 0
       SortOrder: 35
-      ParentEntity: 950000128
+      ParentEntity: 950009002
     UIAnimatorComponent:
       Preset: "slide_fade_in"
       PlayOnStart: true
@@ -720,7 +752,7 @@ Entities:
       Rotation: 0
       Anchor: 0
       SortOrder: 40
-      ParentEntity: 950000128
+      ParentEntity: 950009002
     UIAnimatorComponent:
       Preset: "hover_pulse"
       PlayOnStart: true
@@ -758,7 +790,7 @@ Entities:
       Rotation: 0
       Anchor: 0
       SortOrder: 35
-      ParentEntity: 950000128
+      ParentEntity: 950009002
     UIAnimatorComponent:
       Preset: "slide_fade_in"
       PlayOnStart: true
@@ -785,7 +817,7 @@ Entities:
       Rotation: 0
       Anchor: 0
       SortOrder: 40
-      ParentEntity: 950000128
+      ParentEntity: 950009002
     UIAnimatorComponent:
       Preset: "hover_pulse"
       PlayOnStart: true

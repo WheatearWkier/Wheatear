@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Wheatear/Core/UUID.h"
+#include "Wheatear/Modules/Common/GameplayVisualService.h"
 
 #include <cstdint>
 #include <string>
@@ -434,6 +435,7 @@ namespace Wheatear {
         float          ProtectionGain = 0.0f;
         bool           DestroyOnHit = true;
         std::string    TextureFramePattern;
+        GameplayVisualService::TextureAtlasFrameSpec TextureAtlas;
         int            TextureFrameCount = 1;
         float          TextureFrameRate = 16.0f;
         std::string    HitSound;

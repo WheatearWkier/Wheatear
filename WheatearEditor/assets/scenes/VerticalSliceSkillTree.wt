@@ -14,7 +14,7 @@ Entities:
       Rotation: 0
       Anchor: 0
       SortOrder: 55
-      ParentEntity: 970000000
+      ParentEntity: 970009004
     UITextComponent:
       Text: "返回据点"
       Color: [0.899999976, 0.959999979, 0.939999998, 1]
@@ -43,7 +43,7 @@ Entities:
       Rotation: 0
       Anchor: 0
       SortOrder: 55
-      ParentEntity: 970000000
+      ParentEntity: 970009003
     UITextComponent:
       Text: "学习选中节点"
       Color: [1, 0.939999998, 0.779999971, 1]
@@ -72,7 +72,7 @@ Entities:
       Rotation: 0
       Anchor: 0
       SortOrder: 44
-      ParentEntity: 970000000
+      ParentEntity: 970009003
     UIProgressBarComponent:
       Value: 1
       MaxValue: 2
@@ -92,7 +92,7 @@ Entities:
       Rotation: 0
       Anchor: 0
       SortOrder: 42
-      ParentEntity: 970000000
+      ParentEntity: 970009003
     UITextComponent:
       Text: "材料"
       Color: [1, 0.930000007, 0.720000029, 1]
@@ -116,7 +116,7 @@ Entities:
       Rotation: 0
       Anchor: 0
       SortOrder: 42
-      ParentEntity: 970000000
+      ParentEntity: 970009003
     UITextComponent:
       Text: "魔剑核心"
       Color: [0.959999979, 0.99000001, 0.939999998, 1]
@@ -140,7 +140,7 @@ Entities:
       Rotation: 0
       Anchor: 0
       SortOrder: 42
-      ParentEntity: 970000000
+      ParentEntity: 970009001
     UITextComponent:
       Text: "魔剑 Lv1 / 完整技能网"
       Color: [0.879999995, 0.980000019, 0.920000017, 1]
@@ -164,7 +164,7 @@ Entities:
       Rotation: 0
       Anchor: 0
       SortOrder: 42
-      ParentEntity: 970000000
+      ParentEntity: 970009002
     UITextComponent:
       Text: "拖动画布浏览完整技能树；点击节点查看详情"
       Color: [0.699999988, 0.879999995, 0.879999995, 1]
@@ -188,7 +188,7 @@ Entities:
       Rotation: 0
       Anchor: 0
       SortOrder: 18
-      ParentEntity: 970000000
+      ParentEntity: 970009003
     UIPanelComponent:
       BackgroundColor: [0.0399999991, 0.0460000001, 0.0560000017, 0.839999974]
       BorderColor: [0.560000002, 0.720000029, 0.75999999, 0.879999995]
@@ -211,7 +211,7 @@ Entities:
       Rotation: 0
       Anchor: 0
       SortOrder: 18
-      ParentEntity: 970000000
+      ParentEntity: 970009002
     UIPanelComponent:
       BackgroundColor: [0.0299999993, 0.0450000018, 0.0520000011, 0.75999999]
       BorderColor: [0.180000007, 0.579999983, 0.620000005, 0.879999995]
@@ -870,7 +870,7 @@ Entities:
       Rotation: 0
       Anchor: 0
       SortOrder: 42
-      ParentEntity: 970000000
+      ParentEntity: 970009001
     UITextComponent:
       Text: "第 2 章 / 魔剑 Lv1 / 主角 Lv1"
       Color: [0.699999988, 0.899999976, 0.920000017, 1]
@@ -894,7 +894,7 @@ Entities:
       Rotation: 0
       Anchor: 0
       SortOrder: 42
-      ParentEntity: 970000000
+      ParentEntity: 970009001
     UITextComponent:
       Text: "魔剑技能树"
       Color: [0.899999976, 0.99000001, 1, 1]
@@ -918,7 +918,7 @@ Entities:
       Rotation: 0
       Anchor: 0
       SortOrder: 10
-      ParentEntity: 970000000
+      ParentEntity: 970009001
     UIPanelComponent:
       BackgroundColor: [0.0350000001, 0.0469999984, 0.0579999983, 0.879999995]
       BorderColor: [0.25999999, 0.660000026, 0.720000029, 0.920000017]
@@ -946,6 +946,70 @@ Entities:
       Anchor: 0
       SortOrder: 0
       ParentEntity: 0
+  - Entity: 970009001
+    TagComponent:
+      Tag: SkillTree_HeaderGroup
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    UIWidgetComponent:
+      Visible: true
+      EditorVisible: true
+      Position: [0, 0]
+      Size: [1, 1]
+      Rotation: 0
+      Anchor: 0
+      SortOrder: 1
+      ParentEntity: 970000000
+  - Entity: 970009002
+    TagComponent:
+      Tag: SkillTree_NetworkGroup
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    UIWidgetComponent:
+      Visible: true
+      EditorVisible: true
+      Position: [0, 0]
+      Size: [1, 1]
+      Rotation: 0
+      Anchor: 0
+      SortOrder: 1
+      ParentEntity: 970000000
+  - Entity: 970009003
+    TagComponent:
+      Tag: SkillTree_DetailGroup
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    UIWidgetComponent:
+      Visible: true
+      EditorVisible: true
+      Position: [0, 0]
+      Size: [1, 1]
+      Rotation: 0
+      Anchor: 0
+      SortOrder: 1
+      ParentEntity: 970000000
+  - Entity: 970009004
+    TagComponent:
+      Tag: SkillTree_FooterGroup
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    UIWidgetComponent:
+      Visible: true
+      EditorVisible: true
+      Position: [0, 0]
+      Size: [1, 1]
+      Rotation: 0
+      Anchor: 0
+      SortOrder: 1
+      ParentEntity: 970000000
   - Entity: 970000002
     TagComponent:
       Tag: SkillTree_Background

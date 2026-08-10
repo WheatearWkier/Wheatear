@@ -75,7 +75,7 @@ clips:
     profile: small_enemy
     cellWidth: 512
     cellHeight: 384
-    runtimePattern: assets/vertical_slice/side_combat/enemies/en_claw_beast_idle_{frame2}.png
+    runtimeSheet: assets/vertical_slice/side_combat/sheets/runtime_enemies/en_claw_beast_idle_sheet.png
     fixedCanvasPerClip: true
     pivotBaselineStable: true
     collisionIndependentFromCanvas: true
@@ -85,7 +85,7 @@ clips:
     profile: small_enemy
     cellWidth: 512
     cellHeight: 384
-    runtimePattern: assets/vertical_slice/side_combat/enemies/en_claw_beast_run_{frame2}.png
+    runtimeSheet: assets/vertical_slice/side_combat/sheets/runtime_enemies/en_claw_beast_run_sheet.png
     fixedCanvasPerClip: true
     pivotBaselineStable: true
     collisionIndependentFromCanvas: true
@@ -95,7 +95,7 @@ clips:
     profile: small_enemy_wide
     cellWidth: 768
     cellHeight: 384
-    runtimePattern: assets/vertical_slice/side_combat/enemies/en_claw_beast_hit_{frame2}.png
+    runtimeSheet: assets/vertical_slice/side_combat/sheets/runtime_enemies/en_claw_beast_hit_sheet.png
     fixedCanvasPerClip: true
     pivotBaselineStable: true
     collisionIndependentFromCanvas: true
@@ -105,7 +105,7 @@ clips:
     profile: small_enemy_air_wide
     cellWidth: 768
     cellHeight: 512
-    runtimePattern: assets/vertical_slice/side_combat/enemies/en_claw_beast_fall_{frame2}.png
+    runtimeSheet: assets/vertical_slice/side_combat/sheets/runtime_enemies/en_claw_beast_fall_sheet.png
     fixedCanvasPerClip: true
     pivotBaselineStable: true
     collisionIndependentFromCanvas: true
@@ -115,7 +115,7 @@ clips:
     profile: small_enemy_wide
     cellWidth: 768
     cellHeight: 384
-    runtimePattern: assets/vertical_slice/side_combat/enemies/en_claw_beast_dead_{frame2}.png
+    runtimeSheet: assets/vertical_slice/side_combat/sheets/runtime_enemies/en_claw_beast_dead_sheet.png
     fixedCanvasPerClip: true
     pivotBaselineStable: true
     collisionIndependentFromCanvas: true
@@ -125,7 +125,7 @@ clips:
     profile: small_enemy_wide
     cellWidth: 768
     cellHeight: 384
-    runtimePattern: assets/vertical_slice/side_combat/enemies/en_claw_beast_attack_{frame2}.png
+    runtimeSheet: assets/vertical_slice/side_combat/sheets/runtime_enemies/en_claw_beast_attack_sheet.png
     fixedCanvasPerClip: true
     pivotBaselineStable: true
     collisionIndependentFromCanvas: true
@@ -135,7 +135,7 @@ clips:
     profile: boss_bear_husband
     cellWidth: 1024
     cellHeight: 768
-    runtimePattern: assets/vertical_slice/side_combat/enemies/boss_bear_husband_idle_{frame2}.png
+    runtimeSheet: assets/vertical_slice/side_combat/sheets/runtime_enemies/boss_bear_husband_idle_sheet.png
     fixedCanvasPerClip: true
     pivotBaselineStable: true
     collisionIndependentFromCanvas: true
@@ -145,27 +145,27 @@ clips:
     profile: boss_bear_husband
     cellWidth: 1024
     cellHeight: 768
-    runtimePattern: assets/vertical_slice/side_combat/enemies/boss_bear_husband_walk_{frame2}.png
+    runtimeSheet: assets/vertical_slice/side_combat/sheets/runtime_enemies/boss_bear_husband_walk_sheet.png
     fixedCanvasPerClip: true
     pivotBaselineStable: true
     collisionIndependentFromCanvas: true
   boss_bear_husband_hit:
-    frameCount: 3
+    frameCount: 4
     frameRate: 10.0
     profile: boss_bear_husband
-    cellWidth: 1024
-    cellHeight: 768
-    runtimePattern: assets/vertical_slice/side_combat/enemies/boss_bear_husband_hit_{frame2}.png
+    cellWidth: 512
+    cellHeight: 512
+    runtimeSheet: assets/vertical_slice/side_combat/sheets/runtime_enemies/boss_bear_husband_hit_sheet.png
     fixedCanvasPerClip: true
     pivotBaselineStable: true
     collisionIndependentFromCanvas: true
   boss_bear_husband_fall:
-    frameCount: 3
-    frameRate: 8.0
+    frameCount: 4
+    frameRate: 10.0
     profile: boss_bear_husband
-    cellWidth: 1024
-    cellHeight: 768
-    runtimePattern: assets/vertical_slice/side_combat/enemies/boss_bear_husband_fall_{frame2}.png
+    cellWidth: 512
+    cellHeight: 512
+    runtimeSheet: assets/vertical_slice/side_combat/sheets/runtime_enemies/boss_bear_husband_fall_sheet.png
     fixedCanvasPerClip: true
     pivotBaselineStable: true
     collisionIndependentFromCanvas: true
@@ -175,7 +175,7 @@ clips:
     profile: boss_bear_husband_wide
     cellWidth: 1280
     cellHeight: 768
-    runtimePattern: assets/vertical_slice/side_combat/enemies/boss_bear_husband_dead_{frame2}.png
+    runtimeSheet: assets/vertical_slice/side_combat/sheets/runtime_enemies/boss_bear_husband_dead_sheet.png
     fixedCanvasPerClip: true
     pivotBaselineStable: true
     collisionIndependentFromCanvas: true
@@ -185,7 +185,7 @@ clips:
     profile: boss_bear_husband_wide
     cellWidth: 1280
     cellHeight: 768
-    runtimePattern: assets/vertical_slice/side_combat/enemies/boss_bear_husband_attack_{frame2}.png
+    runtimeSheet: assets/vertical_slice/side_combat/sheets/runtime_enemies/boss_bear_husband_attack_sheet.png
     fixedCanvasPerClip: true
     pivotBaselineStable: true
     collisionIndependentFromCanvas: true
@@ -195,7 +195,7 @@ clips:
     profile: boss_bear_husband
     cellWidth: 1024
     cellHeight: 768
-    runtimePattern: assets/vertical_slice/side_combat/enemies/boss_bear_husband_charge_{frame2}.png
+    runtimeSheet: assets/vertical_slice/side_combat/sheets/runtime_enemies/boss_bear_husband_charge_sheet.png
     fixedCanvasPerClip: true
     pivotBaselineStable: true
     collisionIndependentFromCanvas: true
@@ -205,7 +205,7 @@ clips:
     profile: boss_bear_husband_wide
     cellWidth: 1280
     cellHeight: 768
-    runtimePattern: assets/vertical_slice/side_combat/enemies/boss_bear_husband_shockwave_{frame2}.png
+    runtimeSheet: assets/vertical_slice/side_combat/sheets/runtime_enemies/boss_bear_husband_shockwave_sheet.png
     fixedCanvasPerClip: true
     pivotBaselineStable: true
     collisionIndependentFromCanvas: true

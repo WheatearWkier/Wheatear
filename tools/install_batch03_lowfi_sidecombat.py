@@ -104,12 +104,6 @@ def save_clip(source_action: str, dest_action: str, count: int, profile: str) ->
     return written
 
 
-def save_static_idle() -> Path:
-    static_path = DEST_ROOT / "protag_magic_swordsman.png"
-    shutil.copy2(DEST_ROOT / "protag_idle_01.png", static_path)
-    return static_path
-
-
 def make_contact_sheet(paths: list[Path]) -> Path:
     PREVIEW_ROOT.mkdir(parents=True, exist_ok=True)
     sample_names = [
@@ -141,7 +135,7 @@ def validate(paths: list[Path]) -> list[str]:
     warnings: list[str] = []
     for path in paths:
         image = Image.open(path).convert("RGBA")
-        expected = PROFILE_SIZES["body_512"] if path.name == "protag_magic_swordsman.png" else None
+        expected = None
         if expected is None:
             for source_action, dest_action, _, profile in sorted(SOURCE_CLIPS, key=lambda item: len(item[1]), reverse=True):
                 if path.name.startswith(f"protag_{dest_action}_"):
@@ -165,8 +159,6 @@ def main() -> None:
     all_written: list[Path] = []
     for source_action, dest_action, count, profile in SOURCE_CLIPS:
         all_written.extend(save_clip(source_action, dest_action, count, profile))
-    static_path = save_static_idle()
-    all_written.append(static_path)
     preview = make_contact_sheet(all_written)
     warnings = validate(all_written)
 

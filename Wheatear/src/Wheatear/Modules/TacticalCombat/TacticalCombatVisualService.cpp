@@ -4,6 +4,7 @@
 #include "TacticalCombatBoardService.h"
 #include "TacticalCombatSkillService.h"
 #include "Wheatear/Modules/Common/GameplayEntityService.h"
+#include "Wheatear/Modules/Common/GameplayVisualService.h"
 #include "Wheatear/UI/UIRuntimeTools.h"
 
 #include <algorithm>
@@ -20,12 +21,12 @@ namespace Wheatear::TacticalCombatVisualService {
         {
             if (!unit.RuntimeAlive)
                 return "down";
-            if (unit.RuntimeHitFlashTimer > 0.0f && !unit.HitFramePattern.empty())
+            if (unit.RuntimeHitFlashTimer > 0.0f && (!unit.HitFramePattern.empty() || unit.HitFrameAtlas.IsValid()))
                 return "hit";
             if (level.RuntimePhase == TacticalCombatPhase::Acting
                 && entity
                 && entity.GetUUID() == level.RuntimeActionActor
-                && !unit.AttackFramePattern.empty())
+                && (!unit.AttackFramePattern.empty() || unit.AttackFrameAtlas.IsValid()))
             {
                 return "attack";
             }
@@ -41,6 +42,17 @@ namespace Wheatear::TacticalCombatVisualService {
             if (clip == "down")
                 return unit.DownFramePattern;
             return unit.IdleFramePattern;
+        }
+
+        static const GameplayVisualService::TextureAtlasFrameSpec& AtlasForClip(const TacticalUnitComponent& unit, const std::string& clip)
+        {
+            if (clip == "attack")
+                return unit.AttackFrameAtlas;
+            if (clip == "hit")
+                return unit.HitFrameAtlas;
+            if (clip == "down")
+                return unit.DownFrameAtlas;
+            return unit.IdleFrameAtlas;
         }
 
         static int FrameCountForClip(const TacticalUnitComponent& unit, const std::string& clip)
@@ -81,8 +93,9 @@ namespace Wheatear::TacticalCombatVisualService {
         }
 
         const std::string& pattern = PatternForClip(unit, clip);
+        const auto& atlas = AtlasForClip(unit, clip);
         const int frameCount = std::max(1, FrameCountForClip(unit, clip));
-        if (!pattern.empty())
+        if (!pattern.empty() || atlas.IsValid())
         {
             int frameIndex = 0;
             if (clip == "attack" && level.RuntimePhase == TacticalCombatPhase::Acting)
@@ -99,7 +112,8 @@ namespace Wheatear::TacticalCombatVisualService {
                 frameIndex = std::min(frameCount - 1,
                     (int)(unit.RuntimeVisualTimer * std::max(1.0f, unit.AnimationFrameRate)));
             }
-            UIRuntimeTools::SetImageTexture(scene, entity.GetName(), TacticalCombatSkillService::FormatFramePath(pattern, frameIndex), false);
+            if (!GameplayVisualService::ApplyUIImageAtlasFrame(scene, entity.GetName(), atlas, frameIndex + 1, false))
+                GameplayVisualService::ApplyUIImageFrame(scene, entity.GetName(), pattern, frameIndex + 1, false);
         }
 
         glm::vec4 tint = { 1.0f, 1.0f, 1.0f, unit.RuntimeAlive ? 1.0f : 0.42f };
@@ -141,7 +155,8 @@ namespace Wheatear::TacticalCombatVisualService {
             level.ActionEffectEntityName,
             TacticalCombatBoardService::CellTopLeft(level, targetUnit.GridX, targetUnit.GridY) - level.CellSize * 0.22f,
             level.CellSize * 1.44f);
-        UIRuntimeTools::SetImageTexture(scene, level.ActionEffectEntityName, TacticalCombatSkillService::FormatFramePath(skill->EffectFramePattern, frameIndex), true);
+        if (!GameplayVisualService::ApplyUIImageAtlasFrame(scene, level.ActionEffectEntityName, skill->EffectAtlas, frameIndex + 1, true))
+            GameplayVisualService::ApplyUIImageFrame(scene, level.ActionEffectEntityName, skill->EffectFramePattern, frameIndex + 1, true);
         UIRuntimeTools::SetImageColor(scene, level.ActionEffectEntityName, { 1.0f, 1.0f, 1.0f, alpha });
         UIRuntimeTools::SetWidgetVisible(scene, level.ActionEffectEntityName, alpha > 0.02f);
     }

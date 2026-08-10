@@ -33,6 +33,118 @@ Entities:
       Anchor: 0
       SortOrder: 0
       ParentEntity: 0
+  - Entity: 946209001
+    TagComponent:
+      Tag: SC_StatusHUDGroup
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    UIWidgetComponent:
+      Visible: true
+      EditorVisible: true
+      Position: [0, 0]
+      Size: [1, 1]
+      Rotation: 0
+      Anchor: 0
+      SortOrder: 1
+      ParentEntity: 946200046
+  - Entity: 946209002
+    TagComponent:
+      Tag: SC_ComboGroup
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    UIWidgetComponent:
+      Visible: true
+      EditorVisible: true
+      Position: [0, 0]
+      Size: [1, 1]
+      Rotation: 0
+      Anchor: 0
+      SortOrder: 1
+      ParentEntity: 946200046
+  - Entity: 946209003
+    TagComponent:
+      Tag: SC_MessageGroup
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    UIWidgetComponent:
+      Visible: true
+      EditorVisible: true
+      Position: [0, 0]
+      Size: [1, 1]
+      Rotation: 0
+      Anchor: 0
+      SortOrder: 1
+      ParentEntity: 946200046
+  - Entity: 946209004
+    TagComponent:
+      Tag: SC_SkillBarGroup
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    UIWidgetComponent:
+      Visible: true
+      EditorVisible: true
+      Position: [0, 0]
+      Size: [1, 1]
+      Rotation: 0
+      Anchor: 0
+      SortOrder: 1
+      ParentEntity: 946200046
+  - Entity: 946209005
+    TagComponent:
+      Tag: SC_ItemBarGroup
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    UIWidgetComponent:
+      Visible: true
+      EditorVisible: true
+      Position: [0, 0]
+      Size: [1, 1]
+      Rotation: 0
+      Anchor: 0
+      SortOrder: 1
+      ParentEntity: 946200046
+  - Entity: 946209006
+    TagComponent:
+      Tag: SC_JoystickGroup
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    UIWidgetComponent:
+      Visible: true
+      EditorVisible: true
+      Position: [0, 0]
+      Size: [1, 1]
+      Rotation: 0
+      Anchor: 0
+      SortOrder: 1
+      ParentEntity: 946200046
+  - Entity: 946209007
+    TagComponent:
+      Tag: SC_OverlayGroup
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    UIWidgetComponent:
+      Visible: true
+      EditorVisible: true
+      Position: [0, 0]
+      Size: [1, 1]
+      Rotation: 0
+      Anchor: 0
+      SortOrder: 1
+      ParentEntity: 946200046
   - Entity: 940000001
     TagComponent:
       Tag: SC_Camera
@@ -108,10 +220,10 @@ Entities:
       Scale: [2.45000005, 2.45000005, 1]
     SpriteRendererComponent:
       Color: [1, 1, 1, 1]
-      Texture: assets/vertical_slice/side_combat/characters/protag_magic_swordsman.png
+      Texture: assets/vertical_slice/side_combat/sheets/runtime_characters/protag_idle_sheet.png
       TilingFactor: 1
       UVMin: [0, 0]
-      UVMax: [1, 1]
+      UVMax: [0.125, 1]
       FlipX: false
       DrawOffset: [0, 0]
       DrawScale: [1, 1]
@@ -162,10 +274,10 @@ Entities:
       Scale: [2.54999995, 2.0999999, 1]
     SpriteRendererComponent:
       Color: [1, 1, 1, 1]
-      Texture: assets/vertical_slice/side_combat/enemies/boss_bear_husband.png
+      Texture: assets/vertical_slice/side_combat/sheets/runtime_enemies/boss_bear_husband_idle_sheet.png
       TilingFactor: 1
       UVMin: [0, 0]
-      UVMax: [1, 1]
+      UVMax: [0.25, 1]
       FlipX: false
       DrawOffset: [0, 0]
       DrawScale: [1, 1]
@@ -288,10 +400,10 @@ Entities:
       Scale: [1.72000003, 1.72000003, 1]
     SpriteRendererComponent:
       Color: [1, 1, 1, 1]
-      Texture: assets/vertical_slice/side_combat/enemies/en_claw_beast_idle_01.png
+      Texture: assets/vertical_slice/side_combat/sheets/runtime_enemies/en_claw_beast_idle_sheet.png
       TilingFactor: 1
       UVMin: [0, 0]
-      UVMax: [1, 1]
+      UVMax: [0.25, 1]
       FlipX: false
       DrawOffset: [0, 0]
       DrawScale: [1, 1]
@@ -342,10 +454,10 @@ Entities:
       Scale: [1.72000003, 1.72000003, 1]
     SpriteRendererComponent:
       Color: [1, 1, 1, 1]
-      Texture: assets/vertical_slice/side_combat/enemies/en_claw_beast_idle_01.png
+      Texture: assets/vertical_slice/side_combat/sheets/runtime_enemies/en_claw_beast_idle_sheet.png
       TilingFactor: 1
       UVMin: [0, 0]
-      UVMax: [1, 1]
+      UVMax: [0.25, 1]
       FlipX: false
       DrawOffset: [0, 0]
       DrawScale: [1, 1]
@@ -396,10 +508,10 @@ Entities:
       Scale: [1.72000003, 1.72000003, 1]
     SpriteRendererComponent:
       Color: [1, 1, 1, 1]
-      Texture: assets/vertical_slice/side_combat/enemies/en_claw_beast_idle_01.png
+      Texture: assets/vertical_slice/side_combat/sheets/runtime_enemies/en_claw_beast_idle_sheet.png
       TilingFactor: 1
       UVMin: [0, 0]
-      UVMax: [1, 1]
+      UVMax: [0.25, 1]
       FlipX: false
       DrawOffset: [0, 0]
       DrawScale: [1, 1]
@@ -450,10 +562,10 @@ Entities:
       Scale: [1.72000003, 1.72000003, 1]
     SpriteRendererComponent:
       Color: [1, 1, 1, 1]
-      Texture: assets/vertical_slice/side_combat/enemies/en_claw_beast_idle_01.png
+      Texture: assets/vertical_slice/side_combat/sheets/runtime_enemies/en_claw_beast_idle_sheet.png
       TilingFactor: 1
       UVMin: [0, 0]
-      UVMax: [1, 1]
+      UVMax: [0.25, 1]
       FlipX: false
       DrawOffset: [0, 0]
       DrawScale: [1, 1]
@@ -504,10 +616,10 @@ Entities:
       Scale: [1.72000003, 1.72000003, 1]
     SpriteRendererComponent:
       Color: [1, 1, 1, 1]
-      Texture: assets/vertical_slice/side_combat/enemies/en_claw_beast_idle_01.png
+      Texture: assets/vertical_slice/side_combat/sheets/runtime_enemies/en_claw_beast_idle_sheet.png
       TilingFactor: 1
       UVMin: [0, 0]
-      UVMax: [1, 1]
+      UVMax: [0.25, 1]
       FlipX: false
       DrawOffset: [0, 0]
       DrawScale: [1, 1]
@@ -548,7 +660,7 @@ Entities:
       Rotation: 0
       Anchor: 0
       SortOrder: 18
-      ParentEntity: 946200046
+      ParentEntity: 946209001
     UIAnimatorComponent:
       Preset: "slide_fade_in"
       PlayOnStart: true
@@ -578,7 +690,7 @@ Entities:
       Rotation: 0
       Anchor: 0
       SortOrder: 18
-      ParentEntity: 946200046
+      ParentEntity: 946209002
     UIAnimatorComponent:
       Preset: "fade_in"
       PlayOnStart: true
@@ -608,7 +720,7 @@ Entities:
       Rotation: 0
       Anchor: 0
       SortOrder: 24
-      ParentEntity: 946200046
+      ParentEntity: 946209001
     UIImageComponent:
       Color: [1, 1, 1, 1]
       TexturePath: assets/vertical_slice/side_combat/ui/sidecombat_ui_sheet.png
@@ -634,7 +746,7 @@ Entities:
       Rotation: 0
       Anchor: 0
       SortOrder: 30
-      ParentEntity: 946200046
+      ParentEntity: 946209001
     UITextComponent:
       Text: "閻㈢喎鎳?420/420"
       Color: [0.899999976, 0.980000019, 0.920000017, 1]
@@ -663,7 +775,7 @@ Entities:
       Rotation: 0
       Anchor: 0
       SortOrder: 24
-      ParentEntity: 946200046
+      ParentEntity: 946209001
     UIImageComponent:
       Color: [1, 1, 1, 1]
       TexturePath: assets/vertical_slice/side_combat/ui/sidecombat_ui_sheet.png
@@ -684,7 +796,7 @@ Entities:
       Rotation: 0
       Anchor: 0
       SortOrder: 25
-      ParentEntity: 946200046
+      ParentEntity: 946209001
     UIImageComponent:
       Color: [1, 1, 1, 0.920000017]
       TexturePath: assets/vertical_slice/side_combat/ui/sidecombat_ui_sheet.png
@@ -705,7 +817,7 @@ Entities:
       Rotation: 0
       Anchor: 0
       SortOrder: 24
-      ParentEntity: 946200046
+      ParentEntity: 946209001
     UIImageComponent:
       Color: [1, 1, 1, 1]
       TexturePath: assets/vertical_slice/side_combat/ui/sidecombat_ui_sheet.png
@@ -731,7 +843,7 @@ Entities:
       Rotation: 0
       Anchor: 0
       SortOrder: 30
-      ParentEntity: 946200046
+      ParentEntity: 946209001
     UITextComponent:
       Text: "姒涙垹鍞烘稉鍫濄亱 1450/1450"
       Color: [1, 0.899999976, 0.860000014, 1]
@@ -760,7 +872,7 @@ Entities:
       Rotation: 0
       Anchor: 0
       SortOrder: 25
-      ParentEntity: 946200046
+      ParentEntity: 946209001
     UIImageComponent:
       Color: [1, 1, 1, 1]
       TexturePath: assets/vertical_slice/side_combat/ui/sidecombat_ui_sheet.png
@@ -781,7 +893,7 @@ Entities:
       Rotation: 0
       Anchor: 0
       SortOrder: 70
-      ParentEntity: 946200046
+      ParentEntity: 946209001
     UIImageComponent:
       Color: [1, 1, 1, 1]
       TexturePath: assets/vertical_slice/side_combat/ui/sidecombat_ui_sheet.png
@@ -802,7 +914,7 @@ Entities:
       Rotation: 0
       Anchor: 0
       SortOrder: 70
-      ParentEntity: 946200046
+      ParentEntity: 946209001
     UIImageComponent:
       Color: [1, 1, 1, 1]
       TexturePath: assets/vertical_slice/side_combat/ui/sidecombat_ui_sheet.png
@@ -823,7 +935,7 @@ Entities:
       Rotation: 0
       Anchor: 0
       SortOrder: 70
-      ParentEntity: 946200046
+      ParentEntity: 946209001
     UIImageComponent:
       Color: [1, 1, 1, 1]
       TexturePath: assets/vertical_slice/side_combat/ui/sidecombat_ui_sheet.png
@@ -844,7 +956,7 @@ Entities:
       Rotation: 0
       Anchor: 0
       SortOrder: 70
-      ParentEntity: 946200046
+      ParentEntity: 946209001
     UIImageComponent:
       Color: [1, 1, 1, 1]
       TexturePath: assets/vertical_slice/side_combat/ui/sidecombat_ui_sheet.png
@@ -865,7 +977,7 @@ Entities:
       Rotation: 0
       Anchor: 0
       SortOrder: 70
-      ParentEntity: 946200046
+      ParentEntity: 946209001
     UIImageComponent:
       Color: [1, 1, 1, 1]
       TexturePath: assets/vertical_slice/side_combat/ui/sidecombat_ui_sheet.png
@@ -886,7 +998,7 @@ Entities:
       Rotation: 0
       Anchor: 0
       SortOrder: 70
-      ParentEntity: 946200046
+      ParentEntity: 946209001
     UIImageComponent:
       Color: [1, 1, 1, 1]
       TexturePath: assets/vertical_slice/side_combat/ui/sidecombat_ui_sheet.png
@@ -907,7 +1019,7 @@ Entities:
       Rotation: 0
       Anchor: 0
       SortOrder: 70
-      ParentEntity: 946200046
+      ParentEntity: 946209001
     UIImageComponent:
       Color: [1, 1, 1, 1]
       TexturePath: assets/vertical_slice/side_combat/ui/sidecombat_ui_sheet.png
@@ -928,7 +1040,7 @@ Entities:
       Rotation: 0
       Anchor: 0
       SortOrder: 70
-      ParentEntity: 946200046
+      ParentEntity: 946209001
     UIImageComponent:
       Color: [1, 1, 1, 1]
       TexturePath: assets/vertical_slice/side_combat/ui/sidecombat_ui_sheet.png
@@ -949,7 +1061,7 @@ Entities:
       Rotation: 0
       Anchor: 0
       SortOrder: 24
-      ParentEntity: 946200046
+      ParentEntity: 946209003
     UIAnimatorComponent:
       Preset: "fade_in"
       PlayOnStart: true
@@ -987,7 +1099,7 @@ Entities:
       Rotation: 0
       Anchor: 0
       SortOrder: 32
-      ParentEntity: 946200046
+      ParentEntity: 946209002
     UIAnimatorComponent:
       Preset: "pulse"
       PlayOnStart: true
@@ -1025,7 +1137,7 @@ Entities:
       Rotation: 0
       Anchor: 0
       SortOrder: 38
-      ParentEntity: 946200046
+      ParentEntity: 946209002
     UIImageComponent:
       Color: [1, 1, 1, 0.939999998]
       TexturePath: assets/vertical_slice/side_combat/ui/sidecombat_ui_sheet.png
@@ -1046,7 +1158,7 @@ Entities:
       Rotation: 0
       Anchor: 0
       SortOrder: 44
-      ParentEntity: 946200046
+      ParentEntity: 946209002
     UIImageComponent:
       Color: [1, 1, 1, 1]
       TexturePath: assets/vertical_slice/side_combat/ui/font/sidecombat_combo_font.png
@@ -1067,7 +1179,7 @@ Entities:
       Rotation: 0
       Anchor: 0
       SortOrder: 44
-      ParentEntity: 946200046
+      ParentEntity: 946209002
     UIImageComponent:
       Color: [1, 1, 1, 1]
       TexturePath: assets/vertical_slice/side_combat/ui/font/sidecombat_combo_font.png
@@ -1088,7 +1200,7 @@ Entities:
       Rotation: 0
       Anchor: 0
       SortOrder: 44
-      ParentEntity: 946200046
+      ParentEntity: 946209002
     UIImageComponent:
       Color: [1, 1, 1, 1]
       TexturePath: assets/vertical_slice/side_combat/ui/font/sidecombat_combo_font.png
@@ -1109,7 +1221,7 @@ Entities:
       Rotation: 0
       Anchor: 0
       SortOrder: 44
-      ParentEntity: 946200046
+      ParentEntity: 946209002
     UIImageComponent:
       Color: [1, 1, 1, 1]
       TexturePath: assets/vertical_slice/side_combat/ui/font/sidecombat_combo_font.png
@@ -1130,7 +1242,7 @@ Entities:
       Rotation: 0
       Anchor: 0
       SortOrder: 44
-      ParentEntity: 946200046
+      ParentEntity: 946209002
     UIImageComponent:
       Color: [1, 1, 1, 1]
       TexturePath: assets/vertical_slice/side_combat/ui/font/sidecombat_combo_font.png
@@ -1151,7 +1263,7 @@ Entities:
       Rotation: 0
       Anchor: 0
       SortOrder: 44
-      ParentEntity: 946200046
+      ParentEntity: 946209002
     UIImageComponent:
       Color: [1, 1, 1, 1]
       TexturePath: assets/vertical_slice/side_combat/ui/font/sidecombat_combo_font.png
@@ -1172,7 +1284,7 @@ Entities:
       Rotation: 0
       Anchor: 0
       SortOrder: 44
-      ParentEntity: 946200046
+      ParentEntity: 946209002
     UIImageComponent:
       Color: [1, 1, 1, 1]
       TexturePath: assets/vertical_slice/side_combat/ui/font/sidecombat_combo_font.png
@@ -1193,7 +1305,7 @@ Entities:
       Rotation: 0
       Anchor: 0
       SortOrder: 44
-      ParentEntity: 946200046
+      ParentEntity: 946209002
     UIImageComponent:
       Color: [1, 1, 1, 1]
       TexturePath: assets/vertical_slice/side_combat/ui/font/sidecombat_combo_font.png
@@ -1214,7 +1326,7 @@ Entities:
       Rotation: 0
       Anchor: 0
       SortOrder: 24
-      ParentEntity: 946200046
+      ParentEntity: 946209003
     UIAnimatorComponent:
       Preset: "fade_in"
       PlayOnStart: true
@@ -1252,7 +1364,7 @@ Entities:
       Rotation: 0
       Anchor: 0
       SortOrder: 24
-      ParentEntity: 946200046
+      ParentEntity: 946209003
     UIAnimatorComponent:
       Preset: "fade_in"
       PlayOnStart: true
@@ -1290,7 +1402,7 @@ Entities:
       Rotation: 0
       Anchor: 4
       SortOrder: 100
-      ParentEntity: 946200046
+      ParentEntity: 946209007
     UIImageComponent:
       Color: [0, 0, 0, 1]
       TexturePath: ""
@@ -1311,7 +1423,7 @@ Entities:
       Rotation: 0
       Anchor: 0
       SortOrder: 50
-      ParentEntity: 946200046
+      ParentEntity: 946209004
     UIPanelComponent:
       BackgroundColor: [0, 0, 0, 0]
       BorderColor: [0, 0, 0, 0]
@@ -1335,7 +1447,7 @@ Entities:
       Rotation: 0
       Anchor: 0
       SortOrder: 61
-      ParentEntity: 946200046
+      ParentEntity: 946209004
     UIButtonComponent:
       NormalColor: [1, 1, 1, 0]
       HoverColor: [1, 1, 1, 0]
@@ -1357,7 +1469,7 @@ Entities:
       Rotation: 0
       Anchor: 0
       SortOrder: 64
-      ParentEntity: 946200046
+      ParentEntity: 946209004
     UIImageComponent:
       Color: [1, 1, 1, 1]
       TexturePath: assets/vertical_slice/side_combat/ui/sidecombat_ui_sheet.png
@@ -1384,7 +1496,7 @@ Entities:
       Rotation: 0
       Anchor: 0
       SortOrder: 66
-      ParentEntity: 946200046
+      ParentEntity: 946209004
     UIImageComponent:
       Color: [0, 0, 0, 0.540000021]
       TexturePath: assets/vertical_slice/side_combat/ui/sidecombat_ui_sheet.png
@@ -1411,7 +1523,7 @@ Entities:
       Rotation: 0
       Anchor: 0
       SortOrder: 67
-      ParentEntity: 946200046
+      ParentEntity: 946209004
     UITextComponent:
       Text: ""
       Color: [0.899999976, 0.980000019, 1, 1]
@@ -1440,7 +1552,7 @@ Entities:
       Rotation: 0
       Anchor: 0
       SortOrder: 68
-      ParentEntity: 946200046
+      ParentEntity: 946209004
     UITextComponent:
       Text: "J"
       Color: [0.899999976, 0.980000019, 1, 1]
@@ -1469,7 +1581,7 @@ Entities:
       Rotation: 0
       Anchor: 0
       SortOrder: 61
-      ParentEntity: 946200046
+      ParentEntity: 946209004
     UIPanelComponent:
       BackgroundColor: [0, 0, 0, 0]
       BorderColor: [0, 0, 0, 0]
@@ -1493,7 +1605,7 @@ Entities:
       Rotation: 0
       Anchor: 0
       SortOrder: 64
-      ParentEntity: 946200046
+      ParentEntity: 946209004
     UIImageComponent:
       Color: [1, 1, 1, 1]
       TexturePath: assets/vertical_slice/side_combat/ui/sidecombat_ui_sheet.png
@@ -1520,7 +1632,7 @@ Entities:
       Rotation: 0
       Anchor: 0
       SortOrder: 66
-      ParentEntity: 946200046
+      ParentEntity: 946209004
     UIImageComponent:
       Color: [0, 0, 0, 0.540000021]
       TexturePath: assets/vertical_slice/side_combat/ui/sidecombat_ui_sheet.png
@@ -1552,7 +1664,7 @@ Entities:
       Rotation: 0
       Anchor: 0
       SortOrder: 67
-      ParentEntity: 946200046
+      ParentEntity: 946209004
     UITextComponent:
       Text: ""
       Color: [1, 1, 1, 1]
@@ -1581,7 +1693,7 @@ Entities:
       Rotation: 0
       Anchor: 0
       SortOrder: 68
-      ParentEntity: 946200046
+      ParentEntity: 946209004
     UITextComponent:
       Text: "S+J"
       Color: [0.899999976, 0.980000019, 1, 1]
@@ -1610,7 +1722,7 @@ Entities:
       Rotation: 0
       Anchor: 0
       SortOrder: 61
-      ParentEntity: 946200046
+      ParentEntity: 946209004
     UIButtonComponent:
       NormalColor: [1, 1, 1, 0]
       HoverColor: [1, 1, 1, 0]
@@ -1632,7 +1744,7 @@ Entities:
       Rotation: 0
       Anchor: 0
       SortOrder: 64
-      ParentEntity: 946200046
+      ParentEntity: 946209004
     UIImageComponent:
       Color: [1, 1, 1, 1]
       TexturePath: assets/vertical_slice/side_combat/ui/sidecombat_ui_sheet.png
@@ -1659,7 +1771,7 @@ Entities:
       Rotation: 0
       Anchor: 0
       SortOrder: 66
-      ParentEntity: 946200046
+      ParentEntity: 946209004
     UIImageComponent:
       Color: [0, 0, 0, 0.540000021]
       TexturePath: assets/vertical_slice/side_combat/ui/sidecombat_ui_sheet.png
@@ -1686,7 +1798,7 @@ Entities:
       Rotation: 0
       Anchor: 0
       SortOrder: 67
-      ParentEntity: 946200046
+      ParentEntity: 946209004
     UITextComponent:
       Text: ""
       Color: [0.899999976, 0.980000019, 1, 1]
@@ -1715,7 +1827,7 @@ Entities:
       Rotation: 0
       Anchor: 0
       SortOrder: 68
-      ParentEntity: 946200046
+      ParentEntity: 946209004
     UITextComponent:
       Text: "U"
       Color: [0.899999976, 0.980000019, 1, 1]
@@ -1744,7 +1856,7 @@ Entities:
       Rotation: 0
       Anchor: 0
       SortOrder: 61
-      ParentEntity: 946200046
+      ParentEntity: 946209004
     UIButtonComponent:
       NormalColor: [1, 1, 1, 0]
       HoverColor: [1, 1, 1, 0]
@@ -1766,7 +1878,7 @@ Entities:
       Rotation: 0
       Anchor: 0
       SortOrder: 64
-      ParentEntity: 946200046
+      ParentEntity: 946209004
     UIImageComponent:
       Color: [1, 1, 1, 1]
       TexturePath: assets/vertical_slice/side_combat/ui/sidecombat_ui_sheet.png
@@ -1793,7 +1905,7 @@ Entities:
       Rotation: 0
       Anchor: 0
       SortOrder: 66
-      ParentEntity: 946200046
+      ParentEntity: 946209004
     UIImageComponent:
       Color: [0, 0, 0, 0.540000021]
       TexturePath: assets/vertical_slice/side_combat/ui/sidecombat_ui_sheet.png
@@ -1820,7 +1932,7 @@ Entities:
       Rotation: 0
       Anchor: 0
       SortOrder: 67
-      ParentEntity: 946200046
+      ParentEntity: 946209004
     UITextComponent:
       Text: ""
       Color: [0.899999976, 0.980000019, 1, 1]
@@ -1849,7 +1961,7 @@ Entities:
       Rotation: 0
       Anchor: 0
       SortOrder: 68
-      ParentEntity: 946200046
+      ParentEntity: 946209004
     UITextComponent:
       Text: "I"
       Color: [0.899999976, 0.980000019, 1, 1]
@@ -1878,7 +1990,7 @@ Entities:
       Rotation: 0
       Anchor: 0
       SortOrder: 61
-      ParentEntity: 946200046
+      ParentEntity: 946209004
     UIPanelComponent:
       BackgroundColor: [0, 0, 0, 0]
       BorderColor: [0, 0, 0, 0]
@@ -1902,7 +2014,7 @@ Entities:
       Rotation: 0
       Anchor: 0
       SortOrder: 64
-      ParentEntity: 946200046
+      ParentEntity: 946209004
     UIImageComponent:
       Color: [1, 1, 1, 1]
       TexturePath: assets/vertical_slice/side_combat/ui/sidecombat_ui_sheet.png
@@ -1929,7 +2041,7 @@ Entities:
       Rotation: 0
       Anchor: 0
       SortOrder: 66
-      ParentEntity: 946200046
+      ParentEntity: 946209004
     UIImageComponent:
       Color: [0, 0, 0, 0.540000021]
       TexturePath: assets/vertical_slice/side_combat/ui/sidecombat_ui_sheet.png
@@ -1961,7 +2073,7 @@ Entities:
       Rotation: 0
       Anchor: 0
       SortOrder: 67
-      ParentEntity: 946200046
+      ParentEntity: 946209004
     UITextComponent:
       Text: ""
       Color: [1, 1, 1, 1]
@@ -1990,7 +2102,7 @@ Entities:
       Rotation: 0
       Anchor: 0
       SortOrder: 68
-      ParentEntity: 946200046
+      ParentEntity: 946209004
     UITextComponent:
       Text: "O"
       Color: [0.899999976, 0.980000019, 1, 1]
@@ -2019,7 +2131,7 @@ Entities:
       Rotation: 0
       Anchor: 0
       SortOrder: 61
-      ParentEntity: 946200046
+      ParentEntity: 946209004
     UIPanelComponent:
       BackgroundColor: [0, 0, 0, 0]
       BorderColor: [0, 0, 0, 0]
@@ -2043,7 +2155,7 @@ Entities:
       Rotation: 0
       Anchor: 0
       SortOrder: 64
-      ParentEntity: 946200046
+      ParentEntity: 946209004
     UIImageComponent:
       Color: [1, 1, 1, 1]
       TexturePath: assets/vertical_slice/side_combat/ui/sidecombat_ui_sheet.png
@@ -2070,7 +2182,7 @@ Entities:
       Rotation: 0
       Anchor: 0
       SortOrder: 66
-      ParentEntity: 946200046
+      ParentEntity: 946209004
     UIImageComponent:
       Color: [0, 0, 0, 0.540000021]
       TexturePath: assets/vertical_slice/side_combat/ui/sidecombat_ui_sheet.png
@@ -2102,7 +2214,7 @@ Entities:
       Rotation: 0
       Anchor: 0
       SortOrder: 67
-      ParentEntity: 946200046
+      ParentEntity: 946209004
     UITextComponent:
       Text: ""
       Color: [1, 1, 1, 1]
@@ -2131,7 +2243,7 @@ Entities:
       Rotation: 0
       Anchor: 0
       SortOrder: 68
-      ParentEntity: 946200046
+      ParentEntity: 946209004
     UITextComponent:
       Text: "H"
       Color: [0.899999976, 0.980000019, 1, 1]
@@ -2160,7 +2272,7 @@ Entities:
       Rotation: 0
       Anchor: 0
       SortOrder: 61
-      ParentEntity: 946200046
+      ParentEntity: 946209004
     UIPanelComponent:
       BackgroundColor: [0, 0, 0, 0]
       BorderColor: [0, 0, 0, 0]
@@ -2184,7 +2296,7 @@ Entities:
       Rotation: 0
       Anchor: 0
       SortOrder: 64
-      ParentEntity: 946200046
+      ParentEntity: 946209004
     UIImageComponent:
       Color: [1, 1, 1, 1]
       TexturePath: assets/vertical_slice/side_combat/ui/icon_skill_break_limit.png
@@ -2211,7 +2323,7 @@ Entities:
       Rotation: 0
       Anchor: 0
       SortOrder: 66
-      ParentEntity: 946200046
+      ParentEntity: 946209004
     UIImageComponent:
       Color: [0, 0, 0, 0.540000021]
       TexturePath: assets/vertical_slice/side_combat/ui/icon_skill_break_limit.png
@@ -2243,7 +2355,7 @@ Entities:
       Rotation: 0
       Anchor: 0
       SortOrder: 67
-      ParentEntity: 946200046
+      ParentEntity: 946209004
     UITextComponent:
       Text: ""
       Color: [1, 1, 1, 1]
@@ -2272,7 +2384,7 @@ Entities:
       Rotation: 0
       Anchor: 0
       SortOrder: 68
-      ParentEntity: 946200046
+      ParentEntity: 946209004
     UITextComponent:
       Text: "L"
       Color: [0.899999976, 0.980000019, 1, 1]
@@ -2301,7 +2413,7 @@ Entities:
       Rotation: 0
       Anchor: 0
       SortOrder: 76
-      ParentEntity: 946200046
+      ParentEntity: 946209004
     UIPanelComponent:
       BackgroundColor: [0.0250000004, 0.0320000015, 0.0379999988, 0.920000017]
       BorderColor: [0.280000001, 0.779999971, 0.819999993, 0.819999993]
@@ -2325,7 +2437,7 @@ Entities:
       Rotation: 0
       Anchor: 0
       SortOrder: 77
-      ParentEntity: 946200046
+      ParentEntity: 946209004
     UITextComponent:
       Text: ""
       Color: [0.920000017, 0.980000019, 0.959999979, 1]
@@ -2354,7 +2466,7 @@ Entities:
       Rotation: 0
       Anchor: 0
       SortOrder: 58
-      ParentEntity: 946200046
+      ParentEntity: 946209005
     UIImageComponent:
       Color: [1, 1, 1, 1]
       TexturePath: assets/vertical_slice/side_combat/ui/sidecombat_ui_sheet.png
@@ -2383,7 +2495,7 @@ Entities:
       Rotation: 0
       Anchor: 0
       SortOrder: 60
-      ParentEntity: 946200046
+      ParentEntity: 946209005
     UIImageComponent:
       Color: [1, 1, 1, 1]
       TexturePath: assets/vertical_slice/side_combat/ui/sidecombat_ui_sheet.png
@@ -2404,7 +2516,7 @@ Entities:
       Rotation: 0
       Anchor: 0
       SortOrder: 62
-      ParentEntity: 946200046
+      ParentEntity: 946209005
     UIButtonComponent:
       NormalColor: [1, 1, 1, 0]
       HoverColor: [1, 1, 1, 0]
@@ -2426,7 +2538,7 @@ Entities:
       Rotation: 0
       Anchor: 0
       SortOrder: 61
-      ParentEntity: 946200046
+      ParentEntity: 946209005
     UIImageComponent:
       Color: [0, 0, 0, 0]
       TexturePath: assets/vertical_slice/side_combat/ui/sidecombat_ui_sheet.png
@@ -2453,7 +2565,7 @@ Entities:
       Rotation: 0
       Anchor: 0
       SortOrder: 64
-      ParentEntity: 946200046
+      ParentEntity: 946209005
     UITextComponent:
       Text: ""
       Color: [0.949999988, 0.980000019, 1, 1]
@@ -2482,7 +2594,7 @@ Entities:
       Rotation: 0
       Anchor: 0
       SortOrder: 63
-      ParentEntity: 946200046
+      ParentEntity: 946209005
     UITextComponent:
       Text: "1"
       Color: [1, 0.920000017, 0.680000007, 1]
@@ -2511,7 +2623,7 @@ Entities:
       Rotation: 0
       Anchor: 0
       SortOrder: 58
-      ParentEntity: 946200046
+      ParentEntity: 946209005
     UIImageComponent:
       Color: [1, 1, 1, 1]
       TexturePath: assets/vertical_slice/side_combat/ui/sidecombat_ui_sheet.png
@@ -2540,7 +2652,7 @@ Entities:
       Rotation: 0
       Anchor: 0
       SortOrder: 60
-      ParentEntity: 946200046
+      ParentEntity: 946209005
     UIImageComponent:
       Color: [1, 1, 1, 1]
       TexturePath: assets/vertical_slice/side_combat/ui/sidecombat_ui_sheet.png
@@ -2561,7 +2673,7 @@ Entities:
       Rotation: 0
       Anchor: 0
       SortOrder: 62
-      ParentEntity: 946200046
+      ParentEntity: 946209005
     UIButtonComponent:
       NormalColor: [1, 1, 1, 0]
       HoverColor: [1, 1, 1, 0]
@@ -2583,7 +2695,7 @@ Entities:
       Rotation: 0
       Anchor: 0
       SortOrder: 61
-      ParentEntity: 946200046
+      ParentEntity: 946209005
     UIImageComponent:
       Color: [0, 0, 0, 0]
       TexturePath: assets/vertical_slice/side_combat/ui/sidecombat_ui_sheet.png
@@ -2610,7 +2722,7 @@ Entities:
       Rotation: 0
       Anchor: 0
       SortOrder: 64
-      ParentEntity: 946200046
+      ParentEntity: 946209005
     UITextComponent:
       Text: ""
       Color: [0.949999988, 0.980000019, 1, 1]
@@ -2639,7 +2751,7 @@ Entities:
       Rotation: 0
       Anchor: 0
       SortOrder: 63
-      ParentEntity: 946200046
+      ParentEntity: 946209005
     UITextComponent:
       Text: "2"
       Color: [1, 0.920000017, 0.680000007, 1]
@@ -2668,7 +2780,7 @@ Entities:
       Rotation: 0
       Anchor: 0
       SortOrder: 58
-      ParentEntity: 946200046
+      ParentEntity: 946209005
     UIImageComponent:
       Color: [1, 1, 1, 1]
       TexturePath: assets/vertical_slice/side_combat/ui/sidecombat_ui_sheet.png
@@ -2697,7 +2809,7 @@ Entities:
       Rotation: 0
       Anchor: 0
       SortOrder: 60
-      ParentEntity: 946200046
+      ParentEntity: 946209005
     UIImageComponent:
       Color: [1, 1, 1, 1]
       TexturePath: assets/vertical_slice/side_combat/ui/sidecombat_ui_sheet.png
@@ -2718,7 +2830,7 @@ Entities:
       Rotation: 0
       Anchor: 0
       SortOrder: 62
-      ParentEntity: 946200046
+      ParentEntity: 946209005
     UIButtonComponent:
       NormalColor: [1, 1, 1, 0]
       HoverColor: [1, 1, 1, 0]
@@ -2740,7 +2852,7 @@ Entities:
       Rotation: 0
       Anchor: 0
       SortOrder: 61
-      ParentEntity: 946200046
+      ParentEntity: 946209005
     UIImageComponent:
       Color: [0, 0, 0, 0]
       TexturePath: assets/vertical_slice/side_combat/ui/sidecombat_ui_sheet.png
@@ -2767,7 +2879,7 @@ Entities:
       Rotation: 0
       Anchor: 0
       SortOrder: 64
-      ParentEntity: 946200046
+      ParentEntity: 946209005
     UITextComponent:
       Text: ""
       Color: [0.949999988, 0.980000019, 1, 1]
@@ -2796,7 +2908,7 @@ Entities:
       Rotation: 0
       Anchor: 0
       SortOrder: 63
-      ParentEntity: 946200046
+      ParentEntity: 946209005
     UITextComponent:
       Text: "3"
       Color: [1, 0.920000017, 0.680000007, 1]
@@ -2825,7 +2937,7 @@ Entities:
       Rotation: 0
       Anchor: 0
       SortOrder: 58
-      ParentEntity: 946200046
+      ParentEntity: 946209006
     UIImageComponent:
       Color: [1, 1, 1, 0.860000014]
       TexturePath: assets/vertical_slice/side_combat/ui/sidecombat_ui_sheet.png
@@ -2846,7 +2958,7 @@ Entities:
       Rotation: 0
       Anchor: 0
       SortOrder: 59
-      ParentEntity: 946200046
+      ParentEntity: 946209006
     UIImageComponent:
       Color: [0.660000026, 0.800000012, 0.839999974, 0.519999981]
       TexturePath: assets/vertical_slice/side_combat/ui/sidecombat_ui_sheet.png

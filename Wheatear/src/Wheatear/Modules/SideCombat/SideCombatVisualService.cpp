@@ -79,10 +79,25 @@ namespace Wheatear::SideCombatVisualService {
             auto animationClip = AnimationClip::Create(key, clipTuning.Loop);
             const float duration = 1.0f / std::max(1.0f, clipTuning.FrameRate);
             const int frameCount = std::max(1, clipTuning.FrameCount);
-            for (int frame = 1; frame <= frameCount; ++frame)
+            if (clipTuning.Atlas.IsValid())
             {
-                if (Ref<Texture2D> texture = GameplayVisualService::LoadTextureCached(FormatFramePath(clipTuning.Pattern, frame)))
-                    animationClip->AddFrame({ texture, duration });
+                for (int frame = 1; frame <= frameCount; ++frame)
+                {
+                    Ref<Texture2D> texture;
+                    glm::vec2 uvMin{ 0.0f };
+                    glm::vec2 uvMax{ 1.0f };
+                    if (GameplayVisualService::ResolveAtlasFrame(clipTuning.Atlas, frame, &texture, &uvMin, &uvMax))
+                        animationClip->AddFrame({ texture, uvMin, uvMax, duration });
+                }
+            }
+
+            if (animationClip->GetFrameCount() == 0)
+            {
+                for (int frame = 1; frame <= frameCount; ++frame)
+                {
+                    if (Ref<Texture2D> texture = GameplayVisualService::LoadTextureCached(FormatFramePath(clipTuning.Pattern, frame)))
+                        animationClip->AddFrame({ texture, duration });
+                }
             }
 
             if (animationClip->GetFrameCount() > 0)
@@ -275,8 +290,10 @@ namespace Wheatear::SideCombatVisualService {
             else
                 frame = std::min(frame, frameCount);
 
-            if (Ref<Texture2D> texture = GameplayVisualService::LoadTextureCached(FormatFramePath(clip.Pattern, frame)))
-                sprite.Texture = texture;
+            if (GameplayVisualService::ApplySpriteAtlasFrame(sprite, clip.Atlas, frame))
+                return;
+
+            GameplayVisualService::ApplySpriteFrame(sprite, clip.Pattern, frame);
         }
 
     } // namespace

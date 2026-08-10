@@ -14,7 +14,7 @@ Entities:
       Rotation: 0
       Anchor: 0
       SortOrder: 40
-      ParentEntity: 983000055
+      ParentEntity: 983009002
     UIAnimatorComponent:
       Preset: "hover_pulse"
       PlayOnStart: true
@@ -52,7 +52,7 @@ Entities:
       Rotation: 0
       Anchor: 0
       SortOrder: 40
-      ParentEntity: 983000055
+      ParentEntity: 983009002
     UIAnimatorComponent:
       Preset: "hover_pulse"
       PlayOnStart: true
@@ -90,7 +90,7 @@ Entities:
       Rotation: 0
       Anchor: 0
       SortOrder: 40
-      ParentEntity: 983000055
+      ParentEntity: 983009002
     UIAnimatorComponent:
       Preset: "hover_pulse"
       PlayOnStart: true
@@ -128,7 +128,7 @@ Entities:
       Rotation: 0
       Anchor: 0
       SortOrder: 40
-      ParentEntity: 983000055
+      ParentEntity: 983009002
     UIAnimatorComponent:
       Preset: "hover_pulse"
       PlayOnStart: true
@@ -166,7 +166,7 @@ Entities:
       Rotation: 0
       Anchor: 0
       SortOrder: 40
-      ParentEntity: 983000055
+      ParentEntity: 983009002
     UIAnimatorComponent:
       Preset: "hover_pulse"
       PlayOnStart: true
@@ -204,7 +204,7 @@ Entities:
       Rotation: 0
       Anchor: 0
       SortOrder: 30
-      ParentEntity: 983000055
+      ParentEntity: 983009001
     UIAnimatorComponent:
       Preset: "fade_in"
       PlayOnStart: true
@@ -237,7 +237,7 @@ Entities:
       Rotation: 0
       Anchor: 0
       SortOrder: 30
-      ParentEntity: 983000055
+      ParentEntity: 983009001
     UIAnimatorComponent:
       Preset: "fade_in"
       PlayOnStart: true
@@ -270,7 +270,7 @@ Entities:
       Rotation: 0
       Anchor: 0
       SortOrder: 30
-      ParentEntity: 983000055
+      ParentEntity: 983009001
     UIAnimatorComponent:
       Preset: "fade_in"
       PlayOnStart: true
@@ -303,7 +303,7 @@ Entities:
       Rotation: 0
       Anchor: 0
       SortOrder: 31
-      ParentEntity: 983000055
+      ParentEntity: 983009001
     UIAnimatorComponent:
       Preset: "slide_fade_in"
       PlayOnStart: true
@@ -332,7 +332,7 @@ Entities:
       Rotation: 0
       Anchor: 0
       SortOrder: 10
-      ParentEntity: 983000055
+      ParentEntity: 983009001
     UIAnimatorComponent:
       Preset: "slide_fade_in"
       PlayOnStart: true
@@ -400,6 +400,38 @@ Entities:
       Anchor: 0
       SortOrder: 0
       ParentEntity: 0
+  - Entity: 983009001
+    TagComponent:
+      Tag: Support_MainGroup
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    UIWidgetComponent:
+      Visible: true
+      EditorVisible: true
+      Position: [0, 0]
+      Size: [1, 1]
+      Rotation: 0
+      Anchor: 0
+      SortOrder: 1
+      ParentEntity: 983000055
+  - Entity: 983009002
+    TagComponent:
+      Tag: Support_ActionsGroup
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    UIWidgetComponent:
+      Visible: true
+      EditorVisible: true
+      Position: [0, 0]
+      Size: [1, 1]
+      Rotation: 0
+      Anchor: 0
+      SortOrder: 1
+      ParentEntity: 983000055
   - Entity: 983000056
     TagComponent:
       Tag: FlowController

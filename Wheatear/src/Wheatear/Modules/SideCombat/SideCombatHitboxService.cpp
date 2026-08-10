@@ -53,7 +53,7 @@ namespace Wheatear::SideCombatHitboxService {
         static bool ShouldKeepVisualAfterHit(const SideHitboxComponent& hitbox)
         {
             return hitbox.AttackKind == SideAttackKind::Launcher &&
-                !hitbox.TextureFramePattern.empty() &&
+                (hitbox.TextureAtlas.IsValid() || !hitbox.TextureFramePattern.empty()) &&
                 hitbox.TextureFrameCount > 1;
         }
 
@@ -110,6 +110,7 @@ namespace Wheatear::SideCombatHitboxService {
         component.AirRange = tuning.AirRange;
         component.DestroyOnHit = tuning.DestroyOnHit;
         component.TextureFramePattern = tuning.TextureFramePattern;
+        component.TextureAtlas = tuning.TextureAtlas;
         component.TextureFrameCount = std::max(1, tuning.TextureFrameCount);
         component.TextureFrameRate = std::max(1.0f, tuning.TextureFrameRate);
         component.HitSound = tuning.HitSound;
@@ -122,7 +123,11 @@ namespace Wheatear::SideCombatHitboxService {
         if (!sprite.Texture)
         {
             if (Ref<Texture2D> texture = GameplayVisualService::LoadTextureCached(ResolveAttackTexture(kind, team)))
+            {
                 sprite.Texture = texture;
+                sprite.UVMin = { 0.0f, 0.0f };
+                sprite.UVMax = { 1.0f, 1.0f };
+            }
         }
         return hitbox;
     }
@@ -153,12 +158,19 @@ namespace Wheatear::SideCombatHitboxService {
         const int frameCount = std::max(1, hitbox.TextureFrameCount);
         const float frameRate = std::max(1.0f, hitbox.TextureFrameRate);
         const int frame = 1 + std::min(frameCount - 1, (int)std::floor(hitbox.RuntimeAge * frameRate));
+        if (GameplayVisualService::ApplySpriteAtlasFrame(sprite, hitbox.TextureAtlas, frame))
+            return;
+
         const std::string path = FormatFramePath(hitbox.TextureFramePattern, frame);
         if (path.empty())
             return;
 
         if (Ref<Texture2D> texture = GameplayVisualService::LoadTextureCached(path))
+        {
             sprite.Texture = texture;
+            sprite.UVMin = { 0.0f, 0.0f };
+            sprite.UVMax = { 1.0f, 1.0f };
+        }
     }
 
     bool OverlapsHitbox(const SideHitboxComponent& hitbox, const SideCombatantComponent& target)

@@ -72,17 +72,17 @@
     "levelScene": "assets/scenes/SideCombatBeastPath.wt",
     "tuning": "assets/vertical_slice/data/side_combat_tuning.yaml",
     "background": "assets/vertical_slice/side_combat/backgrounds/bg_black_forest_stage.png",
-    "player": "assets/vertical_slice/side_combat/characters/protag_magic_swordsman.png",
-    "boss": "assets/vertical_slice/side_combat/enemies/boss_bear_husband.png",
+    "player": "assets/vertical_slice/side_combat/sheets/runtime_characters/protag_idle_sheet.png",
+    "boss": "assets/vertical_slice/side_combat/sheets/runtime_enemies/boss_bear_husband_idle_sheet.png",
     "shadow": "assets/vertical_slice/side_combat/ui/blob_shadow_soft.png",
     "effects": [
-      "assets/vertical_slice/side_combat/effects/vfx_basic_slash_{frame}.png",
-      "assets/vertical_slice/side_combat/effects/vfx_launcher_slash_{frame}.png",
-      "assets/vertical_slice/side_combat/effects/vfx_magic_bolt_{frame}.png",
-      "assets/vertical_slice/side_combat/effects/vfx_ally_support_{frame}.png",
-      "assets/vertical_slice/side_combat/effects/vfx_enemy_claw_{frame}.png",
-      "assets/vertical_slice/side_combat/effects/vfx_boss_bear_charge_{frame}.png",
-      "assets/vertical_slice/side_combat/effects/vfx_boss_bear_shockwave_{frame}.png"
+      "assets/vertical_slice/side_combat/vfx_sheets/runtime_effects/vfx_basic_slash_sheet.png",
+      "assets/vertical_slice/side_combat/vfx_sheets/runtime_effects/vfx_launcher_slash_sheet.png",
+      "assets/vertical_slice/side_combat/vfx_sheets/runtime_effects/vfx_magic_bolt_sheet.png",
+      "assets/vertical_slice/side_combat/vfx_sheets/runtime_effects/vfx_ally_support_sheet.png",
+      "assets/vertical_slice/side_combat/vfx_sheets/runtime_effects/vfx_enemy_claw_sheet.png",
+      "assets/vertical_slice/side_combat/vfx_sheets/runtime_effects/vfx_boss_bear_charge_sheet.png",
+      "assets/vertical_slice/side_combat/vfx_sheets/runtime_effects/vfx_boss_bear_shockwave_sheet.png"
     ],
     "drops": [
       "assets/vertical_slice/side_combat/ui/icon_drop_magic_core.png",
@@ -95,21 +95,21 @@
     "background": "assets/vertical_slice/turn_combat/backgrounds/bg_turn_ruins_arena.png",
     "bgm": "assets/vertical_slice/turn_combat/audio/turn_battle_bgm.wav",
     "units": [
-      "assets/vertical_slice/turn_combat/characters/protag_magic_swordsman.png",
-      "assets/vertical_slice/turn_combat/characters/ally_white_mage.png",
-      "assets/vertical_slice/turn_combat/characters/ally_guardian.png",
-      "assets/vertical_slice/turn_combat/characters/en_bearling.png",
-      "assets/vertical_slice/turn_combat/characters/en_wolf.png",
-      "assets/vertical_slice/turn_combat/characters/en_apprentice_mage.png"
+      "assets/vertical_slice/turn_combat/sheets/characters/protag_magic_swordsman_idle_sheet.png",
+      "assets/vertical_slice/turn_combat/sheets/characters/ally_white_mage_idle_sheet.png",
+      "assets/vertical_slice/turn_combat/sheets/characters/ally_guardian_idle_sheet.png",
+      "assets/vertical_slice/turn_combat/sheets/characters/en_bearling_idle_sheet.png",
+      "assets/vertical_slice/turn_combat/sheets/characters/en_wolf_idle_sheet.png",
+      "assets/vertical_slice/turn_combat/sheets/characters/en_apprentice_mage_idle_sheet.png"
     ],
     "effects": [
-      "assets/vertical_slice/turn_combat/effects/vfx_turn_slash.png",
-      "assets/vertical_slice/turn_combat/effects/vfx_turn_magic_sword.png",
-      "assets/vertical_slice/turn_combat/effects/vfx_turn_heal.png",
-      "assets/vertical_slice/turn_combat/effects/vfx_turn_guard.png",
-      "assets/vertical_slice/turn_combat/effects/vfx_turn_dark.png",
-      "assets/vertical_slice/turn_combat/effects/vfx_turn_focus.png",
-      "assets/vertical_slice/turn_combat/effects/vfx_turn_claw.png"
+      "assets/vertical_slice/turn_combat/sheets/effects/vfx_turn_slash_sheet.png",
+      "assets/vertical_slice/turn_combat/sheets/effects/vfx_turn_magic_sword_sheet.png",
+      "assets/vertical_slice/turn_combat/sheets/effects/vfx_turn_heal_sheet.png",
+      "assets/vertical_slice/turn_combat/sheets/effects/vfx_turn_guard_sheet.png",
+      "assets/vertical_slice/turn_combat/sheets/effects/vfx_turn_dark_sheet.png",
+      "assets/vertical_slice/turn_combat/sheets/effects/vfx_turn_focus_sheet.png",
+      "assets/vertical_slice/turn_combat/sheets/effects/vfx_turn_claw_sheet.png"
     ],
     "ui": {
       "panels": [
@@ -135,7 +135,15 @@
     "player": "assets/vertical_slice/arcade_combat/characters/protag_arcade_mage.png",
     "boss": "assets/vertical_slice/arcade_combat/characters/boss_arcade_mage.png",
     "dangerBar": "assets/vertical_slice/arcade_combat/ui/ui_arcade_danger_bar.png",
-    "cover": "assets/vertical_slice/arcade_combat/props/prop_arcade_cover_block.png"
+    "cover": "assets/vertical_slice/arcade_combat/props/prop_arcade_cover_block.png",
+    "projectiles": [
+      "assets/vertical_slice/arcade_combat/sheets/static_effects/proj_arcade_player_bolt_sheet.png",
+      "assets/vertical_slice/arcade_combat/sheets/static_effects/proj_arcade_boss_orb_sheet.png"
+    ],
+    "effects": [
+      "assets/vertical_slice/arcade_combat/sheets/runtime_effects/arcade_projectile_vfx_sheet.png",
+      "assets/vertical_slice/arcade_combat/sheets/static_effects/vfx_arcade_katana_slash_sheet.png"
+    ]
   },
   "ui": {
     "panels": [
@@ -213,7 +221,7 @@
     "assets/vertical_slice/side_combat/ui/icon_skill_uppercut.png",
     "assets/vertical_slice/side_combat/ui/icon_skill_magic_bolt.png",
     "assets/vertical_slice/turn_combat/backgrounds/bg_turn_ruins_arena.png",
-    "assets/vertical_slice/turn_combat/effects/vfx_turn_slash.png",
+    "assets/vertical_slice/turn_combat/sheets/effects/vfx_turn_slash_sheet.png",
     "assets/vertical_slice/ui/skill_tree/skill_magic_sword_core.png"
   ]
 }

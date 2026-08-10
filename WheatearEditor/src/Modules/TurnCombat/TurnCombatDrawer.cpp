@@ -8,6 +8,7 @@
 #include <imgui/imgui.h>
 
 #include <algorithm>
+#include <string>
 #include <vector>
 
 namespace Wheatear {
@@ -29,6 +30,22 @@ namespace Wheatear {
             case TurnCombatPhase::Defeat: return "Defeat";
             }
             return "Unknown";
+        }
+
+        static void DrawAtlasFrameSpec(
+            const char* label,
+            GameplayVisualService::TextureAtlasFrameSpec& atlas,
+            int pathWidth)
+        {
+            const std::string sheetLabel = std::string(label) + " Sheet";
+            const std::string cellLabel = std::string(label) + " Cell";
+            const std::string columnsLabel = std::string(label) + " Columns";
+            const std::string startLabel = std::string(label) + " Start";
+
+            InputString(sheetLabel.c_str(), atlas.SheetPath, pathWidth);
+            ImGui::DragInt2(cellLabel.c_str(), &atlas.CellWidth, 1.0f, 0, 8192);
+            ImGui::DragInt(columnsLabel.c_str(), &atlas.Columns, 1.0f, 0, 256);
+            ImGui::DragInt(startLabel.c_str(), &atlas.StartFrame, 1.0f, 0, 4096);
         }
 
     } // namespace
@@ -109,12 +126,16 @@ namespace Wheatear {
             ImGui::TextDisabled("Animation Frames");
             InputString("Idle Pattern", combatant.IdleFramePattern, 260);
             ImGui::DragInt("Idle Frames", &combatant.IdleFrameCount, 1.0f, 1, 64);
+            DrawAtlasFrameSpec("Idle Atlas", combatant.IdleFrameAtlas, 260);
             InputString("Attack Pattern", combatant.AttackFramePattern, 260);
             ImGui::DragInt("Attack Frames", &combatant.AttackFrameCount, 1.0f, 1, 64);
+            DrawAtlasFrameSpec("Attack Atlas", combatant.AttackFrameAtlas, 260);
             InputString("Hit Pattern", combatant.HitFramePattern, 260);
             ImGui::DragInt("Hit Frames", &combatant.HitFrameCount, 1.0f, 1, 64);
+            DrawAtlasFrameSpec("Hit Atlas", combatant.HitFrameAtlas, 260);
             InputString("Down Pattern", combatant.DownFramePattern, 260);
             ImGui::DragInt("Down Frames", &combatant.DownFrameCount, 1.0f, 1, 64);
+            DrawAtlasFrameSpec("Down Atlas", combatant.DownFrameAtlas, 260);
             ImGui::DragFloat("Frame Rate", &combatant.AnimationFrameRate, 0.25f, 1.0f, 60.0f);
 
             ImGui::Separator();

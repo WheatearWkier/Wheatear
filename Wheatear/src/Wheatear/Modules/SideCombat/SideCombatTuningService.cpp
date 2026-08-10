@@ -23,16 +23,62 @@ namespace Wheatear::SideCombatTuningService {
             return GameplayTextService::FormatFramePath(pattern, frame);
         }
 
+        static std::string ReadAtlasPath(const YAML::Node& node, const std::string& fallback)
+        {
+            if (!node || !node.IsMap())
+                return fallback;
+
+            const YAML::Node pathNode = node["sheetPath"] ? node["sheetPath"]
+                : (node["sheet"] ? node["sheet"]
+                    : (node["texture"] ? node["texture"]
+                        : node["path"]));
+            return AssetAliasRegistry::Resolve(pathNode.as<std::string>(fallback));
+        }
+
+        static GameplayVisualService::TextureAtlasFrameSpec ReadAtlasFrameSpec(
+            const YAML::Node& node,
+            const GameplayVisualService::TextureAtlasFrameSpec& fallback)
+        {
+            auto atlas = fallback;
+            if (!node || !node.IsMap())
+                return atlas;
+
+            atlas.SheetPath = ReadAtlasPath(node, atlas.SheetPath);
+            atlas.CellWidth = node["cellWidth"].as<int>(atlas.CellWidth);
+            atlas.CellHeight = node["cellHeight"].as<int>(atlas.CellHeight);
+            atlas.Columns = node["columns"].as<int>(atlas.Columns);
+            atlas.StartFrame = node["startFrame"].as<int>(atlas.StartFrame);
+            return atlas;
+        }
+
+        static GameplayVisualService::TextureAtlasFrameSpec MakeAtlas(
+            const std::string& sheetPath,
+            int cellWidth,
+            int cellHeight,
+            int columns,
+            int startFrame = 0)
+        {
+            GameplayVisualService::TextureAtlasFrameSpec atlas;
+            atlas.SheetPath = sheetPath;
+            atlas.CellWidth = cellWidth;
+            atlas.CellHeight = cellHeight;
+            atlas.Columns = columns;
+            atlas.StartFrame = startFrame;
+            return atlas;
+        }
+
         static SideAnimationClipTuning MakeAnimationClip(
             const std::string& pattern,
             int frameCount,
             float frameRate,
             bool loop = true,
             glm::vec2 renderScale = { 1.0f, 1.0f },
-            glm::vec2 renderOffset = { 0.0f, 0.0f })
+            glm::vec2 renderOffset = { 0.0f, 0.0f },
+            GameplayVisualService::TextureAtlasFrameSpec atlas = {})
         {
             SideAnimationClipTuning clip;
             clip.Pattern = pattern;
+            clip.Atlas = std::move(atlas);
             clip.FrameCount = std::max(1, frameCount);
             clip.FrameRate = std::max(1.0f, frameRate);
             clip.Loop = loop;
@@ -49,9 +95,10 @@ namespace Wheatear::SideCombatTuningService {
             float frameRate,
             bool loop = true,
             glm::vec2 renderScale = { 1.0f, 1.0f },
-            glm::vec2 renderOffset = { 0.0f, 0.0f })
+            glm::vec2 renderOffset = { 0.0f, 0.0f },
+            GameplayVisualService::TextureAtlasFrameSpec atlas = {})
         {
-            set.Clips[key] = MakeAnimationClip(pattern, frameCount, frameRate, loop, renderScale, renderOffset);
+            set.Clips[key] = MakeAnimationClip(pattern, frameCount, frameRate, loop, renderScale, renderOffset, std::move(atlas));
         }
 
         static std::filesystem::path ResolveTuningPath(const std::string& path)
@@ -140,6 +187,7 @@ namespace Wheatear::SideCombatTuningService {
             tuning.DestroyOnHit = node["destroyOnHit"].as<bool>(tuning.DestroyOnHit);
             tuning.TextureFramePattern = AssetAliasRegistry::Resolve(
                 node["textureFramePattern"].as<std::string>(tuning.TextureFramePattern));
+            tuning.TextureAtlas = ReadAtlasFrameSpec(node["textureAtlas"], tuning.TextureAtlas);
             tuning.TextureFrameCount = node["textureFrameCount"].as<int>(tuning.TextureFrameCount);
             tuning.TextureFrameRate = node["textureFrameRate"].as<float>(tuning.TextureFrameRate);
             tuning.SwingSound = AssetAliasRegistry::Resolve(
@@ -184,6 +232,7 @@ namespace Wheatear::SideCombatTuningService {
                 return clip;
 
             clip.Pattern = node["pattern"].as<std::string>(clip.Pattern);
+            clip.Atlas = ReadAtlasFrameSpec(node["atlas"] ? node["atlas"] : node, clip.Atlas);
             clip.FrameCount = node["frameCount"].as<int>(clip.FrameCount);
             clip.FrameRate = node["frameRate"].as<float>(clip.FrameRate);
             clip.Loop = node["loop"].as<bool>(clip.Loop);
@@ -563,7 +612,6 @@ namespace Wheatear::SideCombatTuningService {
 
         static void AddDefaultAnimationData(SideCombatTuning& tuning)
         {
-            const std::string characterRoot = AssetAliasRegistry::Path("side.path.characters");
             const glm::vec2 bodyScale = { 1.0f, 1.0f };
             const glm::vec2 bodyOffset = { 0.0f, 0.3398f };
             const glm::vec2 bodyTallScale = { 1.0f, 1.25f };
@@ -580,24 +628,6 @@ namespace Wheatear::SideCombatTuningService {
             const glm::vec2 breakLimitOffset = { 0.0f, 0.3398f };
             const glm::vec2 floorScale = { 2.0f, 1.0f };
 
-            AddAnimationClip(tuning.PlayerAnimations, "idle", characterRoot + "protag_idle_{frame2}.png", 8, 12.0f, true, bodyScale, bodyOffset);
-            AddAnimationClip(tuning.PlayerAnimations, "run", characterRoot + "protag_run_{frame2}.png", 10, 18.0f, true, bodyScale, bodyOffset);
-            AddAnimationClip(tuning.PlayerAnimations, "jump", characterRoot + "protag_jump_{frame2}.png", 4, 18.0f, false, bodyScale, bodyOffset);
-            AddAnimationClip(tuning.PlayerAnimations, "fall", characterRoot + "protag_fall_{frame2}.png", 4, 12.0f, true, bodyTallScale, bodyTallOffset);
-            AddAnimationClip(tuning.PlayerAnimations, "hit", characterRoot + "protag_hit_{frame2}.png", 5, 18.0f, false, bodyScale, bodyOffset);
-            AddAnimationClip(tuning.PlayerAnimations, "dead", characterRoot + "protag_dead_{frame2}.png", 8, 12.0f, false, floorScale, bodyOffset);
-            AddAnimationClip(tuning.PlayerAnimations, "basic1", characterRoot + "protag_basic1_{frame2}.png", 7, 24.0f, false, slashScale, bodyOffset);
-            AddAnimationClip(tuning.PlayerAnimations, "basic2", characterRoot + "protag_basic2_{frame2}.png", 7, 24.0f, false, slashScale, bodyOffset);
-            AddAnimationClip(tuning.PlayerAnimations, "basic3", characterRoot + "protag_basic3_{frame2}.png", 9, 24.0f, false, dashWideScale, bodyOffset);
-            AddAnimationClip(tuning.PlayerAnimations, "air_basic", characterRoot + "protag_air_basic_{frame2}.png", 7, 24.0f, false, verticalScale, bodyTallOffset);
-            AddAnimationClip(tuning.PlayerAnimations, "launcher", characterRoot + "protag_launcher_{frame2}.png", 9, 24.0f, false, launcherScale, launcherOffset);
-            AddAnimationClip(tuning.PlayerAnimations, "air_chase", characterRoot + "protag_air_chase_{frame2}.png", 8, 24.0f, false, dashTallScale, bodyTallOffset);
-            AddAnimationClip(tuning.PlayerAnimations, "dash", characterRoot + "protag_dash_{frame2}.png", 1, 8.0f, false, actionTallScale, actionTallOffset);
-            AddAnimationClip(tuning.PlayerAnimations, "magic_bolt", characterRoot + "protag_magic_bolt_{frame2}.png", 9, 20.0f, false, bodyScale, bodyOffset);
-            AddAnimationClip(tuning.PlayerAnimations, "ally_support", characterRoot + "protag_ally_support_{frame2}.png", 8, 18.0f, false, slashScale, bodyOffset);
-            AddAnimationClip(tuning.PlayerAnimations, "break_limit", characterRoot + "protag_break_limit_{frame2}.png", 2, 8.0f, false, breakLimitScale, breakLimitOffset);
-
-            const std::string enemyRoot = AssetAliasRegistry::Path("side.path.enemies");
             const glm::vec2 gruntScale = { 1.0f, 1.0f };
             const glm::vec2 gruntOffset = { 0.0f, 0.2969f };
             const glm::vec2 gruntWideScale = { 1.5f, 1.0f };
@@ -611,22 +641,39 @@ namespace Wheatear::SideCombatTuningService {
             const glm::vec2 bossShockwaveScale = { 1.16f, 0.96f };
             const glm::vec2 bossWideScale = { 1.25f, 1.0f };
 
-            AddAnimationClip(tuning.GruntAnimations, "idle", enemyRoot + "en_claw_beast_idle_{frame2}.png", 4, 7.0f, true, gruntScale, gruntOffset);
-            AddAnimationClip(tuning.GruntAnimations, "run", enemyRoot + "en_claw_beast_run_{frame2}.png", 5, 11.0f, true, gruntScale, gruntOffset);
-            AddAnimationClip(tuning.GruntAnimations, "hit", enemyRoot + "en_claw_beast_hit_{frame2}.png", 3, 12.0f, false, gruntWideScale, gruntOffset);
-            AddAnimationClip(tuning.GruntAnimations, "fall", enemyRoot + "en_claw_beast_fall_{frame2}.png", 3, 9.0f, true, gruntAirWideScale, gruntAirOffset);
-            AddAnimationClip(tuning.GruntAnimations, "dead", enemyRoot + "en_claw_beast_dead_{frame2}.png", 4, 7.0f, false, gruntWideScale, gruntOffset);
-            AddAnimationClip(tuning.GruntAnimations, "enemy_claw", enemyRoot + "en_claw_beast_attack_{frame2}.png", 4, 14.0f, false, gruntWideScale, gruntOffset);
+            AddAnimationClip(tuning.PlayerAnimations, "idle", "", 8, 12.0f, true, bodyScale, bodyOffset, MakeAtlas("assets/vertical_slice/side_combat/sheets/runtime_characters/protag_idle_sheet.png", 512, 512, 8));
+            AddAnimationClip(tuning.PlayerAnimations, "run", "", 4, 18.0f, true, bodyScale, bodyOffset, MakeAtlas("assets/vertical_slice/side_combat/sheets/runtime_characters/protag_run_sheet.png", 512, 512, 4));
+            AddAnimationClip(tuning.PlayerAnimations, "jump", "", 1, 18.0f, false, bodyScale, bodyOffset, MakeAtlas("assets/vertical_slice/side_combat/sheets/runtime_characters/protag_jump_sheet.png", 512, 512, 1));
+            AddAnimationClip(tuning.PlayerAnimations, "fall", "", 1, 12.0f, true, bodyTallScale, bodyTallOffset, MakeAtlas("assets/vertical_slice/side_combat/sheets/runtime_characters/protag_fall_sheet.png", 512, 512, 1));
+            AddAnimationClip(tuning.PlayerAnimations, "hit", "", 4, 18.0f, false, bodyScale, bodyOffset, MakeAtlas("assets/vertical_slice/side_combat/sheets/runtime_characters/protag_hit_sheet.png", 512, 512, 4));
+            AddAnimationClip(tuning.PlayerAnimations, "dead", "", 8, 12.0f, false, floorScale, bodyOffset, MakeAtlas("assets/vertical_slice/side_combat/sheets/runtime_characters/protag_dead_sheet.png", 1024, 512, 8));
+            AddAnimationClip(tuning.PlayerAnimations, "basic1", "", 4, 24.0f, false, slashScale, bodyOffset, MakeAtlas("assets/vertical_slice/side_combat/sheets/runtime_characters/protag_basic1_sheet.png", 512, 512, 4));
+            AddAnimationClip(tuning.PlayerAnimations, "basic2", "", 4, 24.0f, false, slashScale, bodyOffset, MakeAtlas("assets/vertical_slice/side_combat/sheets/runtime_characters/protag_basic2_sheet.png", 512, 512, 4));
+            AddAnimationClip(tuning.PlayerAnimations, "basic3", "", 4, 24.0f, false, dashWideScale, bodyOffset, MakeAtlas("assets/vertical_slice/side_combat/sheets/runtime_characters/protag_basic3_sheet.png", 512, 512, 4));
+            AddAnimationClip(tuning.PlayerAnimations, "air_basic", "", 4, 24.0f, false, verticalScale, bodyTallOffset, MakeAtlas("assets/vertical_slice/side_combat/sheets/runtime_characters/protag_air_basic_sheet.png", 512, 512, 4));
+            AddAnimationClip(tuning.PlayerAnimations, "launcher", "", 2, 24.0f, false, launcherScale, launcherOffset, MakeAtlas("assets/vertical_slice/side_combat/sheets/runtime_characters/protag_launcher_sheet.png", 512, 512, 2));
+            AddAnimationClip(tuning.PlayerAnimations, "air_chase", "", 8, 24.0f, false, dashTallScale, bodyTallOffset, MakeAtlas("assets/vertical_slice/side_combat/sheets/runtime_characters/protag_air_chase_sheet.png", 768, 640, 8));
+            AddAnimationClip(tuning.PlayerAnimations, "dash", "", 1, 8.0f, false, actionTallScale, actionTallOffset, MakeAtlas("assets/vertical_slice/side_combat/sheets/runtime_characters/protag_dash_sheet.png", 512, 512, 1));
+            AddAnimationClip(tuning.PlayerAnimations, "magic_bolt", "", 9, 20.0f, false, bodyScale, bodyOffset, MakeAtlas("assets/vertical_slice/side_combat/sheets/runtime_characters/protag_magic_bolt_sheet.png", 512, 512, 9));
+            AddAnimationClip(tuning.PlayerAnimations, "ally_support", "", 8, 18.0f, false, slashScale, bodyOffset, MakeAtlas("assets/vertical_slice/side_combat/sheets/runtime_characters/protag_ally_support_sheet.png", 640, 512, 8));
+            AddAnimationClip(tuning.PlayerAnimations, "break_limit", "", 2, 8.0f, false, breakLimitScale, breakLimitOffset, MakeAtlas("assets/vertical_slice/side_combat/sheets/runtime_characters/protag_break_limit_sheet.png", 512, 512, 2));
 
-            AddAnimationClip(tuning.BossAnimations, "idle", enemyRoot + "boss_bear_husband_idle_{frame2}.png", 4, 6.0f, true, bossScale, bossOffset);
-            AddAnimationClip(tuning.BossAnimations, "run", enemyRoot + "boss_bear_husband_walk_{frame2}.png", 4, 8.0f, true, bossScale, bossOffset);
-            AddAnimationClip(tuning.BossAnimations, "hit", enemyRoot + "boss_bear_husband_hit_{frame2}.png", 4, 10.0f, false, bossHitScale, bossHitOffset);
-            AddAnimationClip(tuning.BossAnimations, "fall", enemyRoot + "boss_bear_husband_hit_04.png", 1, 8.0f, false, bossHitScale, bossHitOffset);
-            AddAnimationClip(tuning.BossAnimations, "dead", enemyRoot + "boss_bear_husband_dead_{frame2}.png", 4, 7.0f, false, bossWideScale, bossOffset);
-            AddAnimationClip(tuning.BossAnimations, "enemy_claw", enemyRoot + "boss_bear_husband_attack_claw_{frame2}.png", 3, 5.0f, false, bossClawScale, bossOffset);
-            AddAnimationClip(tuning.BossAnimations, "bear_charge", enemyRoot + "boss_bear_husband_charge_{frame2}.png", 4, 12.0f, true, bossScale, bossOffset);
-            AddAnimationClip(tuning.BossAnimations, "bear_charge_windup", enemyRoot + "boss_bear_husband_charge_windup_{frame2}.png", 6, 12.0f, false, bossScale, bossOffset);
-            AddAnimationClip(tuning.BossAnimations, "bear_shockwave", enemyRoot + "boss_bear_husband_shockwave_{frame2}.png", 4, 12.0f, false, bossShockwaveScale, bossOffset);
+            AddAnimationClip(tuning.GruntAnimations, "idle", "", 4, 7.0f, true, gruntScale, gruntOffset, MakeAtlas("assets/vertical_slice/side_combat/sheets/runtime_enemies/en_claw_beast_idle_sheet.png", 512, 384, 4));
+            AddAnimationClip(tuning.GruntAnimations, "run", "", 5, 11.0f, true, gruntScale, gruntOffset, MakeAtlas("assets/vertical_slice/side_combat/sheets/runtime_enemies/en_claw_beast_run_sheet.png", 512, 384, 5));
+            AddAnimationClip(tuning.GruntAnimations, "hit", "", 3, 12.0f, false, gruntWideScale, gruntOffset, MakeAtlas("assets/vertical_slice/side_combat/sheets/runtime_enemies/en_claw_beast_hit_sheet.png", 768, 384, 3));
+            AddAnimationClip(tuning.GruntAnimations, "fall", "", 3, 9.0f, true, gruntAirWideScale, gruntAirOffset, MakeAtlas("assets/vertical_slice/side_combat/sheets/runtime_enemies/en_claw_beast_fall_sheet.png", 768, 512, 3));
+            AddAnimationClip(tuning.GruntAnimations, "dead", "", 4, 7.0f, false, gruntWideScale, gruntOffset, MakeAtlas("assets/vertical_slice/side_combat/sheets/runtime_enemies/en_claw_beast_dead_sheet.png", 768, 384, 4));
+            AddAnimationClip(tuning.GruntAnimations, "enemy_claw", "", 4, 14.0f, false, gruntWideScale, gruntOffset, MakeAtlas("assets/vertical_slice/side_combat/sheets/runtime_enemies/en_claw_beast_attack_sheet.png", 768, 384, 4));
+
+            AddAnimationClip(tuning.BossAnimations, "idle", "", 4, 6.0f, true, bossScale, bossOffset, MakeAtlas("assets/vertical_slice/side_combat/sheets/runtime_enemies/boss_bear_husband_idle_sheet.png", 512, 512, 4));
+            AddAnimationClip(tuning.BossAnimations, "run", "", 4, 8.0f, true, bossScale, bossOffset, MakeAtlas("assets/vertical_slice/side_combat/sheets/runtime_enemies/boss_bear_husband_walk_sheet.png", 512, 512, 4));
+            AddAnimationClip(tuning.BossAnimations, "hit", "", 4, 10.0f, false, bossHitScale, bossHitOffset, MakeAtlas("assets/vertical_slice/side_combat/sheets/runtime_enemies/boss_bear_husband_hit_sheet.png", 512, 512, 4));
+            AddAnimationClip(tuning.BossAnimations, "fall", "", 4, 10.0f, false, bossHitScale, bossHitOffset, MakeAtlas("assets/vertical_slice/side_combat/sheets/runtime_enemies/boss_bear_husband_fall_sheet.png", 512, 512, 4));
+            AddAnimationClip(tuning.BossAnimations, "dead", "", 4, 7.0f, false, bossWideScale, bossOffset, MakeAtlas("assets/vertical_slice/side_combat/sheets/runtime_enemies/boss_bear_husband_dead_sheet.png", 1280, 768, 4));
+            AddAnimationClip(tuning.BossAnimations, "enemy_claw", "", 3, 5.0f, false, bossClawScale, bossOffset, MakeAtlas("assets/vertical_slice/side_combat/sheets/runtime_enemies/boss_bear_husband_attack_claw_sheet.png", 512, 512, 3));
+            AddAnimationClip(tuning.BossAnimations, "bear_charge", "", 4, 12.0f, true, bossScale, bossOffset, MakeAtlas("assets/vertical_slice/side_combat/sheets/runtime_enemies/boss_bear_husband_charge_sheet.png", 512, 512, 4));
+            AddAnimationClip(tuning.BossAnimations, "bear_charge_windup", "", 6, 12.0f, false, bossScale, bossOffset, MakeAtlas("assets/vertical_slice/side_combat/sheets/runtime_enemies/boss_bear_husband_charge_windup_sheet.png", 512, 512, 6));
+            AddAnimationClip(tuning.BossAnimations, "bear_shockwave", "", 4, 12.0f, false, bossShockwaveScale, bossOffset, MakeAtlas("assets/vertical_slice/side_combat/sheets/runtime_enemies/boss_bear_husband_shockwave_sheet.png", 512, 512, 4));
         }
 
         static void ApplyDefaultAttackFeedback(SideCombatTuning& tuning)
@@ -666,6 +713,46 @@ namespace Wheatear::SideCombatTuningService {
             apply("enemy_claw", audioRoot + "enemy_swing.wav", audioRoot + "player_hit.wav", 0.70f, 0.030f, 0.016f, 0.060f);
             apply("bear_charge", audioRoot + "bear_charge.wav", audioRoot + "player_hit.wav", 0.80f, 0.045f, 0.026f, 0.085f);
             apply("bear_shockwave", audioRoot + "shockwave_cast.wav", audioRoot + "player_hit.wav", 0.74f, 0.035f, 0.020f, 0.070f);
+        }
+
+        static void ApplyDefaultAttackVisuals(SideCombatTuning& tuning)
+        {
+            auto apply = [&](const std::string& id,
+                GameplayVisualService::TextureAtlasFrameSpec atlas,
+                int frameCount,
+                float frameRate)
+            {
+                auto attackIt = tuning.Attacks.find(id);
+                if (attackIt == tuning.Attacks.end())
+                    return;
+
+                auto& attack = attackIt->second;
+                attack.TextureFramePattern.clear();
+                attack.TextureAtlas = std::move(atlas);
+                attack.TextureFrameCount = std::max(1, frameCount);
+                attack.TextureFrameRate = std::max(1.0f, frameRate);
+            };
+
+            const auto basicSlash = MakeAtlas("assets/vertical_slice/side_combat/vfx_sheets/runtime_effects/vfx_basic_slash_sheet.png", 320, 192, 4);
+            apply("basic1", basicSlash, 4, 26.0f);
+            apply("basic2", basicSlash, 4, 26.0f);
+            apply("basic3", basicSlash, 4, 26.0f);
+            apply("air_basic", basicSlash, 4, 28.0f);
+
+            const auto launcherSlash = MakeAtlas("assets/vertical_slice/side_combat/vfx_sheets/runtime_effects/vfx_launcher_slash_sheet.png", 240, 320, 5);
+            apply("launcher", launcherSlash, 5, 26.0f);
+            apply("air_chase", launcherSlash, 5, 26.0f);
+            apply("dash", launcherSlash, 5, 26.0f);
+
+            apply("magic_bolt", MakeAtlas("assets/vertical_slice/side_combat/vfx_sheets/runtime_effects/vfx_magic_bolt_sheet.png", 288, 160, 4), 4, 18.0f);
+
+            const auto support = MakeAtlas("assets/vertical_slice/side_combat/vfx_sheets/runtime_effects/vfx_ally_support_sheet.png", 256, 320, 5);
+            apply("ally_support", support, 5, 18.0f);
+            apply("break_limit", support, 5, 22.0f);
+
+            apply("enemy_claw", MakeAtlas("assets/vertical_slice/side_combat/vfx_sheets/runtime_effects/vfx_enemy_claw_sheet.png", 256, 192, 3), 3, 18.0f);
+            apply("bear_charge", MakeAtlas("assets/vertical_slice/side_combat/vfx_sheets/runtime_effects/vfx_boss_bear_charge_sheet.png", 320, 192, 3), 3, 16.0f);
+            apply("bear_shockwave", MakeAtlas("assets/vertical_slice/side_combat/vfx_sheets/runtime_effects/vfx_boss_bear_shockwave_sheet.png", 384, 192, 4), 4, 16.0f);
         }
 
         static SideCombatTuning BuildDefaultTuning()
@@ -912,6 +999,7 @@ namespace Wheatear::SideCombatTuningService {
             tuning.Attacks["bear_shockwave"] = shockwave;
 
             ApplyDefaultAttackFeedback(tuning);
+            ApplyDefaultAttackVisuals(tuning);
 
             return tuning;
         }

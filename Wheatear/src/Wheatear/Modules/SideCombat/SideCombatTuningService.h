@@ -2,6 +2,7 @@
 
 #include "SideCombatComponents.h"
 #include "Wheatear/Core/Core.h"
+#include "Wheatear/Modules/Common/GameplayVisualService.h"
 
 #include <string>
 #include <unordered_map>
@@ -34,6 +35,7 @@ namespace Wheatear::SideCombatTuningService {
         float ProtectionGain = 0.0f;
         bool DestroyOnHit = true;
         std::string TextureFramePattern;
+        GameplayVisualService::TextureAtlasFrameSpec TextureAtlas;
         int TextureFrameCount = 1;
         float TextureFrameRate = 16.0f;
         std::string SwingSound;
@@ -144,6 +146,7 @@ namespace Wheatear::SideCombatTuningService {
     struct SideAnimationClipTuning
     {
         std::string Pattern;
+        GameplayVisualService::TextureAtlasFrameSpec Atlas;
         int FrameCount = 1;
         float FrameRate = 8.0f;
         bool Loop = true;

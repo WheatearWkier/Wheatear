@@ -79,6 +79,13 @@ namespace Wheatear::TurnCombatSkillService {
             skill.IconPath = recipe.IconPath;
             skill.SoundPath = recipe.SoundPath;
             skill.EffectPath = recipe.EffectPath;
+            skill.EffectAtlas.SheetPath = WAO::ParamString(recipe, "effectAtlasSheet");
+            skill.EffectAtlas.CellWidth = WAO::ParamInt(recipe, "effectAtlasCellWidth", 0);
+            skill.EffectAtlas.CellHeight = WAO::ParamInt(recipe, "effectAtlasCellHeight", 0);
+            skill.EffectAtlas.Columns = WAO::ParamInt(recipe, "effectAtlasColumns", 0);
+            skill.EffectAtlas.StartFrame = WAO::ParamInt(recipe, "effectAtlasStartFrame", 0);
+            skill.EffectFrameCount = WAO::ParamInt(recipe, "effectFrameCount", 1);
+            skill.EffectFrameRate = WAO::ParamFloat(recipe, "effectFrameRate", 12.0f);
             skill.TargetRule = TargetFromRecipe(recipe);
             skill.ManaCost = WAO::ParamFloat(recipe, "manaCost", WAO::ResourceCost(recipe, "mana"));
             skill.Power = WAO::ParamFloat(recipe, "power", damage ? damage->Value : 0.0f);

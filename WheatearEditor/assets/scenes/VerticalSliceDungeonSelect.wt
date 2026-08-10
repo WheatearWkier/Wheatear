@@ -31,6 +31,38 @@ Entities:
       Rotation: 0
       Anchor: 0
       SortOrder: 0
+  - Entity: 981009001
+    TagComponent:
+      Tag: Dungeon_MainGroup
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    UIWidgetComponent:
+      Visible: true
+      EditorVisible: true
+      Position: [0, 0]
+      Size: [1, 1]
+      Rotation: 0
+      Anchor: 0
+      SortOrder: 1
+      ParentEntity: 981000054
+  - Entity: 981009002
+    TagComponent:
+      Tag: Dungeon_ActionsGroup
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    UIWidgetComponent:
+      Visible: true
+      EditorVisible: true
+      Position: [0, 0]
+      Size: [1, 1]
+      Rotation: 0
+      Anchor: 0
+      SortOrder: 1
+      ParentEntity: 981000054
   - Entity: 981000001
     TagComponent:
       Tag: Dungeon_Camera
@@ -74,7 +106,7 @@ Entities:
       Rotation: 0
       Anchor: 0
       SortOrder: 10
-      ParentEntity: 981000054
+      ParentEntity: 981009001
     UIAnimatorComponent:
       Preset: "slide_fade_in"
       PlayOnStart: true
@@ -101,7 +133,7 @@ Entities:
       Rotation: 0
       Anchor: 0
       SortOrder: 31
-      ParentEntity: 981000054
+      ParentEntity: 981009001
     UIAnimatorComponent:
       Preset: "slide_fade_in"
       PlayOnStart: true
@@ -128,7 +160,7 @@ Entities:
       Rotation: 0
       Anchor: 0
       SortOrder: 30
-      ParentEntity: 981000054
+      ParentEntity: 981009001
     UIAnimatorComponent:
       Preset: "fade_in"
       PlayOnStart: true
@@ -161,7 +193,7 @@ Entities:
       Rotation: 0
       Anchor: 0
       SortOrder: 30
-      ParentEntity: 981000054
+      ParentEntity: 981009001
     UIAnimatorComponent:
       Preset: "fade_in"
       PlayOnStart: true
@@ -194,7 +226,7 @@ Entities:
       Rotation: 0
       Anchor: 0
       SortOrder: 30
-      ParentEntity: 981000054
+      ParentEntity: 981009001
     UIAnimatorComponent:
       Preset: "fade_in"
       PlayOnStart: true
@@ -227,7 +259,7 @@ Entities:
       Rotation: 0
       Anchor: 0
       SortOrder: 30
-      ParentEntity: 981000054
+      ParentEntity: 981009001
     UIAnimatorComponent:
       Preset: "fade_in"
       PlayOnStart: true
@@ -260,7 +292,7 @@ Entities:
       Rotation: 0
       Anchor: 0
       SortOrder: 40
-      ParentEntity: 981000054
+      ParentEntity: 981009002
     UIAnimatorComponent:
       Preset: "hover_pulse"
       PlayOnStart: true
@@ -298,7 +330,7 @@ Entities:
       Rotation: 0
       Anchor: 0
       SortOrder: 40
-      ParentEntity: 981000054
+      ParentEntity: 981009002
     UIAnimatorComponent:
       Preset: "hover_pulse"
       PlayOnStart: true
@@ -336,7 +368,7 @@ Entities:
       Rotation: 0
       Anchor: 0
       SortOrder: 40
-      ParentEntity: 981000054
+      ParentEntity: 981009002
     UIAnimatorComponent:
       Preset: "hover_pulse"
       PlayOnStart: true
@@ -374,7 +406,7 @@ Entities:
       Rotation: 0
       Anchor: 0
       SortOrder: 40
-      ParentEntity: 981000054
+      ParentEntity: 981009002
     UIAnimatorComponent:
       Preset: "hover_pulse"
       PlayOnStart: true

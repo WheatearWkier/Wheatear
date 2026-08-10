@@ -32,6 +32,70 @@ Entities:
       Anchor: 0
       SortOrder: 0
       ParentEntity: 0
+  - Entity: 940109001
+    TagComponent:
+      Tag: TC_HUDGroup
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    UIWidgetComponent:
+      Visible: true
+      EditorVisible: true
+      Position: [0, 0]
+      Size: [1, 1]
+      Rotation: 0
+      Anchor: 0
+      SortOrder: 1
+      ParentEntity: 940100002
+  - Entity: 940109002
+    TagComponent:
+      Tag: TC_CommandGroup
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    UIWidgetComponent:
+      Visible: true
+      EditorVisible: true
+      Position: [0, 0]
+      Size: [1, 1]
+      Rotation: 0
+      Anchor: 0
+      SortOrder: 1
+      ParentEntity: 940100002
+  - Entity: 940109003
+    TagComponent:
+      Tag: TC_TargetGroup
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    UIWidgetComponent:
+      Visible: true
+      EditorVisible: true
+      Position: [0, 0]
+      Size: [1, 1]
+      Rotation: 0
+      Anchor: 0
+      SortOrder: 1
+      ParentEntity: 940100002
+  - Entity: 940109004
+    TagComponent:
+      Tag: TC_OverlayGroup
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    UIWidgetComponent:
+      Visible: true
+      EditorVisible: true
+      Position: [0, 0]
+      Size: [1, 1]
+      Rotation: 0
+      Anchor: 0
+      SortOrder: 1
+      ParentEntity: 940100002
   - Entity: 940100003
     TagComponent:
       Tag: TC_Camera
@@ -108,8 +172,10 @@ Entities:
       Scale: [1.35, 1.75, 1]
     SpriteRendererComponent:
       Color: [1, 1, 1, 1]
-      Texture: assets/vertical_slice/turn_combat/characters/protag_magic_swordsman.png
+      Texture: assets/vertical_slice/turn_combat/sheets/characters/protag_magic_swordsman_idle_sheet.png
       TilingFactor: 1
+      UVMin: [0, 0]
+      UVMax: [0.25, 1]
     TurnCombatantComponent:
       Team: 1
       Slot: 0
@@ -134,10 +200,30 @@ Entities:
       StatusTextEntityName: TC_Hero_Status
       TargetButtonEntityName: TC_Hero_Target
       TargetMarkerEntityName: TC_Hero_Marker
-      IdleFramePattern: assets/vertical_slice/turn_combat/characters/protag_magic_swordsman_idle_{frame2}.png
-      AttackFramePattern: assets/vertical_slice/turn_combat/characters/protag_magic_swordsman_attack_{frame2}.png
-      HitFramePattern: assets/vertical_slice/turn_combat/characters/protag_magic_swordsman_hit_{frame2}.png
-      DownFramePattern: assets/vertical_slice/turn_combat/characters/protag_magic_swordsman_down_{frame2}.png
+      IdleFramePattern: ""
+      AttackFramePattern: ""
+      HitFramePattern: ""
+      DownFramePattern: ""
+      IdleFrameSheet: assets/vertical_slice/turn_combat/sheets/characters/protag_magic_swordsman_idle_sheet.png
+      IdleFrameCellWidth: 128
+      IdleFrameCellHeight: 160
+      IdleFrameColumns: 4
+      IdleFrameStartFrame: 0
+      AttackFrameSheet: assets/vertical_slice/turn_combat/sheets/characters/protag_magic_swordsman_attack_sheet.png
+      AttackFrameCellWidth: 128
+      AttackFrameCellHeight: 160
+      AttackFrameColumns: 4
+      AttackFrameStartFrame: 0
+      HitFrameSheet: assets/vertical_slice/turn_combat/sheets/characters/protag_magic_swordsman_hit_sheet.png
+      HitFrameCellWidth: 128
+      HitFrameCellHeight: 160
+      HitFrameColumns: 3
+      HitFrameStartFrame: 0
+      DownFrameSheet: assets/vertical_slice/turn_combat/sheets/characters/protag_magic_swordsman_down_sheet.png
+      DownFrameCellWidth: 128
+      DownFrameCellHeight: 160
+      DownFrameColumns: 3
+      DownFrameStartFrame: 0
       IdleFrameCount: 4
       AttackFrameCount: 4
       HitFrameCount: 3
@@ -152,8 +238,10 @@ Entities:
       Scale: [1.2, 1.62, 1]
     SpriteRendererComponent:
       Color: [1, 1, 1, 1]
-      Texture: assets/vertical_slice/turn_combat/characters/ally_white_mage.png
+      Texture: assets/vertical_slice/turn_combat/sheets/characters/ally_white_mage_idle_sheet.png
       TilingFactor: 1
+      UVMin: [0, 0]
+      UVMax: [0.25, 1]
     TurnCombatantComponent:
       Team: 1
       Slot: 1
@@ -178,10 +266,30 @@ Entities:
       StatusTextEntityName: TC_White_Status
       TargetButtonEntityName: TC_White_Target
       TargetMarkerEntityName: TC_White_Marker
-      IdleFramePattern: assets/vertical_slice/turn_combat/characters/ally_white_mage_idle_{frame2}.png
-      AttackFramePattern: assets/vertical_slice/turn_combat/characters/ally_white_mage_attack_{frame2}.png
-      HitFramePattern: assets/vertical_slice/turn_combat/characters/ally_white_mage_hit_{frame2}.png
-      DownFramePattern: assets/vertical_slice/turn_combat/characters/ally_white_mage_down_{frame2}.png
+      IdleFramePattern: ""
+      AttackFramePattern: ""
+      HitFramePattern: ""
+      DownFramePattern: ""
+      IdleFrameSheet: assets/vertical_slice/turn_combat/sheets/characters/ally_white_mage_idle_sheet.png
+      IdleFrameCellWidth: 128
+      IdleFrameCellHeight: 160
+      IdleFrameColumns: 4
+      IdleFrameStartFrame: 0
+      AttackFrameSheet: assets/vertical_slice/turn_combat/sheets/characters/ally_white_mage_attack_sheet.png
+      AttackFrameCellWidth: 128
+      AttackFrameCellHeight: 160
+      AttackFrameColumns: 4
+      AttackFrameStartFrame: 0
+      HitFrameSheet: assets/vertical_slice/turn_combat/sheets/characters/ally_white_mage_hit_sheet.png
+      HitFrameCellWidth: 128
+      HitFrameCellHeight: 160
+      HitFrameColumns: 3
+      HitFrameStartFrame: 0
+      DownFrameSheet: assets/vertical_slice/turn_combat/sheets/characters/ally_white_mage_down_sheet.png
+      DownFrameCellWidth: 128
+      DownFrameCellHeight: 160
+      DownFrameColumns: 3
+      DownFrameStartFrame: 0
       IdleFrameCount: 4
       AttackFrameCount: 4
       HitFrameCount: 3
@@ -196,8 +304,10 @@ Entities:
       Scale: [1.25, 1.68, 1]
     SpriteRendererComponent:
       Color: [1, 1, 1, 1]
-      Texture: assets/vertical_slice/turn_combat/characters/ally_guardian.png
+      Texture: assets/vertical_slice/turn_combat/sheets/characters/ally_guardian_idle_sheet.png
       TilingFactor: 1
+      UVMin: [0, 0]
+      UVMax: [0.25, 1]
     TurnCombatantComponent:
       Team: 1
       Slot: 2
@@ -222,10 +332,30 @@ Entities:
       StatusTextEntityName: TC_Guard_Status
       TargetButtonEntityName: TC_Guard_Target
       TargetMarkerEntityName: TC_Guard_Marker
-      IdleFramePattern: assets/vertical_slice/turn_combat/characters/ally_guardian_idle_{frame2}.png
-      AttackFramePattern: assets/vertical_slice/turn_combat/characters/ally_guardian_attack_{frame2}.png
-      HitFramePattern: assets/vertical_slice/turn_combat/characters/ally_guardian_hit_{frame2}.png
-      DownFramePattern: assets/vertical_slice/turn_combat/characters/ally_guardian_down_{frame2}.png
+      IdleFramePattern: ""
+      AttackFramePattern: ""
+      HitFramePattern: ""
+      DownFramePattern: ""
+      IdleFrameSheet: assets/vertical_slice/turn_combat/sheets/characters/ally_guardian_idle_sheet.png
+      IdleFrameCellWidth: 128
+      IdleFrameCellHeight: 160
+      IdleFrameColumns: 4
+      IdleFrameStartFrame: 0
+      AttackFrameSheet: assets/vertical_slice/turn_combat/sheets/characters/ally_guardian_attack_sheet.png
+      AttackFrameCellWidth: 128
+      AttackFrameCellHeight: 160
+      AttackFrameColumns: 4
+      AttackFrameStartFrame: 0
+      HitFrameSheet: assets/vertical_slice/turn_combat/sheets/characters/ally_guardian_hit_sheet.png
+      HitFrameCellWidth: 128
+      HitFrameCellHeight: 160
+      HitFrameColumns: 3
+      HitFrameStartFrame: 0
+      DownFrameSheet: assets/vertical_slice/turn_combat/sheets/characters/ally_guardian_down_sheet.png
+      DownFrameCellWidth: 128
+      DownFrameCellHeight: 160
+      DownFrameColumns: 3
+      DownFrameStartFrame: 0
       IdleFrameCount: 4
       AttackFrameCount: 4
       HitFrameCount: 3
@@ -240,8 +370,10 @@ Entities:
       Scale: [1.72, 2.25, 1]
     SpriteRendererComponent:
       Color: [1, 1, 1, 1]
-      Texture: assets/vertical_slice/turn_combat/characters/en_bearling.png
+      Texture: assets/vertical_slice/turn_combat/sheets/characters/en_bearling_idle_sheet.png
       TilingFactor: 1
+      UVMin: [0, 0]
+      UVMax: [0.25, 1]
     TurnCombatantComponent:
       Team: 2
       Slot: 0
@@ -266,10 +398,30 @@ Entities:
       StatusTextEntityName: TC_Bear_Status
       TargetButtonEntityName: TC_Bear_Target
       TargetMarkerEntityName: TC_Bear_Marker
-      IdleFramePattern: assets/vertical_slice/turn_combat/characters/en_bearling_idle_{frame2}.png
-      AttackFramePattern: assets/vertical_slice/turn_combat/characters/en_bearling_attack_{frame2}.png
-      HitFramePattern: assets/vertical_slice/turn_combat/characters/en_bearling_hit_{frame2}.png
-      DownFramePattern: assets/vertical_slice/turn_combat/characters/en_bearling_down_{frame2}.png
+      IdleFramePattern: ""
+      AttackFramePattern: ""
+      HitFramePattern: ""
+      DownFramePattern: ""
+      IdleFrameSheet: assets/vertical_slice/turn_combat/sheets/characters/en_bearling_idle_sheet.png
+      IdleFrameCellWidth: 128
+      IdleFrameCellHeight: 160
+      IdleFrameColumns: 4
+      IdleFrameStartFrame: 0
+      AttackFrameSheet: assets/vertical_slice/turn_combat/sheets/characters/en_bearling_attack_sheet.png
+      AttackFrameCellWidth: 128
+      AttackFrameCellHeight: 160
+      AttackFrameColumns: 4
+      AttackFrameStartFrame: 0
+      HitFrameSheet: assets/vertical_slice/turn_combat/sheets/characters/en_bearling_hit_sheet.png
+      HitFrameCellWidth: 128
+      HitFrameCellHeight: 160
+      HitFrameColumns: 3
+      HitFrameStartFrame: 0
+      DownFrameSheet: assets/vertical_slice/turn_combat/sheets/characters/en_bearling_down_sheet.png
+      DownFrameCellWidth: 128
+      DownFrameCellHeight: 160
+      DownFrameColumns: 3
+      DownFrameStartFrame: 0
       IdleFrameCount: 4
       AttackFrameCount: 4
       HitFrameCount: 3
@@ -284,8 +436,10 @@ Entities:
       Scale: [1.25, 1.56, 1]
     SpriteRendererComponent:
       Color: [1, 1, 1, 1]
-      Texture: assets/vertical_slice/turn_combat/characters/en_wolf.png
+      Texture: assets/vertical_slice/turn_combat/sheets/characters/en_wolf_idle_sheet.png
       TilingFactor: 1
+      UVMin: [0, 0]
+      UVMax: [0.25, 1]
     TurnCombatantComponent:
       Team: 2
       Slot: 1
@@ -310,10 +464,30 @@ Entities:
       StatusTextEntityName: TC_Wolf_Status
       TargetButtonEntityName: TC_Wolf_Target
       TargetMarkerEntityName: TC_Wolf_Marker
-      IdleFramePattern: assets/vertical_slice/turn_combat/characters/en_wolf_idle_{frame2}.png
-      AttackFramePattern: assets/vertical_slice/turn_combat/characters/en_wolf_attack_{frame2}.png
-      HitFramePattern: assets/vertical_slice/turn_combat/characters/en_wolf_hit_{frame2}.png
-      DownFramePattern: assets/vertical_slice/turn_combat/characters/en_wolf_down_{frame2}.png
+      IdleFramePattern: ""
+      AttackFramePattern: ""
+      HitFramePattern: ""
+      DownFramePattern: ""
+      IdleFrameSheet: assets/vertical_slice/turn_combat/sheets/characters/en_wolf_idle_sheet.png
+      IdleFrameCellWidth: 128
+      IdleFrameCellHeight: 160
+      IdleFrameColumns: 4
+      IdleFrameStartFrame: 0
+      AttackFrameSheet: assets/vertical_slice/turn_combat/sheets/characters/en_wolf_attack_sheet.png
+      AttackFrameCellWidth: 128
+      AttackFrameCellHeight: 160
+      AttackFrameColumns: 4
+      AttackFrameStartFrame: 0
+      HitFrameSheet: assets/vertical_slice/turn_combat/sheets/characters/en_wolf_hit_sheet.png
+      HitFrameCellWidth: 128
+      HitFrameCellHeight: 160
+      HitFrameColumns: 3
+      HitFrameStartFrame: 0
+      DownFrameSheet: assets/vertical_slice/turn_combat/sheets/characters/en_wolf_down_sheet.png
+      DownFrameCellWidth: 128
+      DownFrameCellHeight: 160
+      DownFrameColumns: 3
+      DownFrameStartFrame: 0
       IdleFrameCount: 4
       AttackFrameCount: 4
       HitFrameCount: 3
@@ -328,8 +502,10 @@ Entities:
       Scale: [1.18, 1.62, 1]
     SpriteRendererComponent:
       Color: [1, 1, 1, 1]
-      Texture: assets/vertical_slice/turn_combat/characters/en_apprentice_mage.png
+      Texture: assets/vertical_slice/turn_combat/sheets/characters/en_apprentice_mage_idle_sheet.png
       TilingFactor: 1
+      UVMin: [0, 0]
+      UVMax: [0.25, 1]
     TurnCombatantComponent:
       Team: 2
       Slot: 2
@@ -354,10 +530,30 @@ Entities:
       StatusTextEntityName: TC_Mage_Status
       TargetButtonEntityName: TC_Mage_Target
       TargetMarkerEntityName: TC_Mage_Marker
-      IdleFramePattern: assets/vertical_slice/turn_combat/characters/en_apprentice_mage_idle_{frame2}.png
-      AttackFramePattern: assets/vertical_slice/turn_combat/characters/en_apprentice_mage_attack_{frame2}.png
-      HitFramePattern: assets/vertical_slice/turn_combat/characters/en_apprentice_mage_hit_{frame2}.png
-      DownFramePattern: assets/vertical_slice/turn_combat/characters/en_apprentice_mage_down_{frame2}.png
+      IdleFramePattern: ""
+      AttackFramePattern: ""
+      HitFramePattern: ""
+      DownFramePattern: ""
+      IdleFrameSheet: assets/vertical_slice/turn_combat/sheets/characters/en_apprentice_mage_idle_sheet.png
+      IdleFrameCellWidth: 128
+      IdleFrameCellHeight: 160
+      IdleFrameColumns: 4
+      IdleFrameStartFrame: 0
+      AttackFrameSheet: assets/vertical_slice/turn_combat/sheets/characters/en_apprentice_mage_attack_sheet.png
+      AttackFrameCellWidth: 128
+      AttackFrameCellHeight: 160
+      AttackFrameColumns: 4
+      AttackFrameStartFrame: 0
+      HitFrameSheet: assets/vertical_slice/turn_combat/sheets/characters/en_apprentice_mage_hit_sheet.png
+      HitFrameCellWidth: 128
+      HitFrameCellHeight: 160
+      HitFrameColumns: 3
+      HitFrameStartFrame: 0
+      DownFrameSheet: assets/vertical_slice/turn_combat/sheets/characters/en_apprentice_mage_down_sheet.png
+      DownFrameCellWidth: 128
+      DownFrameCellHeight: 160
+      DownFrameColumns: 3
+      DownFrameStartFrame: 0
       IdleFrameCount: 4
       AttackFrameCount: 4
       HitFrameCount: 3
@@ -372,7 +568,7 @@ Entities:
       Scale: [1.4, 1.1, 1]
     SpriteRendererComponent:
       Color: [1, 1, 1, 0]
-      Texture: assets/vertical_slice/turn_combat/effects/vfx_turn_slash.png
+      Texture: assets/vertical_slice/turn_combat/sheets/effects/vfx_turn_slash_sheet.png
       TilingFactor: 1
   - Entity: 940100014
     TagComponent:
@@ -388,7 +584,7 @@ Entities:
       Rotation: 0
       Anchor: 0
       SortOrder: 5
-      ParentEntity: 940100002
+      ParentEntity: 940109001
     UIImageComponent:
       Color: [0.03, 0.045, 0.065, 0.78]
       TexturePath: assets/vertical_slice/turn_combat/ui/panels/panel_turn_order.png
@@ -406,7 +602,7 @@ Entities:
       Rotation: 0
       Anchor: 0
       SortOrder: 12
-      ParentEntity: 940100002
+      ParentEntity: 940109001
     UITextComponent:
       Text: "魔剑试炼  回合战斗 / 轨迹式界面"
       Color: [0.72, 0.95, 0.88, 1]
@@ -430,7 +626,7 @@ Entities:
       Rotation: 0
       Anchor: 0
       SortOrder: 12
-      ParentEntity: 940100002
+      ParentEntity: 940109001
     UITextComponent:
       Text: "行动中：-"
       Color: [1.0, 0.84, 0.42, 1]
@@ -454,7 +650,7 @@ Entities:
       Rotation: 0
       Anchor: 0
       SortOrder: 12
-      ParentEntity: 940100002
+      ParentEntity: 940109001
     UITextComponent:
       Text: "行动顺序"
       Color: [0.92, 0.9, 0.78, 1]
@@ -478,7 +674,7 @@ Entities:
       Rotation: 0
       Anchor: 0
       SortOrder: 6
-      ParentEntity: 940100002
+      ParentEntity: 940109001
     UIPanelComponent:
       BackgroundColor: [0.02, 0.025, 0.035, 0.72]
       BorderColor: [0.28, 0.66, 0.7, 0.62]
@@ -501,7 +697,7 @@ Entities:
       Rotation: 0
       Anchor: 0
       SortOrder: 14
-      ParentEntity: 940100002
+      ParentEntity: 940109001
     UITextComponent:
       Text: "回合战斗开始。"
       Color: [0.94, 0.92, 0.82, 1]
@@ -525,7 +721,7 @@ Entities:
       Rotation: 0
       Anchor: 0
       SortOrder: 18
-      ParentEntity: 940100002
+      ParentEntity: 940109001
     UITextComponent:
       Text: "选择目标"
       Color: [1.0, 0.82, 0.36, 1]
@@ -549,7 +745,7 @@ Entities:
       Rotation: 0
       Anchor: 0
       SortOrder: 8
-      ParentEntity: 940100002
+      ParentEntity: 940109001
     UIPanelComponent:
       BackgroundColor: [0.02, 0.03, 0.04, 0.66]
       BorderColor: [0.22, 0.62, 0.58, 0.62]
@@ -572,7 +768,7 @@ Entities:
       Rotation: 0
       Anchor: 0
       SortOrder: 8
-      ParentEntity: 940100002
+      ParentEntity: 940109001
     UIPanelComponent:
       BackgroundColor: [0.04, 0.025, 0.03, 0.66]
       BorderColor: [0.72, 0.3, 0.25, 0.62]
@@ -595,7 +791,7 @@ Entities:
       Rotation: 0
       Anchor: 0
       SortOrder: 16
-      ParentEntity: 940100002
+      ParentEntity: 940109001
     UITextComponent:
       Text: "主角"
       Color: [0.9, 0.9, 0.8, 1]
@@ -619,7 +815,7 @@ Entities:
       Rotation: 0
       Anchor: 0
       SortOrder: 16
-      ParentEntity: 940100002
+      ParentEntity: 940109001
     UIProgressBarComponent:
       Value: 1
       MaxValue: 1
@@ -639,7 +835,7 @@ Entities:
       Rotation: 0
       Anchor: 0
       SortOrder: 16
-      ParentEntity: 940100002
+      ParentEntity: 940109001
     UIProgressBarComponent:
       Value: 1
       MaxValue: 1
@@ -659,7 +855,7 @@ Entities:
       Rotation: 0
       Anchor: 0
       SortOrder: 16
-      ParentEntity: 940100002
+      ParentEntity: 940109001
     UITextComponent:
       Text: "白魔法使"
       Color: [0.9, 0.9, 0.8, 1]
@@ -683,7 +879,7 @@ Entities:
       Rotation: 0
       Anchor: 0
       SortOrder: 16
-      ParentEntity: 940100002
+      ParentEntity: 940109001
     UIProgressBarComponent:
       Value: 1
       MaxValue: 1
@@ -703,7 +899,7 @@ Entities:
       Rotation: 0
       Anchor: 0
       SortOrder: 16
-      ParentEntity: 940100002
+      ParentEntity: 940109001
     UIProgressBarComponent:
       Value: 1
       MaxValue: 1
@@ -723,7 +919,7 @@ Entities:
       Rotation: 0
       Anchor: 0
       SortOrder: 16
-      ParentEntity: 940100002
+      ParentEntity: 940109001
     UITextComponent:
       Text: "守护骑士"
       Color: [0.9, 0.9, 0.8, 1]
@@ -747,7 +943,7 @@ Entities:
       Rotation: 0
       Anchor: 0
       SortOrder: 16
-      ParentEntity: 940100002
+      ParentEntity: 940109001
     UIProgressBarComponent:
       Value: 1
       MaxValue: 1
@@ -767,7 +963,7 @@ Entities:
       Rotation: 0
       Anchor: 0
       SortOrder: 16
-      ParentEntity: 940100002
+      ParentEntity: 940109001
     UIProgressBarComponent:
       Value: 1
       MaxValue: 1
@@ -787,7 +983,7 @@ Entities:
       Rotation: 0
       Anchor: 0
       SortOrder: 16
-      ParentEntity: 940100002
+      ParentEntity: 940109001
     UITextComponent:
       Text: "幼熊兽"
       Color: [0.9, 0.9, 0.8, 1]
@@ -811,7 +1007,7 @@ Entities:
       Rotation: 0
       Anchor: 0
       SortOrder: 16
-      ParentEntity: 940100002
+      ParentEntity: 940109001
     UIProgressBarComponent:
       Value: 1
       MaxValue: 1
@@ -831,7 +1027,7 @@ Entities:
       Rotation: 0
       Anchor: 0
       SortOrder: 16
-      ParentEntity: 940100002
+      ParentEntity: 940109001
     UIProgressBarComponent:
       Value: 1
       MaxValue: 1
@@ -851,7 +1047,7 @@ Entities:
       Rotation: 0
       Anchor: 0
       SortOrder: 16
-      ParentEntity: 940100002
+      ParentEntity: 940109001
     UITextComponent:
       Text: "月狼"
       Color: [0.9, 0.9, 0.8, 1]
@@ -875,7 +1071,7 @@ Entities:
       Rotation: 0
       Anchor: 0
       SortOrder: 16
-      ParentEntity: 940100002
+      ParentEntity: 940109001
     UIProgressBarComponent:
       Value: 1
       MaxValue: 1
@@ -895,7 +1091,7 @@ Entities:
       Rotation: 0
       Anchor: 0
       SortOrder: 16
-      ParentEntity: 940100002
+      ParentEntity: 940109001
     UIProgressBarComponent:
       Value: 1
       MaxValue: 1
@@ -915,7 +1111,7 @@ Entities:
       Rotation: 0
       Anchor: 0
       SortOrder: 16
-      ParentEntity: 940100002
+      ParentEntity: 940109001
     UITextComponent:
       Text: "学徒法师"
       Color: [0.9, 0.9, 0.8, 1]
@@ -939,7 +1135,7 @@ Entities:
       Rotation: 0
       Anchor: 0
       SortOrder: 16
-      ParentEntity: 940100002
+      ParentEntity: 940109001
     UIProgressBarComponent:
       Value: 1
       MaxValue: 1
@@ -959,7 +1155,7 @@ Entities:
       Rotation: 0
       Anchor: 0
       SortOrder: 16
-      ParentEntity: 940100002
+      ParentEntity: 940109001
     UIProgressBarComponent:
       Value: 1
       MaxValue: 1
@@ -979,7 +1175,7 @@ Entities:
       Rotation: 0
       Anchor: 0
       SortOrder: 20
-      ParentEntity: 940100002
+      ParentEntity: 940109002
     UIImageComponent:
       Color: [1, 1, 1, 1]
       TexturePath: assets/vertical_slice/turn_combat/ui/panels/panel_turn_command.png
@@ -1354,7 +1550,7 @@ Entities:
       Rotation: 0
       Anchor: 0
       SortOrder: 35
-      ParentEntity: 940100002
+      ParentEntity: 940109003
     UIButtonComponent:
       NormalColor: [0.9, 0.72, 0.16, 0.1]
       HoverColor: [1.0, 0.82, 0.2, 0.28]
@@ -1392,7 +1588,7 @@ Entities:
       Rotation: 0
       Anchor: 0
       SortOrder: 35
-      ParentEntity: 940100002
+      ParentEntity: 940109003
     UIButtonComponent:
       NormalColor: [0.9, 0.72, 0.16, 0.1]
       HoverColor: [1.0, 0.82, 0.2, 0.28]
@@ -1430,7 +1626,7 @@ Entities:
       Rotation: 0
       Anchor: 0
       SortOrder: 35
-      ParentEntity: 940100002
+      ParentEntity: 940109003
     UIButtonComponent:
       NormalColor: [0.9, 0.72, 0.16, 0.1]
       HoverColor: [1.0, 0.82, 0.2, 0.28]
@@ -1468,7 +1664,7 @@ Entities:
       Rotation: 0
       Anchor: 0
       SortOrder: 35
-      ParentEntity: 940100002
+      ParentEntity: 940109003
     UIButtonComponent:
       NormalColor: [0.9, 0.72, 0.16, 0.1]
       HoverColor: [1.0, 0.82, 0.2, 0.28]
@@ -1506,7 +1702,7 @@ Entities:
       Rotation: 0
       Anchor: 0
       SortOrder: 35
-      ParentEntity: 940100002
+      ParentEntity: 940109003
     UIButtonComponent:
       NormalColor: [0.9, 0.72, 0.16, 0.1]
       HoverColor: [1.0, 0.82, 0.2, 0.28]
@@ -1544,7 +1740,7 @@ Entities:
       Rotation: 0
       Anchor: 0
       SortOrder: 35
-      ParentEntity: 940100002
+      ParentEntity: 940109003
     UIButtonComponent:
       NormalColor: [0.9, 0.72, 0.16, 0.1]
       HoverColor: [1.0, 0.82, 0.2, 0.28]
@@ -1582,7 +1778,7 @@ Entities:
       Rotation: 0
       Anchor: 0
       SortOrder: 80
-      ParentEntity: 940100002
+      ParentEntity: 940109004
     UIImageComponent:
       Color: [1, 1, 1, 0]
       TexturePath: ""
@@ -1600,7 +1796,7 @@ Entities:
       Rotation: 0
       Anchor: 0
       SortOrder: 90
-      ParentEntity: 940100002
+      ParentEntity: 940109004
     UIImageComponent:
       Color: [0, 0, 0, 1]
       TexturePath: ""
@@ -1613,7 +1809,7 @@ Entities:
       Scale: [0.01, 0.01, 1]
     SpriteRendererComponent:
       Color: [1, 1, 1, 0]
-      Texture: assets/vertical_slice/turn_combat/effects/vfx_turn_magic_sword.png
+      Texture: assets/vertical_slice/turn_combat/sheets/effects/vfx_turn_magic_sword_sheet.png
       TilingFactor: 1
   - Entity: 940100074
     TagComponent:
@@ -1624,7 +1820,7 @@ Entities:
       Scale: [0.01, 0.01, 1]
     SpriteRendererComponent:
       Color: [1, 1, 1, 0]
-      Texture: assets/vertical_slice/turn_combat/effects/vfx_turn_heal.png
+      Texture: assets/vertical_slice/turn_combat/sheets/effects/vfx_turn_heal_sheet.png
       TilingFactor: 1
   - Entity: 940100075
     TagComponent:
@@ -1635,7 +1831,7 @@ Entities:
       Scale: [0.01, 0.01, 1]
     SpriteRendererComponent:
       Color: [1, 1, 1, 0]
-      Texture: assets/vertical_slice/turn_combat/effects/vfx_turn_guard.png
+      Texture: assets/vertical_slice/turn_combat/sheets/effects/vfx_turn_guard_sheet.png
       TilingFactor: 1
   - Entity: 940100076
     TagComponent:
@@ -1646,7 +1842,7 @@ Entities:
       Scale: [0.01, 0.01, 1]
     SpriteRendererComponent:
       Color: [1, 1, 1, 0]
-      Texture: assets/vertical_slice/turn_combat/effects/vfx_turn_dark.png
+      Texture: assets/vertical_slice/turn_combat/sheets/effects/vfx_turn_dark_sheet.png
       TilingFactor: 1
   - Entity: 940100077
     TagComponent:
@@ -1657,7 +1853,7 @@ Entities:
       Scale: [0.01, 0.01, 1]
     SpriteRendererComponent:
       Color: [1, 1, 1, 0]
-      Texture: assets/vertical_slice/turn_combat/effects/vfx_turn_focus.png
+      Texture: assets/vertical_slice/turn_combat/sheets/effects/vfx_turn_focus_sheet.png
       TilingFactor: 1
   - Entity: 940100078
     TagComponent:
@@ -1668,7 +1864,7 @@ Entities:
       Scale: [0.01, 0.01, 1]
     SpriteRendererComponent:
       Color: [1, 1, 1, 0]
-      Texture: assets/vertical_slice/turn_combat/effects/vfx_turn_claw.png
+      Texture: assets/vertical_slice/turn_combat/sheets/effects/vfx_turn_claw_sheet.png
       TilingFactor: 1
   - Entity: 940100079
     TagComponent:

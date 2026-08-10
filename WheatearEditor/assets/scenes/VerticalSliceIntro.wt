@@ -378,7 +378,7 @@ Entities:
       Rotation: 0
       Anchor: 0
       SortOrder: 5200
-      ParentEntity: 930023401
+      ParentEntity: 930023904
     UIImageComponent:
       Color: [1, 1, 1, 0.920000017]
       TexturePath: assets/vertical_slice/ui/atlases/vn_ui_atlas.png
@@ -1613,7 +1613,7 @@ Entities:
       Rotation: 0
       Anchor: 0
       SortOrder: 80
-      ParentEntity: 930023401
+      ParentEntity: 930023903
     UIPanelComponent:
       BackgroundColor: [0.0399999991, 0.0450000018, 0.0549999997, 0.879999995]
       BorderColor: [0.800000012, 0.639999986, 0.360000014, 0.899999976]
@@ -1637,7 +1637,7 @@ Entities:
       Rotation: 0
       Anchor: 4
       SortOrder: 90
-      ParentEntity: 930023401
+      ParentEntity: 930023904
     UITextComponent:
       Text: "已保存"
       Color: [0.920000017, 0.980000019, 0.860000014, 1]
@@ -1872,7 +1872,7 @@ Entities:
       Rotation: 0
       Anchor: 4
       SortOrder: 80
-      ParentEntity: 930023401
+      ParentEntity: 930023903
     UIAnimatorComponent:
       Preset: "slide_fade_in"
       PlayOnStart: true
@@ -1945,7 +1945,7 @@ Entities:
       Rotation: 0
       Anchor: 4
       SortOrder: 70
-      ParentEntity: 930023401
+      ParentEntity: 930023903
     UIAnimatorComponent:
       Preset: "slide_fade_in"
       PlayOnStart: true
@@ -2321,7 +2321,7 @@ Entities:
       Rotation: 0
       Anchor: 0
       SortOrder: 5069
-      ParentEntity: 930017111
+      ParentEntity: 930023902
     UITextComponent:
       Text: ""
       Color: [0.920000017, 0.980000019, 0.860000014, 1]
@@ -2349,7 +2349,7 @@ Entities:
       Rotation: 0
       Anchor: 0
       SortOrder: 5050
-      ParentEntity: 930017111
+      ParentEntity: 930023902
     UIImageComponent:
       Color: [1, 1, 1, 0]
       TexturePath: ""
@@ -2370,7 +2370,7 @@ Entities:
       Rotation: 0
       Anchor: 0
       SortOrder: 41
-      ParentEntity: 930023401
+      ParentEntity: 930023901
     UITextComponent:
       Text: "自动"
       Color: [0.720000029, 0.959999979, 0.74000001, 1]
@@ -2460,7 +2460,7 @@ Entities:
       Rotation: 0
       Anchor: 4
       SortOrder: 32
-      ParentEntity: 930023401
+      ParentEntity: 930023901
     UIImageComponent:
       Color: [1, 1, 1, 0.949999988]
       TexturePath: assets/vertical_slice/ui/atlases/vn_ui_atlas.png
@@ -2499,7 +2499,7 @@ Entities:
       Rotation: 0
       Anchor: 4
       SortOrder: 31
-      ParentEntity: 930023401
+      ParentEntity: 930023901
     UIImageComponent:
       Color: [1, 1, 1, 0.949999988]
       TexturePath: assets/vertical_slice/ui/atlases/vn_ui_atlas.png
@@ -2538,7 +2538,7 @@ Entities:
       Rotation: 0
       Anchor: 4
       SortOrder: 30
-      ParentEntity: 930023401
+      ParentEntity: 930023901
     UIImageComponent:
       Color: [1, 1, 1, 0.949999988]
       TexturePath: assets/vertical_slice/ui/atlases/vn_ui_atlas.png
@@ -2715,7 +2715,7 @@ Entities:
       Rotation: 0
       Anchor: 4
       SortOrder: 10
-      ParentEntity: 930023401
+      ParentEntity: 930023901
     UIImageComponent:
       Color: [0.0599999987, 0.0700000003, 0.0900000036, 0.879999995]
       TexturePath: assets/vertical_slice/ui/atlases/vn_ui_atlas.png
@@ -2839,6 +2839,70 @@ Entities:
       Anchor: 0
       SortOrder: 0
       ParentEntity: 0
+  - Entity: 930023902
+    TagComponent:
+      Tag: VN_CommandGroup
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    UIWidgetComponent:
+      Visible: true
+      EditorVisible: true
+      Position: [0, 0]
+      Size: [1, 1]
+      Rotation: 0
+      Anchor: 0
+      SortOrder: 1
+      ParentEntity: 930023401
+  - Entity: 930023901
+    TagComponent:
+      Tag: VN_StoryGroup
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    UIWidgetComponent:
+      Visible: true
+      EditorVisible: true
+      Position: [0, 0]
+      Size: [1, 1]
+      Rotation: 0
+      Anchor: 0
+      SortOrder: 1
+      ParentEntity: 930023401
+  - Entity: 930023903
+    TagComponent:
+      Tag: VN_OverlayGroup
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    UIWidgetComponent:
+      Visible: true
+      EditorVisible: true
+      Position: [0, 0]
+      Size: [1, 1]
+      Rotation: 0
+      Anchor: 0
+      SortOrder: 1
+      ParentEntity: 930023401
+  - Entity: 930023904
+    TagComponent:
+      Tag: VN_SystemGroup
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    UIWidgetComponent:
+      Visible: true
+      EditorVisible: true
+      Position: [0, 0]
+      Size: [1, 1]
+      Rotation: 0
+      Anchor: 0
+      SortOrder: 1
+      ParentEntity: 930023401
   - Entity: 930023402
     TagComponent:
       Tag: FlowController

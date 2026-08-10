@@ -1,6 +1,7 @@
 #pragma once
 
 #include "TurnCombatComponents.h"
+#include "Wheatear/Modules/Common/GameplayVisualService.h"
 #include "Wheatear/Core/Core.h"
 
 #include <optional>
@@ -36,6 +37,9 @@ namespace Wheatear::TurnCombatSkillService {
         std::string IconPath;
         std::string SoundPath;
         std::string EffectPath;
+        GameplayVisualService::TextureAtlasFrameSpec EffectAtlas;
+        int EffectFrameCount = 1;
+        float EffectFrameRate = 12.0f;
         TurnTargetRule TargetRule = TurnTargetRule::EnemySingle;
         float ManaCost = 0.0f;
         float Power = 1.0f;

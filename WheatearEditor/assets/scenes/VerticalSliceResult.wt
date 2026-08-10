@@ -31,6 +31,54 @@ Entities:
       Rotation: 0
       Anchor: 0
       SortOrder: 0
+  - Entity: 960009001
+    TagComponent:
+      Tag: Result_MainGroup
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    UIWidgetComponent:
+      Visible: true
+      EditorVisible: true
+      Position: [0, 0]
+      Size: [1, 1]
+      Rotation: 0
+      Anchor: 0
+      SortOrder: 1
+      ParentEntity: 960000033
+  - Entity: 960009002
+    TagComponent:
+      Tag: Result_RewardsGroup
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    UIWidgetComponent:
+      Visible: true
+      EditorVisible: true
+      Position: [0, 0]
+      Size: [1, 1]
+      Rotation: 0
+      Anchor: 0
+      SortOrder: 1
+      ParentEntity: 960000033
+  - Entity: 960009003
+    TagComponent:
+      Tag: Result_TooltipGroup
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    UIWidgetComponent:
+      Visible: true
+      EditorVisible: true
+      Position: [0, 0]
+      Size: [1, 1]
+      Rotation: 0
+      Anchor: 0
+      SortOrder: 1
+      ParentEntity: 960000033
   - Entity: 960000001
     TagComponent:
       Tag: Result_Camera
@@ -85,7 +133,7 @@ Entities:
       Rotation: 0
       Anchor: 0
       SortOrder: 10
-      ParentEntity: 960000033
+      ParentEntity: 960009001
     UIAnimatorComponent:
       Preset: "slide_fade_in"
       PlayOnStart: true
@@ -112,7 +160,7 @@ Entities:
       Rotation: 0
       Anchor: 0
       SortOrder: 30
-      ParentEntity: 960000033
+      ParentEntity: 960009001
     UIAnimatorComponent:
       Preset: "fade_in"
       PlayOnStart: true
@@ -145,7 +193,7 @@ Entities:
       Rotation: 0
       Anchor: 0
       SortOrder: 31
-      ParentEntity: 960000033
+      ParentEntity: 960009001
     UIAnimatorComponent:
       Preset: "result_pop"
       PlayOnStart: true
@@ -172,7 +220,7 @@ Entities:
       Rotation: 0
       Anchor: 0
       SortOrder: 34
-      ParentEntity: 960000033
+      ParentEntity: 960009001
     UIAnimatorComponent:
       Preset: "result_pop"
       PlayOnStart: true
@@ -205,7 +253,7 @@ Entities:
       Rotation: 0
       Anchor: 0
       SortOrder: 32
-      ParentEntity: 960000033
+      ParentEntity: 960009001
     UIAnimatorComponent:
       Preset: "fade_in"
       PlayOnStart: true
@@ -238,7 +286,7 @@ Entities:
       Rotation: 0
       Anchor: 0
       SortOrder: 32
-      ParentEntity: 960000033
+      ParentEntity: 960009001
     UIProgressBarComponent:
       Value: 0
       MaxValue: 100
@@ -258,7 +306,7 @@ Entities:
       Rotation: 0
       Anchor: 0
       SortOrder: 10
-      ParentEntity: 960000033
+      ParentEntity: 960009002
     UIAnimatorComponent:
       Preset: "slide_fade_in"
       PlayOnStart: true
@@ -285,7 +333,7 @@ Entities:
       Rotation: 0
       Anchor: 0
       SortOrder: 33
-      ParentEntity: 960000033
+      ParentEntity: 960009002
     UIAnimatorComponent:
       Preset: "fade_in"
       PlayOnStart: true
@@ -318,7 +366,7 @@ Entities:
       Rotation: 0
       Anchor: 0
       SortOrder: 40
-      ParentEntity: 960000033
+      ParentEntity: 960009001
     UIAnimatorComponent:
       Preset: "hover_pulse"
       PlayOnStart: true
@@ -356,7 +404,7 @@ Entities:
       Rotation: 0
       Anchor: 0
       SortOrder: 40
-      ParentEntity: 960000033
+      ParentEntity: 960009001
     UIAnimatorComponent:
       Preset: "hover_pulse"
       PlayOnStart: true
@@ -394,7 +442,7 @@ Entities:
       Rotation: 0
       Anchor: 0
       SortOrder: 40
-      ParentEntity: 960000033
+      ParentEntity: 960009001
     UIAnimatorComponent:
       Preset: "hover_pulse"
       PlayOnStart: true
@@ -432,7 +480,7 @@ Entities:
       Rotation: 0.0
       Anchor: 0
       SortOrder: 35
-      ParentEntity: 960000033
+      ParentEntity: 960009002
     UIPanelComponent:
       BackgroundColor: [0.025, 0.032, 0.038, 0.84]
       BorderColor: [0.74, 0.6, 0.3, 0.82]
@@ -451,7 +499,7 @@ Entities:
       Rotation: 0.0
       Anchor: 0
       SortOrder: 38
-      ParentEntity: 960000033
+      ParentEntity: 960009002
     UIImageComponent:
       Color: [1, 1, 1, 1.0]
       TexturePath: assets/vertical_slice/side_combat/ui/icon_drop_magic_core.png
@@ -469,7 +517,7 @@ Entities:
       Rotation: 0.0
       Anchor: 0
       SortOrder: 48
-      ParentEntity: 960000033
+      ParentEntity: 960009002
     UIButtonComponent:
       NormalColor: [0, 0, 0, 0]
       HoverColor: [0.95, 1, 0.82, 0.14]
@@ -489,7 +537,7 @@ Entities:
       Rotation: 0.0
       Anchor: 0
       SortOrder: 50
-      ParentEntity: 960000033
+      ParentEntity: 960009002
     UITextComponent:
       Text: "x1"
       Color: [1.0, 0.92, 0.68, 1]
@@ -513,7 +561,7 @@ Entities:
       Rotation: 0.0
       Anchor: 0
       SortOrder: 35
-      ParentEntity: 960000033
+      ParentEntity: 960009002
     UIPanelComponent:
       BackgroundColor: [0.025, 0.032, 0.038, 0.84]
       BorderColor: [0.74, 0.6, 0.3, 0.82]
@@ -532,7 +580,7 @@ Entities:
       Rotation: 0.0
       Anchor: 0
       SortOrder: 38
-      ParentEntity: 960000033
+      ParentEntity: 960009002
     UIImageComponent:
       Color: [1, 1, 1, 1.0]
       TexturePath: assets/vertical_slice/side_combat/ui/icon_drop_beast_sinew.png
@@ -550,7 +598,7 @@ Entities:
       Rotation: 0.0
       Anchor: 0
       SortOrder: 48
-      ParentEntity: 960000033
+      ParentEntity: 960009002
     UIButtonComponent:
       NormalColor: [0, 0, 0, 0]
       HoverColor: [0.95, 1, 0.82, 0.14]
@@ -570,7 +618,7 @@ Entities:
       Rotation: 0.0
       Anchor: 0
       SortOrder: 50
-      ParentEntity: 960000033
+      ParentEntity: 960009002
     UITextComponent:
       Text: "x2"
       Color: [1.0, 0.92, 0.68, 1]
@@ -594,7 +642,7 @@ Entities:
       Rotation: 0.0
       Anchor: 0
       SortOrder: 35
-      ParentEntity: 960000033
+      ParentEntity: 960009002
     UIPanelComponent:
       BackgroundColor: [0.025, 0.032, 0.038, 0.84]
       BorderColor: [0.74, 0.6, 0.3, 0.82]
@@ -613,7 +661,7 @@ Entities:
       Rotation: 0.0
       Anchor: 0
       SortOrder: 38
-      ParentEntity: 960000033
+      ParentEntity: 960009002
     UIImageComponent:
       Color: [1, 1, 1, 1.0]
       TexturePath: assets/vertical_slice/side_combat/ui/icon_drop_beast_claw.png
@@ -631,7 +679,7 @@ Entities:
       Rotation: 0.0
       Anchor: 0
       SortOrder: 48
-      ParentEntity: 960000033
+      ParentEntity: 960009002
     UIButtonComponent:
       NormalColor: [0, 0, 0, 0]
       HoverColor: [0.95, 1, 0.82, 0.14]
@@ -651,7 +699,7 @@ Entities:
       Rotation: 0.0
       Anchor: 0
       SortOrder: 50
-      ParentEntity: 960000033
+      ParentEntity: 960009002
     UITextComponent:
       Text: "x1"
       Color: [1.0, 0.92, 0.68, 1]
@@ -675,7 +723,7 @@ Entities:
       Rotation: 0.0
       Anchor: 0
       SortOrder: 78
-      ParentEntity: 960000033
+      ParentEntity: 960009003
     UIPanelComponent:
       BackgroundColor: [0.025, 0.032, 0.038, 0.94]
       BorderColor: [0.74, 0.60, 0.30, 0.86]
@@ -694,7 +742,7 @@ Entities:
       Rotation: 0.0
       Anchor: 0
       SortOrder: 79
-      ParentEntity: 960000033
+      ParentEntity: 960009003
     UITextComponent:
       Text: ""
       Color: [0.94, 0.98, 0.92, 1]

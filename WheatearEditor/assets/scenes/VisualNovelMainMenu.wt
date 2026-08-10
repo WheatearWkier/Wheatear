@@ -32,6 +32,54 @@ Entities:
       Anchor: 0
       SortOrder: 0
       ParentEntity: 0
+  - Entity: 920009001
+    TagComponent:
+      Tag: Menu_HeaderGroup
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    UIWidgetComponent:
+      Visible: true
+      EditorVisible: true
+      Position: [0, 0]
+      Size: [1, 1]
+      Rotation: 0
+      Anchor: 0
+      SortOrder: 1
+      ParentEntity: 920000012
+  - Entity: 920009002
+    TagComponent:
+      Tag: Menu_ButtonGroup
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    UIWidgetComponent:
+      Visible: true
+      EditorVisible: true
+      Position: [0, 0]
+      Size: [1, 1]
+      Rotation: 0
+      Anchor: 0
+      SortOrder: 1
+      ParentEntity: 920000012
+  - Entity: 920009003
+    TagComponent:
+      Tag: Menu_FooterGroup
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    UIWidgetComponent:
+      Visible: true
+      EditorVisible: true
+      Position: [0, 0]
+      Size: [1, 1]
+      Rotation: 0
+      Anchor: 0
+      SortOrder: 1
+      ParentEntity: 920000012
   - Entity: 920000011
     TagComponent:
       Tag: Menu_MainPanel
@@ -46,7 +94,7 @@ Entities:
       Rotation: 0
       Anchor: 0
       SortOrder: 18
-      ParentEntity: 920000012
+      ParentEntity: 920009001
     UIAnimatorComponent:
       Preset: "slide_fade_in"
       PlayOnStart: true
@@ -75,7 +123,7 @@ Entities:
       Rotation: 0
       Anchor: 0
       SortOrder: 22
-      ParentEntity: 920000012
+      ParentEntity: 920009003
     UITextComponent:
       Text: "演示版本 0.1"
       Color: [0.680000007, 0.75999999, 0.74000001, 1]
@@ -99,7 +147,7 @@ Entities:
       Rotation: 0
       Anchor: 0
       SortOrder: 32
-      ParentEntity: 920000012
+      ParentEntity: 920009002
     UIAnimatorComponent:
       Preset: "hover_pulse"
       PlayOnStart: true
@@ -137,7 +185,7 @@ Entities:
       Rotation: 0
       Anchor: 0
       SortOrder: 31
-      ParentEntity: 920000012
+      ParentEntity: 920009002
     UIAnimatorComponent:
       Preset: "hover_pulse"
       PlayOnStart: true
@@ -175,7 +223,7 @@ Entities:
       Rotation: 0
       Anchor: 0
       SortOrder: 30
-      ParentEntity: 920000012
+      ParentEntity: 920009002
     UIAnimatorComponent:
       Preset: "hover_pulse"
       PlayOnStart: true
@@ -213,7 +261,7 @@ Entities:
       Rotation: 0
       Anchor: 0
       SortOrder: 21
-      ParentEntity: 920000012
+      ParentEntity: 920009001
     UIAnimatorComponent:
       Preset: "fade_in"
       PlayOnStart: true
@@ -246,7 +294,7 @@ Entities:
       Rotation: 0
       Anchor: 0
       SortOrder: 20
-      ParentEntity: 920000012
+      ParentEntity: 920009001
     UIAnimatorComponent:
       Preset: "fade_in"
       PlayOnStart: true

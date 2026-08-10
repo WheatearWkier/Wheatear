@@ -19,6 +19,11 @@ actions:
       defensePierce: 0.05
       magic: false
       guard: false
+      effectAtlasSheet: tactical.vfx.slash
+      effectAtlasCellWidth: 160
+      effectAtlasCellHeight: 160
+      effectAtlasColumns: 5
+      effectAtlasStartFrame: 0
       effectFrameCount: 5
       effectFrameRate: 14
     effects:
@@ -47,6 +52,11 @@ actions:
       defensePierce: 0.22
       magic: true
       guard: false
+      effectAtlasSheet: tactical.vfx.magic
+      effectAtlasCellWidth: 160
+      effectAtlasCellHeight: 160
+      effectAtlasColumns: 6
+      effectAtlasStartFrame: 0
       effectFrameCount: 6
       effectFrameRate: 14
       statusEffect: DefenseDown
@@ -83,6 +93,11 @@ actions:
       defensePierce: 0
       magic: true
       guard: false
+      effectAtlasSheet: tactical.vfx.heal
+      effectAtlasCellWidth: 160
+      effectAtlasCellHeight: 160
+      effectAtlasColumns: 6
+      effectAtlasStartFrame: 0
       effectFrameCount: 6
       effectFrameRate: 12
       statusEffect: Regeneration
@@ -119,6 +134,11 @@ actions:
       defensePierce: 0
       magic: false
       guard: true
+      effectAtlasSheet: tactical.vfx.guard
+      effectAtlasCellWidth: 160
+      effectAtlasCellHeight: 160
+      effectAtlasColumns: 4
+      effectAtlasStartFrame: 0
       effectFrameCount: 4
       effectFrameRate: 10
       statusEffect: Guard
@@ -152,6 +172,11 @@ actions:
       defensePierce: 0
       magic: false
       guard: false
+      effectAtlasSheet: tactical.vfx.heal
+      effectAtlasCellWidth: 160
+      effectAtlasCellHeight: 160
+      effectAtlasColumns: 6
+      effectAtlasStartFrame: 0
       effectFrameCount: 6
       effectFrameRate: 12
     effects:
@@ -180,6 +205,11 @@ actions:
       defensePierce: 0
       magic: false
       guard: false
+      effectAtlasSheet: tactical.vfx.slash
+      effectAtlasCellWidth: 160
+      effectAtlasCellHeight: 160
+      effectAtlasColumns: 5
+      effectAtlasStartFrame: 0
       effectFrameCount: 5
       effectFrameRate: 14
     effects:
@@ -208,6 +238,11 @@ actions:
       defensePierce: 0.18
       magic: true
       guard: false
+      effectAtlasSheet: tactical.vfx.dark
+      effectAtlasCellWidth: 160
+      effectAtlasCellHeight: 160
+      effectAtlasColumns: 6
+      effectAtlasStartFrame: 0
       effectFrameCount: 6
       effectFrameRate: 14
       statusEffect: Burn

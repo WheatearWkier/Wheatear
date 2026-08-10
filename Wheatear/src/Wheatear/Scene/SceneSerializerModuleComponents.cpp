@@ -6,6 +6,34 @@
 
 namespace Wheatear {
 
+    namespace {
+
+        static void SerializeAtlasFrame(YAML::Emitter& o,
+            const char* prefix,
+            const GameplayVisualService::TextureAtlasFrameSpec& atlas)
+        {
+            const std::string keyPrefix = prefix ? prefix : "";
+            o << YAML::Key << keyPrefix + "Sheet" << YAML::Value << atlas.SheetPath;
+            o << YAML::Key << keyPrefix + "CellWidth" << YAML::Value << atlas.CellWidth;
+            o << YAML::Key << keyPrefix + "CellHeight" << YAML::Value << atlas.CellHeight;
+            o << YAML::Key << keyPrefix + "Columns" << YAML::Value << atlas.Columns;
+            o << YAML::Key << keyPrefix + "StartFrame" << YAML::Value << atlas.StartFrame;
+        }
+
+        static void DeserializeAtlasFrame(const YAML::Node& n,
+            const char* prefix,
+            GameplayVisualService::TextureAtlasFrameSpec& atlas)
+        {
+            const std::string keyPrefix = prefix ? prefix : "";
+            atlas.SheetPath = n[keyPrefix + "Sheet"].as<std::string>(atlas.SheetPath);
+            atlas.CellWidth = n[keyPrefix + "CellWidth"].as<int>(atlas.CellWidth);
+            atlas.CellHeight = n[keyPrefix + "CellHeight"].as<int>(atlas.CellHeight);
+            atlas.Columns = n[keyPrefix + "Columns"].as<int>(atlas.Columns);
+            atlas.StartFrame = n[keyPrefix + "StartFrame"].as<int>(atlas.StartFrame);
+        }
+
+    } // namespace
+
     template<> struct ComponentSerializer<VisualNovelComponent> {
         static constexpr const char* Key = "VisualNovelComponent";
         static void Serialize(YAML::Emitter& o, const VisualNovelComponent& c) {
@@ -800,6 +828,11 @@ namespace Wheatear {
             o << YAML::Key << "ProtectionGain" << YAML::Value << c.ProtectionGain;
             o << YAML::Key << "DestroyOnHit" << YAML::Value << c.DestroyOnHit;
             o << YAML::Key << "TextureFramePattern" << YAML::Value << c.TextureFramePattern;
+            o << YAML::Key << "TextureAtlasSheet" << YAML::Value << c.TextureAtlas.SheetPath;
+            o << YAML::Key << "TextureAtlasCellWidth" << YAML::Value << c.TextureAtlas.CellWidth;
+            o << YAML::Key << "TextureAtlasCellHeight" << YAML::Value << c.TextureAtlas.CellHeight;
+            o << YAML::Key << "TextureAtlasColumns" << YAML::Value << c.TextureAtlas.Columns;
+            o << YAML::Key << "TextureAtlasStartFrame" << YAML::Value << c.TextureAtlas.StartFrame;
             o << YAML::Key << "TextureFrameCount" << YAML::Value << c.TextureFrameCount;
             o << YAML::Key << "TextureFrameRate" << YAML::Value << c.TextureFrameRate;
             o << YAML::Key << "HitSound" << YAML::Value << c.HitSound;
@@ -826,6 +859,11 @@ namespace Wheatear {
             c.ProtectionGain = n["ProtectionGain"].as<float>(c.ProtectionGain);
             c.DestroyOnHit = n["DestroyOnHit"].as<bool>(c.DestroyOnHit);
             c.TextureFramePattern = n["TextureFramePattern"].as<std::string>(c.TextureFramePattern);
+            c.TextureAtlas.SheetPath = n["TextureAtlasSheet"].as<std::string>(c.TextureAtlas.SheetPath);
+            c.TextureAtlas.CellWidth = n["TextureAtlasCellWidth"].as<int>(c.TextureAtlas.CellWidth);
+            c.TextureAtlas.CellHeight = n["TextureAtlasCellHeight"].as<int>(c.TextureAtlas.CellHeight);
+            c.TextureAtlas.Columns = n["TextureAtlasColumns"].as<int>(c.TextureAtlas.Columns);
+            c.TextureAtlas.StartFrame = n["TextureAtlasStartFrame"].as<int>(c.TextureAtlas.StartFrame);
             c.TextureFrameCount = n["TextureFrameCount"].as<int>(c.TextureFrameCount);
             c.TextureFrameRate = n["TextureFrameRate"].as<float>(c.TextureFrameRate);
             c.HitSound = n["HitSound"].as<std::string>(c.HitSound);
@@ -949,6 +987,10 @@ namespace Wheatear {
             o << YAML::Key << "AttackFramePattern" << YAML::Value << c.AttackFramePattern;
             o << YAML::Key << "HitFramePattern" << YAML::Value << c.HitFramePattern;
             o << YAML::Key << "DownFramePattern" << YAML::Value << c.DownFramePattern;
+            SerializeAtlasFrame(o, "IdleFrame", c.IdleFrameAtlas);
+            SerializeAtlasFrame(o, "AttackFrame", c.AttackFrameAtlas);
+            SerializeAtlasFrame(o, "HitFrame", c.HitFrameAtlas);
+            SerializeAtlasFrame(o, "DownFrame", c.DownFrameAtlas);
             o << YAML::Key << "IdleFrameCount" << YAML::Value << c.IdleFrameCount;
             o << YAML::Key << "AttackFrameCount" << YAML::Value << c.AttackFrameCount;
             o << YAML::Key << "HitFrameCount" << YAML::Value << c.HitFrameCount;
@@ -982,6 +1024,10 @@ namespace Wheatear {
             c.AttackFramePattern = n["AttackFramePattern"].as<std::string>(c.AttackFramePattern);
             c.HitFramePattern = n["HitFramePattern"].as<std::string>(c.HitFramePattern);
             c.DownFramePattern = n["DownFramePattern"].as<std::string>(c.DownFramePattern);
+            DeserializeAtlasFrame(n, "IdleFrame", c.IdleFrameAtlas);
+            DeserializeAtlasFrame(n, "AttackFrame", c.AttackFrameAtlas);
+            DeserializeAtlasFrame(n, "HitFrame", c.HitFrameAtlas);
+            DeserializeAtlasFrame(n, "DownFrame", c.DownFrameAtlas);
             c.IdleFrameCount = n["IdleFrameCount"].as<int>(c.IdleFrameCount);
             c.AttackFrameCount = n["AttackFrameCount"].as<int>(c.AttackFrameCount);
             c.HitFrameCount = n["HitFrameCount"].as<int>(c.HitFrameCount);
@@ -1067,6 +1113,10 @@ namespace Wheatear {
             o << YAML::Key << "AttackFramePattern" << YAML::Value << c.AttackFramePattern;
             o << YAML::Key << "HitFramePattern" << YAML::Value << c.HitFramePattern;
             o << YAML::Key << "DownFramePattern" << YAML::Value << c.DownFramePattern;
+            SerializeAtlasFrame(o, "IdleFrame", c.IdleFrameAtlas);
+            SerializeAtlasFrame(o, "AttackFrame", c.AttackFrameAtlas);
+            SerializeAtlasFrame(o, "HitFrame", c.HitFrameAtlas);
+            SerializeAtlasFrame(o, "DownFrame", c.DownFrameAtlas);
             o << YAML::Key << "IdleFrameCount" << YAML::Value << c.IdleFrameCount;
             o << YAML::Key << "AttackFrameCount" << YAML::Value << c.AttackFrameCount;
             o << YAML::Key << "HitFrameCount" << YAML::Value << c.HitFrameCount;
@@ -1102,6 +1152,10 @@ namespace Wheatear {
             c.AttackFramePattern = n["AttackFramePattern"].as<std::string>(c.AttackFramePattern);
             c.HitFramePattern = n["HitFramePattern"].as<std::string>(c.HitFramePattern);
             c.DownFramePattern = n["DownFramePattern"].as<std::string>(c.DownFramePattern);
+            DeserializeAtlasFrame(n, "IdleFrame", c.IdleFrameAtlas);
+            DeserializeAtlasFrame(n, "AttackFrame", c.AttackFrameAtlas);
+            DeserializeAtlasFrame(n, "HitFrame", c.HitFrameAtlas);
+            DeserializeAtlasFrame(n, "DownFrame", c.DownFrameAtlas);
             c.IdleFrameCount = n["IdleFrameCount"].as<int>(c.IdleFrameCount);
             c.AttackFrameCount = n["AttackFrameCount"].as<int>(c.AttackFrameCount);
             c.HitFrameCount = n["HitFrameCount"].as<int>(c.HitFrameCount);

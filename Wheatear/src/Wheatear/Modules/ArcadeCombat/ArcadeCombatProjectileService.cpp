@@ -36,15 +36,30 @@ namespace Wheatear::ArcadeCombatProjectileService {
             target.Alive = GameplayCombatService::IsAlive(target.Health);
         }
 
-        static std::string ResolveProjectileTexturePath(int team, bool heavy, bool melee)
+        static GameplayVisualService::TextureAtlasFrameSpec ResolveProjectileAtlas(int team, bool heavy, bool melee)
         {
+            const std::string projectileAtlasPath = AssetAliasRegistry::Path(
+                "arcade.runtime.projectile_vfx",
+                "assets/vertical_slice/arcade_combat/sheets/runtime_effects/arcade_projectile_vfx_sheet.png");
+
             if (melee)
-                return AssetAliasRegistry::Path("arcade.vfx.katana_slash");
+            {
+                return {
+                    AssetAliasRegistry::Path("arcade.vfx.katana_slash"),
+                    220, 120, 1, 0
+                };
+            }
             if (team == (int)ArcadeTeam::Enemy)
-                return AssetAliasRegistry::Path("arcade.projectile.boss_orb");
-            return heavy
-                ? AssetAliasRegistry::Path("arcade.vfx.cannon_blast")
-                : AssetAliasRegistry::Path("arcade.projectile.player_bolt");
+            {
+                return {
+                    projectileAtlasPath,
+                    160, 160, 3, 1
+                };
+            }
+            return {
+                projectileAtlasPath,
+                160, 160, 3, heavy ? 2 : 0
+            };
         }
 
         static bool ProjectileBlockedByCover(Scene* scene,
@@ -133,10 +148,26 @@ namespace Wheatear::ArcadeCombatProjectileService {
 
         auto& sprite = projectile.AddComponent<SpriteRendererComponent>();
         sprite.Color = color;
-        if (Ref<Texture2D> texture = GameplayVisualService::LoadTextureCached(ResolveProjectileTexturePath(team, heavy, melee)))
+        if (GameplayVisualService::ApplySpriteAtlasFrame(sprite, ResolveProjectileAtlas(team, heavy, melee), 1))
         {
-            sprite.Texture = texture;
             sprite.Color = { 1.0f, 1.0f, 1.0f, color.a };
+        }
+        else
+        {
+            const std::string fallbackTexturePath = melee
+                ? AssetAliasRegistry::Path("arcade.vfx.katana_slash")
+                : (team == (int)ArcadeTeam::Enemy
+                    ? AssetAliasRegistry::Path("arcade.projectile.boss_orb")
+                    : (heavy
+                        ? AssetAliasRegistry::Path("arcade.vfx.cannon_blast")
+                        : AssetAliasRegistry::Path("arcade.projectile.player_bolt")));
+            if (Ref<Texture2D> texture = GameplayVisualService::LoadTextureCached(fallbackTexturePath))
+            {
+                sprite.Texture = texture;
+                sprite.UVMin = { 0.0f, 0.0f };
+                sprite.UVMax = { 1.0f, 1.0f };
+                sprite.Color = { 1.0f, 1.0f, 1.0f, color.a };
+            }
         }
 
         auto& projectileComponent = projectile.AddComponent<ArcadeProjectileComponent>();

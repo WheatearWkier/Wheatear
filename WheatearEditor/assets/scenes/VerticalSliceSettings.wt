@@ -14,7 +14,7 @@ Entities:
       Rotation: 0
       Anchor: 0
       SortOrder: 55
-      ParentEntity: 840000026
+      ParentEntity: 840009004
     UIAnimatorComponent:
       Preset: "hover_pulse"
       PlayOnStart: true
@@ -52,7 +52,7 @@ Entities:
       Rotation: 0
       Anchor: 0
       SortOrder: 42
-      ParentEntity: 840000026
+      ParentEntity: 840009001
     UITextComponent:
       Text: "设置状态"
       Color: [0.939999998, 0.980000019, 0.899999976, 1]
@@ -76,7 +76,7 @@ Entities:
       Rotation: 0
       Anchor: 0
       SortOrder: 55
-      ParentEntity: 840000026
+      ParentEntity: 840009004
     UIAnimatorComponent:
       Preset: "hover_pulse"
       PlayOnStart: true
@@ -114,7 +114,7 @@ Entities:
       Rotation: 0
       Anchor: 0
       SortOrder: 55
-      ParentEntity: 840000026
+      ParentEntity: 840009004
     UIAnimatorComponent:
       Preset: "hover_pulse"
       PlayOnStart: true
@@ -152,7 +152,7 @@ Entities:
       Rotation: 0
       Anchor: 0
       SortOrder: 55
-      ParentEntity: 840000026
+      ParentEntity: 840009003
     UIAnimatorComponent:
       Preset: "hover_pulse"
       PlayOnStart: true
@@ -190,7 +190,7 @@ Entities:
       Rotation: 0
       Anchor: 0
       SortOrder: 55
-      ParentEntity: 840000026
+      ParentEntity: 840009003
     UIAnimatorComponent:
       Preset: "hover_pulse"
       PlayOnStart: true
@@ -228,7 +228,7 @@ Entities:
       Rotation: 0
       Anchor: 0
       SortOrder: 55
-      ParentEntity: 840000026
+      ParentEntity: 840009003
     UIAnimatorComponent:
       Preset: "hover_pulse"
       PlayOnStart: true
@@ -266,7 +266,7 @@ Entities:
       Rotation: 0
       Anchor: 0
       SortOrder: 44
-      ParentEntity: 840000026
+      ParentEntity: 840009003
     UISliderComponent:
       Value: 55
       MinValue: 0
@@ -290,7 +290,7 @@ Entities:
       Rotation: 0
       Anchor: 0
       SortOrder: 42
-      ParentEntity: 840000026
+      ParentEntity: 840009003
     UITextComponent:
       Text: "音效"
       Color: [0.879999995, 1, 0.899999976, 1]
@@ -314,7 +314,7 @@ Entities:
       Rotation: 0
       Anchor: 0
       SortOrder: 55
-      ParentEntity: 840000026
+      ParentEntity: 840009003
     UIAnimatorComponent:
       Preset: "hover_pulse"
       PlayOnStart: true
@@ -352,7 +352,7 @@ Entities:
       Rotation: 0
       Anchor: 0
       SortOrder: 55
-      ParentEntity: 840000026
+      ParentEntity: 840009003
     UIAnimatorComponent:
       Preset: "hover_pulse"
       PlayOnStart: true
@@ -390,7 +390,7 @@ Entities:
       Rotation: 0
       Anchor: 0
       SortOrder: 44
-      ParentEntity: 840000026
+      ParentEntity: 840009003
     UISliderComponent:
       Value: 55
       MinValue: 0
@@ -414,7 +414,7 @@ Entities:
       Rotation: 0
       Anchor: 0
       SortOrder: 42
-      ParentEntity: 840000026
+      ParentEntity: 840009003
     UITextComponent:
       Text: "音乐"
       Color: [0.879999995, 1, 0.899999976, 1]
@@ -438,7 +438,7 @@ Entities:
       Rotation: 0
       Anchor: 0
       SortOrder: 55
-      ParentEntity: 840000026
+      ParentEntity: 840009003
     UIAnimatorComponent:
       Preset: "hover_pulse"
       PlayOnStart: true
@@ -476,7 +476,7 @@ Entities:
       Rotation: 0
       Anchor: 0
       SortOrder: 44
-      ParentEntity: 840000026
+      ParentEntity: 840009003
     UISliderComponent:
       Value: 80
       MinValue: 0
@@ -500,7 +500,7 @@ Entities:
       Rotation: 0
       Anchor: 0
       SortOrder: 42
-      ParentEntity: 840000026
+      ParentEntity: 840009003
     UITextComponent:
       Text: "主音量"
       Color: [0.879999995, 1, 0.899999976, 1]
@@ -524,7 +524,7 @@ Entities:
       Rotation: 0
       Anchor: 0
       SortOrder: 55
-      ParentEntity: 840000026
+      ParentEntity: 840009002
     UIAnimatorComponent:
       Preset: "hover_pulse"
       PlayOnStart: true
@@ -562,7 +562,7 @@ Entities:
       Rotation: 0
       Anchor: 0
       SortOrder: 55
-      ParentEntity: 840000026
+      ParentEntity: 840009002
     UIAnimatorComponent:
       Preset: "hover_pulse"
       PlayOnStart: true
@@ -600,7 +600,7 @@ Entities:
       Rotation: 0
       Anchor: 0
       SortOrder: 44
-      ParentEntity: 840000026
+      ParentEntity: 840009002
     UISliderComponent:
       Value: 48
       MinValue: 12
@@ -624,7 +624,7 @@ Entities:
       Rotation: 0
       Anchor: 0
       SortOrder: 42
-      ParentEntity: 840000026
+      ParentEntity: 840009002
     UITextComponent:
       Text: "文字速度"
       Color: [0.879999995, 1, 0.899999976, 1]
@@ -648,7 +648,7 @@ Entities:
       Rotation: 0
       Anchor: 0
       SortOrder: 18
-      ParentEntity: 840000026
+      ParentEntity: 840009002
     UIPanelComponent:
       BackgroundColor: [0.0399999991, 0.0700000003, 0.0599999987, 0.649999976]
       BorderColor: [0.400000006, 0.800000012, 0.600000024, 0.850000024]
@@ -671,7 +671,7 @@ Entities:
       Rotation: 0
       Anchor: 0
       SortOrder: 42
-      ParentEntity: 840000026
+      ParentEntity: 840009001
     UITextComponent:
       Text: "第2章 / 魔剑 Lv1 / 主角 Lv1"
       Color: [0.699999988, 0.899999976, 0.779999971, 1]
@@ -695,7 +695,7 @@ Entities:
       Rotation: 0
       Anchor: 0
       SortOrder: 42
-      ParentEntity: 840000026
+      ParentEntity: 840009001
     UITextComponent:
       Text: "系统设置"
       Color: [0.879999995, 1, 0.920000017, 1]
@@ -719,7 +719,7 @@ Entities:
       Rotation: 0
       Anchor: 0
       SortOrder: 10
-      ParentEntity: 840000026
+      ParentEntity: 840009001
     UIImageComponent:
       Color: [1, 1, 1, 0.970000029]
       TexturePath: assets/vertical_slice/ui/panels/panel_settings.png
@@ -778,6 +778,70 @@ Entities:
       Anchor: 0
       SortOrder: 0
       ParentEntity: 0
+  - Entity: 840009001
+    TagComponent:
+      Tag: Settings_HeaderGroup
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    UIWidgetComponent:
+      Visible: true
+      EditorVisible: true
+      Position: [0, 0]
+      Size: [1, 1]
+      Rotation: 0
+      Anchor: 0
+      SortOrder: 1
+      ParentEntity: 840000026
+  - Entity: 840009002
+    TagComponent:
+      Tag: Settings_TextGroup
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    UIWidgetComponent:
+      Visible: true
+      EditorVisible: true
+      Position: [0, 0]
+      Size: [1, 1]
+      Rotation: 0
+      Anchor: 0
+      SortOrder: 1
+      ParentEntity: 840000026
+  - Entity: 840009003
+    TagComponent:
+      Tag: Settings_VolumeGroup
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    UIWidgetComponent:
+      Visible: true
+      EditorVisible: true
+      Position: [0, 0]
+      Size: [1, 1]
+      Rotation: 0
+      Anchor: 0
+      SortOrder: 1
+      ParentEntity: 840000026
+  - Entity: 840009004
+    TagComponent:
+      Tag: Settings_TogglesGroup
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    UIWidgetComponent:
+      Visible: true
+      EditorVisible: true
+      Position: [0, 0]
+      Size: [1, 1]
+      Rotation: 0
+      Anchor: 0
+      SortOrder: 1
+      ParentEntity: 840000026
   - Entity: 840000027
     TagComponent:
       Tag: FlowController

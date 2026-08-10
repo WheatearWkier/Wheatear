@@ -2,6 +2,7 @@
 
 #include "Wheatear/Core/UUID.h"
 #include "Wheatear/Gameplay/Action/ActionTypes.h"
+#include "Wheatear/Modules/Common/GameplayVisualService.h"
 
 #include <string>
 #include <vector>
@@ -118,6 +119,10 @@ namespace Wheatear {
         std::string AttackFramePattern;
         std::string HitFramePattern;
         std::string DownFramePattern;
+        GameplayVisualService::TextureAtlasFrameSpec IdleFrameAtlas;
+        GameplayVisualService::TextureAtlasFrameSpec AttackFrameAtlas;
+        GameplayVisualService::TextureAtlasFrameSpec HitFrameAtlas;
+        GameplayVisualService::TextureAtlasFrameSpec DownFrameAtlas;
         int IdleFrameCount = 1;
         int AttackFrameCount = 1;
         int HitFrameCount = 1;

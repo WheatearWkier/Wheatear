@@ -340,23 +340,9 @@ def shockwave_frame(frame: int) -> Image.Image:
 
 
 def save_effect_sequence(prefix: str, frame_count: int, factory: Callable[[int], Image.Image]) -> None:
-    first = None
     for frame in range(1, frame_count + 1):
         image = factory(frame)
-        if first is None:
-            first = image
         save(image, SC_ROOT / "effects" / f"{prefix}_{frame:02}.png")
-    if first is not None:
-        alias = {
-            "vfx_basic_slash": "vfx_basic_slash.png",
-            "vfx_launcher_slash": "vfx_launcher_slash.png",
-            "vfx_magic_bolt": "vfx_magic_bolt.png",
-            "vfx_ally_support": "vfx_ally_support.png",
-            "vfx_enemy_claw": "vfx_enemy_claw.png",
-            "vfx_boss_bear_shockwave": "vfx_enemy_projectile.png",
-        }.get(prefix)
-        if alias:
-            save(first, SC_ROOT / "effects" / alias)
 
 
 def save_character_sequence(
@@ -367,14 +353,9 @@ def save_character_sequence(
     factory: Callable[[str, int, int], Image.Image],
     alias: str | None = None,
 ) -> None:
-    first = None
     for frame in range(1, frame_count + 1):
         image = factory(pose, frame, frame_count)
-        if first is None:
-            first = image
         save(image, SC_ROOT / folder / f"{prefix}_{frame:02}.png")
-    if alias and first:
-        save(first, SC_ROOT / folder / alias)
 
 
 def write_wav(path: Path, duration: float, generator: Callable[[float], float], sample_rate: int = 44100) -> None:
@@ -426,7 +407,7 @@ def main() -> None:
     save(blob_shadow(), SC_ROOT / "ui" / "blob_shadow_soft.png")
 
     player_clips = {
-        "protag_idle": ("idle", 4, "protag_magic_swordsman.png"),
+        "protag_idle": ("idle", 4, None),
         "protag_run": ("run", 6, None),
         "protag_jump": ("jump", 3, None),
         "protag_fall": ("fall", 3, None),
@@ -446,7 +427,7 @@ def main() -> None:
         save_character_sequence("characters", prefix, pose, frames, draw_player_pose, alias)
 
     bear_clips = {
-        "boss_bear_husband_idle": ("idle", 4, "boss_bear_husband.png"),
+        "boss_bear_husband_idle": ("idle", 4, None),
         "boss_bear_husband_walk": ("run", 5, None),
         "boss_bear_husband_hit": ("hit", 3, None),
         "boss_bear_husband_fall": ("fall", 3, None),
@@ -459,7 +440,7 @@ def main() -> None:
         save_character_sequence("enemies", prefix, pose, frames, draw_bear_pose, alias)
 
     beast_clips = {
-        "en_claw_beast_idle": ("idle", 4, "en_claw_beast_small.png"),
+        "en_claw_beast_idle": ("idle", 4, None),
         "en_claw_beast_run": ("run", 5, None),
         "en_claw_beast_hit": ("hit", 3, None),
         "en_claw_beast_fall": ("fall", 3, None),

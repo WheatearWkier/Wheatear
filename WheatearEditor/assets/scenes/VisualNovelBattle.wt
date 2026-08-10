@@ -31,6 +31,54 @@ Entities:
       Rotation: 0
       Anchor: 0
       SortOrder: 0
+  - Entity: 930009001
+    TagComponent:
+      Tag: Battle_HUDGroup
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    UIWidgetComponent:
+      Visible: true
+      EditorVisible: true
+      Position: [0, 0]
+      Size: [1, 1]
+      Rotation: 0
+      Anchor: 0
+      SortOrder: 1
+      ParentEntity: 930000021
+  - Entity: 930009002
+    TagComponent:
+      Tag: Battle_MessageGroup
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    UIWidgetComponent:
+      Visible: true
+      EditorVisible: true
+      Position: [0, 0]
+      Size: [1, 1]
+      Rotation: 0
+      Anchor: 0
+      SortOrder: 1
+      ParentEntity: 930000021
+  - Entity: 930009003
+    TagComponent:
+      Tag: Battle_OverlayGroup
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    UIWidgetComponent:
+      Visible: true
+      EditorVisible: true
+      Position: [0, 0]
+      Size: [1, 1]
+      Rotation: 0
+      Anchor: 0
+      SortOrder: 1
+      ParentEntity: 930000021
   - Entity: 930000001
     TagComponent:
       Tag: Battle_Camera
@@ -234,7 +282,7 @@ Entities:
       Rotation: 0
       Anchor: 0
       SortOrder: 20
-      ParentEntity: 930000021
+      ParentEntity: 930009001
     UIProgressBarComponent:
       Value: 120
       MaxValue: 120
@@ -254,7 +302,7 @@ Entities:
       Rotation: 0
       Anchor: 0
       SortOrder: 21
-      ParentEntity: 930000021
+      ParentEntity: 930009001
     UITextComponent:
       Text: "生命 120/120"
       Color: [0.88, 0.96, 0.92, 1]
@@ -274,7 +322,7 @@ Entities:
       Rotation: 0
       Anchor: 4
       SortOrder: 20
-      ParentEntity: 930000021
+      ParentEntity: 930009001
     UIProgressBarComponent:
       Value: 220
       MaxValue: 220
@@ -294,7 +342,7 @@ Entities:
       Rotation: 0
       Anchor: 4
       SortOrder: 21
-      ParentEntity: 930000021
+      ParentEntity: 930009001
     UITextComponent:
       Text: "首领 --/--"
       Color: [1, 0.86, 0.88, 1]
@@ -314,7 +362,7 @@ Entities:
       Rotation: 0
       Anchor: 0
       SortOrder: 22
-      ParentEntity: 930000021
+      ParentEntity: 930009001
     UITextComponent:
       Text: "武器: 手枪  [1 手枪] [2 重炮] [3 太刀]"
       Color: [0.86, 0.94, 0.98, 1]
@@ -334,7 +382,7 @@ Entities:
       Rotation: 0
       Anchor: 4
       SortOrder: 23
-      ParentEntity: 930000021
+      ParentEntity: 930009002
     UITextComponent:
       Text: "移动到发光点。"
       Color: [0.92, 0.96, 0.92, 1]
@@ -354,7 +402,7 @@ Entities:
       Rotation: 0
       Anchor: 4
       SortOrder: 80
-      ParentEntity: 930000021
+      ParentEntity: 930009003
     UIPanelComponent:
       BackgroundColor: [0.03, 0.04, 0.06, 0.90]
       BorderColor: [0.45, 0.82, 0.92, 0.82]
@@ -378,7 +426,7 @@ Entities:
       Rotation: 0
       Anchor: 4
       SortOrder: 24
-      ParentEntity: 930000021
+      ParentEntity: 930009002
     UITextComponent:
       Text: "原生战斗流程已接管，胜利后返回剧情。"
       Color: [0.72, 0.92, 1, 1]
@@ -398,7 +446,7 @@ Entities:
       Rotation: 0
       Anchor: 4
       SortOrder: 100
-      ParentEntity: 930000021
+      ParentEntity: 930009003
     UIImageComponent:
       Color: [0, 0, 0, 1]
       TexturePath: ""

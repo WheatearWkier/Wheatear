@@ -19,6 +19,70 @@ Entities:
       Anchor: 0
       SortOrder: 0
       ParentEntity: 0
+  - Entity: 950209001
+    TagComponent:
+      Tag: TK_GridGroup
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    UIWidgetComponent:
+      Visible: true
+      EditorVisible: true
+      Position: [0, 0]
+      Size: [1, 1]
+      Rotation: 0
+      Anchor: 0
+      SortOrder: 1
+      ParentEntity: 950200001
+  - Entity: 950209002
+    TagComponent:
+      Tag: TK_UnitsGroup
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    UIWidgetComponent:
+      Visible: true
+      EditorVisible: true
+      Position: [0, 0]
+      Size: [1, 1]
+      Rotation: 0
+      Anchor: 0
+      SortOrder: 1
+      ParentEntity: 950200001
+  - Entity: 950209003
+    TagComponent:
+      Tag: TK_HUDGroup
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    UIWidgetComponent:
+      Visible: true
+      EditorVisible: true
+      Position: [0, 0]
+      Size: [1, 1]
+      Rotation: 0
+      Anchor: 0
+      SortOrder: 1
+      ParentEntity: 950200001
+  - Entity: 950209004
+    TagComponent:
+      Tag: TK_OverlayGroup
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    UIWidgetComponent:
+      Visible: true
+      EditorVisible: true
+      Position: [0, 0]
+      Size: [1, 1]
+      Rotation: 0
+      Anchor: 0
+      SortOrder: 1
+      ParentEntity: 950200001
   - Entity: 950200002
     TagComponent:
       Tag: TK_Camera
@@ -51,7 +115,7 @@ Entities:
       Rotation: 0
       Anchor: 0
       SortOrder: 1
-      ParentEntity: 950200001
+      ParentEntity: 950209001
     UIImageComponent:
       Color: [1, 1, 1, 1]
       TexturePath: "assets/vertical_slice/tactical_combat/backgrounds/bg_tactical_ruins_grid.png"
@@ -115,7 +179,7 @@ Entities:
       Rotation: 0
       Anchor: 0
       SortOrder: 5
-      ParentEntity: 950200001
+      ParentEntity: 950209001
     UIImageComponent:
       Color: [1, 1, 1, 1]
       TexturePath: "assets/vertical_slice/tactical_combat/tiles/tile_plain.png"
@@ -138,7 +202,7 @@ Entities:
       Rotation: 0
       Anchor: 0
       SortOrder: 5
-      ParentEntity: 950200001
+      ParentEntity: 950209001
     UIImageComponent:
       Color: [1, 1, 1, 1]
       TexturePath: "assets/vertical_slice/tactical_combat/tiles/tile_plain.png"
@@ -161,7 +225,7 @@ Entities:
       Rotation: 0
       Anchor: 0
       SortOrder: 5
-      ParentEntity: 950200001
+      ParentEntity: 950209001
     UIImageComponent:
       Color: [1, 1, 1, 1]
       TexturePath: "assets/vertical_slice/tactical_combat/tiles/tile_plain.png"
@@ -184,7 +248,7 @@ Entities:
       Rotation: 0
       Anchor: 0
       SortOrder: 5
-      ParentEntity: 950200001
+      ParentEntity: 950209001
     UIImageComponent:
       Color: [1, 1, 1, 1]
       TexturePath: "assets/vertical_slice/tactical_combat/tiles/tile_plain.png"
@@ -207,7 +271,7 @@ Entities:
       Rotation: 0
       Anchor: 0
       SortOrder: 5
-      ParentEntity: 950200001
+      ParentEntity: 950209001
     UIImageComponent:
       Color: [1, 1, 1, 1]
       TexturePath: "assets/vertical_slice/tactical_combat/tiles/tile_plain.png"
@@ -230,7 +294,7 @@ Entities:
       Rotation: 0
       Anchor: 0
       SortOrder: 5
-      ParentEntity: 950200001
+      ParentEntity: 950209001
     UIImageComponent:
       Color: [1, 1, 1, 1]
       TexturePath: "assets/vertical_slice/tactical_combat/tiles/tile_plain.png"
@@ -253,7 +317,7 @@ Entities:
       Rotation: 0
       Anchor: 0
       SortOrder: 5
-      ParentEntity: 950200001
+      ParentEntity: 950209001
     UIImageComponent:
       Color: [1, 1, 1, 1]
       TexturePath: "assets/vertical_slice/tactical_combat/tiles/tile_plain.png"
@@ -276,7 +340,7 @@ Entities:
       Rotation: 0
       Anchor: 0
       SortOrder: 5
-      ParentEntity: 950200001
+      ParentEntity: 950209001
     UIImageComponent:
       Color: [1, 1, 1, 1]
       TexturePath: "assets/vertical_slice/tactical_combat/tiles/tile_plain.png"
@@ -299,7 +363,7 @@ Entities:
       Rotation: 0
       Anchor: 0
       SortOrder: 5
-      ParentEntity: 950200001
+      ParentEntity: 950209001
     UIImageComponent:
       Color: [1, 1, 1, 1]
       TexturePath: "assets/vertical_slice/tactical_combat/tiles/tile_plain.png"
@@ -322,7 +386,7 @@ Entities:
       Rotation: 0
       Anchor: 0
       SortOrder: 5
-      ParentEntity: 950200001
+      ParentEntity: 950209001
     UIImageComponent:
       Color: [1, 1, 1, 1]
       TexturePath: "assets/vertical_slice/tactical_combat/tiles/tile_plain.png"
@@ -345,7 +409,7 @@ Entities:
       Rotation: 0
       Anchor: 0
       SortOrder: 5
-      ParentEntity: 950200001
+      ParentEntity: 950209001
     UIImageComponent:
       Color: [1, 1, 1, 1]
       TexturePath: "assets/vertical_slice/tactical_combat/tiles/tile_plain.png"
@@ -368,7 +432,7 @@ Entities:
       Rotation: 0
       Anchor: 0
       SortOrder: 5
-      ParentEntity: 950200001
+      ParentEntity: 950209001
     UIImageComponent:
       Color: [1, 1, 1, 1]
       TexturePath: "assets/vertical_slice/tactical_combat/tiles/tile_plain.png"
@@ -391,7 +455,7 @@ Entities:
       Rotation: 0
       Anchor: 0
       SortOrder: 5
-      ParentEntity: 950200001
+      ParentEntity: 950209001
     UIImageComponent:
       Color: [1, 1, 1, 1]
       TexturePath: "assets/vertical_slice/tactical_combat/tiles/tile_plain.png"
@@ -414,7 +478,7 @@ Entities:
       Rotation: 0
       Anchor: 0
       SortOrder: 5
-      ParentEntity: 950200001
+      ParentEntity: 950209001
     UIImageComponent:
       Color: [1, 1, 1, 1]
       TexturePath: "assets/vertical_slice/tactical_combat/tiles/tile_plain.png"
@@ -437,7 +501,7 @@ Entities:
       Rotation: 0
       Anchor: 0
       SortOrder: 5
-      ParentEntity: 950200001
+      ParentEntity: 950209001
     UIImageComponent:
       Color: [1, 1, 1, 1]
       TexturePath: "assets/vertical_slice/tactical_combat/tiles/tile_plain.png"
@@ -460,7 +524,7 @@ Entities:
       Rotation: 0
       Anchor: 0
       SortOrder: 5
-      ParentEntity: 950200001
+      ParentEntity: 950209001
     UIImageComponent:
       Color: [1, 1, 1, 1]
       TexturePath: "assets/vertical_slice/tactical_combat/tiles/tile_plain.png"
@@ -483,7 +547,7 @@ Entities:
       Rotation: 0
       Anchor: 0
       SortOrder: 5
-      ParentEntity: 950200001
+      ParentEntity: 950209001
     UIImageComponent:
       Color: [1, 1, 1, 1]
       TexturePath: "assets/vertical_slice/tactical_combat/tiles/tile_plain.png"
@@ -506,7 +570,7 @@ Entities:
       Rotation: 0
       Anchor: 0
       SortOrder: 5
-      ParentEntity: 950200001
+      ParentEntity: 950209001
     UIImageComponent:
       Color: [1, 1, 1, 1]
       TexturePath: "assets/vertical_slice/tactical_combat/tiles/tile_plain.png"
@@ -529,7 +593,7 @@ Entities:
       Rotation: 0
       Anchor: 0
       SortOrder: 5
-      ParentEntity: 950200001
+      ParentEntity: 950209001
     UIImageComponent:
       Color: [1, 1, 1, 1]
       TexturePath: "assets/vertical_slice/tactical_combat/tiles/tile_plain.png"
@@ -552,7 +616,7 @@ Entities:
       Rotation: 0
       Anchor: 0
       SortOrder: 5
-      ParentEntity: 950200001
+      ParentEntity: 950209001
     UIImageComponent:
       Color: [1, 1, 1, 1]
       TexturePath: "assets/vertical_slice/tactical_combat/tiles/tile_plain.png"
@@ -575,7 +639,7 @@ Entities:
       Rotation: 0
       Anchor: 0
       SortOrder: 5
-      ParentEntity: 950200001
+      ParentEntity: 950209001
     UIImageComponent:
       Color: [1, 1, 1, 1]
       TexturePath: "assets/vertical_slice/tactical_combat/tiles/tile_plain.png"
@@ -598,7 +662,7 @@ Entities:
       Rotation: 0
       Anchor: 0
       SortOrder: 5
-      ParentEntity: 950200001
+      ParentEntity: 950209001
     UIImageComponent:
       Color: [1, 1, 1, 1]
       TexturePath: "assets/vertical_slice/tactical_combat/tiles/tile_plain.png"
@@ -621,7 +685,7 @@ Entities:
       Rotation: 0
       Anchor: 0
       SortOrder: 5
-      ParentEntity: 950200001
+      ParentEntity: 950209001
     UIImageComponent:
       Color: [1, 1, 1, 1]
       TexturePath: "assets/vertical_slice/tactical_combat/tiles/tile_plain.png"
@@ -644,7 +708,7 @@ Entities:
       Rotation: 0
       Anchor: 0
       SortOrder: 5
-      ParentEntity: 950200001
+      ParentEntity: 950209001
     UIImageComponent:
       Color: [1, 1, 1, 1]
       TexturePath: "assets/vertical_slice/tactical_combat/tiles/tile_plain.png"
@@ -667,7 +731,7 @@ Entities:
       Rotation: 0
       Anchor: 0
       SortOrder: 5
-      ParentEntity: 950200001
+      ParentEntity: 950209001
     UIImageComponent:
       Color: [1, 1, 1, 1]
       TexturePath: "assets/vertical_slice/tactical_combat/tiles/tile_plain.png"
@@ -690,7 +754,7 @@ Entities:
       Rotation: 0
       Anchor: 0
       SortOrder: 5
-      ParentEntity: 950200001
+      ParentEntity: 950209001
     UIImageComponent:
       Color: [1, 1, 1, 1]
       TexturePath: "assets/vertical_slice/tactical_combat/tiles/tile_plain.png"
@@ -713,7 +777,7 @@ Entities:
       Rotation: 0
       Anchor: 0
       SortOrder: 5
-      ParentEntity: 950200001
+      ParentEntity: 950209001
     UIImageComponent:
       Color: [1, 1, 1, 1]
       TexturePath: "assets/vertical_slice/tactical_combat/tiles/tile_plain.png"
@@ -736,7 +800,7 @@ Entities:
       Rotation: 0
       Anchor: 0
       SortOrder: 5
-      ParentEntity: 950200001
+      ParentEntity: 950209001
     UIImageComponent:
       Color: [1, 1, 1, 1]
       TexturePath: "assets/vertical_slice/tactical_combat/tiles/tile_plain.png"
@@ -759,7 +823,7 @@ Entities:
       Rotation: 0
       Anchor: 0
       SortOrder: 5
-      ParentEntity: 950200001
+      ParentEntity: 950209001
     UIImageComponent:
       Color: [1, 1, 1, 1]
       TexturePath: "assets/vertical_slice/tactical_combat/tiles/tile_plain.png"
@@ -782,7 +846,7 @@ Entities:
       Rotation: 0
       Anchor: 0
       SortOrder: 5
-      ParentEntity: 950200001
+      ParentEntity: 950209001
     UIImageComponent:
       Color: [1, 1, 1, 1]
       TexturePath: "assets/vertical_slice/tactical_combat/tiles/tile_plain.png"
@@ -805,7 +869,7 @@ Entities:
       Rotation: 0
       Anchor: 0
       SortOrder: 5
-      ParentEntity: 950200001
+      ParentEntity: 950209001
     UIImageComponent:
       Color: [1, 1, 1, 1]
       TexturePath: "assets/vertical_slice/tactical_combat/tiles/tile_plain.png"
@@ -828,7 +892,7 @@ Entities:
       Rotation: 0
       Anchor: 0
       SortOrder: 5
-      ParentEntity: 950200001
+      ParentEntity: 950209001
     UIImageComponent:
       Color: [1, 1, 1, 1]
       TexturePath: "assets/vertical_slice/tactical_combat/tiles/tile_plain.png"
@@ -851,7 +915,7 @@ Entities:
       Rotation: 0
       Anchor: 0
       SortOrder: 5
-      ParentEntity: 950200001
+      ParentEntity: 950209001
     UIImageComponent:
       Color: [1, 1, 1, 1]
       TexturePath: "assets/vertical_slice/tactical_combat/tiles/tile_plain.png"
@@ -874,7 +938,7 @@ Entities:
       Rotation: 0
       Anchor: 0
       SortOrder: 5
-      ParentEntity: 950200001
+      ParentEntity: 950209001
     UIImageComponent:
       Color: [1, 1, 1, 1]
       TexturePath: "assets/vertical_slice/tactical_combat/tiles/tile_plain.png"
@@ -897,7 +961,7 @@ Entities:
       Rotation: 0
       Anchor: 0
       SortOrder: 5
-      ParentEntity: 950200001
+      ParentEntity: 950209001
     UIImageComponent:
       Color: [1, 1, 1, 1]
       TexturePath: "assets/vertical_slice/tactical_combat/tiles/tile_plain.png"
@@ -920,7 +984,7 @@ Entities:
       Rotation: 0
       Anchor: 0
       SortOrder: 5
-      ParentEntity: 950200001
+      ParentEntity: 950209001
     UIImageComponent:
       Color: [1, 1, 1, 1]
       TexturePath: "assets/vertical_slice/tactical_combat/tiles/tile_plain.png"
@@ -943,7 +1007,7 @@ Entities:
       Rotation: 0
       Anchor: 0
       SortOrder: 5
-      ParentEntity: 950200001
+      ParentEntity: 950209001
     UIImageComponent:
       Color: [1, 1, 1, 1]
       TexturePath: "assets/vertical_slice/tactical_combat/tiles/tile_plain.png"
@@ -966,7 +1030,7 @@ Entities:
       Rotation: 0
       Anchor: 0
       SortOrder: 5
-      ParentEntity: 950200001
+      ParentEntity: 950209001
     UIImageComponent:
       Color: [1, 1, 1, 1]
       TexturePath: "assets/vertical_slice/tactical_combat/tiles/tile_plain.png"
@@ -989,7 +1053,7 @@ Entities:
       Rotation: 0
       Anchor: 0
       SortOrder: 5
-      ParentEntity: 950200001
+      ParentEntity: 950209001
     UIImageComponent:
       Color: [1, 1, 1, 1]
       TexturePath: "assets/vertical_slice/tactical_combat/tiles/tile_plain.png"
@@ -1012,7 +1076,7 @@ Entities:
       Rotation: 0
       Anchor: 0
       SortOrder: 5
-      ParentEntity: 950200001
+      ParentEntity: 950209001
     UIImageComponent:
       Color: [1, 1, 1, 1]
       TexturePath: "assets/vertical_slice/tactical_combat/tiles/tile_plain.png"
@@ -1035,7 +1099,7 @@ Entities:
       Rotation: 0
       Anchor: 0
       SortOrder: 5
-      ParentEntity: 950200001
+      ParentEntity: 950209001
     UIImageComponent:
       Color: [1, 1, 1, 1]
       TexturePath: "assets/vertical_slice/tactical_combat/tiles/tile_plain.png"
@@ -1058,7 +1122,7 @@ Entities:
       Rotation: 0
       Anchor: 0
       SortOrder: 5
-      ParentEntity: 950200001
+      ParentEntity: 950209001
     UIImageComponent:
       Color: [1, 1, 1, 1]
       TexturePath: "assets/vertical_slice/tactical_combat/tiles/tile_plain.png"
@@ -1081,7 +1145,7 @@ Entities:
       Rotation: 0
       Anchor: 0
       SortOrder: 5
-      ParentEntity: 950200001
+      ParentEntity: 950209001
     UIImageComponent:
       Color: [1, 1, 1, 1]
       TexturePath: "assets/vertical_slice/tactical_combat/tiles/tile_plain.png"
@@ -1104,7 +1168,7 @@ Entities:
       Rotation: 0
       Anchor: 0
       SortOrder: 5
-      ParentEntity: 950200001
+      ParentEntity: 950209001
     UIImageComponent:
       Color: [1, 1, 1, 1]
       TexturePath: "assets/vertical_slice/tactical_combat/tiles/tile_plain.png"
@@ -1127,7 +1191,7 @@ Entities:
       Rotation: 0
       Anchor: 0
       SortOrder: 5
-      ParentEntity: 950200001
+      ParentEntity: 950209001
     UIImageComponent:
       Color: [1, 1, 1, 1]
       TexturePath: "assets/vertical_slice/tactical_combat/tiles/tile_plain.png"
@@ -1150,7 +1214,7 @@ Entities:
       Rotation: 0
       Anchor: 0
       SortOrder: 5
-      ParentEntity: 950200001
+      ParentEntity: 950209001
     UIImageComponent:
       Color: [1, 1, 1, 1]
       TexturePath: "assets/vertical_slice/tactical_combat/tiles/tile_plain.png"
@@ -1173,7 +1237,7 @@ Entities:
       Rotation: 0
       Anchor: 0
       SortOrder: 5
-      ParentEntity: 950200001
+      ParentEntity: 950209001
     UIImageComponent:
       Color: [1, 1, 1, 1]
       TexturePath: "assets/vertical_slice/tactical_combat/tiles/tile_plain.png"
@@ -1196,7 +1260,7 @@ Entities:
       Rotation: 0
       Anchor: 0
       SortOrder: 5
-      ParentEntity: 950200001
+      ParentEntity: 950209001
     UIImageComponent:
       Color: [1, 1, 1, 1]
       TexturePath: "assets/vertical_slice/tactical_combat/tiles/tile_plain.png"
@@ -1219,10 +1283,10 @@ Entities:
       Rotation: 0
       Anchor: 0
       SortOrder: 12
-      ParentEntity: 950200001
+      ParentEntity: 950209002
     UIImageComponent:
       Color: [1, 1, 1, 1]
-      TexturePath: "assets/vertical_slice/tactical_combat/characters/unit_protag_magic_swordsman.png"
+      TexturePath: "assets/vertical_slice/tactical_combat/sheets/characters/unit_protag_magic_swordsman_idle_sheet.png"
     TacticalUnitComponent:
       Team: 1
       Slot: 0
@@ -1245,10 +1309,30 @@ Entities:
       HealthBarEntityName: "TK_Status_Hero_HP"
       StatusTextEntityName: "TK_Status_Hero_Text"
       MarkerEntityName: "TK_Marker_Hero"
-      IdleFramePattern: "assets/vertical_slice/tactical_combat/characters/unit_protag_magic_swordsman_idle_{frame2}.png"
-      AttackFramePattern: "assets/vertical_slice/tactical_combat/characters/unit_protag_magic_swordsman_attack_{frame2}.png"
-      HitFramePattern: "assets/vertical_slice/tactical_combat/characters/unit_protag_magic_swordsman_hit_{frame2}.png"
-      DownFramePattern: "assets/vertical_slice/tactical_combat/characters/unit_protag_magic_swordsman_down_{frame2}.png"
+      IdleFramePattern: ""
+      AttackFramePattern: ""
+      HitFramePattern: ""
+      DownFramePattern: ""
+      IdleFrameSheet: assets/vertical_slice/tactical_combat/sheets/characters/unit_protag_magic_swordsman_idle_sheet.png
+      IdleFrameCellWidth: 96
+      IdleFrameCellHeight: 112
+      IdleFrameColumns: 4
+      IdleFrameStartFrame: 0
+      AttackFrameSheet: assets/vertical_slice/tactical_combat/sheets/characters/unit_protag_magic_swordsman_attack_sheet.png
+      AttackFrameCellWidth: 96
+      AttackFrameCellHeight: 112
+      AttackFrameColumns: 5
+      AttackFrameStartFrame: 0
+      HitFrameSheet: assets/vertical_slice/tactical_combat/sheets/characters/unit_protag_magic_swordsman_hit_sheet.png
+      HitFrameCellWidth: 96
+      HitFrameCellHeight: 112
+      HitFrameColumns: 3
+      HitFrameStartFrame: 0
+      DownFrameSheet: assets/vertical_slice/tactical_combat/sheets/characters/unit_protag_magic_swordsman_down_sheet.png
+      DownFrameCellWidth: 96
+      DownFrameCellHeight: 112
+      DownFrameColumns: 3
+      DownFrameStartFrame: 0
       IdleFrameCount: 4
       AttackFrameCount: 5
       HitFrameCount: 3
@@ -1268,7 +1352,7 @@ Entities:
       Rotation: 0
       Anchor: 0
       SortOrder: 11
-      ParentEntity: 950200001
+      ParentEntity: 950209002
     UIImageComponent:
       Color: [1, 1, 1, 1]
       TexturePath: "assets/vertical_slice/tactical_combat/ui/marker_selected.png"
@@ -1286,10 +1370,10 @@ Entities:
       Rotation: 0
       Anchor: 0
       SortOrder: 12
-      ParentEntity: 950200001
+      ParentEntity: 950209002
     UIImageComponent:
       Color: [1, 1, 1, 1]
-      TexturePath: "assets/vertical_slice/tactical_combat/characters/unit_white_mage.png"
+      TexturePath: "assets/vertical_slice/tactical_combat/sheets/characters/unit_white_mage_idle_sheet.png"
     TacticalUnitComponent:
       Team: 1
       Slot: 1
@@ -1312,10 +1396,30 @@ Entities:
       HealthBarEntityName: "TK_Status_WhiteMage_HP"
       StatusTextEntityName: "TK_Status_WhiteMage_Text"
       MarkerEntityName: "TK_Marker_WhiteMage"
-      IdleFramePattern: "assets/vertical_slice/tactical_combat/characters/unit_white_mage_idle_{frame2}.png"
-      AttackFramePattern: "assets/vertical_slice/tactical_combat/characters/unit_white_mage_attack_{frame2}.png"
-      HitFramePattern: "assets/vertical_slice/tactical_combat/characters/unit_white_mage_hit_{frame2}.png"
-      DownFramePattern: "assets/vertical_slice/tactical_combat/characters/unit_white_mage_down_{frame2}.png"
+      IdleFramePattern: ""
+      AttackFramePattern: ""
+      HitFramePattern: ""
+      DownFramePattern: ""
+      IdleFrameSheet: assets/vertical_slice/tactical_combat/sheets/characters/unit_white_mage_idle_sheet.png
+      IdleFrameCellWidth: 96
+      IdleFrameCellHeight: 112
+      IdleFrameColumns: 4
+      IdleFrameStartFrame: 0
+      AttackFrameSheet: assets/vertical_slice/tactical_combat/sheets/characters/unit_white_mage_attack_sheet.png
+      AttackFrameCellWidth: 96
+      AttackFrameCellHeight: 112
+      AttackFrameColumns: 5
+      AttackFrameStartFrame: 0
+      HitFrameSheet: assets/vertical_slice/tactical_combat/sheets/characters/unit_white_mage_hit_sheet.png
+      HitFrameCellWidth: 96
+      HitFrameCellHeight: 112
+      HitFrameColumns: 3
+      HitFrameStartFrame: 0
+      DownFrameSheet: assets/vertical_slice/tactical_combat/sheets/characters/unit_white_mage_down_sheet.png
+      DownFrameCellWidth: 96
+      DownFrameCellHeight: 112
+      DownFrameColumns: 3
+      DownFrameStartFrame: 0
       IdleFrameCount: 4
       AttackFrameCount: 5
       HitFrameCount: 3
@@ -1335,7 +1439,7 @@ Entities:
       Rotation: 0
       Anchor: 0
       SortOrder: 11
-      ParentEntity: 950200001
+      ParentEntity: 950209002
     UIImageComponent:
       Color: [1, 1, 1, 1]
       TexturePath: "assets/vertical_slice/tactical_combat/ui/marker_selected.png"
@@ -1353,10 +1457,10 @@ Entities:
       Rotation: 0
       Anchor: 0
       SortOrder: 12
-      ParentEntity: 950200001
+      ParentEntity: 950209002
     UIImageComponent:
       Color: [1, 1, 1, 1]
-      TexturePath: "assets/vertical_slice/tactical_combat/characters/unit_guardian.png"
+      TexturePath: "assets/vertical_slice/tactical_combat/sheets/characters/unit_guardian_idle_sheet.png"
     TacticalUnitComponent:
       Team: 1
       Slot: 2
@@ -1379,10 +1483,30 @@ Entities:
       HealthBarEntityName: "TK_Status_Guardian_HP"
       StatusTextEntityName: "TK_Status_Guardian_Text"
       MarkerEntityName: "TK_Marker_Guardian"
-      IdleFramePattern: "assets/vertical_slice/tactical_combat/characters/unit_guardian_idle_{frame2}.png"
-      AttackFramePattern: "assets/vertical_slice/tactical_combat/characters/unit_guardian_attack_{frame2}.png"
-      HitFramePattern: "assets/vertical_slice/tactical_combat/characters/unit_guardian_hit_{frame2}.png"
-      DownFramePattern: "assets/vertical_slice/tactical_combat/characters/unit_guardian_down_{frame2}.png"
+      IdleFramePattern: ""
+      AttackFramePattern: ""
+      HitFramePattern: ""
+      DownFramePattern: ""
+      IdleFrameSheet: assets/vertical_slice/tactical_combat/sheets/characters/unit_guardian_idle_sheet.png
+      IdleFrameCellWidth: 96
+      IdleFrameCellHeight: 112
+      IdleFrameColumns: 4
+      IdleFrameStartFrame: 0
+      AttackFrameSheet: assets/vertical_slice/tactical_combat/sheets/characters/unit_guardian_attack_sheet.png
+      AttackFrameCellWidth: 96
+      AttackFrameCellHeight: 112
+      AttackFrameColumns: 5
+      AttackFrameStartFrame: 0
+      HitFrameSheet: assets/vertical_slice/tactical_combat/sheets/characters/unit_guardian_hit_sheet.png
+      HitFrameCellWidth: 96
+      HitFrameCellHeight: 112
+      HitFrameColumns: 3
+      HitFrameStartFrame: 0
+      DownFrameSheet: assets/vertical_slice/tactical_combat/sheets/characters/unit_guardian_down_sheet.png
+      DownFrameCellWidth: 96
+      DownFrameCellHeight: 112
+      DownFrameColumns: 3
+      DownFrameStartFrame: 0
       IdleFrameCount: 4
       AttackFrameCount: 5
       HitFrameCount: 3
@@ -1402,7 +1526,7 @@ Entities:
       Rotation: 0
       Anchor: 0
       SortOrder: 11
-      ParentEntity: 950200001
+      ParentEntity: 950209002
     UIImageComponent:
       Color: [1, 1, 1, 1]
       TexturePath: "assets/vertical_slice/tactical_combat/ui/marker_selected.png"
@@ -1420,10 +1544,10 @@ Entities:
       Rotation: 0
       Anchor: 0
       SortOrder: 12
-      ParentEntity: 950200001
+      ParentEntity: 950209002
     UIImageComponent:
       Color: [1, 1, 1, 1]
-      TexturePath: "assets/vertical_slice/tactical_combat/characters/unit_en_spear_soldier.png"
+      TexturePath: "assets/vertical_slice/tactical_combat/sheets/characters/unit_en_spear_soldier_idle_sheet.png"
     TacticalUnitComponent:
       Team: 2
       Slot: 0
@@ -1446,10 +1570,30 @@ Entities:
       HealthBarEntityName: "TK_Status_Spear_HP"
       StatusTextEntityName: "TK_Status_Spear_Text"
       MarkerEntityName: "TK_Marker_Spear"
-      IdleFramePattern: "assets/vertical_slice/tactical_combat/characters/unit_en_spear_soldier_idle_{frame2}.png"
-      AttackFramePattern: "assets/vertical_slice/tactical_combat/characters/unit_en_spear_soldier_attack_{frame2}.png"
-      HitFramePattern: "assets/vertical_slice/tactical_combat/characters/unit_en_spear_soldier_hit_{frame2}.png"
-      DownFramePattern: "assets/vertical_slice/tactical_combat/characters/unit_en_spear_soldier_down_{frame2}.png"
+      IdleFramePattern: ""
+      AttackFramePattern: ""
+      HitFramePattern: ""
+      DownFramePattern: ""
+      IdleFrameSheet: assets/vertical_slice/tactical_combat/sheets/characters/unit_en_spear_soldier_idle_sheet.png
+      IdleFrameCellWidth: 96
+      IdleFrameCellHeight: 112
+      IdleFrameColumns: 4
+      IdleFrameStartFrame: 0
+      AttackFrameSheet: assets/vertical_slice/tactical_combat/sheets/characters/unit_en_spear_soldier_attack_sheet.png
+      AttackFrameCellWidth: 96
+      AttackFrameCellHeight: 112
+      AttackFrameColumns: 5
+      AttackFrameStartFrame: 0
+      HitFrameSheet: assets/vertical_slice/tactical_combat/sheets/characters/unit_en_spear_soldier_hit_sheet.png
+      HitFrameCellWidth: 96
+      HitFrameCellHeight: 112
+      HitFrameColumns: 3
+      HitFrameStartFrame: 0
+      DownFrameSheet: assets/vertical_slice/tactical_combat/sheets/characters/unit_en_spear_soldier_down_sheet.png
+      DownFrameCellWidth: 96
+      DownFrameCellHeight: 112
+      DownFrameColumns: 3
+      DownFrameStartFrame: 0
       IdleFrameCount: 4
       AttackFrameCount: 5
       HitFrameCount: 3
@@ -1469,7 +1613,7 @@ Entities:
       Rotation: 0
       Anchor: 0
       SortOrder: 11
-      ParentEntity: 950200001
+      ParentEntity: 950209002
     UIImageComponent:
       Color: [1, 1, 1, 1]
       TexturePath: "assets/vertical_slice/tactical_combat/ui/marker_selected.png"
@@ -1487,10 +1631,10 @@ Entities:
       Rotation: 0
       Anchor: 0
       SortOrder: 12
-      ParentEntity: 950200001
+      ParentEntity: 950209002
     UIImageComponent:
       Color: [1, 1, 1, 1]
-      TexturePath: "assets/vertical_slice/tactical_combat/characters/unit_en_dark_mage.png"
+      TexturePath: "assets/vertical_slice/tactical_combat/sheets/characters/unit_en_dark_mage_idle_sheet.png"
     TacticalUnitComponent:
       Team: 2
       Slot: 1
@@ -1513,10 +1657,30 @@ Entities:
       HealthBarEntityName: "TK_Status_DarkMage_HP"
       StatusTextEntityName: "TK_Status_DarkMage_Text"
       MarkerEntityName: "TK_Marker_DarkMage"
-      IdleFramePattern: "assets/vertical_slice/tactical_combat/characters/unit_en_dark_mage_idle_{frame2}.png"
-      AttackFramePattern: "assets/vertical_slice/tactical_combat/characters/unit_en_dark_mage_attack_{frame2}.png"
-      HitFramePattern: "assets/vertical_slice/tactical_combat/characters/unit_en_dark_mage_hit_{frame2}.png"
-      DownFramePattern: "assets/vertical_slice/tactical_combat/characters/unit_en_dark_mage_down_{frame2}.png"
+      IdleFramePattern: ""
+      AttackFramePattern: ""
+      HitFramePattern: ""
+      DownFramePattern: ""
+      IdleFrameSheet: assets/vertical_slice/tactical_combat/sheets/characters/unit_en_dark_mage_idle_sheet.png
+      IdleFrameCellWidth: 96
+      IdleFrameCellHeight: 112
+      IdleFrameColumns: 4
+      IdleFrameStartFrame: 0
+      AttackFrameSheet: assets/vertical_slice/tactical_combat/sheets/characters/unit_en_dark_mage_attack_sheet.png
+      AttackFrameCellWidth: 96
+      AttackFrameCellHeight: 112
+      AttackFrameColumns: 5
+      AttackFrameStartFrame: 0
+      HitFrameSheet: assets/vertical_slice/tactical_combat/sheets/characters/unit_en_dark_mage_hit_sheet.png
+      HitFrameCellWidth: 96
+      HitFrameCellHeight: 112
+      HitFrameColumns: 3
+      HitFrameStartFrame: 0
+      DownFrameSheet: assets/vertical_slice/tactical_combat/sheets/characters/unit_en_dark_mage_down_sheet.png
+      DownFrameCellWidth: 96
+      DownFrameCellHeight: 112
+      DownFrameColumns: 3
+      DownFrameStartFrame: 0
       IdleFrameCount: 4
       AttackFrameCount: 5
       HitFrameCount: 3
@@ -1536,7 +1700,7 @@ Entities:
       Rotation: 0
       Anchor: 0
       SortOrder: 11
-      ParentEntity: 950200001
+      ParentEntity: 950209002
     UIImageComponent:
       Color: [1, 1, 1, 1]
       TexturePath: "assets/vertical_slice/tactical_combat/ui/marker_selected.png"
@@ -1554,10 +1718,10 @@ Entities:
       Rotation: 0
       Anchor: 0
       SortOrder: 12
-      ParentEntity: 950200001
+      ParentEntity: 950209002
     UIImageComponent:
       Color: [1, 1, 1, 1]
-      TexturePath: "assets/vertical_slice/tactical_combat/characters/unit_en_beast.png"
+      TexturePath: "assets/vertical_slice/tactical_combat/sheets/characters/unit_en_beast_idle_sheet.png"
     TacticalUnitComponent:
       Team: 2
       Slot: 2
@@ -1580,10 +1744,30 @@ Entities:
       HealthBarEntityName: "TK_Status_Beast_HP"
       StatusTextEntityName: "TK_Status_Beast_Text"
       MarkerEntityName: "TK_Marker_Beast"
-      IdleFramePattern: "assets/vertical_slice/tactical_combat/characters/unit_en_beast_idle_{frame2}.png"
-      AttackFramePattern: "assets/vertical_slice/tactical_combat/characters/unit_en_beast_attack_{frame2}.png"
-      HitFramePattern: "assets/vertical_slice/tactical_combat/characters/unit_en_beast_hit_{frame2}.png"
-      DownFramePattern: "assets/vertical_slice/tactical_combat/characters/unit_en_beast_down_{frame2}.png"
+      IdleFramePattern: ""
+      AttackFramePattern: ""
+      HitFramePattern: ""
+      DownFramePattern: ""
+      IdleFrameSheet: assets/vertical_slice/tactical_combat/sheets/characters/unit_en_beast_idle_sheet.png
+      IdleFrameCellWidth: 96
+      IdleFrameCellHeight: 112
+      IdleFrameColumns: 4
+      IdleFrameStartFrame: 0
+      AttackFrameSheet: assets/vertical_slice/tactical_combat/sheets/characters/unit_en_beast_attack_sheet.png
+      AttackFrameCellWidth: 96
+      AttackFrameCellHeight: 112
+      AttackFrameColumns: 5
+      AttackFrameStartFrame: 0
+      HitFrameSheet: assets/vertical_slice/tactical_combat/sheets/characters/unit_en_beast_hit_sheet.png
+      HitFrameCellWidth: 96
+      HitFrameCellHeight: 112
+      HitFrameColumns: 3
+      HitFrameStartFrame: 0
+      DownFrameSheet: assets/vertical_slice/tactical_combat/sheets/characters/unit_en_beast_down_sheet.png
+      DownFrameCellWidth: 96
+      DownFrameCellHeight: 112
+      DownFrameColumns: 3
+      DownFrameStartFrame: 0
       IdleFrameCount: 4
       AttackFrameCount: 5
       HitFrameCount: 3
@@ -1603,7 +1787,7 @@ Entities:
       Rotation: 0
       Anchor: 0
       SortOrder: 11
-      ParentEntity: 950200001
+      ParentEntity: 950209002
     UIImageComponent:
       Color: [1, 1, 1, 1]
       TexturePath: "assets/vertical_slice/tactical_combat/ui/marker_selected.png"
@@ -1621,7 +1805,7 @@ Entities:
       Rotation: 0
       Anchor: 0
       SortOrder: 20
-      ParentEntity: 950200001
+      ParentEntity: 950209003
     UIImageComponent:
       Color: [1, 1, 1, 1]
       TexturePath: "assets/vertical_slice/tactical_combat/ui/panels/panel_tactical_top.png"
@@ -1639,7 +1823,7 @@ Entities:
       Rotation: 0
       Anchor: 0
       SortOrder: 24
-      ParentEntity: 950200001
+      ParentEntity: 950209003
     UITextComponent:
       Text: "我方回合"
       Color: [0.92, 0.94, 0.86, 1]
@@ -1663,7 +1847,7 @@ Entities:
       Rotation: 0
       Anchor: 0
       SortOrder: 24
-      ParentEntity: 950200001
+      ParentEntity: 950209003
     UITextComponent:
       Text: "点击角色开始行动。"
       Color: [0.92, 0.94, 0.86, 1]
@@ -1687,7 +1871,7 @@ Entities:
       Rotation: 0
       Anchor: 0
       SortOrder: 20
-      ParentEntity: 950200001
+      ParentEntity: 950209003
     UIImageComponent:
       Color: [1, 1, 1, 1]
       TexturePath: "assets/vertical_slice/tactical_combat/ui/panels/panel_tactical_status.png"
@@ -1705,7 +1889,7 @@ Entities:
       Rotation: 0
       Anchor: 0
       SortOrder: 25
-      ParentEntity: 950200001
+      ParentEntity: 950209003
     UITextComponent:
       Text: "主角 160/160"
       Color: [0.9, 0.93, 0.86, 1]
@@ -1729,7 +1913,7 @@ Entities:
       Rotation: 0
       Anchor: 0
       SortOrder: 25
-      ParentEntity: 950200001
+      ParentEntity: 950209003
     UIProgressBarComponent:
       Value: 1
       MaxValue: 1
@@ -1749,7 +1933,7 @@ Entities:
       Rotation: 0
       Anchor: 0
       SortOrder: 25
-      ParentEntity: 950200001
+      ParentEntity: 950209003
     UITextComponent:
       Text: "白魔队友 112/112"
       Color: [0.9, 0.93, 0.86, 1]
@@ -1773,7 +1957,7 @@ Entities:
       Rotation: 0
       Anchor: 0
       SortOrder: 25
-      ParentEntity: 950200001
+      ParentEntity: 950209003
     UIProgressBarComponent:
       Value: 1
       MaxValue: 1
@@ -1793,7 +1977,7 @@ Entities:
       Rotation: 0
       Anchor: 0
       SortOrder: 25
-      ParentEntity: 950200001
+      ParentEntity: 950209003
     UITextComponent:
       Text: "护卫队友 190/190"
       Color: [0.9, 0.93, 0.86, 1]
@@ -1817,7 +2001,7 @@ Entities:
       Rotation: 0
       Anchor: 0
       SortOrder: 25
-      ParentEntity: 950200001
+      ParentEntity: 950209003
     UIProgressBarComponent:
       Value: 1
       MaxValue: 1
@@ -1837,7 +2021,7 @@ Entities:
       Rotation: 0
       Anchor: 0
       SortOrder: 25
-      ParentEntity: 950200001
+      ParentEntity: 950209003
     UITextComponent:
       Text: "敌方枪兵 110/110"
       Color: [1, 0.82, 0.76, 1]
@@ -1861,7 +2045,7 @@ Entities:
       Rotation: 0
       Anchor: 0
       SortOrder: 25
-      ParentEntity: 950200001
+      ParentEntity: 950209003
     UIProgressBarComponent:
       Value: 1
       MaxValue: 1
@@ -1881,7 +2065,7 @@ Entities:
       Rotation: 0
       Anchor: 0
       SortOrder: 25
-      ParentEntity: 950200001
+      ParentEntity: 950209003
     UITextComponent:
       Text: "敌方法师 92/92"
       Color: [1, 0.82, 0.76, 1]
@@ -1905,7 +2089,7 @@ Entities:
       Rotation: 0
       Anchor: 0
       SortOrder: 25
-      ParentEntity: 950200001
+      ParentEntity: 950209003
     UIProgressBarComponent:
       Value: 1
       MaxValue: 1
@@ -1925,7 +2109,7 @@ Entities:
       Rotation: 0
       Anchor: 0
       SortOrder: 25
-      ParentEntity: 950200001
+      ParentEntity: 950209003
     UITextComponent:
       Text: "敌方兽兵 128/128"
       Color: [1, 0.82, 0.76, 1]
@@ -1949,7 +2133,7 @@ Entities:
       Rotation: 0
       Anchor: 0
       SortOrder: 25
-      ParentEntity: 950200001
+      ParentEntity: 950209003
     UIProgressBarComponent:
       Value: 1
       MaxValue: 1
@@ -1969,7 +2153,7 @@ Entities:
       Rotation: 0
       Anchor: 0
       SortOrder: 20
-      ParentEntity: 950200001
+      ParentEntity: 950209003
     UIImageComponent:
       Color: [1, 1, 1, 1]
       TexturePath: "assets/vertical_slice/tactical_combat/ui/panels/panel_tactical_detail.png"
@@ -1987,7 +2171,7 @@ Entities:
       Rotation: 0
       Anchor: 0
       SortOrder: 25
-      ParentEntity: 950200001
+      ParentEntity: 950209003
     UITextComponent:
       Text: "选择我方单位。"
       Color: [0.92, 0.94, 0.86, 1]
@@ -2011,7 +2195,7 @@ Entities:
       Rotation: 0
       Anchor: 0
       SortOrder: 22
-      ParentEntity: 950200001
+      ParentEntity: 950209003
     UIImageComponent:
       Color: [1, 1, 1, 1]
       TexturePath: "assets/vertical_slice/tactical_combat/ui/panels/panel_tactical_command.png"
@@ -2289,7 +2473,7 @@ Entities:
       Rotation: 0
       Anchor: 0
       SortOrder: 24
-      ParentEntity: 950200001
+      ParentEntity: 950209003
     UIImageComponent:
       Color: [1, 1, 1, 1]
       TexturePath: "assets/vertical_slice/tactical_combat/ui/panels/panel_tactical_button.png"
@@ -2312,7 +2496,7 @@ Entities:
       Rotation: 0
       Anchor: 0
       SortOrder: 27
-      ParentEntity: 950200001
+      ParentEntity: 950209003
     UITextComponent:
       Text: "取消"
       Color: [0.92, 0.94, 0.86, 1]
@@ -2336,10 +2520,10 @@ Entities:
       Rotation: 0
       Anchor: 0
       SortOrder: 30
-      ParentEntity: 950200001
+      ParentEntity: 950209002
     UIImageComponent:
       Color: [1, 1, 1, 0]
-      TexturePath: "assets/vertical_slice/tactical_combat/effects/vfx_tac_slash_01.png"
+      TexturePath: "assets/vertical_slice/tactical_combat/sheets/effects/vfx_tac_slash_sheet.png"
   - Entity: 950200100
     TagComponent:
       Tag: TK_Fade
@@ -2354,7 +2538,7 @@ Entities:
       Rotation: 0
       Anchor: 0
       SortOrder: 100
-      ParentEntity: 950200001
+      ParentEntity: 950209004
     UIImageComponent:
       Color: [0, 0, 0, 1]
       TexturePath: ""

@@ -51,6 +51,27 @@ namespace Wheatear::TurnCombatVisualService {
             return combatant.IdleFrameCount;
         }
 
+        static const GameplayVisualService::TextureAtlasFrameSpec& AnimationAtlasForClip(
+            const TurnCombatantComponent& combatant,
+            const std::string& clip)
+        {
+            if (clip == "attack")
+                return combatant.AttackFrameAtlas;
+            if (clip == "hit")
+                return combatant.HitFrameAtlas;
+            if (clip == "down")
+                return combatant.DownFrameAtlas;
+            return combatant.IdleFrameAtlas;
+        }
+
+        static bool HasAnimationForClip(
+            const TurnCombatantComponent& combatant,
+            const std::string& clip)
+        {
+            return !AnimationPatternForClip(combatant, clip).empty() ||
+                AnimationAtlasForClip(combatant, clip).IsValid();
+        }
+
         static bool AnimationClipLoops(const std::string& clip)
         {
             return clip == "idle";
@@ -63,12 +84,12 @@ namespace Wheatear::TurnCombatVisualService {
         {
             if (!combatant.RuntimeAlive)
                 return "down";
-            if (combatant.RuntimeHitFlashTimer > 0.0f && !combatant.HitFramePattern.empty())
+            if (combatant.RuntimeHitFlashTimer > 0.0f && HasAnimationForClip(combatant, "hit"))
                 return "hit";
             if (level.RuntimePhase == TurnCombatPhase::Acting
                 && entity
                 && entity.GetUUID() == level.RuntimeActionActor
-                && !combatant.AttackFramePattern.empty())
+                && HasAnimationForClip(combatant, "attack"))
             {
                 return "attack";
             }
@@ -87,7 +108,8 @@ namespace Wheatear::TurnCombatVisualService {
             const std::string clip = SelectCombatantAnimationClip(entity, combatant, level);
             const std::string& pattern = AnimationPatternForClip(combatant, clip);
             const int frameCount = std::max(AnimationFrameCountForClip(combatant, clip), 1);
-            if (pattern.empty())
+            const auto& atlas = AnimationAtlasForClip(combatant, clip);
+            if (pattern.empty() && !atlas.IsValid())
                 return;
 
             if (!entity.HasComponent<SpriteAnimatorComponent>())
@@ -98,10 +120,16 @@ namespace Wheatear::TurnCombatVisualService {
             animator.PlayOnStart = false;
             animator.FireEvents = true;
 
-            const auto ensureClip = [&](const std::string& clipName, const std::string& clipPattern, int clipFrameCount)
+            const auto ensureClip = [&](const std::string& clipName,
+                const std::string& clipPattern,
+                const GameplayVisualService::TextureAtlasFrameSpec& clipAtlas,
+                int clipFrameCount)
             {
-                if (clipPattern.empty() || animator.Clips.find(clipName) != animator.Clips.end())
+                if ((clipPattern.empty() && !clipAtlas.IsValid()) ||
+                    animator.Clips.find(clipName) != animator.Clips.end())
+                {
                     return;
+                }
 
                 const bool looping = AnimationClipLoops(clipName);
                 auto animationClip = AnimationClip::Create(clipName, looping);
@@ -110,20 +138,35 @@ namespace Wheatear::TurnCombatVisualService {
                     ? std::max(level.ActionDuration, 0.01f) / (float)safeFrameCount
                     : 1.0f / std::max(combatant.AnimationFrameRate, 1.0f);
 
-                for (int frameIndex = 0; frameIndex < safeFrameCount; ++frameIndex)
+                if (clipAtlas.IsValid())
                 {
-                    if (Ref<Texture2D> texture = GameplayVisualService::LoadTextureCached(FormatAnimationFramePath(clipPattern, frameIndex)))
-                        animationClip->AddFrame({ texture, duration });
+                    for (int frameIndex = 0; frameIndex < safeFrameCount; ++frameIndex)
+                    {
+                        Ref<Texture2D> texture;
+                        glm::vec2 uvMin{ 0.0f };
+                        glm::vec2 uvMax{ 1.0f };
+                        if (GameplayVisualService::ResolveAtlasFrame(clipAtlas, frameIndex + 1, &texture, &uvMin, &uvMax))
+                            animationClip->AddFrame({ texture, uvMin, uvMax, duration });
+                    }
+                }
+
+                if (animationClip->GetFrameCount() == 0)
+                {
+                    for (int frameIndex = 0; frameIndex < safeFrameCount; ++frameIndex)
+                    {
+                        if (Ref<Texture2D> texture = GameplayVisualService::LoadTextureCached(FormatAnimationFramePath(clipPattern, frameIndex)))
+                            animationClip->AddFrame({ texture, duration });
+                    }
                 }
 
                 if (animationClip->GetFrameCount() > 0)
                     animator.AddClip(animationClip);
             };
 
-            ensureClip("idle", combatant.IdleFramePattern, combatant.IdleFrameCount);
-            ensureClip("attack", combatant.AttackFramePattern, combatant.AttackFrameCount);
-            ensureClip("hit", combatant.HitFramePattern, combatant.HitFrameCount);
-            ensureClip("down", combatant.DownFramePattern, combatant.DownFrameCount);
+            ensureClip("idle", combatant.IdleFramePattern, combatant.IdleFrameAtlas, combatant.IdleFrameCount);
+            ensureClip("attack", combatant.AttackFramePattern, combatant.AttackFrameAtlas, combatant.AttackFrameCount);
+            ensureClip("hit", combatant.HitFramePattern, combatant.HitFrameAtlas, combatant.HitFrameCount);
+            ensureClip("down", combatant.DownFramePattern, combatant.DownFrameAtlas, combatant.DownFrameCount);
 
             if (combatant.RuntimeAnimationClip != clip)
             {
@@ -165,8 +208,10 @@ namespace Wheatear::TurnCombatVisualService {
             }
 
             auto& sprite = entity.GetComponent<SpriteRendererComponent>();
-            if (Ref<Texture2D> texture = GameplayVisualService::LoadTextureCached(FormatAnimationFramePath(pattern, frameIndex)))
-                sprite.Texture = texture;
+            if (GameplayVisualService::ApplySpriteAtlasFrame(sprite, atlas, frameIndex + 1))
+                return;
+
+            GameplayVisualService::ApplySpriteFrame(sprite, pattern, frameIndex + 1);
         }
 
     } // namespace
@@ -269,8 +314,19 @@ namespace Wheatear::TurnCombatVisualService {
             if (effect && skill && effect.HasComponent<SpriteRendererComponent>() && effect.HasComponent<TransformComponent>())
             {
                 auto& sprite = effect.GetComponent<SpriteRendererComponent>();
-                if (Ref<Texture2D> texture = GameplayVisualService::LoadTextureCached(skill->EffectPath))
-                    sprite.Texture = texture;
+                const int effectFrameCount = std::max(1, skill->EffectFrameCount);
+                const int effectFrame = std::min(
+                    effectFrameCount,
+                    std::max(1, (int)(t * (float)effectFrameCount) + 1));
+                if (!GameplayVisualService::ApplySpriteAtlasFrame(sprite, skill->EffectAtlas, effectFrame))
+                {
+                    if (Ref<Texture2D> texture = GameplayVisualService::LoadTextureCached(skill->EffectPath))
+                    {
+                        sprite.Texture = texture;
+                        sprite.UVMin = { 0.0f, 0.0f };
+                        sprite.UVMax = { 1.0f, 1.0f };
+                    }
+                }
 
                 const float effectAlpha = std::max(0.0f, std::sin(t * 3.14159265f));
                 sprite.Color = { 1.0f, 1.0f, 1.0f, effectAlpha };

@@ -1413,7 +1413,13 @@ namespace Wheatear::SideCombatHudService {
 
         if (playerCombatant)
         {
+            const float playerHealthRatio = std::clamp(
+                playerCombatant->Health / std::max(1.0f, playerCombatant->MaxHealth),
+                0.0f,
+                1.0f);
             SetProgress(scene, level.PlayerHealthBarEntityName, playerCombatant->Health, playerCombatant->MaxHealth);
+            EnsureSheetFill(scene, level.PlayerHealthBarEntityName, level.PlayerHealthLayout.Position, level.PlayerHealthLayout.Size, 24,
+                RedBarUV(), playerHealthRatio);
             SetText(scene, level.PlayerHealthTextEntityName,
                 level.HudPlayerHealthLabel + FormatFloat(playerCombatant->Health) + "/" + FormatFloat(playerCombatant->MaxHealth));
         }
@@ -1427,7 +1433,13 @@ namespace Wheatear::SideCombatHudService {
             SetWidgetVisible(scene, level.BossHealthTextEntityName, bossVisible);
             if (bossVisible)
             {
+                const float bossHealthRatio = std::clamp(
+                    bossCombatant->Health / std::max(1.0f, bossCombatant->MaxHealth),
+                    0.0f,
+                    1.0f);
                 SetProgress(scene, level.BossHealthBarEntityName, bossCombatant->Health, bossCombatant->MaxHealth);
+                EnsureSheetFill(scene, level.BossHealthBarEntityName, level.BossHealthLayout.Position, level.BossHealthLayout.Size, 24,
+                    CyanBarUV(), bossHealthRatio, glm::vec4(1.0f), bossVisible);
                 std::string bossText = level.HudBossHealthLabel + FormatFloat(bossCombatant->Health) + "/" + FormatFloat(bossCombatant->MaxHealth);
                 if (SideCombatTuningService::ShouldShowCombatStateHud(level, tuning))
                     bossText += "  " + std::string(GetCombatStateLabel(bossCombatant->RuntimeState));

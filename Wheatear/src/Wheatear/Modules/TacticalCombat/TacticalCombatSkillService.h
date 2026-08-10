@@ -2,6 +2,7 @@
 
 #include "TacticalCombatComponents.h"
 #include "Wheatear/Core/Core.h"
+#include "Wheatear/Modules/Common/GameplayVisualService.h"
 
 #include <optional>
 #include <string>
@@ -43,6 +44,7 @@ namespace Wheatear::TacticalCombatSkillService {
         std::string IconPath;
         std::string SoundPath;
         std::string EffectFramePattern;
+        GameplayVisualService::TextureAtlasFrameSpec EffectAtlas;
         int EffectFrameCount = 1;
         float EffectFrameRate = 12.0f;
         TacticalTargetRule TargetRule = TacticalTargetRule::Enemy;

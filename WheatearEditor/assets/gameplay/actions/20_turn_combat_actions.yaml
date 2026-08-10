@@ -19,6 +19,13 @@ actions:
       defensePierce: 0.1
       magic: false
       guard: false
+      effectAtlasSheet: turn.vfx.slash
+      effectAtlasCellWidth: 128
+      effectAtlasCellHeight: 128
+      effectAtlasColumns: 1
+      effectAtlasStartFrame: 0
+      effectFrameCount: 1
+      effectFrameRate: 1
     effects:
       - type: Damage
         attribute: attack
@@ -47,6 +54,13 @@ actions:
       defensePierce: 0.22
       magic: true
       guard: false
+      effectAtlasSheet: turn.vfx.magic_sword
+      effectAtlasCellWidth: 128
+      effectAtlasCellHeight: 128
+      effectAtlasColumns: 1
+      effectAtlasStartFrame: 0
+      effectFrameCount: 1
+      effectFrameRate: 1
       statusEffect: DefenseDown
       effectTurns: 2
       effectPower: 0.22
@@ -83,6 +97,13 @@ actions:
       defensePierce: 0
       magic: true
       guard: false
+      effectAtlasSheet: turn.vfx.heal
+      effectAtlasCellWidth: 128
+      effectAtlasCellHeight: 128
+      effectAtlasColumns: 1
+      effectAtlasStartFrame: 0
+      effectFrameCount: 1
+      effectFrameRate: 1
       statusEffect: Regeneration
       effectTurns: 2
       effectPower: 10
@@ -119,6 +140,13 @@ actions:
       defensePierce: 0
       magic: false
       guard: true
+      effectAtlasSheet: turn.vfx.guard
+      effectAtlasCellWidth: 128
+      effectAtlasCellHeight: 128
+      effectAtlasColumns: 1
+      effectAtlasStartFrame: 0
+      effectFrameCount: 1
+      effectFrameRate: 1
       statusEffect: Guard
       effectTurns: 1
       effectPower: 0.45
@@ -152,6 +180,13 @@ actions:
       defensePierce: 0.18
       magic: true
       guard: false
+      effectAtlasSheet: turn.vfx.dark
+      effectAtlasCellWidth: 128
+      effectAtlasCellHeight: 128
+      effectAtlasColumns: 1
+      effectAtlasStartFrame: 0
+      effectFrameCount: 1
+      effectFrameRate: 1
       statusEffect: Burn
       effectTurns: 2
       effectPower: 8
@@ -186,6 +221,13 @@ actions:
       defensePierce: 0
       magic: false
       guard: false
+      effectAtlasSheet: turn.vfx.heal
+      effectAtlasCellWidth: 128
+      effectAtlasCellHeight: 128
+      effectAtlasColumns: 1
+      effectAtlasStartFrame: 0
+      effectFrameCount: 1
+      effectFrameRate: 1
     effects:
       - type: Heal
         attribute: item
@@ -212,6 +254,13 @@ actions:
       defensePierce: 0
       magic: false
       guard: false
+      effectAtlasSheet: turn.vfx.focus
+      effectAtlasCellWidth: 128
+      effectAtlasCellHeight: 128
+      effectAtlasColumns: 1
+      effectAtlasStartFrame: 0
+      effectFrameCount: 1
+      effectFrameRate: 1
     effects:
       - type: ModifyAttribute
         attribute: mana
@@ -238,6 +287,13 @@ actions:
       defensePierce: 0
       magic: false
       guard: false
+      effectAtlasSheet: turn.vfx.claw
+      effectAtlasCellWidth: 128
+      effectAtlasCellHeight: 128
+      effectAtlasColumns: 1
+      effectAtlasStartFrame: 0
+      effectFrameCount: 1
+      effectFrameRate: 1
     effects:
       - type: Damage
         attribute: attack
@@ -264,6 +320,13 @@ actions:
       defensePierce: 0.08
       magic: false
       guard: false
+      effectAtlasSheet: turn.vfx.claw
+      effectAtlasCellWidth: 128
+      effectAtlasCellHeight: 128
+      effectAtlasColumns: 1
+      effectAtlasStartFrame: 0
+      effectFrameCount: 1
+      effectFrameRate: 1
     effects:
       - type: Damage
         attribute: attack
@@ -290,6 +353,13 @@ actions:
       defensePierce: 0.2
       magic: true
       guard: false
+      effectAtlasSheet: turn.vfx.dark
+      effectAtlasCellWidth: 128
+      effectAtlasCellHeight: 128
+      effectAtlasColumns: 1
+      effectAtlasStartFrame: 0
+      effectFrameCount: 1
+      effectFrameRate: 1
       statusEffect: Burn
       effectTurns: 2
       effectPower: 7
