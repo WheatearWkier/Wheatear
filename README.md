@@ -4,7 +4,7 @@
 
 Wheatear 不是单纯的引擎样例，而是把剧情、战斗、成长、UI、脚本、渲染和打包串成一条完整链路，方便展示与方便快速说明“做了什么、为什么这样做”。
 
-（有声版演示请移步：https://pan.baidu.com/s/1fXlNgqQ0OwrBwkjKCmegiA?pwd=2333 提取码: 2333）
+（有声版演示请移步：https://www.bilibili.com/video/BV1tGue6vEAt/?share_source=copy_web&vd_source=da98153b23f4943d9fa70056f1fb1ae8）
 
 **编辑器演示**
 
