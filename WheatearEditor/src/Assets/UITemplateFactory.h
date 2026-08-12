@@ -20,7 +20,11 @@ namespace Wheatear {
         Tooltip,
         SaveSlot,
         SkillTreeNode,
-        CombatSkillSlot
+        CombatSkillSlot,
+        // Designer-authored composite carrying an embedded Prefab v2 body in the
+        // .wtuit file instead of a C++ builder; recognized by KindFromString but
+        // intentionally has no builtin descriptor (no fixed asset path/builder).
+        Composite
     };
 
     struct UITemplateDescriptor

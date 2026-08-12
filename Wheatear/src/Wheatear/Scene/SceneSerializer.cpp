@@ -294,4 +294,52 @@ namespace Wheatear {
         return entities.empty() ? Entity{} : entities.front();
     }
 
+    bool SceneSerializer::SerializeUITemplate(Entity entity,
+        const std::filesystem::path& filepath,
+        const std::string& displayName,
+        const std::string& category,
+        const std::string& description)
+    {
+        const std::vector<Entity> prefabEntities = CollectPrefabEntities(entity);
+
+        YAML::Emitter out;
+        out << YAML::BeginMap;
+
+        // Metadata block - matches what UITemplateFactory::CreateFromAsset reads.
+        out << YAML::Key << "UITemplate" << YAML::Value << YAML::BeginMap;
+        out << YAML::Key << "Version" << YAML::Value << 1;
+        out << YAML::Key << "Kind" << YAML::Value << "Composite";
+        out << YAML::Key << "DisplayName" << YAML::Value << displayName;
+        out << YAML::Key << "Category" << YAML::Value << category;
+        out << YAML::Key << "Description" << YAML::Value << description;
+        out << YAML::EndMap;
+
+        // Embedded prefab body - DeserializePrefabEntities reuses this verbatim,
+        // so composites round-trip through the same V2 path as .wtprefab files.
+        out << YAML::Key << "Prefab" << YAML::Value << entity.GetName();
+        out << YAML::Key << "Version" << YAML::Value << 2;
+        out << YAML::Key << "RootEntity" << YAML::Value << entity.GetUUID();
+        out << YAML::Key << "Entities" << YAML::Value << YAML::BeginSeq;
+        for (Entity prefabEntity : prefabEntities)
+            SerializeEntity(out, prefabEntity);
+        out << YAML::EndSeq;
+
+        out << YAML::EndMap;
+
+        const std::filesystem::path resolvedPath = AssetPath::Resolve(filepath);
+        const std::filesystem::path parentPath = resolvedPath.parent_path();
+        if (!parentPath.empty())
+            std::filesystem::create_directories(parentPath);
+
+        std::ofstream file(resolvedPath);
+        if (!file.is_open())
+        {
+            WT_CORE_ERROR("UITemplateSerializer: failed to open '{}'", resolvedPath.string());
+            return false;
+        }
+
+        file << out.c_str();
+        return true;
+    }
+
 } // namespace Wheatear

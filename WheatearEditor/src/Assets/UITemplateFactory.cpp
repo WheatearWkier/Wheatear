@@ -8,6 +8,7 @@
 #include "Wheatear/Scene/Components.h"
 #include "Wheatear/Scene/Scene.h"
 #include "Wheatear/Scene/EntityReference.h"
+#include "Wheatear/Scene/SceneSerializer.h"
 
 #include <yaml-cpp/yaml.h>
 
@@ -400,6 +401,8 @@ namespace Wheatear {
 
     UITemplateKind UITemplateFactory::KindFromString(const std::string& value)
     {
+        if (value == "Composite")
+            return UITemplateKind::Composite;
         for (const auto& descriptor : GetBuiltinTemplates())
             if (descriptor.KindName == value)
                 return descriptor.Kind;
@@ -408,6 +411,8 @@ namespace Wheatear {
 
     std::string UITemplateFactory::KindToString(UITemplateKind kind)
     {
+        if (kind == UITemplateKind::Composite)
+            return "Composite";
         if (const UITemplateDescriptor* descriptor = FindBuiltinTemplate(kind))
             return descriptor->KindName;
         return "Unknown";
@@ -468,6 +473,43 @@ namespace Wheatear {
 
         const UITemplateKind kind = KindFromString(node["Kind"].as<std::string>(""));
         const std::string displayName = node["DisplayName"].as<std::string>("");
+
+        // Composite templates carry an embedded Prefab Version 2 body authored by
+        // the Hierarchy "Save selection as UI Template" action. Deserialize it
+        // through the prefab path and reparent the lone root back onto parentID,
+        // matching how the C++ builders attach their root widget to the canvas.
+        if (kind == UITemplateKind::Composite || root["Entities"])
+        {
+            std::vector<Entity> entities = SceneSerializer::DeserializePrefabEntities(resolvedPath, scene);
+            if (entities.empty())
+                return {};
+
+            Entity rootEntity;
+            for (Entity e : entities)
+            {
+                if (e.HasComponent<UIWidgetComponent>())
+                {
+                    UIWidgetComponent& widget = e.GetComponent<UIWidgetComponent>();
+                    // A prefab root carries no parent (ParentEntity == 0); children
+                    // already had their intra-tree references remapped. Adopt the
+                    // first orphan we find as the root and attach it to the canvas.
+                    if (widget.ParentEntity == 0)
+                    {
+                        if (!rootEntity)
+                            rootEntity = e;
+                        widget.ParentEntity = parentID;
+                    }
+                }
+            }
+
+            // Fallback: if no orphaned root was found (unexpected), attach the
+            // first entity so the composite still lands under the chosen parent.
+            if (!rootEntity && !entities.empty() && entities.front().HasComponent<UIWidgetComponent>())
+                entities.front().GetComponent<UIWidgetComponent>().ParentEntity = parentID;
+
+            return entities;
+        }
+
         return Create(scene, kind, parentID, displayName.empty() ? std::string{} : "UI_" + displayName);
     }
 

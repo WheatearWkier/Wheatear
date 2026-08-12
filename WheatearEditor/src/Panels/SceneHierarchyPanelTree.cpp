@@ -437,6 +437,39 @@ namespace Wheatear {
                 WT_CORE_INFO("Saved prefab: {}", savePath.string());
             }
 
+            if (ImGui::MenuItem("Save as UI Template"))
+            {
+                // Composite UI templates are .wtuit files embedding a Prefab v2
+                // body; designers use this to author reusable widget bundles (new
+                // HUD elements, popups, slots) without touching C++ or YAML.
+                std::filesystem::path templateDir = AssetPath::Resolve("assets/ui_templates");
+                std::filesystem::create_directories(templateDir);
+
+                std::string baseName = entity.GetName();
+                if (baseName.empty())
+                    baseName = "UI_Template";
+                std::filesystem::path savePath;
+
+                int index = 0;
+                do
+                {
+                    std::string filename = baseName;
+                    if (index > 0)
+                        filename += std::to_string(index);
+                    filename += AssetFileType::UITemplateExtension;
+                    savePath = templateDir / filename;
+                    index++;
+                } while (std::filesystem::exists(savePath));
+
+                if (SceneSerializer::SerializeUITemplate(entity, savePath,
+                        baseName,
+                        "Composite",
+                        "Designer-authored UI template."))
+                {
+                    WT_CORE_INFO("Saved UI template: {}", savePath.string());
+                }
+            }
+
             ImGui::Separator();
 
             if (ImGui::MenuItem("Delete Entity"))
