@@ -131,6 +131,54 @@ namespace Wheatear {
         return false;
     }
 
+    // Splits a trailing " if flag <id>" / "if flag:<id>" gate off a TargetLabel.
+    // Returns the label without the gate; writes the flag id into outFlag (empty if
+    // no well-formed gate). The whole-token "if flag" form requires three words
+    // after "->", so label text containing "if" is only matched when it forms a
+    // standalone clause.
+    static std::string ExtractRequiredFlag(std::string target, std::string& outFlag)
+    {
+        target = Trim(target);
+        if (target.empty())
+            return target;
+
+        // Find the first standalone " if " token (whitespace-delimited). Use
+        // SplitWords then locate "if" so the scan is token-aware rather than
+        // naive substring (avoids matching "if" inside a word).
+        const std::vector<std::string> words = SplitWords(target);
+        if (words.size() < 3)
+            return target;
+
+        size_t ifIndex = 0;
+        bool foundIf = false;
+        // The gate must be the trailing clause: exactly "if flag <id>" occupies
+        // the last three words, so anything after the flag id would be ambiguous.
+        if (words.size() >= 3 && words[words.size() - 3] == "if" && words[words.size() - 2] == "flag")
+        {
+            ifIndex = words.size() - 3;
+            foundIf = true;
+        }
+        if (!foundIf)
+            return target;
+
+        std::string flagId = words[ifIndex + 2];
+        // Normalize "flag:X" -> "X" if authors used the colon form.
+        if (flagId.rfind("flag:", 0) == 0 && flagId.size() > 5)
+            flagId = flagId.substr(5);
+
+        // Reconstruct the label as words[0..ifIndex-1] joined.
+        std::string label;
+        for (size_t i = 0; i < ifIndex; ++i)
+        {
+            if (!label.empty())
+                label += " ";
+            label += words[i];
+        }
+
+        outFlag = Trim(flagId);
+        return Trim(label);
+    }
+
     static std::vector<VisualNovelChoice> ParseChoices(const std::string& payload)
     {
         std::vector<VisualNovelChoice> choices;
@@ -146,13 +194,22 @@ namespace Wheatear {
             const size_t arrow = segment.find("->");
             if (arrow == std::string::npos)
             {
-                choices.push_back({ StripQuotes(segment), {} });
+                choices.push_back({ StripQuotes(segment), {}, {} });
                 continue;
             }
 
             VisualNovelChoice choice;
             choice.Text = StripQuotes(segment.substr(0, arrow));
             choice.TargetLabel = StripQuotes(segment.substr(arrow + 2));
+
+            // Optional trailing "if flag <id>" / "if flag:<id>" gate the choice
+            // behind a progression story flag. Only the part after "->" is scanned
+            // so option text containing "if" stays unaffected.
+            if (!choice.TargetLabel.empty())
+            {
+                choice.TargetLabel = ExtractRequiredFlag(choice.TargetLabel, choice.RequiredFlag);
+            }
+
             if (!choice.Text.empty())
                 choices.push_back(std::move(choice));
         }

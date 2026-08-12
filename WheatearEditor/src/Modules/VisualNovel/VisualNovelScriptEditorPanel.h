@@ -39,6 +39,7 @@ namespace Wheatear {
         {
             std::string Text;
             std::string Target;
+            std::string RequiredFlag;
         };
 
         struct Row

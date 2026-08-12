@@ -2040,17 +2040,22 @@ namespace Wheatear {
         {
             StopSkip(state);
             const auto& choices = state.Runtime.GetCurrentChoices();
-            const size_t maxChoices = std::min<size_t>(choices.size(), 9);
+            // Visible indices already exclude gated-out options; input maps a
+            // displayed N to the underlying script choice so Choose advances to
+            // the correct TargetLabel even when earlier options are hidden.
+            const std::vector<size_t> visibleIndices = CollectVisibleChoiceIndices(choices);
+            const size_t maxChoices = std::min<size_t>(visibleIndices.size(), 9);
 
             for (size_t i = 0; i < maxChoices; ++i)
             {
                 const bool pressed = input.ChoicePressed[i];
                 if (pressed && !state.PreviousChoicePressed[i])
                 {
-                    if (IsExternalChoiceCommand(choices[i].TargetLabel))
-                        component.RuntimeRequestedCommand = choices[i].TargetLabel;
+                    const size_t scriptIndex = visibleIndices[i];
+                    if (IsExternalChoiceCommand(choices[scriptIndex].TargetLabel))
+                        component.RuntimeRequestedCommand = choices[scriptIndex].TargetLabel;
                     else
-                        state.Runtime.Choose(i);
+                        state.Runtime.Choose(scriptIndex);
                     break;
                 }
                 state.PreviousChoicePressed[i] = pressed;
@@ -2063,10 +2068,11 @@ namespace Wheatear {
                 {
                     if (IsEntityHoveredButton(scene, component.ChoiceEntityPrefix + std::to_string(i + 1)))
                     {
-                        if (IsExternalChoiceCommand(choices[i].TargetLabel))
-                            component.RuntimeRequestedCommand = choices[i].TargetLabel;
+                        const size_t scriptIndex = visibleIndices[i];
+                        if (IsExternalChoiceCommand(choices[scriptIndex].TargetLabel))
+                            component.RuntimeRequestedCommand = choices[scriptIndex].TargetLabel;
                         else
-                            state.Runtime.Choose(i);
+                            state.Runtime.Choose(scriptIndex);
                         break;
                     }
                 }
@@ -2092,6 +2098,20 @@ namespace Wheatear {
                 state.Runtime.Advance();
         }
         state.PreviousAdvancePressed = pressed;
+    }
+
+    std::vector<size_t> VisualNovelSystem::CollectVisibleChoiceIndices(
+        const std::vector<VisualNovelChoice>& choices)
+    {
+        std::vector<size_t> indices;
+        indices.reserve(choices.size());
+        const auto& flags = GameProgress::GetState().StoryFlags;
+        for (size_t i = 0; i < choices.size(); ++i)
+        {
+            if (choices[i].RequiredFlag.empty() || flags.count(choices[i].RequiredFlag) > 0)
+                indices.push_back(i);
+        }
+        return indices;
     }
 
     void VisualNovelSystem::UpdateSceneBindings(Scene* scene,
@@ -2177,9 +2197,13 @@ namespace Wheatear {
         SetText(scene, component.AdvanceHintEntityName, hint);
 
         const auto& choices = state.Runtime.GetCurrentChoices();
+        // Gated choices (RequiredFlag set but flag not in StoryFlags) are filtered
+        // out here and in UpdateRuntimeInputs, so the Nth visible button stays
+        // stable across hidden options instead of indexing choices by raw N.
+        const std::vector<size_t> visibleIndices = CollectVisibleChoiceIndices(choices);
         const uint32_t maxVisibleChoices = std::min<uint32_t>(
             component.MaxVisibleChoices,
-            static_cast<uint32_t>(choices.size()));
+            static_cast<uint32_t>(visibleIndices.size()));
 
         for (uint32_t i = 0; i < component.MaxVisibleChoices; ++i)
         {
@@ -2188,11 +2212,12 @@ namespace Wheatear {
             SetWidgetVisible(scene, entityName, visible);
             if (visible)
             {
-                const std::string choiceText = std::to_string(i + 1) + ". " + choices[i].Text;
+                const size_t scriptIndex = visibleIndices[i];
+                const std::string choiceText = std::to_string(i + 1) + ". " + choices[scriptIndex].Text;
                 PreloadTextForEntity(scene, entityName, choiceText);
                 SetText(scene, entityName, choiceText);
                 SetButtonCommand(scene, entityName,
-                    IsExternalChoiceCommand(choices[i].TargetLabel) ? choices[i].TargetLabel : "");
+                    IsExternalChoiceCommand(choices[scriptIndex].TargetLabel) ? choices[scriptIndex].TargetLabel : "");
             }
             else
             {

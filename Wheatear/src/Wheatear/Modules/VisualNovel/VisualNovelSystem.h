@@ -62,6 +62,14 @@ namespace Wheatear {
         void UpdateBGM(Scene* scene, const VisualNovelComponent& component, RuntimeState& state);
         void UpdateMusicNotice(Scene* scene, const VisualNovelComponent& component, RuntimeState& state, float deltaSeconds);
 
+        // Returns the script indices of choices whose RequiredFlag (if any) is
+        // currently set in the progression StoryFlags. A choice with an empty
+        // RequiredFlag is always visible. Render and input both consume this so
+        // the Nth visible button always maps to the same choice regardless of
+        // which options are gated out.
+        static std::vector<size_t> CollectVisibleChoiceIndices(
+            const std::vector<VisualNovelChoice>& choices);
+
     private:
         std::unordered_map<UUID, RuntimeState> m_RuntimeStates;
     };

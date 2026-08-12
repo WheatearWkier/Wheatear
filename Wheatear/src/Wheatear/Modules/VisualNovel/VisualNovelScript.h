@@ -28,6 +28,10 @@ namespace Wheatear {
     {
         std::string Text;
         std::string TargetLabel;
+        // Optional progression story flag; the choice only renders when this flag
+        // is set (or always, when empty). Kept out of the line-text grammar via the
+        // trailing "if flag <id>" token so existing scripts parse unchanged.
+        std::string RequiredFlag;
     };
 
     struct VisualNovelLine

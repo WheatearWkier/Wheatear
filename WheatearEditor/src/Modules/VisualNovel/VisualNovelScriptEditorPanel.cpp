@@ -145,6 +145,41 @@ namespace Wheatear {
                 ImGuiInputTextFlags_AllowTabInput);
         }
 
+        // Mirrors the runtime grammar: an optional trailing " if flag <id>" /
+// "if flag:<id>" clause (the last three whitespace tokens after "->")
+// gates this option behind a progression story flag.
+static void ExtractChoiceRequiredFlag(std::string& target, std::string& outFlag)
+        {
+            target = Trim(target);
+            if (target.empty())
+                return;
+
+            std::vector<std::string> words;
+            {
+                std::istringstream w(target);
+                std::string w0;
+                while (w >> w0)
+                    words.push_back(w0);
+            }
+            if (words.size() < 3 || words[words.size() - 3] != "if" || words[words.size() - 2] != "flag")
+                return;
+
+            std::string flagId = words.back();
+            if (flagId.rfind("flag:", 0) == 0 && flagId.size() > 5)
+                flagId = flagId.substr(5);
+
+            std::string label;
+            for (size_t i = 0; i < words.size() - 3; ++i)
+            {
+                if (!label.empty())
+                    label += " ";
+                label += words[i];
+            }
+
+            outFlag = Trim(flagId);
+            target = Trim(label);
+        }
+
         static std::vector<VisualNovelScriptEditorPanel::ChoiceEntry> ParseChoices(const std::string& payload)
         {
             std::vector<VisualNovelScriptEditorPanel::ChoiceEntry> choices;
@@ -166,6 +201,7 @@ namespace Wheatear {
                 {
                     choice.Text = StripQuotes(segment.substr(0, arrow));
                     choice.Target = StripQuotes(segment.substr(arrow + 2));
+                    ExtractChoiceRequiredFlag(choice.Target, choice.RequiredFlag);
                 }
                 choices.push_back(std::move(choice));
             }
@@ -595,7 +631,11 @@ namespace Wheatear {
                             out << " | ";
                         out << row.Choices[i].Text;
                         if (!row.Choices[i].Target.empty())
+                        {
                             out << " -> " << row.Choices[i].Target;
+                            if (!row.Choices[i].RequiredFlag.empty())
+                                out << " if flag " << row.Choices[i].RequiredFlag;
+                        }
                     }
                     break;
                 case RowKind::Goto:
@@ -803,6 +843,9 @@ namespace Wheatear {
                         m_Dirty = true;
                     if (EditorContentPickers::DrawStringPicker("Target", row.Choices[i].Target, CollectLabels(m_Rows), 512))
                         m_Dirty = true;
+                    if (EditorContentPickers::DrawStoryFlagField("Required Flag", row.Choices[i].RequiredFlag, 256))
+                        m_Dirty = true;
+                    EditorWidgets::HelpTooltip("Optional. The choice only renders when this story flag is set. Leave empty for an always-visible option.");
                     ImGui::SameLine();
                     if (ImGui::Button("Remove"))
                     {
@@ -816,7 +859,7 @@ namespace Wheatear {
                 }
                 if (ImGui::Button("+ Choice Option"))
                 {
-                    row.Choices.push_back({ "New option", "target_label" });
+                    row.Choices.push_back({ "New option", "target_label", {} });
                     m_Dirty = true;
                 }
                 break;
@@ -916,7 +959,7 @@ namespace Wheatear {
                 row.Value = "neutral";
                 break;
             case RowKind::Choice:
-                row.Choices.push_back({ "Option text", "target_label" });
+                row.Choices.push_back({ "Option text", "target_label", {} });
                 break;
             case RowKind::Dialogue:
                 row.Name = "Leo";
