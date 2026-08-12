@@ -1,5 +1,6 @@
 #pragma once
 
+#include <array>
 #include <filesystem>
 #include <memory>
 #include <string>
@@ -35,6 +36,7 @@ namespace Wheatear {
         void DrawFeelTab();
         void DrawRulesTab();
         void DrawAttacksTab();
+        void DrawAnimationsTab();
         void DrawSkillsTab();
         void DrawProgressionTab();
         void DrawRawPreviewTab();
@@ -50,6 +52,10 @@ namespace Wheatear {
         std::string m_SelectedAttackId;
         std::string m_SelectedSkillId;
         std::string m_SelectedProfileId;
+        std::string m_SelectedPlayerAnimId;
+        std::string m_SelectedGruntAnimId;
+        std::string m_SelectedBossAnimId;
+        std::array<char, 64> m_NewAnimId{};
         std::string m_RawPreview;
         std::unique_ptr<YAML::Node> m_Root;
     };

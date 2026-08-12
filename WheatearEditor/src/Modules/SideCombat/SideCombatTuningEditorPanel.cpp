@@ -1,5 +1,6 @@
 #include "SideCombatTuningEditorPanel.h"
 
+#include "Editor/EditorContentPickers.h"
 #include "Editor/EditorFloatingWindow.h"
 #include "Editor/EditorWidgets.h"
 #include "Editor/GameplayEditorShell.h"
@@ -121,6 +122,12 @@ namespace Wheatear {
             if (ImGui::BeginTabItem("Attacks"))
             {
                 DrawAttacksTab();
+                ImGui::EndTabItem();
+            }
+
+            if (ImGui::BeginTabItem("Animations"))
+            {
+                DrawAnimationsTab();
                 ImGui::EndTabItem();
             }
 
@@ -510,6 +517,173 @@ namespace Wheatear {
         if (DrawFloat(attack, "hitPause", "Hit Pause", 0.005f, 0.0f, 1.0f)) m_Dirty = true;
         if (DrawFloat(attack, "cameraShake", "Camera Shake", 0.001f, 0.0f, 1.0f, "%.4f")) m_Dirty = true;
         if (DrawFloat(attack, "cameraShakeDuration", "Shake Duration", 0.005f, 0.0f, 2.0f)) m_Dirty = true;
+    }
+
+    namespace {
+
+        using namespace EditorWidgets;
+
+        // Animations tab: visuals.<animMapsKey>[id] all share an identical schema
+        //   { pattern, atlas{ sheet,cellWidth,cellHeight,columns,startFrame },
+        //     frameCount, frameRate, loop, renderScale, renderOffset }
+        // and are the largest hand-YAML section in side_combat_tuning.yaml.
+        void DrawAnimEntry(YAML::Node entry, bool& dirty)
+        {
+            if (DrawString(entry, "pattern", "Pattern", 256)) dirty = true;
+
+            YAML::Node atlas = EnsureMap(entry, "atlas");
+            std::string sheet = EditorWidgets::ReadString(atlas, "sheet");
+            if (EditorContentPickers::DrawAssetField(
+                    "Atlas Sheet", sheet, EditorWidgets::AssetReferenceKind::Texture, 512))
+            {
+                atlas["sheet"] = sheet;
+                dirty = true;
+            }
+            if (DrawInt(atlas, "cellWidth", "Cell Width", 0, 8192)) dirty = true;
+            if (DrawInt(atlas, "cellHeight", "Cell Height", 0, 8192)) dirty = true;
+            if (DrawInt(atlas, "columns", "Columns", 0, 256)) dirty = true;
+            if (DrawInt(atlas, "startFrame", "Start Frame", 0, 4096)) dirty = true;
+
+            if (DrawInt(entry, "frameCount", "Frame Count", 1, 256)) dirty = true;
+            if (DrawFloat(entry, "frameRate", "Frame Rate", 0.5f, 1.0f, 120.0f)) dirty = true;
+            if (DrawBool(entry, "loop", "Loop")) dirty = true;
+            if (DrawVec2(entry, "renderScale", "Render Scale", 0.01f)) dirty = true;
+            if (DrawVec2(entry, "renderOffset", "Render Offset", 0.005f)) dirty = true;
+        }
+
+        // Returns true while the caller should keep drawing the selected entry.
+        bool DrawAnimSelectorAndOps(const char* groupLabel,
+            YAML::Node animMaps,
+            std::string& selectedId,
+            std::array<char, 64>& newIdBuf,
+            bool& dirty)
+        {
+            const std::vector<std::string> keys = MapKeys(animMaps);
+            if (std::find(keys.begin(), keys.end(), selectedId) == keys.end())
+                selectedId = keys.empty() ? std::string{} : keys.front();
+
+            ImGui::AlignTextToFramePadding();
+            ImGui::TextUnformatted(groupLabel);
+            ImGui::SameLine();
+            ImGui::PushItemWidth(220.0f);
+            const char* preview = selectedId.empty() ? "(none)" : selectedId.c_str();
+            if (ImGui::BeginCombo("##AnimId", preview))
+            {
+                for (size_t i = 0; i < keys.size(); ++i)
+                {
+                    const std::string& key = keys[i];
+                    const bool isSelected = selectedId == key;
+                    const std::string itemLabel =
+                        EditorWidgets::LabelWithId(key, "anim_selector:" + std::to_string(i));
+                    if (ImGui::Selectable(itemLabel.c_str(), isSelected))
+                        selectedId = key;
+                    if (isSelected)
+                        ImGui::SetItemDefaultFocus();
+                }
+                ImGui::EndCombo();
+            }
+            ImGui::PopItemWidth();
+
+            ImGui::SameLine();
+            if (ImGui::Button("Add"))
+            {
+                std::string newId = newIdBuf.data();
+                // trim
+                auto end = std::find(newId.begin(), newId.end(), '\0');
+                if (end != newId.end()) newId.erase(end, newId.end());
+                while (!newId.empty() && std::isspace(static_cast<unsigned char>(newId.front()))) newId.erase(newId.begin());
+                while (!newId.empty() && std::isspace(static_cast<unsigned char>(newId.back()))) newId.pop_back();
+                if (!newId.empty() && !animMaps[newId])
+                {
+                    EnsureMap(animMaps, newId.c_str());
+                    selectedId = newId;
+                    newIdBuf.fill('\0');
+                    dirty = true;
+                }
+            }
+            ImGui::SameLine();
+            ImGui::PushItemWidth(180.0f);
+            ImGui::InputTextWithHint("##NewAnimId", "new animation id", newIdBuf.data(), newIdBuf.size());
+            ImGui::PopItemWidth();
+
+            if (!selectedId.empty() && !keys.empty())
+            {
+                ImGui::SameLine();
+                if (ImGui::Button("Delete"))
+                {
+                    animMaps.remove(selectedId);
+                    selectedId.clear();
+                    dirty = true;
+                }
+            }
+
+            return !selectedId.empty();
+        }
+
+    } // namespace
+
+    void SideCombatTuningEditorPanel::DrawAnimationsTab()
+    {
+        EditorWidgets::SectionHeader("Animations",
+            "Atlas-backed animation clips for player / grunt / boss, plus stage shadow visuals. "
+            "This is the largest section of the tuning YAML - author it here instead of by hand.");
+
+        YAML::Node root = *m_Root;
+        YAML::Node visuals = EnsureMap(root, "visuals");
+
+        if (ImGui::CollapsingHeader("Stage Shadow", ImGuiTreeNodeFlags_DefaultOpen))
+        {
+            // shadowColor is a 4-float sequence [r,g,b,a]; EditorWidgets has no DrawVec4,
+            // so read/write it manually as two DragFloat2 pairs to stay in the helper idiom.
+            float color[4] = { 0.0f, 0.0f, 0.0f, 1.0f };
+            const YAML::Node shadowColor = visuals["shadowColor"];
+            if (shadowColor && shadowColor.IsSequence() && shadowColor.size() >= 4)
+            {
+                for (int i = 0; i < 4; ++i)
+                    color[i] = shadowColor[i].as<float>(color[i]);
+            }
+            const std::string shadowColorLabel = EditorWidgets::LabelWithId("Shadow Color", "shadowColor");
+            bool changed = false;
+            ImGui::PushID("shadowColorRGB");
+            if (ImGui::DragFloat2("RGB", color, 0.01f, 0.0f, 1.0f, "%.3f")) changed = true;
+            ImGui::PopID();
+            ImGui::PushID("shadowColorA");
+            if (ImGui::DragFloat("Alpha", &color[3], 0.01f, 0.0f, 1.0f, "%.3f")) changed = true;
+            ImGui::PopID();
+            (void)shadowColorLabel;
+            if (changed)
+            {
+                YAML::Node seq(YAML::NodeType::Sequence);
+                for (int i = 0; i < 4; ++i) seq.push_back(color[i]);
+                visuals["shadowColor"] = seq;
+                m_Dirty = true;
+            }
+            if (DrawVec2(visuals, "shadowOffset", "Shadow Offset", 0.01f)) m_Dirty = true;
+            if (DrawFloat(visuals, "shadowMinAlpha", "Shadow Min Alpha", 0.01f, 0.0f, 1.0f)) m_Dirty = true;
+            if (DrawFloat(visuals, "shadowMaxAlpha", "Shadow Max Alpha", 0.01f, 0.0f, 1.0f)) m_Dirty = true;
+            if (DrawFloat(visuals, "shadowAirFadeHeight", "Shadow Air Fade Height", 0.05f, 0.0f, 20.0f)) m_Dirty = true;
+        }
+
+        auto drawGroup = [&](const char* groupLabel, const char* mapKey, std::string& selectedId)
+        {
+            if (!ImGui::CollapsingHeader(groupLabel, ImGuiTreeNodeFlags_DefaultOpen))
+                return;
+            YAML::Node animMaps = EnsureMap(visuals, mapKey);
+            if (!DrawAnimSelectorAndOps(groupLabel, animMaps, selectedId, m_NewAnimId, m_Dirty))
+            {
+                ImGui::Separator();
+                EditorWidgets::EmptyState("No animation selected.",
+                    "Add an id above or pick an existing clip from the dropdown.");
+                return;
+            }
+            ImGui::Separator();
+            YAML::Node entry = EnsureMap(animMaps, selectedId.c_str());
+            DrawAnimEntry(entry, m_Dirty);
+        };
+
+        drawGroup("Player Animations", "playerAnimations", m_SelectedPlayerAnimId);
+        drawGroup("Grunt Animations", "gruntAnimations", m_SelectedGruntAnimId);
+        drawGroup("Boss Animations", "bossAnimations", m_SelectedBossAnimId);
     }
 
     void SideCombatTuningEditorPanel::DrawSkillsTab()
