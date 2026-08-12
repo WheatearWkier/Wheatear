@@ -13,6 +13,7 @@ from PIL import Image, ImageDraw, ImageFilter
 ROOT = Path(__file__).resolve().parents[2]
 ASSET_ROOT = ROOT / "WheatearEditor" / "assets" / "vertical_slice" / "tactical_combat"
 SCENE_PATH = ROOT / "WheatearEditor" / "assets" / "scenes" / "VerticalSliceTacticalCombat.wt"
+ENTITY_IDS: dict[str, int] = {}
 
 
 def ensure(path: Path) -> None:
@@ -305,6 +306,7 @@ def quote(value: str) -> str:
 
 
 def entity_header(entity_id: int, tag: str) -> list[str]:
+    ENTITY_IDS[tag] = entity_id
     return [
         f"  - Entity: {entity_id}",
         "    TagComponent:",
@@ -317,6 +319,7 @@ def entity_header(entity_id: int, tag: str) -> list[str]:
 
 
 def widget_block(pos: tuple[float, float], size: tuple[float, float], sort: int, parent: str = "WT_UI_Canvas", visible: bool = True) -> list[str]:
+    parent_entity = ENTITY_IDS.get(parent, 0) if parent else 0
     return [
         "    UIWidgetComponent:",
         f"      Visible: {'true' if visible else 'false'}",
@@ -325,8 +328,7 @@ def widget_block(pos: tuple[float, float], size: tuple[float, float], sort: int,
         "      Rotation: 0",
         "      Anchor: 0",
         f"      SortOrder: {sort}",
-        "      ParentEntity: 0",
-        f"      ParentTag: {quote(parent)}",
+        f"      ParentEntity: {parent_entity}",
     ]
 
 
@@ -418,6 +420,7 @@ def unit_component_block(unit: dict[str, object]) -> list[str]:
 
 
 def generate_scene() -> None:
+    ENTITY_IDS.clear()
     eid = 950200000
 
     def next_id() -> int:
@@ -608,7 +611,7 @@ def generate_scene() -> None:
 
 def main() -> None:
     save(background(), ASSET_ROOT / "backgrounds" / "bg_tactical_ruins_grid.png")
-    for kind in ("plain", "move", "attack", "selected"):
+    for kind in ("plain",):
         save(tile(kind), ASSET_ROOT / "tiles" / f"tile_{kind}.png")
     save(panel((420, 96), (86, 220, 236)), ASSET_ROOT / "ui" / "panels" / "panel_tactical_top.png")
     save(panel((420, 720), (86, 220, 236)), ASSET_ROOT / "ui" / "panels" / "panel_tactical_status.png")
@@ -620,7 +623,6 @@ def main() -> None:
         ("magic", "cmd_tac_magic.png"),
         ("heal", "cmd_tac_heal.png"),
         ("guard", "cmd_tac_guard.png"),
-        ("wait", "cmd_tac_wait.png"),
         ("enemy", "cmd_tac_enemy.png"),
         ("enemy_magic", "cmd_tac_enemy_magic.png"),
     ):

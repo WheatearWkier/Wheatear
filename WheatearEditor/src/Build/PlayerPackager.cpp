@@ -8,6 +8,8 @@
 #include "Wheatear/Core/PlayerConfig.h"
 
 #include <algorithm>
+#include <chrono>
+#include <cctype>
 #include <cstdlib>
 #include <cstring>
 #include <fstream>
@@ -91,6 +93,24 @@ namespace Wheatear {
         static std::string Quote(const std::filesystem::path& path)
         {
             return "\"" + path.string() + "\"";
+        }
+
+        static std::string ToLower(std::string value)
+        {
+            std::transform(value.begin(), value.end(), value.begin(),
+                [](unsigned char c) { return static_cast<char>(std::tolower(c)); });
+            return value;
+        }
+
+        static double ElapsedMilliseconds(std::chrono::steady_clock::time_point startedAt)
+        {
+            return std::chrono::duration<double, std::milli>(
+                std::chrono::steady_clock::now() - startedAt).count();
+        }
+
+        static void LogTimedStep(const char* label, std::chrono::steady_clock::time_point startedAt)
+        {
+            WT_CORE_INFO("PlayerPackager: {} completed in {:.2f} ms", label, ElapsedMilliseconds(startedAt));
         }
 
 #ifdef WT_PLATFORM_WINDOWS
@@ -271,6 +291,23 @@ namespace Wheatear {
             return false;
         }
 
+        static bool ShouldTryAssetPackCompression(const std::filesystem::path& relativePath)
+        {
+            const std::string extension = ToLower(relativePath.extension().generic_string());
+            return extension != ".png"
+                && extension != ".jpg"
+                && extension != ".jpeg"
+                && extension != ".webp"
+                && extension != ".mp3"
+                && extension != ".ogg"
+                && extension != ".wav"
+                && extension != ".ttf"
+                && extension != ".ttc"
+                && extension != ".otf"
+                && extension != ".woff"
+                && extension != ".woff2";
+        }
+
         static bool CopyLooseRuntimeDataAssets(const std::filesystem::path& projectRoot,
             const std::vector<std::filesystem::path>& packageAssets,
             const std::filesystem::path& outputDirectory,
@@ -372,7 +409,9 @@ namespace Wheatear {
 
                 uint32_t method = kAssetPackMethodStore;
                 std::vector<unsigned char> payload = sourceBytes;
-                if (!sourceBytes.empty() && sourceBytes.size() <= static_cast<size_t>(std::numeric_limits<int>::max()))
+                if (ShouldTryAssetPackCompression(std::filesystem::path(entryPath))
+                    && !sourceBytes.empty()
+                    && sourceBytes.size() <= static_cast<size_t>(std::numeric_limits<int>::max()))
                 {
                     int compressedSize = 0;
                     unsigned char* compressed = stbi_zlib_compress(
@@ -506,6 +545,7 @@ namespace Wheatear {
 #ifndef WT_PLATFORM_WINDOWS
         return Fail("Player packaging currently targets Windows builds.");
 #else
+        const auto packageStarted = std::chrono::steady_clock::now();
         const std::filesystem::path repositoryRoot = FindRepositoryRoot();
         if (repositoryRoot.empty())
             return Fail("Could not locate Wheatear.sln; unable to find repository root.");
@@ -555,6 +595,7 @@ namespace Wheatear {
 
         const std::filesystem::path powerShell = FindPowerShell();
         std::string errorMessage;
+        const auto sandboxBuildStarted = std::chrono::steady_clock::now();
         if (!BuildVisualStudioProject(repositoryRoot,
             powerShell,
             buildScript,
@@ -563,11 +604,13 @@ namespace Wheatear {
             "build-sandbox-msbuild.log",
             "WheatearSandbox",
             &errorMessage))
-        {
-            return Fail(errorMessage, outputDirectory);
-        }
+            {
+                return Fail(errorMessage, outputDirectory);
+            }
+        LogTimedStep("WheatearSandbox build", sandboxBuildStarted);
 
         const std::filesystem::path currentExecutable = GetCurrentExecutablePath();
+        const auto editorBuildStarted = std::chrono::steady_clock::now();
         if (IsSameNormalizedPath(currentExecutable, editorExe))
         {
             WT_CORE_INFO("PlayerPackager: using running editor executable '{}'; skipping locked self-rebuild",
@@ -583,6 +626,10 @@ namespace Wheatear {
             &errorMessage))
         {
             return Fail(errorMessage, outputDirectory);
+        }
+        else
+        {
+            LogTimedStep("WheatearEditor build", editorBuildStarted);
         }
 
         if (!std::filesystem::exists(playerExe))
@@ -634,6 +681,7 @@ namespace Wheatear {
         }
 
         const std::filesystem::path startupScene = ResolvePackagedStartupScene(options, outputDirectory);
+        const auto dependencyScanStarted = std::chrono::steady_clock::now();
         AssetDependencyScanOptions scanOptions;
         scanOptions.ProjectRoot = AssetPath::GetProjectRoot();
         scanOptions.StartupAsset = startupScene;
@@ -641,6 +689,7 @@ namespace Wheatear {
         scanOptions.IncludeBuiltinAssets = true;
         scanOptions.IncludeUnusedAssets = false;
         const AssetDependencyReport dependencyReport = AssetDependencyScanner::BuildReport(scanOptions);
+        LogTimedStep("Dependency scan", dependencyScanStarted);
         if (!dependencyReport.MissingReferences.empty() || !dependencyReport.MissingSceneTransitions.empty())
         {
             const std::filesystem::path preflightReportPath = outputDirectory / "package_preflight_report.txt";
@@ -662,31 +711,40 @@ namespace Wheatear {
             return Fail("No assets were collected for the package.", outputDirectory);
 
         const std::filesystem::path assetPackPath = outputDirectory / kAssetPackFilename;
+        const auto writePackStarted = std::chrono::steady_clock::now();
         if (!WriteAssetPack(AssetPath::GetProjectRoot(), packageAssets, assetPackPath, &errorMessage))
             return Fail("Failed to write asset pack: " + errorMessage, outputDirectory);
+        LogTimedStep("Asset pack write", writePackStarted);
 
+        const auto copyLooseStarted = std::chrono::steady_clock::now();
         if (!CopyLooseRuntimeDataAssets(AssetPath::GetProjectRoot(), packageAssets, outputDirectory, &errorMessage))
             return Fail("Failed to copy loose runtime data assets: " + errorMessage, outputDirectory);
+        LogTimedStep("Loose runtime data copy", copyLooseStarted);
 
         const std::filesystem::path reportPath = outputDirectory / "package_report.txt";
+        const auto reportStarted = std::chrono::steady_clock::now();
         if (!WritePackageReport(options, dependencyReport, reportPath, assetPackPath, editorOutputDirectory, &errorMessage))
             return Fail("Failed to write package report: " + errorMessage, outputDirectory);
+        LogTimedStep("Package report write", reportStarted);
 
         RuntimePlayerConfig playerConfig;
         playerConfig.StartupScene = startupScene;
         playerConfig.EnableScripts = options.EnableScripts;
+        const auto configStarted = std::chrono::steady_clock::now();
         if (!SaveRuntimePlayerConfig(outputDirectory / "assets" / "game" / "player.config",
             playerConfig,
             EngineInfo::EditorName))
         {
             return Fail("Failed to write player.config.", outputDirectory);
         }
+        LogTimedStep("Player config write", configStarted);
 
         const std::filesystem::path executablePath = outputDirectory / "WheatearSandbox.exe";
         const std::filesystem::path editorExecutablePath = editorOutputDirectory / "WheatearEditor.exe";
         WT_CORE_INFO("PlayerPackager: package completed '{}' with {} packed assets",
             outputDirectory.string(),
             packageAssets.size());
+        LogTimedStep("Full package", packageStarted);
         std::error_code sizeError;
         PlayerPackageResult result;
         result.Success = true;

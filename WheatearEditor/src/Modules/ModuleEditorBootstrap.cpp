@@ -2,22 +2,27 @@
 #include "ModuleEditorBootstrap.h"
 
 #include "Editor/EditorComponentRegistry.h"
+#include "Editor/EventScriptGraphPanel.h"
 #include "Editor/EditorToolRegistry.h"
 #include "Panels/EditorCommands.h"
 #include "Modules/ArcadeCombat/ArcadeCombatDrawer.h"
 #include "Modules/SideCombat/SideCombatDrawer.h"
+#include "Modules/SideCombat/SideCombatHudPresetEditorPanel.h"
 #include "Modules/SideCombat/SideCombatTuningEditorPanel.h"
+#include "Modules/Progression/ProgressionContentEditorPanel.h"
 #include "Modules/TacticalCombat/TacticalCombatDrawer.h"
 #include "Modules/TurnCombat/TurnCombatDrawer.h"
 #include "Modules/VisualNovel/VisualNovelDrawer.h"
 #include "Modules/VisualNovel/VisualNovelScriptEditorPanel.h"
 #include "Tools/ProjectHealthPanel.h"
+#include "Tools/AssetAliasManifestEditorPanel.h"
 #include "Tools/WAOActionEditorPanel.h"
 #include "Wheatear/Modules/ArcadeCombat/ArcadeCombatComponents.h"
 #include "Wheatear/Modules/SideCombat/SideCombatComponents.h"
 #include "Wheatear/Modules/TacticalCombat/TacticalCombatComponents.h"
 #include "Wheatear/Modules/TurnCombat/TurnCombatComponents.h"
 #include "Wheatear/Modules/VisualNovel/VisualNovelComponents.h"
+#include "Wheatear/Scene/Components.h"
 
 namespace Wheatear {
 
@@ -35,15 +40,39 @@ namespace Wheatear {
             return panel;
         }
 
+        static SideCombatHudPresetEditorPanel& GetSideCombatHudPresetEditorPanel()
+        {
+            static SideCombatHudPresetEditorPanel panel;
+            return panel;
+        }
+
+        static ProgressionContentEditorPanel& GetProgressionContentEditorPanel()
+        {
+            static ProgressionContentEditorPanel panel;
+            return panel;
+        }
+
         static ProjectHealthPanel& GetProjectHealthPanel()
         {
             static ProjectHealthPanel panel;
             return panel;
         }
 
+        static AssetAliasManifestEditorPanel& GetAssetAliasManifestEditorPanel()
+        {
+            static AssetAliasManifestEditorPanel panel;
+            return panel;
+        }
+
         static WAOActionEditorPanel& GetWAOActionEditorPanel()
         {
             static WAOActionEditorPanel panel;
+            return panel;
+        }
+
+        static EventScriptGraphPanel& GetEventScriptEditorPanel()
+        {
+            static EventScriptGraphPanel panel;
             return panel;
         }
 
@@ -78,6 +107,29 @@ namespace Wheatear {
         static void RegisterEditorTools()
         {
             EditorToolRegistry::Register({
+                "Event Script Editor",
+                EditorToolCategory::Gameplay,
+                [](const EditorToolContext& context)
+                {
+                    std::string scriptPath = "assets/events/vertical_slice_flow.wts";
+                    std::string eventName;
+                    if (context.SelectedEntity && context.SelectedEntity.HasComponent<EventScriptComponent>())
+                    {
+                        const auto& script = context.SelectedEntity.GetComponent<EventScriptComponent>();
+                        if (!script.ScriptPath.empty())
+                            scriptPath = script.ScriptPath;
+                        eventName = script.StartEvent;
+                    }
+
+                    GetEventScriptEditorPanel().Open(scriptPath, eventName);
+                },
+                []()
+                {
+                    GetEventScriptEditorPanel().OnImGuiRender();
+                }
+            });
+
+            EditorToolRegistry::Register({
                 "Project Health",
                 EditorToolCategory::Diagnostics,
                 [](const EditorToolContext& context)
@@ -91,7 +143,20 @@ namespace Wheatear {
             });
 
             EditorToolRegistry::Register({
-                "WAO Action Debugger",
+                "Asset Alias / Manifest Editor",
+                EditorToolCategory::Gameplay,
+                [](const EditorToolContext& context)
+                {
+                    GetAssetAliasManifestEditorPanel().Open(context);
+                },
+                []()
+                {
+                    GetAssetAliasManifestEditorPanel().OnImGuiRender();
+                }
+            });
+
+            EditorToolRegistry::Register({
+                "WAO Action Editor",
                 EditorToolCategory::Gameplay,
                 [](const EditorToolContext& context)
                 {
@@ -134,6 +199,36 @@ namespace Wheatear {
                 []()
                 {
                     GetSideCombatTuningEditorPanel().OnImGuiRender();
+                }
+            });
+
+            EditorToolRegistry::Register({
+                "Side Combat HUD Preset Editor",
+                EditorToolCategory::Gameplay,
+                [](const EditorToolContext& context)
+                {
+                    std::string presetPath = "side.hud.preset";
+                    if (context.SelectedEntity && context.SelectedEntity.HasComponent<SideCombatLevelComponent>())
+                        presetPath = context.SelectedEntity.GetComponent<SideCombatLevelComponent>().HudPresetPath;
+
+                    GetSideCombatHudPresetEditorPanel().Open(presetPath);
+                },
+                []()
+                {
+                    GetSideCombatHudPresetEditorPanel().OnImGuiRender();
+                }
+            });
+
+            EditorToolRegistry::Register({
+                "Progression Content Editor",
+                EditorToolCategory::Gameplay,
+                [](const EditorToolContext&)
+                {
+                    GetProgressionContentEditorPanel().Open();
+                },
+                []()
+                {
+                    GetProgressionContentEditorPanel().OnImGuiRender();
                 }
             });
         }

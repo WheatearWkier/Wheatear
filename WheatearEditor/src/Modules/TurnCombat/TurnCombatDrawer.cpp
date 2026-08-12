@@ -1,5 +1,7 @@
 #include "TurnCombatDrawer.h"
 
+#include "Editor/CommandBuilder.h"
+#include "Editor/EditorContentPickers.h"
 #include "Editor/EditorWidgets.h"
 #include "Panels/SceneHierarchy/ComponentDrawers.h"
 #include "Wheatear/Modules/TurnCombat/TurnCombatComponents.h"
@@ -15,6 +17,7 @@ namespace Wheatear {
 
     namespace {
 
+        using EditorCommandBuilder::DrawCommandBuilder;
         using EditorWidgets::DrawTeamCombo;
         using EditorWidgets::InputString;
 
@@ -42,7 +45,10 @@ namespace Wheatear {
             const std::string columnsLabel = std::string(label) + " Columns";
             const std::string startLabel = std::string(label) + " Start";
 
-            InputString(sheetLabel.c_str(), atlas.SheetPath, pathWidth);
+            EditorContentPickers::DrawAssetField(sheetLabel.c_str(),
+                atlas.SheetPath,
+                EditorWidgets::AssetReferenceKind::Texture,
+                pathWidth);
             ImGui::DragInt2(cellLabel.c_str(), &atlas.CellWidth, 1.0f, 0, 8192);
             ImGui::DragInt(columnsLabel.c_str(), &atlas.Columns, 1.0f, 0, 256);
             ImGui::DragInt(startLabel.c_str(), &atlas.StartFrame, 1.0f, 0, 4096);
@@ -52,8 +58,9 @@ namespace Wheatear {
 
     void DrawTurnCombatLevelComponent(Entity entity)
     {
-        DrawComponent<TurnCombatLevelComponent>("Turn Combat Level", entity, [](auto& level)
+        DrawComponent<TurnCombatLevelComponent>("Turn Combat Level", entity, [entity](auto& level)
         {
+            EditorWidgets::StatusBadge("Edits Scene", EditorWidgets::StatusKind::Success);
             ImGui::Checkbox("Play On Start", &level.PlayOnStart);
             InputString("Level Id", level.LevelId, 220);
             ImGui::DragFloat("Start Fade", &level.StartFadeDuration, 0.02f, 0.0f, 5.0f);
@@ -61,20 +68,20 @@ namespace Wheatear {
             ImGui::DragFloat("Action Duration", &level.ActionDuration, 0.02f, 0.1f, 5.0f);
             ImGui::DragFloat("Victory Return Delay", &level.VictoryReturnDelay, 0.05f, 0.0f, 10.0f);
             ImGui::DragFloat("Defeat Return Delay", &level.DefeatReturnDelay, 0.05f, 0.0f, 10.0f);
-            InputString("Victory Command", level.VictorySceneCommand, 260);
-            InputString("Defeat Command", level.DefeatSceneCommand, 260);
+            DrawCommandBuilder("Victory Command", level.VictorySceneCommand, 260);
+            DrawCommandBuilder("Defeat Command", level.DefeatSceneCommand, 260);
 
             ImGui::Separator();
             ImGui::TextDisabled("Scene Bindings");
-            InputString("Fade", level.FadeEntityName);
-            InputString("Message Text", level.MessageTextEntityName);
-            InputString("Active Actor Text", level.ActiveActorTextEntityName);
-            InputString("Turn Order Text", level.TurnOrderTextEntityName);
-            InputString("Skill Detail Text", level.SkillDetailTextEntityName);
-            InputString("Command Panel", level.CommandPanelEntityName);
-            InputString("Target Hint Text", level.TargetHintTextEntityName);
-            InputString("Action Flash", level.ActionFlashEntityName);
-            InputString("Action Effect", level.ActionEffectEntityName);
+            EditorContentPickers::DrawSceneEntityField("Fade", entity, level.FadeEntityName);
+            EditorContentPickers::DrawSceneEntityField("Message Text", entity, level.MessageTextEntityName);
+            EditorContentPickers::DrawSceneEntityField("Active Actor Text", entity, level.ActiveActorTextEntityName);
+            EditorContentPickers::DrawSceneEntityField("Turn Order Text", entity, level.TurnOrderTextEntityName);
+            EditorContentPickers::DrawSceneEntityField("Skill Detail Text", entity, level.SkillDetailTextEntityName);
+            EditorContentPickers::DrawSceneEntityField("Command Panel", entity, level.CommandPanelEntityName);
+            EditorContentPickers::DrawSceneEntityField("Target Hint Text", entity, level.TargetHintTextEntityName);
+            EditorContentPickers::DrawSceneEntityField("Action Flash", entity, level.ActionFlashEntityName);
+            EditorContentPickers::DrawSceneEntityField("Action Effect", entity, level.ActionEffectEntityName);
 
             ImGui::Separator();
             ImGui::TextDisabled("Runtime");
@@ -88,8 +95,9 @@ namespace Wheatear {
 
     void DrawTurnCombatantComponent(Entity entity)
     {
-        DrawComponent<TurnCombatantComponent>("Turn Combatant", entity, [](auto& combatant)
+        DrawComponent<TurnCombatantComponent>("Turn Combatant", entity, [entity](auto& combatant)
         {
+            EditorWidgets::StatusBadge("Edits Scene", EditorWidgets::StatusKind::Success);
             DrawTeamCombo(combatant.Team);
             ImGui::DragInt("Slot", &combatant.Slot, 1.0f, 0, 16);
             InputString("Display Name", combatant.DisplayName);
@@ -116,11 +124,11 @@ namespace Wheatear {
 
             ImGui::Separator();
             ImGui::TextDisabled("UI Bindings");
-            InputString("Health Bar", combatant.HealthBarEntityName);
-            InputString("Mana Bar", combatant.ManaBarEntityName);
-            InputString("Status Text", combatant.StatusTextEntityName);
-            InputString("Target Button", combatant.TargetButtonEntityName);
-            InputString("Target Marker", combatant.TargetMarkerEntityName);
+            EditorContentPickers::DrawSceneEntityField("Health Bar", entity, combatant.HealthBarEntityName);
+            EditorContentPickers::DrawSceneEntityField("Mana Bar", entity, combatant.ManaBarEntityName);
+            EditorContentPickers::DrawSceneEntityField("Status Text", entity, combatant.StatusTextEntityName);
+            EditorContentPickers::DrawSceneEntityField("Target Button", entity, combatant.TargetButtonEntityName);
+            EditorContentPickers::DrawSceneEntityField("Target Marker", entity, combatant.TargetMarkerEntityName);
 
             ImGui::Separator();
             ImGui::TextDisabled("Animation Frames");

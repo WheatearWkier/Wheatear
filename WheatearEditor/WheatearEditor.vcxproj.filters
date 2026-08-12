@@ -16,6 +16,9 @@
     <Filter Include="Modules\ArcadeCombat">
       <UniqueIdentifier>{437F8A6D-2F0E-1437-D82C-2832C49A24DD}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Modules\Progression">
+      <UniqueIdentifier>{B458D208-5C33-4D24-B417-1C0E5ACF18D1}</UniqueIdentifier>
+    </Filter>
     <Filter Include="Modules\SideCombat">
       <UniqueIdentifier>{68116838-54F5-288E-BD55-23E1A9581310}</UniqueIdentifier>
     </Filter>
@@ -60,7 +63,16 @@
     <ClInclude Include="src\Build\ProjectSourceScanner.h">
       <Filter>Build</Filter>
     </ClInclude>
+    <ClInclude Include="src\Editor\AssetDocument.h">
+      <Filter>Editor</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Editor\CommandBuilder.h">
+      <Filter>Editor</Filter>
+    </ClInclude>
     <ClInclude Include="src\Editor\CoreEditorComponents.h">
+      <Filter>Editor</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Editor\EditorContentPickers.h">
       <Filter>Editor</Filter>
     </ClInclude>
     <ClInclude Include="src\Editor\EditorCanvasTools.h">
@@ -84,6 +96,9 @@
       <ClInclude Include="src\Editor\EditorPlatform.h">
         <Filter>Editor</Filter>
       </ClInclude>
+    <ClInclude Include="src\Editor\EditorLocale.h">
+      <Filter>Editor</Filter>
+    </ClInclude>
     <ClInclude Include="src\Editor\EditorToolRegistry.h">
       <Filter>Editor</Filter>
     </ClInclude>
@@ -93,10 +108,16 @@
     <ClInclude Include="src\Editor\EventScriptGraphPanel.h">
       <Filter>Editor</Filter>
     </ClInclude>
+    <ClInclude Include="src\Editor\GameplayEditorShell.h">
+      <Filter>Editor</Filter>
+    </ClInclude>
     <ClInclude Include="src\Editor\ModeSelectLayer.h">
       <Filter>Editor</Filter>
     </ClInclude>
     <ClInclude Include="src\Editor\TextAssetEditor.h">
+      <Filter>Editor</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Editor\YamlAssetDocument.h">
       <Filter>Editor</Filter>
     </ClInclude>
     <ClInclude Include="src\Modules\ArcadeCombat\ArcadeCombatDrawer.h">
@@ -105,7 +126,13 @@
     <ClInclude Include="src\Modules\ModuleEditorBootstrap.h">
       <Filter>Modules</Filter>
     </ClInclude>
+    <ClInclude Include="src\Modules\Progression\ProgressionContentEditorPanel.h">
+      <Filter>Modules\Progression</Filter>
+    </ClInclude>
     <ClInclude Include="src\Modules\SideCombat\SideCombatDrawer.h">
+      <Filter>Modules\SideCombat</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Modules\SideCombat\SideCombatHudPresetEditorPanel.h">
       <Filter>Modules\SideCombat</Filter>
     </ClInclude>
     <ClInclude Include="src\Modules\SideCombat\SideCombatTuningEditorPanel.h">
@@ -177,6 +204,9 @@
     <ClInclude Include="src\Tools\ProjectHealthPanel.h">
       <Filter>Tools</Filter>
     </ClInclude>
+    <ClInclude Include="src\Tools\AssetAliasManifestEditorPanel.h">
+      <Filter>Tools</Filter>
+    </ClInclude>
     <ClInclude Include="src\Tools\WAOActionEditorPanel.h">
       <Filter>Tools</Filter>
     </ClInclude>
@@ -246,7 +276,13 @@
     <ClCompile Include="src\Modules\ModuleEditorBootstrap.cpp">
       <Filter>Modules</Filter>
     </ClCompile>
+    <ClCompile Include="src\Modules\Progression\ProgressionContentEditorPanel.cpp">
+      <Filter>Modules\Progression</Filter>
+    </ClCompile>
     <ClCompile Include="src\Modules\SideCombat\SideCombatDrawer.cpp">
+      <Filter>Modules\SideCombat</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Modules\SideCombat\SideCombatHudPresetEditorPanel.cpp">
       <Filter>Modules\SideCombat</Filter>
     </ClCompile>
     <ClCompile Include="src\Modules\SideCombat\SideCombatTuningEditorPanel.cpp">
@@ -319,6 +355,9 @@
       <Filter>Panels</Filter>
     </ClCompile>
     <ClCompile Include="src\Tools\ProjectHealthPanel.cpp">
+      <Filter>Tools</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Tools\AssetAliasManifestEditorPanel.cpp">
       <Filter>Tools</Filter>
     </ClCompile>
     <ClCompile Include="src\Tools\WAOActionEditorPanel.cpp">

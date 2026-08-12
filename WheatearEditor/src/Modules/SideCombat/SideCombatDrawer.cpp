@@ -1,7 +1,10 @@
 #include "SideCombatDrawer.h"
 
+#include "Editor/CommandBuilder.h"
+#include "Editor/EditorContentPickers.h"
 #include "Editor/EditorWidgets.h"
 #include "Editor/TextAssetEditor.h"
+#include "Modules/SideCombat/SideCombatHudPresetEditorPanel.h"
 #include "Modules/SideCombat/SideCombatTuningEditorPanel.h"
 #include "Panels/SceneHierarchy/ComponentDrawers.h"
 #include "Wheatear/Modules/SideCombat/SideCombatHudPreset.h"
@@ -19,6 +22,7 @@ namespace Wheatear {
 
     namespace {
 
+        using EditorCommandBuilder::DrawCommandBuilder;
         using EditorWidgets::DrawTeamCombo;
         using EditorWidgets::InputString;
 
@@ -63,19 +67,30 @@ namespace Wheatear {
             return labels[std::clamp((int)state, 0, 7)];
         }
 
-        static void DrawDeathRewardRow(SideCombatLevelComponent::DeathReward& reward, int index)
+        static void DrawSceneBinding(Entity entity, const char* label, std::string& value)
+        {
+            EditorContentPickers::DrawSceneEntityField(label, entity, value, 260);
+        }
+
+        static void DrawDeathRewardRow(Entity entity, SideCombatLevelComponent::DeathReward& reward, int index)
         {
             ImGui::PushID(index);
             ImGui::Checkbox("Enabled", &reward.Enabled);
             ImGui::DragInt("Enemy Kind", &reward.EnemyKind, 1.0f, -1, 3);
-            InputString("Source Entity", reward.SourceEntityName, 260);
-            InputString("Spawn Entity", reward.SpawnEntityName, 260);
-            InputString("Item Id", reward.ItemId, 260);
+            DrawSceneBinding(entity, "Source Entity", reward.SourceEntityName);
+            DrawSceneBinding(entity, "Spawn Entity", reward.SpawnEntityName);
+            EditorContentPickers::DrawProgressionIdField("Item Id",
+                reward.ItemId,
+                EditorContentPickers::ProgressionIdKind::Material,
+                260);
             InputString("Display Name", reward.DisplayName, 260);
             ImGui::DragInt("Amount", &reward.Amount, 1.0f, 1, 999);
             ImGui::DragFloat3("Offset", glm::value_ptr(reward.Offset), 0.02f);
             ImGui::DragFloat3("Scale", glm::value_ptr(reward.Scale), 0.02f, 0.01f, 20.0f);
-            InputString("Texture Path", reward.TexturePath, 260);
+            EditorWidgets::DrawAssetReferenceField("Texture",
+                reward.TexturePath,
+                EditorWidgets::AssetReferenceKind::Texture,
+                260);
             ImGui::PopID();
         }
 
@@ -111,13 +126,16 @@ namespace Wheatear {
             ImGui::Checkbox("Enabled", &slot.Enabled);
             InputString("Key", slot.Key, 64);
             InputString("Key Label", slot.KeyLabel, 64);
-            InputString("Command", slot.Command, 260);
+            DrawCommandBuilder("Command", slot.Command, 260);
             ImGui::DragFloat2("Position", glm::value_ptr(slot.Position), 0.001f, 0.0f, 1.0f, "%.3f");
             ImGui::DragFloat2("Size", glm::value_ptr(slot.Size), 0.001f, 0.0f, 1.0f, "%.3f");
             ImGui::DragFloat2("Tooltip Position", glm::value_ptr(slot.TooltipPosition), 0.001f, 0.0f, 1.0f, "%.3f");
             ImGui::Checkbox("Use Sheet Icon", &slot.UseSheetIcon);
             ImGui::DragFloat4("Icon Sheet Pixels", glm::value_ptr(slot.IconSheetPixels), 1.0f, 0.0f, 8192.0f, "%.1f");
-            InputString("Icon Texture", slot.IconTexturePath, 260);
+            EditorWidgets::DrawAssetReferenceField("Icon Texture",
+                slot.IconTexturePath,
+                EditorWidgets::AssetReferenceKind::Texture,
+                260);
             InputString("Tooltip", slot.TooltipText, 512);
             ImGui::PopID();
         }
@@ -128,7 +146,7 @@ namespace Wheatear {
             ImGui::Checkbox("Enabled", &slot.Enabled);
             InputString("Key", slot.Key, 64);
             InputString("Shortcut", slot.Shortcut, 64);
-            InputString("Command", slot.Command, 260);
+            DrawCommandBuilder("Command", slot.Command, 260);
             ImGui::DragFloat2("Position", glm::value_ptr(slot.Position), 0.001f, 0.0f, 1.0f, "%.3f");
             ImGui::DragFloat2("Frame Size", glm::value_ptr(slot.FrameSize), 0.001f, 0.0f, 1.0f, "%.3f");
             ImGui::DragFloat2("Icon Inset", glm::value_ptr(slot.IconInset), 0.001f, 0.0f, 1.0f, "%.3f");
@@ -136,7 +154,10 @@ namespace Wheatear {
             ImGui::DragFloat2("Tooltip Position", glm::value_ptr(slot.TooltipPosition), 0.001f, 0.0f, 1.0f, "%.3f");
             ImGui::Checkbox("Use Sheet Icon", &slot.UseSheetIcon);
             ImGui::DragFloat4("Icon Sheet Pixels", glm::value_ptr(slot.IconSheetPixels), 1.0f, 0.0f, 8192.0f, "%.1f");
-            InputString("Icon Texture", slot.IconTexturePath, 260);
+            EditorWidgets::DrawAssetReferenceField("Icon Texture",
+                slot.IconTexturePath,
+                EditorWidgets::AssetReferenceKind::Texture,
+                260);
             InputString("Display Name", slot.DisplayName, 260);
             InputString("Usage Text", slot.UsageText, 512);
             ImGui::PopID();
@@ -152,15 +173,32 @@ namespace Wheatear {
     {
         DrawComponent<SideCombatLevelComponent>("Side Combat Level", entity, [entity](auto& level)
         {
+            EditorWidgets::StatusBadge("Edits Scene", EditorWidgets::StatusKind::Success);
             ImGui::Checkbox("Play On Start", &level.PlayOnStart);
             InputString("Level Id / Unlock Profile", level.LevelId);
             ImGui::TextDisabled("Level Id selects progression.profiles in the tuning YAML.");
-            InputString("Tuning Path", level.TuningPath, 260);
+            EditorWidgets::DrawAssetReferenceField("Tuning",
+                level.TuningPath,
+                EditorWidgets::AssetReferenceKind::Data,
+                260);
             if (ImGui::Button("Open Side Combat Tuning Editor"))
                 SideCombatEditorRequests::RequestOpenTuning(level.TuningPath);
-            if (ImGui::CollapsingHeader("Raw Side Combat Tuning YAML"))
-                EditorUI::DrawTextAssetEditor("Side Combat Tuning YAML", "SideCombatTuningEditor", AssetAliasRegistry::Resolve(level.TuningPath), s_TuningEditors, 512 * 1024);
-            InputString("HUD Preset Path", level.HudPresetPath, 260);
+            if (ImGui::CollapsingHeader("Advanced Raw Side Combat Tuning YAML"))
+            {
+                EditorWidgets::InlineStatus("Advanced raw preview. Prefer Side Combat Tuning Editor for normal authoring.", EditorWidgets::StatusKind::Warning);
+                EditorUI::DrawTextAssetEditor("Side Combat Tuning YAML",
+                    "SideCombatTuningEditor",
+                    AssetAliasRegistry::Resolve(level.TuningPath),
+                    s_TuningEditors,
+                    512 * 1024,
+                    ImGuiInputTextFlags_ReadOnly | ImGuiInputTextFlags_AllowTabInput);
+            }
+            EditorWidgets::DrawAssetReferenceField("HUD Preset",
+                level.HudPresetPath,
+                EditorWidgets::AssetReferenceKind::Data,
+                260);
+            if (ImGui::Button("Open Side Combat HUD Preset Editor"))
+                SideCombatEditorRequests::RequestOpenHudPreset(level.HudPresetPath);
             ImGui::Checkbox("HUD Preset Overrides", &level.HudPresetOverridesEnabled);
             if (ImGui::Button("Apply HUD Preset"))
             {
@@ -191,8 +229,16 @@ namespace Wheatear {
             }
             if (!s_HudPresetStatus.empty())
                 ImGui::TextWrapped("%s", s_HudPresetStatus.c_str());
-            if (ImGui::CollapsingHeader("Raw Side Combat HUD Preset YAML"))
-                EditorUI::DrawTextAssetEditor("Side Combat HUD Preset YAML", "SideCombatHudPresetEditor", AssetAliasRegistry::Resolve(level.HudPresetPath), s_HudPresetEditors, 512 * 1024);
+            if (ImGui::CollapsingHeader("Advanced Raw Side Combat HUD Preset YAML"))
+            {
+                EditorWidgets::InlineStatus("Advanced raw preview. HUD preset should move to a structured preset editor next.", EditorWidgets::StatusKind::Warning);
+                EditorUI::DrawTextAssetEditor("Side Combat HUD Preset YAML",
+                    "SideCombatHudPresetEditor",
+                    AssetAliasRegistry::Resolve(level.HudPresetPath),
+                    s_HudPresetEditors,
+                    512 * 1024,
+                    ImGuiInputTextFlags_ReadOnly | ImGuiInputTextFlags_AllowTabInput);
+            }
             ImGui::DragFloat2("Arena Min", glm::value_ptr(level.ArenaMin), 0.05f);
             ImGui::DragFloat2("Arena Max", glm::value_ptr(level.ArenaMax), 0.05f);
             ImGui::DragFloat("Ground Y", &level.GroundY, 0.02f, -20.0f, 20.0f);
@@ -203,8 +249,8 @@ namespace Wheatear {
             ImGui::DragFloat("Defeat Return Delay", &level.DefeatReturnDelay, 0.05f, 0.0f, 20.0f);
             ImGui::DragFloat("Result Fade", &level.ResultSceneFadeDuration, 0.02f, 0.0f, 5.0f);
             ImGui::DragFloat("Combo Drop Delay", &level.ComboDropDelay, 0.02f, 0.2f, 5.0f);
-            InputString("Victory Command", level.VictorySceneCommand, 260);
-            InputString("Defeat Command", level.DefeatSceneCommand, 260);
+            DrawCommandBuilder("Victory Command", level.VictorySceneCommand, 260);
+            DrawCommandBuilder("Defeat Command", level.DefeatSceneCommand, 260);
             InputString("First Clear Reward", level.FirstClearRewardText, 260);
 
             ImGui::Separator();
@@ -216,7 +262,7 @@ namespace Wheatear {
                 bool removeReward = false;
                 if (ImGui::CollapsingHeader(header.c_str(), ImGuiTreeNodeFlags_DefaultOpen))
                 {
-                    DrawDeathRewardRow(level.DeathRewards[i], i);
+                    DrawDeathRewardRow(entity, level.DeathRewards[i], i);
                     if (ImGui::Button("Remove"))
                         removeReward = true;
                 }
@@ -242,37 +288,37 @@ namespace Wheatear {
             {
                 ImGui::Separator();
                 ImGui::TextDisabled("Scene Bindings");
-                InputString("Player", level.PlayerEntityName);
-                InputString("Boss", level.BossEntityName);
-                InputString("Fade", level.FadeEntityName);
-                InputString("Message Text", level.MessageTextEntityName);
-                InputString("Combo Text", level.ComboTextEntityName);
-                InputString("Skill Text", level.SkillTextEntityName);
-                InputString("Reward Text", level.RewardTextEntityName);
-                InputString("Player Health Bar", level.PlayerHealthBarEntityName);
-                InputString("Player Health Text", level.PlayerHealthTextEntityName);
-                InputString("Boss Health Bar", level.BossHealthBarEntityName);
-                InputString("Boss Health Text", level.BossHealthTextEntityName);
-                InputString("Camera", level.CameraEntityName);
-                InputString("Top Panel", level.TopPanelEntityName);
-                InputString("Combo Panel", level.ComboPanelEntityName);
-                InputString("Combo Frame", level.ComboFrameEntityName);
-                InputString("Combo Label", level.ComboLabelEntityName);
-                InputString("Combo Multiply", level.ComboMultiplyEntityName);
-                InputString("Combo Digit Prefix", level.ComboDigitPrefix);
-                InputString("Skill Bar Panel", level.SkillBarPanelEntityName);
-                InputString("Skill Tooltip Panel", level.SkillTooltipPanelEntityName);
-                InputString("Skill Tooltip Text", level.SkillTooltipTextEntityName);
-                InputString("Joystick Base", level.JoystickBaseEntityName);
-                InputString("Joystick Thumb", level.JoystickThumbEntityName);
-                InputString("Player Mana", level.PlayerManaEntityName);
-                InputString("Player Ultimate Fill", level.PlayerUltimateFillEntityName);
-                InputString("Player Ultimate Mask", level.PlayerUltimateMaskEntityName);
-                InputString("Boss Protection", level.BossProtectionEntityName);
-                InputString("Player Status Prefix", level.PlayerStatusPrefix);
-                InputString("Enemy Status Prefix", level.EnemyStatusPrefix);
-                InputString("Skill Prefix", level.SkillPrefix);
-                InputString("Item Slot Prefix", level.ItemSlotPrefix);
+                DrawSceneBinding(entity, "Player", level.PlayerEntityName);
+                DrawSceneBinding(entity, "Boss", level.BossEntityName);
+                DrawSceneBinding(entity, "Fade", level.FadeEntityName);
+                DrawSceneBinding(entity, "Message Text", level.MessageTextEntityName);
+                DrawSceneBinding(entity, "Combo Text", level.ComboTextEntityName);
+                DrawSceneBinding(entity, "Skill Text", level.SkillTextEntityName);
+                DrawSceneBinding(entity, "Reward Text", level.RewardTextEntityName);
+                DrawSceneBinding(entity, "Player Health Bar", level.PlayerHealthBarEntityName);
+                DrawSceneBinding(entity, "Player Health Text", level.PlayerHealthTextEntityName);
+                DrawSceneBinding(entity, "Boss Health Bar", level.BossHealthBarEntityName);
+                DrawSceneBinding(entity, "Boss Health Text", level.BossHealthTextEntityName);
+                DrawSceneBinding(entity, "Camera", level.CameraEntityName);
+                DrawSceneBinding(entity, "Top Panel", level.TopPanelEntityName);
+                DrawSceneBinding(entity, "Combo Panel", level.ComboPanelEntityName);
+                DrawSceneBinding(entity, "Combo Frame", level.ComboFrameEntityName);
+                DrawSceneBinding(entity, "Combo Label", level.ComboLabelEntityName);
+                DrawSceneBinding(entity, "Combo Multiply", level.ComboMultiplyEntityName);
+                InputString("Combo Digit Prefix", level.ComboDigitPrefix, 128);
+                DrawSceneBinding(entity, "Skill Bar Panel", level.SkillBarPanelEntityName);
+                DrawSceneBinding(entity, "Skill Tooltip Panel", level.SkillTooltipPanelEntityName);
+                DrawSceneBinding(entity, "Skill Tooltip Text", level.SkillTooltipTextEntityName);
+                DrawSceneBinding(entity, "Joystick Base", level.JoystickBaseEntityName);
+                DrawSceneBinding(entity, "Joystick Thumb", level.JoystickThumbEntityName);
+                DrawSceneBinding(entity, "Player Mana", level.PlayerManaEntityName);
+                DrawSceneBinding(entity, "Player Ultimate Fill", level.PlayerUltimateFillEntityName);
+                DrawSceneBinding(entity, "Player Ultimate Mask", level.PlayerUltimateMaskEntityName);
+                DrawSceneBinding(entity, "Boss Protection", level.BossProtectionEntityName);
+                InputString("Player Status Prefix", level.PlayerStatusPrefix, 128);
+                InputString("Enemy Status Prefix", level.EnemyStatusPrefix, 128);
+                InputString("Skill Prefix", level.SkillPrefix, 128);
+                InputString("Item Slot Prefix", level.ItemSlotPrefix, 128);
 
                 if (ImGui::CollapsingHeader("HUD Layout"))
                 {
@@ -522,7 +568,9 @@ namespace Wheatear {
     {
         DrawComponent<SidePickupComponent>("Side Pickup", entity, [](auto& pickup)
         {
-            InputString("Item Id", pickup.ItemId);
+            EditorContentPickers::DrawProgressionIdField("Item Id",
+                pickup.ItemId,
+                EditorContentPickers::ProgressionIdKind::Material);
             InputString("Display Name", pickup.DisplayName);
             ImGui::DragInt("Amount", &pickup.Amount, 1.0f, 1, 999);
             ImGui::DragFloat("Pickup Radius", &pickup.PickupRadius, 0.01f, 0.01f, 5.0f);

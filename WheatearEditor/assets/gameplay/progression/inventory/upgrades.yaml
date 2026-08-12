@@ -13,8 +13,6 @@ upgrades:
     attributeBonus: { ATK: 3, MATK: 3 }
     unlockSkills:
       - 'magic_sword_lv2'
-      - 'basic_slash_boost'
-      - 'air_chain_training'
   travelerArmorLv1:
     costs:
       - item: 'MAT-BEAST-SINEW'

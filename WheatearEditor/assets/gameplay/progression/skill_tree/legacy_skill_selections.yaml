@@ -1,9 +1,0 @@
-legacySkillSelections:
-  select_skill_core: 'magic_sword_core'
-  select_skill_melee: 'ME-01'
-  select_skill_launcher: 'ME-02'
-  select_skill_air: 'ME-03'
-  select_skill_magic: 'MA-01'
-  select_skill_support: 'FU-04'
-  select_skill_mobility: 'MO-01'
-  select_skill_break: 'LI-02'

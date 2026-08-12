@@ -19,12 +19,19 @@ namespace Wheatear {
         void DrawActionDetails();
         void DrawRecipeOverview();
         void DrawRecipeEditor();
+        bool DrawParamsEditor();
         void DrawEffectsTable();
         void DrawEffectEditor();
         void DrawValidationPanel();
         void DrawPreviewPanel();
         void DrawDebugLedger();
+        void DrawActionSetsPanel();
+        void LoadActionSetEditor();
+        bool SaveActionSetEditor();
         void BeginEdit(const WAO::ActionRecipe& recipe);
+        void CreateRecipeInSet(const std::string& setKey, const WAO::ActionRecipe* sourceRecipe = nullptr);
+        void DuplicateSelectedRecipe();
+        bool DeleteSelectedRecipe();
         bool SaveEditedRecipe();
         bool ReloadActionSources();
 
@@ -38,8 +45,13 @@ namespace Wheatear {
         bool m_EditDirty = false;
         WAO::ActionRecipe m_EditRecipe;
         std::string m_EditingActionId;
+        std::string m_NewActionSetKey;
         std::string m_SaveStatus;
         int m_SelectedEffectIndex = -1;
+        bool m_ActionSetsLoaded = false;
+        bool m_ActionSetsDirty = false;
+        std::string m_ActionSetsStatus;
+        std::string m_SelectedActionSetKey;
     };
 
 } // namespace Wheatear

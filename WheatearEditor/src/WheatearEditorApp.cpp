@@ -19,6 +19,11 @@ namespace Wheatear
 {
     namespace {
 
+        static bool IsCommandOption(const std::string& argument)
+        {
+            return argument.rfind("--", 0) == 0;
+        }
+
         static ApplicationSpecification CreateEditorSpecification(ApplicationCommandLineArgs args)
         {
             ApplicationSpecification specification;
@@ -33,7 +38,7 @@ namespace Wheatear
             for (int i = 1; i < args.Count; ++i)
             {
                 const std::string argument = args[i];
-                if (argument == "--package-player" || argument == "--build-player")
+                if (argument == "--package" || argument == "--package-player" || argument == "--build-player")
                     return true;
             }
             return false;
@@ -66,8 +71,12 @@ namespace Wheatear
             for (int i = 1; i < args.Count; ++i)
             {
                 const std::string argument = args[i];
-                if ((argument == "--startup" || argument == "--startup-scene") && i + 1 < args.Count)
+                if ((argument == "--startup" || argument == "--startup-scene")
+                    && i + 1 < args.Count
+                    && !IsCommandOption(args[i + 1]))
+                {
                     return args[i + 1];
+                }
             }
 
             return EngineInfo::DefaultStartupScene;
@@ -78,8 +87,12 @@ namespace Wheatear
             for (int i = 1; i < args.Count; ++i)
             {
                 const std::string argument = args[i];
-                if ((argument == "--package-player" || argument == "--build-player") && i + 1 < args.Count)
+                if ((argument == "--package" || argument == "--package-player" || argument == "--build-player")
+                    && i + 1 < args.Count
+                    && !IsCommandOption(args[i + 1]))
+                {
                     return args[i + 1];
+                }
             }
 
             return EngineInfo::DefaultStartupScene;
@@ -163,6 +176,22 @@ namespace Wheatear
             return 1;
         }
 
+        static int RunPackagePlayer(ApplicationCommandLineArgs args)
+        {
+            PlayerPackageOptions options;
+            options.StartupScene = ReadPackageStartupScene(args);
+            options.Configuration = "Debug";
+            options.EnableScripts = ReadPackageEnableScripts(args);
+            options.IncludeDebugSymbols = false;
+
+            const PlayerPackageResult result = PlayerPackager::PackagePlayer(options);
+            if (result.Success)
+                WT_CORE_INFO("{}", result.Message);
+            else
+                WT_CORE_ERROR("{}", result.Message);
+            return result.Success ? 0 : 1;
+        }
+
     } // namespace
 
     class WheatearEditor : public Application
@@ -171,24 +200,6 @@ namespace Wheatear
         WheatearEditor(ApplicationCommandLineArgs args)
             : Application(CreateEditorSpecification(args))
         {
-            if (IsPackagePlayerCommand(args))
-            {
-                PlayerPackageOptions options;
-                options.StartupScene = ReadPackageStartupScene(args);
-                options.Configuration = "Debug";
-                options.EnableScripts = ReadPackageEnableScripts(args);
-                options.IncludeDebugSymbols = false;
-
-                const PlayerPackageResult result = PlayerPackager::PackagePlayer(options);
-                if (result.Success)
-                    WT_CORE_INFO("{}", result.Message);
-                else
-                    WT_CORE_ERROR("{}", result.Message);
-
-                Close();
-                return;
-            }
-
             if (IsRefreshAssetRegistryCommand(args))
             {
                 const std::filesystem::path projectRoot = GetSpecification().ProjectRoot.empty()
@@ -222,6 +233,8 @@ namespace Wheatear
 
     Application* CreateApplication(ApplicationCommandLineArgs args)
     {
+        if (IsPackagePlayerCommand(args))
+            std::exit(RunPackagePlayer(args));
         if (IsProjectHealthCommand(args))
             std::exit(RunProjectHealth(args));
 

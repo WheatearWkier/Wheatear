@@ -44,12 +44,17 @@ namespace Wheatear::ProgressionContent {
     struct SkillNodeDefinition
     {
         std::string Id;
+        std::string ParentId;
+        bool HasParentId = false;
         std::string Name;
         std::string Branch;
         std::string Input;
         std::string ComboRole;
         std::string Requirement;
         std::string Description;
+        float PositionX = 0.5f;
+        float PositionY = 0.5f;
+        bool HasPosition = false;
         int UnlockChapter = 1;
     };
 
@@ -93,7 +98,6 @@ namespace Wheatear::ProgressionContent {
         std::vector<std::string> DungeonRewardSummary;
         std::vector<GameProgress::RelationshipRecord> Relationships;
         std::vector<SkillNodeDefinition> SkillNodes;
-        std::unordered_map<std::string, std::string> LegacySkillSelections;
         std::vector<EquipmentSlotDefinition> EquipmentSlots;
         std::vector<EquipmentDefinition> Equipment;
     };
@@ -105,6 +109,5 @@ namespace Wheatear::ProgressionContent {
     WHEATEAR_API const DungeonDefinition* FindDungeon(const std::string& dungeonId);
     WHEATEAR_API const SkillNodeDefinition* FindSkillNode(const std::string& nodeId);
     WHEATEAR_API const EquipmentDefinition* FindEquipment(const std::string& equipmentId);
-    WHEATEAR_API std::string ResolveLegacySkillSelection(const std::string& action);
 
 } // namespace Wheatear::ProgressionContent

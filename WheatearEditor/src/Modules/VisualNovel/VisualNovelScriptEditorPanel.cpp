@@ -1,7 +1,10 @@
 #include "VisualNovelScriptEditorPanel.h"
 
 #include "Editor/EditorFloatingWindow.h"
+#include "Editor/EditorContentPickers.h"
+#include "Editor/EditorLocale.h"
 #include "Editor/EditorWidgets.h"
+#include "Editor/GameplayEditorShell.h"
 #include "Wheatear/Core/AssetAliasRegistry.h"
 #include "Wheatear/Core/AssetPath.h"
 
@@ -211,6 +214,87 @@ namespace Wheatear {
             return {};
         }
 
+        static void SortUnique(std::vector<std::string>& values)
+        {
+            values.erase(std::remove_if(values.begin(), values.end(), [](const std::string& value)
+            {
+                return Trim(value).empty();
+            }), values.end());
+            std::sort(values.begin(), values.end());
+            values.erase(std::unique(values.begin(), values.end()), values.end());
+        }
+
+        static std::vector<std::string> CollectLabels(const std::vector<VisualNovelScriptEditorPanel::Row>& rows)
+        {
+            std::vector<std::string> labels;
+            for (const VisualNovelScriptEditorPanel::Row& row : rows)
+            {
+                if (row.Kind == VisualNovelScriptEditorPanel::RowKind::Label)
+                    labels.push_back(row.Name);
+            }
+            SortUnique(labels);
+            return labels;
+        }
+
+        static std::vector<std::string> CollectCharacterIds(const std::vector<VisualNovelScriptEditorPanel::Row>& rows)
+        {
+            std::vector<std::string> ids;
+            for (const VisualNovelScriptEditorPanel::Row& row : rows)
+            {
+                if (row.Kind == VisualNovelScriptEditorPanel::RowKind::Character)
+                    ids.push_back(row.Name);
+                else if (row.Kind == VisualNovelScriptEditorPanel::RowKind::Dialogue)
+                    ids.push_back(row.Name);
+                else if (row.Kind == VisualNovelScriptEditorPanel::RowKind::Expression)
+                    ids.push_back(row.Name);
+            }
+            SortUnique(ids);
+            return ids;
+        }
+
+        static std::vector<std::string> CollectExpressionIds(const std::vector<VisualNovelScriptEditorPanel::Row>& rows,
+            const std::string& character)
+        {
+            std::vector<std::string> ids;
+            for (const VisualNovelScriptEditorPanel::Row& row : rows)
+            {
+                if (row.Kind != VisualNovelScriptEditorPanel::RowKind::Expression)
+                    continue;
+                if (!character.empty() && row.Name != character)
+                    continue;
+                ids.push_back(row.Value);
+            }
+            SortUnique(ids);
+            return ids;
+        }
+
+        static std::vector<std::string> PortraitStyleChoices()
+        {
+            std::vector<std::string> choices = {
+                AssetAliasRegistry::Path("vn.default.portrait_pattern")
+            };
+            const std::filesystem::path portraitRoot = AssetPath::Resolve("assets/vertical_slice/vn/portraits");
+            if (std::filesystem::is_directory(portraitRoot))
+            {
+                std::error_code error;
+                for (const auto& entry : std::filesystem::recursive_directory_iterator(portraitRoot, error))
+                {
+                    if (error || !entry.is_regular_file())
+                        continue;
+
+                    const std::string extension = entry.path().extension().generic_string();
+                    if (extension != ".png" && extension != ".jpg" && extension != ".jpeg")
+                        continue;
+
+                    std::filesystem::path relative = std::filesystem::relative(entry.path(), AssetPath::GetProjectRoot(), error);
+                    if (!error)
+                        choices.push_back(relative.generic_string());
+                }
+            }
+            SortUnique(choices);
+            return choices;
+        }
+
     } // namespace
 
     namespace VisualNovelEditorRequests {
@@ -257,30 +341,36 @@ namespace Wheatear {
             Load();
 
         EditorFloatingWindow::Begin("VN Script Editor", &m_Open, 0, { 1180.0f, 760.0f });
-        EditorWidgets::PanelHeader("VN Script Editor", "Timeline-first authoring for dialogue, choices, characters, BGM cues, and raw script output.");
+        EditorWidgets::PanelHeader(
+            EditorLocale::Text("VN Script Editor", "视觉小说脚本编辑器"),
+            EditorLocale::Text("Timeline-first authoring for dialogue, choices, characters, BGM cues, and raw script output.", "以时间线方式编辑对白、选项、角色、BGM 和脚本预览。"));
         EditorWidgets::StatusBadge((std::to_string(m_Rows.size()) + " row(s)").c_str(), EditorWidgets::StatusKind::Info);
         ImGui::SameLine();
-        EditorWidgets::StatusBadge(m_Dirty ? "Unsaved edit" : "Clean",
-            m_Dirty ? EditorWidgets::StatusKind::Warning : EditorWidgets::StatusKind::Success);
-        ImGui::SameLine();
         EditorFloatingWindow::DrawToggleButton("VN Script Editor");
+        EditorGameplayShell::DrawDocumentStatus({
+            EditorGameplayShell::DocumentKind::Asset,
+            m_Dirty,
+            true,
+            m_SourcePath,
+            m_Status
+        });
         DrawToolbar();
 
         if (ImGui::BeginTabBar("##VNEditorTabs"))
         {
-            if (ImGui::BeginTabItem("Timeline"))
+            if (ImGui::BeginTabItem(EditorLocale::Text("Timeline", "时间线")))
             {
                 DrawTimeline();
                 ImGui::EndTabItem();
             }
 
-            if (ImGui::BeginTabItem("Characters / BGM"))
+            if (ImGui::BeginTabItem(EditorLocale::Text("Characters / BGM", "角色 / BGM")))
             {
                 DrawLibraries();
                 ImGui::EndTabItem();
             }
 
-            if (ImGui::BeginTabItem("Raw Preview"))
+            if (EditorGameplayShell::BeginRawPreviewTab("Advanced Raw"))
             {
                 DrawRawPreview();
                 ImGui::EndTabItem();
@@ -525,7 +615,7 @@ namespace Wheatear {
         EditorWidgets::SectionHeader("Source", "The script file remains the data source used by runtime VN playback.");
 
         ImGui::PushItemWidth(-1.0f);
-        if (InputString("Script", m_SourcePath, 512))
+        if (EditorContentPickers::DrawAssetField("Script", m_SourcePath, EditorWidgets::AssetReferenceKind::Script, 512))
             m_Loaded = false;
         ImGui::PopItemWidth();
 
@@ -556,9 +646,18 @@ namespace Wheatear {
         if (ImGui::Button("+ Choice")) AddRow(RowKind::Choice);
         if (ImGui::Button("+ Character")) AddRow(RowKind::Character);
         ImGui::SameLine();
+        if (ImGui::Button("+ Show")) AddRow(RowKind::Show);
+        ImGui::SameLine();
+        if (ImGui::Button("+ Hide")) AddRow(RowKind::Hide);
+        ImGui::SameLine();
+        if (ImGui::Button("+ Expression")) AddRow(RowKind::Expression);
+        if (ImGui::Button("+ Goto")) AddRow(RowKind::Goto);
+        ImGui::SameLine();
         if (ImGui::Button("+ Background")) AddRow(RowKind::Background);
         ImGui::SameLine();
         if (ImGui::Button("+ Label")) AddRow(RowKind::Label);
+        ImGui::SameLine();
+        if (ImGui::Button("+ End")) AddRow(RowKind::End);
 
         ImGui::Separator();
         if (m_Rows.empty())
@@ -571,6 +670,7 @@ namespace Wheatear {
             std::string label = std::to_string(i + 1) + "  [" + KindName(row.Kind) + "]  " + RowSummary(row);
             if (label.size() > 96)
                 label = label.substr(0, 93) + "...";
+            label = EditorWidgets::LabelWithId(label, "vn_row:" + std::to_string(i));
             if (ImGui::Selectable(label.c_str(), m_SelectedRow == i))
                 m_SelectedRow = i;
         }
@@ -628,7 +728,7 @@ namespace Wheatear {
                     m_Dirty = true;
                 break;
             case RowKind::Background:
-                if (InputString("Background", row.Value, 512))
+                if (EditorContentPickers::DrawAssetField("Background", row.Value, EditorWidgets::AssetReferenceKind::Texture, 512))
                     m_Dirty = true;
                 break;
             case RowKind::Music:
@@ -642,9 +742,13 @@ namespace Wheatear {
                             row.Value.clear();
                             m_Dirty = true;
                         }
-                        for (const std::string& asset : m_BGMAssets)
+                        for (size_t i = 0; i < m_BGMAssets.size(); ++i)
                         {
-                            if (ImGui::Selectable(asset.c_str(), asset == row.Value))
+                            const std::string& asset = m_BGMAssets[i];
+                            const std::string label = EditorWidgets::LabelWithId(
+                                asset,
+                                "vn_bgm:" + std::to_string(i));
+                            if (ImGui::Selectable(label.c_str(), asset == row.Value))
                             {
                                 row.Value = asset;
                                 m_Dirty = true;
@@ -653,7 +757,7 @@ namespace Wheatear {
                         ImGui::EndCombo();
                     }
                 }
-                if (InputString("BGM Path", row.Value, 512))
+                if (EditorContentPickers::DrawAssetField("BGM Path", row.Value, EditorWidgets::AssetReferenceKind::Audio, 512))
                     m_Dirty = true;
                 if (InputString("Display Name", row.Text, 256))
                     m_Dirty = true;
@@ -667,25 +771,25 @@ namespace Wheatear {
                     m_Dirty = true;
                 if (InputString("Display Name", row.Text, 128))
                     m_Dirty = true;
-                if (InputString("Portrait Style", row.Value, 512))
+                if (EditorContentPickers::DrawStringPicker("Portrait Style", row.Value, PortraitStyleChoices(), 512))
                     m_Dirty = true;
                 break;
             case RowKind::Show:
-                if (InputString("Characters", row.Value, 512))
+                if (EditorContentPickers::DrawStringPicker("Characters", row.Value, CollectCharacterIds(m_Rows), 512))
                     m_Dirty = true;
                 break;
             case RowKind::Hide:
-                if (InputString("Characters / all", row.Value, 512))
+                if (EditorContentPickers::DrawStringPicker("Characters / all", row.Value, CollectCharacterIds(m_Rows), 512))
                     m_Dirty = true;
                 break;
             case RowKind::Expression:
-                if (InputString("Character", row.Name, 128))
+                if (EditorContentPickers::DrawStringPicker("Character", row.Name, CollectCharacterIds(m_Rows), 128))
                     m_Dirty = true;
-                if (InputString("Expression", row.Value, 128))
+                if (EditorContentPickers::DrawStringPicker("Expression", row.Value, CollectExpressionIds(m_Rows, row.Name), 128))
                     m_Dirty = true;
                 break;
             case RowKind::Dialogue:
-                if (InputString("Speaker", row.Name, 128))
+                if (EditorContentPickers::DrawStringPicker("Speaker", row.Name, CollectCharacterIds(m_Rows), 128))
                     m_Dirty = true;
                 if (InputMultiline("Text", row.Text, ImVec2(-1.0f, 130.0f)))
                     m_Dirty = true;
@@ -697,7 +801,7 @@ namespace Wheatear {
                     ImGui::Text("Choice %d", i + 1);
                     if (InputString("Text", row.Choices[i].Text, 512))
                         m_Dirty = true;
-                    if (InputString("Target", row.Choices[i].Target, 512))
+                    if (EditorContentPickers::DrawStringPicker("Target", row.Choices[i].Target, CollectLabels(m_Rows), 512))
                         m_Dirty = true;
                     ImGui::SameLine();
                     if (ImGui::Button("Remove"))
@@ -717,7 +821,7 @@ namespace Wheatear {
                 }
                 break;
             case RowKind::Goto:
-                if (InputString("Target Label", row.Value, 256))
+                if (EditorContentPickers::DrawStringPicker("Target Label", row.Value, CollectLabels(m_Rows), 256))
                     m_Dirty = true;
                 break;
             case RowKind::End:
@@ -759,7 +863,7 @@ namespace Wheatear {
             ImGui::PushID(10000 + i);
             ImGui::Separator();
             ImGui::Text("Row %d", i + 1);
-            if (InputString("Path", row.Value, 512)) m_Dirty = true;
+            if (EditorContentPickers::DrawAssetField("Path", row.Value, EditorWidgets::AssetReferenceKind::Audio, 512)) m_Dirty = true;
             if (InputString("Display Name", row.Text, 256)) m_Dirty = true;
             ImGui::PopID();
         }
@@ -771,13 +875,19 @@ namespace Wheatear {
     {
         EditorWidgets::SectionHeader("Raw Preview", "Generated script text. Save writes the Timeline data to this format.");
         std::string preview = SerializeRows();
-        InputMultiline("##RawPreview", preview, ImVec2(-1.0f, -1.0f), std::max<size_t>(preview.size() + 1, 4096));
+        EditorWidgets::InputMultilineString("##RawPreview",
+            preview,
+            ImVec2(-1.0f, -1.0f),
+            std::max<size_t>(preview.size() + 1, 4096),
+            ImGuiInputTextFlags_ReadOnly | ImGuiInputTextFlags_AllowTabInput);
     }
 
     void VisualNovelScriptEditorPanel::AddRow(RowKind kind)
     {
         Row row;
         row.Kind = kind;
+        const std::vector<std::string> characterIds = CollectCharacterIds(m_Rows);
+        const std::vector<std::string> labels = CollectLabels(m_Rows);
         switch (kind)
         {
             case RowKind::Label:
@@ -795,12 +905,27 @@ namespace Wheatear {
                 row.Text = "角色";
                 row.Value = AssetAliasRegistry::Path("vn.default.portrait_pattern");
                 break;
+            case RowKind::Show:
+                row.Value = characterIds.empty() ? "Character" : characterIds.front();
+                break;
+            case RowKind::Hide:
+                row.Value = characterIds.empty() ? "Character" : characterIds.front();
+                break;
+            case RowKind::Expression:
+                row.Name = characterIds.empty() ? "Character" : characterIds.front();
+                row.Value = "neutral";
+                break;
             case RowKind::Choice:
                 row.Choices.push_back({ "Option text", "target_label" });
                 break;
             case RowKind::Dialogue:
                 row.Name = "Leo";
                 row.Text = "新台词。";
+                break;
+            case RowKind::Goto:
+                row.Value = labels.empty() ? "target_label" : labels.front();
+                break;
+            case RowKind::End:
                 break;
             default:
                 row.Raw = "";

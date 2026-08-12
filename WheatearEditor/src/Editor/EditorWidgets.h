@@ -38,6 +38,7 @@ namespace Wheatear::EditorWidgets {
     void StatusBadge(const char* label, StatusKind kind = StatusKind::Neutral);
     void InlineStatus(const std::string& message, StatusKind kind = StatusKind::Info);
     void EmptyState(const char* title, const char* description = nullptr);
+    std::string LabelWithId(const std::string& label, const std::string& id);
     bool SearchBar(const char* id, char* buffer, size_t bufferSize, const char* hint = "Search...");
     bool IconButton(const char* id,
         const Ref<Texture2D>& icon,
@@ -50,6 +51,18 @@ namespace Wheatear::EditorWidgets {
         const char* cancelLabel = "Cancel",
         bool* cancelClicked = nullptr);
 
+    enum class AssetReferenceKind
+    {
+        Any = 0,
+        Texture,
+        Audio,
+        Font,
+        Data,
+        Scene,
+        Script,
+        Prefab
+    };
+
     std::vector<std::string> SplitList(const std::string& text);
     std::string JoinList(const std::vector<std::string>& values);
 
@@ -61,6 +74,10 @@ namespace Wheatear::EditorWidgets {
     void OpenProjectAssetFolder(const std::string& relativePath);
     void DrawPathTools(const char* id, const std::string& relativePath);
     void DrawLabeledPathTools(const char* label, const std::string& relativePath);
+    bool DrawAssetReferenceField(const char* label,
+        std::string& reference,
+        AssetReferenceKind kind = AssetReferenceKind::Any,
+        size_t capacity = 512);
 
     template<typename T>
     T ReadScalar(const YAML::Node& node, const char* key, T fallback)

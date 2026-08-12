@@ -7,6 +7,14 @@ skillNodes:
     requirement: '序章后由真青梅赠与'
     description: '魔剑会自动吸收靠近的材料，是主角后续成长和双修技能的承载物。'
     unlockChapter: 0
+  - id: 'magic_sword_lv2'
+    name: '魔剑 Lv2 觉醒'
+    branch: '核心'
+    input: '据点强化'
+    comboRole: '开启魔法、融合和更稳定的空连衔接'
+    requirement: '魔核碎片 x1 / 兽筋 x2 / 熊爪 x1'
+    description: '消耗黑熊战掉落的核心材料，让魔剑进入 Lv2。完成后，依赖 Lv2 的技能节点可以继续学习。'
+    unlockChapter: 2
   - id: 'ME-01'
     name: '三段斩'
     branch: '近战'

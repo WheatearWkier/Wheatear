@@ -1,14 +1,12 @@
 #pragma once
 
-#include "Wheatear/Core/AssetPath.h"
+#include "Editor/AssetDocument.h"
 
 #include <imgui/imgui.h>
 
 #include <algorithm>
 #include <cstring>
 #include <filesystem>
-#include <fstream>
-#include <iterator>
 #include <string>
 #include <unordered_map>
 #include <vector>
@@ -17,6 +15,7 @@ namespace Wheatear::EditorUI {
 
     struct TextAssetEditorState
     {
+        EditorDocuments::TextAssetDocument Document;
         std::string SourcePath;
         std::filesystem::path ResolvedPath;
         std::vector<char> Buffer;
@@ -38,6 +37,36 @@ namespace Wheatear::EditorUI {
         state.Buffer.assign(std::max<size_t>(capacity, 1), '\0');
     }
 
+    inline void SyncTextAssetMetadata(TextAssetEditorState& state)
+    {
+        state.SourcePath = state.Document.GetSourcePath();
+        state.ResolvedPath = state.Document.GetResolvedPath();
+        state.Loaded = state.Document.IsLoaded();
+        state.Dirty = state.Document.IsDirty();
+        state.Status = state.Document.GetStatus();
+    }
+
+    inline void SyncTextAssetBufferFromDocument(TextAssetEditorState& state, size_t defaultCapacity)
+    {
+        constexpr size_t maxEditorCapacity = 2 * 1024 * 1024;
+        const std::string& text = state.Document.GetText();
+        const size_t targetCapacity = std::min(maxEditorCapacity, std::max(defaultCapacity, text.size() + 4096));
+        ResetBuffer(state, targetCapacity);
+
+        const size_t copyLength = std::min(text.size(), state.Buffer.size() - 1);
+        if (copyLength > 0)
+            std::memcpy(state.Buffer.data(), text.data(), copyLength);
+
+        SyncTextAssetMetadata(state);
+    }
+
+    inline void MarkTextAssetDirty(TextAssetEditorState& state)
+    {
+        const size_t length = GetTextLength(state.Buffer);
+        state.Document.SetText(std::string(state.Buffer.data(), state.Buffer.data() + length), true);
+        SyncTextAssetMetadata(state);
+    }
+
     inline TextAssetEditorState& GetTextAssetState(
         std::unordered_map<std::string, TextAssetEditorState>& cache,
         const std::string& sourcePath,
@@ -55,84 +84,21 @@ namespace Wheatear::EditorUI {
 
     inline bool LoadTextAsset(TextAssetEditorState& state, const std::string& sourcePath, size_t defaultCapacity)
     {
-        state.SourcePath = sourcePath;
-        state.ResolvedPath = AssetPath::Resolve(sourcePath);
-
-        if (sourcePath.empty())
-        {
-            ResetBuffer(state, defaultCapacity);
-            state.Loaded = true;
-            state.Dirty = false;
-            state.Status = "No asset path set.";
-            return false;
-        }
-
-        if (!std::filesystem::exists(state.ResolvedPath))
-        {
-            ResetBuffer(state, defaultCapacity);
-            state.Loaded = true;
-            state.Dirty = false;
-            state.Status = "File does not exist yet. Save will create it.";
-            return false;
-        }
-
-        std::ifstream input(state.ResolvedPath, std::ios::binary);
-        if (!input)
-        {
-            ResetBuffer(state, defaultCapacity);
-            state.Loaded = true;
-            state.Dirty = false;
-            state.Status = "Failed to open file for reading.";
-            return false;
-        }
-
-        std::string text((std::istreambuf_iterator<char>(input)), std::istreambuf_iterator<char>());
         constexpr size_t maxEditorCapacity = 2 * 1024 * 1024;
-        const size_t targetCapacity = std::min(maxEditorCapacity, std::max(defaultCapacity, text.size() + 4096));
-        ResetBuffer(state, targetCapacity);
-
-        const size_t copyLength = std::min(text.size(), state.Buffer.size() - 1);
-        if (copyLength > 0)
-            std::memcpy(state.Buffer.data(), text.data(), copyLength);
-
-        state.Loaded = true;
-        state.Dirty = false;
-        state.Status = (copyLength == text.size())
-            ? "Loaded."
-            : "Loaded with truncation because the file is larger than the editor text buffer.";
-        return true;
+        state.Document.SetSourcePath(sourcePath);
+        const bool loaded = state.Document.Load(maxEditorCapacity);
+        SyncTextAssetBufferFromDocument(state, defaultCapacity);
+        return loaded;
     }
 
     inline bool SaveTextAsset(TextAssetEditorState& state, const std::string& sourcePath)
     {
-        state.SourcePath = sourcePath;
-        state.ResolvedPath = AssetPath::Resolve(sourcePath);
-
-        if (sourcePath.empty())
-        {
-            state.Status = "Cannot save because the asset path is empty.";
-            return false;
-        }
-
-        const std::filesystem::path parent = state.ResolvedPath.parent_path();
-        if (!parent.empty())
-            std::filesystem::create_directories(parent);
-
-        std::ofstream output(state.ResolvedPath, std::ios::binary | std::ios::trunc);
-        if (!output)
-        {
-            state.Status = "Failed to open file for writing.";
-            return false;
-        }
-
         const size_t length = GetTextLength(state.Buffer);
-        if (length > 0)
-            output.write(state.Buffer.data(), static_cast<std::streamsize>(length));
-
-        state.Loaded = true;
-        state.Dirty = false;
-        state.Status = "Saved.";
-        return true;
+        state.Document.SetSourcePath(sourcePath);
+        state.Document.SetText(std::string(state.Buffer.data(), state.Buffer.data() + length), true);
+        const bool saved = state.Document.Save();
+        SyncTextAssetMetadata(state);
+        return saved;
     }
 
     inline void DrawTextAssetEditor(
@@ -140,7 +106,8 @@ namespace Wheatear::EditorUI {
         const char* editorId,
         const std::string& sourcePath,
         std::unordered_map<std::string, TextAssetEditorState>& cache,
-        size_t defaultCapacity = 256 * 1024)
+        size_t defaultCapacity = 256 * 1024,
+        ImGuiInputTextFlags textFlags = ImGuiInputTextFlags_AllowTabInput)
     {
         ImGui::PushID(editorId);
         if (ImGui::CollapsingHeader(title, ImGuiTreeNodeFlags_DefaultOpen))
@@ -154,9 +121,12 @@ namespace Wheatear::EditorUI {
             if (ImGui::Button("Reload"))
                 LoadTextAsset(state, sourcePath, defaultCapacity);
 
-            ImGui::SameLine();
-            if (ImGui::Button("Save"))
-                SaveTextAsset(state, sourcePath);
+            if ((textFlags & ImGuiInputTextFlags_ReadOnly) == 0)
+            {
+                ImGui::SameLine();
+                if (ImGui::Button("Save"))
+                    SaveTextAsset(state, sourcePath);
+            }
 
             if (state.Dirty)
             {
@@ -168,8 +138,8 @@ namespace Wheatear::EditorUI {
                 ImGui::TextWrapped("%s", state.Status.c_str());
 
             ImVec2 editorSize(-1.0f, 260.0f);
-            if (ImGui::InputTextMultiline("##TextAssetBuffer", state.Buffer.data(), state.Buffer.size(), editorSize, ImGuiInputTextFlags_AllowTabInput))
-                state.Dirty = true;
+            if (ImGui::InputTextMultiline("##TextAssetBuffer", state.Buffer.data(), state.Buffer.size(), editorSize, textFlags))
+                MarkTextAssetDirty(state);
         }
         ImGui::PopID();
     }

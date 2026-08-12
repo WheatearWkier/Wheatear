@@ -218,7 +218,10 @@ namespace Wheatear {
                 ImGui::SameLine(0, 2);
             first = false;
 
-            if (ImGui::SmallButton(part.string().c_str()))
+            const std::string breadcrumbLabel = EditorWidgets::LabelWithId(
+                part.string(),
+                "breadcrumb:" + accumulated.generic_string());
+            if (ImGui::SmallButton(breadcrumbLabel.c_str()))
                 NavigateTo(GetEditorAssetPath().parent_path() / accumulated);
 
             ImGui::SameLine(0, 2);

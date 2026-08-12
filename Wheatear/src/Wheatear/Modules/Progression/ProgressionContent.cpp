@@ -137,9 +137,7 @@ namespace Wheatear::ProgressionContent {
             content.MagicSwordLv2.Bonus.ATK = 3;
             content.MagicSwordLv2.Bonus.MATK = 3;
             content.MagicSwordLv2.UnlockSkills = {
-                "magic_sword_lv2",
-                "basic_slash_boost",
-                "air_chain_training"
+                "magic_sword_lv2"
             };
             content.TravelerArmorLv1.Costs = {
                 { "MAT-BEAST-SINEW", "兽筋", 1 },
@@ -192,24 +190,19 @@ namespace Wheatear::ProgressionContent {
             content.SkillNodes = {
                 {
                     "magic_sword_core",
+                    "",
+                    false,
                     "魔剑核心",
                     "核心",
                     "剧情获得",
                     "技能树中心",
                     "序章后由真青梅赠与",
                     "魔剑会自动吸收靠近的材料，是主角后续成长和双修技能的承载物。",
+                    0.50f,
+                    0.50f,
+                    false,
                     0
                 }
-            };
-            content.LegacySkillSelections = {
-                { "select_skill_core", "magic_sword_core" },
-                { "select_skill_melee", "ME-01" },
-                { "select_skill_launcher", "ME-02" },
-                { "select_skill_air", "ME-03" },
-                { "select_skill_magic", "MA-01" },
-                { "select_skill_support", "FU-04" },
-                { "select_skill_mobility", "MO-01" },
-                { "select_skill_break", "LI-02" }
             };
             content.EquipmentSlots = {
                 { "weapon", "副武器" },
@@ -320,6 +313,36 @@ namespace Wheatear::ProgressionContent {
             }
         }
 
+        static bool ReadSkillNodePosition(const YAML::Node& item, float& x, float& y)
+        {
+            const YAML::Node position = item["position"];
+            if (!position)
+                return false;
+
+            try
+            {
+                if (position.IsSequence() && position.size() >= 2)
+                {
+                    x = std::clamp(position[0].as<float>(x), 0.0f, 1.0f);
+                    y = std::clamp(position[1].as<float>(y), 0.0f, 1.0f);
+                    return true;
+                }
+
+                if (position.IsMap())
+                {
+                    x = std::clamp(position["x"].as<float>(x), 0.0f, 1.0f);
+                    y = std::clamp(position["y"].as<float>(y), 0.0f, 1.0f);
+                    return true;
+                }
+            }
+            catch (...)
+            {
+                return false;
+            }
+
+            return false;
+        }
+
         static void LoadSkillNodes(const YAML::Node& node, Content* content)
         {
             if (!node || !node.IsSequence() || !content)
@@ -331,12 +354,16 @@ namespace Wheatear::ProgressionContent {
             {
                 SkillNodeDefinition skill;
                 skill.Id = ReadString(item["id"]);
+                const YAML::Node parentId = item["parentId"];
+                skill.HasParentId = parentId.IsDefined();
+                skill.ParentId = ReadString(parentId);
                 skill.Name = ReadString(item["name"], skill.Id);
                 skill.Branch = ReadString(item["branch"]);
                 skill.Input = ReadString(item["input"]);
                 skill.ComboRole = ReadString(item["comboRole"]);
                 skill.Requirement = ReadString(item["requirement"]);
                 skill.Description = ReadString(item["description"]);
+                skill.HasPosition = ReadSkillNodePosition(item, skill.PositionX, skill.PositionY);
                 skill.UnlockChapter = item["unlockChapter"].as<int>(skill.UnlockChapter);
                 if (!skill.Id.empty())
                     content->SkillNodes.push_back(std::move(skill));
@@ -426,8 +453,6 @@ namespace Wheatear::ProgressionContent {
                 content->Relationships = fallback.Relationships;
             if (content->SkillNodes.empty())
                 content->SkillNodes = fallback.SkillNodes;
-            if (content->LegacySkillSelections.empty())
-                content->LegacySkillSelections = fallback.LegacySkillSelections;
             if (content->EquipmentSlots.empty())
                 content->EquipmentSlots = fallback.EquipmentSlots;
             if (content->Equipment.empty())
@@ -451,8 +476,6 @@ namespace Wheatear::ProgressionContent {
                 content->DungeonRewardSummary = ReadStringList(rewardSummary);
             LoadRelationships(root["relationships"], content);
             LoadSkillNodes(root["skillNodes"], content);
-            if (const YAML::Node legacySkillSelections = root["legacySkillSelections"])
-                content->LegacySkillSelections = ReadStringMap(legacySkillSelections);
             LoadEquipmentSlots(root["equipmentSlots"], content);
             LoadEquipment(root["equipment"], content);
         }
@@ -578,14 +601,6 @@ namespace Wheatear::ProgressionContent {
                 return &item;
         }
         return nullptr;
-    }
-
-    std::string ResolveLegacySkillSelection(const std::string& action)
-    {
-        const auto& selections = Get().LegacySkillSelections;
-        if (auto it = selections.find(action); it != selections.end())
-            return it->second;
-        return {};
     }
 
 } // namespace Wheatear::ProgressionContent

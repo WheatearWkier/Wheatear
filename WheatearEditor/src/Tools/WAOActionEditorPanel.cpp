@@ -2,7 +2,9 @@
 #include "WAOActionEditorPanel.h"
 
 #include "Editor/EditorFloatingWindow.h"
+#include "Editor/EditorLocale.h"
 #include "Editor/EditorWidgets.h"
+#include "Editor/GameplayEditorShell.h"
 #include "Wheatear/Core/AssetAliasRegistry.h"
 #include "Wheatear/Core/AssetPath.h"
 #include "Wheatear/Gameplay/Action/ActionAssetLoader.h"
@@ -114,6 +116,125 @@ namespace Wheatear {
             return policies;
         }
 
+        const std::vector<std::string>& CommonParamKeys()
+        {
+            static const std::vector<std::string> keys = {
+                "targetRule",
+                "category",
+                "magic",
+                "physical",
+                "defensePierce",
+                "comboStep",
+                "airborne",
+                "guardBreak",
+                "range",
+                "radius",
+                "knockback",
+                "hitStop",
+                "cameraShake",
+                "sideSkillId",
+                "turnSkillId",
+                "tacticalCommandId"
+            };
+            return keys;
+        }
+
+        std::vector<std::string> CommonParamValues(const std::string& key)
+        {
+            if (key == "targetRule")
+                return { "Self", "EnemySingle", "EnemyAll", "AllySingle", "AllyAll", "Point", "Area" };
+            if (key == "category")
+                return { "Basic", "Skill", "Ultimate", "Item", "Reaction", "System" };
+            if (key == "magic" || key == "physical" || key == "airborne" || key == "guardBreak")
+                return { "true", "false" };
+            if (key == "comboStep")
+                return { "1", "2", "3" };
+            return {};
+        }
+
+        bool DrawStringChoice(const char* buttonLabel,
+            std::string& value,
+            const std::vector<std::string>& choices)
+        {
+            if (choices.empty())
+                return false;
+
+            bool changed = false;
+            const std::string popupId = std::string("##choice_popup_") + (buttonLabel ? buttonLabel : "value");
+            if (ImGui::SmallButton(buttonLabel))
+                ImGui::OpenPopup(popupId.c_str());
+            if (ImGui::BeginPopup(popupId.c_str()))
+            {
+                for (const std::string& choice : choices)
+                {
+                    const bool selected = value == choice;
+                    if (ImGui::Selectable(choice.c_str(), selected))
+                    {
+                        value = choice;
+                        changed = true;
+                        ImGui::CloseCurrentPopup();
+                    }
+                    if (selected)
+                        ImGui::SetItemDefaultFocus();
+                }
+                ImGui::EndPopup();
+            }
+            return changed;
+        }
+
+        WAO::EffectSpec MakeEffectTemplate(WAO::EffectType type)
+        {
+            WAO::EffectSpec effect;
+            effect.Type = type;
+            switch (type)
+            {
+            case WAO::EffectType::Damage:
+                effect.AttributeId = "hp";
+                effect.Value = -10.0f;
+                break;
+            case WAO::EffectType::Heal:
+                effect.AttributeId = "hp";
+                effect.Value = 10.0f;
+                break;
+            case WAO::EffectType::ModifyAttribute:
+                effect.AttributeId = "atk";
+                effect.Value = 1.0f;
+                effect.DurationPolicy = WAO::EffectDurationPolicy::Turns;
+                effect.Turns = 1;
+                break;
+            case WAO::EffectType::AddState:
+                effect.StateId = "stunned";
+                effect.DurationPolicy = WAO::EffectDurationPolicy::Turns;
+                effect.Turns = 1;
+                break;
+            case WAO::EffectType::RemoveState:
+                effect.StateId = "stunned";
+                break;
+            case WAO::EffectType::StartCooldown:
+                effect.Seconds = 1.0f;
+                effect.DurationPolicy = WAO::EffectDurationPolicy::Seconds;
+                break;
+            case WAO::EffectType::ConsumeResource:
+                effect.AttributeId = "mana";
+                effect.Value = 1.0f;
+                break;
+            case WAO::EffectType::Launch:
+                effect.Value = 1.0f;
+                break;
+            case WAO::EffectType::HitStun:
+                effect.Seconds = 0.20f;
+                effect.DurationPolicy = WAO::EffectDurationPolicy::Seconds;
+                break;
+            case WAO::EffectType::EmitSignal:
+                effect.SignalId = "action_hit";
+                break;
+            case WAO::EffectType::None:
+            default:
+                break;
+            }
+            return effect;
+        }
+
         std::string ActionModuleKey(const WAO::ActionRecipe& recipe)
         {
             const size_t split = recipe.Id.find('.');
@@ -168,6 +289,12 @@ namespace Wheatear {
             return sets;
         }
 
+        std::filesystem::path ActionSetsManifestPath()
+        {
+            return AssetPath::Resolve(
+                AssetAliasRegistry::Path("wao.action_sets", "assets/gameplay/actions/action_sets.yaml"));
+        }
+
         std::vector<ActionSetDefinition>& MutableActionSets()
         {
             static std::vector<ActionSetDefinition> sets = LoadActionSets();
@@ -177,6 +304,23 @@ namespace Wheatear {
         const std::vector<ActionSetDefinition>& ActionSets()
         {
             return MutableActionSets();
+        }
+
+        YAML::Node ActionSetsToYaml(const std::vector<ActionSetDefinition>& sets)
+        {
+            YAML::Node root(YAML::NodeType::Map);
+            root["version"] = 1;
+            YAML::Node yamlSets(YAML::NodeType::Sequence);
+            for (const ActionSetDefinition& set : sets)
+            {
+                YAML::Node item(YAML::NodeType::Map);
+                item["key"] = set.Key;
+                item["label"] = set.Label.empty() ? set.Key : set.Label;
+                item["path"] = set.Path;
+                yamlSets.push_back(item);
+            }
+            root["sets"] = yamlSets;
+            return root;
         }
 
         void ReloadActionSetDefinitions()
@@ -192,6 +336,21 @@ namespace Wheatear {
                     return set.Label;
             }
             return "Misc";
+        }
+
+        const ActionSetDefinition* FindActionSetByKey(const std::string& key)
+        {
+            for (const ActionSetDefinition& set : ActionSets())
+            {
+                if (set.Key == key)
+                    return &set;
+            }
+            return nullptr;
+        }
+
+        std::string FirstActionSetKey()
+        {
+            return ActionSets().empty() ? std::string{} : ActionSets().front().Key;
         }
 
         std::string RecipeSourcePath(const std::string& actionId)
@@ -260,6 +419,42 @@ namespace Wheatear {
         std::vector<WAO::ActionRecipe> SortedActions()
         {
             return WAO::RecipesWithPrefix("");
+        }
+
+        bool RecipeIdExists(const std::string& actionId)
+        {
+            const auto actions = SortedActions();
+            return std::find_if(actions.begin(), actions.end(), [&](const WAO::ActionRecipe& recipe)
+            {
+                return recipe.Id == actionId;
+            }) != actions.end();
+        }
+
+        std::string ActionIdSuffix(const std::string& actionId)
+        {
+            const size_t split = actionId.find('.');
+            if (split == std::string::npos || split + 1 >= actionId.size())
+                return actionId.empty() ? "new_action" : actionId;
+            return actionId.substr(split + 1);
+        }
+
+        std::string MakeUniqueActionId(const std::string& setKey, const std::string& baseSuffix)
+        {
+            const std::string prefix = setKey.empty() ? "misc" : setKey;
+            std::string suffix = baseSuffix.empty() ? "new_action" : baseSuffix;
+            std::replace(suffix.begin(), suffix.end(), ' ', '_');
+
+            const std::string base = prefix + "." + suffix;
+            if (!RecipeIdExists(base))
+                return base;
+
+            for (int i = 2; i < 10000; ++i)
+            {
+                const std::string candidate = base + "_" + std::to_string(i);
+                if (!RecipeIdExists(candidate))
+                    return candidate;
+            }
+            return base + "_copy";
         }
 
         const WAO::ActionRecipe* FindSelectedRecipe(const std::string& id)
@@ -451,11 +646,22 @@ namespace Wheatear {
             node["cancelEnd"] = recipe.CancelEnd;
             node["movementScale"] = recipe.MovementScale;
             WriteStringSequence(node, "tags", recipe.Tags);
+            WriteStringSequence(node, "requiredStates", recipe.RequiredStates);
+            WriteStringSequence(node, "blockedStates", recipe.BlockedStates);
+            WriteStringSequence(node, "requiredTags", recipe.RequiredTags);
+            WriteStringSequence(node, "blockedTags", recipe.BlockedTags);
             WriteStringSequence(node, "signals", recipe.Signals);
             WriteResourceCost(node, recipe.ResourceCost);
             WriteParams(node, recipe.Params);
             WriteEffects(node, recipe.Effects);
             return true;
+        }
+
+        YAML::Node RecipeToYaml(const WAO::ActionRecipe& recipe)
+        {
+            YAML::Node node(YAML::NodeType::Map);
+            WriteEditableRecipeFields(node, recipe);
+            return node;
         }
 
         void LabelValue(const char* label, const std::string& value)
@@ -506,6 +712,8 @@ namespace Wheatear {
     void WAOActionEditorPanel::Open(const EditorToolContext&)
     {
         m_Open = true;
+        if (m_NewActionSetKey.empty())
+            m_NewActionSetKey = FirstActionSetKey();
         if (m_SelectedActionId.empty())
         {
             const auto actions = SortedActions();
@@ -519,34 +727,64 @@ namespace Wheatear {
         if (!m_Open)
             return;
 
-        if (!EditorFloatingWindow::Begin("WAO Action Debugger", &m_Open, 0, { 1220.0f, 760.0f }))
+        if (m_NewActionSetKey.empty())
+            m_NewActionSetKey = FirstActionSetKey();
+
+        if (!EditorFloatingWindow::Begin("WAO Action Editor", &m_Open, 0, { 1220.0f, 760.0f }))
         {
             EditorFloatingWindow::End();
             return;
         }
 
         const auto actions = SortedActions();
-        EditorWidgets::PanelHeader("WAO Action Editor", "Author and inspect reusable gameplay action recipes, effects, validation, and runtime ledger entries.");
+        EditorWidgets::PanelHeader(
+            EditorLocale::Text("WAO Action Editor", "WAO 动作编辑器"),
+            EditorLocale::Text("Author and inspect reusable gameplay action recipes, effects, validation, and runtime ledger entries.", "编辑可复用 Gameplay 动作、效果、校验和运行时记录。"));
         EditorWidgets::StatusBadge((std::to_string(actions.size()) + " recipes").c_str(), EditorWidgets::StatusKind::Info);
         ImGui::SameLine();
-        EditorWidgets::StatusBadge(m_EditDirty ? "Unsaved edit" : "Clean", m_EditDirty ? EditorWidgets::StatusKind::Warning : EditorWidgets::StatusKind::Success);
-        ImGui::SameLine();
-        if (ImGui::Button("Clear Ledger"))
+        if (ImGui::Button(EditorLocale::Text("Clear Ledger", "清空记录")))
         {
             WAO::ActionDebugHistory::Clear();
             m_SelectedRecordSequence = 0;
         }
         ImGui::SameLine();
-        if (ImGui::Button("Reload YAML"))
+        if (ImGui::Button(EditorLocale::Text("Reload YAML", "重载 YAML")))
             ReloadActionSources();
         ImGui::SameLine();
-        EditorFloatingWindow::DrawToggleButton("WAO Action Debugger");
+        ImGui::SetNextItemWidth(170.0f);
+        if (ImGui::BeginCombo("Action Set", m_NewActionSetKey.empty() ? "(none)" : ActionModuleLabel(m_NewActionSetKey).c_str()))
+        {
+            for (const ActionSetDefinition& set : ActionSets())
+            {
+                const bool selected = set.Key == m_NewActionSetKey;
+                const std::string label = EditorWidgets::LabelWithId(set.Label, "wao_action_set:" + set.Key);
+                if (ImGui::Selectable(label.c_str(), selected))
+                    m_NewActionSetKey = set.Key;
+                if (selected)
+                    ImGui::SetItemDefaultFocus();
+            }
+            ImGui::EndCombo();
+        }
         ImGui::SameLine();
-        EditorWidgets::InlineStatus(
-            m_SaveStatus.empty() ? "Runtime recipes update as gameplay starts actions." : m_SaveStatus,
-            m_SaveStatus.find("fail") != std::string::npos || m_SaveStatus.find("Failed") != std::string::npos
-                ? EditorWidgets::StatusKind::Error
-                : EditorWidgets::StatusKind::Info);
+        if (ImGui::Button(EditorLocale::Text("New Action", "新建动作")))
+            CreateRecipeInSet(m_NewActionSetKey.empty() ? FirstActionSetKey() : m_NewActionSetKey);
+        ImGui::SameLine();
+        ImGui::BeginDisabled(m_SelectedActionId.empty());
+        if (ImGui::Button(EditorLocale::Text("Duplicate", "复制")))
+            DuplicateSelectedRecipe();
+        ImGui::SameLine();
+        if (ImGui::Button(EditorLocale::Text("Delete", "删除")))
+            DeleteSelectedRecipe();
+        ImGui::EndDisabled();
+        ImGui::SameLine();
+        EditorFloatingWindow::DrawToggleButton("WAO Action Editor");
+        EditorGameplayShell::DrawDocumentStatus({
+            EditorGameplayShell::DocumentKind::Asset,
+            m_EditDirty,
+            true,
+            m_SelectedActionId.empty() ? std::string{} : RecipeSourcePath(m_SelectedActionId),
+            m_SaveStatus.empty() ? "Runtime recipes update as gameplay starts actions." : m_SaveStatus
+        });
 
         ImGui::Separator();
         const float leftWidth = std::max(260.0f, ImGui::GetContentRegionAvail().x * 0.30f);
@@ -571,13 +809,17 @@ namespace Wheatear {
         ImGui::Separator();
 
         const std::vector<WAO::ActionRecipe> actions = SortedActions();
-        auto drawRecipe = [this](const WAO::ActionRecipe& recipe)
+        size_t visibleRecipeIndex = 0;
+        auto drawRecipe = [this, &visibleRecipeIndex](const WAO::ActionRecipe& recipe)
         {
             if (!MatchesFilter(recipe, m_Filter))
                 return;
 
             const bool selected = recipe.Id == m_SelectedActionId;
-            if (ImGui::Selectable(recipe.Id.c_str(), selected))
+            const std::string label = EditorWidgets::LabelWithId(
+                recipe.Id.empty() ? "(unnamed)" : recipe.Id,
+                "wao_recipe:" + std::to_string(visibleRecipeIndex++));
+            if (ImGui::Selectable(label.c_str(), selected))
                 m_SelectedActionId = recipe.Id;
 
             if (!recipe.DisplayName.empty())
@@ -616,33 +858,33 @@ namespace Wheatear {
 
     void WAOActionEditorPanel::DrawActionDetails()
     {
-        if (!FindSelectedRecipe(m_SelectedActionId))
-        {
-            EditorWidgets::EmptyState("Select an action recipe.", "Choose a recipe on the left to inspect YAML source, effects, validation, preview, and ledger history.");
-            DrawDebugLedger();
-            return;
-        }
+        const bool hasRecipe = FindSelectedRecipe(m_SelectedActionId) != nullptr;
 
         if (ImGui::BeginTabBar("##WAOActionTabs"))
         {
-            if (ImGui::BeginTabItem("Recipe"))
+            if (hasRecipe && ImGui::BeginTabItem("Recipe"))
             {
                 DrawRecipeOverview();
                 ImGui::EndTabItem();
             }
-            if (ImGui::BeginTabItem("Effects"))
+            if (hasRecipe && ImGui::BeginTabItem("Effects"))
             {
                 DrawEffectsTable();
                 ImGui::EndTabItem();
             }
-            if (ImGui::BeginTabItem("Validation"))
+            if (hasRecipe && ImGui::BeginTabItem("Validation"))
             {
                 DrawValidationPanel();
                 ImGui::EndTabItem();
             }
-            if (ImGui::BeginTabItem("Preview"))
+            if (hasRecipe && ImGui::BeginTabItem("Preview"))
             {
                 DrawPreviewPanel();
+                ImGui::EndTabItem();
+            }
+            if (ImGui::BeginTabItem("Action Sets"))
+            {
+                DrawActionSetsPanel();
                 ImGui::EndTabItem();
             }
             if (ImGui::BeginTabItem("Ledger"))
@@ -652,6 +894,9 @@ namespace Wheatear {
             }
             ImGui::EndTabBar();
         }
+
+        if (!hasRecipe)
+            EditorWidgets::EmptyState("Select an action recipe.", "Choose a recipe on the left, or use Action Sets to manage YAML recipe files.");
     }
 
     void WAOActionEditorPanel::DrawRecipeOverview()
@@ -753,6 +998,185 @@ namespace Wheatear {
         m_SaveStatus.clear();
     }
 
+    void WAOActionEditorPanel::CreateRecipeInSet(const std::string& setKey, const WAO::ActionRecipe* sourceRecipe)
+    {
+        const ActionSetDefinition* set = FindActionSetByKey(setKey);
+        if (!set)
+        {
+            m_SaveStatus = "Choose an action set before creating a recipe.";
+            return;
+        }
+
+        WAO::ActionRecipe recipe = sourceRecipe ? *sourceRecipe : WAO::ActionRecipe{};
+        recipe.Id = MakeUniqueActionId(set->Key, sourceRecipe ? ActionIdSuffix(sourceRecipe->Id) + "_copy" : "new_action");
+
+        if (sourceRecipe)
+        {
+            recipe.DisplayName = sourceRecipe->DisplayName.empty()
+                ? recipe.Id
+                : sourceRecipe->DisplayName + " Copy";
+        }
+        else
+        {
+            recipe.DisplayName = "New Action";
+            recipe.Description = "New WAO action recipe.";
+            recipe.MovementScale = 1.0f;
+            recipe.Tags = { set->Key };
+        }
+
+        const std::filesystem::path path = EditorWidgets::ResolveProjectAsset(set->Path);
+        if (path.empty())
+        {
+            m_SaveStatus = "Missing YAML source path for action set " + set->Key;
+            return;
+        }
+
+        try
+        {
+            YAML::Node root(YAML::NodeType::Map);
+            if (std::filesystem::is_regular_file(path))
+                root = YAML::LoadFile(path.string());
+
+            YAML::Node actions = root["actions"];
+            if (!actions || !actions.IsSequence())
+            {
+                YAML::Node sequence(YAML::NodeType::Sequence);
+                if (root["id"])
+                    sequence.push_back(YAML::Clone(root));
+
+                root = YAML::Node(YAML::NodeType::Map);
+                root["actions"] = sequence;
+                actions = root["actions"];
+            }
+
+            actions.push_back(RecipeToYaml(recipe));
+
+            if (!path.parent_path().empty())
+                std::filesystem::create_directories(path.parent_path());
+
+            if (!EditorWidgets::WriteFileText(path, std::string(YAML::Dump(root))))
+            {
+                m_SaveStatus = "Failed to write " + path.string();
+                return;
+            }
+
+            ReloadActionSources();
+            m_SelectedActionId = recipe.Id;
+            BeginEdit(recipe);
+            m_EditDirty = false;
+            m_NewActionSetKey = set->Key;
+            m_SaveStatus = "Created " + recipe.Id + ".";
+        }
+        catch (const YAML::Exception& exception)
+        {
+            m_SaveStatus = std::string("YAML error: ") + exception.what();
+        }
+        catch (const std::exception& exception)
+        {
+            m_SaveStatus = std::string("Create failed: ") + exception.what();
+        }
+    }
+
+    void WAOActionEditorPanel::DuplicateSelectedRecipe()
+    {
+        const WAO::ActionRecipe* recipe = FindSelectedRecipe(m_SelectedActionId);
+        if (!recipe)
+        {
+            m_SaveStatus = "Select a recipe to duplicate.";
+            return;
+        }
+
+        const std::string targetSet = m_NewActionSetKey.empty()
+            ? ActionModuleKey(*recipe)
+            : m_NewActionSetKey;
+        CreateRecipeInSet(targetSet, recipe);
+    }
+
+    bool WAOActionEditorPanel::DeleteSelectedRecipe()
+    {
+        if (m_SelectedActionId.empty())
+        {
+            m_SaveStatus = "Select a recipe to delete.";
+            return false;
+        }
+
+        const std::string deletedId = m_SelectedActionId;
+        const std::string relativePath = RecipeSourcePath(deletedId);
+        if (relativePath.empty())
+        {
+            m_SaveStatus = "No YAML source mapping for " + deletedId;
+            return false;
+        }
+
+        const std::filesystem::path path = EditorWidgets::ResolveProjectAsset(relativePath);
+        if (path.empty() || !std::filesystem::is_regular_file(path))
+        {
+            m_SaveStatus = "Missing YAML source: " + relativePath;
+            return false;
+        }
+
+        try
+        {
+            YAML::Node root = YAML::LoadFile(path.string());
+            bool removed = false;
+
+            YAML::Node actions = root["actions"];
+            if (actions && actions.IsSequence())
+            {
+                for (size_t i = 0; i < actions.size(); ++i)
+                {
+                    YAML::Node action = actions[i];
+                    if (action && action["id"] && action["id"].as<std::string>() == deletedId)
+                    {
+                        actions.remove(i);
+                        removed = true;
+                        break;
+                    }
+                }
+            }
+            else if (root["id"] && root["id"].as<std::string>() == deletedId)
+            {
+                root = YAML::Node(YAML::NodeType::Map);
+                root["actions"] = YAML::Node(YAML::NodeType::Sequence);
+                removed = true;
+            }
+
+            if (!removed)
+            {
+                m_SaveStatus = "Recipe was not found in " + relativePath;
+                return false;
+            }
+
+            if (!EditorWidgets::WriteFileText(path, std::string(YAML::Dump(root))))
+            {
+                m_SaveStatus = "Failed to write " + path.string();
+                return false;
+            }
+
+            ReloadActionSources();
+            const auto actionsAfterReload = SortedActions();
+            m_SelectedActionId = actionsAfterReload.empty() ? std::string{} : actionsAfterReload.front().Id;
+            if (m_EditingActionId == deletedId)
+            {
+                m_EditMode = false;
+                m_EditDirty = false;
+                m_EditingActionId.clear();
+            }
+            m_SaveStatus = "Deleted " + deletedId + ".";
+            return true;
+        }
+        catch (const YAML::Exception& exception)
+        {
+            m_SaveStatus = std::string("YAML error: ") + exception.what();
+            return false;
+        }
+        catch (const std::exception& exception)
+        {
+            m_SaveStatus = std::string("Delete failed: ") + exception.what();
+            return false;
+        }
+    }
+
     void WAOActionEditorPanel::DrawRecipeEditor()
     {
         if (m_EditingActionId.empty())
@@ -768,10 +1192,16 @@ namespace Wheatear {
         bool changed = false;
         changed |= EditorWidgets::InputString("Name", m_EditRecipe.DisplayName);
         changed |= EditorWidgets::InputMultilineString("Description", m_EditRecipe.Description, ImVec2(0.0f, 76.0f), 1536);
-        changed |= EditorWidgets::InputString("Icon Path", m_EditRecipe.IconPath);
+        changed |= EditorWidgets::DrawAssetReferenceField("Icon",
+            m_EditRecipe.IconPath,
+            EditorWidgets::AssetReferenceKind::Texture);
         changed |= EditorWidgets::InputString("Animation Id", m_EditRecipe.AnimationId);
-        changed |= EditorWidgets::InputString("SFX Path", m_EditRecipe.SoundPath);
-        changed |= EditorWidgets::InputString("VFX Path", m_EditRecipe.EffectPath);
+        changed |= EditorWidgets::DrawAssetReferenceField("SFX",
+            m_EditRecipe.SoundPath,
+            EditorWidgets::AssetReferenceKind::Audio);
+        changed |= EditorWidgets::DrawAssetReferenceField("VFX",
+            m_EditRecipe.EffectPath,
+            EditorWidgets::AssetReferenceKind::Any);
 
         SectionHeader("Timing");
         changed |= ImGui::DragFloat("Cooldown", &m_EditRecipe.Cooldown, 0.01f, 0.0f, 60.0f, "%.3f");
@@ -798,6 +1228,34 @@ namespace Wheatear {
             changed = true;
         }
 
+        std::string requiredStates = EditorWidgets::JoinList(m_EditRecipe.RequiredStates);
+        if (EditorWidgets::InputString("Required States", requiredStates))
+        {
+            m_EditRecipe.RequiredStates = EditorWidgets::SplitList(requiredStates);
+            changed = true;
+        }
+
+        std::string blockedStates = EditorWidgets::JoinList(m_EditRecipe.BlockedStates);
+        if (EditorWidgets::InputString("Blocked States", blockedStates))
+        {
+            m_EditRecipe.BlockedStates = EditorWidgets::SplitList(blockedStates);
+            changed = true;
+        }
+
+        std::string requiredTags = EditorWidgets::JoinList(m_EditRecipe.RequiredTags);
+        if (EditorWidgets::InputString("Required Tags", requiredTags))
+        {
+            m_EditRecipe.RequiredTags = EditorWidgets::SplitList(requiredTags);
+            changed = true;
+        }
+
+        std::string blockedTags = EditorWidgets::JoinList(m_EditRecipe.BlockedTags);
+        if (EditorWidgets::InputString("Blocked Tags", blockedTags))
+        {
+            m_EditRecipe.BlockedTags = EditorWidgets::SplitList(blockedTags);
+            changed = true;
+        }
+
         std::string resourceCost = JoinResourceCost(m_EditRecipe.ResourceCost);
         if (EditorWidgets::InputString("Resource Cost", resourceCost))
         {
@@ -806,13 +1264,7 @@ namespace Wheatear {
         }
         ImGui::TextDisabled("Resource format: mana=12, sword=1");
 
-        std::string params = JoinParams(m_EditRecipe.Params);
-        if (EditorWidgets::InputString("Params", params, 1024))
-        {
-            m_EditRecipe.Params = ParseParams(params);
-            changed = true;
-        }
-        ImGui::TextDisabled("Param format: targetRule=EnemySingle, category=Skill, magic=true, defensePierce=0.22");
+        changed |= DrawParamsEditor();
 
         DrawEffectEditor();
 
@@ -841,6 +1293,112 @@ namespace Wheatear {
             m_EditDirty = false;
             m_SaveStatus = "Edit cancelled.";
         }
+    }
+
+    bool WAOActionEditorPanel::DrawParamsEditor()
+    {
+        bool changed = false;
+        SectionHeader("Params");
+        ImGui::TextDisabled("Typed key/value parameters used by action resolvers.");
+
+        std::vector<std::pair<std::string, std::string>> params(m_EditRecipe.Params.begin(), m_EditRecipe.Params.end());
+        std::sort(params.begin(), params.end(), [](const auto& left, const auto& right)
+        {
+            return left.first < right.first;
+        });
+
+        std::string removeKey;
+        if (ImGui::BeginTable("##WAOParamsEditor", 4,
+            ImGuiTableFlags_Borders | ImGuiTableFlags_RowBg | ImGuiTableFlags_Resizable))
+        {
+            ImGui::TableSetupColumn("Key", ImGuiTableColumnFlags_WidthFixed, 190.0f);
+            ImGui::TableSetupColumn("Value");
+            ImGui::TableSetupColumn("Pick", ImGuiTableColumnFlags_WidthFixed, 82.0f);
+            ImGui::TableSetupColumn("", ImGuiTableColumnFlags_WidthFixed, 72.0f);
+            ImGui::TableHeadersRow();
+
+            for (const auto& [originalKey, originalValue] : params)
+            {
+                ImGui::PushID(originalKey.c_str());
+                std::string key = originalKey;
+                std::string value = originalValue;
+
+                ImGui::TableNextRow();
+                ImGui::TableSetColumnIndex(0);
+                ImGui::SetNextItemWidth(-1.0f);
+                if (EditorWidgets::InputString("##key", key, 128) && !key.empty() && key != originalKey)
+                {
+                    m_EditRecipe.Params.erase(originalKey);
+                    m_EditRecipe.Params[key] = value;
+                    changed = true;
+                }
+
+                ImGui::TableSetColumnIndex(1);
+                ImGui::SetNextItemWidth(-1.0f);
+                if (EditorWidgets::InputString("##value", value, 256))
+                {
+                    m_EditRecipe.Params[key] = value;
+                    changed = true;
+                }
+
+                ImGui::TableSetColumnIndex(2);
+                if (DrawStringChoice("Key", key, CommonParamKeys()) && !key.empty())
+                {
+                    m_EditRecipe.Params.erase(originalKey);
+                    m_EditRecipe.Params[key] = value;
+                    changed = true;
+                }
+                ImGui::SameLine();
+                if (DrawStringChoice("Value", value, CommonParamValues(key)))
+                {
+                    m_EditRecipe.Params[key] = value;
+                    changed = true;
+                }
+
+                ImGui::TableSetColumnIndex(3);
+                if (ImGui::SmallButton("Remove"))
+                    removeKey = key;
+
+                ImGui::PopID();
+            }
+
+            ImGui::EndTable();
+        }
+
+        if (!removeKey.empty())
+        {
+            m_EditRecipe.Params.erase(removeKey);
+            changed = true;
+        }
+
+        if (ImGui::SmallButton("Add Param"))
+        {
+            std::string key = "targetRule";
+            for (int i = 2; m_EditRecipe.Params.find(key) != m_EditRecipe.Params.end(); ++i)
+                key = "param" + std::to_string(i);
+            m_EditRecipe.Params[key] = key == "targetRule" ? "EnemySingle" : "";
+            changed = true;
+        }
+        ImGui::SameLine();
+        if (ImGui::SmallButton("Add Target Rule"))
+        {
+            m_EditRecipe.Params["targetRule"] = "EnemySingle";
+            changed = true;
+        }
+        ImGui::SameLine();
+        if (ImGui::SmallButton("Add Category"))
+        {
+            m_EditRecipe.Params["category"] = "Skill";
+            changed = true;
+        }
+        ImGui::SameLine();
+        if (ImGui::SmallButton("Add Magic Flag"))
+        {
+            m_EditRecipe.Params["magic"] = "true";
+            changed = true;
+        }
+
+        return changed;
     }
 
     bool WAOActionEditorPanel::SaveEditedRecipe()
@@ -913,15 +1471,48 @@ namespace Wheatear {
     {
         SectionHeader("Effects");
 
-        if (ImGui::Button("Add Effect"))
+        if (ImGui::Button("Add Damage"))
         {
-            WAO::EffectSpec effect;
-            effect.Type = WAO::EffectType::Damage;
-            effect.AttributeId = "hp";
-            effect.Value = 1.0f;
-            m_EditRecipe.Effects.push_back(effect);
+            m_EditRecipe.Effects.push_back(MakeEffectTemplate(WAO::EffectType::Damage));
             m_SelectedEffectIndex = static_cast<int>(m_EditRecipe.Effects.size()) - 1;
             m_EditDirty = true;
+        }
+        ImGui::SameLine();
+        if (ImGui::Button("Add Heal"))
+        {
+            m_EditRecipe.Effects.push_back(MakeEffectTemplate(WAO::EffectType::Heal));
+            m_SelectedEffectIndex = static_cast<int>(m_EditRecipe.Effects.size()) - 1;
+            m_EditDirty = true;
+        }
+        ImGui::SameLine();
+        if (ImGui::Button("Add State"))
+        {
+            m_EditRecipe.Effects.push_back(MakeEffectTemplate(WAO::EffectType::AddState));
+            m_SelectedEffectIndex = static_cast<int>(m_EditRecipe.Effects.size()) - 1;
+            m_EditDirty = true;
+        }
+        ImGui::SameLine();
+        if (ImGui::Button("Add Signal"))
+        {
+            m_EditRecipe.Effects.push_back(MakeEffectTemplate(WAO::EffectType::EmitSignal));
+            m_SelectedEffectIndex = static_cast<int>(m_EditRecipe.Effects.size()) - 1;
+            m_EditDirty = true;
+        }
+        ImGui::SameLine();
+        if (ImGui::Button("More"))
+            ImGui::OpenPopup("##WAOEffectTemplatePopup");
+        if (ImGui::BeginPopup("##WAOEffectTemplatePopup"))
+        {
+            for (WAO::EffectType type : EditableEffectTypes())
+            {
+                if (ImGui::Selectable(EffectTypeName(type)))
+                {
+                    m_EditRecipe.Effects.push_back(MakeEffectTemplate(type));
+                    m_SelectedEffectIndex = static_cast<int>(m_EditRecipe.Effects.size()) - 1;
+                    m_EditDirty = true;
+                }
+            }
+            ImGui::EndPopup();
         }
 
         ImGui::SameLine();
@@ -950,6 +1541,7 @@ namespace Wheatear {
         {
             const WAO::EffectSpec& effect = m_EditRecipe.Effects[static_cast<size_t>(i)];
             std::string label = std::to_string(i + 1) + ". " + EffectTypeName(effect.Type) + " -> " + EffectTargetText(effect);
+            label = EditorWidgets::LabelWithId(label, "wao_effect:" + std::to_string(i));
             if (ImGui::Selectable(label.c_str(), i == m_SelectedEffectIndex))
                 m_SelectedEffectIndex = i;
         }
@@ -968,8 +1560,11 @@ namespace Wheatear {
                 const bool selected = effect.Type == type;
                 if (ImGui::Selectable(EffectTypeName(type), selected))
                 {
-                    effect.Type = type;
-                    changed = true;
+                    if (effect.Type != type)
+                    {
+                        effect = MakeEffectTemplate(type);
+                        changed = true;
+                    }
                 }
                 if (selected)
                     ImGui::SetItemDefaultFocus();
@@ -977,19 +1572,37 @@ namespace Wheatear {
             ImGui::EndCombo();
         }
 
-        changed |= EditorWidgets::InputString("Attribute Id", effect.AttributeId, 128);
-        changed |= EditorWidgets::InputString("State Id", effect.StateId, 128);
-        changed |= EditorWidgets::InputString("Signal Id", effect.SignalId, 128);
-        changed |= ImGui::DragFloat("Value", &effect.Value, 0.05f, -100000.0f, 100000.0f, "%.3f");
+        const bool usesAttribute =
+            effect.Type == WAO::EffectType::Damage
+            || effect.Type == WAO::EffectType::Heal
+            || effect.Type == WAO::EffectType::ModifyAttribute
+            || effect.Type == WAO::EffectType::ConsumeResource;
+        const bool usesState =
+            effect.Type == WAO::EffectType::AddState
+            || effect.Type == WAO::EffectType::RemoveState;
+        const bool usesSignal = effect.Type == WAO::EffectType::EmitSignal;
+        const bool usesValue =
+            usesAttribute
+            || effect.Type == WAO::EffectType::Launch;
+
+        if (usesAttribute)
+            changed |= EditorWidgets::InputString("Attribute / Resource Id", effect.AttributeId, 128);
+        if (usesState)
+            changed |= EditorWidgets::InputString("State Id", effect.StateId, 128);
+        if (usesSignal)
+            changed |= EditorWidgets::InputString("Signal Id", effect.SignalId, 128);
+        if (usesValue)
+            changed |= ImGui::DragFloat("Value", &effect.Value, 0.05f, -100000.0f, 100000.0f, "%.3f");
 
         int turns = effect.Turns;
-        if (ImGui::InputInt("Turns", &turns))
+        if (effect.DurationPolicy == WAO::EffectDurationPolicy::Turns && ImGui::InputInt("Turns", &turns))
         {
             effect.Turns = std::max(0, turns);
             changed = true;
         }
 
-        changed |= ImGui::DragFloat("Seconds", &effect.Seconds, 0.05f, 0.0f, 3600.0f, "%.3f");
+        if (effect.DurationPolicy == WAO::EffectDurationPolicy::Seconds)
+            changed |= ImGui::DragFloat("Seconds", &effect.Seconds, 0.05f, 0.0f, 3600.0f, "%.3f");
         if (ImGui::BeginCombo("Duration Policy", DurationPolicyName(effect.DurationPolicy)))
         {
             for (WAO::EffectDurationPolicy policy : EditableDurationPolicies())
@@ -1094,6 +1707,22 @@ namespace Wheatear {
                 errors.push_back("Recipe params contain an empty key.");
             if (value.empty())
                 warnings.push_back("Recipe param has an empty value: " + id);
+
+            const std::vector<std::string> choices = CommonParamValues(id);
+            if (!choices.empty() && std::find(choices.begin(), choices.end(), value) == choices.end())
+                warnings.push_back("Recipe param " + id + " uses a value outside the common schema: " + value);
+
+            if (id == "defensePierce" || id == "range" || id == "radius" || id == "knockback" || id == "hitStop" || id == "cameraShake")
+            {
+                try
+                {
+                    (void)std::stof(value);
+                }
+                catch (...)
+                {
+                    errors.push_back("Recipe param " + id + " must be numeric.");
+                }
+            }
         }
 
         for (size_t i = 0; i < recipe->Effects.size(); ++i)
@@ -1190,6 +1819,8 @@ namespace Wheatear {
     bool WAOActionEditorPanel::ReloadActionSources()
     {
         ReloadActionSetDefinitions();
+        if (FindActionSetByKey(m_NewActionSetKey) == nullptr)
+            m_NewActionSetKey = FirstActionSetKey();
         size_t loaded = WAO::ActionAssetLoader::ReloadManifest(
             AssetAliasRegistry::Path("wao.action_sets", "assets/gameplay/actions/action_sets.yaml"));
         if (loaded == 0)
@@ -1199,6 +1830,195 @@ namespace Wheatear {
         }
         m_SaveStatus = "Reloaded " + std::to_string(loaded) + " YAML action recipe(s).";
         return loaded > 0;
+    }
+
+    void WAOActionEditorPanel::LoadActionSetEditor()
+    {
+        ReloadActionSetDefinitions();
+        m_ActionSetsLoaded = true;
+        m_ActionSetsDirty = false;
+        if (m_SelectedActionSetKey.empty() && !ActionSets().empty())
+            m_SelectedActionSetKey = ActionSets().front().Key;
+        m_ActionSetsStatus = "Loaded action set manifest.";
+    }
+
+    bool WAOActionEditorPanel::SaveActionSetEditor()
+    {
+        const std::filesystem::path path = ActionSetsManifestPath();
+        if (path.empty())
+        {
+            m_ActionSetsStatus = "Cannot resolve action set manifest path.";
+            return false;
+        }
+
+        std::error_code error;
+        std::filesystem::create_directories(path.parent_path(), error);
+        if (error)
+        {
+            m_ActionSetsStatus = "Cannot create manifest directory: " + error.message();
+            return false;
+        }
+
+        YAML::Emitter out;
+        out << ActionSetsToYaml(ActionSets());
+        if (!out.good() || !EditorWidgets::WriteFileText(path, std::string(out.c_str())))
+        {
+            m_ActionSetsStatus = "Failed to write action set manifest.";
+            return false;
+        }
+
+        m_ActionSetsDirty = false;
+        ReloadActionSources();
+        m_ActionSetsStatus = "Saved action set manifest and reloaded YAML actions.";
+        return true;
+    }
+
+    void WAOActionEditorPanel::DrawActionSetsPanel()
+    {
+        if (!m_ActionSetsLoaded)
+            LoadActionSetEditor();
+
+        std::vector<ActionSetDefinition>& sets = MutableActionSets();
+        EditorWidgets::SectionHeader("Action Set Manifest", "Manage YAML files that contain WAO action recipes.");
+        EditorGameplayShell::DrawDocumentStatus({
+            EditorGameplayShell::DocumentKind::Asset,
+            m_ActionSetsDirty,
+            true,
+            AssetAliasRegistry::Path("wao.action_sets", "assets/gameplay/actions/action_sets.yaml"),
+            m_ActionSetsStatus
+        });
+
+        if (ImGui::Button("Reload Sets"))
+            LoadActionSetEditor();
+        ImGui::SameLine();
+        ImGui::BeginDisabled(!m_ActionSetsDirty);
+        if (ImGui::Button("Save Sets"))
+            SaveActionSetEditor();
+        ImGui::EndDisabled();
+        ImGui::SameLine();
+        if (ImGui::Button("Add Set"))
+        {
+            ActionSetDefinition set;
+            set.Key = "new";
+            for (int i = 2; FindActionSetByKey(set.Key) != nullptr; ++i)
+                set.Key = "new" + std::to_string(i);
+            set.Label = "New Action Set";
+            set.Path = "assets/gameplay/actions/" + set.Key + "_actions.yaml";
+            sets.push_back(set);
+            m_SelectedActionSetKey = set.Key;
+            m_ActionSetsDirty = true;
+        }
+
+        ImGui::Separator();
+        if (sets.empty())
+        {
+            EditorWidgets::EmptyState("No action sets.", "Add a set to create a manifest entry for WAO recipe YAML.");
+            return;
+        }
+
+        int selectedIndex = -1;
+        for (int i = 0; i < static_cast<int>(sets.size()); ++i)
+        {
+            if (sets[static_cast<size_t>(i)].Key == m_SelectedActionSetKey)
+            {
+                selectedIndex = i;
+                break;
+            }
+        }
+        if (selectedIndex < 0)
+        {
+            selectedIndex = 0;
+            m_SelectedActionSetKey = sets.front().Key;
+        }
+
+        const float listWidth = std::max(260.0f, ImGui::GetContentRegionAvail().x * 0.34f);
+        ImGui::BeginChild("##WAOActionSetsList", ImVec2(listWidth, 0.0f), true);
+        for (int i = 0; i < static_cast<int>(sets.size()); ++i)
+        {
+            const ActionSetDefinition& set = sets[static_cast<size_t>(i)];
+            const std::string label = EditorWidgets::LabelWithId(
+                set.Label.empty() ? set.Key : set.Label,
+                "wao_action_set_manifest:" + std::to_string(i));
+            if (ImGui::Selectable(label.c_str(), i == selectedIndex))
+            {
+                selectedIndex = i;
+                m_SelectedActionSetKey = set.Key;
+            }
+            ImGui::TextDisabled("%s", set.Path.c_str());
+            ImGui::Spacing();
+        }
+        ImGui::EndChild();
+
+        ImGui::SameLine();
+        ImGui::BeginChild("##WAOActionSetDetails", ImVec2(0.0f, 0.0f), true);
+        ActionSetDefinition& set = sets[static_cast<size_t>(selectedIndex)];
+        std::string key = set.Key;
+        if (EditorWidgets::InputString("Key", key, 128) && !key.empty())
+        {
+            const bool duplicate = std::find_if(sets.begin(), sets.end(), [&](const ActionSetDefinition& current)
+            {
+                return &current != &set && current.Key == key;
+            }) != sets.end();
+            if (duplicate)
+            {
+                m_ActionSetsStatus = "Action set key already exists.";
+            }
+            else
+            {
+                set.Key = key;
+                m_SelectedActionSetKey = key;
+                m_ActionSetsDirty = true;
+            }
+        }
+
+        if (EditorWidgets::InputString("Label", set.Label, 256))
+            m_ActionSetsDirty = true;
+        if (EditorWidgets::DrawAssetReferenceField("YAML Path", set.Path, EditorWidgets::AssetReferenceKind::Script, 512))
+            m_ActionSetsDirty = true;
+        if (!set.Path.empty() && !EditorWidgets::ProjectAssetExists(set.Path))
+            EditorWidgets::InlineStatus("YAML path does not exist yet. New actions can create it later.", EditorWidgets::StatusKind::Warning);
+
+        ImGui::Separator();
+        ImGui::BeginDisabled(selectedIndex <= 0);
+        if (ImGui::Button("Move Up"))
+        {
+            std::swap(sets[static_cast<size_t>(selectedIndex)], sets[static_cast<size_t>(selectedIndex - 1)]);
+            --selectedIndex;
+            m_ActionSetsDirty = true;
+        }
+        ImGui::EndDisabled();
+        ImGui::SameLine();
+        ImGui::BeginDisabled(selectedIndex + 1 >= static_cast<int>(sets.size()));
+        if (ImGui::Button("Move Down"))
+        {
+            std::swap(sets[static_cast<size_t>(selectedIndex)], sets[static_cast<size_t>(selectedIndex + 1)]);
+            ++selectedIndex;
+            m_ActionSetsDirty = true;
+        }
+        ImGui::EndDisabled();
+        ImGui::SameLine();
+        if (ImGui::Button("Duplicate Set"))
+        {
+            ActionSetDefinition clone = set;
+            clone.Key += "_copy";
+            for (int i = 2; FindActionSetByKey(clone.Key) != nullptr; ++i)
+                clone.Key = set.Key + "_copy" + std::to_string(i);
+            clone.Label += " Copy";
+            sets.push_back(std::move(clone));
+            m_SelectedActionSetKey = sets.back().Key;
+            m_ActionSetsDirty = true;
+        }
+        ImGui::SameLine();
+        ImGui::BeginDisabled(sets.size() <= 1);
+        if (ImGui::Button("Delete Set"))
+        {
+            sets.erase(sets.begin() + selectedIndex);
+            selectedIndex = std::min(selectedIndex, static_cast<int>(sets.size()) - 1);
+            m_SelectedActionSetKey = selectedIndex >= 0 ? sets[static_cast<size_t>(selectedIndex)].Key : std::string{};
+            m_ActionSetsDirty = true;
+        }
+        ImGui::EndDisabled();
+        ImGui::EndChild();
     }
 
     void WAOActionEditorPanel::DrawDebugLedger()
@@ -1227,7 +2047,8 @@ namespace Wheatear {
                 ImGui::TableSetColumnIndex(0);
                 const bool selected = record.Sequence == m_SelectedRecordSequence;
                 std::string id = std::to_string(record.Sequence);
-                if (ImGui::Selectable(id.c_str(), selected, ImGuiSelectableFlags_SpanAllColumns))
+                const std::string label = EditorWidgets::LabelWithId(id, "wao_ledger:" + id);
+                if (ImGui::Selectable(label.c_str(), selected, ImGuiSelectableFlags_SpanAllColumns))
                     m_SelectedRecordSequence = record.Sequence;
                 ImGui::TableSetColumnIndex(1);
                 ImGui::TextUnformatted(record.Intent.ActionId.c_str());

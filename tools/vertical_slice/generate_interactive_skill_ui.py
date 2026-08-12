@@ -38,23 +38,6 @@ def q(text_value: str) -> str:
     return '"' + text_value.replace("\\", "\\\\").replace('"', '\\"').replace("\n", "\\n") + '"'
 
 
-SKILL_NAMES: dict[str, str] = {
-    "magic_sword_core": "魔剑核心",
-}
-
-BRANCH_NAMES = {
-    "ME": ["三段斩", "裂空上挑", "空中追斩", "落星斩", "破盾连斩", "踏前刺", "十字裂斩", "空旋回刃", "王宫破阵斩", "青龙裂鳞", "白虎断牙", "终式百裂"],
-    "MA": ["魔法弹", "炎刃附魔", "魔力浮环", "白辉护印", "寒星矢", "黑炎刻印", "雷锁", "破法反弹", "王权封印", "朱雀焚天", "玄武结界", "天使之泪"],
-    "FU": ["魔剑共鸣", "剑气回环", "魔核超载", "白辉共振", "护卫借势", "黑咒扩散", "魂线牵引", "伪青梅残影", "真青梅魂契", "四圣兽合契", "天使契印", "完全魔剑士"],
-    "MO": ["疾风步", "一段跳", "滞空调息", "踏影横移", "斜线冲刺", "受身翻滚", "高空安全域", "魔阵踏步", "青龙游空", "白虎踏阵", "朱雀翔焰", "玄武稳域"],
-    "LI": ["保护槽识别", "断限追击", "空界锁痕", "断限递耗", "低空抢断", "高空连锁", "青龙断限", "白虎断限", "朱雀断限", "玄武断限", "天使续命", "空界连锁"],
-}
-
-for prefix, names in BRANCH_NAMES.items():
-    for index, name in enumerate(names, 1):
-        SKILL_NAMES[f"{prefix}-{index:02d}"] = name
-
-
 def safe_id(node_id: str) -> str:
     return node_id.replace("-", "_").replace(":", "_").lower()
 
@@ -62,6 +45,7 @@ def safe_id(node_id: str) -> str:
 def skill_nodes() -> list[dict[str, object]]:
     nodes: list[dict[str, object]] = [
         {"id": "magic_sword_core", "parent": "", "pos": (0.50, 0.50)},
+        {"id": "magic_sword_lv2", "parent": "magic_sword_core", "pos": (0.50, 0.36)},
     ]
 
     def add_branch(prefix: str, base_degrees: float, curve_degrees: float) -> None:
@@ -83,6 +67,17 @@ def skill_nodes() -> list[dict[str, object]]:
     add_branch("MO", 126.0, 52.0)
     add_branch("LI", 198.0, 50.0)
     return nodes
+
+
+def skill_icon_file(node_id: str) -> str:
+    if node_id in {"magic_sword_core", "magic_sword_lv2"}:
+        return "skill_magic_sword_core.png"
+
+    branch = node_id.split("-", 1)[0].lower()
+    if branch in {"me", "ma", "fu", "mo", "li"}:
+        return f"skill_{branch}.png"
+
+    return f"skill_{safe_id(node_id)}.png"
 
 
 def framed_skill_icon(node_id: str, name: str) -> Image.Image:
@@ -163,8 +158,8 @@ def combat_skill_icon(kind: str) -> Image.Image:
 
 
 def generate_assets() -> None:
-    for node_id, name in SKILL_NAMES.items():
-        save(framed_skill_icon(node_id, name), UI_ROOT / "skill_tree" / f"skill_{safe_id(node_id)}.png")
+    for node_id in ["magic_sword_core", "ME-01", "MA-01", "FU-01", "MO-01", "LI-01"]:
+        save(framed_skill_icon(node_id, node_id), UI_ROOT / "skill_tree" / skill_icon_file(node_id))
 
     lock, d = canvas((64, 64))
     d.rounded_rectangle((5, 5, 59, 59), radius=7, fill=(8, 10, 12, 145))
@@ -244,7 +239,7 @@ def widget(pos: tuple[float, float], size: tuple[float, float], sort: int, ancho
       Rotation: {rotation}
       Anchor: {anchor}
       SortOrder: {sort}
-      ParentTag: WT_UI_Canvas
+      ParentEntity: 0
 """
 
 
@@ -342,38 +337,6 @@ def slider(entity_id: int, tag: str, pos: tuple[float, float], size: tuple[float
 """
 
 
-def skill_branch(node_id: str) -> str:
-    if node_id == "magic_sword_core":
-        return "Core"
-    return {
-        "ME": "Melee",
-        "MA": "Magic",
-        "FU": "Aerial",
-        "MO": "Mobility",
-        "LI": "Limit",
-    }.get(node_id.split("-")[0], "Unknown")
-
-
-def skill_unlock_chapter(node_id: str) -> int:
-    if node_id == "magic_sword_core":
-        return 1
-    try:
-        index = int(node_id.split("-")[1])
-    except Exception:
-        index = 1
-    if index <= 2:
-        return 2
-    if index <= 4:
-        return 3
-    if index <= 6:
-        return 7
-    if index <= 8:
-        return 10
-    if index <= 10:
-        return 13
-    return 17
-
-
 def skill_tree_view_component(nodes: list[dict[str, object]]) -> str:
     out = """    UISkillTreeViewComponent:
       Pan: [0, 0]
@@ -401,13 +364,10 @@ def skill_tree_view_component(nodes: list[dict[str, object]]) -> str:
         node_id = str(node["id"])
         parent = str(node["parent"])
         x, y = node["pos"]  # type: ignore[misc]
-        safe = safe_id(node_id)
         out += f"""        - Id: {q(node_id)}
           ParentId: {q(parent)}
           Position: [{x:.6f}, {y:.6f}]
-          IconPath: "assets/vertical_slice/ui/skill_tree/skill_{safe}.png"
-          Branch: {q(skill_branch(node_id))}
-          UnlockChapter: {skill_unlock_chapter(node_id)}
+          IconPath: "assets/vertical_slice/ui/skill_tree/{skill_icon_file(node_id)}"
           Learned: {str(node_id == "magic_sword_core").lower()}
           Available: true
           Selected: {str(node_id == "magic_sword_core").lower()}
@@ -424,7 +384,7 @@ def skill_tree_scene() -> str:
     out += panel(970000010, "SkillTree_MainPanel", (0.04, 0.07), (0.92, 0.80), [0.035, 0.047, 0.058, 0.88], [0.26, 0.66, 0.72, 0.92], 10, 2.0)
     out += text(970000011, "SkillTree_Title", (0.075, 0.105), (0.46, 0.06), "魔剑技能树", [0.90, 0.99, 1.0, 1], 42, 42, "title")
     out += text(970000012, "SkillTree_Subtitle", (0.075, 0.17), (0.70, 0.035), "第 2 章 / 魔剑 Lv1 / 主角 Lv1", [0.70, 0.90, 0.92, 1], 18, 42, "body")
-    out += panel(970000013, "SkillTree_NetworkPanel", (0.06, 0.215), (0.61, 0.57), [0.03, 0.045, 0.052, 0.76], [0.18, 0.58, 0.62, 0.88], 18, 2.0)
+    out += panel(970000013, "SkillTree_View", (0.06, 0.215), (0.61, 0.57), [0.03, 0.045, 0.052, 0.76], [0.18, 0.58, 0.62, 0.88], 18, 2.0)
     out += skill_tree_view_component(nodes)
     out += panel(970000014, "SkillTree_DetailPanel", (0.70, 0.215), (0.235, 0.57), [0.04, 0.046, 0.056, 0.84], [0.56, 0.72, 0.76, 0.88], 18, 2.0)
     out += text(970000015, "SkillTree_DragHint", (0.075, 0.735), (0.52, 0.03), "拖动画布浏览完整技能树；点击节点查看详情", [0.70, 0.88, 0.88, 1], 16, 42, "body")
@@ -433,7 +393,7 @@ def skill_tree_scene() -> str:
     out += text(970000031, "SkillTree_Details", (0.725, 0.255), (0.18, 0.30), "魔剑核心", [0.96, 0.99, 0.94, 1], 18, 42, "body")
     out += text(970000032, "SkillTree_Materials", (0.725, 0.590), (0.18, 0.11), "材料", [1.0, 0.93, 0.72, 1], 15, 42, "body")
     out += progress(970000033, "SkillTree_MagicSwordBar", (0.725, 0.725), (0.18, 0.018), 1, 2, [0.35, 0.88, 0.86, 1], [0.05, 0.08, 0.10, 0.92])
-    out += button(970000034, "SkillTree_Button_UpgradeMagicSword", (0.725, 0.755), (0.18, 0.052), "学习选中节点", "progression:learn_selected_skill_v2", 55, "gold")
+    out += button(970000034, "SkillTree_Button_LearnSelectedSkill", (0.725, 0.755), (0.18, 0.052), "学习选中节点", "progression:learn_selected_skill", 55, "gold")
     out += button(970000035, "SkillTree_Button_Back", (0.075, 0.825), (0.15, 0.05), "返回据点", "scene:assets/scenes/VerticalSliceHub.wt", 55, "dark")
     return out
 
@@ -532,7 +492,7 @@ def skill_bar_entities(base_id: int) -> str:
       Rotation: 0.0
       Anchor: 0
       SortOrder: 76
-      ParentTag: WT_UI_Canvas
+      ParentEntity: 0
     UIPanelComponent:
       BackgroundColor: [0.025, 0.032, 0.038, 0.92]
       BorderColor: [0.28, 0.78, 0.82, 0.82]
@@ -551,7 +511,7 @@ def skill_bar_entities(base_id: int) -> str:
       Rotation: 0.0
       Anchor: 0
       SortOrder: 77
-      ParentTag: WT_UI_Canvas
+      ParentEntity: 0
     UITextComponent:
       Text: ""
       Color: [0.92, 0.98, 0.96, 1]
@@ -607,7 +567,7 @@ def result_reward_entities(base_id: int) -> str:
       Rotation: 0.0
       Anchor: 0
       SortOrder: 78
-      ParentTag: WT_UI_Canvas
+      ParentEntity: 0
     UIPanelComponent:
       BackgroundColor: [0.025, 0.032, 0.038, 0.94]
       BorderColor: [0.74, 0.60, 0.30, 0.86]
@@ -626,7 +586,7 @@ def result_reward_entities(base_id: int) -> str:
       Rotation: 0.0
       Anchor: 0
       SortOrder: 79
-      ParentTag: WT_UI_Canvas
+      ParentEntity: 0
     UITextComponent:
       Text: ""
       Color: [0.94, 0.98, 0.92, 1]
@@ -735,6 +695,11 @@ def update_manifest() -> None:
         "assets/scenes/VerticalSliceSkillTree.wt",
         "assets/scenes/VerticalSliceEquipment.wt",
         "assets/vertical_slice/ui/skill_tree/skill_magic_sword_core.png",
+        "assets/vertical_slice/ui/skill_tree/skill_me.png",
+        "assets/vertical_slice/ui/skill_tree/skill_ma.png",
+        "assets/vertical_slice/ui/skill_tree/skill_fu.png",
+        "assets/vertical_slice/ui/skill_tree/skill_mo.png",
+        "assets/vertical_slice/ui/skill_tree/skill_li.png",
         "assets/vertical_slice/side_combat/ui/icon_skill_basic_slash.png",
         "assets/vertical_slice/side_combat/ui/icon_skill_launcher_slash.png",
         "assets/vertical_slice/side_combat/ui/icon_skill_uppercut.png",

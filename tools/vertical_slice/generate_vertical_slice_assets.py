@@ -224,7 +224,6 @@ def main() -> None:
     save(icon("core"), sc / "ui" / "icon_drop_magic_core.png")
     save(icon("sinew"), sc / "ui" / "icon_drop_beast_sinew.png")
     save(icon("claw"), sc / "ui" / "icon_drop_beast_claw.png")
-    save(icon("sword"), sc / "ui" / "icon_magic_sword.png")
 
 
 if __name__ == "__main__":

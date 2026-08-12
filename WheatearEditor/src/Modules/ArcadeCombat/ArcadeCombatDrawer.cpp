@@ -1,5 +1,7 @@
 #include "ArcadeCombatDrawer.h"
 
+#include "Editor/CommandBuilder.h"
+#include "Editor/EditorContentPickers.h"
 #include "Editor/EditorWidgets.h"
 #include "Panels/SceneHierarchy/ComponentDrawers.h"
 #include "Wheatear/Scene/Components.h"
@@ -14,6 +16,7 @@ namespace Wheatear {
 
     namespace {
 
+        using EditorCommandBuilder::DrawCommandBuilder;
         using EditorWidgets::DrawTeamCombo;
         using EditorWidgets::InputString;
 
@@ -37,8 +40,9 @@ namespace Wheatear {
 
     void DrawArcadeCombatLevelComponent(Entity entity)
     {
-        DrawComponent<ArcadeCombatLevelComponent>("Arcade Combat Level", entity, [](auto& level)
+        DrawComponent<ArcadeCombatLevelComponent>("Arcade Combat Level", entity, [entity](auto& level)
             {
+                EditorWidgets::StatusBadge("Edits Scene", EditorWidgets::StatusKind::Success);
                 ImGui::Checkbox("Play On Start", &level.PlayOnStart);
                 ImGui::DragFloat2("Arena Min", glm::value_ptr(level.ArenaMin), 0.05f);
                 ImGui::DragFloat2("Arena Max", glm::value_ptr(level.ArenaMax), 0.05f);
@@ -47,21 +51,21 @@ namespace Wheatear {
                 ImGui::DragFloat("Defeat Return Delay", &level.DefeatReturnDelay, 0.02f, 0.0f, 10.0f);
                 ImGui::DragFloat("Result Scene Fade", &level.ResultSceneFadeDuration, 0.02f, 0.0f, 5.0f);
                 ImGui::DragFloat("Boss Defeat Fade", &level.BossDefeatFadeDuration, 0.02f, 0.0f, 10.0f);
-                InputString("Victory Command", level.VictorySceneCommand, 256);
-                InputString("Defeat Command", level.DefeatSceneCommand, 256);
+                DrawCommandBuilder("Victory Command", level.VictorySceneCommand, 256);
+                DrawCommandBuilder("Defeat Command", level.DefeatSceneCommand, 256);
 
                 ImGui::Separator();
                 ImGui::TextDisabled("Scene Bindings");
-                InputString("Player", level.PlayerEntityName);
-                InputString("Boss", level.BossEntityName);
-                InputString("Fade", level.FadeEntityName);
-                InputString("Pause Panel", level.PausePanelEntityName);
-                InputString("Message Text", level.MessageTextEntityName);
-                InputString("Weapon Text", level.WeaponTextEntityName);
-                InputString("Player Health Bar", level.PlayerHealthBarEntityName);
-                InputString("Player Health Text", level.PlayerHealthTextEntityName);
-                InputString("Boss Health Bar", level.BossHealthBarEntityName);
-                InputString("Boss Health Text", level.BossHealthTextEntityName);
+                EditorContentPickers::DrawSceneEntityField("Player", entity, level.PlayerEntityName);
+                EditorContentPickers::DrawSceneEntityField("Boss", entity, level.BossEntityName);
+                EditorContentPickers::DrawSceneEntityField("Fade", entity, level.FadeEntityName);
+                EditorContentPickers::DrawSceneEntityField("Pause Panel", entity, level.PausePanelEntityName);
+                EditorContentPickers::DrawSceneEntityField("Message Text", entity, level.MessageTextEntityName);
+                EditorContentPickers::DrawSceneEntityField("Weapon Text", entity, level.WeaponTextEntityName);
+                EditorContentPickers::DrawSceneEntityField("Player Health Bar", entity, level.PlayerHealthBarEntityName);
+                EditorContentPickers::DrawSceneEntityField("Player Health Text", entity, level.PlayerHealthTextEntityName);
+                EditorContentPickers::DrawSceneEntityField("Boss Health Bar", entity, level.BossHealthBarEntityName);
+                EditorContentPickers::DrawSceneEntityField("Boss Health Text", entity, level.BossHealthTextEntityName);
 
                 ImGui::Separator();
                 ImGui::TextDisabled("Runtime State");

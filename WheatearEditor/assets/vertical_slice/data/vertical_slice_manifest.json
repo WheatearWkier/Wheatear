@@ -150,36 +150,22 @@
       "assets/vertical_slice/ui/panels/panel_dark.png",
       "assets/vertical_slice/ui/panels/panel_hub.png",
       "assets/vertical_slice/ui/panels/panel_result.png",
-      "assets/vertical_slice/ui/panels/panel_skill.png",
-      "assets/vertical_slice/ui/panels/panel_equipment.png",
       "assets/vertical_slice/ui/panels/panel_dungeon.png",
       "assets/vertical_slice/ui/panels/panel_relationship.png",
       "assets/vertical_slice/ui/panels/panel_support.png",
-      "assets/vertical_slice/ui/panels/panel_settings.png",
-      "assets/vertical_slice/ui/panels/panel_save_load.png"
+      "assets/vertical_slice/ui/panels/panel_settings.png"
     ],
     "icons": [
       "assets/vertical_slice/ui/icons/icon_dungeon.png",
       "assets/vertical_slice/ui/icons/icon_skill_tree.png",
-      "assets/vertical_slice/ui/icons/icon_magic_sword.png",
       "assets/vertical_slice/ui/icons/icon_armor.png",
       "assets/vertical_slice/ui/icons/icon_result.png",
-      "assets/vertical_slice/ui/icons/icon_history.png",
-      "assets/vertical_slice/ui/icons/icon_tutorial.png",
-      "assets/vertical_slice/ui/icons/icon_material_core.png",
-      "assets/vertical_slice/ui/icons/icon_material_sinew.png",
-      "assets/vertical_slice/ui/icons/icon_material_claw.png",
       "assets/vertical_slice/ui/icons/icon_relationship.png",
       "assets/vertical_slice/ui/icons/icon_support.png",
       "assets/vertical_slice/ui/icons/icon_settings.png",
-      "assets/vertical_slice/ui/icons/icon_save.png",
-      "assets/vertical_slice/ui/icons/icon_back.png"
+      "assets/vertical_slice/ui/icons/icon_save.png"
     ],
-    "nodes": [
-      "assets/vertical_slice/ui/nodes/node_active.png",
-      "assets/vertical_slice/ui/nodes/node_unlocked.png",
-      "assets/vertical_slice/ui/nodes/node_locked.png"
-    ]
+    "nodes": []
   },
   "replacementPolicy": {
     "keepFormalPathsStable": true,
@@ -198,16 +184,8 @@
     "assets/vertical_slice/ui/icons/icon_equipment_traveler_armor.png",
     "assets/vertical_slice/ui/icons/icon_equipment_ward_charm.png",
     "assets/vertical_slice/ui/icons/icon_equipment_wind_boots.png",
-    "assets/vertical_slice/ui/icons/icon_skill_air.png",
-    "assets/vertical_slice/ui/icons/icon_skill_break.png",
-    "assets/vertical_slice/ui/icons/icon_skill_core.png",
-    "assets/vertical_slice/ui/icons/icon_skill_dash.png",
-    "assets/vertical_slice/ui/icons/icon_skill_fire.png",
-    "assets/vertical_slice/ui/icons/icon_skill_locked.png",
     "assets/vertical_slice/ui/icons/icon_skill_slash.png",
-    "assets/vertical_slice/ui/icons/icon_skill_support.png",
-    "assets/vertical_slice/ui/icons/icon_skill_tree.png",
-    "assets/vertical_slice/ui/icons/icon_skill_uppercut.png"
+    "assets/vertical_slice/ui/icons/icon_skill_tree.png"
   ],
   "interactive_ui_revision": "2026-07-28-skillbar-tree-pages",
   "generated_assets": [
@@ -216,12 +194,17 @@
     "assets/scenes/VerticalSliceTurnCombat.wt",
     "assets/vertical_slice/side_combat/ui/icon_skill_ally_support.png",
     "assets/vertical_slice/side_combat/ui/icon_skill_basic_slash.png",
-    "assets/vertical_slice/side_combat/ui/icon_skill_launcher_slash.png",
     "assets/vertical_slice/side_combat/ui/icon_skill_break_limit.png",
-    "assets/vertical_slice/side_combat/ui/icon_skill_uppercut.png",
+    "assets/vertical_slice/side_combat/ui/icon_skill_launcher_slash.png",
     "assets/vertical_slice/side_combat/ui/icon_skill_magic_bolt.png",
+    "assets/vertical_slice/side_combat/ui/icon_skill_uppercut.png",
     "assets/vertical_slice/turn_combat/backgrounds/bg_turn_ruins_arena.png",
     "assets/vertical_slice/turn_combat/sheets/effects/vfx_turn_slash_sheet.png",
-    "assets/vertical_slice/ui/skill_tree/skill_magic_sword_core.png"
+    "assets/vertical_slice/ui/skill_tree/skill_fu.png",
+    "assets/vertical_slice/ui/skill_tree/skill_li.png",
+    "assets/vertical_slice/ui/skill_tree/skill_ma.png",
+    "assets/vertical_slice/ui/skill_tree/skill_magic_sword_core.png",
+    "assets/vertical_slice/ui/skill_tree/skill_me.png",
+    "assets/vertical_slice/ui/skill_tree/skill_mo.png"
   ]
 }

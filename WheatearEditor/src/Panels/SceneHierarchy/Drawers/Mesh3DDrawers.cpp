@@ -26,7 +26,8 @@ namespace Wheatear {
                 }
                 ImGui::Text("Mesh");
                 ImGui::SameLine();
-                ImGui::Button(meshName.c_str(), ImVec2(-1, 0));
+                const std::string meshButtonLabel = meshName + "##MeshDropSlot";
+                ImGui::Button(meshButtonLabel.c_str(), ImVec2(-1, 0));
                 if (ImGui::BeginDragDropTarget())
                 {
                     if (const ImGuiPayload* payload =
@@ -53,7 +54,8 @@ namespace Wheatear {
                     ? std::filesystem::path(c.Material->GetPath()).filename().string()
                     : "[Unsaved Material]";
 
-                ImGui::Button(matName.c_str(), ImVec2(-1, 0));
+                const std::string materialButtonLabel = matName + "##MaterialDropSlot";
+                ImGui::Button(materialButtonLabel.c_str(), ImVec2(-1, 0));
 
                 if (ImGui::BeginDragDropTarget())
                 {

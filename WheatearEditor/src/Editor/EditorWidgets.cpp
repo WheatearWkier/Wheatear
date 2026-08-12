@@ -11,11 +11,128 @@
 #include <cstring>
 #include <fstream>
 #include <iterator>
+#include <set>
 #include <sstream>
 
 namespace Wheatear::EditorWidgets {
 
     namespace {
+
+        struct AssetReferenceChoice
+        {
+            std::string Label;
+            std::string Value;
+            bool IsAlias = false;
+        };
+
+        static const char* AssetReferenceKindLabel(AssetReferenceKind kind)
+        {
+            switch (kind)
+            {
+            case AssetReferenceKind::Texture: return "Texture";
+            case AssetReferenceKind::Audio: return "Audio";
+            case AssetReferenceKind::Font: return "Font";
+            case AssetReferenceKind::Data: return "Data";
+            case AssetReferenceKind::Scene: return "Scene";
+            case AssetReferenceKind::Script: return "Script";
+            case AssetReferenceKind::Prefab: return "Prefab";
+            case AssetReferenceKind::Any:
+            default: return "Asset";
+            }
+        }
+
+        static bool IsAssetReferenceKindMatch(AssetReferenceKind kind, const std::filesystem::path& path)
+        {
+            const std::string extension = path.extension().generic_string();
+            if (path.empty())
+                return false;
+
+            switch (kind)
+            {
+            case AssetReferenceKind::Texture:
+                return extension == ".png" || extension == ".jpg" || extension == ".jpeg" || extension == ".tga" || extension == ".bmp";
+            case AssetReferenceKind::Audio:
+                return extension == ".mp3" || extension == ".wav" || extension == ".ogg" || extension == ".flac";
+            case AssetReferenceKind::Font:
+                return extension == ".ttf" || extension == ".otf" || extension == ".ttc";
+            case AssetReferenceKind::Scene:
+                return extension == ".wt" || extension == ".yaml" || extension == ".yml";
+            case AssetReferenceKind::Script:
+                return extension == ".lua" || extension == ".cs" || extension == ".vn" || extension == ".wts";
+            case AssetReferenceKind::Prefab:
+                return extension == ".wtprefab";
+            case AssetReferenceKind::Data:
+                return extension == ".yaml" || extension == ".yml" || extension == ".json" || extension == ".txt" || extension == ".wts" || extension == ".wtuit";
+            case AssetReferenceKind::Any:
+            default:
+                return true;
+            }
+        }
+
+        static std::string ToLowerCopy(std::string value)
+        {
+            std::transform(value.begin(), value.end(), value.begin(), [](unsigned char c)
+            {
+                return static_cast<char>(std::tolower(c));
+            });
+            return value;
+        }
+
+        static std::vector<AssetReferenceChoice> BuildAssetReferenceChoices(AssetReferenceKind kind)
+        {
+            std::vector<AssetReferenceChoice> choices;
+            std::set<std::string> seenValues;
+
+            for (const auto& [alias, target] : AssetAliasRegistry::All())
+            {
+                const std::filesystem::path targetPath = AssetPath::Resolve(target);
+                if (targetPath.empty() || !std::filesystem::exists(targetPath))
+                    continue;
+                if (!IsAssetReferenceKindMatch(kind, targetPath))
+                    continue;
+
+                AssetReferenceChoice choice;
+                choice.Label = alias + " -> " + target;
+                choice.Value = alias;
+                choice.IsAlias = true;
+                if (seenValues.insert(choice.Value).second)
+                    choices.push_back(std::move(choice));
+            }
+
+            const std::filesystem::path assetRoot = AssetPath::GetAssetRoot();
+            if (std::filesystem::exists(assetRoot))
+            {
+                for (const auto& entry : std::filesystem::recursive_directory_iterator(assetRoot))
+                {
+                    if (!entry.is_regular_file())
+                        continue;
+
+                    const std::filesystem::path relative = AssetPath::ToProjectRelative(entry.path());
+                    const std::string relativeText = relative.generic_string();
+                    if (relative.empty() || relativeText.find("assets/.wheatear/") == 0)
+                        continue;
+                    if (!IsAssetReferenceKindMatch(kind, relative))
+                        continue;
+
+                    const std::string value = relativeText;
+                    if (!seenValues.insert(value).second)
+                        continue;
+
+                    AssetReferenceChoice choice;
+                    choice.Label = value;
+                    choice.Value = value;
+                    choices.push_back(std::move(choice));
+                }
+            }
+
+            std::sort(choices.begin(), choices.end(), [](const AssetReferenceChoice& a, const AssetReferenceChoice& b)
+            {
+                if (a.IsAlias != b.IsAlias)
+                    return a.IsAlias > b.IsAlias;
+                return ToLowerCopy(a.Label) < ToLowerCopy(b.Label);
+            });
+            return choices;
+        }
 
         ImVec4 StatusColor(StatusKind kind)
         {
@@ -134,7 +251,9 @@ namespace Wheatear::EditorWidgets {
         ImGui::PushStyleColor(ImGuiCol_ButtonHovered, bg);
         ImGui::PushStyleColor(ImGuiCol_ButtonActive, bg);
         ImGui::PushStyleColor(ImGuiCol_Text, fg);
+        ImGui::PushItemFlag(ImGuiItemFlags_AllowDuplicateId, true);
         ImGui::SmallButton(label ? label : "");
+        ImGui::PopItemFlag();
         ImGui::PopStyleColor(4);
     }
 
@@ -154,6 +273,11 @@ namespace Wheatear::EditorWidgets {
         ImGui::TextDisabled("%s", title ? title : "No content.");
         if (description && description[0] != '\0')
             ImGui::TextWrapped("%s", description);
+    }
+
+    std::string LabelWithId(const std::string& label, const std::string& id)
+    {
+        return label + "##" + id;
     }
 
     bool SearchBar(const char* id, char* buffer, size_t bufferSize, const char* hint)
@@ -352,6 +476,104 @@ namespace Wheatear::EditorWidgets {
         DrawPathTools(label, relativePath);
     }
 
+    bool DrawAssetReferenceField(const char* label,
+        std::string& reference,
+        AssetReferenceKind kind,
+        size_t capacity)
+    {
+        const std::string fieldId = std::string(label ? label : "Asset") + "##asset_ref_field";
+        bool changed = false;
+
+        ImGui::TextDisabled("%s", label ? label : "Asset");
+        ImGui::SameLine(150.0f);
+        ImGui::PushID(fieldId.c_str());
+
+        std::vector<char> buffer(std::max<size_t>(capacity, reference.size() + 32), 0);
+        strncpy_s(buffer.data(), buffer.size(), reference.c_str(), _TRUNCATE);
+        ImGui::SetNextItemWidth(260.0f);
+        if (ImGui::InputText("##reference", buffer.data(), buffer.size()))
+        {
+            reference = buffer.data();
+            changed = true;
+        }
+        ImGui::SameLine();
+
+        const std::string popupId = std::string("Select##") + fieldId;
+        if (ImGui::SmallButton("Select"))
+            ImGui::OpenPopup(popupId.c_str());
+        if (ImGui::IsItemHovered())
+        {
+            const std::string hint = std::string("Pick a ") + AssetReferenceKindLabel(kind) + " from aliases or project assets.";
+            ImGui::SetTooltip("%s", hint.c_str());
+        }
+
+        ImGui::SameLine();
+        if (ImGui::SmallButton("Clear"))
+        {
+            reference.clear();
+            changed = true;
+        }
+        ImGui::SameLine();
+        if (ImGui::SmallButton("Open"))
+            OpenProjectAssetFolder(reference);
+
+        const bool exists = ProjectAssetExists(reference);
+        ImGui::SameLine();
+        if (reference.empty())
+            ImGui::TextDisabled("(none)");
+        else if (exists)
+            ImGui::TextDisabled("%s", reference.c_str());
+        else
+            ImGui::TextColored(ImVec4(0.95f, 0.55f, 0.45f, 1.0f), "%s", reference.c_str());
+
+        if (ImGui::BeginPopup(popupId.c_str()))
+        {
+            static char searchBuffer[128] = {};
+            SearchBar("##asset_reference_search", searchBuffer, sizeof(searchBuffer), "Search asset or alias...");
+            ImGui::Separator();
+
+            const std::vector<AssetReferenceChoice> choices = BuildAssetReferenceChoices(kind);
+            const std::string filter = ToLowerCopy(searchBuffer);
+            const size_t maxChoices = 180;
+            size_t shown = 0;
+            for (const AssetReferenceChoice& choice : choices)
+            {
+                if (!filter.empty())
+                {
+                    const std::string labelText = ToLowerCopy(choice.Label);
+                    const std::string valueText = ToLowerCopy(choice.Value);
+                    if (labelText.find(filter) == std::string::npos && valueText.find(filter) == std::string::npos)
+                        continue;
+                }
+
+                const bool selected = reference == choice.Value;
+                const std::string itemLabel = LabelWithId(choice.Label, "asset_ref_choice:" + choice.Value);
+                if (ImGui::Selectable(itemLabel.c_str(), selected))
+                {
+                    reference = choice.Value;
+                    changed = true;
+                    ImGui::CloseCurrentPopup();
+                }
+                if (selected)
+                    ImGui::SetItemDefaultFocus();
+
+                if (++shown >= maxChoices)
+                {
+                    ImGui::TextDisabled("More results omitted.");
+                    break;
+                }
+            }
+
+            if (choices.empty())
+                EmptyState("No matching assets.", "Use Content Browser or add an alias to make this picker useful.");
+
+            ImGui::EndPopup();
+        }
+
+        ImGui::PopID();
+        return changed;
+    }
+
     std::string ReadString(const YAML::Node& node, const char* key, const std::string& fallback)
     {
         return ReadScalar<std::string>(node, key, fallback);
@@ -403,7 +625,8 @@ namespace Wheatear::EditorWidgets {
         const char* format)
     {
         float value = ReadScalar<float>(map, key, 0.0f);
-        if (ImGui::DragFloat(label, &value, speed, minValue, maxValue, format))
+        const std::string itemLabel = LabelWithId(label ? label : key, key ? key : label);
+        if (ImGui::DragFloat(itemLabel.c_str(), &value, speed, minValue, maxValue, format))
         {
             map[key] = value;
             return true;
@@ -418,7 +641,8 @@ namespace Wheatear::EditorWidgets {
         int maxValue)
     {
         int value = ReadScalar<int>(map, key, 0);
-        if (ImGui::DragInt(label, &value, 1.0f, minValue, maxValue))
+        const std::string itemLabel = LabelWithId(label ? label : key, key ? key : label);
+        if (ImGui::DragInt(itemLabel.c_str(), &value, 1.0f, minValue, maxValue))
         {
             map[key] = value;
             return true;
@@ -429,7 +653,8 @@ namespace Wheatear::EditorWidgets {
     bool DrawBool(YAML::Node map, const char* key, const char* label)
     {
         bool value = ReadScalar<bool>(map, key, false);
-        if (ImGui::Checkbox(label, &value))
+        const std::string itemLabel = LabelWithId(label ? label : key, key ? key : label);
+        if (ImGui::Checkbox(itemLabel.c_str(), &value))
         {
             map[key] = value;
             return true;
@@ -443,7 +668,8 @@ namespace Wheatear::EditorWidgets {
         size_t capacity)
     {
         std::string value = ReadString(map, key);
-        if (InputString(label, value, capacity))
+        const std::string itemLabel = LabelWithId(label ? label : key, key ? key : label);
+        if (InputString(itemLabel.c_str(), value, capacity))
         {
             map[key] = value;
             return true;
@@ -464,7 +690,8 @@ namespace Wheatear::EditorWidgets {
             values[1] = source[1].as<float>(0.0f);
         }
 
-        if (ImGui::DragFloat2(label, values, speed))
+        const std::string itemLabel = LabelWithId(label ? label : key, key ? key : label);
+        if (ImGui::DragFloat2(itemLabel.c_str(), values, speed))
         {
             YAML::Node sequence(YAML::NodeType::Sequence);
             sequence.push_back(values[0]);
@@ -481,7 +708,8 @@ namespace Wheatear::EditorWidgets {
         size_t capacity)
     {
         std::string value = JoinList(ReadStringList(map[key]));
-        if (InputString(label, value, capacity))
+        const std::string itemLabel = LabelWithId(label ? label : key, key ? key : label);
+        if (InputString(itemLabel.c_str(), value, capacity))
         {
             YAML::Node sequence(YAML::NodeType::Sequence);
             for (const std::string& item : SplitList(value))
@@ -513,10 +741,12 @@ namespace Wheatear::EditorWidgets {
 
         if (ImGui::BeginCombo(label, selected.empty() ? "(none)" : selected.c_str()))
         {
-            for (const std::string& key : keys)
+            for (size_t i = 0; i < keys.size(); ++i)
             {
+                const std::string& key = keys[i];
                 const bool isSelected = selected == key;
-                if (ImGui::Selectable(key.c_str(), isSelected))
+                const std::string itemLabel = LabelWithId(key, "selector:" + std::to_string(i));
+                if (ImGui::Selectable(itemLabel.c_str(), isSelected))
                     selected = key;
                 if (isSelected)
                     ImGui::SetItemDefaultFocus();

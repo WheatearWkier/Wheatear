@@ -1,5 +1,6 @@
 #include "wtpch.h"
 #include "AudioDrawer.h"
+#include "Editor/EditorWidgets.h"
 #include "Wheatear/Scene/Components.h"
 #include "Wheatear/Audio/AudioEngine.h"
 #include "Wheatear/Core/Log.h"
@@ -21,20 +22,11 @@ namespace Wheatear {
 
         if (open)
         {
-            // Audio file path
-            // Keep a local buffer and entity-scoped ImGui ID to avoid cross-row input collisions.
-            char buf[256];
-            memset(buf, 0, sizeof(buf));
-            strncpy_s(buf, asc.AudioFilePath.c_str(), sizeof(buf) - 1);
-
-            ImGui::Text("Audio File");
-            ImGui::SameLine();
-            ImGui::SetNextItemWidth(-1.0f);
-
             ImGui::PushID((int)(uint32_t)entity);
-            if (ImGui::InputText("##AudioFilePath", buf, sizeof(buf)))
-                asc.AudioFilePath = buf;
-            ImGui::PopID();
+            EditorWidgets::DrawAssetReferenceField("Audio File",
+                asc.AudioFilePath,
+                EditorWidgets::AssetReferenceKind::Audio,
+                256);
 
             // Drag and drop audio assets.
             if (ImGui::BeginDragDropTarget())
@@ -56,9 +48,10 @@ namespace Wheatear {
                 }
                 ImGui::EndDragDropTarget();
             }
+            ImGui::PopID();
 
             if (asc.AudioFilePath.empty())
-                ImGui::TextDisabled("  Drag an audio file here, or type path");
+                ImGui::TextDisabled("Choose or drag an audio asset.");
 
             // Volume
             ImGui::SliderFloat("Volume", &asc.Volume, 0.0f, 1.0f);

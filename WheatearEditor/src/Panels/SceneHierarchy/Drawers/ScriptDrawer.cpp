@@ -5,7 +5,6 @@
 
 #include "Editor/EditorWidgets.h"
 #include "Editor/EventScriptGraphPanel.h"
-#include "Editor/TextAssetEditor.h"
 #include "Wheatear/Scene/Components.h"
 #include "Wheatear/Scripting/ScriptEngine.h"
 
@@ -30,8 +29,6 @@ namespace Wheatear {
         };
 
         static std::unordered_map<uint64_t, ScriptSelectorState> s_SelectorStates;
-        static std::unordered_map<std::string, EditorUI::TextAssetEditorState> s_EventScriptEditors;
-
         using EditorWidgets::InputString;
 
         static std::string ToLower(std::string value)
@@ -285,14 +282,18 @@ namespace Wheatear {
                 }
 
                 bool anyVisible = false;
-                for (const std::string& className : classNames)
+                for (size_t i = 0; i < classNames.size(); ++i)
                 {
+                    const std::string& className = classNames[i];
                     if (!ContainsCaseInsensitive(className, state.Search.data()))
                         continue;
 
                     anyVisible = true;
                     const bool selected = component.ClassName == className;
-                    if (ImGui::Selectable(className.c_str(), selected))
+                    const std::string label = EditorWidgets::LabelWithId(
+                        className,
+                        "script_class:" + std::to_string(i));
+                    if (ImGui::Selectable(label.c_str(), selected))
                     {
                         component.ClassName = className;
                         ScriptEngine::ClearScriptFieldMap(entity);
@@ -396,8 +397,12 @@ namespace Wheatear {
             ImGui::Checkbox("Enabled", &component.Enabled);
             ImGui::Checkbox("Run On Start", &component.RunOnStart);
             ImGui::Checkbox("Run Once", &component.RunOnce);
-            if (ImGui::Button("Open Event Graph"))
+            if (ImGui::Button("Open Event Script Editor"))
                 EventScriptGraphRequests::RequestOpenScript(component.ScriptPath, component.StartEvent);
+            ImGui::SameLine();
+            EditorWidgets::StatusBadge("Edits Asset", EditorWidgets::StatusKind::Info);
+            ImGui::SameLine();
+            EditorWidgets::StatusBadge("Edits Scene", EditorWidgets::StatusKind::Success);
 
             ImGui::Separator();
             ImGui::TextDisabled("Runtime");
@@ -409,13 +414,6 @@ namespace Wheatear {
             ImGui::TextDisabled("Instruction: %zu / Wait: %.2fs",
                 component.RuntimeInstructionIndex,
                 component.RuntimeWaitRemaining);
-
-            EditorUI::DrawTextAssetEditor(
-                "Wheatear Event Script (.wts)",
-                "EventScriptTextEditor",
-                component.ScriptPath,
-                s_EventScriptEditors,
-                256 * 1024);
 
             ImGui::PopID();
         });

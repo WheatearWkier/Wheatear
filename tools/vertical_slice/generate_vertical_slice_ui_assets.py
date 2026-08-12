@@ -1,8 +1,9 @@
 from __future__ import annotations
 
+import math
 from pathlib import Path
 
-from PIL import Image, ImageDraw, ImageFilter
+from PIL import Image, ImageDraw
 
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -35,25 +36,6 @@ def panel(size: tuple[int, int], body: tuple[int, int, int], border: tuple[int, 
     d.rectangle((5, h - 8, w - 6, h - 6), fill=(0, 0, 0, 80))
     for y in range(13, h - 12, 10):
         d.line((8, y, w - 9, y), fill=(*glow, 24), width=1)
-    return upscale(image, 3)
-
-
-def small_badge(color: tuple[int, int, int], accent: tuple[int, int, int]) -> Image.Image:
-    image, d = alpha_canvas((48, 48))
-    d.polygon([(24, 3), (40, 10), (45, 27), (34, 43), (14, 43), (3, 27), (8, 10)], fill=(*color, 245), outline=(255, 255, 255, 210))
-    d.polygon([(24, 9), (36, 15), (39, 28), (31, 38), (17, 38), (9, 28), (12, 15)], fill=(*accent, 230))
-    d.line((15, 27, 23, 35, 35, 17), fill=(255, 255, 255, 235), width=3)
-    return upscale(image, 3)
-
-
-def icon_magic_sword() -> Image.Image:
-    image, d = alpha_canvas((64, 64))
-    d.ellipse((18, 42, 48, 52), fill=(0, 0, 0, 70))
-    d.polygon([(34, 3), (42, 12), (33, 49), (26, 49), (25, 12)], fill=(92, 241, 255, 245))
-    d.polygon([(31, 5), (36, 13), (30, 43), (27, 44), (27, 13)], fill=(236, 255, 255, 255))
-    d.rectangle((19, 44, 42, 49), fill=(43, 67, 99, 255))
-    d.rectangle((27, 49, 35, 59), fill=(81, 58, 102, 255))
-    d.line((39, 16, 52, 10), fill=(156, 255, 232, 185), width=2)
     return upscale(image, 3)
 
 
@@ -95,73 +77,44 @@ def icon_result() -> Image.Image:
     return upscale(image, 3)
 
 
-def material_core() -> Image.Image:
+def icon_circle(base: tuple[int, int, int], accent: tuple[int, int, int], mark: str) -> Image.Image:
     image, d = alpha_canvas((48, 48))
-    d.polygon([(25, 4), (39, 15), (35, 34), (19, 44), (6, 30), (9, 12)], fill=(126, 81, 200, 245), outline=(236, 220, 255, 210))
-    d.polygon([(24, 12), (32, 19), (29, 30), (19, 35), (13, 27), (15, 17)], fill=(69, 232, 255, 230))
-    return upscale(image, 3)
-
-
-def material_sinew() -> Image.Image:
-    image, d = alpha_canvas((48, 48))
-    for offset, color in [(0, (197, 128, 74)), (6, (232, 171, 111)), (12, (159, 93, 70))]:
-        d.arc((6 + offset, 9, 34 + offset, 39), 80, 288, fill=(*color, 245), width=5)
-    d.line((14, 14, 37, 34), fill=(255, 222, 164, 220), width=2)
-    return upscale(image, 3)
-
-
-def material_claw() -> Image.Image:
-    image, d = alpha_canvas((48, 48))
-    for x in (14, 24, 34):
-        d.polygon([(x, 5), (x + 7, 35), (x - 4, 43)], fill=(232, 224, 186, 245), outline=(94, 75, 55, 180))
-    d.rectangle((8, 34, 40, 42), fill=(112, 70, 48, 230))
-    return upscale(image, 3)
-
-
-def icon_history() -> Image.Image:
-    image, d = alpha_canvas((48, 48))
-    d.rounded_rectangle((8, 5, 39, 43), radius=3, fill=(46, 62, 75, 245), outline=(168, 225, 226, 220), width=2)
-    for y in (14, 22, 30, 38):
-        d.line((14, y, 33, y), fill=(224, 238, 222, 230), width=2)
-    d.rectangle((10, 5, 16, 43), fill=(79, 177, 171, 190))
-    return upscale(image, 3)
-
-
-def icon_tutorial() -> Image.Image:
-    image, d = alpha_canvas((48, 48))
-    d.ellipse((7, 7, 41, 41), fill=(47, 113, 119, 245), outline=(225, 248, 236, 225), width=2)
-    d.rectangle((21, 18, 26, 34), fill=(244, 238, 182, 255))
-    d.rectangle((21, 11, 26, 15), fill=(244, 238, 182, 255))
-    return upscale(image, 3)
-
-
-def node(color: tuple[int, int, int], border: tuple[int, int, int]) -> Image.Image:
-    image, d = alpha_canvas((40, 40))
-    d.ellipse((5, 5, 35, 35), fill=(*color, 235), outline=(*border, 245), width=3)
-    d.ellipse((14, 14, 26, 26), fill=(245, 250, 240, 200))
+    d.ellipse((5, 5, 43, 43), fill=(*base, 245), outline=(242, 246, 226, 225), width=2)
+    d.ellipse((12, 12, 36, 36), fill=(*accent, 218))
+    if mark == "heart":
+        d.polygon([(24, 36), (12, 22), (15, 14), (22, 15), (24, 19), (26, 15), (33, 14), (36, 22)], fill=(255, 216, 225, 245))
+    elif mark == "support":
+        d.rectangle((14, 19, 34, 25), fill=(238, 245, 220, 245))
+        d.rectangle((20, 13, 28, 35), fill=(238, 245, 220, 245))
+    elif mark == "settings":
+        for angle in range(0, 360, 45):
+            x = 24 + int(math.cos(math.radians(angle)) * 12)
+            y = 24 + int(math.sin(math.radians(angle)) * 12)
+            d.rectangle((x - 2, y - 2, x + 2, y + 2), fill=(238, 245, 220, 235))
+        d.ellipse((16, 16, 32, 32), fill=(40, 50, 58, 255), outline=(238, 245, 220, 235), width=2)
+    elif mark == "save":
+        d.rounded_rectangle((12, 10, 36, 38), radius=3, fill=(238, 245, 220, 245))
+        d.rectangle((16, 13, 32, 20), fill=(*base, 245))
+        d.rectangle((17, 26, 31, 34), fill=(*accent, 220))
     return upscale(image, 3)
 
 
 def main() -> None:
     save(panel((96, 40), (20, 26, 34), (80, 219, 213), (98, 235, 230)), UI_ROOT / "panels" / "panel_dark.png")
-    save(panel((128, 64), (35, 29, 38), (236, 196, 86), (255, 231, 132)), UI_ROOT / "panels" / "panel_result.png")
-    save(panel((128, 64), (25, 32, 50), (92, 156, 244), (120, 210, 255)), UI_ROOT / "panels" / "panel_skill.png")
-    save(panel((128, 64), (40, 32, 23), (224, 170, 92), (255, 214, 128)), UI_ROOT / "panels" / "panel_equipment.png")
     save(panel((128, 64), (24, 42, 40), (80, 219, 160), (128, 248, 210)), UI_ROOT / "panels" / "panel_hub.png")
-    save(small_badge((214, 171, 74), (70, 197, 203)), UI_ROOT / "badges" / "badge_result_gold.png")
-    save(icon_magic_sword(), UI_ROOT / "icons" / "icon_magic_sword.png")
+    save(panel((128, 64), (35, 29, 38), (236, 196, 86), (255, 231, 132)), UI_ROOT / "panels" / "panel_result.png")
+    save(panel((128, 64), (26, 34, 46), (92, 180, 244), (118, 218, 255)), UI_ROOT / "panels" / "panel_dungeon.png")
+    save(panel((128, 64), (42, 30, 42), (226, 138, 162), (255, 190, 205)), UI_ROOT / "panels" / "panel_relationship.png")
+    save(panel((128, 64), (34, 36, 48), (156, 142, 238), (190, 184, 255)), UI_ROOT / "panels" / "panel_support.png")
+    save(panel((128, 64), (28, 34, 36), (128, 220, 178), (176, 250, 210)), UI_ROOT / "panels" / "panel_settings.png")
     save(icon_armor(), UI_ROOT / "icons" / "icon_armor.png")
     save(icon_dungeon(), UI_ROOT / "icons" / "icon_dungeon.png")
     save(icon_skill_tree(), UI_ROOT / "icons" / "icon_skill_tree.png")
     save(icon_result(), UI_ROOT / "icons" / "icon_result.png")
-    save(material_core(), UI_ROOT / "icons" / "icon_material_core.png")
-    save(material_sinew(), UI_ROOT / "icons" / "icon_material_sinew.png")
-    save(material_claw(), UI_ROOT / "icons" / "icon_material_claw.png")
-    save(icon_history(), UI_ROOT / "icons" / "icon_history.png")
-    save(icon_tutorial(), UI_ROOT / "icons" / "icon_tutorial.png")
-    save(node((58, 226, 206), (235, 255, 246)), UI_ROOT / "nodes" / "node_unlocked.png")
-    save(node((90, 96, 105), (155, 165, 175)), UI_ROOT / "nodes" / "node_locked.png")
-    save(node((232, 184, 78), (255, 245, 190)), UI_ROOT / "nodes" / "node_active.png")
+    save(icon_circle((172, 66, 98), (92, 42, 70), "heart"), UI_ROOT / "icons" / "icon_relationship.png")
+    save(icon_circle((83, 78, 177), (48, 52, 114), "support"), UI_ROOT / "icons" / "icon_support.png")
+    save(icon_circle((74, 136, 108), (34, 72, 65), "settings"), UI_ROOT / "icons" / "icon_settings.png")
+    save(icon_circle((188, 139, 62), (82, 65, 42), "save"), UI_ROOT / "icons" / "icon_save.png")
 
 
 if __name__ == "__main__":

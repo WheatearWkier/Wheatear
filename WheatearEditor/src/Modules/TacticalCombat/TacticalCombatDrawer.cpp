@@ -1,5 +1,7 @@
 #include "TacticalCombatDrawer.h"
 
+#include "Editor/CommandBuilder.h"
+#include "Editor/EditorContentPickers.h"
 #include "Editor/EditorWidgets.h"
 #include "Panels/SceneHierarchy/ComponentDrawers.h"
 #include "Wheatear/Modules/TacticalCombat/TacticalCombatComponents.h"
@@ -14,6 +16,7 @@ namespace Wheatear {
 
     namespace {
 
+        using EditorCommandBuilder::DrawCommandBuilder;
         using EditorWidgets::DrawTeamCombo;
         using EditorWidgets::InputString;
 
@@ -43,7 +46,10 @@ namespace Wheatear {
             const std::string columnsLabel = std::string(label) + " Columns";
             const std::string startLabel = std::string(label) + " Start";
 
-            InputString(sheetLabel.c_str(), atlas.SheetPath, pathWidth);
+            EditorContentPickers::DrawAssetField(sheetLabel.c_str(),
+                atlas.SheetPath,
+                EditorWidgets::AssetReferenceKind::Texture,
+                pathWidth);
             ImGui::DragInt2(cellLabel.c_str(), &atlas.CellWidth, 1.0f, 0, 8192);
             ImGui::DragInt(columnsLabel.c_str(), &atlas.Columns, 1.0f, 0, 256);
             ImGui::DragInt(startLabel.c_str(), &atlas.StartFrame, 1.0f, 0, 4096);
@@ -53,8 +59,9 @@ namespace Wheatear {
 
     void DrawTacticalCombatLevelComponent(Entity entity)
     {
-        DrawComponent<TacticalCombatLevelComponent>("Tactical Combat Level", entity, [](auto& level)
+        DrawComponent<TacticalCombatLevelComponent>("Tactical Combat Level", entity, [entity](auto& level)
         {
+            EditorWidgets::StatusBadge("Edits Scene", EditorWidgets::StatusKind::Success);
             ImGui::Checkbox("Play On Start", &level.PlayOnStart);
             InputString("Level Id", level.LevelId, 240);
 
@@ -78,14 +85,14 @@ namespace Wheatear {
 
             ImGui::Separator();
             ImGui::TextDisabled("Scene Bindings");
-            InputString("Fade", level.FadeEntityName);
-            InputString("Message Text", level.MessageTextEntityName);
-            InputString("Phase Text", level.PhaseTextEntityName);
-            InputString("Detail Text", level.DetailTextEntityName);
-            InputString("Command Panel", level.CommandPanelEntityName);
-            InputString("Action Effect", level.ActionEffectEntityName);
-            InputString("Victory Command", level.VictorySceneCommand, 300);
-            InputString("Defeat Command", level.DefeatSceneCommand, 300);
+            EditorContentPickers::DrawSceneEntityField("Fade", entity, level.FadeEntityName);
+            EditorContentPickers::DrawSceneEntityField("Message Text", entity, level.MessageTextEntityName);
+            EditorContentPickers::DrawSceneEntityField("Phase Text", entity, level.PhaseTextEntityName);
+            EditorContentPickers::DrawSceneEntityField("Detail Text", entity, level.DetailTextEntityName);
+            EditorContentPickers::DrawSceneEntityField("Command Panel", entity, level.CommandPanelEntityName);
+            EditorContentPickers::DrawSceneEntityField("Action Effect", entity, level.ActionEffectEntityName);
+            DrawCommandBuilder("Victory Command", level.VictorySceneCommand, 300);
+            DrawCommandBuilder("Defeat Command", level.DefeatSceneCommand, 300);
 
             ImGui::Separator();
             ImGui::TextDisabled("Tile Highlight Colors");
@@ -106,8 +113,9 @@ namespace Wheatear {
 
     void DrawTacticalUnitComponent(Entity entity)
     {
-        DrawComponent<TacticalUnitComponent>("Tactical Unit", entity, [](auto& unit)
+        DrawComponent<TacticalUnitComponent>("Tactical Unit", entity, [entity](auto& unit)
         {
+            EditorWidgets::StatusBadge("Edits Scene", EditorWidgets::StatusKind::Success);
             DrawTeamCombo(unit.Team);
             ImGui::DragInt("Slot", &unit.Slot, 1.0f, 0, 64);
             ImGui::DragInt("Grid X", &unit.GridX, 1.0f, 0, 64);
@@ -135,9 +143,9 @@ namespace Wheatear {
 
             ImGui::Separator();
             ImGui::TextDisabled("UI Bindings");
-            InputString("HP Bar", unit.HealthBarEntityName);
-            InputString("Status Text", unit.StatusTextEntityName);
-            InputString("Marker", unit.MarkerEntityName);
+            EditorContentPickers::DrawSceneEntityField("HP Bar", entity, unit.HealthBarEntityName);
+            EditorContentPickers::DrawSceneEntityField("Status Text", entity, unit.StatusTextEntityName);
+            EditorContentPickers::DrawSceneEntityField("Marker", entity, unit.MarkerEntityName);
 
             ImGui::Separator();
             ImGui::TextDisabled("Animation Frames");

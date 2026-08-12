@@ -25,10 +25,10 @@
 #include "Assets/AssetRegistry.h"
 #include "Assets/UITemplateFactory.h"
 #include "Editor/EditorCanvasTools.h"
+#include "Editor/EditorLocale.h"
 #include "Editor/EditorFloatingWindow.h"
 #include "Editor/EditorPlatform.h"
 #include "Editor/EditorWidgets.h"
-#include "Editor/EventScriptGraphPanel.h"
 #include "Editor/EditorToolRegistry.h"
 #include "Panels/AnimationEditorPanel.h"
 #include "Panels/ContentBrowserPanel.h"
@@ -46,6 +46,7 @@
 #include <algorithm>
 #include <chrono>
 #include <cmath>
+#include <cstring>
 #include <functional>
 #include <limits>
 #include <memory>
@@ -65,12 +66,6 @@ namespace Wheatear {
             int SortOrder = 0;
             std::string Name;
         };
-
-        static EventScriptGraphPanel& GetEventScriptGraphPanel()
-        {
-            static EventScriptGraphPanel panel;
-            return panel;
-        }
 
         static ImVec2 ToScreenPoint(const glm::vec2& viewportMin,
             const glm::vec2& viewportSize,
@@ -501,7 +496,6 @@ namespace Wheatear {
             if (tool.Draw)
                 tool.Draw();
         });
-        GetEventScriptGraphPanel().OnImGuiRender();
 
         if (m_ShowStats)
             UI_Stats();
@@ -661,11 +655,24 @@ namespace Wheatear {
         if (!ImGui::BeginMenuBar()) return;
 
         const EditorToolContext toolContext{ m_SceneHierarchyPanel->GetSelectedEntity() };
+        auto localizedToolLabel = [](const char* label) -> const char*
+        {
+            if (!label) return "";
+            if (std::strcmp(label, "Event Script Editor") == 0) return EditorLocale::Text("Event Script Editor", "事件脚本编辑器");
+            if (std::strcmp(label, "VN Script Editor") == 0) return EditorLocale::Text("VN Script Editor", "视觉小说脚本编辑器");
+            if (std::strcmp(label, "Side Combat Tuning Editor") == 0) return EditorLocale::Text("Side Combat Tuning Editor", "横版战斗调参编辑器");
+            if (std::strcmp(label, "Side Combat HUD Preset Editor") == 0) return EditorLocale::Text("Side Combat HUD Preset Editor", "横版战斗 HUD 预设编辑器");
+            if (std::strcmp(label, "WAO Action Editor") == 0) return EditorLocale::Text("WAO Action Editor", "WAO 动作编辑器");
+            if (std::strcmp(label, "Asset Alias / Manifest Editor") == 0) return EditorLocale::Text("Asset Alias / Manifest Editor", "资产别名 / 清单编辑器");
+            if (std::strcmp(label, "Progression Content Editor") == 0) return EditorLocale::Text("Progression Content Editor", "成长内容编辑器");
+            if (std::strcmp(label, "Project Health") == 0) return EditorLocale::Text("Project Health", "项目健康检查");
+            return label;
+        };
         auto drawToolsByCategory = [&](EditorToolCategory category)
         {
             EditorToolRegistry::ForEach([&](const EditorToolDescriptor& tool)
             {
-                if (tool.Category == category && ImGui::MenuItem(tool.MenuLabel.c_str()) && tool.Open)
+                if (tool.Category == category && ImGui::MenuItem(localizedToolLabel(tool.MenuLabel.c_str())) && tool.Open)
                     tool.Open(toolContext);
             });
         };
@@ -677,21 +684,6 @@ namespace Wheatear {
                     tool.Open(toolContext);
             });
         };
-        auto openEventGraph = [&]()
-        {
-            std::string scriptPath = "assets/events/vertical_slice_flow.wts";
-            std::string eventName;
-            if (Entity selected = m_SceneHierarchyPanel->GetSelectedEntity())
-            {
-                if (selected.HasComponent<EventScriptComponent>())
-                {
-                    const auto& script = selected.GetComponent<EventScriptComponent>();
-                    scriptPath = script.ScriptPath;
-                    eventName = script.StartEvent;
-                }
-            }
-            GetEventScriptGraphPanel().Open(scriptPath, eventName);
-        };
         auto drawFloatingWindowItem = [&](const char* title, const std::function<void()>& open)
         {
             if (EditorFloatingWindow::DrawFloatingMenuItem(title)
@@ -699,6 +691,23 @@ namespace Wheatear {
                 && open)
             {
                 open();
+            }
+        };
+        auto drawLocalizedFloatingWindowItem = [&](const char* title, const std::function<void()>& open)
+        {
+            const bool floating = EditorFloatingWindow::IsFloating(title);
+            const std::string label = std::string(floating
+                ? EditorLocale::Text("Dock ", "停靠 ")
+                : EditorLocale::Text("Pop Out ", "弹出 "))
+                + localizedToolLabel(title);
+            if (ImGui::MenuItem(label.c_str()))
+            {
+                if (floating)
+                    EditorFloatingWindow::Dock(title);
+                else
+                    EditorFloatingWindow::OpenFloating(title);
+                if (!floating && open)
+                    open();
             }
         };
 
@@ -785,20 +794,25 @@ namespace Wheatear {
             {
                 m_SpriteSheetPickerPanel->OpenForEntity(m_SceneHierarchyPanel->GetSelectedEntity());
             });
-            drawFloatingWindowItem("Event Script Graph", openEventGraph);
-            drawFloatingWindowItem("VN Script Editor", [&]() { openToolByLabel("VN Script Editor"); });
-            drawFloatingWindowItem("Side Combat Tuning Editor", [&]() { openToolByLabel("Side Combat Tuning Editor"); });
-            drawFloatingWindowItem("WAO Action Debugger", [&]() { openToolByLabel("WAO Action Debugger"); });
-            drawFloatingWindowItem("Project Health", [&]() { openToolByLabel("Project Health"); });
+            drawLocalizedFloatingWindowItem("Event Script Editor", [&]() { openToolByLabel("Event Script Editor"); });
+            drawLocalizedFloatingWindowItem("VN Script Editor", [&]() { openToolByLabel("VN Script Editor"); });
+            drawLocalizedFloatingWindowItem("Side Combat Tuning Editor", [&]() { openToolByLabel("Side Combat Tuning Editor"); });
+            drawLocalizedFloatingWindowItem("Side Combat HUD Preset Editor", [&]() { openToolByLabel("Side Combat HUD Preset Editor"); });
+            drawLocalizedFloatingWindowItem("WAO Action Editor", [&]() { openToolByLabel("WAO Action Editor"); });
+            drawLocalizedFloatingWindowItem("Asset Alias / Manifest Editor", [&]() { openToolByLabel("Asset Alias / Manifest Editor"); });
+            drawLocalizedFloatingWindowItem("Project Health", [&]() { openToolByLabel("Project Health"); });
+            ImGui::Separator();
+            if (ImGui::MenuItem("Reset Window Layout"))
+            {
+                m_RequestDefaultDockspaceLayout = true;
+                m_DefaultDockspaceLayoutBuilt = false;
+            }
+            drawToolsByCategory(EditorToolCategory::Window);
             ImGui::EndMenu();
         }
 
         if (ImGui::BeginMenu("Gameplay"))
         {
-            if (ImGui::MenuItem("Event Script Graph"))
-            {
-                openEventGraph();
-            }
             drawToolsByCategory(EditorToolCategory::Gameplay);
             ImGui::EndMenu();
         }
@@ -833,19 +847,13 @@ namespace Wheatear {
             ImGui::EndMenu();
         }
 
-        if (ImGui::BeginMenu("Window"))
-        {
-            if (ImGui::MenuItem("Reset Window Layout"))
-            {
-                m_RequestDefaultDockspaceLayout = true;
-                m_DefaultDockspaceLayoutBuilt = false;
-            }
-            drawToolsByCategory(EditorToolCategory::Window);
-            ImGui::EndMenu();
-        }
-
         if (ImGui::BeginMenu("App"))
         {
+            if (ImGui::BeginMenu(EditorLocale::Text("Language", "语言")))
+            {
+                EditorLocale::DrawLanguageMenu();
+                ImGui::EndMenu();
+            }
             if (ImGui::MenuItem("Exit")) Application::Get().Close();
             ImGui::EndMenu();
         }
@@ -1734,22 +1742,6 @@ namespace Wheatear {
                     tool.Open(toolContext);
             });
         };
-        auto openEventGraph = [&]()
-        {
-            std::string scriptPath = "assets/events/vertical_slice_flow.wts";
-            std::string eventName;
-            if (Entity selected = m_SceneHierarchyPanel->GetSelectedEntity())
-            {
-                if (selected.HasComponent<EventScriptComponent>())
-                {
-                    const auto& script = selected.GetComponent<EventScriptComponent>();
-                    scriptPath = script.ScriptPath;
-                    eventName = script.StartEvent;
-                }
-            }
-            GetEventScriptGraphPanel().Open(scriptPath, eventName);
-        };
-
         if (EditorWidgets::IconButton("##ToolbarNewScene", m_IconNewScene, "New Scene (Ctrl+N)", iconSize))
             NewScene();
         sameLine();
@@ -1793,8 +1785,8 @@ namespace Wheatear {
         if (EditorWidgets::IconButton("##ToolbarSpriteSheet", m_IconSpriteSheet, "Sprite Sheet Picker", iconSize))
             m_SpriteSheetPickerPanel->OpenForEntity(m_SceneHierarchyPanel->GetSelectedEntity());
         sameLine();
-        if (EditorWidgets::IconButton("##ToolbarEventGraph", m_IconEventGraph, "Event Script Graph", iconSize))
-            openEventGraph();
+        if (EditorWidgets::IconButton("##ToolbarEventGraph", m_IconEventGraph, "Event Script Editor", iconSize))
+            openToolByLabel("Event Script Editor");
 
         groupGap();
 

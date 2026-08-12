@@ -263,7 +263,7 @@
 - 中心是魔剑核心，近战、上挑、空连、魔法、支援、机动和断限节点向外分支。
 - 点击节点会写入 `GameProgress::State.SelectedSkillNodeId`。
 - `SkillTree_Details` 显示选中节点的类型、连招职责、已学 / 未学状态、材料或章节条件。
-- `SkillTree_Button_UpgradeMagicSword` 当前改为“学习选中节点”，竖切阶段主要验证魔法弹和疾风步的 Lv2 解锁流程。
+- `SkillTree_Button_LearnSelectedSkill` 用于“学习选中节点”，竖切阶段主要验证技能树选择、解锁条件和材料提示流程。
 - 断限追击节点只展示规则和后期教学定位，不在第二章竖切中正式开放给玩家。
 
 后续正式化还需要补：节点高亮框、材料来源点击跳转、技能装备栏、节点前置连线状态和多级升级。
@@ -521,9 +521,8 @@
 
 | 命令 | 行为 |
 | --- | --- |
-| `progression:learn_selected_skill` | 根据当前选中技能节点执行学习；竖切中魔法弹 / 疾风步会尝试把魔剑升到 Lv2 |
-| `progression:select_skill_core / select_skill_melee / select_skill_launcher / select_skill_air / select_skill_magic / select_skill_support / select_skill_mobility / select_skill_break` | 选择技能树节点并刷新详情 |
-| `progression:upgrade_magic_sword` | 旧版直升命令，仍可消耗 `魔核碎片 x1 / 兽筋 x2 / 熊爪 x1` 把魔剑升到 Lv2 |
+| `progression:learn_selected_skill` | 根据当前选中的内容表节点执行学习；技能树 UI 已不再依赖旧实体选择表 |
+| `progression:select_skill_node:<skill_id>` | 选择技能树节点并刷新详情 |
 | `progression:upgrade_traveler_armor` | 消耗 `兽筋 x1 / 熊爪 x1`，把旅人护衣强化到 +1，提升 HP / DEF |
 | `progression:select_equipment_<id>` | 选择背包装备并刷新装备详情 |
 | `progression:equipment_page_1 / equipment_page_2` | 切换背包分页并刷新页码滑条 |

@@ -1,5 +1,6 @@
 #include "UIDrawers.h"
 #include "../ComponentDrawers.h"
+#include "Editor/CommandBuilder.h"
 #include "Editor/EditorCanvasTools.h"
 #include "Editor/EditorWidgets.h"
 #include "Panels/SpriteSheetPickerPanel.h"
@@ -189,7 +190,11 @@ namespace Wheatear {
 
                     const auto& id = registry.get<IDComponent>(candidate).ID;
                     const bool selected = candidate == current;
-                    if (ImGui::Selectable(EntityReferenceLabel(scene, candidate).c_str(), selected))
+                    const std::string displayLabel = EntityReferenceLabel(scene, candidate);
+                    const std::string itemLabel = EditorWidgets::LabelWithId(
+                        displayLabel,
+                        "ui_reference:" + std::to_string(static_cast<uint64_t>(id)));
+                    if (ImGui::Selectable(itemLabel.c_str(), selected))
                         targetID = id;
                     if (selected)
                         ImGui::SetItemDefaultFocus();
@@ -364,6 +369,17 @@ namespace Wheatear {
                     if (ImGui::Button("Clear"))
                         image.Texture = nullptr;
                 }
+
+                std::string texturePath = image.Texture ? image.Texture->GetPath() : std::string{};
+                if (EditorWidgets::DrawAssetReferenceField("Texture",
+                    texturePath,
+                    EditorWidgets::AssetReferenceKind::Texture))
+                {
+                    image.Texture = texturePath.empty()
+                        ? nullptr
+                        : Texture2D::Create(texturePath);
+                }
+
                 if (ImGui::Button("Open Sprite Sheet Picker"))
                     SpriteSheetPickerPanel::RequestOpen(entity);
                 if (ImGui::IsItemHovered(ImGuiHoveredFlags_DelayShort))
@@ -405,7 +421,10 @@ namespace Wheatear {
                 ImGui::ColorEdit4("Outline Color", glm::value_ptr(text.OutlineColor));
                 ImGui::DragFloat("Outline px", &text.OutlineThickness, 0.1f, 0.0f, 8.0f);
 
-                EditorWidgets::InputString("Font Path", text.FontPath, 260);
+                EditorWidgets::DrawAssetReferenceField("Font",
+                    text.FontPath,
+                    EditorWidgets::AssetReferenceKind::Font,
+                    260);
 
                 if (ImGui::BeginDragDropTarget())
                 {
@@ -424,19 +443,13 @@ namespace Wheatear {
 
     void DrawUIButtonComponent(Entity entity)
     {
-        DrawComponent<UIButtonComponent>("UI Button", entity, [entity](auto& button)
+        DrawComponent<UIButtonComponent>("UI Button", entity, [](auto& button)
             {
                 ImGui::ColorEdit4("Normal Color", glm::value_ptr(button.NormalColor));
                 ImGui::ColorEdit4("Hover Color", glm::value_ptr(button.HoverColor));
                 ImGui::ColorEdit4("Pressed Color", glm::value_ptr(button.PressedColor));
 
-                char funcBuffer[64];
-                memset(funcBuffer, 0, sizeof(funcBuffer));
-                strncpy_s(funcBuffer, sizeof(funcBuffer), button.OnClickFunction.c_str(), _TRUNCATE);
-
-                ImGui::PushID((int)(uint32_t)entity);
-                if (ImGui::InputText("On Click", funcBuffer, sizeof(funcBuffer)))
-                    button.OnClickFunction = funcBuffer;
+                EditorCommandBuilder::DrawCommandBuilder("On Click", button.OnClickFunction, 256);
 
                 char tooltipBuffer[128];
                 memset(tooltipBuffer, 0, sizeof(tooltipBuffer));
@@ -444,7 +457,6 @@ namespace Wheatear {
 
                 if (ImGui::InputText("Tooltip Text", tooltipBuffer, sizeof(tooltipBuffer)))
                     button.TooltipText = tooltipBuffer;
-                ImGui::PopID();
 
                 ImGui::PushItemFlag(ImGuiItemFlags_Disabled, true);
                 ImGui::PushStyleVar(ImGuiStyleVar_Alpha, ImGui::GetStyle().Alpha * 0.5f);
@@ -510,7 +522,7 @@ namespace Wheatear {
     // -- UISlider ----------------------------------------------------------
     void DrawUISliderComponent(Entity entity)
     {
-        DrawComponent<UISliderComponent>("UI Slider", entity, [entity](auto& slider)
+        DrawComponent<UISliderComponent>("UI Slider", entity, [](auto& slider)
             {
                 ImGui::DragFloat("Min", &slider.MinValue, 0.01f);
                 ImGui::DragFloat("Max", &slider.MaxValue, 0.01f);
@@ -523,14 +535,7 @@ namespace Wheatear {
                 ImGui::ColorEdit4("Handle", glm::value_ptr(slider.HandleColor));
                 ImGui::ColorEdit4("Hover", glm::value_ptr(slider.HoverColor));
 
-                char funcBuffer[96];
-                memset(funcBuffer, 0, sizeof(funcBuffer));
-                strncpy_s(funcBuffer, sizeof(funcBuffer), slider.OnValueChangedFunction.c_str(), _TRUNCATE);
-
-                ImGui::PushID((int)(uint32_t)entity);
-                if (ImGui::InputText("On Value Changed", funcBuffer, sizeof(funcBuffer)))
-                    slider.OnValueChangedFunction = funcBuffer;
-                ImGui::PopID();
+                EditorCommandBuilder::DrawCommandBuilder("On Value Changed", slider.OnValueChangedFunction, 256);
 
                 ImGui::PushItemFlag(ImGuiItemFlags_Disabled, true);
                 ImGui::PushStyleVar(ImGuiStyleVar_Alpha, ImGui::GetStyle().Alpha * 0.5f);
@@ -756,7 +761,7 @@ namespace Wheatear {
     // -- UICheckbox --------------------------------------------------------
     void DrawUICheckboxComponent(Entity entity)
     {
-        DrawComponent<UICheckboxComponent>("UI Checkbox", entity, [entity](auto& checkbox)
+        DrawComponent<UICheckboxComponent>("UI Checkbox", entity, [](auto& checkbox)
             {
                 ImGui::Checkbox("Checked", &checkbox.Checked);
                 ImGui::ColorEdit4("Box", glm::value_ptr(checkbox.BoxColor));
@@ -764,14 +769,7 @@ namespace Wheatear {
                 ImGui::ColorEdit4("Hover", glm::value_ptr(checkbox.HoverColor));
                 ImGui::ColorEdit4("Pressed", glm::value_ptr(checkbox.PressedColor));
 
-                char funcBuffer[96];
-                memset(funcBuffer, 0, sizeof(funcBuffer));
-                strncpy_s(funcBuffer, sizeof(funcBuffer), checkbox.OnValueChangedFunction.c_str(), _TRUNCATE);
-
-                ImGui::PushID((int)(uint32_t)entity);
-                if (ImGui::InputText("On Value Changed", funcBuffer, sizeof(funcBuffer)))
-                    checkbox.OnValueChangedFunction = funcBuffer;
-                ImGui::PopID();
+                EditorCommandBuilder::DrawCommandBuilder("On Value Changed", checkbox.OnValueChangedFunction, 256);
 
                 ImGui::PushItemFlag(ImGuiItemFlags_Disabled, true);
                 ImGui::PushStyleVar(ImGuiStyleVar_Alpha, ImGui::GetStyle().Alpha * 0.5f);

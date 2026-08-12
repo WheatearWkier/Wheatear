@@ -2,6 +2,7 @@
 
 #include "Editor/EditorFloatingWindow.h"
 #include "Editor/EditorWidgets.h"
+#include "Editor/GameplayEditorShell.h"
 #include "Wheatear/Core/AssetAliasRegistry.h"
 #include "Wheatear/Core/AssetPath.h"
 
@@ -84,13 +85,14 @@ namespace Wheatear {
 
         EditorFloatingWindow::Begin("Side Combat Tuning Editor", &m_Open, 0, { 1180.0f, 760.0f });
         EditorWidgets::PanelHeader("Side Combat Tuning", "Structured YAML authoring for runtime movement, combo feel, attacks, skills, and progression profiles.");
-        EditorWidgets::StatusBadge(m_ParseValid ? "YAML valid" : "YAML invalid",
-            m_ParseValid ? EditorWidgets::StatusKind::Success : EditorWidgets::StatusKind::Error);
-        ImGui::SameLine();
-        EditorWidgets::StatusBadge(m_Dirty ? "Unsaved edit" : "Clean",
-            m_Dirty ? EditorWidgets::StatusKind::Warning : EditorWidgets::StatusKind::Success);
-        ImGui::SameLine();
         EditorFloatingWindow::DrawToggleButton("Side Combat Tuning Editor");
+        EditorGameplayShell::DrawDocumentStatus({
+            EditorGameplayShell::DocumentKind::Asset,
+            m_Dirty,
+            m_ParseValid,
+            m_SourcePath,
+            m_Status
+        });
         DrawToolbar();
 
         if (!m_ParseValid)
@@ -134,7 +136,7 @@ namespace Wheatear {
                 ImGui::EndTabItem();
             }
 
-            if (ImGui::BeginTabItem("Raw Preview"))
+            if (EditorGameplayShell::BeginRawPreviewTab("Advanced Raw"))
             {
                 DrawRawPreviewTab();
                 ImGui::EndTabItem();

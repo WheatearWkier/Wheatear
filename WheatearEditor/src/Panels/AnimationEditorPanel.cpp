@@ -409,10 +409,14 @@ namespace Wheatear {
         if (ImGui::BeginCombo("##clipselect",
             m_CurrentClipName.empty() ? "(none)" : m_CurrentClipName.c_str()))
         {
+            size_t clipIndex = 0;
             for (auto& [name, clip] : m_Animator->Clips)
             {
                 bool sel = (name == m_CurrentClipName);
-                if (ImGui::Selectable(name.c_str(), sel))
+                const std::string label = EditorWidgets::LabelWithId(
+                    name,
+                    "animation_clip:" + std::to_string(clipIndex++));
+                if (ImGui::Selectable(label.c_str(), sel))
                 {
                     StopPreview();
                     m_CurrentClipName = name;

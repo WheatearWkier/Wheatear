@@ -1,6 +1,7 @@
 #pragma once
 #include <imgui/imgui.h>
 #include <imgui/imgui_internal.h>
+#include <typeinfo>
 #include <unordered_map>
 #include "Wheatear/Scene/Entity.h"
 #include "Panels/EditorCommands.h"
@@ -17,12 +18,13 @@ namespace Wheatear {
         if (!entity.HasComponent<T>())
             return;
         auto& component = entity.GetComponent<T>();
+        ImGui::PushID(static_cast<const void*>(&typeid(T)));
         const ImVec2 contentRegion = ImGui::GetContentRegionAvail();
         ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2{ 4, 4 });
         const float lineHeight = ImGui::GetFrameHeight();
         ImGui::Separator();
         const bool open = ImGui::TreeNodeEx(
-            reinterpret_cast<void*>(typeid(T).hash_code()),
+            "##ComponentHeader",
             treeNodeFlags,
             "%s", name.c_str()
         );
@@ -86,6 +88,7 @@ namespace Wheatear {
 
             ImGui::TreePop();
         }
+        ImGui::PopID();
         if (removeComponent)
         {
             auto cmd = std::make_unique<RemoveComponentCommand<T>>(entity);

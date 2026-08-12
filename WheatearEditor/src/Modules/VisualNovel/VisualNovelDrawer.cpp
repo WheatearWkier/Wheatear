@@ -1,7 +1,7 @@
 #include "VisualNovelDrawer.h"
 
+#include "Editor/EditorContentPickers.h"
 #include "Editor/EditorWidgets.h"
-#include "Editor/TextAssetEditor.h"
 #include "Modules/VisualNovel/VisualNovelScriptEditorPanel.h"
 #include "Panels/SceneHierarchy/ComponentDrawers.h"
 #include "Wheatear/Scene/Components.h"
@@ -9,16 +9,11 @@
 #include <imgui/imgui.h>
 
 #include <algorithm>
-#include <unordered_map>
 #include <vector>
 
 namespace Wheatear {
 
     namespace {
-
-        using EditorWidgets::InputString;
-
-        static std::unordered_map<std::string, EditorUI::TextAssetEditorState> s_ScriptEditors;
 
         static bool StartsWith(const std::string& value, const std::string& prefix)
         {
@@ -58,23 +53,26 @@ namespace Wheatear {
     {
         DrawComponent<VisualNovelComponent>("Visual Novel", entity, [entity](auto& component)
             {
-                InputString("Script Path", component.ScriptPath);
+                EditorContentPickers::DrawAssetField("Script Path",
+                    component.ScriptPath,
+                    EditorWidgets::AssetReferenceKind::Script);
                 if (ImGui::Button("Open VN Script Editor"))
                     VisualNovelEditorRequests::RequestOpenScript(component.ScriptPath);
+                ImGui::SameLine();
+                EditorWidgets::StatusBadge("Edits Asset", EditorWidgets::StatusKind::Info);
                 ImGui::DragFloat("Characters / Second", &component.CharactersPerSecond, 1.0f, 1.0f, 240.0f);
                 ImGui::Checkbox("Play On Start", &component.PlayOnStart);
                 ImGui::Checkbox("Restart On Finish", &component.RestartOnFinish);
-                EditorUI::DrawTextAssetEditor("VN Script Editor", "VisualNovelScriptEditor", component.ScriptPath, s_ScriptEditors, 512 * 1024);
 
                 ImGui::Separator();
                 ImGui::TextDisabled("Scene Bindings");
-                InputString("Speaker Text", component.SpeakerTextEntityName);
-                InputString("Body Text", component.BodyTextEntityName);
-                InputString("Advance Hint", component.AdvanceHintEntityName);
-                InputString("Background", component.BackgroundEntityName);
-                InputString("Floor", component.FloorEntityName);
-                InputString("Character Prefix", component.CharacterEntityPrefix);
-                InputString("Choice Prefix", component.ChoiceEntityPrefix);
+                EditorContentPickers::DrawSceneEntityField("Speaker Text", entity, component.SpeakerTextEntityName);
+                EditorContentPickers::DrawSceneEntityField("Body Text", entity, component.BodyTextEntityName);
+                EditorContentPickers::DrawSceneEntityField("Advance Hint", entity, component.AdvanceHintEntityName);
+                EditorContentPickers::DrawSceneEntityField("Background", entity, component.BackgroundEntityName);
+                EditorContentPickers::DrawSceneEntityField("Floor", entity, component.FloorEntityName);
+                EditorWidgets::InputString("Character Prefix", component.CharacterEntityPrefix);
+                EditorWidgets::InputString("Choice Prefix", component.ChoiceEntityPrefix);
 
                 int maxChoices = static_cast<int>(component.MaxVisibleChoices);
                 if (ImGui::DragInt("Max Choices", &maxChoices, 1.0f, 1, 9))
@@ -84,22 +82,22 @@ namespace Wheatear {
                 ImGui::TextDisabled("Runtime Controls");
                 ImGui::Checkbox("Auto Play On Start", &component.AutoPlayOnStart);
                 ImGui::DragFloat("Auto Play Delay", &component.AutoPlayDelay, 0.05f, 0.2f, 10.0f);
-                InputString("History Text", component.HistoryTextEntityName);
-                InputString("Auto Play Indicator", component.AutoPlayIndicatorEntityName);
-                InputString("Command Bar", component.CommandBarEntityName);
-                InputString("Command Tooltip", component.CommandTooltipEntityName);
+                EditorContentPickers::DrawSceneEntityField("History Text", entity, component.HistoryTextEntityName);
+                EditorContentPickers::DrawSceneEntityField("Auto Play Indicator", entity, component.AutoPlayIndicatorEntityName);
+                EditorContentPickers::DrawSceneEntityField("Command Bar", entity, component.CommandBarEntityName);
+                EditorContentPickers::DrawSceneEntityField("Command Tooltip", entity, component.CommandTooltipEntityName);
                 ImGui::Checkbox("Command Tooltip Follow Mouse", &component.CommandTooltipFollowMouse);
                 ImGui::DragFloat2("Command Tooltip Mouse Offset", &component.CommandTooltipMouseOffset.x, 0.001f, -1.0f, 1.0f, "%.3f");
-                InputString("History Panel", component.HistoryPanelEntityName);
-                InputString("History Scroll", component.HistoryScrollEntityName);
-                InputString("Settings Panel", component.SettingsPanelEntityName);
-                InputString("Settings Text", component.SettingsTextEntityName);
-                InputString("Save Load Panel", component.SaveLoadPanelEntityName);
-                InputString("Save Load Text", component.SaveLoadTextEntityName);
-                InputString("System Message", component.SystemMessageEntityName);
-                InputString("Music Notice Panel", component.MusicNoticePanelEntityName);
-                InputString("Music Notice Text", component.MusicNoticeTextEntityName);
-                InputString("Save Directory", component.SaveDirectory);
+                EditorContentPickers::DrawSceneEntityField("History Panel", entity, component.HistoryPanelEntityName);
+                EditorContentPickers::DrawSceneEntityField("History Scroll", entity, component.HistoryScrollEntityName);
+                EditorContentPickers::DrawSceneEntityField("Settings Panel", entity, component.SettingsPanelEntityName);
+                EditorContentPickers::DrawSceneEntityField("Settings Text", entity, component.SettingsTextEntityName);
+                EditorContentPickers::DrawSceneEntityField("Save Load Panel", entity, component.SaveLoadPanelEntityName);
+                EditorContentPickers::DrawSceneEntityField("Save Load Text", entity, component.SaveLoadTextEntityName);
+                EditorContentPickers::DrawSceneEntityField("System Message", entity, component.SystemMessageEntityName);
+                EditorContentPickers::DrawSceneEntityField("Music Notice Panel", entity, component.MusicNoticePanelEntityName);
+                EditorContentPickers::DrawSceneEntityField("Music Notice Text", entity, component.MusicNoticeTextEntityName);
+                EditorWidgets::InputString("Save Directory", component.SaveDirectory);
                 ImGui::DragInt("Auto Load Slot", &component.AutoLoadSlot, 1.0f, 0, 9);
 
                 ImGui::Separator();

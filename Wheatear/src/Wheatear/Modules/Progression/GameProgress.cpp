@@ -3,6 +3,7 @@
 
 #include "ProgressionContent.h"
 #include "ProgressionSettingsCommandService.h"
+#include "Wheatear/Core/AssetAliasRegistry.h"
 #include "Wheatear/Core/AssetPath.h"
 #include "Wheatear/Core/UserSettings.h"
 
@@ -17,12 +18,17 @@
 
 namespace Wheatear::GameProgress {
 
+    static bool CanUpgradeMagicSwordToLv2Internal();
+    static bool TryUpgradeMagicSwordToLv2Internal();
+
     namespace {
 
         static constexpr int kMaxSaveSlots = 20;
         static constexpr int kCurrentSaveVersion = 3;
-        static constexpr const char* kDefaultLoadScenePath = "assets/scenes/VerticalSliceIntro.wt";
-        static constexpr const char* kSaveLoadScenePath = "assets/scenes/VerticalSliceSaveLoad.wt";
+        static constexpr const char* kDefaultLoadSceneAlias = "progression.scene.default_load";
+        static constexpr const char* kSaveLoadSceneAlias = "progression.scene.save_load";
+        static constexpr const char* kFallbackDefaultLoadScenePath = "assets/scenes/VerticalSliceIntro.wt";
+        static constexpr const char* kFallbackSaveLoadScenePath = "assets/scenes/VerticalSliceSaveLoad.wt";
 
         static int ClampSaveSlot(int slot)
         {
@@ -33,6 +39,16 @@ namespace Wheatear::GameProgress {
         {
             const int safeSlot = ClampSaveSlot(slot);
             return AssetPath::Resolve("assets/saves/progression_slot" + std::to_string(safeSlot) + ".wtsave");
+        }
+
+        static std::string DefaultLoadScenePath()
+        {
+            return AssetAliasRegistry::Path(kDefaultLoadSceneAlias, kFallbackDefaultLoadScenePath);
+        }
+
+        static std::string SaveLoadScenePath()
+        {
+            return AssetAliasRegistry::Path(kSaveLoadSceneAlias, kFallbackSaveLoadScenePath);
         }
 
         static std::filesystem::path GameRuntimeSavePathForSlot(int slot, const std::string& saveDirectory)
@@ -98,7 +114,7 @@ namespace Wheatear::GameProgress {
 
         static bool IsSaveLoadScenePath(const std::string& scenePath)
         {
-            return ToLowerCopy(NormalizeAssetLikePath(scenePath)) == ToLowerCopy(kSaveLoadScenePath);
+            return ToLowerCopy(NormalizeAssetLikePath(scenePath)) == ToLowerCopy(SaveLoadScenePath());
         }
 
         static std::string UnescapeSavedField(const std::string& value)
@@ -173,7 +189,7 @@ namespace Wheatear::GameProgress {
                 return current;
             if (!previous.empty() && !IsSaveLoadScenePath(previous))
                 return previous;
-            return kDefaultLoadScenePath;
+            return DefaultLoadScenePath();
         }
 
         static std::string ResolveLoadScenePathForSlot(int slot, const std::string& requestedScenePath)
@@ -198,7 +214,7 @@ namespace Wheatear::GameProgress {
                 return previous;
             if (!current.empty() && !IsSaveLoadScenePath(current))
                 return current;
-            return kDefaultLoadScenePath;
+            return DefaultLoadScenePath();
         }
         static std::string JoinSet(const std::unordered_set<std::string>& values)
         {
@@ -452,7 +468,7 @@ namespace Wheatear::GameProgress {
         }
 
         using SkillNodeDisplayInfo = ProgressionContent::SkillNodeDefinition;
-        using SkillNodeInfo = ProgressionContent::SkillNodeDefinition;
+        static constexpr const char* kMagicSwordLv2SkillNodeId = "magic_sword_lv2";
 
         static const std::vector<SkillNodeDisplayInfo>& GetSkillNodeDisplayInfos()
         {
@@ -470,17 +486,14 @@ namespace Wheatear::GameProgress {
             return nodes.empty() ? nullptr : &nodes.front();
         }
 
-        static const SkillNodeInfo& FindSkillNode(const std::string& nodeId)
-        {
-            const auto& nodes = ProgressionContent::Get().SkillNodes;
-            if (const auto* node = ProgressionContent::FindSkillNode(nodeId))
-                return *node;
-            return nodes.front();
-        }
-
         static bool RequiresMagicSwordLv2(const SkillNodeDisplayInfo& node)
         {
             return node.Requirement.find("Lv2") != std::string::npos;
+        }
+
+        static bool IsMagicSwordLv2Node(const std::string& nodeId)
+        {
+            return nodeId == kMagicSwordLv2SkillNodeId;
         }
 
         static std::string SkillNodeDisplayState(const State& state, const std::string& nodeId)
@@ -488,6 +501,14 @@ namespace Wheatear::GameProgress {
             const SkillNodeDisplayInfo* node = LookupSkillNodeDisplayInfo(nodeId);
             if (!node)
                 return {};
+            if (IsMagicSwordLv2Node(nodeId))
+            {
+                if (state.MagicSwordLevel >= 2)
+                    return "已觉醒";
+                if (node->UnlockChapter > state.CurrentChapter)
+                    return "后续第 " + std::to_string(node->UnlockChapter) + " 章开放";
+                return CanUpgradeMagicSwordToLv2Internal() ? "可觉醒" : "材料不足";
+            }
             if (state.UnlockedSkills.find(nodeId) != state.UnlockedSkills.end())
                 return "已习得";
             if (RequiresMagicSwordLv2(*node) && state.MagicSwordLevel < 2)
@@ -497,21 +518,6 @@ namespace Wheatear::GameProgress {
             if (node->UnlockChapter == state.CurrentChapter + 1)
                 return "下一章节开放";
             return "后续第 " + std::to_string(node->UnlockChapter) + " 章开放";
-        }
-
-        static std::string LegacySkillActionToNodeId(const std::string& action)
-        {
-            return ProgressionContent::ResolveLegacySkillSelection(action);
-        }
-
-        static std::string SkillNodeState(const State& state, const std::string& nodeId)
-        {
-            return SkillNodeDisplayState(state, nodeId);
-        }
-
-        static std::string SkillActionToNodeId(const std::string& action)
-        {
-            return ProgressionContent::ResolveLegacySkillSelection(action);
         }
 
         using EquipmentInfo = ProgressionContent::EquipmentDefinition;
@@ -603,7 +609,7 @@ namespace Wheatear::GameProgress {
         const std::string previous = NormalizeScenePathString(previousScenePath);
         std::string current = NormalizeScenePathString(currentScenePath);
         if (current.empty())
-            current = kDefaultLoadScenePath;
+            current = DefaultLoadScenePath();
 
         if (!previous.empty() && previous != current)
             state.PreviousScenePath = previous;
@@ -1047,12 +1053,12 @@ namespace Wheatear::GameProgress {
         return {};
     }
 
-    bool CanUpgradeMagicSwordToLv2()
+    static bool CanUpgradeMagicSwordToLv2Internal()
     {
         return GetState().MagicSwordLevel < 2 && HasMaterials(MagicSwordLv2Cost());
     }
 
-    bool TryUpgradeMagicSwordToLv2()
+    static bool TryUpgradeMagicSwordToLv2Internal()
     {
         State& state = GetState();
         if (state.MagicSwordLevel >= 2)
@@ -1115,12 +1121,7 @@ namespace Wheatear::GameProgress {
             return result;
 
         result.Handled = true;
-        if (action == "upgrade_magic_sword")
-        {
-            result.Changed = TryUpgradeMagicSwordToLv2();
-            result.Success = result.Changed || GetState().MagicSwordLevel >= 2;
-        }
-        else if (action == "upgrade_traveler_armor")
+        if (action == "upgrade_traveler_armor")
         {
             if (GetState().SelectedEquipmentId != TravelerArmorUpgradeEquipmentId())
             {
@@ -1133,7 +1134,7 @@ namespace Wheatear::GameProgress {
                 result.Success = result.Changed || GetState().TravelerArmorLevel >= 1;
             }
         }
-        else if (action == "learn_selected_skill_v2")
+        else if (action == "learn_selected_skill")
         {
             State& state = GetState();
             const SkillNodeDisplayInfo* node = LookupSkillNodeDisplayInfo(state.SelectedSkillNodeId);
@@ -1146,6 +1147,11 @@ namespace Wheatear::GameProgress {
             {
                 state.LastResultMessage = std::string(node->Name) + " 会在后续第 " + std::to_string(node->UnlockChapter) + " 章开放。";
                 result.Success = true;
+            }
+            else if (IsMagicSwordLv2Node(state.SelectedSkillNodeId))
+            {
+                result.Changed = TryUpgradeMagicSwordToLv2Internal();
+                result.Success = result.Changed || state.MagicSwordLevel >= 2;
             }
             else if (RequiresMagicSwordLv2(*node) && state.MagicSwordLevel < 2)
             {
@@ -1165,25 +1171,6 @@ namespace Wheatear::GameProgress {
                 result.Success = true;
             }
         }
-        else if (action == "learn_selected_skill")
-        {
-            const std::string selected = GetState().SelectedSkillNodeId;
-            if (selected == "vfx_magic_bolt" || selected == "wind_step")
-            {
-                result.Changed = TryUpgradeMagicSwordToLv2();
-                result.Success = result.Changed || GetState().MagicSwordLevel >= 2;
-            }
-            else if (selected == "break_limit")
-            {
-                GetState().LastResultMessage = "断限追击是第七章后正式教学的高手机制，当前竖切只展示节点和规则。";
-                result.Success = true;
-            }
-            else
-            {
-                GetState().LastResultMessage = "该节点已经习得。请尝试选择魔法弹或疾风步查看 Lv2 解锁条件。";
-                result.Success = true;
-            }
-        }
         else if (action.rfind("select_skill_node:", 0) == 0)
         {
             const std::string selectedNode = action.substr(18);
@@ -1200,22 +1187,6 @@ namespace Wheatear::GameProgress {
                 GetState().LastResultMessage = "未找到技能节点: " + selectedNode;
                 result.Success = true;
             }
-        }
-        else if (const std::string selectedNode = LegacySkillActionToNodeId(action); !selectedNode.empty())
-        {
-            const SkillNodeDisplayInfo* node = LookupSkillNodeDisplayInfo(selectedNode);
-            GetState().SelectedSkillNodeId = selectedNode;
-            GetState().LastResultMessage = std::string("已选中技能节点: ") + (node ? node->Name : selectedNode);
-            result.Changed = true;
-            result.Success = true;
-        }
-        else if (const std::string selectedNode = SkillActionToNodeId(action); !selectedNode.empty())
-        {
-            GetState().SelectedSkillNodeId = selectedNode;
-            const SkillNodeInfo& node = FindSkillNode(selectedNode);
-            GetState().LastResultMessage = std::string("已选中技能节点：") + node.Name;
-            result.Changed = true;
-            result.Success = true;
         }
         else if (action.rfind("equipment_page_slider:", 0) == 0)
         {
@@ -1499,7 +1470,7 @@ namespace Wheatear::GameProgress {
                << " / 魔攻 " << state.Attributes.MATK << "\n";
 
         if (state.MagicSwordLevel < 2)
-            stream << "魔剑 Lv2: " << (CanUpgradeMagicSwordToLv2() ? "可升级" : BuildCostText(MagicSwordLv2Cost()));
+            stream << "魔剑 Lv2: " << (CanUpgradeMagicSwordToLv2Internal() ? "可升级" : BuildCostText(MagicSwordLv2Cost()));
         else
             stream << "已解锁: 魔剑 Lv2 / 基础斩击强化 / 空中连击训练";
 
@@ -1521,7 +1492,7 @@ namespace Wheatear::GameProgress {
         const State& state = GetState();
         if (state.MagicSwordLevel >= 2)
             return "魔剑技能树";
-        return CanUpgradeMagicSwordToLv2() ? "技能树：可觉醒" : "魔剑技能树";
+        return CanUpgradeMagicSwordToLv2Internal() ? "技能树：可觉醒" : "魔剑技能树";
     }
 
     std::string GetEquipmentButtonText()
@@ -1582,59 +1553,6 @@ namespace Wheatear::GameProgress {
     {
         const State& state = GetState();
         std::ostringstream stream;
-        stream << "魔剑 Lv" << state.MagicSwordLevel << " / 技能网络\n";
-        stream << "中心向四个方向展开：近战、魔法、机动、支援。\n";
-        stream << "当前选中: " << FindSkillNode(state.SelectedSkillNodeId).Name
-               << " [" << SkillNodeState(state, state.SelectedSkillNodeId) << "]\n";
-        stream << "节点颜色: 金色=当前 / 青色=已学或可用 / 灰色=后续章节。";
-        return stream.str();
-    }
-
-    std::string BuildSkillTreeDetails()
-    {
-        const State& state = GetState();
-        const SkillNodeInfo& node = FindSkillNode(state.SelectedSkillNodeId);
-        std::ostringstream stream;
-        stream << node.Name << "\n";
-        stream << "分支: " << node.Branch << "\n";
-        stream << "输入: " << node.Input << "\n";
-        stream << "状态: " << SkillNodeState(state, state.SelectedSkillNodeId) << "\n";
-        stream << "连招职责: " << node.ComboRole << "\n";
-        stream << "条件: " << node.Requirement << "\n";
-        stream << node.Description;
-        return stream.str();
-    }
-
-    std::string BuildSkillTreeMaterials()
-    {
-        std::ostringstream stream;
-        const State& state = GetState();
-        stream << "材料栏: " << BuildMaterialInventoryText() << "\n";
-        if (state.SelectedSkillNodeId == "vfx_magic_bolt" || state.SelectedSkillNodeId == "wind_step")
-            stream << "选中节点需求: 魔剑 Lv2 / " << BuildCostText(MagicSwordLv2Cost());
-        else if (state.SelectedSkillNodeId == "break_limit")
-            stream << "选中节点需求: 第七章王宫战后正式开放。";
-        else
-            stream << "选中节点无需额外材料，已经属于当前基础战斗动作。";
-        return stream.str();
-    }
-
-    std::string GetMagicSwordUpgradeButtonText()
-    {
-        const State& state = GetState();
-        if (state.SelectedSkillNodeId == "break_limit")
-            return "后期节点";
-        if (state.SelectedSkillNodeId != "vfx_magic_bolt" && state.SelectedSkillNodeId != "wind_step")
-            return "节点已学 / 查看详情";
-        if (state.MagicSwordLevel >= 2)
-            return "Lv2 节点已解锁";
-        return CanUpgradeMagicSwordToLv2() ? "学习选中节点" : "材料不足";
-    }
-
-    std::string BuildSkillTreeStatusV2()
-    {
-        const State& state = GetState();
-        std::ostringstream stream;
         stream << "魔剑 Lv" << state.MagicSwordLevel << " / 完整技能网\n";
         stream << "五大分支: 近战 / 魔法 / 魔剑融合 / 机动 / 断限\n";
         if (const SkillNodeDisplayInfo* node = LookupSkillNodeDisplayInfo(state.SelectedSkillNodeId))
@@ -1643,7 +1561,7 @@ namespace Wheatear::GameProgress {
         return stream.str();
     }
 
-    std::string BuildSkillTreeDetailsV2()
+    std::string BuildSkillTreeDetails()
     {
         const State& state = GetState();
         const SkillNodeDisplayInfo* node = LookupSkillNodeDisplayInfo(state.SelectedSkillNodeId);
@@ -1661,7 +1579,7 @@ namespace Wheatear::GameProgress {
         return stream.str();
     }
 
-    std::string BuildSkillTreeMaterialsV2()
+    std::string BuildSkillTreeMaterials()
     {
         const State& state = GetState();
         const SkillNodeDisplayInfo* node = LookupSkillNodeDisplayInfo(state.SelectedSkillNodeId);
@@ -1672,6 +1590,13 @@ namespace Wheatear::GameProgress {
 
         if (node->UnlockChapter > state.CurrentChapter)
             stream << "后续章节开放: 第 " << node->UnlockChapter << " 章";
+        else if (IsMagicSwordLv2Node(state.SelectedSkillNodeId))
+        {
+            if (state.MagicSwordLevel >= 2)
+                stream << "魔剑 Lv2 已觉醒。依赖 Lv2 的技能节点可以继续学习。";
+            else
+                stream << "觉醒材料: " << BuildCostText(MagicSwordLv2Cost());
+        }
         else if (RequiresMagicSwordLv2(*node) && state.MagicSwordLevel < 2)
             stream << "当前节点需要魔剑 Lv2。先在据点刷材料并完成魔剑觉醒。";
         else if (state.UnlockedSkills.find(state.SelectedSkillNodeId) != state.UnlockedSkills.end())
@@ -1681,7 +1606,7 @@ namespace Wheatear::GameProgress {
         return stream.str();
     }
 
-    std::string GetMagicSwordUpgradeButtonTextV2()
+    std::string GetSkillTreeLearnButtonText()
     {
         const State& state = GetState();
         const SkillNodeDisplayInfo* node = LookupSkillNodeDisplayInfo(state.SelectedSkillNodeId);
@@ -1689,6 +1614,12 @@ namespace Wheatear::GameProgress {
             return "节点无效";
         if (node->UnlockChapter > state.CurrentChapter)
             return "后续章节开放";
+        if (IsMagicSwordLv2Node(state.SelectedSkillNodeId))
+        {
+            if (state.MagicSwordLevel >= 2)
+                return "魔剑已觉醒";
+            return CanUpgradeMagicSwordToLv2Internal() ? "觉醒魔剑 Lv2" : "材料不足";
+        }
         if (RequiresMagicSwordLv2(*node) && state.MagicSwordLevel < 2)
             return "需要魔剑 Lv2";
         if (state.UnlockedSkills.find(state.SelectedSkillNodeId) != state.UnlockedSkills.end())

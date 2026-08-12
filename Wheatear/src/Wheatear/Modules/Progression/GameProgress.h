@@ -148,8 +148,6 @@ namespace Wheatear::GameProgress {
     WHEATEAR_API bool IsDungeonUnlocked(const std::string& dungeonId);
     WHEATEAR_API bool IsSkillUnlocked(const std::string& skillId);
 
-    WHEATEAR_API bool CanUpgradeMagicSwordToLv2();
-    WHEATEAR_API bool TryUpgradeMagicSwordToLv2();
     WHEATEAR_API bool CanUpgradeTravelerArmorToLv1();
     WHEATEAR_API bool TryUpgradeTravelerArmorToLv1();
 
@@ -166,11 +164,7 @@ namespace Wheatear::GameProgress {
     WHEATEAR_API std::string BuildSkillTreeStatus();
     WHEATEAR_API std::string BuildSkillTreeDetails();
     WHEATEAR_API std::string BuildSkillTreeMaterials();
-    WHEATEAR_API std::string GetMagicSwordUpgradeButtonText();
-    WHEATEAR_API std::string BuildSkillTreeStatusV2();
-    WHEATEAR_API std::string BuildSkillTreeDetailsV2();
-    WHEATEAR_API std::string BuildSkillTreeMaterialsV2();
-    WHEATEAR_API std::string GetMagicSwordUpgradeButtonTextV2();
+    WHEATEAR_API std::string GetSkillTreeLearnButtonText();
     WHEATEAR_API std::string BuildEquipmentStatus();
     WHEATEAR_API std::string BuildEquipmentDetails();
     WHEATEAR_API std::string BuildEquipmentTooltip(const std::string& equipmentId);

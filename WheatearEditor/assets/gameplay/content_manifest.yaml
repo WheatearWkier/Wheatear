@@ -36,11 +36,11 @@ aliases:
       beast_claw: assets/vertical_slice/side_combat/ui/icon_drop_beast_claw.png
     vfx:
       enemy_projectile: assets/vertical_slice/side_combat/vfx_sheets/static_effects/vfx_enemy_projectile_sheet.png
-      enemy_claw: assets/vertical_slice/side_combat/vfx_sheets/static_effects/vfx_enemy_claw_sheet.png
-      launcher_slash: assets/vertical_slice/side_combat/vfx_sheets/static_effects/vfx_launcher_slash_sheet.png
-      magic_bolt: assets/vertical_slice/side_combat/vfx_sheets/static_effects/vfx_magic_bolt_sheet.png
-      ally_support: assets/vertical_slice/side_combat/vfx_sheets/static_effects/vfx_ally_support_sheet.png
-      basic_slash: assets/vertical_slice/side_combat/vfx_sheets/static_effects/vfx_basic_slash_sheet.png
+      enemy_claw: assets/vertical_slice/side_combat/vfx_sheets/runtime_effects/vfx_enemy_claw_sheet.png
+      launcher_slash: assets/vertical_slice/side_combat/vfx_sheets/runtime_effects/vfx_launcher_slash_sheet.png
+      magic_bolt: assets/vertical_slice/side_combat/vfx_sheets/runtime_effects/vfx_magic_bolt_sheet.png
+      ally_support: assets/vertical_slice/side_combat/vfx_sheets/runtime_effects/vfx_ally_support_sheet.png
+      basic_slash: assets/vertical_slice/side_combat/vfx_sheets/runtime_effects/vfx_basic_slash_sheet.png
     audio:
       jump: assets/vertical_slice/side_combat/audio/jump.wav
       land: assets/vertical_slice/side_combat/audio/land.wav
@@ -84,11 +84,11 @@ aliases:
       magic: assets/vertical_slice/tactical_combat/ui/icons/cmd_tac_magic.png
       heal: assets/vertical_slice/tactical_combat/ui/icons/cmd_tac_heal.png
       guard: assets/vertical_slice/tactical_combat/ui/icons/cmd_tac_guard.png
-      item: assets/vertical_slice/tactical_combat/ui/icons/cmd_tac_item.png
+      item: assets/vertical_slice/turn_combat/ui/icons/cmd_item_potion.png
       enemy: assets/vertical_slice/tactical_combat/ui/icons/cmd_tac_enemy.png
       enemy_magic: assets/vertical_slice/tactical_combat/ui/icons/cmd_tac_enemy_magic.png
-      empty: assets/vertical_slice/tactical_combat/ui/icons/cmd_tac_empty.png
-      cancel: assets/vertical_slice/tactical_combat/ui/icons/cmd_tac_cancel.png
+      empty: assets/vertical_slice/turn_combat/ui/icons/cmd_item_empty.png
+      cancel: assets/vertical_slice/turn_combat/ui/icons/cmd_cancel.png
     panel:
       button: assets/vertical_slice/tactical_combat/ui/panels/panel_tactical_button.png
     audio:
@@ -107,6 +107,9 @@ aliases:
       guard: assets/vertical_slice/tactical_combat/sheets/effects/vfx_tac_guard_sheet.png
       dark: assets/vertical_slice/tactical_combat/sheets/effects/vfx_tac_dark_sheet.png
   progression:
+    scene:
+      default_load: assets/scenes/VerticalSliceIntro.wt
+      save_load: assets/scenes/VerticalSliceSaveLoad.wt
     equipment:
       traveler_armor: assets/vertical_slice/ui/icons/icon_equipment_traveler_armor.png
       black_forest_armor: assets/vertical_slice/ui/icons/icon_equipment_black_forest_armor.png

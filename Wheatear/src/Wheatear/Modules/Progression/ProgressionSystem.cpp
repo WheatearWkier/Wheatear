@@ -7,6 +7,7 @@
 #include "ProgressionSaveLoadPageService.h"
 #include "ProgressionSkillTreePageService.h"
 #include "ProgressionSettingsPageService.h"
+#include "Wheatear/Core/AssetAliasRegistry.h"
 #include "Wheatear/Modules/VisualNovel/VisualNovelComponents.h"
 #include "Wheatear/Runtime/CommandBus.h"
 #include "Wheatear/Runtime/SceneTransitionService.h"
@@ -28,7 +29,8 @@ namespace Wheatear {
         using UIRuntimeTools::SetProgress;
         using UIRuntimeTools::SetText;
 
-        static constexpr const char* kSaveLoadScenePath = "assets/scenes/VerticalSliceSaveLoad.wt";
+        static constexpr const char* kSaveLoadSceneAlias = "progression.scene.save_load";
+        static constexpr const char* kFallbackSaveLoadScenePath = "assets/scenes/VerticalSliceSaveLoad.wt";
 
         static bool s_SaveLoadSaveMode = true;
         static int s_PendingOverwriteSlot = 0;
@@ -54,7 +56,13 @@ namespace Wheatear {
         static bool IsSaveLoadScenePath(const std::string& scenePath)
         {
             const std::string normalized = ToLower(scenePath);
-            return normalized.find("verticalslicesaveload.wt") != std::string::npos;
+            return normalized == ToLower(AssetAliasRegistry::Path(kSaveLoadSceneAlias, kFallbackSaveLoadScenePath))
+                || normalized.find("verticalslicesaveload.wt") != std::string::npos;
+        }
+
+        static std::string GetSaveLoadScenePath()
+        {
+            return AssetAliasRegistry::Path(kSaveLoadSceneAlias, kFallbackSaveLoadScenePath);
         }
 
         static std::string GetSaveLoadCloseTargetScene()
@@ -109,7 +117,7 @@ namespace Wheatear {
                     s_SaveLoadSaveMode = true;
                     s_PendingSaveLoadMode = true;
                     s_PendingOverwriteSlot = 0;
-                    SceneTransitionService::RequestLoadScene(kSaveLoadScenePath, command);
+                    SceneTransitionService::RequestLoadScene(GetSaveLoadScenePath(), command);
                     continue;
                 }
 
@@ -118,7 +126,7 @@ namespace Wheatear {
                     s_SaveLoadSaveMode = false;
                     s_PendingSaveLoadMode = false;
                     s_PendingOverwriteSlot = 0;
-                    SceneTransitionService::RequestLoadScene(kSaveLoadScenePath, command);
+                    SceneTransitionService::RequestLoadScene(GetSaveLoadScenePath(), command);
                     continue;
                 }
 
@@ -217,18 +225,14 @@ namespace Wheatear {
 
             const auto& state = GameProgress::GetState();
             SetText(scene, "SkillTree_Subtitle", GameProgress::BuildHubSubtitle());
-            SetText(scene, "SkillTree_Status", GameProgress::BuildSkillTreeStatusV2());
-            SetText(scene, "SkillTree_Details", GameProgress::BuildSkillTreeDetailsV2());
-            SetText(scene, "SkillTree_Materials", GameProgress::BuildSkillTreeMaterialsV2());
-            SetText(scene, "SkillTree_Button_UpgradeMagicSword", GameProgress::GetMagicSwordUpgradeButtonTextV2());
+            SetText(scene, "SkillTree_Status", GameProgress::BuildSkillTreeStatus());
+            SetText(scene, "SkillTree_Details", GameProgress::BuildSkillTreeDetails());
+            SetText(scene, "SkillTree_Materials", GameProgress::BuildSkillTreeMaterials());
+            SetText(scene, "SkillTree_Button_LearnSelectedSkill", GameProgress::GetSkillTreeLearnButtonText());
             SetProgress(scene, "SkillTree_MagicSwordBar",
                 static_cast<float>(state.MagicSwordLevel),
                 2.0f);
-            if (!ProgressionSkillTreePageService::SyncView(scene))
-            {
-                ProgressionSkillTreePageService::UpdateDrag(scene);
-                ProgressionSkillTreePageService::UpdateLegacyCanvas(scene);
-            }
+            ProgressionSkillTreePageService::SyncView(scene);
         }
 
         static void UpdateEquipment(Scene* scene)
@@ -325,7 +329,6 @@ namespace Wheatear {
         }
 
         s_PendingOverwriteSlot = 0;
-        ProgressionSkillTreePageService::ResetCache();
         UpdateProgressionPages(scene);
     }
 
