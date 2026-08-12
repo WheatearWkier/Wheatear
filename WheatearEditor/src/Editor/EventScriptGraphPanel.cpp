@@ -92,64 +92,273 @@ namespace Wheatear {
             return stream.str();
         }
 
+        static std::vector<std::string> SplitWords(const std::string& value)
+        {
+            std::vector<std::string> words;
+            std::istringstream stream(value);
+            std::string word;
+            while (stream >> word)
+                words.push_back(word);
+            return words;
+        }
+
+        static std::string ToLower(std::string value)
+        {
+            std::transform(value.begin(), value.end(), value.begin(),
+                [](unsigned char c) { return static_cast<char>(std::tolower(c)); });
+            return value;
+        }
+
+        enum class ConditionKind
+        {
+            Always, Never, StoryFlag, Skill,
+            Dungeon, DungeonUnlocked, Completed,
+            LastDungeon, LastResult, Equipment, Equipped,
+            Chapter, Material, Raw
+        };
+
+        static const char* ConditionKindLabel(ConditionKind k)
+        {
+            switch (k)
+            {
+            case ConditionKind::Always: return "Always";
+            case ConditionKind::Never: return "Never";
+            case ConditionKind::StoryFlag: return "Story Flag";
+            case ConditionKind::Skill: return "Skill Unlocked";
+            case ConditionKind::Dungeon: return "Dungeon Unlocked";
+            case ConditionKind::DungeonUnlocked: return "Dungeon Unlocked (explicit)";
+            case ConditionKind::Completed: return "Dungeon Completed";
+            case ConditionKind::LastDungeon: return "Last Dungeon";
+            case ConditionKind::LastResult: return "Last Result";
+            case ConditionKind::Equipment: return "Equipment Owned";
+            case ConditionKind::Equipped: return "Equipment Equipped";
+            case ConditionKind::Chapter: return "Chapter";
+            case ConditionKind::Material: return "Material";
+            case ConditionKind::Raw: return "Raw";
+            }
+            return "Raw";
+        }
+
+        static ConditionKind ConditionTokenToKind(const std::string& tokenLower)
+        {
+            if (tokenLower == "always") return ConditionKind::Always;
+            if (tokenLower == "never") return ConditionKind::Never;
+            if (tokenLower == "flag") return ConditionKind::StoryFlag;
+            if (tokenLower == "skill") return ConditionKind::Skill;
+            if (tokenLower == "dungeon") return ConditionKind::Dungeon;
+            if (tokenLower == "dungeon_unlocked") return ConditionKind::DungeonUnlocked;
+            if (tokenLower == "completed") return ConditionKind::Completed;
+            if (tokenLower == "last_dungeon") return ConditionKind::LastDungeon;
+            if (tokenLower == "last_result") return ConditionKind::LastResult;
+            if (tokenLower == "equipment") return ConditionKind::Equipment;
+            if (tokenLower == "equipped") return ConditionKind::Equipped;
+            if (tokenLower == "chapter") return ConditionKind::Chapter;
+            if (tokenLower == "material") return ConditionKind::Material;
+            return ConditionKind::Raw;
+        }
+
         static bool DrawConditionBuilder(std::string& condition)
         {
             bool changed = false;
             condition = Trim(condition);
 
-            enum class ConditionKind
-            {
-                StoryFlag,
-                Raw
-            };
+            // Condition grammar is fixed in EventScriptSystem.cpp EvaluateCondition.
+            // Kinds + exact runtime syntax (whitespace-separated):
+            //   always | never | flag X | skill X | dungeon X | dungeon_unlocked X
+            //   completed X | last_dungeon X | last_result X
+            //   equipment X | equipped X | chapter OP N | material X[ OP N]
+            // Optional leading "not " negates. Aliases (dungeon_unlocked==dungeon,
+            // completed==dungeon_completed, last_result==last_dungeon) keep their
+            // own spelling on edit; the raw form is preserved for Raw.
 
-            const bool isFlagCondition = condition.rfind("flag ", 0) == 0;
-            ConditionKind kind = isFlagCondition
-                ? ConditionKind::StoryFlag
-                : ConditionKind::Raw;
-
-            const char* preview = kind == ConditionKind::StoryFlag ? "Story Flag" : "Raw";
-            if (ImGui::BeginCombo("Condition Type", preview))
+            // Split leading "not".
+            bool negate = false;
+            std::string body = condition;
+            if (body.size() >= 4 && ToLower(body.substr(0, 4)) == "not ")
             {
-                const bool flagSelected = kind == ConditionKind::StoryFlag;
-                if (ImGui::Selectable("Story Flag", flagSelected))
+                negate = true;
+                body = Trim(body.substr(4));
+            }
+
+            std::vector<std::string> words = SplitWords(body);
+            ConditionKind kind = words.empty() ? ConditionKind::Raw : ConditionTokenToKind(ToLower(words[0]));
+
+            if (ImGui::BeginCombo("Condition Type", ConditionKindLabel(kind)))
+            {
+                static const ConditionKind kinds[] = {
+                    ConditionKind::Always, ConditionKind::Never,
+                    ConditionKind::StoryFlag, ConditionKind::Skill,
+                    ConditionKind::Dungeon, ConditionKind::DungeonUnlocked,
+                    ConditionKind::Completed, ConditionKind::LastDungeon,
+                    ConditionKind::LastResult, ConditionKind::Equipment,
+                    ConditionKind::Equipped, ConditionKind::Chapter,
+                    ConditionKind::Material, ConditionKind::Raw
+                };
+                for (ConditionKind k : kinds)
                 {
-                    if (kind != ConditionKind::StoryFlag)
+                    const bool selected = k == kind;
+                    if (ImGui::Selectable(ConditionKindLabel(k), selected))
                     {
-                        kind = ConditionKind::StoryFlag;
-                        condition = "flag ";
+                        kind = k;
+                        // Re-seed minimal default so the picker has something to edit.
+                        switch (k)
+                        {
+                        case ConditionKind::Always: body = "always"; break;
+                        case ConditionKind::Never: body = "never"; break;
+                        case ConditionKind::StoryFlag: body = "flag FLAG_"; break;
+                        case ConditionKind::Skill: body = "skill "; break;
+                        case ConditionKind::Dungeon: body = "dungeon "; break;
+                        case ConditionKind::DungeonUnlocked: body = "dungeon_unlocked "; break;
+                        case ConditionKind::Completed: body = "completed "; break;
+                        case ConditionKind::LastDungeon: body = "last_dungeon "; break;
+                        case ConditionKind::LastResult: body = "last_result "; break;
+                        case ConditionKind::Equipment: body = "equipment "; break;
+                        case ConditionKind::Equipped: body = "equipped "; break;
+                        case ConditionKind::Chapter: body = "chapter >= 1"; break;
+                        case ConditionKind::Material: body = "material "; break;
+                        case ConditionKind::Raw: body = {}; break;
+                        }
                         changed = true;
                     }
-                }
-                if (flagSelected)
-                    ImGui::SetItemDefaultFocus();
-
-                const bool rawSelected = kind == ConditionKind::Raw;
-                if (ImGui::Selectable("Raw", rawSelected))
-                {
-                    if (kind != ConditionKind::Raw)
-                    {
-                        kind = ConditionKind::Raw;
-                        changed = true;
-                    }
+                    if (selected)
+                        ImGui::SetItemDefaultFocus();
                 }
                 ImGui::EndCombo();
             }
 
-            if (kind == ConditionKind::StoryFlag)
             {
-                std::string flag = condition.rfind("flag ", 0) == 0
-                    ? Trim(condition.substr(5))
-                    : std::string{};
-                if (EditorContentPickers::DrawStoryFlagField("Flag", flag, 256))
+                bool neg = negate;
+                if (ImGui::Checkbox("Negate (not)", &neg))
                 {
-                    condition = "flag " + flag;
+                    negate = neg;
                     changed = true;
                 }
             }
-            else if (EditorWidgets::InputString("Condition", condition, 256))
+
+            // Helper: rebuild full condition from body + negate.
+            auto rebuild = [&](const std::string& newBody)
             {
+                body = newBody;
+                condition = (negate && !newBody.empty() ? "not " + newBody : newBody);
                 changed = true;
+            };
+
+            auto firstWordRest = [&]() -> std::string
+            {
+                // Returns words[1..] joined (the id argument) after the kind token.
+                if (words.size() >= 2)
+                {
+                    std::string rest = body.substr(body.find(words[0]) + words[0].size());
+                    return Trim(rest);
+                }
+                return {};
+            };
+
+            switch (kind)
+            {
+            case ConditionKind::Always:
+                if (body != "always") rebuild("always");
+                break;
+            case ConditionKind::Never:
+                if (body != "never") rebuild("never");
+                break;
+            case ConditionKind::StoryFlag:
+            {
+                std::string flag = words.size() >= 2 ? firstWordRest() : std::string{};
+                if (EditorContentPickers::DrawStoryFlagField("Flag", flag, 256))
+                    rebuild("flag " + flag);
+                break;
+            }
+            case ConditionKind::Skill:
+            {
+                std::string id = words.size() >= 2 ? firstWordRest() : std::string{};
+                if (EditorContentPickers::DrawProgressionIdField("Skill", id,
+                    EditorContentPickers::ProgressionIdKind::Skill, 256))
+                    rebuild("skill " + id);
+                break;
+            }
+            case ConditionKind::Dungeon:
+            case ConditionKind::DungeonUnlocked:
+            {
+                std::string id = words.size() >= 2 ? firstWordRest() : std::string{};
+                if (EditorContentPickers::DrawProgressionIdField("Dungeon", id,
+                    EditorContentPickers::ProgressionIdKind::Dungeon, 256))
+                    rebuild((kind == ConditionKind::Dungeon ? "dungeon " : "dungeon_unlocked ") + id);
+                break;
+            }
+            case ConditionKind::Completed:
+            {
+                std::string id = words.size() >= 2 ? firstWordRest() : std::string{};
+                if (EditorContentPickers::DrawProgressionIdField("Dungeon", id,
+                    EditorContentPickers::ProgressionIdKind::Dungeon, 256))
+                    rebuild("completed " + id);
+                break;
+            }
+            case ConditionKind::LastDungeon:
+            case ConditionKind::LastResult:
+            {
+                std::string id = words.size() >= 2 ? firstWordRest() : std::string{};
+                if (EditorContentPickers::DrawProgressionIdField("Dungeon", id,
+                    EditorContentPickers::ProgressionIdKind::Dungeon, 256))
+                    rebuild((kind == ConditionKind::LastDungeon ? "last_dungeon " : "last_result ") + id);
+                break;
+            }
+            case ConditionKind::Equipment:
+            {
+                std::string id = words.size() >= 2 ? firstWordRest() : std::string{};
+                if (EditorContentPickers::DrawProgressionIdField("Equipment", id,
+                    EditorContentPickers::ProgressionIdKind::Equipment, 256))
+                    rebuild("equipment " + id);
+                break;
+            }
+            case ConditionKind::Equipped:
+            {
+                std::string id = words.size() >= 2 ? firstWordRest() : std::string{};
+                if (EditorContentPickers::DrawProgressionIdField("Equipment", id,
+                    EditorContentPickers::ProgressionIdKind::Equipment, 256))
+                    rebuild("equipped " + id);
+                break;
+            }
+            case ConditionKind::Chapter:
+            {
+                // grammar: chapter OP N  (OP in ==/!=/>/>=/</<=, N int)
+                std::string op = words.size() >= 2 ? words[1] : std::string{">="};
+                const char* ops[] = { "==", "!=", ">", ">=", "<", "<=" };
+                int opIndex = 2; // default >=
+                for (int i = 0; i < IM_ARRAYSIZE(ops); ++i)
+                    if (op == ops[i]) { opIndex = i; break; }
+                if (ImGui::Combo("Operator", &opIndex, ops, IM_ARRAYSIZE(ops)))
+                {
+                    op = ops[opIndex];
+                    changed = true;
+                }
+                int n = 1;
+                if (words.size() >= 3)
+                {
+                    try { n = std::stoi(words[2]); } catch (...) { n = 1; }
+                }
+                if (ImGui::DragInt("Chapter", &n, 1.0f, 0, 999))
+                    changed = true;
+                if (changed)
+                {
+                    std::ostringstream s; s << "chapter " << op << " " << n;
+                    rebuild(s.str());
+                }
+                break;
+            }
+            case ConditionKind::Material:
+            {
+                std::string id = words.size() >= 2 ? firstWordRest() : std::string{};
+                if (EditorContentPickers::DrawProgressionIdField("Material", id,
+                    EditorContentPickers::ProgressionIdKind::Material, 256))
+                    rebuild("material " + id);
+                EditorWidgets::HelpTooltip("Runtime defaults to amount > 0. Add \">= N\" etc. via Raw for quantity comparisons.");
+                break;
+            }
+            case ConditionKind::Raw:
+                if (EditorWidgets::InputString("Condition", condition, 256))
+                    changed = true;
+                break;
             }
 
             return changed;

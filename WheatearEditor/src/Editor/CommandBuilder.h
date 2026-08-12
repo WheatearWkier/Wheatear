@@ -10,7 +10,9 @@
 #include <cctype>
 #include <filesystem>
 #include <fstream>
+#include <iomanip>
 #include <set>
+#include <sstream>
 #include <string>
 #include <vector>
 
@@ -35,6 +37,10 @@ namespace Wheatear::EditorCommandBuilder {
         ProgressionSetActiveDungeon,
         ProgressionClearActiveDungeon,
         ProgressionSetChapter,
+        // ui:pager:@UUID:action[:N]  - selector at parts[2], action at parts[3]
+        UiPager,
+        // anim:action:@UUID[:arg]     - action at parts[1], selector at parts[2]
+        Anim,
         Quit,
         Raw
     };
@@ -42,9 +48,11 @@ namespace Wheatear::EditorCommandBuilder {
     struct CommandSpec
     {
         CommandKind Kind = CommandKind::None;
-        std::string Primary;
+        std::string Primary;   // scene path / event name / @UUID selector for ui:pager & anim
+        std::string Secondary; // action keyword for ui:pager & anim; clip name for anim:play
         std::string Raw;
-        int Number = 1;
+        int Number = 1;        // slot / chapter / page index for ui:pager:page
+        float FloatValue = 0.0f; // seek seconds for anim:seek
     };
 
     struct CommandAssetCache
@@ -220,10 +228,19 @@ namespace Wheatear::EditorCommandBuilder {
         case CommandKind::ProgressionSetActiveDungeon: return "Set Active Dungeon";
         case CommandKind::ProgressionClearActiveDungeon: return "Clear Active Dungeon";
         case CommandKind::ProgressionSetChapter: return "Set Chapter";
+        case CommandKind::UiPager: return "UI Pager";
+        case CommandKind::Anim: return "Animation";
         case CommandKind::Quit: return "Quit";
         case CommandKind::Raw: return "Raw Command";
         }
         return "Raw Command";
+    }
+
+    inline std::string FormatSeek(float seconds)
+    {
+        std::ostringstream stream;
+        stream << std::fixed << std::setprecision(2) << std::max(0.0f, seconds);
+        return stream.str();
     }
 
     inline std::string BuildCommand(const CommandSpec& spec)
@@ -247,6 +264,29 @@ namespace Wheatear::EditorCommandBuilder {
         case CommandKind::ProgressionSetActiveDungeon: return "progression:set_active_dungeon:" + spec.Primary;
         case CommandKind::ProgressionClearActiveDungeon: return "progression:clear_active_dungeon";
         case CommandKind::ProgressionSetChapter: return "progression:set_chapter:" + std::to_string(std::max(1, spec.Number));
+        case CommandKind::UiPager:
+        {
+            // Grammar: ui:pager:@UUID:action[:page]
+            std::string action = spec.Secondary.empty() ? "next" : spec.Secondary;
+            std::string result = "ui:pager:" + spec.Primary + ":" + action;
+            if (action == "page" || action == "set")
+                result += ":" + std::to_string(std::max(1, spec.Number));
+            return result;
+        }
+        case CommandKind::Anim:
+        {
+            // Grammar: anim:action:@UUID[:arg]  - action FIRST, selector SECOND (opposite of ui:pager)
+            std::string action = spec.Secondary.empty() ? "play" : spec.Secondary;
+            if (action == "seek")
+                return "anim:seek:" + spec.Primary + ":" + FormatSeek(spec.FloatValue);
+            if (action == "play")
+            {
+                if (spec.Raw.empty())
+                    return "anim:play:" + spec.Primary;
+                return "anim:play:" + spec.Primary + ":" + spec.Raw;
+            }
+            return "anim:" + action + ":" + spec.Primary;
+        }
         case CommandKind::Quit: return "quit";
         case CommandKind::Raw: return spec.Raw;
         }
@@ -257,6 +297,25 @@ namespace Wheatear::EditorCommandBuilder {
     {
         CommandSpec spec;
         spec.Raw = command;
+
+        // Local split-on-':' mirroring CommandBus::SplitCommand (runtime, CommandBus.cpp).
+        auto splitColon = [](const std::string& value)
+        {
+            std::vector<std::string> parts;
+            std::string current;
+            for (char c : value)
+            {
+                if (c == ':')
+                {
+                    parts.push_back(current);
+                    current.clear();
+                }
+                else
+                    current.push_back(c);
+            }
+            parts.push_back(current);
+            return parts;
+        };
 
         if (command.empty())
             return spec;
@@ -383,6 +442,38 @@ namespace Wheatear::EditorCommandBuilder {
             return spec;
         }
 
+        // Grammar: ui:pager:@UUID:action[:page]  (selector at parts[2], action at parts[3])
+        if (StartsWith(command, "ui:pager:"))
+        {
+            spec.Kind = CommandKind::UiPager;
+            const std::vector<std::string> parts = splitColon(command);
+            if (parts.size() >= 3) spec.Primary = parts[2];        // @UUID
+            if (parts.size() >= 4) spec.Secondary = parts[3];     // action
+            if (parts.size() >= 5 && (parts[3] == "page" || parts[3] == "set"))
+                TryParsePositiveInt(parts[4], spec.Number);
+            return spec;
+        }
+
+        // Grammar: anim:action:@UUID[:arg]  (action at parts[1], selector at parts[2])
+        if (StartsWith(command, "anim:"))
+        {
+            spec.Kind = CommandKind::Anim;
+            const std::vector<std::string> parts = splitColon(command);
+            if (parts.size() >= 2) spec.Secondary = parts[1];     // action
+            if (parts.size() >= 3) spec.Primary = parts[2];       // @UUID
+            if (parts.size() >= 4)
+            {
+                if (spec.Secondary == "play")
+                    spec.Raw = parts[3];                          // clip name
+                else if (spec.Secondary == "seek")
+                {
+                    try { spec.FloatValue = std::stof(parts[3]); }
+                    catch (...) { spec.FloatValue = 0.0f; }
+                }
+            }
+            return spec;
+        }
+
         spec.Kind = CommandKind::Raw;
         return spec;
     }
@@ -465,6 +556,8 @@ namespace Wheatear::EditorCommandBuilder {
             CommandKind::ProgressionSetActiveDungeon,
             CommandKind::ProgressionClearActiveDungeon,
             CommandKind::ProgressionSetChapter,
+            CommandKind::UiPager,
+            CommandKind::Anim,
             CommandKind::Quit,
             CommandKind::Raw
         };
@@ -556,6 +649,76 @@ namespace Wheatear::EditorCommandBuilder {
                 spec.Number = std::max(1, chapter);
                 command = BuildCommand(spec);
                 changed = true;
+            }
+            break;
+        }
+        case CommandKind::UiPager:
+        {
+            // Grammar: ui:pager:@UUID:action[:page]
+            if (EditorWidgets::InputString("Pager Target", spec.Primary, 64))
+            {
+                command = BuildCommand(spec);
+                changed = true;
+            }
+            EditorWidgets::HelpTooltip("Target is the pager entity UUID, e.g. @123456789.");
+            static const char* pagerActions[] = { "next", "prev", "first", "last", "page", "set" };
+            int actionIndex = 0;
+            for (int i = 0; i < IM_ARRAYSIZE(pagerActions); ++i)
+                if (spec.Secondary == pagerActions[i]) { actionIndex = i; break; }
+            if (ImGui::Combo("Action", &actionIndex, pagerActions, IM_ARRAYSIZE(pagerActions)))
+            {
+                spec.Secondary = pagerActions[actionIndex];
+                command = BuildCommand(spec);
+                changed = true;
+            }
+            if (spec.Secondary == "page" || spec.Secondary == "set")
+            {
+                int page = std::max(1, spec.Number);
+                if (ImGui::DragInt("Page", &page, 1.0f, 1, 999))
+                {
+                    spec.Number = std::max(1, page);
+                    command = BuildCommand(spec);
+                    changed = true;
+                }
+            }
+            break;
+        }
+        case CommandKind::Anim:
+        {
+            // Grammar: anim:action:@UUID[:arg]
+            if (EditorWidgets::InputString("Animation Target", spec.Primary, 64))
+            {
+                command = BuildCommand(spec);
+                changed = true;
+            }
+            EditorWidgets::HelpTooltip("Target is the animator entity UUID, e.g. @123456789.");
+            static const char* animActions[] = { "play", "restart", "pause", "resume", "stop", "seek" };
+            int actionIndex = 0;
+            for (int i = 0; i < IM_ARRAYSIZE(animActions); ++i)
+                if (spec.Secondary == animActions[i]) { actionIndex = i; break; }
+            if (ImGui::Combo("Action", &actionIndex, animActions, IM_ARRAYSIZE(animActions)))
+            {
+                spec.Secondary = animActions[actionIndex];
+                command = BuildCommand(spec);
+                changed = true;
+            }
+            if (spec.Secondary == "play")
+            {
+                if (EditorWidgets::InputString("Clip Name", spec.Raw, 128))
+                {
+                    command = BuildCommand(spec);
+                    changed = true;
+                }
+            }
+            else if (spec.Secondary == "seek")
+            {
+                float seek = std::max(0.0f, spec.FloatValue);
+                if (ImGui::DragFloat("Seek Time", &seek, 0.01f, 0.0f, 120.0f, "%.2f"))
+                {
+                    spec.FloatValue = std::max(0.0f, seek);
+                    command = BuildCommand(spec);
+                    changed = true;
+                }
             }
             break;
         }
