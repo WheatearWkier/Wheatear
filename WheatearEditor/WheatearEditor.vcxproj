@@ -172,6 +172,7 @@
     <ClInclude Include="src\Editor\EditorToolRegistry.h" />
     <ClInclude Include="src\Editor\EditorWidgets.h" />
     <ClInclude Include="src\Editor\EventScriptGraphPanel.h" />
+    <ClInclude Include="src\Editor\EventScriptGraphPanelInternal.h" />
     <ClInclude Include="src\Editor\GameplayEditorShell.h" />
     <ClInclude Include="src\Editor\ModeSelectLayer.h" />
     <ClInclude Include="src\Editor\TextAssetEditor.h" />
@@ -231,6 +232,7 @@
     <ClCompile Include="src\Editor\EditorPlatform.cpp" />
     <ClCompile Include="src\Editor\EditorWidgets.cpp" />
     <ClCompile Include="src\Editor\EventScriptGraphPanel.cpp" />
+    <ClCompile Include="src\Editor\EventScriptGraphPanel_Graph.cpp" />
     <ClCompile Include="src\Editor\ModeSelectLayer.cpp" />
     <ClCompile Include="src\Modules\ArcadeCombat\ArcadeCombatDrawer.cpp" />
     <ClCompile Include="src\Modules\ModuleEditorBootstrap.cpp" />

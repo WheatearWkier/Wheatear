@@ -105,6 +105,9 @@
     <ClInclude Include="src\Editor\EventScriptGraphPanel.h">
       <Filter>Editor</Filter>
     </ClInclude>
+    <ClInclude Include="src\Editor\EventScriptGraphPanelInternal.h">
+      <Filter>Editor</Filter>
+    </ClInclude>
     <ClInclude Include="src\Editor\GameplayEditorShell.h">
       <Filter>Editor</Filter>
     </ClInclude>
@@ -274,6 +277,9 @@
       <Filter>Editor</Filter>
     </ClCompile>
     <ClCompile Include="src\Editor\EventScriptGraphPanel.cpp">
+      <Filter>Editor</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Editor\EventScriptGraphPanel_Graph.cpp">
       <Filter>Editor</Filter>
     </ClCompile>
     <ClCompile Include="src\Editor\ModeSelectLayer.cpp">
