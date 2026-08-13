@@ -135,9 +135,28 @@ namespace Wheatear {
         m_SceneState = SceneState::Edit;
         m_ActiveScene = m_EditorScene;
         m_ActiveScene->OnEditorStart();
+        m_PlayPaused = false;
+        m_StepOnce = false;
 
         SyncPanels();
     }
+
+    void EditorLayerBase::TogglePlayPause()
+    {
+        if (m_SceneState != SceneState::Play)
+            return;
+        m_PlayPaused = !m_PlayPaused;
+        m_StepOnce = false;
+    }
+
+    void EditorLayerBase::StepPlayFrame()
+    {
+        if (m_SceneState != SceneState::Play)
+            return;
+        m_PlayPaused = true;
+        m_StepOnce = true;
+    }
+
     void EditorLayerBase::LoadPlayScene(const std::filesystem::path& scenePath)
     {
         if (m_SceneState != SceneState::Play)
@@ -516,6 +535,9 @@ namespace Wheatear {
         if (m_SceneState == SceneState::Play)
             TransitionToStop();
 
+        // Save the current scene first so packaging uses the latest state, then
+        // show a scene picker so the designer can choose the startup scene
+        // (defaults to the currently open one).
         if (m_EditorScenePath.empty())
         {
             SaveSceneAs();
@@ -530,8 +552,16 @@ namespace Wheatear {
             SaveScene();
         }
 
+        m_PackageScenePath = m_EditorScenePath.generic_string();
+        m_PackageSceneInput = m_PackageScenePath;
+        m_PackageEnableScripts = enableScripts;
+        m_PackageScenePickerOpen = true;
+    }
+
+    void EditorLayerBase::ExecutePlayerPackageBuild(bool enableScripts)
+    {
         PlayerPackageOptions options;
-        options.StartupScene = m_EditorScenePath;
+        options.StartupScene = m_PackageScenePath.empty() ? m_EditorScenePath : std::filesystem::path(m_PackageScenePath);
         options.Configuration = "Debug";
         options.EnableScripts = enableScripts;
         options.IncludeDebugSymbols = false;

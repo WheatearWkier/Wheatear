@@ -6,6 +6,7 @@
 #include "Editor/EditorPlatform.h"
 #include "Editor/EditorWidgets.h"
 #include "Editor/EventScriptGraphPanel.h"
+#include "Modules/VisualNovel/VisualNovelScriptEditorPanel.h"
 #include "Wheatear/Core/AssetPath.h"
 #include "Wheatear/Core/EngineInfo.h"
 
@@ -397,7 +398,20 @@ namespace Wheatear {
             if (ImGui::IsItemHovered() && ImGui::IsMouseDoubleClicked(ImGuiMouseButton_Left))
             {
                 if (entry.is_directory())
+                {
                     NavigateTo(path);
+                }
+                else
+                {
+                    // Open designer-authored text assets in their structured
+                    // editors instead of forcing a raw text edit.
+                    const std::string ext = path.extension().string();
+                    const std::string relative = AssetPath::ToProjectRelative(path).generic_string();
+                    if (ext == ".vn")
+                        VisualNovelEditorRequests::RequestOpenScript(relative);
+                    else if (ext == ".wts")
+                        EventScriptGraphRequests::RequestOpenScript(relative);
+                }
             }
 
             if (ImGui::BeginPopupContextItem())

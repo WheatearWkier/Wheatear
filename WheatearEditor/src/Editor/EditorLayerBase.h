@@ -78,6 +78,11 @@ namespace Wheatear {
         void TransitionToStop();
         bool ConsumePlayModeRuntimeCommands();
 
+        // Play-mode pause / single-frame stepping (designer iteration aid).
+        bool IsPlayPaused() const { return m_PlayPaused; }
+        void TogglePlayPause();
+        void StepPlayFrame();
+
         void NewScene();
         void OpenScene();
         void OpenScene(const std::filesystem::path& path);
@@ -117,6 +122,7 @@ namespace Wheatear {
             Entity canvasEntity);
         void UI_Stats();
         void UI_PlayerBuildStatus();
+        void UI_PlayerBuildScenePicker();
         void BuildDefaultDockspaceLayout(uint32_t dockspaceID);
         void FocusEditorCameraOnPrimarySceneCamera();
 
@@ -126,6 +132,7 @@ namespace Wheatear {
         void CommitPendingUIEdit();
         void UpdateUITextFontDuringUIResize(Entity entity);
         void StartPlayerPackageBuild(bool enableScripts = false);
+        void ExecutePlayerPackageBuild(bool enableScripts);
         void PollPlayerPackageBuild();
         void ProcessDeferredViewportAssetDrop();
         void SelectEditorEntity(Entity entity, bool preferMoveGizmo);
@@ -154,6 +161,8 @@ namespace Wheatear {
         std::filesystem::path m_EditorScenePath;
         std::filesystem::path m_PlayScenePath;
         SceneState m_SceneState = SceneState::Edit;
+        bool m_PlayPaused = false;
+        bool m_StepOnce = false;
 
         Entity m_HoveredEntity;
 
@@ -190,6 +199,8 @@ namespace Wheatear {
 
         Ref<Texture2D> m_IconPlay;
         Ref<Texture2D> m_IconStop;
+        Ref<Texture2D> m_IconPause;
+        Ref<Texture2D> m_IconStep;
         Ref<Texture2D> m_IconNewScene;
         Ref<Texture2D> m_IconOpenScene;
         Ref<Texture2D> m_IconSaveScene;
@@ -210,6 +221,10 @@ namespace Wheatear {
         std::future<PlayerPackageResult> m_PlayerBuildFuture;
         bool m_PlayerBuildRunning = false;
         std::string m_PlayerBuildStatus;
+        bool m_PackageScenePickerOpen = false;
+        std::string m_PackageScenePath;
+        std::string m_PackageSceneInput;
+        bool m_PackageEnableScripts = false;
         std::filesystem::path m_LastPlayerBuildDirectory;
         std::filesystem::path m_LastEditorBuildDirectory;
         std::filesystem::path m_DeferredSceneOpenPath;

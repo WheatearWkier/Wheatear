@@ -649,7 +649,17 @@ static void ExtractChoiceRequiredCondition(std::string& target,
             else if (ReadCommandPayload(line, { "choice" }, payload))
             {
                 row.Kind = RowKind::Choice;
-                row.Choices = ParseChoices(payload);
+                std::string choicesPayload = payload;
+                if (choicesPayload.rfind("prompt:", 0) == 0)
+                {
+                    const size_t separator = choicesPayload.find('|');
+                    if (separator != std::string::npos)
+                    {
+                        row.Value = StripQuotes(Trim(choicesPayload.substr(7, separator - 7)));
+                        choicesPayload = choicesPayload.substr(separator + 1);
+                    }
+                }
+                row.Choices = ParseChoices(choicesPayload);
             }
             else if (ReadCommandPayload(line, { "goto" }, payload))
             {
@@ -790,6 +800,8 @@ static void ExtractChoiceRequiredCondition(std::string& target,
                     break;
                 case RowKind::Choice:
                     out << "@choice ";
+                    if (!row.Value.empty())
+                        out << "prompt:" << row.Value << " | ";
                     for (size_t i = 0; i < row.Choices.size(); ++i)
                     {
                         if (i > 0)
@@ -1026,6 +1038,10 @@ static void ExtractChoiceRequiredCondition(std::string& target,
                     m_Dirty = true;
                 break;
             case RowKind::Choice:
+                if (InputString("Prompt", row.Value, 256))
+                    m_Dirty = true;
+                EditorWidgets::HelpTooltip("Text shown while waiting for a choice. Empty uses the default.");
+                ImGui::Separator();
                 for (int i = 0; i < static_cast<int>(row.Choices.size()); ++i)
                 {
                     ImGui::PushID(i);

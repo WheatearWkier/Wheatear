@@ -412,7 +412,18 @@ namespace Wheatear {
                 VisualNovelLine choice;
                 choice.Type = VisualNovelLineType::Choice;
                 choice.Text = "选择一个答案。";
-                choice.Choices = ParseChoices(payload);
+                // Optional prompt prefix: "@choice prompt:请选择 | opt1 -> l1 | ..."
+                std::string choicesPayload = payload;
+                if (choicesPayload.rfind("prompt:", 0) == 0)
+                {
+                    const size_t separator = choicesPayload.find('|');
+                    if (separator != std::string::npos)
+                    {
+                        choice.Text = StripQuotes(Trim(choicesPayload.substr(7, separator - 7)));
+                        choicesPayload = choicesPayload.substr(separator + 1);
+                    }
+                }
+                choice.Choices = ParseChoices(choicesPayload);
                 applyState(choice);
                 if (!choice.Choices.empty())
                     m_Lines.push_back(std::move(choice));

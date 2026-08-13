@@ -25,6 +25,7 @@
 #include "Assets/AssetRegistry.h"
 #include "Assets/UITemplateFactory.h"
 #include "Editor/EditorCanvasTools.h"
+#include "Editor/EditorContentPickers.h"
 #include "Editor/EditorLocale.h"
 #include "Editor/EditorFloatingWindow.h"
 #include "Editor/EditorPlatform.h"
@@ -879,9 +880,51 @@ namespace Wheatear {
         ImGui::End();
     }
 
+    void EditorLayerBase::UI_PlayerBuildScenePicker()
+    {
+        if (!m_PackageScenePickerOpen)
+            return;
+
+        ImGui::OpenPopup("Choose Startup Scene");
+        ImGui::SetNextWindowSize(ImVec2(520.0f, 0.0f), ImGuiCond_Appearing);
+        if (ImGui::BeginPopupModal("Choose Startup Scene", nullptr, ImGuiWindowFlags_AlwaysAutoResize))
+        {
+            ImGui::TextWrapped("The packaged player boots into this scene. "
+                "Defaults to the currently open scene.");
+            ImGui::Separator();
+
+            if (EditorContentPickers::DrawAssetField("Startup Scene",
+                    m_PackageSceneInput,
+                    EditorWidgets::AssetReferenceKind::Scene, 512))
+            {
+            }
+
+            ImGui::Separator();
+            if (!(m_PackageSceneInput.rfind("assets/scenes/", 0) == 0))
+                ImGui::TextColored(ImVec4(1.0f, 0.4f, 0.35f, 1.0f),
+                    "Scene path must start with assets/scenes/");
+
+            ImGui::Separator();
+            if (ImGui::Button("Package"))
+            {
+                m_PackageScenePath = m_PackageSceneInput;
+                m_PackageScenePickerOpen = false;
+                ExecutePlayerPackageBuild(m_PackageEnableScripts);
+            }
+            ImGui::SameLine();
+            if (ImGui::Button("Cancel"))
+                m_PackageScenePickerOpen = false;
+
+            ImGui::EndPopup();
+        }
+    }
+
     void EditorLayerBase::UI_PlayerBuildStatus()
     {
         PollPlayerPackageBuild();
+
+        if (m_PackageScenePickerOpen)
+            UI_PlayerBuildScenePicker();
 
         if (m_PlayerBuildStatus.empty() && !m_PlayerBuildRunning)
             return;
@@ -1761,6 +1804,25 @@ namespace Wheatear {
                 TransitionToPlay();
             else
                 TransitionToStop();
+        }
+
+        if (m_SceneState == SceneState::Play)
+        {
+            sameLine();
+            const char* pauseTooltip = m_PlayPaused
+                ? "Resume (F6)" : "Pause (F6)";
+            if (EditorWidgets::IconButton("##ToolbarPause",
+                    m_PlayPaused ? m_IconPlay : m_IconPause,
+                    pauseTooltip, iconSize))
+            {
+                TogglePlayPause();
+            }
+            sameLine();
+            if (EditorWidgets::IconButton("##ToolbarStep", m_IconStep,
+                    "Step One Frame (F7)", iconSize))
+            {
+                StepPlayFrame();
+            }
         }
         sameLine();
         if (EditorWidgets::IconButton("##ToolbarFocus", m_IconFocus, "Frame Selection (F)", iconSize))

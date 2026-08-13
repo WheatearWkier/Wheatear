@@ -95,6 +95,8 @@ namespace Wheatear {
 
         m_IconPlay = Texture2D::Create("Resources/Icons/Editor/play.png");
         m_IconStop = Texture2D::Create("Resources/Icons/Editor/stop.png");
+        m_IconPause = Texture2D::Create("Resources/Icons/Editor/pause.png");
+        m_IconStep = Texture2D::Create("Resources/Icons/Editor/play.png");
         m_IconNewScene = Texture2D::Create("Resources/Icons/Editor/new_scene.png");
         m_IconOpenScene = Texture2D::Create("Resources/Icons/Editor/open_scene.png");
         m_IconSaveScene = Texture2D::Create("Resources/Icons/Editor/save_scene.png");
@@ -308,7 +310,14 @@ namespace Wheatear {
                 Input::SetMouseInputBounds(1.0f, 1.0f, 0.0f, 0.0f);
             }
 
-            m_ActiveScene->OnUpdateRuntime(ts);
+            // Pause / single-frame stepping: when paused the runtime is not
+            // advanced (scene still renders); StepPlayFrame runs exactly one
+            // update then re-pauses.
+            if (!m_PlayPaused || m_StepOnce)
+            {
+                m_ActiveScene->OnUpdateRuntime(ts);
+                m_StepOnce = false;
+            }
             Input::ClearMouseInputBounds();
             ConsumePlayModeRuntimeCommands();
             break;
@@ -399,6 +408,14 @@ namespace Wheatear {
                     TransitionToStop();
             }
 
+            break;
+        case WT_KEY_F6:
+            if (m_SceneState == SceneState::Play)
+                TogglePlayPause();
+            break;
+        case WT_KEY_F7:
+            if (m_SceneState == SceneState::Play)
+                StepPlayFrame();
             break;
 
         case WT_KEY_D: if (ctrl) OnDuplicateEntity(); break;
