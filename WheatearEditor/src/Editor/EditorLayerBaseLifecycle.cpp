@@ -221,6 +221,10 @@ namespace Wheatear {
     {
         WT_PROFILE_FUNCTION();
 
+        // Render one queued asset thumbnail per frame (scenes/prefabs/UI
+        // templates/meshes) so browsing the content browser never stalls.
+        m_ContentBrowserPanel->OnUpdate();
+
         {
             const auto& spec = m_Framebuffer->GetSpecification();
             const auto  w = static_cast<uint32_t>(m_ViewportSize.x);

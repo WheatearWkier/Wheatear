@@ -253,6 +253,28 @@ namespace Wheatear {
 		return pixelData;
 	}
 
+	void OpenGLFramebuffer::ReadPixelsRGBA(void* buffer)
+	{
+		WT_CORE_ASSERT(!m_ColorAttachments.empty());
+		glReadBuffer(GL_COLOR_ATTACHMENT0);
+		glReadPixels(0, 0,
+			static_cast<GLsizei>(m_Specification.Width),
+			static_cast<GLsizei>(m_Specification.Height),
+			GL_RGBA, GL_UNSIGNED_BYTE, buffer);
+	}
+
+	uint32_t Framebuffer::GetBoundFramebufferID()
+	{
+		GLint id = 0;
+		glGetIntegerv(GL_FRAMEBUFFER_BINDING, &id);
+		return static_cast<uint32_t>(id);
+	}
+
+	void Framebuffer::BindFramebufferID(uint32_t id)
+	{
+		glBindFramebuffer(GL_FRAMEBUFFER, static_cast<GLuint>(id));
+	}
+
 	void OpenGLFramebuffer::ClearAttachment(uint32_t attachmentIndex, int value)
 	{
 		WT_CORE_ASSERT(attachmentIndex < m_ColorAttachments.size());

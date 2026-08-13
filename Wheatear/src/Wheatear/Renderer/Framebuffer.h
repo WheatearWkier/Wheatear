@@ -61,6 +61,9 @@ namespace Wheatear {
 
 		virtual void Resize(uint32_t width, uint32_t height) = 0;
 		virtual int ReadPixel(uint32_t attachmentIndex, int x, int y) = 0;
+		// Read the whole RGBA8 color attachment back into a buffer of
+		// width * height * 4 bytes (thumbnail / preview captures).
+		virtual void ReadPixelsRGBA(void* buffer) = 0;
 
 		virtual void ClearAttachment(uint32_t attachmentIndex, int value) = 0;
 
@@ -74,6 +77,11 @@ namespace Wheatear {
 		virtual const FramebufferSpecification& GetSpecification() const = 0;
 
 		static Ref<Framebuffer> Create(const FramebufferSpecification& spec);
+
+		// Offscreen-capture helpers (used by the editor's asset thumbnail
+		// renderer) so callers never need raw GL calls.
+		static uint32_t GetBoundFramebufferID();
+		static void BindFramebufferID(uint32_t id);
 
 	};
 }

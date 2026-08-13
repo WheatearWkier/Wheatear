@@ -18,6 +18,7 @@ project "WheatearEditor"
 
     includedirs {
         "src",
+        "%{IncludeDir.GLAD}",
         "%{IncludeDir.ImGuizmo}",
         "%{IncludeDir.miniaudio}",
         "%{IncludeDir.yaml_cpp}",

@@ -6,9 +6,12 @@
 #include <filesystem>
 #include <string>
 #include <unordered_map>
+#include <unordered_set>
 #include <vector>
 
 namespace Wheatear {
+
+    class Framebuffer;
 
     std::filesystem::path GetEditorAssetPath();
 
@@ -27,6 +30,7 @@ namespace Wheatear {
         Data,
         Metadata,
         AnimationClip,
+        Mesh,
     };
 
     class ContentBrowserPanel
@@ -34,6 +38,10 @@ namespace Wheatear {
     public:
         ContentBrowserPanel();
         void OnImGuiRender();
+
+        // Frame-by-frame thumbnail rendering for non-image assets (scenes,
+        // prefabs, UI templates, meshes). Called from the editor layer update.
+        void OnUpdate();
 
         // UE-style content drawer: the panel folds into a floating bar at the
         // bottom of the editor instead of a docked window.
@@ -73,6 +81,7 @@ namespace Wheatear {
         std::vector<std::filesystem::directory_entry> GetFilteredEntries() const;
         void OpenEntry(const std::filesystem::path& path);
         void CommitRename(const std::filesystem::path& oldPath, const char* newName);
+        bool RenderThumbnail(const std::string& key, AssetType type);
 
     private:
         std::filesystem::path              m_CurrentDirectory;
@@ -96,6 +105,11 @@ namespace Wheatear {
         std::unordered_map<AssetType, Ref<Texture2D>> m_Icons;
         // path -> real texture preview for image assets (nullptr = failed load).
         std::unordered_map<std::string, Ref<Texture2D>> m_ThumbnailCache;
+        // Pending render-thumbnail queue (scenes/prefabs/UI templates/meshes).
+        std::vector<std::string> m_ThumbnailRenderQueue;
+        std::unordered_set<std::string> m_ThumbnailQueued;
+        std::unordered_map<std::string, AssetType> m_ThumbnailQueueTypes;
+        Ref<Framebuffer> m_ThumbnailFramebuffer;
 
         std::function<void(const std::filesystem::path&)> m_OnOpenScene;
         std::function<void(const std::filesystem::path&)> m_OnInstantiatePrefab;

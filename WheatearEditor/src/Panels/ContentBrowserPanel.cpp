@@ -11,6 +11,14 @@
 #include "Modules/VisualNovel/VisualNovelScriptEditorPanel.h"
 #include "Wheatear/Assets/AssetPath.h"
 #include "Wheatear/Core/EngineInfo.h"
+#include "Wheatear/Renderer/Framebuffer.h"
+#include "Wheatear/Renderer/Mesh.h"
+#include "Wheatear/Renderer/RenderCommand.h"
+#include "Wheatear/Renderer/Renderer3D.h"
+#include "Wheatear/Renderer/Renderer2D.h"
+#include "Wheatear/Scene/Components.h"
+#include "Wheatear/Scene/Scene.h"
+#include "Wheatear/Scene/SceneSerializer.h"
 
 #include <imgui/imgui.h>
 #include <imgui/imgui_internal.h>
@@ -40,6 +48,7 @@ namespace Wheatear {
                 case AssetType::Data:       return "Data";
                 case AssetType::Metadata:   return "Metadata";
                 case AssetType::AnimationClip: return "Animation Clip";
+                case AssetType::Mesh:          return "Mesh";
                 default:                    return "Unknown";
             }
         }
@@ -68,6 +77,7 @@ namespace Wheatear {
         m_Icons[AssetType::Data]      = Texture2D::Create("Resources/Icons/Editor/file_text.png");
         m_Icons[AssetType::Metadata]  = m_Icons[AssetType::Unknown];
         m_Icons[AssetType::AnimationClip] = Texture2D::Create("Resources/Icons/Editor/film.png");
+        m_Icons[AssetType::Mesh] = Texture2D::Create("Resources/Icons/Editor/box.png");
 
         AssetRegistry::Get().LoadCache(AssetPath::GetProjectRoot());
         m_RegistryStatus = "Loaded asset registry cache. Use Rescan Assets after adding or replacing resources.";
@@ -90,6 +100,8 @@ namespace Wheatear {
             return AssetType::Metadata;
         if (ext == ".png" || ext == ".jpg" || ext == ".jpeg" || ext == ".tga" || ext == ".bmp")
             return AssetType::Texture;
+        if (ext == ".obj" || ext == ".fbx")
+            return AssetType::Mesh;
         if (ext == ".glsl" || ext == ".hlsl")
             return AssetType::Shader;
         if (ext == ".mp3" || ext == ".wav" || ext == ".ogg")
@@ -195,6 +207,111 @@ namespace Wheatear {
             m_SelectedPath = newPath;
             m_RegistryStatus = "Renamed to: " + name;
         }
+    }
+
+    void ContentBrowserPanel::OnUpdate()
+    {
+        if (m_ThumbnailRenderQueue.empty())
+            return;
+
+        const std::string key = m_ThumbnailRenderQueue.front();
+        m_ThumbnailRenderQueue.erase(m_ThumbnailRenderQueue.begin());
+
+        const auto typeIt = m_ThumbnailQueueTypes.find(key);
+        const AssetType type = (typeIt != m_ThumbnailQueueTypes.end())
+            ? typeIt->second : AssetType::Unknown;
+
+        if (!RenderThumbnail(key, type))
+            m_ThumbnailCache[key] = nullptr;   // failed: don't retry this session
+    }
+
+    bool ContentBrowserPanel::RenderThumbnail(const std::string& key, AssetType type)
+    {
+        constexpr uint32_t thumbSize = 128;
+
+        if (!m_ThumbnailFramebuffer)
+        {
+            FramebufferSpecification spec;
+            spec.Attachments = {
+                FramebufferTextureFormat::RGBA8,
+                FramebufferTextureFormat::Depth
+            };
+            spec.Width = thumbSize;
+            spec.Height = thumbSize;
+            m_ThumbnailFramebuffer = Framebuffer::Create(spec);
+        }
+
+        const std::filesystem::path path(key);
+        Ref<Scene> scene = CreateRef<Scene>();
+
+        if (type == AssetType::Scene)
+        {
+            SceneSerializer serializer(scene);
+            if (!serializer.DeserializeYaml(path))
+                return false;
+        }
+        else if (type == AssetType::Prefab)
+        {
+            if (!SceneSerializer::DeserializePrefab(path, scene.get()))
+                return false;
+        }
+        else if (type == AssetType::UITemplate)
+        {
+            Entity canvas = scene->CreateEntity("ThumbCanvas");
+            canvas.AddComponent<UICanvasComponent>();
+            canvas.AddComponent<UIWidgetComponent>();
+            UITemplateFactory::CreateFromAsset(scene.get(), path, canvas.GetUUID());
+        }
+        else if (type == AssetType::Mesh)
+        {
+            Entity meshEntity = scene->CreateEntity("ThumbMesh");
+            auto& meshComponent = meshEntity.AddComponent<MeshRendererComponent>();
+            meshComponent.Mesh = Mesh::Create(path.string());
+            if (!meshComponent.Mesh)
+                return false;
+            meshComponent.Material = Material::Create();
+        }
+        else
+        {
+            return false;
+        }
+
+        scene->OnEditorStart();
+        scene->OnViewportResize(thumbSize, thumbSize);
+
+        // Use the scene's primary camera, or place a default one looking at
+        // the origin from +Z so prefabs/meshes without cameras preview well.
+        Entity cameraEntity = scene->GetPrimaryCameraEntity();
+        if (!cameraEntity)
+        {
+            cameraEntity = scene->CreateEntity("ThumbCam");
+            cameraEntity.AddComponent<CameraComponent>();
+            cameraEntity.GetComponent<TransformComponent>().Translation = { 0.0f, 0.0f, 10.0f };
+        }
+
+        const auto& camera = cameraEntity.GetComponent<CameraComponent>().Camera;
+        const auto& transform = cameraEntity.GetComponent<TransformComponent>().GetTransform();
+        const bool includeUI = (type == AssetType::UITemplate);
+
+        const uint32_t previousFramebuffer = Framebuffer::GetBoundFramebufferID();
+
+        m_ThumbnailFramebuffer->Bind();
+        RenderCommand::SetClearColor({ 0.07f, 0.08f, 0.10f, 1.0f });
+        RenderCommand::Clear();
+        scene->RenderWithSceneCamera(camera, transform, includeUI);
+
+        std::vector<uint8_t> pixels(thumbSize * thumbSize * 4);
+        m_ThumbnailFramebuffer->ReadPixelsRGBA(pixels.data());
+        m_ThumbnailFramebuffer->Unbind();
+
+        Framebuffer::BindFramebufferID(previousFramebuffer);
+
+        scene->OnEditorStop();
+
+        Ref<Texture2D> thumbnail = Texture2D::Create(thumbSize, thumbSize);
+        thumbnail->SetData(pixels.data(), pixels.size());
+        m_ThumbnailCache[key] = thumbnail;
+        return true;
     }
 
     void ContentBrowserPanel::NavigateTo(const std::filesystem::path& path)
@@ -428,20 +545,32 @@ namespace Wheatear {
             const AssetType type = GetAssetType(path);
             const Ref<Texture2D>& icon = GetIconForType(type);
 
-            // Real thumbnail preview for image assets (cached; failed loads
-            // fall back to the type icon and are not retried this session).
+            // Real thumbnail preview: image assets load their texture directly;
+            // scenes/prefabs/UI templates/meshes are rendered offscreen through
+            // a frame-by-frame queue (see OnUpdate/RenderThumbnail).
             Ref<Texture2D> displayIcon = icon;
-            if (type == AssetType::Texture)
+            const bool needsRenderThumbnail =
+                type == AssetType::Scene || type == AssetType::Prefab
+                || type == AssetType::UITemplate || type == AssetType::Mesh;
+            if (type == AssetType::Texture || needsRenderThumbnail)
             {
                 const std::string thumbKey = path.string();
                 auto thumbIt = m_ThumbnailCache.find(thumbKey);
                 if (thumbIt == m_ThumbnailCache.end())
                 {
-                    Ref<Texture2D> loaded = Texture2D::Create(thumbKey);
-                    m_ThumbnailCache[thumbKey] = (loaded && loaded->IsLoaded()) ? loaded : nullptr;
-                    thumbIt = m_ThumbnailCache.find(thumbKey);
+                    if (type == AssetType::Texture)
+                    {
+                        Ref<Texture2D> loaded = Texture2D::Create(thumbKey);
+                        m_ThumbnailCache[thumbKey] = (loaded && loaded->IsLoaded()) ? loaded : nullptr;
+                        thumbIt = m_ThumbnailCache.find(thumbKey);
+                    }
+                    else if (m_ThumbnailQueued.insert(thumbKey).second)
+                    {
+                        m_ThumbnailQueueTypes[thumbKey] = type;
+                        m_ThumbnailRenderQueue.push_back(thumbKey);
+                    }
                 }
-                if (thumbIt->second)
+                if (thumbIt != m_ThumbnailCache.end() && thumbIt->second)
                     displayIcon = thumbIt->second;
             }
 
