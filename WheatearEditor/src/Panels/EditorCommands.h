@@ -357,6 +357,74 @@ namespace Wheatear {
         return std::make_unique<ComponentValueCommand<T>>(e, before, after);
     }
 
+    // Deep snapshot of a SpriteAnimatorComponent for undo/redo of structural
+    // animation edits (add/delete/rename clip, add/delete frame/event/track,
+    // generate frames, set default). Unlike ComponentValueCommand this deep-copies
+    // the Clips map so undo restores actual clip contents, not just shared Refs.
+    class AnimatorStateCommand : public ICommand
+    {
+    public:
+        AnimatorStateCommand(Entity entity,
+            const SpriteAnimatorComponent& before,
+            const SpriteAnimatorComponent& after)
+            : m_Entity(entity), m_Before(DeepCopy(before)), m_After(DeepCopy(after))
+        {
+        }
+
+        void Execute() override
+        {
+            if (m_Entity.HasComponent<SpriteAnimatorComponent>())
+                m_Entity.GetComponent<SpriteAnimatorComponent>() = DeepCopy(m_After);
+        }
+
+        void Undo() override
+        {
+            if (m_Entity.HasComponent<SpriteAnimatorComponent>())
+                m_Entity.GetComponent<SpriteAnimatorComponent>() = DeepCopy(m_Before);
+        }
+
+        bool TryMerge(ICommand* other) override { return false; }
+
+    private:
+        static SpriteAnimatorComponent DeepCopy(const SpriteAnimatorComponent& source)
+        {
+            SpriteAnimatorComponent copy;
+            copy.DefaultClipName = source.DefaultClipName;
+            copy.PlayOnStart = source.PlayOnStart;
+            copy.FireEvents = source.FireEvents;
+            copy.PlaybackSpeed = source.PlaybackSpeed;
+            copy.CurrentClipName = source.CurrentClipName;
+            copy.CurrentFrameIndex = source.CurrentFrameIndex;
+            copy.ElapsedTime = source.ElapsedTime;
+            copy.IsPlaying = source.IsPlaying;
+            copy.IsFinished = source.IsFinished;
+            copy.ExternalClipAssets = source.ExternalClipAssets;
+            for (const auto& [name, clip] : source.Clips)
+                copy.Clips[name] = clip ? clip->Clone() : nullptr;
+            return copy;
+        }
+
+        Entity m_Entity;
+        SpriteAnimatorComponent m_Before;
+        SpriteAnimatorComponent m_After;
+    };
+
+    // Convenience: captures before, applies the mutation lambda, captures after,
+    // pushes an AnimatorStateCommand. The mutation must run against the same
+    // entity's SpriteAnimatorComponent.
+    inline void ApplyAnimatorEdit(Entity entity,
+        const std::function<void(SpriteAnimatorComponent&)>& mutate)
+    {
+        if (!entity || !entity.HasComponent<SpriteAnimatorComponent>())
+            return;
+
+        SpriteAnimatorComponent& component = entity.GetComponent<SpriteAnimatorComponent>();
+        const SpriteAnimatorComponent before = component;
+        mutate(component);
+        CommandHistory::Get().Push(
+            std::make_unique<AnimatorStateCommand>(entity, before, component));
+    }
+
     template<typename T>
     class AddComponentCommand : public ICommand
     {

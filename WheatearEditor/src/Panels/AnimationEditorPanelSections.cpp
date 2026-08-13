@@ -2,6 +2,7 @@
 #include "AnimationEditorPanel.h"
 
 #include "ContentBrowserPanel.h"
+#include "EditorCommands.h"
 #include "Editor/EditorWidgets.h"
 #include "SpriteSheetPickerPanel.h"
 #include "Wheatear/Core/AssetPath.h"
@@ -84,22 +85,32 @@ namespace Wheatear {
 
         if (ImGui::Button("Generate Frames"))
         {
-            clip->ClearFrames();
-            const float uStep = 1.0f / atlas.Cols;
-            const float vStep = 1.0f / atlas.Rows;
-            int col = atlas.StartCol;
-            int row = atlas.StartRow;
-            for (int i = 0; i < atlas.FrameCount; i++)
+            const std::string clipName = m_CurrentClipName;
+            const AtlasConfig generation = atlas; // copy; mutation runs against component data
+            ApplyAnimatorEdit(m_Entity,
+                [clipName, generation](SpriteAnimatorComponent& component)
             {
-                glm::vec2 uvMin = { col * uStep, row * vStep };
-                glm::vec2 uvMax = { (col + 1) * uStep, (row + 1) * vStep };
-                clip->AddFrame({ atlas.Texture, uvMin, uvMax, atlas.Duration });
-                if (++col >= atlas.Cols)
+                auto it = component.Clips.find(clipName);
+                if (it == component.Clips.end() || !generation.Texture)
+                    return;
+                auto clip = it->second;
+                clip->ClearFrames();
+                const float uStep = 1.0f / generation.Cols;
+                const float vStep = 1.0f / generation.Rows;
+                int col = generation.StartCol;
+                int row = generation.StartRow;
+                for (int i = 0; i < generation.FrameCount; i++)
                 {
-                    col = 0;
-                    row++;
+                    glm::vec2 uvMin = { col * uStep, row * vStep };
+                    glm::vec2 uvMax = { (col + 1) * uStep, (row + 1) * vStep };
+                    clip->AddFrame({ generation.Texture, uvMin, uvMax, generation.Duration });
+                    if (++col >= generation.Cols)
+                    {
+                        col = 0;
+                        row++;
+                    }
                 }
-            }
+            });
         }
 
         if (!canGenerate)
@@ -123,11 +134,20 @@ namespace Wheatear {
         auto& events = clip->GetEvents();
         if (ImGui::Button("+ Event At Cursor"))
         {
-            AnimationEvent event;
-            event.Time = std::max(0.0f, m_PlaybackTime);
-            event.Name = "event";
-            event.Command = "";
-            clip->AddEvent(event);
+            const std::string clipName = m_CurrentClipName;
+            const float eventTime = std::max(0.0f, m_PlaybackTime);
+            ApplyAnimatorEdit(m_Entity,
+                [clipName, eventTime](SpriteAnimatorComponent& component)
+            {
+                auto it = component.Clips.find(clipName);
+                if (it == component.Clips.end())
+                    return;
+                AnimationEvent event;
+                event.Time = eventTime;
+                event.Name = "event";
+                event.Command = "";
+                it->second->AddEvent(event);
+            });
         }
         ImGui::SameLine();
         ImGui::TextDisabled("Use commands like anim:play:@UUID:attack, event:foo, or event:@UUID:foo");
@@ -181,7 +201,17 @@ namespace Wheatear {
         }
 
         if (eventToDelete >= 0)
-            clip->RemoveEvent(eventToDelete);
+        {
+            const int deleteIndex = eventToDelete;
+            const std::string clipName = m_CurrentClipName;
+            ApplyAnimatorEdit(m_Entity,
+                [clipName, deleteIndex](SpriteAnimatorComponent& component)
+            {
+                auto it = component.Clips.find(clipName);
+                if (it != component.Clips.end())
+                    it->second->RemoveEvent(deleteIndex);
+            });
+        }
         else if (sortEvents)
             clip->SortEvents();
     }
@@ -255,10 +285,33 @@ namespace Wheatear {
         }
 
         if (frameToDelete >= 0)
-            frames.erase(frames.begin() + frameToDelete);
+        {
+            const int deleteIndex = frameToDelete;
+            const std::string clipName = m_CurrentClipName;
+            ApplyAnimatorEdit(m_Entity,
+                [clipName, deleteIndex](SpriteAnimatorComponent& component)
+            {
+                auto it = component.Clips.find(clipName);
+                if (it != component.Clips.end())
+                {
+                    auto& frameList = it->second->GetFrames();
+                    if (deleteIndex >= 0 && deleteIndex < (int)frameList.size())
+                        frameList.erase(frameList.begin() + deleteIndex);
+                }
+            });
+        }
 
         if (ImGui::Button("+ Add Frame"))
-            clip->AddFrame(AnimationFrame{});
+        {
+            const std::string clipName = m_CurrentClipName;
+            ApplyAnimatorEdit(m_Entity,
+                [clipName](SpriteAnimatorComponent& component)
+            {
+                auto it = component.Clips.find(clipName);
+                if (it != component.Clips.end())
+                    it->second->AddFrame(AnimationFrame{});
+            });
+        }
 
         ImGui::SameLine();
         ImGui::TextDisabled("%d frame(s)", static_cast<int>(frames.size()));

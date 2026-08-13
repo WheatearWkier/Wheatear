@@ -143,6 +143,10 @@ namespace Wheatear {
         virtual int   GetKeyframeCount() const = 0;
 
         virtual TrackDataType GetDataType() const = 0;
+
+        // Deep copy for undo snapshots; Writer is a runtime-only delegate and is
+        // intentionally not copied.
+        virtual Ref<PropertyTrackBase> Clone() const = 0;
     };
 
     // =========================================================
@@ -180,6 +184,14 @@ namespace Wheatear {
         int GetKeyframeCount() const override
         {
             return (int)Keyframes.size();
+        }
+
+        Ref<PropertyTrackBase> Clone() const override
+        {
+            auto copy = CreateRef<PropertyTrack<T>>();
+            copy->Property = Property;
+            copy->Keyframes = Keyframes;
+            return copy;
         }
 
         void Sample(float time, bool looping, float totalDuration) override
@@ -337,6 +349,19 @@ namespace Wheatear {
         static Ref<AnimationClip> Create(const std::string& name, bool looping = true)
         {
             return CreateRef<AnimationClip>(name, looping);
+        }
+
+        // Deep copy used by undo snapshots: frames/events are value-copied,
+        // property tracks are cloned per-type, and textures (assets) are shared.
+        Ref<AnimationClip> Clone() const
+        {
+            auto copy = CreateRef<AnimationClip>(m_Name, m_Looping);
+            copy->m_Frames = m_Frames;
+            copy->m_Events = m_Events;
+            copy->m_PropertyTracks.reserve(m_PropertyTracks.size());
+            for (const auto& track : m_PropertyTracks)
+                copy->m_PropertyTracks.push_back(track->Clone());
+            return copy;
         }
 
     private:

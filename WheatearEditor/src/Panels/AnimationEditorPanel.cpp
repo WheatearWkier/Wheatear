@@ -4,6 +4,7 @@
 #include "Editor/EditorContentPickers.h"
 #include "Editor/EditorFloatingWindow.h"
 #include "Editor/EditorWidgets.h"
+#include "EditorCommands.h"
 
 #include <imgui/imgui.h>
 #include <imgui/imgui_internal.h>
@@ -420,8 +421,12 @@ namespace Wheatear {
                 newName + (suffix ? std::to_string(suffix) : "")))
                 suffix++;
             if (suffix) newName += std::to_string(suffix);
-            m_Animator->AddClip(AnimationClip::Create(newName, true));
-            m_CurrentClipName = newName;
+            const std::string createdName = newName;
+            ApplyAnimatorEdit(m_Entity, [createdName](SpriteAnimatorComponent& component)
+            {
+                component.AddClip(AnimationClip::Create(createdName, true));
+            });
+            m_CurrentClipName = createdName;
         }
 
         ImGui::SameLine();
@@ -465,30 +470,34 @@ namespace Wheatear {
             ImGuiInputTextFlags_EnterReturnsTrue))
         {
             std::string newName = s_RenameBuffer;
+            const std::string oldName = m_CurrentClipName;
             if (!newName.empty() && !m_Animator->Clips.count(newName)
-                && newName != m_CurrentClipName)
+                && newName != oldName)
             {
-                auto clipNode = m_Animator->Clips.extract(m_CurrentClipName);
-                clipNode.key() = newName;
-                m_Animator->Clips.insert(std::move(clipNode));
+                ApplyAnimatorEdit(m_Entity,
+                    [oldName, newName](SpriteAnimatorComponent& component)
+                {
+                    auto clipNode = component.Clips.extract(oldName);
+                    clipNode.key() = newName;
+                    component.Clips.insert(std::move(clipNode));
+                    if (component.CurrentClipName == oldName)
+                        component.CurrentClipName = newName;
+                    auto it = component.Clips.find(newName);
+                    if (it != component.Clips.end())
+                        it->second->SetName(newName);
+                });
 
-                auto atlasNode = m_AtlasConfigs.extract(m_CurrentClipName);
+                // Panel-local atlas config follows the clip name (component-side
+                // undo does not touch it; keep it in sync with the new name).
+                auto atlasNode = m_AtlasConfigs.extract(oldName);
                 if (!atlasNode.empty())
                 {
                     atlasNode.key() = newName;
                     m_AtlasConfigs.insert(std::move(atlasNode));
                 }
 
-                if (m_Animator->CurrentClipName == m_CurrentClipName)
-                    m_Animator->CurrentClipName = newName;
-
                 m_CurrentClipName = newName;
                 s_LastClipName = newName;
-                //m_Animator->CurrentClipName = newName;
-
-                auto it = m_Animator->Clips.find(newName);
-                if (it != m_Animator->Clips.end())
-                    it->second->SetName(newName);
             }
         }
         ImGui::PopID();
@@ -501,10 +510,15 @@ namespace Wheatear {
             if (ImGui::Button("Delete Clip"))
             {
                 StopPreview();
-                m_AtlasConfigs.erase(m_CurrentClipName);
-                m_Animator->Clips.erase(m_CurrentClipName);
-                if (m_Animator->CurrentClipName == m_CurrentClipName)
-                    m_Animator->CurrentClipName = "";
+                const std::string deletedName = m_CurrentClipName;
+                ApplyAnimatorEdit(m_Entity,
+                    [deletedName](SpriteAnimatorComponent& component)
+                {
+                    component.Clips.erase(deletedName);
+                    if (component.CurrentClipName == deletedName)
+                        component.CurrentClipName = "";
+                });
+                m_AtlasConfigs.erase(deletedName);
                 m_CurrentClipName = m_Animator->Clips.empty()
                     ? "" : m_Animator->Clips.begin()->first;
                 m_PlaybackTime = 0.0f;
@@ -545,17 +559,39 @@ namespace Wheatear {
         ImGui::SameLine(0, 20);
         bool looping = clip->IsLooping();
         if (ImGui::Checkbox("Loop", &looping))
-            clip->SetLooping(looping);
+        {
+            const std::string clipName = m_CurrentClipName;
+            ApplyAnimatorEdit(m_Entity,
+                [clipName, looping](SpriteAnimatorComponent& component)
+            {
+                auto it = component.Clips.find(clipName);
+                if (it != component.Clips.end())
+                    it->second->SetLooping(looping);
+            });
+        }
 
         ImGui::SameLine(0, 20);
         if (ImGui::Button("Set Default"))
-            m_Animator->DefaultClipName = m_CurrentClipName;
+        {
+            const std::string defaultName = m_CurrentClipName;
+            ApplyAnimatorEdit(m_Entity,
+                [defaultName](SpriteAnimatorComponent& component)
+            {
+                component.DefaultClipName = defaultName;
+            });
+        }
 
         if (!m_Animator->DefaultClipName.empty())
         {
             ImGui::SameLine();
             if (ImGui::Button("Clear Default"))
-                m_Animator->DefaultClipName = "";
+            {
+                ApplyAnimatorEdit(m_Entity,
+                    [](SpriteAnimatorComponent& component)
+                {
+                    component.DefaultClipName.clear();
+                });
+            }
         }
 
         ImGui::SameLine(0, 20);
@@ -647,21 +683,38 @@ namespace Wheatear {
         ImGui::SameLine();
         if (ImGui::Button("+ Add Track"))
         {
-            AnimatedProperty prop = kAllProperties[s_SelectedPropIdx];
-            if (prop == AnimatedProperty::SpriteColor)
-                clip->AddVec4Track(prop);
-            else
-                clip->AddFloatTrack(prop);
+            const AnimatedProperty prop = kAllProperties[s_SelectedPropIdx];
+            const std::string clipName = m_CurrentClipName;
+            ApplyAnimatorEdit(m_Entity,
+                [clipName, prop](SpriteAnimatorComponent& component)
+            {
+                auto it = component.Clips.find(clipName);
+                if (it == component.Clips.end())
+                    return;
+                if (prop == AnimatedProperty::SpriteColor)
+                    it->second->AddVec4Track(prop);
+                else
+                    it->second->AddFloatTrack(prop);
+            });
         }
 
         ImGui::SameLine(0, 20);
         if (ImGui::Button("+ Add Event"))
         {
-            AnimationEvent event;
-            event.Time = std::max(0.0f, m_PlaybackTime);
-            event.Name = "event";
-            event.Command = "";
-            clip->AddEvent(event);
+            const std::string clipName = m_CurrentClipName;
+            const float eventTime = std::max(0.0f, m_PlaybackTime);
+            ApplyAnimatorEdit(m_Entity,
+                [clipName, eventTime](SpriteAnimatorComponent& component)
+            {
+                auto it = component.Clips.find(clipName);
+                if (it == component.Clips.end())
+                    return;
+                AnimationEvent event;
+                event.Time = eventTime;
+                event.Name = "event";
+                event.Command = "";
+                it->second->AddEvent(event);
+            });
         }
     }
 
@@ -702,7 +755,15 @@ namespace Wheatear {
 
                 if (ImGui::SmallButton("x"))
                 {
-                    clip->RemovePropertyTrack(ti);
+                    const int trackIndex = ti;
+                    const std::string clipName = m_CurrentClipName;
+                    ApplyAnimatorEdit(m_Entity,
+                        [clipName, trackIndex](SpriteAnimatorComponent& component)
+                    {
+                        auto it = component.Clips.find(clipName);
+                        if (it != component.Clips.end())
+                            it->second->RemovePropertyTrack(trackIndex);
+                    });
                     ImGui::PopID();
                     break;
                 }
@@ -828,12 +889,21 @@ namespace Wheatear {
         ImGui::InvisibleButton("##event_track_bg", ImVec2(width, trackHeight));
         if (ImGui::IsItemHovered() && ImGui::IsMouseDoubleClicked(0))
         {
-            float clickTime = (ImGui::GetIO().MousePos.x - origin.x) / m_PixelsPerSecond;
-            AnimationEvent event;
-            event.Time = std::clamp(clickTime, 0.0f, duration);
-            event.Name = "event";
-            event.Command = "";
-            clip->AddEvent(event);
+            const float clickTime = (ImGui::GetIO().MousePos.x - origin.x) / m_PixelsPerSecond;
+            const float eventTime = std::clamp(clickTime, 0.0f, duration);
+            const std::string clipName = m_CurrentClipName;
+            ApplyAnimatorEdit(m_Entity,
+                [clipName, eventTime](SpriteAnimatorComponent& component)
+            {
+                auto it = component.Clips.find(clipName);
+                if (it == component.Clips.end())
+                    return;
+                AnimationEvent event;
+                event.Time = eventTime;
+                event.Name = "event";
+                event.Command = "";
+                it->second->AddEvent(event);
+            });
         }
         if (ImGui::IsItemHovered())
             ImGui::SetTooltip("Double-click to add an animation event.");
@@ -890,7 +960,17 @@ namespace Wheatear {
         }
 
         if (eventToDelete >= 0)
-            clip->RemoveEvent(eventToDelete);
+        {
+            const int deleteIndex = eventToDelete;
+            const std::string clipName = m_CurrentClipName;
+            ApplyAnimatorEdit(m_Entity,
+                [clipName, deleteIndex](SpriteAnimatorComponent& component)
+            {
+                auto it = component.Clips.find(clipName);
+                if (it != component.Clips.end())
+                    it->second->RemoveEvent(deleteIndex);
+            });
+        }
         else if (sortEvents)
             clip->SortEvents();
     }
@@ -1065,7 +1145,23 @@ namespace Wheatear {
             }
 
             if (kfToDelete >= 0)
-                track->RemoveKeyframe(kfToDelete);
+            {
+                const int deleteIndex = kfToDelete;
+                const std::string clipName = m_CurrentClipName;
+                const int trackIdx = trackIndex;
+                ApplyAnimatorEdit(m_Entity,
+                    [clipName, trackIdx, deleteIndex](SpriteAnimatorComponent& component)
+                {
+                    auto it = component.Clips.find(clipName);
+                    if (it == component.Clips.end())
+                        return;
+                    auto& tracks = it->second->GetPropertyTracks();
+                    if (trackIdx < 0 || trackIdx >= (int)tracks.size())
+                        return;
+                    auto track = std::static_pointer_cast<PropertyTrack<float>>(tracks[trackIdx]);
+                    track->RemoveKeyframe(deleteIndex);
+                });
+            }
 
             ImGui::SetCursorScreenPos(origin);
             ImGui::InvisibleButton(
@@ -1075,7 +1171,21 @@ namespace Wheatear {
             {
                 float clickTime = (ImGui::GetIO().MousePos.x - origin.x) / m_PixelsPerSecond;
                 clickTime = std::max(0.0f, clickTime);
-                track->AddKeyframe(clickTime, 0.0f);
+                const std::string clipName = m_CurrentClipName;
+                const int trackIdx = trackIndex;
+                const float kfTime = clickTime;
+                ApplyAnimatorEdit(m_Entity,
+                    [clipName, trackIdx, kfTime](SpriteAnimatorComponent& component)
+                {
+                    auto it = component.Clips.find(clipName);
+                    if (it == component.Clips.end())
+                        return;
+                    auto& tracks = it->second->GetPropertyTracks();
+                    if (trackIdx < 0 || trackIdx >= (int)tracks.size())
+                        return;
+                    auto track = std::static_pointer_cast<PropertyTrack<float>>(tracks[trackIdx]);
+                    track->AddKeyframe(kfTime, 0.0f);
+                });
             }
         }
         else
@@ -1147,7 +1257,23 @@ namespace Wheatear {
             }
 
             if (kfToDelete >= 0)
-                track->RemoveKeyframe(kfToDelete);
+            {
+                const int deleteIndex = kfToDelete;
+                const std::string clipName = m_CurrentClipName;
+                const int trackIdx = trackIndex;
+                ApplyAnimatorEdit(m_Entity,
+                    [clipName, trackIdx, deleteIndex](SpriteAnimatorComponent& component)
+                {
+                    auto it = component.Clips.find(clipName);
+                    if (it == component.Clips.end())
+                        return;
+                    auto& tracks = it->second->GetPropertyTracks();
+                    if (trackIdx < 0 || trackIdx >= (int)tracks.size())
+                        return;
+                    auto track = std::static_pointer_cast<PropertyTrack<glm::vec4>>(tracks[trackIdx]);
+                    track->RemoveKeyframe(deleteIndex);
+                });
+            }
 
             ImGui::SetCursorScreenPos(origin);
             ImGui::InvisibleButton(
@@ -1156,7 +1282,21 @@ namespace Wheatear {
             if (ImGui::IsItemHovered() && ImGui::IsMouseDoubleClicked(0))
             {
                 float clickTime = (ImGui::GetIO().MousePos.x - origin.x) / m_PixelsPerSecond;
-                track->AddKeyframe(std::max(0.0f, clickTime), glm::vec4(1.0f));
+                const std::string clipName = m_CurrentClipName;
+                const int trackIdx = trackIndex;
+                const float kfTime = std::max(0.0f, clickTime);
+                ApplyAnimatorEdit(m_Entity,
+                    [clipName, trackIdx, kfTime](SpriteAnimatorComponent& component)
+                {
+                    auto it = component.Clips.find(clipName);
+                    if (it == component.Clips.end())
+                        return;
+                    auto& tracks = it->second->GetPropertyTracks();
+                    if (trackIdx < 0 || trackIdx >= (int)tracks.size())
+                        return;
+                    auto track = std::static_pointer_cast<PropertyTrack<glm::vec4>>(tracks[trackIdx]);
+                    track->AddKeyframe(kfTime, glm::vec4(1.0f));
+                });
             }
         }
     }
