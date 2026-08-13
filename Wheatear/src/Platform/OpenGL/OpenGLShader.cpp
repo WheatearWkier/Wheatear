@@ -9,7 +9,7 @@
 #include <shaderc/shaderc.hpp>
 #include <spirv_cross/spirv_cross.hpp>
 
-#include "Wheatear/Core/AssetPath.h"
+#include "Wheatear/Assets/AssetPath.h"
 #include "Wheatear/Core/Timer.h"
 
 // =============================================================================

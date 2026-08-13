@@ -3,7 +3,7 @@
 
 #include "Wheatear/Scene/Scene.h"
 #include "Wheatear/Scene/Components.h"
-#include "Wheatear/Core/Input.h"
+#include "Wheatear/Input/Input.h"
 #include "Wheatear/Renderer/RenderCommand.h"
 #include "Wheatear/Renderer/Renderer2D.h"
 #include "Wheatear/UI/UIRenderer.h"

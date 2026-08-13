@@ -4,17 +4,17 @@
 
 #include "Wheatear/Core/Log.h"
 #include "Wheatear/Core/Application.h"
-#include "Wheatear/Core/AssetPath.h"
+#include "Wheatear/Assets/AssetPath.h"
 #include "Wheatear/Core/EngineInfo.h"
-#include "Wheatear/Core/FileSystem.h"
+#include "Wheatear/Assets/FileSystem.h"
 #include "Wheatear/Core/Layer.h"
-#include "Wheatear/Core/PlayerConfig.h"
+#include "Wheatear/Config/PlayerConfig.h"
 
 #include "Wheatear/Core/Timestep.h"
 
-#include "Wheatear/Core/Input.h"
-#include "Wheatear/Core/KeyCodes.h"
-#include "Wheatear/Core/MouseButtonCodes.h"
+#include "Wheatear/Input/Input.h"
+#include "Wheatear/Input/KeyCodes.h"
+#include "Wheatear/Input/MouseButtonCodes.h"
 
 #include "Wheatear/Events/EventBus.h"
 

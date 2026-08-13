@@ -2,8 +2,8 @@
 #include "Application.h"
 
 #include "Wheatear/Audio/AudioEngine.h"
-#include "Wheatear/Core/AssetPath.h"
-#include "Wheatear/Core/UserSettings.h"
+#include "Wheatear/Assets/AssetPath.h"
+#include "Wheatear/Config/UserSettings.h"
 #include "Wheatear/Events/ApplicationEvent.h"
 #include "Wheatear/ImGui/ImGuiLayer.h"
 #include "Wheatear/Renderer/Renderer.h"

@@ -1,7 +1,7 @@
 #include "wtpch.h"
 #include "ProgressionSettingsCommandService.h"
 
-#include "Wheatear/Core/UserSettings.h"
+#include "Wheatear/Config/UserSettings.h"
 
 #include <algorithm>
 #include <sstream>

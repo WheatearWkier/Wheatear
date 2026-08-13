@@ -2,7 +2,7 @@
 #include "ArcadeCombatProjectileService.h"
 
 #include "ArcadeCombatComponents.h"
-#include "Wheatear/Core/AssetAliasRegistry.h"
+#include "Wheatear/Assets/AssetAliasRegistry.h"
 #include "Wheatear/Gameplay/Services/GameplayCombatService.h"
 #include "Wheatear/Gameplay/Services/GameplayAudioService.h"
 #include "Wheatear/Gameplay/Services/GameplayVisualService.h"

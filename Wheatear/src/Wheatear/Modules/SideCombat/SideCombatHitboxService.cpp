@@ -4,7 +4,7 @@
 #include "SideCombatComboService.h"
 #include "SideCombatFeedbackService.h"
 #include "SideCombatHitResolutionService.h"
-#include "Wheatear/Core/AssetAliasRegistry.h"
+#include "Wheatear/Assets/AssetAliasRegistry.h"
 #include "Wheatear/Gameplay/Services/GameplayTextService.h"
 #include "Wheatear/Gameplay/Services/GameplayVisualService.h"
 #include "Wheatear/Renderer/Texture.h"

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Wheatear/Core/UserSettings.h"
+#include "Wheatear/Config/UserSettings.h"
 
 #ifdef WT_PLATFORM_WINDOWS
 #include <windows.h>

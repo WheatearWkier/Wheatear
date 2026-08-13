@@ -6,7 +6,7 @@
 #include "Wheatear/Scene/Entity.h"
 #include "Wheatear/Animation/AnimationClip.h"
 #include "Wheatear/Animation/AnimationClipSerializer.h"
-#include "Wheatear/Core/AssetPath.h"
+#include "Wheatear/Assets/AssetPath.h"
 #include "Wheatear/Runtime/CommandBus.h"
 
 #include <glm/glm.hpp>

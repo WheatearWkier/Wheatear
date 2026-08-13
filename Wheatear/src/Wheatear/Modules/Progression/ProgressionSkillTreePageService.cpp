@@ -3,7 +3,7 @@
 
 #include "GameProgress.h"
 #include "ProgressionContent.h"
-#include "Wheatear/Core/AssetAliasRegistry.h"
+#include "Wheatear/Assets/AssetAliasRegistry.h"
 #include "Wheatear/Scene/Components.h"
 #include "Wheatear/Scene/Entity.h"
 #include "Wheatear/Scene/SceneQueries.h"

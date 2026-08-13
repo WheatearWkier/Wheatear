@@ -6,8 +6,8 @@
 #include "Editor/EditorFloatingWindow.h"
 #include "Editor/EditorWidgets.h"
 #include "Editor/GameplayEditorShell.h"
-#include "Wheatear/Core/AssetAliasRegistry.h"
-#include "Wheatear/Core/AssetPath.h"
+#include "Wheatear/Assets/AssetAliasRegistry.h"
+#include "Wheatear/Assets/AssetPath.h"
 #include "Wheatear/Modules/SideCombat/SideCombatHudPreset.h"
 
 #include <imgui/imgui.h>

@@ -7,7 +7,7 @@
 #include "Editor/EditorWidgets.h"
 #include "ProgressionContentEditorPanelInternal.h"
 #include "Editor/GameplayEditorShell.h"
-#include "Wheatear/Core/AssetAliasRegistry.h"
+#include "Wheatear/Assets/AssetAliasRegistry.h"
 #include "Wheatear/Modules/Progression/ProgressionContent.h"
 
 #include <imgui/imgui.h>

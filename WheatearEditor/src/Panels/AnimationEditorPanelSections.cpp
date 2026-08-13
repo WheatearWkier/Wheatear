@@ -6,7 +6,7 @@
 #include "Editor/EditorLocale.h"
 #include "Editor/EditorWidgets.h"
 #include "SpriteSheetPickerPanel.h"
-#include "Wheatear/Core/AssetPath.h"
+#include "Wheatear/Assets/AssetPath.h"
 #include "Wheatear/Scene/Components.h"
 
 #include <imgui/imgui.h>

@@ -5,7 +5,7 @@
 #include "Wheatear/Scene/Components.h"
 #include "Wheatear/Audio/AudioEngine.h"
 #include "Wheatear/Core/Log.h"
-#include "Wheatear/Core/AssetPath.h"
+#include "Wheatear/Assets/AssetPath.h"
 #include <imgui/imgui.h>
 #include <filesystem>
 

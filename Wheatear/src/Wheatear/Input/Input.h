@@ -1,7 +1,7 @@
 #pragma once
 
 #include "Wheatear/Core/Core.h"
-#include "Wheatear/Core/KeyCodes.h"
+#include "Wheatear/Input/KeyCodes.h"
 //#include "Wheatear/Core/MouseCodes.h"
 
 namespace Wheatear {

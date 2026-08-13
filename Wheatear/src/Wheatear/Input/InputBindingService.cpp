@@ -1,9 +1,9 @@
 #include "wtpch.h"
 #include "InputBindingService.h"
 
-#include "Wheatear/Core/Input.h"
-#include "Wheatear/Core/KeyCodes.h"
-#include "Wheatear/Core/UserSettings.h"
+#include "Wheatear/Input/Input.h"
+#include "Wheatear/Input/KeyCodes.h"
+#include "Wheatear/Config/UserSettings.h"
 
 #include <sstream>
 

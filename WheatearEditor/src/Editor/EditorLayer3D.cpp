@@ -2,7 +2,7 @@
 #include "EditorLayer3D.h"
 
 #include "Editor/EditorLocale.h"
-#include "Wheatear/Core/AssetPath.h"
+#include "Wheatear/Assets/AssetPath.h"
 
 #include "Wheatear/Renderer/Framebuffer.h"
 

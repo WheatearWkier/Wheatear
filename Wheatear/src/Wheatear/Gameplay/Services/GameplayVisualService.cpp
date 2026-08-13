@@ -1,7 +1,7 @@
 #include "wtpch.h"
 #include "GameplayVisualService.h"
 
-#include "Wheatear/Core/AssetAliasRegistry.h"
+#include "Wheatear/Assets/AssetAliasRegistry.h"
 #include "Wheatear/Gameplay/Services/GameplayTextService.h"
 #include "Wheatear/Renderer/Texture.h"
 #include "Wheatear/Scene/Components.h"

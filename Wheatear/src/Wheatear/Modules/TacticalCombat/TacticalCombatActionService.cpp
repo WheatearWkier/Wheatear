@@ -8,7 +8,7 @@
 #include "Wheatear/Gameplay/Action/ActionDebugHistory.h"
 #include "Wheatear/Gameplay/Action/ActionRecipeQueries.h"
 #include "Wheatear/Gameplay/Action/StateRegistry.h"
-#include "Wheatear/Core/AssetAliasRegistry.h"
+#include "Wheatear/Assets/AssetAliasRegistry.h"
 #include "Wheatear/Gameplay/Services/GameplayCombatService.h"
 #include "Wheatear/Gameplay/Services/GameplayEntityService.h"
 

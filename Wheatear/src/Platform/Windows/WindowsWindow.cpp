@@ -1,7 +1,7 @@
 #include "wtpch.h"
 #include "WindowsWindow.h"
 
-#include "Wheatear/Core/AssetPath.h"
+#include "Wheatear/Assets/AssetPath.h"
 
 #include "Wheatear/Events/KeyEvent.h"
 #include "Wheatear/Events/MouseEvent.h"

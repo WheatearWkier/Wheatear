@@ -2,8 +2,8 @@
 #include "VisualNovelSystem.h"
 #include "VisualNovelSystemInternal.h"
 
-#include "Wheatear/Core/AssetAliasRegistry.h"
-#include "Wheatear/Core/AssetPath.h"
+#include "Wheatear/Assets/AssetAliasRegistry.h"
+#include "Wheatear/Assets/AssetPath.h"
 #include "Wheatear/Core/Log.h"
 #include "Wheatear/Modules/Progression/GameProgress.h"
 #include "Wheatear/Renderer/Texture.h"

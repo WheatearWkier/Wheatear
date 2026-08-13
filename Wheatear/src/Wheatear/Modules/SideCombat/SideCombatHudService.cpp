@@ -3,8 +3,8 @@
 
 #include "SideCombatHudPreset.h"
 #include "SideCombatTuningService.h"
-#include "Wheatear/Core/AssetAliasRegistry.h"
-#include "Wheatear/Core/InputBindingService.h"
+#include "Wheatear/Assets/AssetAliasRegistry.h"
+#include "Wheatear/Input/InputBindingService.h"
 #include "Wheatear/Core/Log.h"
 #include "Wheatear/Gameplay/Services/GameplayUILayoutService.h"
 #include "Wheatear/Gameplay/Services/GameplayTextService.h"

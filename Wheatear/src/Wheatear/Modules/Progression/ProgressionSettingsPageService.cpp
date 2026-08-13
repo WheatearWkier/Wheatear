@@ -2,7 +2,7 @@
 #include "ProgressionSettingsPageService.h"
 
 #include "GameProgress.h"
-#include "Wheatear/Core/UserSettings.h"
+#include "Wheatear/Config/UserSettings.h"
 #include "Wheatear/Gameplay/Services/GameplayUILayoutService.h"
 #include "Wheatear/Scene/SceneQueries.h"
 

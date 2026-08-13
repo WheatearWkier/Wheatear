@@ -11,7 +11,7 @@
 #include "Modules/SideCombat/SideCombatTuningEditorPanel.h"
 #include "Panels/SceneHierarchy/ComponentDrawers.h"
 #include "Wheatear/Modules/SideCombat/SideCombatHudPreset.h"
-#include "Wheatear/Core/AssetAliasRegistry.h"
+#include "Wheatear/Assets/AssetAliasRegistry.h"
 #include "Wheatear/Scene/Components.h"
 
 #include <imgui/imgui.h>

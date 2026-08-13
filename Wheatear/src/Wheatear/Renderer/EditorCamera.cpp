@@ -1,8 +1,8 @@
 #include "wtpch.h"
 #include "EditorCamera.h"
-#include "Wheatear/Core/Input.h"
-#include "Wheatear/Core/KeyCodes.h"
-#include "Wheatear/Core/MouseButtonCodes.h"
+#include "Wheatear/Input/Input.h"
+#include "Wheatear/Input/KeyCodes.h"
+#include "Wheatear/Input/MouseButtonCodes.h"
 #include <glm/gtc/matrix_transform.hpp>
 
 namespace Wheatear {

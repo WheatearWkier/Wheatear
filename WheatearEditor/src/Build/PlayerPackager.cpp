@@ -2,11 +2,11 @@
 #include "PlayerPackager.h"
 
 #include "AssetDependencyScanner.h"
-#include "Wheatear/Core/AssetPath.h"
+#include "Wheatear/Assets/AssetPath.h"
 #include "Wheatear/Core/EngineInfo.h"
-#include "Wheatear/Core/FileSystem.h"
+#include "Wheatear/Assets/FileSystem.h"
 #include "Wheatear/Core/Log.h"
-#include "Wheatear/Core/PlayerConfig.h"
+#include "Wheatear/Config/PlayerConfig.h"
 
 #include <algorithm>
 #include <chrono>

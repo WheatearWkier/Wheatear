@@ -1,7 +1,7 @@
 #include "wtpch.h"
 #include "AudioEngine.h"
 #include "Wheatear/Core/Application.h"
-#include "Wheatear/Core/AssetPath.h"
+#include "Wheatear/Assets/AssetPath.h"
 
 #define MINIAUDIO_IMPLEMENTATION
 #include "miniaudio.h"

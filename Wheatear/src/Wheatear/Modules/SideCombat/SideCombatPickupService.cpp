@@ -2,7 +2,7 @@
 #include "SideCombatPickupService.h"
 
 #include "SideCombatMath.h"
-#include "Wheatear/Core/AssetAliasRegistry.h"
+#include "Wheatear/Assets/AssetAliasRegistry.h"
 #include "Wheatear/Gameplay/Services/GameplayVisualService.h"
 #include "Wheatear/Modules/Progression/GameProgress.h"
 #include "Wheatear/Renderer/Texture.h"

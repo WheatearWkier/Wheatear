@@ -1,7 +1,7 @@
 #include "wtpch.h"
 #include "Texture.h"
 
-#include "Wheatear/Core/AssetPath.h"
+#include "Wheatear/Assets/AssetPath.h"
 #include "Renderer.h"
 #include "Platform/OpenGL/OpenGLTexture.h"
 

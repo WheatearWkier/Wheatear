@@ -3,7 +3,7 @@
 
 #include "Build/AssetDependencyScanner.h"
 
-#include "Wheatear/Core/AssetPath.h"
+#include "Wheatear/Assets/AssetPath.h"
 #include "Wheatear/Core/EngineInfo.h"
 
 #include <yaml-cpp/yaml.h>

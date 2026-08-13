@@ -1,6 +1,6 @@
 #include "wtpch.h"
 #include "OpenGLTexture.h"
-#include "Wheatear/Core/AssetPath.h"
+#include "Wheatear/Assets/AssetPath.h"
 #include "stb_image.h"
 #include <glad/glad.h>
 

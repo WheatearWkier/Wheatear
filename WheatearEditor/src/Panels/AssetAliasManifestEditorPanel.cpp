@@ -5,8 +5,8 @@
 #include "Editor/EditorLocale.h"
 #include "Editor/GameplayEditorShell.h"
 #include "Editor/EditorWidgets.h"
-#include "Wheatear/Core/AssetAliasRegistry.h"
-#include "Wheatear/Core/AssetPath.h"
+#include "Wheatear/Assets/AssetAliasRegistry.h"
+#include "Wheatear/Assets/AssetPath.h"
 
 #include <imgui/imgui.h>
 #include <yaml-cpp/yaml.h>

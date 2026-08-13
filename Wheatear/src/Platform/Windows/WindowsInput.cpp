@@ -1,5 +1,5 @@
 #include "wtpch.h"
-#include "Wheatear/Core/Input.h"
+#include "Wheatear/Input/Input.h"
 
 #include "Wheatear/Core/Application.h"
 #include "Wheatear/Core/Window.h"

@@ -1,7 +1,7 @@
 #include "wtpch.h"
 #include "SideCombatFeedbackService.h"
 
-#include "Wheatear/Core/UserSettings.h"
+#include "Wheatear/Config/UserSettings.h"
 #include "Wheatear/Gameplay/Services/GameplayAudioService.h"
 #include "Wheatear/Scene/Components.h"
 #include "Wheatear/Scene/Entity.h"

@@ -2,7 +2,7 @@
 #include "GameplayAudioService.h"
 
 #include "Wheatear/Audio/AudioEngine.h"
-#include "Wheatear/Core/UserSettings.h"
+#include "Wheatear/Config/UserSettings.h"
 
 #include <algorithm>
 

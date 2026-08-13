@@ -8,7 +8,7 @@
 #include "Editor/EditorWidgets.h"
 #include "Panels/EventScriptGraphPanel.h"
 #include "Modules/VisualNovel/VisualNovelScriptEditorPanel.h"
-#include "Wheatear/Core/AssetPath.h"
+#include "Wheatear/Assets/AssetPath.h"
 #include "Wheatear/Core/EngineInfo.h"
 
 #include <imgui/imgui.h>

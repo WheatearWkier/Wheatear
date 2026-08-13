@@ -5,7 +5,7 @@
 #include "Entity.h"
 #include "SceneSerializer.h"
 
-#include "Wheatear/Core/AssetPath.h"
+#include "Wheatear/Assets/AssetPath.h"
 
 #include "Wheatear/Scene/SceneSystemRegistry.h"
 #include "Wheatear/Systems/PhysicsSystem.h"

@@ -9,7 +9,7 @@
 #include "Wheatear/Modules/TacticalCombat/TacticalCombatSystem.h"
 #include "Wheatear/Modules/TurnCombat/TurnCombatSystem.h"
 #include "Wheatear/Modules/VisualNovel/VisualNovelSystem.h"
-#include "Wheatear/Core/AssetAliasRegistry.h"
+#include "Wheatear/Assets/AssetAliasRegistry.h"
 #include "Wheatear/Gameplay/Action/ActionAssetLoader.h"
 #include "Wheatear/Gameplay/Action/ActionResolver.h"
 #include "Wheatear/Runtime/CommandBus.h"

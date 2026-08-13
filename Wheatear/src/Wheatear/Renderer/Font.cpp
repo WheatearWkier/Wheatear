@@ -1,7 +1,7 @@
 #include "wtpch.h"
 #include "Font.h"
 
-#include "Wheatear/Core/AssetPath.h"
+#include "Wheatear/Assets/AssetPath.h"
 #include "Wheatear/Core/Log.h"
 
 #include <algorithm>

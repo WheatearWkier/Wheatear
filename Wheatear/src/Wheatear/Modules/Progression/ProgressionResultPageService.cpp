@@ -2,7 +2,7 @@
 #include "ProgressionResultPageService.h"
 
 #include "GameProgress.h"
-#include "Wheatear/Core/AssetAliasRegistry.h"
+#include "Wheatear/Assets/AssetAliasRegistry.h"
 #include "Wheatear/Gameplay/Services/GameplayRewardService.h"
 #include "Wheatear/Gameplay/Services/GameplayUIService.h"
 #include "Wheatear/Scene/Entity.h"

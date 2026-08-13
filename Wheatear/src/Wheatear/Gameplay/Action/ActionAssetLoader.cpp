@@ -3,8 +3,8 @@
 
 #include "ActionDatabase.h"
 #include "ActionTypes.h"
-#include "Wheatear/Core/AssetAliasRegistry.h"
-#include "Wheatear/Core/AssetPath.h"
+#include "Wheatear/Assets/AssetAliasRegistry.h"
+#include "Wheatear/Assets/AssetPath.h"
 #include "Wheatear/Utils/StringUtils.h"
 
 #include <yaml-cpp/yaml.h>

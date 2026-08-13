@@ -5,7 +5,7 @@
 #include "TacticalCombatBoardService.h"
 #include "TacticalCombatFeedbackService.h"
 #include "TacticalCombatSkillService.h"
-#include "Wheatear/Core/AssetAliasRegistry.h"
+#include "Wheatear/Assets/AssetAliasRegistry.h"
 #include "Wheatear/Gameplay/Services/GameplayEntityService.h"
 #include "Wheatear/Gameplay/Services/GameplayTextService.h"
 

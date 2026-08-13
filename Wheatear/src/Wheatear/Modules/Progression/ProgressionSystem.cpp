@@ -7,7 +7,7 @@
 #include "ProgressionSaveLoadPageService.h"
 #include "ProgressionSkillTreePageService.h"
 #include "ProgressionSettingsPageService.h"
-#include "Wheatear/Core/AssetAliasRegistry.h"
+#include "Wheatear/Assets/AssetAliasRegistry.h"
 #include "Wheatear/Modules/VisualNovel/VisualNovelComponents.h"
 #include "Wheatear/Runtime/CommandBus.h"
 #include "Wheatear/Runtime/SceneTransitionService.h"

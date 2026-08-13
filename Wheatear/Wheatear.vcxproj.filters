@@ -19,8 +19,14 @@
     <Filter Include="src\Wheatear\Animation">
       <UniqueIdentifier>{FC577D1D-E851-A66F-D1BE-3C80BD570CDC}</UniqueIdentifier>
     </Filter>
+    <Filter Include="src\Wheatear\Assets">
+      <UniqueIdentifier>{0F793740-7BDA-144E-0448-5B0070A84B0D}</UniqueIdentifier>
+    </Filter>
     <Filter Include="src\Wheatear\Audio">
       <UniqueIdentifier>{8EAE9DAC-7A92-5E02-E3F2-5855CFF54884}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\Wheatear\Config">
+      <UniqueIdentifier>{32AD9644-9E0E-7452-277C-BA0493DCAA11}</UniqueIdentifier>
     </Filter>
     <Filter Include="src\Wheatear\Core">
       <UniqueIdentifier>{45E7811C-B1FD-7FB2-FA74-0BD466CA503A}</UniqueIdentifier>
@@ -42,6 +48,9 @@
     </Filter>
     <Filter Include="src\Wheatear\ImGui">
       <UniqueIdentifier>{B79529AD-A379-EA02-0CDA-E455F8DCD484}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\Wheatear\Input">
+      <UniqueIdentifier>{8CD02AAD-78B4-EB02-E114-E655CD17D684}</UniqueIdentifier>
     </Filter>
     <Filter Include="src\Wheatear\Math">
       <UniqueIdentifier>{C627871C-323E-85B2-7BB5-10D4E70A563A}</UniqueIdentifier>
@@ -165,16 +174,25 @@
     <ClInclude Include="src\Wheatear\Animation\AnimationClipSerializer.h">
       <Filter>src\Wheatear\Animation</Filter>
     </ClInclude>
+    <ClInclude Include="src\Wheatear\Assets\AssetAliasRegistry.h">
+      <Filter>src\Wheatear\Assets</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Wheatear\Assets\AssetPath.h">
+      <Filter>src\Wheatear\Assets</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Wheatear\Assets\FileSystem.h">
+      <Filter>src\Wheatear\Assets</Filter>
+    </ClInclude>
     <ClInclude Include="src\Wheatear\Audio\AudioEngine.h">
       <Filter>src\Wheatear\Audio</Filter>
     </ClInclude>
+    <ClInclude Include="src\Wheatear\Config\PlayerConfig.h">
+      <Filter>src\Wheatear\Config</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Wheatear\Config\UserSettings.h">
+      <Filter>src\Wheatear\Config</Filter>
+    </ClInclude>
     <ClInclude Include="src\Wheatear\Core\Application.h">
-      <Filter>src\Wheatear\Core</Filter>
-    </ClInclude>
-    <ClInclude Include="src\Wheatear\Core\AssetAliasRegistry.h">
-      <Filter>src\Wheatear\Core</Filter>
-    </ClInclude>
-    <ClInclude Include="src\Wheatear\Core\AssetPath.h">
       <Filter>src\Wheatear\Core</Filter>
     </ClInclude>
     <ClInclude Include="src\Wheatear\Core\Core.h">
@@ -186,18 +204,6 @@
     <ClInclude Include="src\Wheatear\Core\EntryPoint.h">
       <Filter>src\Wheatear\Core</Filter>
     </ClInclude>
-    <ClInclude Include="src\Wheatear\Core\FileSystem.h">
-      <Filter>src\Wheatear\Core</Filter>
-    </ClInclude>
-    <ClInclude Include="src\Wheatear\Core\Input.h">
-      <Filter>src\Wheatear\Core</Filter>
-    </ClInclude>
-    <ClInclude Include="src\Wheatear\Core\InputBindingService.h">
-      <Filter>src\Wheatear\Core</Filter>
-    </ClInclude>
-    <ClInclude Include="src\Wheatear\Core\KeyCodes.h">
-      <Filter>src\Wheatear\Core</Filter>
-    </ClInclude>
     <ClInclude Include="src\Wheatear\Core\Layer.h">
       <Filter>src\Wheatear\Core</Filter>
     </ClInclude>
@@ -207,12 +213,6 @@
     <ClInclude Include="src\Wheatear\Core\Log.h">
       <Filter>src\Wheatear\Core</Filter>
     </ClInclude>
-    <ClInclude Include="src\Wheatear\Core\MouseButtonCodes.h">
-      <Filter>src\Wheatear\Core</Filter>
-    </ClInclude>
-    <ClInclude Include="src\Wheatear\Core\PlayerConfig.h">
-      <Filter>src\Wheatear\Core</Filter>
-    </ClInclude>
     <ClInclude Include="src\Wheatear\Core\Timer.h">
       <Filter>src\Wheatear\Core</Filter>
     </ClInclude>
@@ -220,9 +220,6 @@
       <Filter>src\Wheatear\Core</Filter>
     </ClInclude>
     <ClInclude Include="src\Wheatear\Core\UUID.h">
-      <Filter>src\Wheatear\Core</Filter>
-    </ClInclude>
-    <ClInclude Include="src\Wheatear\Core\UserSettings.h">
       <Filter>src\Wheatear\Core</Filter>
     </ClInclude>
     <ClInclude Include="src\Wheatear\Core\Window.h">
@@ -305,6 +302,18 @@
     </ClInclude>
     <ClInclude Include="src\Wheatear\ImGui\ImGuiLayer.h">
       <Filter>src\Wheatear\ImGui</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Wheatear\Input\Input.h">
+      <Filter>src\Wheatear\Input</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Wheatear\Input\InputBindingService.h">
+      <Filter>src\Wheatear\Input</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Wheatear\Input\KeyCodes.h">
+      <Filter>src\Wheatear\Input</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Wheatear\Input\MouseButtonCodes.h">
+      <Filter>src\Wheatear\Input</Filter>
     </ClInclude>
     <ClInclude Include="src\Wheatear\Math\Math.h">
       <Filter>src\Wheatear\Math</Filter>
@@ -1853,22 +1862,25 @@
     <ClCompile Include="src\Wheatear\Animation\AnimationClipSerializer.cpp">
       <Filter>src\Wheatear\Animation</Filter>
     </ClCompile>
+    <ClCompile Include="src\Wheatear\Assets\AssetAliasRegistry.cpp">
+      <Filter>src\Wheatear\Assets</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Wheatear\Assets\AssetPath.cpp">
+      <Filter>src\Wheatear\Assets</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Wheatear\Assets\FileSystem.cpp">
+      <Filter>src\Wheatear\Assets</Filter>
+    </ClCompile>
     <ClCompile Include="src\Wheatear\Audio\AudioEngine.cpp">
       <Filter>src\Wheatear\Audio</Filter>
     </ClCompile>
+    <ClCompile Include="src\Wheatear\Config\PlayerConfig.cpp">
+      <Filter>src\Wheatear\Config</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Wheatear\Config\UserSettings.cpp">
+      <Filter>src\Wheatear\Config</Filter>
+    </ClCompile>
     <ClCompile Include="src\Wheatear\Core\Application.cpp">
-      <Filter>src\Wheatear\Core</Filter>
-    </ClCompile>
-    <ClCompile Include="src\Wheatear\Core\AssetAliasRegistry.cpp">
-      <Filter>src\Wheatear\Core</Filter>
-    </ClCompile>
-    <ClCompile Include="src\Wheatear\Core\AssetPath.cpp">
-      <Filter>src\Wheatear\Core</Filter>
-    </ClCompile>
-    <ClCompile Include="src\Wheatear\Core\FileSystem.cpp">
-      <Filter>src\Wheatear\Core</Filter>
-    </ClCompile>
-    <ClCompile Include="src\Wheatear\Core\InputBindingService.cpp">
       <Filter>src\Wheatear\Core</Filter>
     </ClCompile>
     <ClCompile Include="src\Wheatear\Core\Layer.cpp">
@@ -1880,13 +1892,7 @@
     <ClCompile Include="src\Wheatear\Core\Log.cpp">
       <Filter>src\Wheatear\Core</Filter>
     </ClCompile>
-    <ClCompile Include="src\Wheatear\Core\PlayerConfig.cpp">
-      <Filter>src\Wheatear\Core</Filter>
-    </ClCompile>
     <ClCompile Include="src\Wheatear\Core\UUID.cpp">
-      <Filter>src\Wheatear\Core</Filter>
-    </ClCompile>
-    <ClCompile Include="src\Wheatear\Core\UserSettings.cpp">
       <Filter>src\Wheatear\Core</Filter>
     </ClCompile>
     <ClCompile Include="src\Wheatear\Events\EventBus.cpp">
@@ -1951,6 +1957,9 @@
     </ClCompile>
     <ClCompile Include="src\Wheatear\ImGui\ImGuiLayer.cpp">
       <Filter>src\Wheatear\ImGui</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Wheatear\Input\InputBindingService.cpp">
+      <Filter>src\Wheatear\Input</Filter>
     </ClCompile>
     <ClCompile Include="src\Wheatear\Math\Math.cpp">
       <Filter>src\Wheatear\Math</Filter>

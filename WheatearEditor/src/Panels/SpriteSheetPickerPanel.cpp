@@ -5,7 +5,7 @@
 #include "Editor/EditorFloatingWindow.h"
 #include "Editor/EditorLocale.h"
 #include "Wheatear/Animation/AnimationClip.h"
-#include "Wheatear/Core/AssetPath.h"
+#include "Wheatear/Assets/AssetPath.h"
 #include "Wheatear/Renderer/Texture.h"
 #include "Wheatear/Scene/Components.h"
 

@@ -1,7 +1,7 @@
 #include "wtpch.h"
 #include "AssetPath.h"
 
-#include "Wheatear/Core/FileSystem.h"
+#include "Wheatear/Assets/FileSystem.h"
 #include "Wheatear/Utils/StringUtils.h"
 
 #include <system_error>

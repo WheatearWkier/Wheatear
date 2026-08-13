@@ -3,9 +3,9 @@
 
 #include "ProgressionContent.h"
 #include "ProgressionSettingsCommandService.h"
-#include "Wheatear/Core/AssetAliasRegistry.h"
-#include "Wheatear/Core/AssetPath.h"
-#include "Wheatear/Core/UserSettings.h"
+#include "Wheatear/Assets/AssetAliasRegistry.h"
+#include "Wheatear/Assets/AssetPath.h"
+#include "Wheatear/Config/UserSettings.h"
 #include "Wheatear/Utils/StringUtils.h"
 
 #include <algorithm>

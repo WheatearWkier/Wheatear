@@ -2,7 +2,7 @@
 #include "UIRenderer.h"
 
 #include "Wheatear/Renderer/Camera.h"
-#include "Wheatear/Core/AssetAliasRegistry.h"
+#include "Wheatear/Assets/AssetAliasRegistry.h"
 #include "Wheatear/Renderer/RenderCommand.h"
 #include "Wheatear/Renderer/Renderer2D.h"
 #include "Wheatear/Renderer/TextRenderer.h"

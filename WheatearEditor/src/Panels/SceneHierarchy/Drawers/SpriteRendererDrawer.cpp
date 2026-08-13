@@ -10,7 +10,7 @@
 
 #include <filesystem>
 
-#include "Wheatear/Core/AssetPath.h"
+#include "Wheatear/Assets/AssetPath.h"
 #include "Wheatear/Scene/Components.h"
 #include "Wheatear/Renderer/Texture.h"
 

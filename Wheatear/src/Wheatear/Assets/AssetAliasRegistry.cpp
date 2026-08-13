@@ -1,7 +1,7 @@
 #include "wtpch.h"
 #include "AssetAliasRegistry.h"
 
-#include "Wheatear/Core/AssetPath.h"
+#include "Wheatear/Assets/AssetPath.h"
 
 #include <yaml-cpp/yaml.h>
 

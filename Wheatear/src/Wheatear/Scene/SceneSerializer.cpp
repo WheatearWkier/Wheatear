@@ -4,7 +4,7 @@
 #include "Components.h"
 #include "Wheatear/Scene/Serialization/SceneSerializerComponentGroups.h"
 
-#include "Wheatear/Core/AssetPath.h"
+#include "Wheatear/Assets/AssetPath.h"
 
 #include <yaml-cpp/yaml.h>
 #include <filesystem>

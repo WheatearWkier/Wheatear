@@ -1,7 +1,7 @@
 #pragma once
 
-#include "Wheatear/Core/AssetAliasRegistry.h"
-#include "Wheatear/Core/AssetPath.h"
+#include "Wheatear/Assets/AssetAliasRegistry.h"
+#include "Wheatear/Assets/AssetPath.h"
 
 #include <algorithm>
 #include <cstdint>

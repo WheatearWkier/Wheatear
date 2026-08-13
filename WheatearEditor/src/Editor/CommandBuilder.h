@@ -3,7 +3,7 @@
 #include "Editor/EditorContentPickers.h"
 #include "Editor/EditorLocale.h"
 #include "Editor/EditorWidgets.h"
-#include "Wheatear/Core/AssetPath.h"
+#include "Wheatear/Assets/AssetPath.h"
 #include "Wheatear/Utils/StringUtils.h"
 
 #include <imgui/imgui.h>

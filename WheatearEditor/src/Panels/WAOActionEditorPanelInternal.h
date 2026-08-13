@@ -7,8 +7,8 @@
 
 #include "Editor/EditorWidgets.h"
 #include "Editor/EditorContentPickers.h"
-#include "Wheatear/Core/AssetAliasRegistry.h"
-#include "Wheatear/Core/AssetPath.h"
+#include "Wheatear/Assets/AssetAliasRegistry.h"
+#include "Wheatear/Assets/AssetPath.h"
 #include "Wheatear/Gameplay/Action/ActionAssetLoader.h"
 #include "Wheatear/Gameplay/Action/ActionDatabase.h"
 #include "Wheatear/Gameplay/Action/ActionRecipeQueries.h"

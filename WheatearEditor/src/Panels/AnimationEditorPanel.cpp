@@ -16,7 +16,7 @@
 #include <vector>
 
 #include "Wheatear/Animation/AnimationClipSerializer.h"
-#include "Wheatear/Core/AssetPath.h"
+#include "Wheatear/Assets/AssetPath.h"
 #include "Wheatear/Core/EngineInfo.h"
 #include "Wheatear/Scene/Components.h"
 

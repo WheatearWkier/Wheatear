@@ -1,6 +1,6 @@
 #include "wtpch.h"
 #include "Material.h"
-#include "Wheatear/Core/AssetPath.h"
+#include "Wheatear/Assets/AssetPath.h"
 #include "Wheatear/Core/Log.h"
 #include <yaml-cpp/yaml.h>
 #include <fstream>

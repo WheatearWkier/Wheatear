@@ -1,7 +1,7 @@
 #include "wtpch.h"
 #include "VisualNovelScript.h"
 
-#include "Wheatear/Core/AssetPath.h"
+#include "Wheatear/Assets/AssetPath.h"
 #include "Wheatear/Core/Log.h"
 #include "Wheatear/Utils/StringUtils.h"
 

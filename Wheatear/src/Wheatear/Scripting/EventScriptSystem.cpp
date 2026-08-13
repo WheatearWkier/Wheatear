@@ -2,7 +2,7 @@
 #include "EventScriptSystem.h"
 
 #include "EventScript.h"
-#include "Wheatear/Core/AssetPath.h"
+#include "Wheatear/Assets/AssetPath.h"
 #include "Wheatear/Core/Log.h"
 #include "Wheatear/Modules/Progression/GameProgress.h"
 #include "Wheatear/Runtime/CommandBus.h"

@@ -4,7 +4,7 @@
 #if defined(WT_ENABLE_CSHARP_SCRIPTING)
 #include "ScriptGlue.h"
 
-#include "Wheatear/Core/AssetPath.h"
+#include "Wheatear/Assets/AssetPath.h"
 #include "Wheatear/Core/EngineInfo.h"
 
 #include "Wheatear/Scene/Scene.h"

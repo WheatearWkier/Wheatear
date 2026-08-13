@@ -2,8 +2,8 @@
 #include "UserSettings.h"
 
 #include "Wheatear/Core/Application.h"
-#include "Wheatear/Core/AssetPath.h"
-#include "Wheatear/Core/KeyCodes.h"
+#include "Wheatear/Assets/AssetPath.h"
+#include "Wheatear/Input/KeyCodes.h"
 #include "Wheatear/Core/Log.h"
 #include "Wheatear/Core/Window.h"
 

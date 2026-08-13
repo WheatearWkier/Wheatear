@@ -6,7 +6,7 @@
 #include <filesystem>
 #include <fstream>
 
-#include "Wheatear/Core/AssetPath.h"
+#include "Wheatear/Assets/AssetPath.h"
 #include "Wheatear/Renderer/Shader.h"
 #include "Wheatear/Renderer/VertexArray.h"
 #include "Wheatear/Renderer/Buffer.h"

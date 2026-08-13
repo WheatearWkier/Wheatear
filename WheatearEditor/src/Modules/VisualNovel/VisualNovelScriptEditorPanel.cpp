@@ -7,8 +7,8 @@
 #include "Editor/EditorWidgets.h"
 #include "VisualNovelScriptEditorPanelInternal.h"
 #include "Editor/GameplayEditorShell.h"
-#include "Wheatear/Core/AssetAliasRegistry.h"
-#include "Wheatear/Core/AssetPath.h"
+#include "Wheatear/Assets/AssetAliasRegistry.h"
+#include "Wheatear/Assets/AssetPath.h"
 
 #include <imgui/imgui.h>
 

@@ -4,7 +4,7 @@
 #include "Wheatear/Scene/Scene.h"
 #include "Wheatear/Scene/Components.h"
 #include "Wheatear/Audio/AudioEngine.h"
-#include "Wheatear/Core/UserSettings.h"
+#include "Wheatear/Config/UserSettings.h"
 
 namespace Wheatear {
 
