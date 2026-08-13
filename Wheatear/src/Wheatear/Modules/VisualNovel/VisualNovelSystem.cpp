@@ -1434,6 +1434,30 @@ namespace Wheatear {
             {
                 LoadRuntime(state, component);
             }
+            else
+            {
+                // Hot reload: if the .vn file changed on disk (edited in the VN
+                // Script Editor), reload the script in place, preserving the
+                // variable table and clamping the playback index so the designer
+                // sees edits immediately without restarting Play mode.
+                std::error_code error;
+                const auto writeTime = std::filesystem::exists(resolvedPath, error)
+                    ? std::filesystem::last_write_time(resolvedPath, error)
+                    : std::filesystem::file_time_type{};
+                if (writeTime != state.LastScriptWriteTime)
+                {
+                    // Preserve script variables across the reload so dialogue
+                    // state (gold, flags, etc.) survives an in-editor edit; the
+                    // playhead restarts from the top of the script.
+                    const auto variables = state.Runtime.GetVariables();
+                    state.Runtime.SetScript(VisualNovelScript::FromFile(resolvedPath));
+                    for (const auto& [name, value] : variables)
+                        state.Runtime.SetVariable(name, value);
+                    state.LastScriptWriteTime = writeTime;
+                    state.SystemMessage = "VN script reloaded (hot).";
+                    state.SystemMessageTimer = 2.0f;
+                }
+            }
 
             component.CharactersPerSecond = static_cast<float>(UserSettings::Get().TextSpeed);
             state.Runtime.SetCharactersPerSecond(component.CharactersPerSecond);
@@ -1698,6 +1722,11 @@ namespace Wheatear {
         }
 
         state.Runtime.SetAutoPlay(component.AutoPlayOnStart);
+
+        std::error_code error;
+        state.LastScriptWriteTime = std::filesystem::exists(state.LoadedPath, error)
+            ? std::filesystem::last_write_time(state.LoadedPath, error)
+            : std::filesystem::file_time_type{};
 
         if (component.AutoLoadSlot > 0)
         {

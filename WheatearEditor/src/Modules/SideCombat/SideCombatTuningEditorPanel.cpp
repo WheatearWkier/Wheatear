@@ -369,6 +369,9 @@ namespace Wheatear {
             if (DrawFloat(player, "launcherChainWindow", "Launcher Chain Window", 0.01f, 0.0f, 3.0f)) m_Dirty = true;
             if (DrawFloat(player, "magicChainWindow", "Magic Chain Window", 0.01f, 0.0f, 3.0f)) m_Dirty = true;
             if (DrawFloat(player, "supportChainWindow", "Support Chain Window", 0.01f, 0.0f, 3.0f)) m_Dirty = true;
+            if (DrawFloat(player, "healItemCooldown", "Heal Item Cooldown", 0.1f, 0.0f, 30.0f)) m_Dirty = true;
+            if (DrawFloat(player, "manaItemCooldown", "Mana Item Cooldown", 0.1f, 0.0f, 30.0f)) m_Dirty = true;
+            if (DrawFloat(player, "attackBuffItemCooldown", "Attack Buff Item Cooldown", 0.1f, 0.0f, 60.0f)) m_Dirty = true;
         }
 
         if (ImGui::CollapsingHeader("Damage / Combo"))
