@@ -89,6 +89,9 @@ namespace Wheatear {
 
     } // namespace
 
+    // The command history marks the scene dirty through this layer instance.
+    static EditorLayerBase* s_ActiveEditorLayer = nullptr;
+
     void EditorLayerBase::OnAttach()
     {
         WT_PROFILE_FUNCTION();
@@ -97,10 +100,17 @@ namespace Wheatear {
         // when the user has never pinned a choice).
         EditorLocale::ApplyFromSettings();
 
+        s_ActiveEditorLayer = this;
+        CommandHistory::SetDirtyCallback([]()
+        {
+            if (s_ActiveEditorLayer)
+                s_ActiveEditorLayer->MarkSceneDirty();
+        });
+
         m_IconPlay = Texture2D::Create("Resources/Icons/Editor/play.png");
         m_IconStop = Texture2D::Create("Resources/Icons/Editor/stop.png");
         m_IconPause = Texture2D::Create("Resources/Icons/Editor/pause.png");
-        m_IconStep = Texture2D::Create("Resources/Icons/Editor/play.png");
+        m_IconStep = Texture2D::Create("Resources/Icons/Editor/step.png");
         m_IconNewScene = Texture2D::Create("Resources/Icons/Editor/new_scene.png");
         m_IconOpenScene = Texture2D::Create("Resources/Icons/Editor/open_scene.png");
         m_IconSaveScene = Texture2D::Create("Resources/Icons/Editor/save_scene.png");
@@ -111,6 +121,21 @@ namespace Wheatear {
         m_IconEventGraph = Texture2D::Create("Resources/Icons/Editor/event_graph.png");
         m_IconFocus = Texture2D::Create("Resources/Icons/Editor/focus.png");
         m_IconResetLayout = Texture2D::Create("Resources/Icons/Editor/reset_layout.png");
+
+        m_IconUndo = Texture2D::Create("Resources/Icons/Editor/undo.png");
+        m_IconRedo = Texture2D::Create("Resources/Icons/Editor/redo.png");
+        m_IconRefresh = Texture2D::Create("Resources/Icons/Editor/refresh.png");
+        m_IconLanguage = Texture2D::Create("Resources/Icons/Editor/language.png");
+        m_IconLogout = Texture2D::Create("Resources/Icons/Editor/logout.png");
+        m_IconFolder = Texture2D::Create("Resources/Icons/Editor/folder.png");
+        m_IconPencil = Texture2D::Create("Resources/Icons/Editor/pencil.png");
+        m_IconPanel = Texture2D::Create("Resources/Icons/Editor/panel.png");
+        m_IconGameplay = Texture2D::Create("Resources/Icons/Editor/gameplay.png");
+        m_IconBarChart = Texture2D::Create("Resources/Icons/Editor/bar_chart.png");
+        m_IconSettings = Texture2D::Create("Resources/Icons/Editor/settings.png");
+        m_IconSearch = Texture2D::Create("Resources/Icons/Editor/search.png");
+        m_IconClose = Texture2D::Create("Resources/Icons/Editor/close.png");
+        m_IconPlus = Texture2D::Create("Resources/Icons/Editor/plus.png");
 
         EditorCanvasTools::Configure({
             [this](Entity canvasEntity)
@@ -182,6 +207,7 @@ namespace Wheatear {
     void EditorLayerBase::OnDetach()
     {
         WT_PROFILE_FUNCTION();
+        s_ActiveEditorLayer = nullptr;
         Input::ClearMouseInputBounds();
         if (m_SceneState == SceneState::Play)
             m_ActiveScene->OnRuntimeStop();
@@ -387,8 +413,23 @@ namespace Wheatear {
         const bool ctrl  = Input::IsKeyPressed(WT_KEY_LEFT_CONTROL)  || Input::IsKeyPressed(WT_KEY_RIGHT_CONTROL);
         const bool shift = Input::IsKeyPressed(WT_KEY_LEFT_SHIFT)    || Input::IsKeyPressed(WT_KEY_RIGHT_SHIFT);
 
+        // Focus guard: while a text field or any ImGui widget is active the
+        // editor hotkeys must not fire (typing "Delete" into a search box must
+        // not delete the selected entity). Esc always passes so it can cancel.
+        ImGuiIO& io = ImGui::GetIO();
+        const bool editingText = io.WantTextInput || ImGui::IsAnyItemActive();
+        if (editingText && e.GetKeyCode() != WT_KEY_ESCAPE)
+            return false;
+
         switch (e.GetKeyCode())
         {
+        case WT_KEY_ESCAPE:
+            // Esc: stop play mode first, otherwise clear the selection.
+            if (m_SceneState == SceneState::Play)
+                TransitionToStop();
+            else if (Entity selected = m_SceneHierarchyPanel->GetSelectedEntity())
+                m_SceneHierarchyPanel->SetSelectedEntity({});
+            break;
         case WT_KEY_N: if (ctrl) NewScene();  break;
         case WT_KEY_O: if (ctrl) OpenScene(); break;
         case WT_KEY_Z:

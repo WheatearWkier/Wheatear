@@ -49,10 +49,15 @@ namespace Wheatear {
         std::pair<int, int> GetSequenceCell(int frameIndex) const;
         bool IsCellValid(int col, int row) const;
         Ref<AnimationClip> GetOrCreateTargetClip();
+        void ApplySequenceToClip(const Ref<AnimationClip>& clip);
 
     private:
         Entity m_Entity;
         bool m_Open = false;
+
+        bool m_ShowReplaceConfirm = false;
+        std::string m_ReplaceConfirmClipName;
+        int m_ReplaceConfirmFrameCount = 0;
 
         Ref<Texture2D> m_Texture;
         std::string m_TexturePath;

@@ -252,9 +252,9 @@ namespace Wheatear {
             dl->AddConvexPolyFilled(marker, 3, IM_COL32(170, 120, 255, 235));
             dl->AddPolyline(marker, 3, IM_COL32(230, 220, 255, 255), true, 1.2f);
 
-            ImGui::SetCursorScreenPos(ImVec2(x - 8.0f, centerY - 9.0f));
+            ImGui::SetCursorScreenPos(ImVec2(x - 10.0f, centerY - 11.0f));
             ImGui::PushID(50000 + i);
-            ImGui::InvisibleButton("##anim_event", ImVec2(16.0f, 18.0f));
+            ImGui::InvisibleButton("##anim_event", ImVec2(20.0f, 22.0f));
             if (ImGui::IsItemActive() && ImGui::IsMouseDragging(0))
             {
                 event.Time += ImGui::GetIO().MouseDelta.x / m_PixelsPerSecond;
@@ -433,9 +433,9 @@ namespace Wheatear {
                 dl->AddConvexPolyFilled(pts, 4, IM_COL32(100, 180, 255, 220));
                 dl->AddPolyline(pts, 4, IM_COL32(180, 220, 255, 255), true, 1.0f);
 
-                ImGui::SetCursorScreenPos(ImVec2(kx - 6.0f, ky - 6.0f));
+                ImGui::SetCursorScreenPos(ImVec2(kx - 8.0f, ky - 8.0f));
                 ImGui::PushID(ki + trackIndex * 1000);
-                ImGui::InvisibleButton("##kf", ImVec2(12.0f, 12.0f));
+                ImGui::InvisibleButton("##kf", ImVec2(16.0f, 16.0f));
 
                 if (ImGui::IsItemActive() && ImGui::IsMouseDragging(0))
                 {

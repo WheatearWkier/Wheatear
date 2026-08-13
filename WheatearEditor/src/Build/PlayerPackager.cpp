@@ -1,4 +1,5 @@
 #include "wepch.h"
+#include "Wheatear/Utils/StringUtils.h"
 #include "PlayerPackager.h"
 
 #include "AssetDependencyScanner.h"
@@ -96,12 +97,6 @@ namespace Wheatear {
             return "\"" + path.string() + "\"";
         }
 
-        static std::string ToLower(std::string value)
-        {
-            std::transform(value.begin(), value.end(), value.begin(),
-                [](unsigned char c) { return static_cast<char>(std::tolower(c)); });
-            return value;
-        }
 
         static double ElapsedMilliseconds(std::chrono::steady_clock::time_point startedAt)
         {
@@ -294,7 +289,7 @@ namespace Wheatear {
 
         static bool ShouldTryAssetPackCompression(const std::filesystem::path& relativePath)
         {
-            const std::string extension = ToLower(relativePath.extension().generic_string());
+            const std::string extension = StringUtils::ToLower(relativePath.extension().generic_string());
             return extension != ".png"
                 && extension != ".jpg"
                 && extension != ".jpeg"

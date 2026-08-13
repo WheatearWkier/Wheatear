@@ -147,7 +147,62 @@ namespace Wheatear {
             ImGui::TextColored(ImVec4(0.42f, 0.88f, 0.72f, 1.0f), "%s", m_LastAction.c_str());
         }
 
+        // Confirmation before replacing a clip's existing frames.
+        if (m_ShowReplaceConfirm)
+        {
+            ImGui::OpenPopup(EditorLocale::Text("Replace Clip", "替换动画片段"));
+            ImGui::SetNextWindowPos(ImGui::GetMainViewport()->GetCenter(), ImGuiCond_Appearing, ImVec2(0.5f, 0.5f));
+            if (ImGui::BeginPopupModal(EditorLocale::Text("Replace Clip", "替换动画片段"),
+                    nullptr, ImGuiWindowFlags_AlwaysAutoResize))
+            {
+                ImGui::Text("%s", EditorLocale::Text(
+                    "This will clear the existing frames of clip '%s' (%d frame(s)). Continue?",
+                    "这将清空动画片段 '%s' 的现有 %d 帧，继续吗？"),
+                    m_ReplaceConfirmClipName.c_str(), m_ReplaceConfirmFrameCount);
+                ImGui::Separator();
+                ImGui::Spacing();
+                if (ImGui::Button(EditorLocale::Text("Replace", "替换"), ImVec2(120.0f, 0.0f)))
+                {
+                    Ref<AnimationClip> clip = GetOrCreateTargetClip();
+                    if (clip)
+                        ApplySequenceToClip(clip);
+                    m_ShowReplaceConfirm = false;
+                }
+                ImGui::SameLine();
+                if (ImGui::Button(EditorLocale::Text("Cancel", "取消"), ImVec2(100.0f, 0.0f)))
+                    m_ShowReplaceConfirm = false;
+                ImGui::EndPopup();
+            }
+        }
+
         EditorFloatingWindow::End();
+    }
+
+    void SpriteSheetPickerPanel::ApplySequenceToClip(const Ref<AnimationClip>& clip)
+    {
+        if (!clip)
+            return;
+
+        if (!m_AppendFrames)
+            clip->ClearFrames();
+
+        int added = 0;
+        for (int i = 0; i < m_FrameCount; ++i)
+        {
+            auto [col, row] = GetSequenceCell(i);
+            if (!IsCellValid(col, row))
+                break;
+
+            clip->AddFrame({ m_Texture, GetCellUVMin(col, row), GetCellUVMax(col, row), m_FrameDuration });
+            ++added;
+        }
+
+        char buffer[128];
+        std::snprintf(buffer, sizeof(buffer), "%s %d frame(s) into clip '%s'.",
+            m_AppendFrames ? "Appended" : "Generated",
+            added,
+            clip->GetName().c_str());
+        m_LastAction = buffer;
     }
 
     void SpriteSheetPickerPanel::SetTexture(const Ref<Texture2D>& texture, const std::string& texturePath)
@@ -530,26 +585,18 @@ namespace Wheatear {
             Ref<AnimationClip> clip = GetOrCreateTargetClip();
             if (clip)
             {
-                if (!m_AppendFrames)
-                    clip->ClearFrames();
-
-                int added = 0;
-                for (int i = 0; i < m_FrameCount; ++i)
+                const bool willClear = !m_AppendFrames && clip->GetFrameCount() > 0;
+                if (willClear)
                 {
-                    auto [col, row] = GetSequenceCell(i);
-                    if (!IsCellValid(col, row))
-                        break;
-
-                    clip->AddFrame({ m_Texture, GetCellUVMin(col, row), GetCellUVMax(col, row), m_FrameDuration });
-                    ++added;
+                    // Replacing wipes the clip's existing frames — ask first.
+                    m_ReplaceConfirmClipName = clip->GetName();
+                    m_ReplaceConfirmFrameCount = clip->GetFrameCount();
+                    m_ShowReplaceConfirm = true;
                 }
-
-                char buffer[128];
-                std::snprintf(buffer, sizeof(buffer), "%s %d frame(s) into clip '%s'.",
-                    m_AppendFrames ? "Appended" : "Generated",
-                    added,
-                    clip->GetName().c_str());
-                m_LastAction = buffer;
+                else
+                {
+                    ApplySequenceToClip(clip);
+                }
             }
         }
         HelpMarker("Creates frame entries from the selected cell and sequence settings. The animation uses one texture and per-frame UVs.");

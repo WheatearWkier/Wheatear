@@ -1,4 +1,5 @@
 #include "wepch.h"
+#include "Wheatear/Utils/StringUtils.h"
 #include "EditorLayerBase.h"
 
 #include "Wheatear/Core/Application.h"
@@ -31,6 +32,7 @@
 #include "Editor/EditorCanvasTools.h"
 #include "Panels/AnimationEditorPanel.h"
 #include "Editor/EditorCommands.h"
+#include "Editor/EditorLocale.h"
 #include "Panels/SceneHierarchy/SceneHierarchyPanel.h"
 #include "Panels/SpriteSheetPickerPanel.h"
 
@@ -55,10 +57,6 @@ namespace Wheatear {
 
     namespace {
 
-        static bool StartsWith(const std::string& value, const std::string& prefix)
-        {
-            return value.rfind(prefix, 0) == 0;
-        }
 
     } // namespace
 
@@ -79,6 +77,7 @@ namespace Wheatear {
         m_EditorScene     = newScene;
         m_ActiveScene     = newScene;
         m_EditorScenePath = scenePath;
+        m_SceneDirty      = false;
 
         if (m_ViewportSize.x > 0.0f && m_ViewportSize.y > 0.0f)
         {
@@ -223,7 +222,7 @@ namespace Wheatear {
         bool consumed = false;
         for (const std::string& command : commands)
         {
-            if (command.empty() || StartsWith(command, "script:"))
+            if (command.empty() || StringUtils::StartsWith(command, "script:"))
                 continue;
 
             if (command == "quit")
@@ -391,6 +390,12 @@ namespace Wheatear {
 
     void EditorLayerBase::NewScene()
     {
+        if (m_SceneDirty)
+        {
+            m_PendingSceneAction = PendingSceneAction::New;
+            m_ShowUnsavedModal = true;
+            return;
+        }
         TransitionToEditScene(CreateRef<Scene>());
     }
 
@@ -403,6 +408,14 @@ namespace Wheatear {
 
     void EditorLayerBase::OpenScene(const std::filesystem::path& path)
     {
+        if (m_SceneDirty)
+        {
+            m_PendingSceneAction = PendingSceneAction::Open;
+            m_PendingScenePath = path;
+            m_ShowUnsavedModal = true;
+            return;
+        }
+
         const std::filesystem::path resolvedPath = AssetPath::Resolve(path);
         if (resolvedPath.extension() != AssetFileType::SceneExtension)
         {
@@ -421,7 +434,10 @@ namespace Wheatear {
     void EditorLayerBase::SaveScene()
     {
         if (!m_EditorScenePath.empty())
+        {
             SerializeScene(m_ActiveScene, m_EditorScenePath);
+            m_SceneDirty = false;
+        }
         else
             SaveSceneAs();
     }
@@ -433,6 +449,7 @@ namespace Wheatear {
         {
             SerializeScene(m_ActiveScene, filepath);
             m_EditorScenePath = filepath;
+            m_SceneDirty = false;
         }
     }
 
@@ -440,6 +457,73 @@ namespace Wheatear {
     {
         SceneSerializer serializer(scene);
         serializer.SerializeYaml(path);
+    }
+
+    // =========================================================================
+    // Unsaved-changes protection
+    // =========================================================================
+
+    void EditorLayerBase::RequestSceneChange(PendingSceneAction action)
+    {
+        if (m_SceneDirty)
+        {
+            m_PendingSceneAction = action;
+            m_ShowUnsavedModal = true;
+            return;
+        }
+        ExecutePendingSceneAction();
+    }
+
+    void EditorLayerBase::ExecutePendingSceneAction()
+    {
+        const PendingSceneAction action = m_PendingSceneAction;
+        m_PendingSceneAction = PendingSceneAction::None;
+        m_ShowUnsavedModal = false;
+        switch (action)
+        {
+        case PendingSceneAction::New:  NewScene(); break;
+        case PendingSceneAction::Open: OpenScene(m_PendingScenePath); break;
+        case PendingSceneAction::Exit: Application::Get().Close(); break;
+        default: break;
+        }
+    }
+
+    void EditorLayerBase::DrawUnsavedChangesModal()
+    {
+        if (!m_ShowUnsavedModal)
+            return;
+
+        ImGui::OpenPopup(EditorLocale::Text("Unsaved Changes", "未保存的更改"));
+        ImGui::SetNextWindowPos(ImGui::GetMainViewport()->GetCenter(), ImGuiCond_Appearing, ImVec2(0.5f, 0.5f));
+        if (ImGui::BeginPopupModal(EditorLocale::Text("Unsaved Changes", "未保存的更改"),
+                nullptr, ImGuiWindowFlags_AlwaysAutoResize))
+        {
+            ImGui::TextUnformatted(EditorLocale::Text(
+                "The current scene has unsaved changes.",
+                "当前场景有未保存的更改。"));
+            ImGui::Separator();
+            ImGui::Spacing();
+
+            if (ImGui::Button(EditorLocale::Text("Save and Continue", "保存并继续"), ImVec2(150.0f, 0.0f)))
+            {
+                m_SceneDirty = false;
+                SaveScene();
+                ExecutePendingSceneAction();
+            }
+            ImGui::SameLine();
+            if (ImGui::Button(EditorLocale::Text("Discard", "不保存"), ImVec2(120.0f, 0.0f)))
+            {
+                m_SceneDirty = false;
+                ExecutePendingSceneAction();
+            }
+            ImGui::SameLine();
+            if (ImGui::Button(EditorLocale::Text("Cancel", "取消"), ImVec2(100.0f, 0.0f)))
+            {
+                m_ShowUnsavedModal = false;
+                m_PendingSceneAction = PendingSceneAction::None;
+            }
+            ImGui::EndPopup();
+        }
     }
 
     void EditorLayerBase::InstantiatePrefab(const std::filesystem::path& path)

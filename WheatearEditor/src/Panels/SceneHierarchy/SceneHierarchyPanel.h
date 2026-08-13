@@ -28,6 +28,10 @@ namespace Wheatear {
         void SetSelectedEntity(Entity entity);
         void SetEntityActivatedCallback(std::function<void(Entity)> callback);
 
+        // Create-entity menu items shared by the hierarchy's own right-click
+        // context menu and the viewport's right-click menu.
+        void DrawCreateEntityPopupItems();
+
     private:
         using UIChildMap = std::unordered_map<uint32_t, std::vector<Entity>>;
 
@@ -73,7 +77,9 @@ namespace Wheatear {
         std::function<void(Entity)> m_EntityActivatedCallback;
         bool m_ScrollToSelection = false;
         bool m_RenameRequested = false;
+        char m_RenameBuffer[256] = {};
         char m_SearchBuffer[128] = {};
+        char m_AddComponentSearch[128] = {};
         bool m_ShowOnlyUI = false;
     };
 

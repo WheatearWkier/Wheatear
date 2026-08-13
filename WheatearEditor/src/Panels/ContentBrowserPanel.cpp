@@ -1,4 +1,5 @@
 #include "wepch.h"
+#include "Wheatear/Utils/StringUtils.h"
 #include "ContentBrowserPanel.h"
 
 #include "Assets/AssetRegistry.h"
@@ -22,14 +23,6 @@ namespace Wheatear {
 
     namespace {
 
-        static std::string ToLowerCopy(std::string value)
-        {
-            std::transform(value.begin(), value.end(), value.begin(), [](unsigned char c)
-            {
-                return static_cast<char>(std::tolower(c));
-            });
-            return value;
-        }
 
         static const char* AssetTypeLabel(AssetType type)
         {
@@ -63,17 +56,18 @@ namespace Wheatear {
     {
         m_Icons[AssetType::Directory] = Texture2D::Create("Resources/Icons/ContentBrowser/DirectoryIcon.png");
         m_Icons[AssetType::Unknown]   = Texture2D::Create("Resources/Icons/ContentBrowser/FileIcon.png");
-        m_Icons[AssetType::Scene]     = m_Icons[AssetType::Unknown];
-        m_Icons[AssetType::Texture]   = m_Icons[AssetType::Unknown];
-        m_Icons[AssetType::Shader]    = m_Icons[AssetType::Unknown];
-        m_Icons[AssetType::Audio]     = m_Icons[AssetType::Unknown];
-        m_Icons[AssetType::Script]    = m_Icons[AssetType::Unknown];
-        m_Icons[AssetType::Prefab]    = m_Icons[AssetType::Unknown];
-        m_Icons[AssetType::UITemplate]= m_Icons[AssetType::Unknown];
-        m_Icons[AssetType::Material]  = m_Icons[AssetType::Unknown];
-        m_Icons[AssetType::Data]      = m_Icons[AssetType::Unknown];
+        // Per-type Lucide icons so the grid reads at a glance.
+        m_Icons[AssetType::Scene]     = Texture2D::Create("Resources/Icons/Editor/open_scene.png");
+        m_Icons[AssetType::Texture]   = Texture2D::Create("Resources/Icons/Editor/sprite_sheet.png");
+        m_Icons[AssetType::Shader]    = Texture2D::Create("Resources/Icons/Editor/code.png");
+        m_Icons[AssetType::Audio]     = Texture2D::Create("Resources/Icons/Editor/audio.png");
+        m_Icons[AssetType::Script]    = Texture2D::Create("Resources/Icons/Editor/script.png");
+        m_Icons[AssetType::Prefab]    = Texture2D::Create("Resources/Icons/Editor/box.png");
+        m_Icons[AssetType::UITemplate]= Texture2D::Create("Resources/Icons/Editor/template.png");
+        m_Icons[AssetType::Material]  = Texture2D::Create("Resources/Icons/Editor/palette.png");
+        m_Icons[AssetType::Data]      = Texture2D::Create("Resources/Icons/Editor/file_text.png");
         m_Icons[AssetType::Metadata]  = m_Icons[AssetType::Unknown];
-        m_Icons[AssetType::AnimationClip] = m_Icons[AssetType::Unknown];
+        m_Icons[AssetType::AnimationClip] = Texture2D::Create("Resources/Icons/Editor/film.png");
 
         AssetRegistry::Get().LoadCache(AssetPath::GetProjectRoot());
         m_RegistryStatus = "Loaded asset registry cache. Use Rescan Assets after adding or replacing resources.";
@@ -123,7 +117,7 @@ namespace Wheatear {
     std::vector<std::filesystem::directory_entry> ContentBrowserPanel::GetFilteredEntries() const
     {
         std::vector<std::filesystem::directory_entry> result;
-        const std::string filter = ToLowerCopy(m_SearchBuffer);
+        const std::string filter = StringUtils::ToLower(m_SearchBuffer);
 
         if (!std::filesystem::exists(m_CurrentDirectory))
             return result;
@@ -131,7 +125,7 @@ namespace Wheatear {
         for (const auto& entry : std::filesystem::directory_iterator(m_CurrentDirectory))
         {
             const std::string name = entry.path().filename().string();
-            const std::string searchable = ToLowerCopy(name);
+            const std::string searchable = StringUtils::ToLower(name);
             if (entry.path().extension() == AssetFileType::MetadataExtension)
                 continue;
             if (entry.is_directory() && entry.path().filename() == ".wheatear")
@@ -412,6 +406,18 @@ namespace Wheatear {
                         VisualNovelEditorRequests::RequestOpenScript(relative);
                     else if (ext == ".wts")
                         EventScriptGraphRequests::RequestOpenScript(relative);
+                    else if (ext == AssetFileType::SceneExtension)
+                    {
+                        if (m_OnOpenScene) m_OnOpenScene(path);
+                    }
+                    else if (ext == AssetFileType::PrefabExtension)
+                    {
+                        if (m_OnInstantiatePrefab) m_OnInstantiatePrefab(path);
+                    }
+                    else if (ext == AssetFileType::UITemplateExtension)
+                    {
+                        if (m_OnInstantiateUITemplate) m_OnInstantiateUITemplate(path);
+                    }
                 }
             }
 
@@ -420,6 +426,10 @@ namespace Wheatear {
                 if (ImGui::MenuItem(EditorLocale::Text("Show in Explorer", "在资源管理器中显示")))
                 {
                     EditorPlatform::OpenDirectory(entry.is_directory() ? path : path.parent_path());
+                }
+                if (ImGui::MenuItem(EditorLocale::Text("Copy Path", "复制路径")))
+                {
+                    ImGui::SetClipboardText(path.string().c_str());
                 }
                 ImGui::EndPopup();
             }

@@ -52,11 +52,17 @@ namespace Wheatear {
     class CommandHistory
     {
     public:
+        using DirtyCallback = void (*)();
+
         static CommandHistory& Get()
         {
             static CommandHistory s_Instance;
             return s_Instance;
         }
+
+        // The editor registers a callback so any scene mutation through the
+        // command system marks the scene dirty (unsaved-changes protection).
+        static void SetDirtyCallback(DirtyCallback cb) { s_DirtyCallback = cb; }
 
         void Push(std::unique_ptr<ICommand> cmd, bool tryMerge = false)
         {
@@ -68,6 +74,7 @@ namespace Wheatear {
             m_UndoStack.push(std::move(cmd));
             while (!m_RedoStack.empty())
                 m_RedoStack.pop();
+            if (s_DirtyCallback) s_DirtyCallback();
         }
 
         void Undo()
@@ -77,6 +84,7 @@ namespace Wheatear {
             m_UndoStack.pop();
             cmd->Undo();
             m_RedoStack.push(std::move(cmd));
+            if (s_DirtyCallback) s_DirtyCallback();
         }
 
         void Redo()
@@ -86,6 +94,7 @@ namespace Wheatear {
             m_RedoStack.pop();
             cmd->Execute();
             m_UndoStack.push(std::move(cmd));
+            if (s_DirtyCallback) s_DirtyCallback();
         }
 
         void Clear()
@@ -101,6 +110,7 @@ namespace Wheatear {
         CommandHistory() = default;
         std::stack<std::unique_ptr<ICommand>> m_UndoStack;
         std::stack<std::unique_ptr<ICommand>> m_RedoStack;
+        inline static DirtyCallback s_DirtyCallback = nullptr;
     };
 
     namespace EditorCommandDetail {

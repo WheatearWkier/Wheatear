@@ -1,4 +1,5 @@
 #include "wepch.h"
+#include "Wheatear/Utils/StringUtils.h"
 #include "EditorWidgets.h"
 
 #include "Editor/EditorPlatform.h"
@@ -72,14 +73,6 @@ namespace Wheatear::EditorWidgets {
             }
         }
 
-        static std::string ToLowerCopy(std::string value)
-        {
-            std::transform(value.begin(), value.end(), value.begin(), [](unsigned char c)
-            {
-                return static_cast<char>(std::tolower(c));
-            });
-            return value;
-        }
 
         static std::vector<AssetReferenceChoice> BuildAssetReferenceChoices(AssetReferenceKind kind)
         {
@@ -132,7 +125,7 @@ namespace Wheatear::EditorWidgets {
             {
                 if (a.IsAlias != b.IsAlias)
                     return a.IsAlias > b.IsAlias;
-                return ToLowerCopy(a.Label) < ToLowerCopy(b.Label);
+                return StringUtils::ToLower(a.Label) < StringUtils::ToLower(b.Label);
             });
             return choices;
         }
@@ -560,15 +553,15 @@ namespace Wheatear::EditorWidgets {
             ImGui::Separator();
 
             const std::vector<AssetReferenceChoice> choices = BuildAssetReferenceChoices(kind);
-            const std::string filter = ToLowerCopy(searchBuffer);
+            const std::string filter = StringUtils::ToLower(searchBuffer);
             const size_t maxChoices = 180;
             size_t shown = 0;
             for (const AssetReferenceChoice& choice : choices)
             {
                 if (!filter.empty())
                 {
-                    const std::string labelText = ToLowerCopy(choice.Label);
-                    const std::string valueText = ToLowerCopy(choice.Value);
+                    const std::string labelText = StringUtils::ToLower(choice.Label);
+                    const std::string valueText = StringUtils::ToLower(choice.Value);
                     if (labelText.find(filter) == std::string::npos && valueText.find(filter) == std::string::npos)
                         continue;
                 }

@@ -3,6 +3,7 @@
 
 #include "Wheatear/Scene/Components.h"
 #include "Wheatear/Scene/Scene.h"
+#include "Wheatear/Utils/StringUtils.h"
 #include "Editor/EditorComponentRegistry.h"
 #include "Editor/EditorLocale.h"
 
@@ -42,10 +43,24 @@ namespace Wheatear {
 
         if (ImGui::BeginPopup("AddComponent"))
         {
+            ImGui::SetNextItemWidth(240.0f);
+            ImGui::SetKeyboardFocusHere();
+            ImGui::InputTextWithHint("##AddComponentSearch",
+                EditorLocale::Text("Search components...", "搜索组件..."),
+                m_AddComponentSearch, sizeof(m_AddComponentSearch));
+            ImGui::Separator();
+
+            const std::string query = StringUtils::ToLower(m_AddComponentSearch);
+
             std::string currentCategory;
             EditorComponentRegistry::ForEach([&](const EditorComponentDescriptor& descriptor)
             {
                 if (!descriptor.CanAdd(m_SelectionContext))
+                    return;
+
+                const std::string& label = descriptor.Label;
+                if (!query.empty()
+                    && StringUtils::ToLower(label).find(query) == std::string::npos)
                     return;
 
                 if (currentCategory != descriptor.Category)
@@ -56,9 +71,10 @@ namespace Wheatear {
                     ImGui::TextDisabled("%s", currentCategory.c_str());
                 }
 
-                if (ImGui::MenuItem(descriptor.Label.c_str()))
+                if (ImGui::MenuItem(label.c_str()))
                 {
                     descriptor.Add(m_SelectionContext);
+                    m_AddComponentSearch[0] = '\0';
                     ImGui::CloseCurrentPopup();
                 }
             });

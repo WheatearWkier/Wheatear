@@ -1,4 +1,5 @@
 #include "wepch.h"
+#include "Wheatear/Utils/StringUtils.h"
 #include "ScriptDrawer.h"
 #include "Wheatear/Core/EngineInfo.h"
 
@@ -33,19 +34,13 @@ namespace Wheatear {
         static std::unordered_map<uint64_t, ScriptSelectorState> s_SelectorStates;
         using EditorWidgets::InputString;
 
-        static std::string ToLower(std::string value)
-        {
-            std::transform(value.begin(), value.end(), value.begin(),
-                [](unsigned char c) { return static_cast<char>(std::tolower(c)); });
-            return value;
-        }
 
         static bool ContainsCaseInsensitive(const std::string& text, const char* filter)
         {
             if (!filter || filter[0] == '\0')
                 return true;
 
-            return ToLower(text).find(ToLower(filter)) != std::string::npos;
+            return StringUtils::ToLower(text).find(StringUtils::ToLower(filter)) != std::string::npos;
         }
 
         static const char* FieldTypeLabel(ScriptFieldType type)

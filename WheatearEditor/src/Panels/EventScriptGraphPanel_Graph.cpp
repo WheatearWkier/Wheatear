@@ -47,6 +47,9 @@ namespace Wheatear {
         const bool hovered = ImGui::IsItemHovered();
         if (hovered && (ImGui::IsMouseDragging(ImGuiMouseButton_Right) || ImGui::IsMouseDragging(ImGuiMouseButton_Middle)))
             m_GraphPan = Add(m_GraphPan, ImGui::GetIO().MouseDelta);
+        // Ctrl + wheel zooms the canvas (matches the zoom slider range).
+        if (hovered && ImGui::GetIO().MouseWheel != 0.0f && ImGui::GetIO().KeyCtrl)
+            m_Zoom = std::clamp(m_Zoom * (1.0f + ImGui::GetIO().MouseWheel * 0.1f), 0.65f, 1.45f);
 
         std::vector<GraphNode> nodes;
         nodes.reserve(block->Instructions.size() + 1);
@@ -495,6 +498,17 @@ namespace Wheatear {
         }
         ImGui::EndDisabled();
         ImGui::SameLine();
+        // Delete key removes the selected instruction while the details panel
+        // is focused (guarded so typing in fields is untouched).
+        if (ImGui::IsWindowFocused() && !ImGui::IsAnyItemActive()
+            && ImGui::IsKeyPressed(ImGuiKey_Delete)
+            && m_SelectedInstruction >= 0
+            && m_SelectedInstruction < static_cast<int>(mutableBlock->Instructions.size()))
+        {
+            mutableBlock->Instructions.erase(mutableBlock->Instructions.begin() + m_SelectedInstruction);
+            m_SelectedInstruction = -1;
+            changed = true;
+        }
         if (ImGui::SmallButton("Delete Node"))
         {
             mutableBlock->Instructions.erase(mutableBlock->Instructions.begin() + m_SelectedInstruction);

@@ -93,6 +93,11 @@ namespace Wheatear {
         void InstantiateUITemplate(const std::filesystem::path& path);
         void OnDuplicateEntity();
 
+        // Unsaved-changes protection: any command executed through the editor
+        // command history marks the scene dirty; New/Open/Exit ask first.
+        void MarkSceneDirty() { m_SceneDirty = true; }
+        bool IsSceneDirty() const { return m_SceneDirty; }
+
         SceneState GetSceneState() const { return m_SceneState; }
         Ref<Scene> GetActiveScene() const { return m_ActiveScene; }
         const EditorCamera& GetEditorCamera() const { return m_EditorCamera; }
@@ -125,6 +130,11 @@ namespace Wheatear {
         void UI_PlayerBuildScenePicker();
         void BuildDefaultDockspaceLayout(uint32_t dockspaceID);
         void FocusEditorCameraOnPrimarySceneCamera();
+
+        enum class PendingSceneAction { None, New, Open, Exit };
+        void RequestSceneChange(PendingSceneAction action);
+        void ExecutePendingSceneAction();
+        void DrawUnsavedChangesModal();
 
         void SyncPanels();
         void ClearEntitySelection();
@@ -163,6 +173,11 @@ namespace Wheatear {
         SceneState m_SceneState = SceneState::Edit;
         bool m_PlayPaused = false;
         bool m_StepOnce = false;
+
+        bool m_SceneDirty = false;
+        bool m_ShowUnsavedModal = false;
+        PendingSceneAction m_PendingSceneAction = PendingSceneAction::None;
+        std::filesystem::path m_PendingScenePath;
 
         Entity m_HoveredEntity;
 
@@ -211,6 +226,22 @@ namespace Wheatear {
         Ref<Texture2D> m_IconEventGraph;
         Ref<Texture2D> m_IconFocus;
         Ref<Texture2D> m_IconResetLayout;
+
+        // Menu-bar icons (Lucide, see scripts/Generate-EditorIcons.ps1).
+        Ref<Texture2D> m_IconUndo;
+        Ref<Texture2D> m_IconRedo;
+        Ref<Texture2D> m_IconRefresh;
+        Ref<Texture2D> m_IconLanguage;
+        Ref<Texture2D> m_IconLogout;
+        Ref<Texture2D> m_IconFolder;
+        Ref<Texture2D> m_IconPencil;
+        Ref<Texture2D> m_IconPanel;
+        Ref<Texture2D> m_IconGameplay;
+        Ref<Texture2D> m_IconBarChart;
+        Ref<Texture2D> m_IconSettings;
+        Ref<Texture2D> m_IconSearch;
+        Ref<Texture2D> m_IconClose;
+        Ref<Texture2D> m_IconPlus;
 
         std::unique_ptr<SceneHierarchyPanel> m_SceneHierarchyPanel;
         std::unique_ptr<ContentBrowserPanel> m_ContentBrowserPanel;

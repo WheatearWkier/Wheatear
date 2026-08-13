@@ -1,4 +1,5 @@
 #include "wepch.h"
+#include "Wheatear/Utils/StringUtils.h"
 #include "VisualNovelDrawer.h"
 #include "Wheatear/Modules/VisualNovel/VisualNovelComponents.h"
 
@@ -17,10 +18,6 @@ namespace Wheatear {
 
     namespace {
 
-        static bool StartsWith(const std::string& value, const std::string& prefix)
-        {
-            return value.rfind(prefix, 0) == 0;
-        }
 
         static void SetVNEditorPreview(Entity controller,
             const std::vector<std::string>& visiblePrefixes)
@@ -33,13 +30,13 @@ namespace Wheatear {
             for (auto entityID : registry.view<TagComponent, UIWidgetComponent>())
             {
                 auto& tag = registry.get<TagComponent>(entityID).Tag;
-                if (!StartsWith(tag, "VN_"))
+                if (!StringUtils::StartsWith(tag, "VN_"))
                     continue;
 
                 bool visible = visiblePrefixes.empty();
                 for (const std::string& prefix : visiblePrefixes)
                 {
-                    if (StartsWith(tag, prefix))
+                    if (StringUtils::StartsWith(tag, prefix))
                     {
                         visible = true;
                         break;

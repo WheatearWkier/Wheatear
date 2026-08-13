@@ -4,6 +4,7 @@
 #include "Build/AssetDependencyScanner.h"
 
 #include "Wheatear/Assets/AssetPath.h"
+#include "Wheatear/Utils/StringUtils.h"
 #include "Wheatear/Core/EngineInfo.h"
 
 #include <yaml-cpp/yaml.h>
@@ -73,31 +74,11 @@ namespace Wheatear {
             values->erase(std::unique(values->begin(), values->end()), values->end());
         }
 
-        static std::string Trim(std::string value)
-        {
-            size_t first = 0;
-            while (first < value.size() && std::isspace(static_cast<unsigned char>(value[first])) != 0)
-                ++first;
 
-            size_t last = value.size();
-            while (last > first && std::isspace(static_cast<unsigned char>(value[last - 1])) != 0)
-                --last;
-
-            if (first >= last)
-                return {};
-            return value.substr(first, last - first);
-        }
-
-        static bool StartsWith(const std::string& value, const char* prefix)
-        {
-            const std::string_view view(value);
-            const std::string_view expected(prefix);
-            return view.size() >= expected.size() && view.substr(0, expected.size()) == expected;
-        }
 
         static std::string Unquote(std::string value)
         {
-            value = Trim(std::move(value));
+            value = StringUtils::Trim(std::move(value));
             if (value.size() >= 2 && value.front() == '"' && value.back() == '"')
                 return value.substr(1, value.size() - 2);
             return value;
@@ -105,8 +86,8 @@ namespace Wheatear {
 
         static std::string ScalarAfter(const std::string& line, const char* key)
         {
-            const std::string trimmed = Trim(line);
-            if (!StartsWith(trimmed, key))
+            const std::string trimmed = StringUtils::Trim(line);
+            if (!StringUtils::StartsWith(trimmed, key))
                 return {};
             return Unquote(trimmed.substr(std::strlen(key)));
         }
@@ -168,7 +149,7 @@ namespace Wheatear {
 
         static bool ParseBool(std::string value, bool fallback)
         {
-            value = Trim(std::move(value));
+            value = StringUtils::Trim(std::move(value));
             if (value == "true") return true;
             if (value == "false") return false;
             return fallback;
@@ -199,7 +180,7 @@ namespace Wheatear {
             std::string line;
             while (std::getline(input, line))
             {
-                const std::string trimmed = Trim(line);
+                const std::string trimmed = StringUtils::Trim(line);
                 if (trimmed == "UITemplate:")
                 {
                     insideTemplate = true;
@@ -209,13 +190,13 @@ namespace Wheatear {
                 if (!insideTemplate)
                     continue;
 
-                if (StartsWith(trimmed, "Kind:"))
+                if (StringUtils::StartsWith(trimmed, "Kind:"))
                     prefab->TemplateKind = ScalarAfter(trimmed, "Kind:");
-                else if (StartsWith(trimmed, "DisplayName:") && displayName)
+                else if (StringUtils::StartsWith(trimmed, "DisplayName:") && displayName)
                     *displayName = ScalarAfter(trimmed, "DisplayName:");
-                else if (StartsWith(trimmed, "Category:"))
+                else if (StringUtils::StartsWith(trimmed, "Category:"))
                     prefab->Category = ScalarAfter(trimmed, "Category:");
-                else if (StartsWith(trimmed, "Description:"))
+                else if (StringUtils::StartsWith(trimmed, "Description:"))
                     prefab->Description = ScalarAfter(trimmed, "Description:");
             }
 
@@ -253,11 +234,11 @@ namespace Wheatear {
             std::string line;
             while (std::getline(input, line))
             {
-                const std::string trimmed = Trim(line);
+                const std::string trimmed = StringUtils::Trim(line);
                 if (trimmed.empty())
                     continue;
 
-                if (StartsWith(trimmed, "- ID:"))
+                if (StringUtils::StartsWith(trimmed, "- ID:"))
                 {
                     pushCurrent();
                     hasAsset = true;
@@ -268,21 +249,21 @@ namespace Wheatear {
                 if (!hasAsset)
                     continue;
 
-                if (StartsWith(trimmed, "Path:")) current.RelativePath = NormalizeAssetPathString(ScalarAfter(trimmed, "Path:"));
-                else if (StartsWith(trimmed, "Type:")) current.Kind = AssetRegistry::KindFromString(ScalarAfter(trimmed, "Type:"));
-                else if (StartsWith(trimmed, "DisplayName:")) current.DisplayName = ScalarAfter(trimmed, "DisplayName:");
-                else if (StartsWith(trimmed, "SizeBytes:")) current.SizeBytes = ParseSize(trimmed.substr(10), current.SizeBytes);
-                else if (StartsWith(trimmed, "LastWriteTime:")) current.LastWriteTime = ParseInt64(trimmed.substr(14), current.LastWriteTime);
-                else if (StartsWith(trimmed, "Tags:")) { listSection = "Tags"; importSection.clear(); }
-                else if (StartsWith(trimmed, "References:")) { listSection = "References"; importSection.clear(); }
-                else if (StartsWith(trimmed, "ReferencedBy:")) { listSection = "ReferencedBy"; importSection.clear(); }
-                else if (StartsWith(trimmed, "Import:")) { listSection.clear(); importSection.clear(); }
+                if (StringUtils::StartsWith(trimmed, "Path:")) current.RelativePath = NormalizeAssetPathString(ScalarAfter(trimmed, "Path:"));
+                else if (StringUtils::StartsWith(trimmed, "Type:")) current.Kind = AssetRegistry::KindFromString(ScalarAfter(trimmed, "Type:"));
+                else if (StringUtils::StartsWith(trimmed, "DisplayName:")) current.DisplayName = ScalarAfter(trimmed, "DisplayName:");
+                else if (StringUtils::StartsWith(trimmed, "SizeBytes:")) current.SizeBytes = ParseSize(trimmed.substr(10), current.SizeBytes);
+                else if (StringUtils::StartsWith(trimmed, "LastWriteTime:")) current.LastWriteTime = ParseInt64(trimmed.substr(14), current.LastWriteTime);
+                else if (StringUtils::StartsWith(trimmed, "Tags:")) { listSection = "Tags"; importSection.clear(); }
+                else if (StringUtils::StartsWith(trimmed, "References:")) { listSection = "References"; importSection.clear(); }
+                else if (StringUtils::StartsWith(trimmed, "ReferencedBy:")) { listSection = "ReferencedBy"; importSection.clear(); }
+                else if (StringUtils::StartsWith(trimmed, "Import:")) { listSection.clear(); importSection.clear(); }
                 else if (trimmed == "Texture:" || trimmed == "Audio:" || trimmed == "Prefab:")
                 {
                     importSection = trimmed.substr(0, trimmed.size() - 1);
                     listSection.clear();
                 }
-                else if (StartsWith(trimmed, "- "))
+                else if (StringUtils::StartsWith(trimmed, "- "))
                 {
                     if (listSection == "Tags")
                         current.Tags.push_back(Unquote(trimmed.substr(2)));
@@ -293,26 +274,26 @@ namespace Wheatear {
                 }
                 else if (importSection == "Texture")
                 {
-                    if (StartsWith(trimmed, "Filter:")) current.Texture.Filter = ScalarAfter(trimmed, "Filter:");
-                    else if (StartsWith(trimmed, "PixelsPerUnit:")) current.Texture.PixelsPerUnit = ParseFloat(trimmed.substr(14), current.Texture.PixelsPerUnit);
-                    else if (StartsWith(trimmed, "Columns:")) current.Texture.Columns = ParseInt(trimmed.substr(8), current.Texture.Columns);
-                    else if (StartsWith(trimmed, "Rows:")) current.Texture.Rows = ParseInt(trimmed.substr(5), current.Texture.Rows);
-                    else if (StartsWith(trimmed, "CellWidth:")) current.Texture.CellWidth = ParseInt(trimmed.substr(10), current.Texture.CellWidth);
-                    else if (StartsWith(trimmed, "CellHeight:")) current.Texture.CellHeight = ParseInt(trimmed.substr(11), current.Texture.CellHeight);
-                    else if (StartsWith(trimmed, "PaddingX:")) current.Texture.PaddingX = ParseInt(trimmed.substr(9), current.Texture.PaddingX);
-                    else if (StartsWith(trimmed, "PaddingY:")) current.Texture.PaddingY = ParseInt(trimmed.substr(9), current.Texture.PaddingY);
+                    if (StringUtils::StartsWith(trimmed, "Filter:")) current.Texture.Filter = ScalarAfter(trimmed, "Filter:");
+                    else if (StringUtils::StartsWith(trimmed, "PixelsPerUnit:")) current.Texture.PixelsPerUnit = ParseFloat(trimmed.substr(14), current.Texture.PixelsPerUnit);
+                    else if (StringUtils::StartsWith(trimmed, "Columns:")) current.Texture.Columns = ParseInt(trimmed.substr(8), current.Texture.Columns);
+                    else if (StringUtils::StartsWith(trimmed, "Rows:")) current.Texture.Rows = ParseInt(trimmed.substr(5), current.Texture.Rows);
+                    else if (StringUtils::StartsWith(trimmed, "CellWidth:")) current.Texture.CellWidth = ParseInt(trimmed.substr(10), current.Texture.CellWidth);
+                    else if (StringUtils::StartsWith(trimmed, "CellHeight:")) current.Texture.CellHeight = ParseInt(trimmed.substr(11), current.Texture.CellHeight);
+                    else if (StringUtils::StartsWith(trimmed, "PaddingX:")) current.Texture.PaddingX = ParseInt(trimmed.substr(9), current.Texture.PaddingX);
+                    else if (StringUtils::StartsWith(trimmed, "PaddingY:")) current.Texture.PaddingY = ParseInt(trimmed.substr(9), current.Texture.PaddingY);
                 }
                 else if (importSection == "Audio")
                 {
-                    if (StartsWith(trimmed, "Usage:")) current.Audio.Usage = ScalarAfter(trimmed, "Usage:");
-                    else if (StartsWith(trimmed, "DefaultVolume:")) current.Audio.DefaultVolume = ParseFloat(trimmed.substr(14), current.Audio.DefaultVolume);
-                    else if (StartsWith(trimmed, "Loop:")) current.Audio.Loop = ParseBool(trimmed.substr(5), current.Audio.Loop);
+                    if (StringUtils::StartsWith(trimmed, "Usage:")) current.Audio.Usage = ScalarAfter(trimmed, "Usage:");
+                    else if (StringUtils::StartsWith(trimmed, "DefaultVolume:")) current.Audio.DefaultVolume = ParseFloat(trimmed.substr(14), current.Audio.DefaultVolume);
+                    else if (StringUtils::StartsWith(trimmed, "Loop:")) current.Audio.Loop = ParseBool(trimmed.substr(5), current.Audio.Loop);
                 }
                 else if (importSection == "Prefab")
                 {
-                    if (StartsWith(trimmed, "Category:")) current.Prefab.Category = ScalarAfter(trimmed, "Category:");
-                    else if (StartsWith(trimmed, "TemplateKind:")) current.Prefab.TemplateKind = ScalarAfter(trimmed, "TemplateKind:");
-                    else if (StartsWith(trimmed, "Description:")) current.Prefab.Description = ScalarAfter(trimmed, "Description:");
+                    if (StringUtils::StartsWith(trimmed, "Category:")) current.Prefab.Category = ScalarAfter(trimmed, "Category:");
+                    else if (StringUtils::StartsWith(trimmed, "TemplateKind:")) current.Prefab.TemplateKind = ScalarAfter(trimmed, "TemplateKind:");
+                    else if (StringUtils::StartsWith(trimmed, "Description:")) current.Prefab.Description = ScalarAfter(trimmed, "Description:");
                 }
             }
 

@@ -356,6 +356,27 @@ namespace Wheatear {
             return;
         }
 
+        // Space toggles preview playback while the panel is focused (guarded
+        // so typing in text fields is untouched).
+        if (ImGui::IsWindowFocused() && !ImGui::IsAnyItemActive()
+            && ImGui::IsKeyPressed(ImGuiKey_Space))
+        {
+            if (m_IsPlaying)
+            {
+                m_IsPlaying = false;
+            }
+            else
+            {
+                auto clip = GetCurrentClip();
+                TakeSnapshot();
+                m_IsPlaying = true;
+                if (clip && m_PlaybackTime >= clip->GetTotalDuration())
+                    m_PlaybackTime = 0.0f;
+                if (m_Scene)
+                    m_Scene->SetAnimationEditorPreviewActive(true);
+            }
+        }
+
         if (m_IsPlaying)
         {
             auto clip = GetCurrentClip();

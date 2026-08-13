@@ -188,6 +188,32 @@ namespace Wheatear {
         );
         m_ViewportImageHovered = ImGui::IsItemHovered(ImGuiHoveredFlags_RectOnly);
 
+        // Right-click over the viewport surface: create entities without
+        // leaving the view (Alt+right-click keeps rotating the camera).
+        if (m_SceneState == SceneState::Edit && m_ViewportImageHovered)
+        {
+            if (ImGui::IsMouseClicked(ImGuiMouseButton_Right)
+                && !Input::IsKeyPressed(WT_KEY_LEFT_ALT)
+                && !ImGui::IsPopupOpen("##ViewportCreateCtx"))
+            {
+                ImGui::OpenPopup("##ViewportCreateCtx");
+            }
+
+            if (ImGui::BeginPopup("##ViewportCreateCtx"))
+            {
+                m_SceneHierarchyPanel->DrawCreateEntityPopupItems();
+                ImGui::Separator();
+                if (ImGui::MenuItem(EditorLocale::Text("Frame Selection", "聚焦选中")))
+                {
+                    if (Entity selected = m_SceneHierarchyPanel->GetSelectedEntity())
+                        ActivateHierarchyEntity(selected);
+                    else
+                        FrameEditorCameraOnScene();
+                }
+                ImGui::EndPopup();
+            }
+        }
+
         if (m_SceneState == SceneState::Edit
             && m_ViewportHovered
             && ImGui::IsMouseDoubleClicked(ImGuiMouseButton_Left)

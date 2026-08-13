@@ -35,6 +35,21 @@ namespace Wheatear {
         ContentBrowserPanel();
         void OnImGuiRender();
 
+        // Double-click routing for scene / prefab / UI-template assets; the
+        // editor layer registers these so the browser never touches the scene.
+        void SetOnOpenSceneCallback(std::function<void(const std::filesystem::path&)> callback)
+        {
+            m_OnOpenScene = std::move(callback);
+        }
+        void SetOnInstantiatePrefabCallback(std::function<void(const std::filesystem::path&)> callback)
+        {
+            m_OnInstantiatePrefab = std::move(callback);
+        }
+        void SetOnInstantiateUITemplateCallback(std::function<void(const std::filesystem::path&)> callback)
+        {
+            m_OnInstantiateUITemplate = std::move(callback);
+        }
+
     private:
         void DrawToolbar();
         void DrawSidebar();
@@ -67,6 +82,10 @@ namespace Wheatear {
         std::string m_RegistryStatus;
 
         std::unordered_map<AssetType, Ref<Texture2D>> m_Icons;
+
+        std::function<void(const std::filesystem::path&)> m_OnOpenScene;
+        std::function<void(const std::filesystem::path&)> m_OnInstantiatePrefab;
+        std::function<void(const std::filesystem::path&)> m_OnInstantiateUITemplate;
     };
 
 } // namespace Wheatear

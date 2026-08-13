@@ -379,6 +379,43 @@ namespace Wheatear {
 
         if (m_Context)
         {
+            // Keyboard navigation: arrows move the selection, F2 starts an
+            // inline rename (guarded so typing in the search box is untouched).
+            if (ImGui::IsWindowFocused() && !ImGui::IsAnyItemActive())
+            {
+                if (ImGui::IsKeyPressed(ImGuiKey_DownArrow) || ImGui::IsKeyPressed(ImGuiKey_UpArrow))
+                {
+                    std::vector<Entity> order;
+                    order.reserve(64);
+                    for (auto id : m_Context->m_Registry.view<IDComponent>())
+                    {
+                        Entity e{ id, m_Context.get() };
+                        if (e)
+                            order.push_back(e);
+                    }
+                    if (!order.empty())
+                    {
+                        int index = -1;
+                        for (int i = 0; i < static_cast<int>(order.size()); ++i)
+                        {
+                            if (order[i] == m_SelectionContext) { index = i; break; }
+                        }
+                        const int step = ImGui::IsKeyPressed(ImGuiKey_DownArrow) ? 1 : -1;
+                        if (index < 0)
+                            index = step > 0 ? 0 : static_cast<int>(order.size()) - 1;
+                        else
+                            index = std::clamp(index + step, 0, static_cast<int>(order.size()) - 1);
+                        m_SelectionContext = order[index];
+                        m_ScrollToSelection = true;
+                    }
+                }
+                else if (ImGui::IsKeyPressed(ImGuiKey_F2))
+                {
+                    if (m_SelectionContext)
+                        m_RenameRequested = true;
+                }
+            }
+
             ImGui::SetNextItemWidth(-168.0f);
             ImGui::InputTextWithHint("##HierarchySearch", "Search entity...", m_SearchBuffer, sizeof(m_SearchBuffer));
             ImGui::SameLine();
@@ -495,54 +532,7 @@ namespace Wheatear {
 
             if (ImGui::BeginPopupContextWindow("##HierarchyCtx", ImGuiPopupFlags_MouseButtonRight | ImGuiPopupFlags_NoOpenOverItems))
             {
-                if (ImGui::MenuItem(EditorLocale::Text("Create Empty Entity", "创建空实体")))
-                    CreateEntityWithUndo("Empty Entity", [](Entity) {});
-
-                ImGui::BeginDisabled(!HasHiddenEditorEntities());
-                if (ImGui::MenuItem("Show All Hidden"))
-                    ShowAllHiddenEditorEntities();
-                ImGui::EndDisabled();
-
-                ImGui::Separator();
-
-                if (ImGui::BeginMenu("2D Object"))
-                {
-                    if (ImGui::MenuItem(EditorLocale::Text("Sprite", "精灵")))
-                    {
-                        CreateEntityWithUndo("Sprite", [](Entity e)
-                        {
-                            e.AddComponent<SpriteRendererComponent>();
-                        });
-                    }
-                    if (ImGui::MenuItem(EditorLocale::Text("Circle", "圆形")))
-                    {
-                        CreateEntityWithUndo("Circle", [](Entity e)
-                        {
-                            e.AddComponent<CircleRendererComponent>();
-                        });
-                    }
-                    ImGui::EndMenu();
-                }
-
-                if (ImGui::BeginMenu(EditorLocale::Text("Camera", "相机")))
-                {
-                    if (ImGui::MenuItem(EditorLocale::Text("Camera", "相机")))
-                    {
-                        CreateEntityWithUndo("Camera", [](Entity e)
-                        {
-                            e.AddComponent<CameraComponent>();
-                        });
-                    }
-                    ImGui::EndMenu();
-                }
-
-
-                if (ImGui::BeginMenu("UI"))
-                {
-                    DrawCreateUIMenuItems(ResolveUIParentID(m_SelectionContext), true);
-                    ImGui::EndMenu();
-                }
-
+                DrawCreateEntityPopupItems();
                 ImGui::EndPopup();
             }
         }
@@ -553,6 +543,56 @@ namespace Wheatear {
         if (m_SelectionContext)
             DrawComponents(m_SelectionContext);
         ImGui::End();
+    }
+
+    void SceneHierarchyPanel::DrawCreateEntityPopupItems()
+    {
+        if (ImGui::MenuItem(EditorLocale::Text("Create Empty Entity", "创建空实体")))
+            CreateEntityWithUndo("Empty Entity", [](Entity) {});
+
+        ImGui::BeginDisabled(!HasHiddenEditorEntities());
+        if (ImGui::MenuItem("Show All Hidden"))
+            ShowAllHiddenEditorEntities();
+        ImGui::EndDisabled();
+
+        ImGui::Separator();
+
+        if (ImGui::BeginMenu("2D Object"))
+        {
+            if (ImGui::MenuItem(EditorLocale::Text("Sprite", "精灵")))
+            {
+                CreateEntityWithUndo("Sprite", [](Entity e)
+                {
+                    e.AddComponent<SpriteRendererComponent>();
+                });
+            }
+            if (ImGui::MenuItem(EditorLocale::Text("Circle", "圆形")))
+            {
+                CreateEntityWithUndo("Circle", [](Entity e)
+                {
+                    e.AddComponent<CircleRendererComponent>();
+                });
+            }
+            ImGui::EndMenu();
+        }
+
+        if (ImGui::BeginMenu(EditorLocale::Text("Camera", "相机")))
+        {
+            if (ImGui::MenuItem(EditorLocale::Text("Camera", "相机")))
+            {
+                CreateEntityWithUndo("Camera", [](Entity e)
+                {
+                    e.AddComponent<CameraComponent>();
+                });
+            }
+            ImGui::EndMenu();
+        }
+
+        if (ImGui::BeginMenu("UI"))
+        {
+            DrawCreateUIMenuItems(ResolveUIParentID(m_SelectionContext), true);
+            ImGui::EndMenu();
+        }
     }
 
     void SceneHierarchyPanel::SetSelectedEntity(Entity entity)

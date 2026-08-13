@@ -280,6 +280,8 @@ namespace Wheatear {
         UI_Toolbar();
         ProcessDeferredViewportAssetDrop();
 
+        DrawUnsavedChangesModal();
+
         ImGui::End();
     }
 
@@ -427,6 +429,16 @@ namespace Wheatear {
         if (!ImGui::BeginMenuBar()) return;
 
         const EditorToolContext toolContext{ m_SceneHierarchyPanel->GetSelectedEntity() };
+        auto drawMenuIcon = [&](const Ref<Texture2D>& icon)
+        {
+            const float iconSize = 16.0f;
+            if (icon)
+                ImGui::Image(static_cast<ImTextureID>(static_cast<uintptr_t>(icon->GetRendererID())),
+                    ImVec2(iconSize, iconSize));
+            else
+                ImGui::Dummy(ImVec2(iconSize, iconSize));
+            ImGui::SameLine();
+        };
         auto localizedToolLabel = [](const char* label) -> const char*
         {
             if (!label) return "";
@@ -488,17 +500,23 @@ namespace Wheatear {
 
         if (ImGui::BeginMenu(EditorLocale::Text("Scene", "场景")))
         {
+            drawMenuIcon(m_IconNewScene);
             if (ImGui::MenuItem(EditorLocale::Text("New", "新建"), "Ctrl+N"))        NewScene();
+            drawMenuIcon(m_IconOpenScene);
             if (ImGui::MenuItem(EditorLocale::Text("Open...", "打开..."), "Ctrl+O"))  OpenScene();
+            drawMenuIcon(m_IconSaveScene);
             if (ImGui::MenuItem(EditorLocale::Text("Save", "保存"), "Ctrl+S"))        SaveScene();
+            drawMenuIcon(m_IconSaveScene);
             if (ImGui::MenuItem(EditorLocale::Text("Save As...", "另存为..."), "Ctrl+Shift+S"))  SaveSceneAs();
             ImGui::EndMenu();
         }
 
         if (ImGui::BeginMenu(EditorLocale::Text("Edit", "编辑")))
         {
+            drawMenuIcon(m_IconUndo);
             if (ImGui::MenuItem(EditorLocale::Text("Undo", "撤销"), "Ctrl+Z", false, CommandHistory::Get().CanUndo()))
                 CommandHistory::Get().Undo();
+            drawMenuIcon(m_IconRedo);
             if (ImGui::MenuItem(EditorLocale::Text("Redo", "重做"), "Ctrl+Y / Ctrl+Shift+Z", false, CommandHistory::Get().CanRedo()))
                 CommandHistory::Get().Redo();
             ImGui::EndMenu();
@@ -508,15 +526,18 @@ namespace Wheatear {
         {
             if (m_SceneState == SceneState::Edit)
             {
+                drawMenuIcon(m_IconPlay);
                 if (ImGui::MenuItem(EditorLocale::Text("Play", "播放"), "Ctrl+Enter"))
                     TransitionToPlay();
             }
             else
             {
+                drawMenuIcon(m_IconStop);
                 if (ImGui::MenuItem(EditorLocale::Text("Stop", "停止"), "Ctrl+Enter"))
                     TransitionToStop();
             }
 
+            drawMenuIcon(m_IconFocus);
             if (ImGui::MenuItem(EditorLocale::Text("Frame Selection", "聚焦选中"), "F"))
             {
                 if (Entity selected = m_SceneHierarchyPanel->GetSelectedEntity())
@@ -529,7 +550,9 @@ namespace Wheatear {
 
         if (ImGui::BeginMenu(EditorLocale::Text("UI", "界面")))
         {
+            drawMenuIcon(nullptr);
             ImGui::MenuItem(EditorLocale::Text("UI Edit Outlines", "UI 编辑轮廓线"), nullptr, &m_ShowUIOutlines);
+            drawMenuIcon(m_IconUICanvas);
             if (ImGui::MenuItem(EditorLocale::Text("UI Canvas Editor", "UI 画布编辑器"), nullptr, &m_UIEditorOpen))
             {
                 EditorFloatingWindow::Dock("UI Canvas Editor");
@@ -537,16 +560,10 @@ namespace Wheatear {
                 if (!m_UIEditingCanvas)
                     m_UIEditingCanvas = m_SceneHierarchyPanel->GetSelectedEntity();
             }
-            if (ImGui::MenuItem(EditorLocale::Text("UI Canvas Editor Floating", "UI 画布编辑器（浮动）")))
-            {
-                m_UIEditorOpen = true;
-                EditorFloatingWindow::OpenFloating("UI Canvas Editor");
-                m_FocusCanvasEditor = true;
-                if (!m_UIEditingCanvas)
-                    m_UIEditingCanvas = m_SceneHierarchyPanel->GetSelectedEntity();
-            }
+            drawMenuIcon(m_IconSpriteSheet);
             if (ImGui::MenuItem(EditorLocale::Text("Sprite Sheet Picker", "序列帧选择器")))
                 m_SpriteSheetPickerPanel->OpenForEntity(m_SceneHierarchyPanel->GetSelectedEntity());
+            drawMenuIcon(nullptr);
             if (ImGui::MenuItem(EditorLocale::Text("Generate UI Templates", "生成内置 UI 模板")))
             {
                 UITemplateFactory::WriteBuiltinTemplateAssets(AssetPath::GetProjectRoot());
@@ -580,6 +597,7 @@ namespace Wheatear {
             drawLocalizedFloatingWindowItem("Asset Alias / Manifest Editor", [&]() { openToolByLabel("Asset Alias / Manifest Editor"); });
             drawLocalizedFloatingWindowItem("Project Health", [&]() { openToolByLabel("Project Health"); });
             ImGui::Separator();
+            drawMenuIcon(m_IconResetLayout);
             if (ImGui::MenuItem(EditorLocale::Text("Reset Window Layout", "重置窗口布局")))
             {
                 m_RequestDefaultDockspaceLayout = true;
@@ -597,6 +615,7 @@ namespace Wheatear {
 
         if (ImGui::BeginMenu(EditorLocale::Text("Assets", "资源")))
         {
+            drawMenuIcon(m_IconRefresh);
             if (ImGui::MenuItem(EditorLocale::Text("Rescan Asset Registry", "重扫资源注册表")))
             {
                 AssetRegistry::Get().Scan(AssetPath::GetProjectRoot());
@@ -608,10 +627,13 @@ namespace Wheatear {
 
         if (ImGui::BeginMenu(EditorLocale::Text("Build", "构建")))
         {
+            drawMenuIcon(m_IconPackage);
             if (ImGui::MenuItem(EditorLocale::Text("Package Player + Editor", "打包玩家 + 编辑器"), nullptr, false, !m_PlayerBuildRunning))
                 StartPlayerPackageBuild(false);
+            drawMenuIcon(nullptr);
             if (ImGui::MenuItem(EditorLocale::Text("Open Player Folder", "打开玩家目录"), nullptr, false, !m_LastPlayerBuildDirectory.empty()))
                 EditorPlatform::OpenDirectory(m_LastPlayerBuildDirectory);
+            drawMenuIcon(nullptr);
             if (ImGui::MenuItem(EditorLocale::Text("Open Editor Folder", "打开编辑器目录"), nullptr, false, !m_LastEditorBuildDirectory.empty()))
                 EditorPlatform::OpenDirectory(m_LastEditorBuildDirectory);
             ImGui::EndMenu();
@@ -627,13 +649,16 @@ namespace Wheatear {
 
         if (ImGui::BeginMenu(EditorLocale::Text("App", "应用")))
         {
+            drawMenuIcon(m_IconLanguage);
             if (ImGui::BeginMenu(EditorLocale::Text("Language", "语言")))
             {
                 EditorLocale::DrawLanguageMenu();
                 ImGui::EndMenu();
             }
             ImGui::Separator();
-            if (ImGui::MenuItem(EditorLocale::Text("Exit", "退出"))) Application::Get().Close();
+            drawMenuIcon(m_IconLogout);
+            if (ImGui::MenuItem(EditorLocale::Text("Exit", "退出")))
+                RequestSceneChange(PendingSceneAction::Exit);
             ImGui::EndMenu();
         }
 

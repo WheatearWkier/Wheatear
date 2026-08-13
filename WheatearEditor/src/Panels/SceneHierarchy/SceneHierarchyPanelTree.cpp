@@ -1,4 +1,5 @@
 #include "wepch.h"
+#include "Wheatear/Utils/StringUtils.h"
 #include "SceneHierarchyPanel.h"
 #include "Editor/EditorCommands.h"
 #include "Editor/EditorLocale.h"
@@ -21,20 +22,12 @@ namespace Wheatear {
 
     namespace {
 
-        static std::string ToLower(std::string value)
-        {
-            std::transform(value.begin(), value.end(), value.begin(), [](unsigned char c)
-            {
-                return static_cast<char>(std::tolower(c));
-            });
-            return value;
-        }
 
         static bool ContainsInsensitive(const std::string& value, const char* query)
         {
             if (!query || query[0] == '\0')
                 return true;
-            return ToLower(value).find(ToLower(query)) != std::string::npos;
+            return StringUtils::ToLower(value).find(StringUtils::ToLower(query)) != std::string::npos;
         }
 
         static const char* EntityKindPrefix(Entity entity)
@@ -312,11 +305,39 @@ namespace Wheatear {
         if (hiddenInEditor)
             ImGui::PushStyleColor(ImGuiCol_Text, ImGui::GetStyleColorVec4(ImGuiCol_TextDisabled));
 
+        const bool inlineRenaming = selected && m_RenameRequested && entity == m_SelectionContext;
+        if (inlineRenaming)
+            std::strncpy(m_RenameBuffer, displayName.c_str(), sizeof(m_RenameBuffer) - 1);
+
         const bool opened = ImGui::TreeNodeEx(
             reinterpret_cast<void*>(static_cast<uint64_t>(static_cast<uint32_t>(entity))),
             flags,
-            "%s", displayName.c_str()
+            "%s", inlineRenaming ? "" : displayName.c_str()
         );
+
+        if (inlineRenaming)
+        {
+            // Inline rename: Enter commits, Esc or clicking elsewhere cancels.
+            ImGui::SameLine();
+            ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x * 0.8f);
+            ImGui::SetKeyboardFocusHere();
+            const bool committed = ImGui::InputText("##inlineRename", m_RenameBuffer,
+                sizeof(m_RenameBuffer),
+                ImGuiInputTextFlags_EnterReturnsTrue | ImGuiInputTextFlags_AutoSelectAll);
+            const bool cancelled = ImGui::IsKeyPressed(ImGuiKey_Escape);
+            const bool deactivated = ImGui::IsItemDeactivated();
+            if (committed)
+            {
+                entity.GetComponent<TagComponent>().Tag = m_RenameBuffer;
+                if (Scene* scene = entity.GetScene())
+                    scene->InvalidateEntityLookupCache();
+                m_RenameRequested = false;
+            }
+            else if (cancelled || (deactivated && !committed))
+            {
+                m_RenameRequested = false;
+            }
+        }
 
         if (hiddenInEditor)
             ImGui::PopStyleColor();

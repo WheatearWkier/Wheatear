@@ -24,6 +24,13 @@ namespace Wheatear {
     {
         m_SceneHierarchyPanel->SetEntityActivatedCallback(
             [this](Entity entity) { ActivateHierarchyEntity(entity); });
+
+        m_ContentBrowserPanel->SetOnOpenSceneCallback(
+            [this](const std::filesystem::path& path) { OpenScene(path); });
+        m_ContentBrowserPanel->SetOnInstantiatePrefabCallback(
+            [this](const std::filesystem::path& path) { InstantiatePrefab(path); });
+        m_ContentBrowserPanel->SetOnInstantiateUITemplateCallback(
+            [this](const std::filesystem::path& path) { InstantiateUITemplate(path); });
     }
 
     EditorLayerBase::~EditorLayerBase() = default;
