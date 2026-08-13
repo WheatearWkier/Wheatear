@@ -229,6 +229,7 @@
     <ClCompile Include="src\Editor\EditorLayerBaseScene.cpp" />
     <ClCompile Include="src\Editor\EditorLayerBaseUI.cpp" />
     <ClCompile Include="src\Editor\EditorLayerBaseUI_Canvas.cpp" />
+    <ClCompile Include="src\Editor\EditorLayerBaseUI_Viewport.cpp" />
     <ClCompile Include="src\Editor\EditorLayerDockspace.cpp" />
     <ClCompile Include="src\Editor\EditorPlatform.cpp" />
     <ClCompile Include="src\Editor\EditorWidgets.cpp" />
