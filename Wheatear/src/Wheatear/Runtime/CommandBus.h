@@ -40,6 +40,9 @@ namespace Wheatear {
 
         static void QueueGameplayCommand(const std::string& command);
         static std::vector<std::string> DrainGameplayCommands(const std::string& prefix = {});
+        // Takes the whole queued batch once (single O(M) swap) so callers can
+        // filter locally instead of re-scanning the queue per prefix.
+        static std::vector<std::string> DrainAllGameplayCommands();
 
         static void QueueEventCommand(const EventCommandRequest& request);
         static std::vector<EventCommandRequest> DrainEventCommands(Scene* scene);

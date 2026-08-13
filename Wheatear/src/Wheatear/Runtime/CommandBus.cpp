@@ -513,19 +513,27 @@ namespace Wheatear {
 
     std::vector<std::string> CommandBus::DrainGameplayCommands(const std::string& prefix)
     {
+        // Take the whole queue once (O(M) swap) and filter locally instead of
+        // copying the unmatched tail back on every prefix drain.
+        std::vector<std::string> all = DrainAllGameplayCommands();
+        if (prefix.empty())
+            return all;
+
         std::vector<std::string> matched;
-        std::vector<std::string> remaining;
-
-        for (const std::string& command : GameplayCommandQueue())
+        matched.reserve(all.size());
+        for (const std::string& command : all)
         {
-            if (prefix.empty() || StartsWith(command, prefix))
-                matched.push_back(command);
-            else
-                remaining.push_back(command);
+            if (StartsWith(command, prefix))
+                matched.push_back(std::move(command));
         }
-
-        GameplayCommandQueue().swap(remaining);
         return matched;
+    }
+
+    std::vector<std::string> CommandBus::DrainAllGameplayCommands()
+    {
+        std::vector<std::string> all;
+        GameplayCommandQueue().swap(all);
+        return all;
     }
 
     void CommandBus::QueueEventCommand(const EventCommandRequest& request)

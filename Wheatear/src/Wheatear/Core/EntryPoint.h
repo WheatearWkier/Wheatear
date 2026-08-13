@@ -15,11 +15,11 @@ int main(int argc, char** argv) {
 	auto app = Wheatear::CreateApplication({ argc, argv });
 	WT_PROFILE_END_SESSION();
 
-	WT_PROFILE_BEGIN_SESSION("Startup", "WheatearProfile-Runtime.json");
+	WT_PROFILE_BEGIN_SESSION("Runtime", "WheatearProfile-Runtime.json");
 	app->Run();
 	WT_PROFILE_END_SESSION();
 
-	WT_PROFILE_BEGIN_SESSION("Startup", "WheatearProfile-Shutdown.json");
+	WT_PROFILE_BEGIN_SESSION("Shutdown", "WheatearProfile-Shutdown.json");
 	delete app;
 	WT_PROFILE_END_SESSION();
 }

@@ -96,7 +96,7 @@ namespace Wheatear {
 		std::vector<EventSubscription> m_LayerEventSubscriptions;
 
 		bool m_Running = true;
-		bool m_Minized = false;
+		bool m_Minimized = false;
 
 		LayerStack m_LayerStack;
 		std::vector<Layer*> m_PendingLayersToPush;

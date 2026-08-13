@@ -560,6 +560,9 @@ namespace Wheatear {
 
     void EditorLayerBase::ExecutePlayerPackageBuild(bool enableScripts)
     {
+        if (m_PlayerBuildRunning)
+            return;
+
         PlayerPackageOptions options;
         options.StartupScene = m_PackageScenePath.empty() ? m_EditorScenePath : std::filesystem::path(m_PackageScenePath);
         options.Configuration = "Debug";

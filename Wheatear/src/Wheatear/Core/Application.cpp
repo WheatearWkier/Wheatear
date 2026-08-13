@@ -159,7 +159,7 @@ namespace Wheatear {
 			Timestep timestep = nowTime - m_LastFrameTime;
 			m_LastFrameTime = nowTime;
 
-			if (!m_Minized)
+			if (!m_Minimized)
 			{
 				{
 					WT_PROFILE_SCOPE("LayerStack OnUpdate");
@@ -195,11 +195,11 @@ namespace Wheatear {
 
 		if (e.GetWidth() == 0 || e.GetHeight() == 0)
 		{
-			m_Minized = true;
+			m_Minimized = true;
 			return false;
 		}
 
-		m_Minized = false;
+		m_Minimized = false;
 		Renderer::OnWindowResize(e.GetWidth(), e.GetHeight());
 		return true;
 	}

@@ -26,6 +26,7 @@ namespace Wheatear {
             VisualNovelRuntime Runtime;
             std::filesystem::path LoadedPath;
             std::filesystem::file_time_type LastScriptWriteTime{};
+            float LastScriptCheckTime = 0.0f;
             bool Loaded = false;
             bool PreviousAdvancePressed = false;
             bool PreviousAutoPressed = false;

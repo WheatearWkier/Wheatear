@@ -17,7 +17,7 @@ namespace Wheatear {
 		uint32_t Height;
 		std::string IconPath;
 
-		WindowProps(const std::string& title = "感觉不如原神",
+		WindowProps(const std::string& title = "Wheatear",
 			uint32_t width = 1920,
 			uint32_t height = 1080,
 			std::string iconPath = "Resources/Icons/icon.png")

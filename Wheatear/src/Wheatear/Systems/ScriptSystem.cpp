@@ -35,17 +35,6 @@ namespace Wheatear {
         auto& registry = scene->GetRegistry();
         ScriptEngine::OnRuntimeUpdate(ts);
 
-        //registry.view<NativeScriptComponent>().each([=](auto e, auto& nsc)
-        //    {
-        //        if (!nsc.Instance)
-        //        {
-        //            nsc.Instance = nsc.InstantiateScript();
-        //            nsc.Instance->m_Entity = { e, scene };
-        //            nsc.Instance->OnCreate();
-        //        }
-        //        nsc.Instance->OnUpdate(ts);
-        //    });
-
         for (auto e : registry.view<ScriptComponent>())
             ScriptEngine::OnUpdateEntity({ e, scene }, ts);
     }
@@ -57,7 +46,6 @@ namespace Wheatear {
         ScriptEngine::OnCreateEntity(entity);
     }
 
-    // ScriptSystem.cpp
     void ScriptSystem::OnEntityDestroy(Scene* scene, Entity& entity)
     {
         if (!ScriptEngine::IsInitialized()) return;

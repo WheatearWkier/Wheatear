@@ -1421,6 +1421,19 @@ namespace Wheatear {
 
     void VisualNovelSystem::OnUpdateRuntime(Scene* scene, Timestep ts)
     {
+        // Drain gameplay commands ONCE per frame (not per entity) so multiple VN
+        // components in one scene do not steal each other's commands; every
+        // entity sees the same batch.
+        std::vector<std::string> vnCommands;
+        std::vector<std::string> gameSaveCommands;
+        for (std::string& command : CommandBus::DrainAllGameplayCommands())
+        {
+            if (StartsWith(command, "vn:"))
+                vnCommands.push_back(std::move(command));
+            else if (StartsWith(command, "gamesave:"))
+                gameSaveCommands.push_back(std::move(command));
+        }
+
         for (auto e : scene->GetRegistry().view<VisualNovelComponent>())
         {
             Entity entity{ e, scene };
@@ -1438,24 +1451,42 @@ namespace Wheatear {
             {
                 // Hot reload: if the .vn file changed on disk (edited in the VN
                 // Script Editor), reload the script in place, preserving the
-                // variable table and clamping the playback index so the designer
-                // sees edits immediately without restarting Play mode.
-                std::error_code error;
-                const auto writeTime = std::filesystem::exists(resolvedPath, error)
-                    ? std::filesystem::last_write_time(resolvedPath, error)
-                    : std::filesystem::file_time_type{};
-                if (writeTime != state.LastScriptWriteTime)
+                // variable table so the designer sees edits immediately without
+                // restarting Play mode. Throttled to 500 ms and guarded against
+                // mid-save truncation (editor writes via truncate): a parse that
+                // yields an empty script while the previous one was non-empty is
+                // treated as an in-progress write and skipped.
+                state.LastScriptCheckTime += ts.GetSeconds();
+                if (state.LastScriptCheckTime >= 0.5f)
                 {
-                    // Preserve script variables across the reload so dialogue
-                    // state (gold, flags, etc.) survives an in-editor edit; the
-                    // playhead restarts from the top of the script.
-                    const auto variables = state.Runtime.GetVariables();
-                    state.Runtime.SetScript(VisualNovelScript::FromFile(resolvedPath));
-                    for (const auto& [name, value] : variables)
-                        state.Runtime.SetVariable(name, value);
-                    state.LastScriptWriteTime = writeTime;
-                    state.SystemMessage = "VN script reloaded (hot).";
-                    state.SystemMessageTimer = 2.0f;
+                    state.LastScriptCheckTime = 0.0f;
+                    std::error_code error;
+                    const auto writeTime = std::filesystem::exists(resolvedPath, error)
+                        ? std::filesystem::last_write_time(resolvedPath, error)
+                        : std::filesystem::file_time_type{};
+                    if (writeTime != state.LastScriptWriteTime)
+                    {
+                        const bool previousNonEmpty = !state.Runtime.GetScript().IsEmpty();
+                        const auto variables = state.Runtime.GetVariables();
+                        VisualNovelScript reloaded = VisualNovelScript::FromFile(resolvedPath);
+                        if (reloaded.IsEmpty() && previousNonEmpty)
+                        {
+                            // Editor is mid-write (file truncated but not closed);
+                            // keep playing the old script and re-check next tick.
+                            state.LastScriptWriteTime = writeTime;
+                            state.SystemMessage = "VN script saving... (hot reload deferred)";
+                            state.SystemMessageTimer = 1.0f;
+                        }
+                        else
+                        {
+                            state.Runtime.SetScript(std::move(reloaded));
+                            for (const auto& [name, value] : variables)
+                                state.Runtime.SetVariable(name, value);
+                            state.LastScriptWriteTime = writeTime;
+                            state.SystemMessage = "VN script reloaded (hot).";
+                            state.SystemMessageTimer = 2.0f;
+                        }
+                    }
                 }
             }
 
@@ -1466,9 +1497,9 @@ namespace Wheatear {
             state.SystemMessageTimer = std::max(0.0f, state.SystemMessageTimer - deltaSeconds);
             state.BGMNoticeTimer = std::max(0.0f, state.BGMNoticeTimer - deltaSeconds);
 
-            for (const std::string& command : CommandBus::DrainGameplayCommands("vn:"))
+            for (const std::string& command : vnCommands)
                 ExecuteCommand(scene, component, state, command);
-            for (const std::string& command : CommandBus::DrainGameplayCommands("gamesave:"))
+            for (const std::string& command : gameSaveCommands)
                 ExecuteCommand(scene, component, state, command);
 
             UpdateInput(scene, component, state);

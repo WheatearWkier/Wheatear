@@ -634,13 +634,22 @@ std::string line;
 
             if (StartsWith(line, "INDEX "))
             {
-                savedIndex = static_cast<size_t>(std::stoull(PayloadAfter(line, "INDEX ")));
+                // Guard against corrupt save files: a malformed index must not
+                // throw out of the update loop and terminate the game.
+                const std::string indexText = PayloadAfter(line, "INDEX ");
+                if (!indexText.empty())
+                {
+                    try { savedIndex = static_cast<size_t>(std::stoull(indexText)); }
+                    catch (...) { savedIndex = 0; }
+                }
                 continue;
             }
 
             if (StartsWith(line, "VISIBLE "))
             {
-                savedVisibleCharacters = std::stof(PayloadAfter(line, "VISIBLE "));
+                float visible = 0.0f;
+                if (TryParseFloat(PayloadAfter(line, "VISIBLE "), visible))
+                    savedVisibleCharacters = visible;
                 continue;
             }
 
@@ -663,7 +672,8 @@ std::string line;
                     continue;
 
                 VisualNovelHistoryEntry entry;
-                entry.LineIndex = static_cast<size_t>(std::stoull(fields[0]));
+                try { entry.LineIndex = static_cast<size_t>(std::stoull(fields[0])); }
+                catch (...) { entry.LineIndex = 0; }
                 entry.IsChoice = fields[1] == "1";
                 entry.Speaker = UnescapeField(fields[2]);
                 entry.Text = UnescapeField(fields[3]);

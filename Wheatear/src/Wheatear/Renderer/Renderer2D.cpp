@@ -221,12 +221,10 @@ namespace Wheatear {
 
     static void FlushAndReset()
     {
+        // Flush() already resets every batch and the texture slot index
+        // (Renderer2D::Flush resets + TextureSlotIndex = 1), so this is just a
+        // named alias used at capacity-overflow call sites.
         Renderer2D::Flush();
-        s_Data.QuadBatch->Reset();
-        s_Data.CircleBatch->Reset();
-        s_Data.LineBatch->Reset();
-        s_Data.TextBatch->Reset();
-        s_Data.TextureSlotIndex = 1;
     }
 
 
