@@ -136,35 +136,31 @@ namespace Wheatear {
     // no well-formed gate). The whole-token "if flag" form requires three words
     // after "->", so label text containing "if" is only matched when it forms a
     // standalone clause.
-    static std::string ExtractRequiredFlag(std::string target, std::string& outFlag)
+    static std::string ExtractRequiredCondition(std::string target,
+        std::string& outFlag,
+        std::string& outCondition)
     {
         target = Trim(target);
         if (target.empty())
             return target;
 
-        // Find the first standalone " if " token (whitespace-delimited). Use
-        // SplitWords then locate "if" so the scan is token-aware rather than
-        // naive substring (avoids matching "if" inside a word).
+        // The gate is the trailing clause after a standalone " if " token
+        // (whitespace-delimited; token-aware so "if" inside a word never matches).
+        //   -> label if flag <id>   : progression flag gate (backward compatible)
+        //   -> label if <expr>      : full VN condition (variables / comparisons)
         const std::vector<std::string> words = SplitWords(target);
         if (words.size() < 3)
             return target;
 
         size_t ifIndex = 0;
         bool foundIf = false;
-        // The gate must be the trailing clause: exactly "if flag <id>" occupies
-        // the last three words, so anything after the flag id would be ambiguous.
-        if (words.size() >= 3 && words[words.size() - 3] == "if" && words[words.size() - 2] == "flag")
+        if (words.size() >= 3 && words[words.size() - 3] == "if")
         {
             ifIndex = words.size() - 3;
             foundIf = true;
         }
         if (!foundIf)
             return target;
-
-        std::string flagId = words[ifIndex + 2];
-        // Normalize "flag:X" -> "X" if authors used the colon form.
-        if (flagId.rfind("flag:", 0) == 0 && flagId.size() > 5)
-            flagId = flagId.substr(5);
 
         // Reconstruct the label as words[0..ifIndex-1] joined.
         std::string label;
@@ -175,7 +171,28 @@ namespace Wheatear {
             label += words[i];
         }
 
-        outFlag = Trim(flagId);
+        std::string clause;
+        for (size_t i = ifIndex + 1; i < words.size(); ++i)
+        {
+            if (!clause.empty())
+                clause += " ";
+            clause += words[i];
+        }
+        clause = Trim(clause);
+
+        if (words.size() == ifIndex + 3 && words[ifIndex + 1] == "flag")
+        {
+            std::string flagId = words[ifIndex + 2];
+            // Normalize "flag:X" -> "X" if authors used the colon form.
+            if (flagId.rfind("flag:", 0) == 0 && flagId.size() > 5)
+                flagId = flagId.substr(5);
+            outFlag = Trim(flagId);
+        }
+        else
+        {
+            outCondition = clause;
+        }
+
         return Trim(label);
     }
 
@@ -194,7 +211,7 @@ namespace Wheatear {
             const size_t arrow = segment.find("->");
             if (arrow == std::string::npos)
             {
-                choices.push_back({ StripQuotes(segment), {}, {} });
+                choices.push_back({ StripQuotes(segment), {}, {}, {} });
                 continue;
             }
 
@@ -202,12 +219,14 @@ namespace Wheatear {
             choice.Text = StripQuotes(segment.substr(0, arrow));
             choice.TargetLabel = StripQuotes(segment.substr(arrow + 2));
 
-            // Optional trailing "if flag <id>" / "if flag:<id>" gate the choice
-            // behind a progression story flag. Only the part after "->" is scanned
-            // so option text containing "if" stays unaffected.
+            // Optional trailing "if flag <id>" / "if <expr>" gate the choice.
+            // Only the part after "->" is scanned so option text containing "if"
+            // stays unaffected.
             if (!choice.TargetLabel.empty())
             {
-                choice.TargetLabel = ExtractRequiredFlag(choice.TargetLabel, choice.RequiredFlag);
+                choice.TargetLabel = ExtractRequiredCondition(choice.TargetLabel,
+                    choice.RequiredFlag,
+                    choice.RequiredCondition);
             }
 
             if (!choice.Text.empty())
@@ -500,6 +519,67 @@ namespace Wheatear {
                 int x = 0, y = 0;
                 command >> name >> x >> y;
                 UpsertCharacter(name, name, "sheet:" + std::to_string(x) + "," + std::to_string(y));
+                continue;
+            }
+
+            if (ReadAnyCommandPayload(line, { "set" }, payload))
+            {
+                // @set name value | @set name = value  (value: number or variable ref)
+                std::string remaining = payload;
+                std::string name = ConsumeToken(remaining);
+                remaining = Trim(remaining);
+                if (StartsWith(remaining, "="))
+                    remaining = Trim(remaining.substr(1));
+                std::string value = StripQuotes(remaining);
+                if (name.empty())
+                    continue;
+                VisualNovelLine setLine;
+                setLine.Type = VisualNovelLineType::Set;
+                setLine.VariableName = name;
+                setLine.VariableValue = value;
+                applyState(setLine);
+                m_Lines.push_back(std::move(setLine));
+                continue;
+            }
+
+            if (ReadAnyCommandPayload(line, { "if" }, payload))
+            {
+                // @if <condition> -> <label>  |  @if <condition> goto <label>
+                // Condition grammar (runtime evaluates against script variables):
+                //   always | never | flag <id> | <var> OP <number>
+                // Optional leading "not ". OP in ==,=,!=,>,>=,<,<=
+                std::string remaining = payload;
+                const size_t arrow = remaining.find("->");
+                size_t split = arrow;
+                if (split == std::string::npos)
+                {
+                    const size_t gotoPos = remaining.find("goto");
+                    if (gotoPos != std::string::npos && gotoPos > 0
+                        && std::isspace(static_cast<unsigned char>(remaining[gotoPos - 1]))
+                        && (gotoPos + 4 >= remaining.size()
+                            || std::isspace(static_cast<unsigned char>(remaining[gotoPos + 4]))))
+                        split = gotoPos;
+                }
+                if (split == std::string::npos)
+                    continue;
+
+                std::string condition = Trim(remaining.substr(0, split));
+                std::string labelPart = Trim(remaining.substr(split + (arrow != std::string::npos ? 2 : 4)));
+                // goto <label> form keeps the label after "goto"
+                if (arrow == std::string::npos)
+                {
+                    const size_t afterGoto = labelPart.find("goto");
+                    if (afterGoto != std::string::npos)
+                        labelPart = Trim(labelPart.substr(afterGoto + 4));
+                }
+                if (condition.empty())
+                    continue;
+                VisualNovelLine ifLine;
+                ifLine.Type = VisualNovelLineType::If;
+                ifLine.Condition = condition;
+                ifLine.TargetLabel = StripQuotes(labelPart);
+                applyState(ifLine);
+                m_Lines.push_back(std::move(ifLine));
                 continue;
             }
 

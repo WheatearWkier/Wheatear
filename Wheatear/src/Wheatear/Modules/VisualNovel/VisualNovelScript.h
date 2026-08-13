@@ -14,7 +14,14 @@ namespace Wheatear {
         Dialogue = 0,
         Choice,
         Goto,
-        End
+        End,
+        // "Set" assigns a script-local variable (@set name value / @set name = expr);
+        // "If" is a conditional jump (@if <cond> -> label / @if <cond> goto label).
+        // Both are consumed by the runtime's NormalizeCurrentNode and never surface
+        // as visible lines, so existing .vn files (which contain neither) are
+        // unaffected.
+        Set,
+        If
     };
 
     struct VisualNovelCharacter
@@ -32,6 +39,10 @@ namespace Wheatear {
         // is set (or always, when empty). Kept out of the line-text grammar via the
         // trailing "if flag <id>" token so existing scripts parse unchanged.
         std::string RequiredFlag;
+        // Optional full VN condition expression (EvaluateVNExpression grammar);
+        // evaluated when RequiredFlag is empty. Both gate visibility in
+        // VisualNovelSystem::CollectVisibleChoiceIndices.
+        std::string RequiredCondition;
     };
 
     struct VisualNovelLine
@@ -47,6 +58,15 @@ namespace Wheatear {
         std::vector<VisualNovelChoice> Choices;
         std::unordered_map<std::string, std::string> CharacterExpressions;
         float CharactersPerSecond = -1.0f;
+
+        // Set line: variable name / assigned value (a literal number or a
+        // reference to another variable, e.g. "@set gold = 5" or "@set hp = maxhp").
+        std::string VariableName;
+        std::string VariableValue;
+
+        // If line: condition string in VariableName (kept separate from Text so
+        // the visible-text path never touches it); jump target in TargetLabel.
+        std::string Condition;
     };
 
     class WHEATEAR_API VisualNovelScript

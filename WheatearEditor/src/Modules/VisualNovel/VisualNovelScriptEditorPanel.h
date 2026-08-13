@@ -18,29 +18,32 @@ namespace Wheatear {
         void OnImGuiRender();
 
     public:
-        enum class RowKind
-        {
-            Raw = 0,
-            Label,
-            Background,
-            Music,
-            Speed,
-            Character,
-            Show,
-            Hide,
-            Expression,
-            Dialogue,
-            Choice,
-            Goto,
-            End
-        };
+enum class RowKind
+    {
+        Raw = 0,
+        Label,
+        Background,
+        Music,
+        Speed,
+        Character,
+        Show,
+        Hide,
+        Expression,
+        Dialogue,
+        Choice,
+        Goto,
+        End,
+        Set,
+        If
+    };
 
-        struct ChoiceEntry
-        {
-            std::string Text;
-            std::string Target;
-            std::string RequiredFlag;
-        };
+    struct ChoiceEntry
+    {
+        std::string Text;
+        std::string Target;
+        std::string RequiredFlag;
+        std::string RequiredCondition;
+    };
 
         struct Row
         {

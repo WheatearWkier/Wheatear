@@ -148,7 +148,9 @@ namespace Wheatear {
         // Mirrors the runtime grammar: an optional trailing " if flag <id>" /
 // "if flag:<id>" clause (the last three whitespace tokens after "->")
 // gates this option behind a progression story flag.
-static void ExtractChoiceRequiredFlag(std::string& target, std::string& outFlag)
+static void ExtractChoiceRequiredCondition(std::string& target,
+            std::string& outFlag,
+            std::string& outCondition)
         {
             target = Trim(target);
             if (target.empty())
@@ -161,12 +163,10 @@ static void ExtractChoiceRequiredFlag(std::string& target, std::string& outFlag)
                 while (w >> w0)
                     words.push_back(w0);
             }
-            if (words.size() < 3 || words[words.size() - 3] != "if" || words[words.size() - 2] != "flag")
+            // Trailing clause after a standalone " if ":  "if flag <id>" or
+            // "if <expr>". Anything else is left as a plain label.
+            if (words.size() < 3 || words[words.size() - 3] != "if")
                 return;
-
-            std::string flagId = words.back();
-            if (flagId.rfind("flag:", 0) == 0 && flagId.size() > 5)
-                flagId = flagId.substr(5);
 
             std::string label;
             for (size_t i = 0; i < words.size() - 3; ++i)
@@ -176,7 +176,26 @@ static void ExtractChoiceRequiredFlag(std::string& target, std::string& outFlag)
                 label += words[i];
             }
 
-            outFlag = Trim(flagId);
+            std::string clause;
+            for (size_t i = words.size() - 2; i < words.size(); ++i)
+            {
+                if (!clause.empty())
+                    clause += " ";
+                clause += words[i];
+            }
+
+            if (words.size() == 3 && words[words.size() - 2] == "flag")
+            {
+                std::string flagId = words.back();
+                if (flagId.rfind("flag:", 0) == 0 && flagId.size() > 5)
+                    flagId = flagId.substr(5);
+                outFlag = Trim(flagId);
+            }
+            else
+            {
+                outCondition = Trim(clause);
+            }
+
             target = Trim(label);
         }
 
@@ -201,7 +220,7 @@ static void ExtractChoiceRequiredFlag(std::string& target, std::string& outFlag)
                 {
                     choice.Text = StripQuotes(segment.substr(0, arrow));
                     choice.Target = StripQuotes(segment.substr(arrow + 2));
-                    ExtractChoiceRequiredFlag(choice.Target, choice.RequiredFlag);
+                    ExtractChoiceRequiredCondition(choice.Target, choice.RequiredFlag, choice.RequiredCondition);
                 }
                 choices.push_back(std::move(choice));
             }
@@ -225,6 +244,8 @@ static void ExtractChoiceRequiredFlag(std::string& target, std::string& outFlag)
                 case VisualNovelScriptEditorPanel::RowKind::Choice: return "Choice";
                 case VisualNovelScriptEditorPanel::RowKind::Goto: return "Goto";
                 case VisualNovelScriptEditorPanel::RowKind::End: return "End";
+                case VisualNovelScriptEditorPanel::RowKind::Set: return "Set";
+                case VisualNovelScriptEditorPanel::RowKind::If: return "If";
             }
             return "Unknown";
         }
@@ -246,6 +267,8 @@ static void ExtractChoiceRequiredFlag(std::string& target, std::string& outFlag)
                 case VisualNovelScriptEditorPanel::RowKind::Choice: return std::to_string(row.Choices.size()) + " choices";
                 case VisualNovelScriptEditorPanel::RowKind::Goto: return row.Value;
                 case VisualNovelScriptEditorPanel::RowKind::End: return "end";
+                case VisualNovelScriptEditorPanel::RowKind::Set: return row.Name + " = " + row.Value;
+                case VisualNovelScriptEditorPanel::RowKind::If: return row.Value + " -> " + row.Text;
             }
             return {};
         }
@@ -565,6 +588,53 @@ static void ExtractChoiceRequiredFlag(std::string& target, std::string& outFlag)
             {
                 row.Kind = RowKind::End;
             }
+            else if (ReadCommandPayload(line, { "set" }, payload))
+            {
+                // @set name value | @set name = value
+                row.Kind = RowKind::Set;
+                std::string remaining = payload;
+                row.Name = ConsumeToken(remaining);
+                remaining = Trim(remaining);
+                if (StartsWith(remaining, "="))
+                    remaining = Trim(remaining.substr(1));
+                row.Value = StripQuotes(remaining);
+            }
+            else if (ReadCommandPayload(line, { "if" }, payload))
+            {
+                // @if <condition> -> <label> | @if <condition> goto <label>
+                row.Kind = RowKind::If;
+                std::string remaining = payload;
+                const size_t arrow = remaining.find("->");
+                if (arrow != std::string::npos)
+                {
+                    row.Value = Trim(remaining.substr(0, arrow));
+                    row.Text = StripQuotes(Trim(remaining.substr(arrow + 2)));
+                }
+                else
+                {
+                    // "goto <label>" form: split at the first standalone " goto "
+                    size_t gotoPos = std::string::npos;
+                    for (size_t i = 0; i + 4 < remaining.size(); ++i)
+                    {
+                        if (remaining.compare(i, 5, "goto ") == 0
+                            && (i == 0 || std::isspace(static_cast<unsigned char>(remaining[i - 1])))
+                            && (i + 5 >= remaining.size() || std::isspace(static_cast<unsigned char>(remaining[i + 5]))))
+                        {
+                            gotoPos = i;
+                            break;
+                        }
+                    }
+                    if (gotoPos != std::string::npos)
+                    {
+                        row.Value = Trim(remaining.substr(0, gotoPos));
+                        row.Text = StripQuotes(Trim(remaining.substr(gotoPos + 5)));
+                    }
+                    else
+                    {
+                        row.Value = remaining;
+                    }
+                }
+            }
             else
             {
                 const size_t colon = line.find(':');
@@ -635,6 +705,8 @@ static void ExtractChoiceRequiredFlag(std::string& target, std::string& outFlag)
                             out << " -> " << row.Choices[i].Target;
                             if (!row.Choices[i].RequiredFlag.empty())
                                 out << " if flag " << row.Choices[i].RequiredFlag;
+                            else if (!row.Choices[i].RequiredCondition.empty())
+                                out << " if " << row.Choices[i].RequiredCondition;
                         }
                     }
                     break;
@@ -643,6 +715,12 @@ static void ExtractChoiceRequiredFlag(std::string& target, std::string& outFlag)
                     break;
                 case RowKind::End:
                     out << "@end";
+                    break;
+                case RowKind::Set:
+                    out << "@set " << row.Name << " = " << row.Value;
+                    break;
+                case RowKind::If:
+                    out << "@if " << row.Value << " -> " << row.Text;
                     break;
             }
             out << "\n";
@@ -698,6 +776,10 @@ static void ExtractChoiceRequiredFlag(std::string& target, std::string& outFlag)
         if (ImGui::Button("+ Label")) AddRow(RowKind::Label);
         ImGui::SameLine();
         if (ImGui::Button("+ End")) AddRow(RowKind::End);
+        ImGui::SameLine();
+        if (ImGui::Button("+ Set")) AddRow(RowKind::Set);
+        ImGui::SameLine();
+        if (ImGui::Button("+ If")) AddRow(RowKind::If);
 
         ImGui::Separator();
         if (m_Rows.empty())
@@ -845,7 +927,10 @@ static void ExtractChoiceRequiredFlag(std::string& target, std::string& outFlag)
                         m_Dirty = true;
                     if (EditorContentPickers::DrawStoryFlagField("Required Flag", row.Choices[i].RequiredFlag, 256))
                         m_Dirty = true;
-                    EditorWidgets::HelpTooltip("Optional. The choice only renders when this story flag is set. Leave empty for an always-visible option.");
+                    EditorWidgets::HelpTooltip("Optional. The choice only renders when this story flag is set.");
+                    if (EditorWidgets::InputString("Required Condition", row.Choices[i].RequiredCondition, 256))
+                        m_Dirty = true;
+                    EditorWidgets::HelpTooltip("Optional expression, e.g. \"gold >= 5\" or \"not flag FLAG_X\". Evaluated against script variables when Required Flag is empty.");
                     ImGui::SameLine();
                     if (ImGui::Button("Remove"))
                     {
@@ -859,7 +944,7 @@ static void ExtractChoiceRequiredFlag(std::string& target, std::string& outFlag)
                 }
                 if (ImGui::Button("+ Choice Option"))
                 {
-                    row.Choices.push_back({ "New option", "target_label", {} });
+                    row.Choices.push_back({ "New option", "target_label", {}, {} });
                     m_Dirty = true;
                 }
                 break;
@@ -869,6 +954,20 @@ static void ExtractChoiceRequiredFlag(std::string& target, std::string& outFlag)
                 break;
             case RowKind::End:
                 ImGui::TextDisabled("Ends this VN script.");
+                break;
+            case RowKind::Set:
+                if (InputString("Variable", row.Name, 128))
+                    m_Dirty = true;
+                if (InputString("Value", row.Value, 128))
+                    m_Dirty = true;
+                EditorWidgets::HelpTooltip("Assigns a literal number or copies another variable (e.g. \"5\" or \"maxhp\").");
+                break;
+            case RowKind::If:
+                if (EditorWidgets::InputString("Condition", row.Value, 256))
+                    m_Dirty = true;
+                EditorWidgets::HelpTooltip("Expression: always | never | flag <id> | <var> OP <number> | <number> OP <number>, optional leading \"not \".");
+                if (EditorContentPickers::DrawStringPicker("Jump To", row.Text, CollectLabels(m_Rows), 256))
+                    m_Dirty = true;
                 break;
         }
     }
@@ -959,7 +1058,7 @@ static void ExtractChoiceRequiredFlag(std::string& target, std::string& outFlag)
                 row.Value = "neutral";
                 break;
             case RowKind::Choice:
-                row.Choices.push_back({ "Option text", "target_label", {} });
+                row.Choices.push_back({ "Option text", "target_label", {}, {} });
                 break;
             case RowKind::Dialogue:
                 row.Name = "Leo";
@@ -969,6 +1068,14 @@ static void ExtractChoiceRequiredFlag(std::string& target, std::string& outFlag)
                 row.Value = labels.empty() ? "target_label" : labels.front();
                 break;
             case RowKind::End:
+                break;
+            case RowKind::Set:
+                row.Name = "gold";
+                row.Value = "0";
+                break;
+            case RowKind::If:
+                row.Value = "always";
+                row.Text = labels.empty() ? "target_label" : labels.front();
                 break;
             default:
                 row.Raw = "";

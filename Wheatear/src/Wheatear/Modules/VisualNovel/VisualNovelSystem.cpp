@@ -2043,7 +2043,7 @@ namespace Wheatear {
             // Visible indices already exclude gated-out options; input maps a
             // displayed N to the underlying script choice so Choose advances to
             // the correct TargetLabel even when earlier options are hidden.
-            const std::vector<size_t> visibleIndices = CollectVisibleChoiceIndices(choices);
+            const std::vector<size_t> visibleIndices = CollectVisibleChoiceIndices(choices, state.Runtime);
             const size_t maxChoices = std::min<size_t>(visibleIndices.size(), 9);
 
             for (size_t i = 0; i < maxChoices; ++i)
@@ -2101,14 +2101,21 @@ namespace Wheatear {
     }
 
     std::vector<size_t> VisualNovelSystem::CollectVisibleChoiceIndices(
-        const std::vector<VisualNovelChoice>& choices)
+        const std::vector<VisualNovelChoice>& choices,
+        const VisualNovelRuntime& runtime)
     {
         std::vector<size_t> indices;
         indices.reserve(choices.size());
         const auto& flags = GameProgress::GetState().StoryFlags;
         for (size_t i = 0; i < choices.size(); ++i)
         {
-            if (choices[i].RequiredFlag.empty() || flags.count(choices[i].RequiredFlag) > 0)
+            const VisualNovelChoice& choice = choices[i];
+            bool visible = true;
+            if (!choice.RequiredFlag.empty())
+                visible = flags.count(choice.RequiredFlag) > 0;
+            else if (!choice.RequiredCondition.empty())
+                visible = EvaluateVNExpression(choice.RequiredCondition, runtime.GetVariables());
+            if (visible)
                 indices.push_back(i);
         }
         return indices;
@@ -2200,7 +2207,7 @@ namespace Wheatear {
         // Gated choices (RequiredFlag set but flag not in StoryFlags) are filtered
         // out here and in UpdateRuntimeInputs, so the Nth visible button stays
         // stable across hidden options instead of indexing choices by raw N.
-        const std::vector<size_t> visibleIndices = CollectVisibleChoiceIndices(choices);
+        const std::vector<size_t> visibleIndices = CollectVisibleChoiceIndices(choices, state.Runtime);
         const uint32_t maxVisibleChoices = std::min<uint32_t>(
             component.MaxVisibleChoices,
             static_cast<uint32_t>(visibleIndices.size()));

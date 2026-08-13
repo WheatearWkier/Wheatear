@@ -2,8 +2,10 @@
 #include "VisualNovelRuntime.h"
 
 #include "Wheatear/Core/Log.h"
+#include "Wheatear/Modules/Progression/GameProgress.h"
 
 #include <algorithm>
+#include <cctype>
 #include <cmath>
 #include <fstream>
 #include <limits>
@@ -172,7 +174,114 @@ namespace Wheatear {
             return index;
         }
 
+        static std::vector<std::string> SplitWords(const std::string& value)
+        {
+            std::vector<std::string> words;
+            std::istringstream stream(value);
+            std::string word;
+            while (stream >> word)
+                words.push_back(word);
+            return words;
+        }
+
+        static std::string ToLower(std::string value)
+        {
+            std::transform(value.begin(), value.end(), value.begin(),
+                [](unsigned char c) { return static_cast<char>(std::tolower(c)); });
+            return value;
+        }
+
+        static bool CompareFloat(float left, const std::string& op, float right)
+        {
+            if (op == "==" || op == "=") return left == right;
+            if (op == "!=") return left != right;
+            if (op == ">") return left > right;
+            if (op == ">=") return left >= right;
+            if (op == "<") return left < right;
+            if (op == "<=") return left <= right;
+            return false;
+        }
+
+        static bool TryParseFloat(const std::string& value, float& result)
+        {
+            if (value.empty())
+                return false;
+            try
+            {
+                size_t parsed = 0;
+                const float parsedValue = std::stof(value, &parsed);
+                if (parsed != value.size())
+                    return false;
+                result = parsedValue;
+                return true;
+            }
+            catch (...)
+            {
+                return false;
+            }
+        }
+
     } // namespace
+
+    bool EvaluateVNExpression(const std::string& expression,
+        const std::unordered_map<std::string, float>& variables)
+    {
+        std::vector<std::string> words = SplitWords(expression);
+        if (words.empty())
+            return false;
+
+        bool negate = false;
+        if (ToLower(words.front()) == "not")
+        {
+            negate = true;
+            words.erase(words.begin());
+        }
+        if (words.empty())
+            return false;
+
+        const std::string kind = ToLower(words[0]);
+        bool value = false;
+
+        if (kind == "always")
+        {
+            value = true;
+        }
+        else if (kind == "never")
+        {
+            value = false;
+        }
+        else if (kind == "flag" && words.size() >= 2)
+        {
+            // Progression story flags stay authoritative for cross-system
+            // conditions (set via progression:set_flag / dungeon clears).
+            value = GameProgress::GetState().StoryFlags.count(words[1]) > 0;
+        }
+        else if (words.size() >= 3)
+        {
+            // <operand> OP <operand>  — left may be a variable or number.
+            float left = 0.0f;
+            if (!TryParseFloat(words[0], left))
+            {
+                const auto it = variables.find(words[0]);
+                if (it != variables.end())
+                    left = it->second;
+                else
+                    return negate ? true : false; // unknown variable -> false
+            }
+            float right = 0.0f;
+            if (!TryParseFloat(words[2], right))
+            {
+                const auto it = variables.find(words[2]);
+                if (it != variables.end())
+                    right = it->second;
+                else
+                    return negate ? true : false; // unknown variable -> false
+            }
+            value = CompareFloat(left, words[1], right);
+        }
+
+        return negate ? !value : value;
+    }
 
     bool VisualNovelRuntime::LoadScript(const std::filesystem::path& filepath)
     {
@@ -192,8 +301,25 @@ namespace Wheatear {
         m_VisibleCharacters = 0.0f;
         m_AutoPlayTimer = 0.0f;
         m_History.clear();
+        m_Variables.clear();
         m_Finished = m_Script.IsEmpty();
         NormalizeCurrentNode();
+    }
+
+    float VisualNovelRuntime::GetVariable(const std::string& name) const
+    {
+        const auto it = m_Variables.find(name);
+        return it == m_Variables.end() ? 0.0f : it->second;
+    }
+
+    void VisualNovelRuntime::SetVariable(const std::string& name, float value)
+    {
+        m_Variables[name] = value;
+    }
+
+    bool VisualNovelRuntime::HasVariable(const std::string& name) const
+    {
+        return m_Variables.count(name) > 0;
     }
 
     const VisualNovelLine* VisualNovelRuntime::GetCurrentLine() const
@@ -202,7 +328,10 @@ namespace Wheatear {
             return nullptr;
 
         const VisualNovelLine& line = m_Script.GetLines()[m_CurrentLineIndex];
-        if (line.Type == VisualNovelLineType::Goto || line.Type == VisualNovelLineType::End)
+        if (line.Type == VisualNovelLineType::Goto
+            || line.Type == VisualNovelLineType::End
+            || line.Type == VisualNovelLineType::Set
+            || line.Type == VisualNovelLineType::If)
             return nullptr;
 
         return &line;
@@ -465,6 +594,12 @@ namespace Wheatear {
                 << EscapeField(entry.Text) << "\n";
         }
 
+        file << "VARS " << m_Variables.size() << "\n";
+        for (const auto& [name, value] : m_Variables)
+        {
+            file << "V " << EscapeField(name) << "|" << value << "\n";
+        }
+
         return true;
     }
 
@@ -477,13 +612,14 @@ namespace Wheatear {
             return false;
         }
 
-        std::string line;
+std::string line;
         std::filesystem::path savedSource;
         size_t savedIndex = 0;
         float savedVisibleCharacters = 0.0f;
         bool savedFinished = false;
         bool savedAutoPlay = false;
         std::vector<VisualNovelHistoryEntry> savedHistory;
+        std::unordered_map<std::string, float> savedVariables;
 
         while (std::getline(file, line))
         {
@@ -533,6 +669,16 @@ namespace Wheatear {
                 entry.Text = UnescapeField(fields[3]);
                 savedHistory.push_back(std::move(entry));
             }
+
+            if (StartsWith(line, "V "))
+            {
+                const auto fields = SplitEscaped(PayloadAfter(line, "V "), '|');
+                if (fields.size() < 2)
+                    continue;
+                float value = 0.0f;
+                if (TryParseFloat(fields[1], value))
+                    savedVariables[UnescapeField(fields[0])] = value;
+            }
         }
 
         if (!savedSource.empty() && savedSource != m_Script.GetSourcePath())
@@ -555,6 +701,7 @@ namespace Wheatear {
         m_AutoPlay = savedAutoPlay;
         m_AutoPlayTimer = 0.0f;
         m_History = std::move(savedHistory);
+        m_Variables = std::move(savedVariables);
         NormalizeCurrentNode();
         return true;
     }
@@ -598,6 +745,38 @@ namespace Wheatear {
                 if (!JumpToLabel(line.TargetLabel))
                     m_Finished = true;
                 m_VisibleCharacters = 0.0f;
+                continue;
+            }
+
+            if (line.Type == VisualNovelLineType::Set)
+            {
+                // Assign a literal number or copy another variable, then advance.
+                float value = 0.0f;
+                if (!TryParseFloat(line.VariableValue, value))
+                {
+                    const auto it = m_Variables.find(line.VariableValue);
+                    if (it != m_Variables.end())
+                        value = it->second;
+                }
+                m_Variables[line.VariableName] = value;
+                ++m_CurrentLineIndex;
+                continue;
+            }
+
+            if (line.Type == VisualNovelLineType::If)
+            {
+                // Conditional jump: evaluate against variables; true -> label,
+                // false -> fall through to the next line.
+                if (EvaluateVNExpression(line.Condition, m_Variables))
+                {
+                    if (!JumpToLabel(line.TargetLabel))
+                        m_Finished = true;
+                    m_VisibleCharacters = 0.0f;
+                }
+                else
+                {
+                    ++m_CurrentLineIndex;
+                }
                 continue;
             }
 

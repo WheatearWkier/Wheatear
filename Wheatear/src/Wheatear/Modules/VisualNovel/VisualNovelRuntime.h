@@ -18,6 +18,13 @@ namespace Wheatear {
         bool IsChoice = false;
     };
 
+    // Shared VN condition evaluator. Grammar (whitespace-separated, optional
+    // leading "not "): always | never | flag <id> | <var> OP <number> |
+    // <number> OP <number>. flag reads GameProgress::StoryFlags; variables come
+    // from the passed table (VisualNovelRuntime::GetVariables()).
+    WHEATEAR_API bool EvaluateVNExpression(const std::string& expression,
+        const std::unordered_map<std::string, float>& variables);
+
     class WHEATEAR_API VisualNovelRuntime
     {
     public:
@@ -39,6 +46,12 @@ namespace Wheatear {
         const std::unordered_map<std::string, std::string>& GetCurrentCharacterExpressions() const;
         const std::vector<VisualNovelChoice>& GetCurrentChoices() const;
         const std::vector<VisualNovelHistoryEntry>& GetHistory() const { return m_History; }
+
+        // Script-local variables (@set) — separate from GameProgress story flags.
+        float GetVariable(const std::string& name) const;
+        void SetVariable(const std::string& name, float value);
+        const std::unordered_map<std::string, float>& GetVariables() const { return m_Variables; }
+        bool HasVariable(const std::string& name) const;
 
         std::string GetVisibleText() const;
         bool IsLineComplete() const;
@@ -76,6 +89,7 @@ namespace Wheatear {
         float m_AutoPlayTimer = 0.0f;
 
         std::vector<VisualNovelHistoryEntry> m_History;
+        std::unordered_map<std::string, float> m_Variables;
     };
 
 } // namespace Wheatear
