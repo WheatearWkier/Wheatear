@@ -1,5 +1,6 @@
 #include "wepch.h"
 #include "SideCombatDrawer.h"
+#include "Wheatear/Modules/SideCombat/SideCombatComponents.h"
 
 #include "Editor/CommandBuilder.h"
 #include "Editor/EditorContentPickers.h"

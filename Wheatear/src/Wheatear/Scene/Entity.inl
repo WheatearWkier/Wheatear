@@ -2,7 +2,7 @@
 
 #include "Entity.h"
 
-#include "Components.h"
+#include "Wheatear/Scene/Components/CoreComponents.h"
 #include "Scene.h"
 #include "Wheatear/Core/Log.h"
 

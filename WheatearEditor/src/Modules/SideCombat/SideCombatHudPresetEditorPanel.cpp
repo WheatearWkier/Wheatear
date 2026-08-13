@@ -1,5 +1,6 @@
 #include "wepch.h"
 #include "SideCombatHudPresetEditorPanel.h"
+#include "Wheatear/Modules/SideCombat/SideCombatComponents.h"
 
 #include "Editor/CommandBuilder.h"
 #include "Editor/EditorFloatingWindow.h"

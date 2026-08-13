@@ -1,5 +1,6 @@
 #include "wepch.h"
 #include "VisualNovelDrawer.h"
+#include "Wheatear/Modules/VisualNovel/VisualNovelComponents.h"
 
 #include "Editor/EditorContentPickers.h"
 #include "Editor/EditorLocale.h"

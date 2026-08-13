@@ -79,6 +79,9 @@
     <Filter Include="src\Wheatear\Scene">
       <UniqueIdentifier>{AA8DD9AD-9671-9A03-FFD1-9456EBD48485}</UniqueIdentifier>
     </Filter>
+    <Filter Include="src\Wheatear\Scene\Components">
+      <UniqueIdentifier>{7F54709D-EB6C-57C7-B419-E76020F1EB60}</UniqueIdentifier>
+    </Filter>
     <Filter Include="src\Wheatear\Scene\Serialization">
       <UniqueIdentifier>{B787F9B7-A3D8-E4F9-CC3C-D3BBB8EC7763}</UniqueIdentifier>
     </Filter>
@@ -605,6 +608,30 @@
     </ClInclude>
     <ClInclude Include="src\Wheatear\Scene\Components.h">
       <Filter>src\Wheatear\Scene</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Wheatear\Scene\Components\AnimationComponents.h">
+      <Filter>src\Wheatear\Scene\Components</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Wheatear\Scene\Components\AudioComponents.h">
+      <Filter>src\Wheatear\Scene\Components</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Wheatear\Scene\Components\CameraComponents.h">
+      <Filter>src\Wheatear\Scene\Components</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Wheatear\Scene\Components\CoreComponents.h">
+      <Filter>src\Wheatear\Scene\Components</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Wheatear\Scene\Components\Physics2DComponents.h">
+      <Filter>src\Wheatear\Scene\Components</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Wheatear\Scene\Components\RenderingComponents.h">
+      <Filter>src\Wheatear\Scene\Components</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Wheatear\Scene\Components\ScriptComponents.h">
+      <Filter>src\Wheatear\Scene\Components</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Wheatear\Scene\Components\UIComponents.h">
+      <Filter>src\Wheatear\Scene\Components</Filter>
     </ClInclude>
     <ClInclude Include="src\Wheatear\Scene\Entity.h">
       <Filter>src\Wheatear\Scene</Filter>

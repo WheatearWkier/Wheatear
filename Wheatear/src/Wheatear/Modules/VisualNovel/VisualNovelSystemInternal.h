@@ -5,6 +5,7 @@
 // off without duplicating UI/scene-binding logic. Inline so each TU compiles
 // independently; callers use `using namespace VisualNovelSystemInternal;`.
 
+#include "Wheatear/Modules/VisualNovel/VisualNovelComponents.h"
 #include "VisualNovelInputService.h"
 #include "Wheatear/Audio/AudioEngine.h"
 #include "Wheatear/Core/AssetAliasRegistry.h"

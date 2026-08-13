@@ -9,6 +9,7 @@
 #include "Wheatear/Scene/Entity.h"
 #include "Wheatear/Scene/Scene.h"
 #include "Wheatear/Scene/Components.h"
+#include "Wheatear/Modules/GameplayModuleComponents.h"
 
 namespace Wheatear {
 
@@ -160,6 +161,7 @@ namespace Wheatear {
     using EditorEntitySnapshot = EditorCommandDetail::EntityComponentSnapshot<
         IDComponent,
         TagComponent,
+        EditorHiddenComponent,
         TransformComponent,
         SpriteRendererComponent,
         SpriteAnimatorComponent,
@@ -189,6 +191,7 @@ namespace Wheatear {
         UISkillTreeViewComponent,
         UIPageItemComponent,
         UICheckboxComponent,
+        UIRadialCooldownComponent,
         AudioSourceComponent,
         VisualNovelComponent,
         ArcadeCombatLevelComponent,
@@ -205,7 +208,9 @@ namespace Wheatear {
         SideHitboxComponent,
         SidePickupComponent,
         TacticalCombatLevelComponent,
-        TacticalUnitComponent
+        TacticalUnitComponent,
+        TurnCombatLevelComponent,
+        TurnCombatantComponent
     >;
 
     class EntityCreateCommand : public ICommand

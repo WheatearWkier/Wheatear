@@ -1,5 +1,6 @@
 #include "wepch.h"
 #include "ArcadeCombatDrawer.h"
+#include "Wheatear/Modules/ArcadeCombat/ArcadeCombatComponents.h"
 
 #include "Editor/CommandBuilder.h"
 #include "Editor/EditorContentPickers.h"

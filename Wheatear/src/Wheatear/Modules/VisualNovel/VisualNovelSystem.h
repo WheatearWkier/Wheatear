@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Wheatear/Core/UUID.h"
+#include "Wheatear/Modules/VisualNovel/VisualNovelComponents.h"
 #include "Wheatear/Modules/VisualNovel/VisualNovelRuntime.h"
 #include "Wheatear/Systems/ISystem.h"
 

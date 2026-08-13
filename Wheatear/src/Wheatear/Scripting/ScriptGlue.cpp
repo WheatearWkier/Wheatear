@@ -3,6 +3,7 @@
 
 #if defined(WT_ENABLE_CSHARP_SCRIPTING)
 
+#include "Wheatear/Modules/ArcadeCombat/ArcadeCombatComponents.h"
 #include "Wheatear/Scene/Scene.h"
 #include "Wheatear/Scene/Entity.h"
 #include "Wheatear/Scene/Components.h"

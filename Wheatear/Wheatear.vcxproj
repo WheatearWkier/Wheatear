@@ -313,6 +313,14 @@
     <ClInclude Include="src\Wheatear\Scene\ComponentGroup.h" />
     <ClInclude Include="src\Wheatear\Scene\ComponentLifecycleRegistry.h" />
     <ClInclude Include="src\Wheatear\Scene\Components.h" />
+    <ClInclude Include="src\Wheatear\Scene\Components\AnimationComponents.h" />
+    <ClInclude Include="src\Wheatear\Scene\Components\AudioComponents.h" />
+    <ClInclude Include="src\Wheatear\Scene\Components\CameraComponents.h" />
+    <ClInclude Include="src\Wheatear\Scene\Components\CoreComponents.h" />
+    <ClInclude Include="src\Wheatear\Scene\Components\Physics2DComponents.h" />
+    <ClInclude Include="src\Wheatear\Scene\Components\RenderingComponents.h" />
+    <ClInclude Include="src\Wheatear\Scene\Components\ScriptComponents.h" />
+    <ClInclude Include="src\Wheatear\Scene\Components\UIComponents.h" />
     <ClInclude Include="src\Wheatear\Scene\Entity.h" />
     <ClInclude Include="src\Wheatear\Scene\Entity.inl" />
     <ClInclude Include="src\Wheatear\Scene\EntityReference.h" />
