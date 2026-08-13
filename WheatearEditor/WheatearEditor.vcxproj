@@ -179,6 +179,7 @@
     <ClInclude Include="src\Modules\ArcadeCombat\ArcadeCombatDrawer.h" />
     <ClInclude Include="src\Modules\ModuleEditorBootstrap.h" />
     <ClInclude Include="src\Modules\Progression\ProgressionContentEditorPanel.h" />
+    <ClInclude Include="src\Modules\Progression\ProgressionContentEditorPanelInternal.h" />
     <ClInclude Include="src\Modules\SideCombat\SideCombatDrawer.h" />
     <ClInclude Include="src\Modules\SideCombat\SideCombatHudPresetEditorPanel.h" />
     <ClInclude Include="src\Modules\SideCombat\SideCombatTuningEditorPanel.h" />
@@ -233,6 +234,8 @@
     <ClCompile Include="src\Modules\ArcadeCombat\ArcadeCombatDrawer.cpp" />
     <ClCompile Include="src\Modules\ModuleEditorBootstrap.cpp" />
     <ClCompile Include="src\Modules\Progression\ProgressionContentEditorPanel.cpp" />
+    <ClCompile Include="src\Modules\Progression\ProgressionContentEditorPanel_Content.cpp" />
+    <ClCompile Include="src\Modules\Progression\ProgressionContentEditorPanel_Yaml.cpp" />
     <ClCompile Include="src\Modules\SideCombat\SideCombatDrawer.cpp" />
     <ClCompile Include="src\Modules\SideCombat\SideCombatHudPresetEditorPanel.cpp" />
     <ClCompile Include="src\Modules\SideCombat\SideCombatTuningEditorPanel.cpp" />

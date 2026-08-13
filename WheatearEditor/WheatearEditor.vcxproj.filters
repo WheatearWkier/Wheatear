@@ -126,6 +126,9 @@
     <ClInclude Include="src\Modules\Progression\ProgressionContentEditorPanel.h">
       <Filter>Modules\Progression</Filter>
     </ClInclude>
+    <ClInclude Include="src\Modules\Progression\ProgressionContentEditorPanelInternal.h">
+      <Filter>Modules\Progression</Filter>
+    </ClInclude>
     <ClInclude Include="src\Modules\SideCombat\SideCombatDrawer.h">
       <Filter>Modules\SideCombat</Filter>
     </ClInclude>
@@ -280,6 +283,12 @@
       <Filter>Modules</Filter>
     </ClCompile>
     <ClCompile Include="src\Modules\Progression\ProgressionContentEditorPanel.cpp">
+      <Filter>Modules\Progression</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Modules\Progression\ProgressionContentEditorPanel_Content.cpp">
+      <Filter>Modules\Progression</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Modules\Progression\ProgressionContentEditorPanel_Yaml.cpp">
       <Filter>Modules\Progression</Filter>
     </ClCompile>
     <ClCompile Include="src\Modules\SideCombat\SideCombatDrawer.cpp">
