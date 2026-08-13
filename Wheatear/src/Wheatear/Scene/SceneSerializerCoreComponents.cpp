@@ -166,30 +166,6 @@ namespace Wheatear {
         }
     };
 
-    //template<> struct ComponentSerializer<MeshRendererComponent>
-    //{
-    //    static constexpr const char* Key = "MeshRendererComponent";
-    //    static void Serialize(YAML::Emitter& o, const MeshRendererComponent& c)
-    //    {
-    //        o << YAML::Key << Key << YAML::BeginMap;
-    //        o << YAML::Key << "MeshPath" << YAML::Value << (c.Mesh ? c.Mesh->GetFilepath() : "");
-    //        o << YAML::Key << "Albedo" << YAML::Value << c.Material.Albedo;
-    //        o << YAML::Key << "Metallic" << YAML::Value << c.Material.Metallic;
-    //        o << YAML::Key << "Roughness" << YAML::Value << c.Material.Roughness;
-    //        o << YAML::EndMap;
-    //    }
-    //    static void Deserialize(const YAML::Node& n, MeshRendererComponent& c)
-    //    {
-    //        c.Material.Albedo = n["Albedo"].as<glm::vec4>(glm::vec4(1.0f));
-    //        c.Material.Metallic = n["Metallic"].as<float>(0.0f);
-    //        c.Material.Roughness = n["Roughness"].as<float>(0.5f);
-    //        auto path = n["MeshPath"].as<std::string>("");
-    //        if (!path.empty())
-    //            c.Mesh = Mesh::Create(path);
-    //        else
-    //    }
-    //};
-
     template<> struct ComponentSerializer<MeshRendererComponent>
     {
         static constexpr const char* Key = "MeshRendererComponent";

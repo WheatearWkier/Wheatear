@@ -214,6 +214,7 @@
     <ClCompile Include="src\Build\AssetDependencyScanner.cpp" />
     <ClCompile Include="src\Build\PlayerPackager.cpp" />
     <ClCompile Include="src\Build\ProjectSourceScanner.cpp" />
+    <ClCompile Include="src\Editor\CommandBuilder.cpp" />
     <ClCompile Include="src\Editor\CoreEditorComponents.cpp" />
     <ClCompile Include="src\Editor\EditorComponentRegistry.cpp" />
     <ClCompile Include="src\Editor\EditorLayer2D.cpp" />

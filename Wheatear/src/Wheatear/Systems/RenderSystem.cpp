@@ -179,7 +179,6 @@ namespace Wheatear {
         Renderer3D::BeginShadowPass(ComputeLightSpaceMatrix(scene, false));
         RenderSceneShadow(scene, false);
         Renderer3D::EndShadowPass();
-        //Renderer3D::GetShadowMapFB()->Unbind();
         RenderCommand::BindFramebuffer(previousFBO);
         RenderCommand::SetViewport(0, 0, scene->GetViewportWidth(), scene->GetViewportHeight());
 

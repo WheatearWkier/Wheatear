@@ -5,12 +5,7 @@
 
 //#include <unordered_map>
 
-//static std::unordered_map<Wheatear::UUID, std::string> m_Map;
 //
-//static void AddToMap()
-//{
-//	m_Map[Wheatear::UUID()] = "wheatear";
-//}
 
 namespace Wheatear {
 

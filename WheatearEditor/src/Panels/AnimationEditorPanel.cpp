@@ -447,7 +447,6 @@ namespace Wheatear {
                 {
                     StopPreview();
                     m_CurrentClipName = name;
-                    //m_Animator->CurrentClipName = name;
                     m_PlaybackTime = 0.0f;
                     m_IsPlaying = false;
                 }

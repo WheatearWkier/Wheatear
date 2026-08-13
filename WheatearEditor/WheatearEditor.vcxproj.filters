@@ -225,6 +225,9 @@
     <ClCompile Include="src\Build\ProjectSourceScanner.cpp">
       <Filter>Build</Filter>
     </ClCompile>
+    <ClCompile Include="src\Editor\CommandBuilder.cpp">
+      <Filter>Editor</Filter>
+    </ClCompile>
     <ClCompile Include="src\Editor\CoreEditorComponents.cpp">
       <Filter>Editor</Filter>
     </ClCompile>
