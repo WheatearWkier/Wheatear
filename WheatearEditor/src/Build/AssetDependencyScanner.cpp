@@ -427,6 +427,7 @@ namespace Wheatear {
         return extension == AssetFileType::SceneExtension
             || extension == AssetFileType::PrefabExtension
             || extension == AssetFileType::MaterialExtension
+            || extension == AssetFileType::AnimationClipExtension
             || extension == ".vn"
             || extension == ".wts"
             || extension == ".yaml"

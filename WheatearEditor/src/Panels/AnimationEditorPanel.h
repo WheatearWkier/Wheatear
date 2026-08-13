@@ -52,6 +52,7 @@ namespace Wheatear {
 
         std::string m_DefaultClipName;
         std::string m_CurrentClipName;
+        std::string m_ClipAssetPath;
 
         Ref<Scene> m_Scene;
         float   m_PlaybackTime = 0.0f;

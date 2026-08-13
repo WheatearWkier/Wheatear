@@ -36,6 +36,7 @@ namespace Wheatear::EditorWidgets {
             case AssetReferenceKind::Scene: return "Scene";
             case AssetReferenceKind::Script: return "Script";
             case AssetReferenceKind::Prefab: return "Prefab";
+            case AssetReferenceKind::AnimationClip: return "Animation Clip";
             case AssetReferenceKind::Any:
             default: return "Asset";
             }
@@ -61,6 +62,8 @@ namespace Wheatear::EditorWidgets {
                 return extension == ".lua" || extension == ".cs" || extension == ".vn" || extension == ".wts";
             case AssetReferenceKind::Prefab:
                 return extension == ".wtprefab";
+            case AssetReferenceKind::AnimationClip:
+                return extension == ".wtanim";
             case AssetReferenceKind::Data:
                 return extension == ".yaml" || extension == ".yml" || extension == ".json" || extension == ".txt" || extension == ".wts" || extension == ".wtuit";
             case AssetReferenceKind::Any:

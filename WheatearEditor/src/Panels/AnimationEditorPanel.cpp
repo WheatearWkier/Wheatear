@@ -1,16 +1,21 @@
 #include "wtpch.h"
 #include "AnimationEditorPanel.h"
 
+#include "Editor/EditorContentPickers.h"
 #include "Editor/EditorFloatingWindow.h"
 #include "Editor/EditorWidgets.h"
 
 #include <imgui/imgui.h>
 #include <imgui/imgui_internal.h>
 #include <glm/gtc/type_ptr.hpp>
+#include <cctype>
 #include <cstring>
 #include <cfloat>
 #include <vector>
 
+#include "Wheatear/Animation/AnimationClipSerializer.h"
+#include "Wheatear/Core/AssetPath.h"
+#include "Wheatear/Core/EngineInfo.h"
 #include "Wheatear/Scene/Components.h"
 
 namespace Wheatear {
@@ -18,6 +23,22 @@ namespace Wheatear {
     static constexpr float kTrackHeight = 36.0f;
     static constexpr float kLabelWidth = 150.0f;
     static constexpr float kRulerHeight = 36.0f;
+
+    static std::string MakeSafeClipName(const std::string& name)
+    {
+        std::string result;
+        result.reserve(name.size());
+        for (char c : name)
+        {
+            if (std::isalnum(static_cast<unsigned char>(c)) || c == '_' || c == '-')
+                result += c;
+            else
+                result += '_';
+        }
+        if (result.empty())
+            result = "clip";
+        return result;
+    }
 
     using EditorWidgets::InputString;
 
@@ -536,6 +557,46 @@ namespace Wheatear {
             if (ImGui::Button("Clear Default"))
                 m_Animator->DefaultClipName = "";
         }
+
+        ImGui::SameLine(0, 20);
+        if (ImGui::Button("Save Clip As..."))
+        {
+            std::string path = m_ClipAssetPath;
+            if (path.empty())
+                path = "assets/animations/" + MakeSafeClipName(clip->GetName()) + AssetFileType::AnimationClipExtension;
+            if (AnimationClipSerializer::Save(clip, AssetPath::Resolve(path)))
+            {
+                m_ClipAssetPath = path;
+                m_Animator->BindExternalClipAsset(clip->GetName(), path);
+                WT_CORE_INFO("Saved animation clip asset: {}", path);
+            }
+            else
+            {
+                WT_CORE_ERROR("Failed to save animation clip asset: {}", path);
+            }
+        }
+        ImGui::SameLine();
+        if (ImGui::Button("Load .wtanim..."))
+        {
+            if (EditorContentPickers::DrawAssetField("Clip Asset", m_ClipAssetPath,
+                    EditorWidgets::AssetReferenceKind::AnimationClip, 512))
+            {
+                Ref<AnimationClip> loaded = AnimationClipSerializer::Load(AssetPath::Resolve(m_ClipAssetPath));
+                if (loaded)
+                {
+                    m_Animator->AddClip(loaded);
+                    m_Animator->BindExternalClipAsset(loaded->GetName(), m_ClipAssetPath);
+                    m_CurrentClipName = loaded->GetName();
+                    WT_CORE_INFO("Loaded animation clip asset: {}", m_ClipAssetPath);
+                }
+                else
+                {
+                    WT_CORE_ERROR("Failed to load animation clip asset: {}", m_ClipAssetPath);
+                }
+            }
+        }
+        EditorWidgets::HelpTooltip("Saves the current clip as a reusable .wtanim asset and binds it to this entity. "
+            "Other entities can bind the same asset; runtime loads it automatically.");
 
         if (!m_Animator->DefaultClipName.empty() && m_Animator->DefaultClipName == m_CurrentClipName)
         {

@@ -60,7 +60,8 @@ namespace Wheatear::EditorWidgets {
         Data,
         Scene,
         Script,
-        Prefab
+        Prefab,
+        AnimationClip
     };
 
     std::vector<std::string> SplitList(const std::string& text);

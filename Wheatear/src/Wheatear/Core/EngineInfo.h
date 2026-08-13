@@ -19,6 +19,7 @@ namespace Wheatear {
         inline constexpr const char* UITemplateExtension = ".wtuit";
         inline constexpr const char* MetadataExtension = ".wtmeta";
         inline constexpr const char* MaterialExtension = ".wtmaterial";
+        inline constexpr const char* AnimationClipExtension = ".wtanim";
     }
 
 } // namespace Wheatear

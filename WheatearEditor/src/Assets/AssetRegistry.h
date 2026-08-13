@@ -24,7 +24,8 @@ namespace Wheatear {
         UITemplate,
         Material,
         Data,
-        Metadata
+        Metadata,
+        AnimationClip
     };
 
     struct TextureImportSettings

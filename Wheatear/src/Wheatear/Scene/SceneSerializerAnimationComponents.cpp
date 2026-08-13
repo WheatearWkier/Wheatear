@@ -11,6 +11,15 @@ namespace Wheatear {
             o << YAML::Key << "PlayOnStart" << YAML::Value << c.PlayOnStart;
             o << YAML::Key << "FireEvents" << YAML::Value << c.FireEvents;
             o << YAML::Key << "PlaybackSpeed" << YAML::Value << c.PlaybackSpeed;
+            o << YAML::Key << "ExternalClipAssets" << YAML::Value << YAML::BeginSeq;
+            for (const auto& [name, path] : c.ExternalClipAssets)
+            {
+                o << YAML::BeginMap;
+                o << YAML::Key << "Name" << YAML::Value << name;
+                o << YAML::Key << "Asset" << YAML::Value << path;
+                o << YAML::EndMap;
+            }
+            o << YAML::EndSeq;
             o << YAML::Key << "Clips" << YAML::Value << YAML::BeginSeq;
             for (const auto& [name, clip] : c.Clips)
             {
@@ -110,6 +119,16 @@ namespace Wheatear {
                             clip->AddEvent(event);
                         }
                     c.AddClip(clip);
+                }
+            }
+            if (auto ex = n["ExternalClipAssets"])
+            {
+                for (auto e : ex)
+                {
+                    const std::string name = e["Name"].as<std::string>("");
+                    const std::string asset = e["Asset"].as<std::string>("");
+                    if (!name.empty() && !asset.empty())
+                        c.ExternalClipAssets[name] = asset;
                 }
             }
             c.DefaultClipName = n["DefaultClip"].as<std::string>("");

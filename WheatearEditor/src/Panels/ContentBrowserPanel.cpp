@@ -43,6 +43,7 @@ namespace Wheatear {
                 case AssetType::Material:   return "Material";
                 case AssetType::Data:       return "Data";
                 case AssetType::Metadata:   return "Metadata";
+                case AssetType::AnimationClip: return "Animation Clip";
                 default:                    return "Unknown";
             }
         }
@@ -69,6 +70,7 @@ namespace Wheatear {
         m_Icons[AssetType::Material]  = m_Icons[AssetType::Unknown];
         m_Icons[AssetType::Data]      = m_Icons[AssetType::Unknown];
         m_Icons[AssetType::Metadata]  = m_Icons[AssetType::Unknown];
+        m_Icons[AssetType::AnimationClip] = m_Icons[AssetType::Unknown];
 
         AssetRegistry::Get().LoadCache(AssetPath::GetProjectRoot());
         m_RegistryStatus = "Loaded asset registry cache. Use Rescan Assets after adding or replacing resources.";
@@ -99,6 +101,8 @@ namespace Wheatear {
             return AssetType::Script;
         if (ext == AssetFileType::MaterialExtension)
             return AssetType::Material;
+        if (ext == AssetFileType::AnimationClipExtension)
+            return AssetType::AnimationClip;
         if (ext == ".yaml" || ext == ".yml" || ext == ".json" || ext == ".txt")
             return AssetType::Data;
 

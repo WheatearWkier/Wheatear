@@ -26,6 +26,7 @@ namespace Wheatear {
         Material,
         Data,
         Metadata,
+        AnimationClip,
     };
 
     class ContentBrowserPanel

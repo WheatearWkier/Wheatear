@@ -164,6 +164,7 @@
     <ClInclude Include="src\Platform\Windows\WindowsWindow.h" />
     <ClInclude Include="src\Wheatear.h" />
     <ClInclude Include="src\Wheatear\Animation\AnimationClip.h" />
+    <ClInclude Include="src\Wheatear\Animation\AnimationClipSerializer.h" />
     <ClInclude Include="src\Wheatear\Audio\AudioEngine.h" />
     <ClInclude Include="src\Wheatear\Core\Application.h" />
     <ClInclude Include="src\Wheatear\Core\AssetAliasRegistry.h" />
@@ -194,8 +195,8 @@
     <ClInclude Include="src\Wheatear\Gameplay\Action\ActionAssetLoader.h" />
     <ClInclude Include="src\Wheatear\Gameplay\Action\ActionDatabase.h" />
     <ClInclude Include="src\Wheatear\Gameplay\Action\ActionDebugHistory.h" />
-    <ClInclude Include="src\Wheatear\Gameplay\Action\ActionResolver.h" />
     <ClInclude Include="src\Wheatear\Gameplay\Action\ActionRecipeQueries.h" />
+    <ClInclude Include="src\Wheatear\Gameplay\Action\ActionResolver.h" />
     <ClInclude Include="src\Wheatear\Gameplay\Action\ActionRunner.h" />
     <ClInclude Include="src\Wheatear\Gameplay\Action\ActionSignalRouter.h" />
     <ClInclude Include="src\Wheatear\Gameplay\Action\ActionTypes.h" />
@@ -717,6 +718,7 @@
     <ClCompile Include="src\Platform\Windows\WindowsInput.cpp" />
     <ClCompile Include="src\Platform\Windows\WindowsPlatformUtils.cpp" />
     <ClCompile Include="src\Platform\Windows\WindowsWindow.cpp" />
+    <ClCompile Include="src\Wheatear\Animation\AnimationClipSerializer.cpp" />
     <ClCompile Include="src\Wheatear\Audio\AudioEngine.cpp" />
     <ClCompile Include="src\Wheatear\Core\Application.cpp" />
     <ClCompile Include="src\Wheatear\Core\AssetAliasRegistry.cpp" />
@@ -733,8 +735,8 @@
     <ClCompile Include="src\Wheatear\Gameplay\Action\ActionAssetLoader.cpp" />
     <ClCompile Include="src\Wheatear\Gameplay\Action\ActionDatabase.cpp" />
     <ClCompile Include="src\Wheatear\Gameplay\Action\ActionDebugHistory.cpp" />
-    <ClCompile Include="src\Wheatear\Gameplay\Action\ActionResolver.cpp" />
     <ClCompile Include="src\Wheatear\Gameplay\Action\ActionRecipeQueries.cpp" />
+    <ClCompile Include="src\Wheatear\Gameplay\Action\ActionResolver.cpp" />
     <ClCompile Include="src\Wheatear\Gameplay\Action\ActionRunner.cpp" />
     <ClCompile Include="src\Wheatear\Gameplay\Action\ActionSignalRouter.cpp" />
     <ClCompile Include="src\Wheatear\Gameplay\Action\ActionTypes.cpp" />

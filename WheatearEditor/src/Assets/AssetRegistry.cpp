@@ -535,6 +535,7 @@ namespace Wheatear {
         case EditorAssetKind::Material: return "Material";
         case EditorAssetKind::Data: return "Data";
         case EditorAssetKind::Metadata: return "Metadata";
+        case EditorAssetKind::AnimationClip: return "AnimationClip";
         default: return "Unknown";
         }
     }
@@ -553,6 +554,7 @@ namespace Wheatear {
         if (value == "Material") return EditorAssetKind::Material;
         if (value == "Data") return EditorAssetKind::Data;
         if (value == "Metadata") return EditorAssetKind::Metadata;
+        if (value == "AnimationClip") return EditorAssetKind::AnimationClip;
         return EditorAssetKind::Unknown;
     }
 
@@ -564,6 +566,7 @@ namespace Wheatear {
         if (extension == AssetFileType::UITemplateExtension) return EditorAssetKind::UITemplate;
         if (extension == AssetFileType::MaterialExtension) return EditorAssetKind::Material;
         if (extension == AssetFileType::MetadataExtension) return EditorAssetKind::Metadata;
+        if (extension == AssetFileType::AnimationClipExtension) return EditorAssetKind::AnimationClip;
         if (extension == ".png" || extension == ".jpg" || extension == ".jpeg" || extension == ".tga" || extension == ".webp")
             return EditorAssetKind::Texture;
         if (extension == ".glsl" || extension == ".hlsl") return EditorAssetKind::Shader;

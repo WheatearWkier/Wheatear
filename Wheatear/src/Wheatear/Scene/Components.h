@@ -245,6 +245,11 @@ namespace Wheatear {
     struct SpriteAnimatorComponent
     {
         std::unordered_map<std::string, Ref<AnimationClip>> Clips;
+        // Optional clip-name -> .wtanim asset path bindings. On runtime start the
+        // AnimationSystem loads any referenced asset into Clips (overriding an
+        // inline clip of the same name), so a clip can be authored once and
+        // reused across entities without duplicating its data in every scene.
+        std::unordered_map<std::string, std::string> ExternalClipAssets;
         std::string DefaultClipName;
         bool PlayOnStart = true;
         bool FireEvents = true;
@@ -262,6 +267,11 @@ namespace Wheatear {
         void AddClip(const Ref<AnimationClip>& clip)
         {
             Clips[clip->GetName()] = clip;
+        }
+
+        void BindExternalClipAsset(const std::string& clipName, const std::string& assetPath)
+        {
+            ExternalClipAssets[clipName] = assetPath;
         }
 
         void Play(const std::string& clipName)

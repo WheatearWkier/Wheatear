@@ -156,6 +156,9 @@
     <ClInclude Include="src\Wheatear\Animation\AnimationClip.h">
       <Filter>src\Wheatear\Animation</Filter>
     </ClInclude>
+    <ClInclude Include="src\Wheatear\Animation\AnimationClipSerializer.h">
+      <Filter>src\Wheatear\Animation</Filter>
+    </ClInclude>
     <ClInclude Include="src\Wheatear\Audio\AudioEngine.h">
       <Filter>src\Wheatear\Audio</Filter>
     </ClInclude>
@@ -246,10 +249,10 @@
     <ClInclude Include="src\Wheatear\Gameplay\Action\ActionDebugHistory.h">
       <Filter>src\Wheatear\Gameplay\Action</Filter>
     </ClInclude>
-    <ClInclude Include="src\Wheatear\Gameplay\Action\ActionResolver.h">
+    <ClInclude Include="src\Wheatear\Gameplay\Action\ActionRecipeQueries.h">
       <Filter>src\Wheatear\Gameplay\Action</Filter>
     </ClInclude>
-    <ClInclude Include="src\Wheatear\Gameplay\Action\ActionRecipeQueries.h">
+    <ClInclude Include="src\Wheatear\Gameplay\Action\ActionResolver.h">
       <Filter>src\Wheatear\Gameplay\Action</Filter>
     </ClInclude>
     <ClInclude Include="src\Wheatear\Gameplay\Action\ActionRunner.h">
@@ -1811,6 +1814,9 @@
     <ClCompile Include="src\Platform\Windows\WindowsWindow.cpp">
       <Filter>src\Platform\Windows</Filter>
     </ClCompile>
+    <ClCompile Include="src\Wheatear\Animation\AnimationClipSerializer.cpp">
+      <Filter>src\Wheatear\Animation</Filter>
+    </ClCompile>
     <ClCompile Include="src\Wheatear\Audio\AudioEngine.cpp">
       <Filter>src\Wheatear\Audio</Filter>
     </ClCompile>
@@ -1859,10 +1865,10 @@
     <ClCompile Include="src\Wheatear\Gameplay\Action\ActionDebugHistory.cpp">
       <Filter>src\Wheatear\Gameplay\Action</Filter>
     </ClCompile>
-    <ClCompile Include="src\Wheatear\Gameplay\Action\ActionResolver.cpp">
+    <ClCompile Include="src\Wheatear\Gameplay\Action\ActionRecipeQueries.cpp">
       <Filter>src\Wheatear\Gameplay\Action</Filter>
     </ClCompile>
-    <ClCompile Include="src\Wheatear\Gameplay\Action\ActionRecipeQueries.cpp">
+    <ClCompile Include="src\Wheatear\Gameplay\Action\ActionResolver.cpp">
       <Filter>src\Wheatear\Gameplay\Action</Filter>
     </ClCompile>
     <ClCompile Include="src\Wheatear\Gameplay\Action\ActionRunner.cpp">

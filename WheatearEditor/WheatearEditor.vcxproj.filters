@@ -2,7 +2,7 @@
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
     <Filter Include="Assets">
-      <UniqueIdentifier>{80B59B21-75B2-4E6D-8AA1-A72D6B4473C9}</UniqueIdentifier>
+      <UniqueIdentifier>{3824E0A7-24C6-0A7E-0D81-1ED2F9C191CE}</UniqueIdentifier>
     </Filter>
     <Filter Include="Build">
       <UniqueIdentifier>{B546EB0C-215B-13BE-EADC-B61D56B00FEF}</UniqueIdentifier>
@@ -17,7 +17,7 @@
       <UniqueIdentifier>{437F8A6D-2F0E-1437-D82C-2832C49A24DD}</UniqueIdentifier>
     </Filter>
     <Filter Include="Modules\Progression">
-      <UniqueIdentifier>{B458D208-5C33-4D24-B417-1C0E5ACF18D1}</UniqueIdentifier>
+      <UniqueIdentifier>{0856A3BE-74B7-80CC-FD24-C77E6985B78B}</UniqueIdentifier>
     </Filter>
     <Filter Include="Modules\SideCombat">
       <UniqueIdentifier>{68116838-54F5-288E-BD55-23E1A9581310}</UniqueIdentifier>
@@ -42,9 +42,6 @@
     </Filter>
     <Filter Include="Tools">
       <UniqueIdentifier>{16CF2D0E-82E3-55BF-4B65-F91EB73852F0}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Resources">
-      <UniqueIdentifier>{6F268935-87EF-4C38-BFE1-5D170DDC9EB4}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -72,13 +69,16 @@
     <ClInclude Include="src\Editor\CoreEditorComponents.h">
       <Filter>Editor</Filter>
     </ClInclude>
-    <ClInclude Include="src\Editor\EditorContentPickers.h">
-      <Filter>Editor</Filter>
-    </ClInclude>
     <ClInclude Include="src\Editor\EditorCanvasTools.h">
       <Filter>Editor</Filter>
     </ClInclude>
     <ClInclude Include="src\Editor\EditorComponentRegistry.h">
+      <Filter>Editor</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Editor\EditorContentPickers.h">
+      <Filter>Editor</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Editor\EditorFloatingWindow.h">
       <Filter>Editor</Filter>
     </ClInclude>
     <ClInclude Include="src\Editor\EditorLayer2D.h">
@@ -87,16 +87,13 @@
     <ClInclude Include="src\Editor\EditorLayer3D.h">
       <Filter>Editor</Filter>
     </ClInclude>
-      <ClInclude Include="src\Editor\EditorLayerBase.h">
-        <Filter>Editor</Filter>
-      </ClInclude>
-      <ClInclude Include="src\Editor\EditorFloatingWindow.h">
-        <Filter>Editor</Filter>
-      </ClInclude>
-      <ClInclude Include="src\Editor\EditorPlatform.h">
-        <Filter>Editor</Filter>
-      </ClInclude>
+    <ClInclude Include="src\Editor\EditorLayerBase.h">
+      <Filter>Editor</Filter>
+    </ClInclude>
     <ClInclude Include="src\Editor\EditorLocale.h">
+      <Filter>Editor</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Editor\EditorPlatform.h">
       <Filter>Editor</Filter>
     </ClInclude>
     <ClInclude Include="src\Editor\EditorToolRegistry.h">
@@ -201,19 +198,16 @@
     <ClInclude Include="src\Panels\SpriteSheetPickerPanel.h">
       <Filter>Panels</Filter>
     </ClInclude>
-    <ClInclude Include="src\Tools\ProjectHealthPanel.h">
+    <ClInclude Include="src\Tools\AssetAliasManifestEditorPanel.h">
       <Filter>Tools</Filter>
     </ClInclude>
-    <ClInclude Include="src\Tools\AssetAliasManifestEditorPanel.h">
+    <ClInclude Include="src\Tools\ProjectHealthPanel.h">
       <Filter>Tools</Filter>
     </ClInclude>
     <ClInclude Include="src\Tools\WAOActionEditorPanel.h">
       <Filter>Tools</Filter>
     </ClInclude>
     <ClInclude Include="src\wepch.h" />
-    <ClInclude Include="resource.h">
-      <Filter>Resources</Filter>
-    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Assets\AssetRegistry.cpp">
@@ -354,10 +348,10 @@
     <ClCompile Include="src\Panels\SpriteSheetPickerPanel.cpp">
       <Filter>Panels</Filter>
     </ClCompile>
-    <ClCompile Include="src\Tools\ProjectHealthPanel.cpp">
+    <ClCompile Include="src\Tools\AssetAliasManifestEditorPanel.cpp">
       <Filter>Tools</Filter>
     </ClCompile>
-    <ClCompile Include="src\Tools\AssetAliasManifestEditorPanel.cpp">
+    <ClCompile Include="src\Tools\ProjectHealthPanel.cpp">
       <Filter>Tools</Filter>
     </ClCompile>
     <ClCompile Include="src\Tools\WAOActionEditorPanel.cpp">
@@ -365,10 +359,5 @@
     </ClCompile>
     <ClCompile Include="src\WheatearEditorApp.cpp" />
     <ClCompile Include="src\wepch.cpp" />
-  </ItemGroup>
-  <ItemGroup>
-    <ResourceCompile Include="WheatearEditor.rc">
-      <Filter>Resources</Filter>
-    </ResourceCompile>
   </ItemGroup>
 </Project>

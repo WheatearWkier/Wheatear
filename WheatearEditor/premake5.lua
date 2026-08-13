@@ -12,6 +12,10 @@ project "WheatearEditor"
 
     wt_app_includes()
 
+    -- Editor TUs instantiate large component snapshots (EditorEntitySnapshot
+    -- covers 40+ component types); keep /bigobj on so C1128 stays away.
+    buildoptions { "/bigobj" }
+
     includedirs {
         "src",
         "%{IncludeDir.ImGuizmo}",

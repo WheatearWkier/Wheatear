@@ -85,7 +85,7 @@
       <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
       <Optimization>Disabled</Optimization>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
-      <AdditionalOptions>/utf-8 /wd4828 /bigobj /MP %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions>/utf-8 /wd4828 /MP /bigobj %(AdditionalOptions)</AdditionalOptions>
       <LanguageStandard>stdcpp20</LanguageStandard>
       <ExternalWarningLevel>Level3</ExternalWarningLevel>
     </ClCompile>
@@ -111,7 +111,7 @@
       <MinimalRebuild>false</MinimalRebuild>
       <StringPooling>true</StringPooling>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
-      <AdditionalOptions>/utf-8 /wd4828 /bigobj /MP %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions>/utf-8 /wd4828 /MP /bigobj %(AdditionalOptions)</AdditionalOptions>
       <LanguageStandard>stdcpp20</LanguageStandard>
       <ExternalWarningLevel>Level3</ExternalWarningLevel>
     </ClCompile>
@@ -138,7 +138,7 @@
       <MinimalRebuild>false</MinimalRebuild>
       <StringPooling>true</StringPooling>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
-      <AdditionalOptions>/utf-8 /wd4828 /bigobj /MP %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions>/utf-8 /wd4828 /MP /bigobj %(AdditionalOptions)</AdditionalOptions>
       <LanguageStandard>stdcpp20</LanguageStandard>
       <ExternalWarningLevel>Level3</ExternalWarningLevel>
     </ClCompile>
@@ -160,15 +160,15 @@
     <ClInclude Include="src\Editor\AssetDocument.h" />
     <ClInclude Include="src\Editor\CommandBuilder.h" />
     <ClInclude Include="src\Editor\CoreEditorComponents.h" />
-    <ClInclude Include="src\Editor\EditorContentPickers.h" />
     <ClInclude Include="src\Editor\EditorCanvasTools.h" />
     <ClInclude Include="src\Editor\EditorComponentRegistry.h" />
+    <ClInclude Include="src\Editor\EditorContentPickers.h" />
+    <ClInclude Include="src\Editor\EditorFloatingWindow.h" />
     <ClInclude Include="src\Editor\EditorLayer2D.h" />
     <ClInclude Include="src\Editor\EditorLayer3D.h" />
-      <ClInclude Include="src\Editor\EditorLayerBase.h" />
-      <ClInclude Include="src\Editor\EditorFloatingWindow.h" />
-      <ClInclude Include="src\Editor\EditorPlatform.h" />
+    <ClInclude Include="src\Editor\EditorLayerBase.h" />
     <ClInclude Include="src\Editor\EditorLocale.h" />
+    <ClInclude Include="src\Editor\EditorPlatform.h" />
     <ClInclude Include="src\Editor\EditorToolRegistry.h" />
     <ClInclude Include="src\Editor\EditorWidgets.h" />
     <ClInclude Include="src\Editor\EventScriptGraphPanel.h" />
@@ -203,11 +203,10 @@
     <ClInclude Include="src\Panels\SceneHierarchy\WidgetHelpers.h" />
     <ClInclude Include="src\Panels\SceneHierarchyPanel.h" />
     <ClInclude Include="src\Panels\SpriteSheetPickerPanel.h" />
-    <ClInclude Include="src\Tools\ProjectHealthPanel.h" />
     <ClInclude Include="src\Tools\AssetAliasManifestEditorPanel.h" />
+    <ClInclude Include="src\Tools\ProjectHealthPanel.h" />
     <ClInclude Include="src\Tools\WAOActionEditorPanel.h" />
     <ClInclude Include="src\wepch.h" />
-    <ClInclude Include="resource.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Assets\AssetRegistry.cpp" />
@@ -256,16 +255,13 @@
     <ClCompile Include="src\Panels\SceneHierarchyPanelComponents.cpp" />
     <ClCompile Include="src\Panels\SceneHierarchyPanelTree.cpp" />
     <ClCompile Include="src\Panels\SpriteSheetPickerPanel.cpp" />
-    <ClCompile Include="src\Tools\ProjectHealthPanel.cpp" />
     <ClCompile Include="src\Tools\AssetAliasManifestEditorPanel.cpp" />
+    <ClCompile Include="src\Tools\ProjectHealthPanel.cpp" />
     <ClCompile Include="src\Tools\WAOActionEditorPanel.cpp" />
     <ClCompile Include="src\WheatearEditorApp.cpp" />
     <ClCompile Include="src\wepch.cpp">
       <PrecompiledHeader>Create</PrecompiledHeader>
     </ClCompile>
-  </ItemGroup>
-  <ItemGroup>
-    <ResourceCompile Include="WheatearEditor.rc" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Wheatear\Wheatear.vcxproj">

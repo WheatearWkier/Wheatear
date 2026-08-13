@@ -5,6 +5,8 @@
 #include "Wheatear/Scene/Components.h"
 #include "Wheatear/Scene/Entity.h"
 #include "Wheatear/Animation/AnimationClip.h"
+#include "Wheatear/Animation/AnimationClipSerializer.h"
+#include "Wheatear/Core/AssetPath.h"
 #include "Wheatear/Runtime/CommandBus.h"
 
 #include <glm/glm.hpp>
@@ -136,6 +138,26 @@ namespace Wheatear {
         for (auto e : scene->GetRegistry().view<SpriteAnimatorComponent>())
         {
             auto& anim = scene->GetRegistry().get<SpriteAnimatorComponent>(e);
+
+            // Load external .wtanim bindings so a clip authored once as an asset
+            // can drive any entity without duplicating its data in the scene.
+            for (const auto& [clipName, assetPath] : anim.ExternalClipAssets)
+            {
+                if (assetPath.empty())
+                    continue;
+                const std::filesystem::path resolved = AssetPath::Resolve(assetPath);
+                Ref<AnimationClip> clip = AnimationClipSerializer::Load(resolved);
+                if (!clip)
+                {
+                    WT_CORE_WARN("AnimationSystem: failed to load external clip '{}' for '{}'",
+                        assetPath, clipName);
+                    continue;
+                }
+                if (clip->GetName().empty())
+                    clip->SetName(clipName);
+                anim.AddClip(clip);
+            }
+
             anim.CurrentClipName = anim.DefaultClipName;
             anim.ElapsedTime = 0.0f;
             anim.IsPlaying = anim.PlayOnStart;

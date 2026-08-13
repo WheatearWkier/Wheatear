@@ -36,6 +36,14 @@ namespace Wheatear {
 
                 ImGui::TextDisabled("%d clip(s) - edit in Animation Editor window",
                     (int)c.Clips.size());
+
+                if (!c.ExternalClipAssets.empty())
+                {
+                    ImGui::Separator();
+                    ImGui::TextDisabled("External .wtanim assets");
+                    for (const auto& [name, path] : c.ExternalClipAssets)
+                        ImGui::BulletText("%s -> %s", name.c_str(), path.c_str());
+                }
             });
     }
 
