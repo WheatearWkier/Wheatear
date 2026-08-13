@@ -155,8 +155,11 @@ namespace Wheatear {
 			if (!m_Running)
 				break;
 
-			float nowTime = (float)glfwGetTime();
-			Timestep timestep = nowTime - m_LastFrameTime;
+			// Compute the frame delta in double and only narrow to float for the
+			// Timestep handed to layers; float accumulation of glfwGetTime() loses
+			// millisecond precision after ~77 s of runtime.
+			const double nowTime = glfwGetTime();
+			Timestep timestep = static_cast<float>(nowTime - m_LastFrameTime);
 			m_LastFrameTime = nowTime;
 
 			if (!m_Minimized)

@@ -2,7 +2,10 @@
 
 #include "ISystem.h"
 
+#include "entt.hpp"
 #include <glm/glm.hpp>
+#include <utility>
+#include <vector>
 
 namespace Wheatear {
 
@@ -20,6 +23,10 @@ namespace Wheatear {
 
     private:
         glm::vec2 m_ViewportOffset = { 0.0f, 0.0f };
+
+        // Reused across frames to avoid per-frame heap allocation for the
+        // SortOrder sort in RenderUI.
+        std::vector<std::pair<int, entt::entity>> m_SortBuffer;
     };
 
 } // namespace Wheatear

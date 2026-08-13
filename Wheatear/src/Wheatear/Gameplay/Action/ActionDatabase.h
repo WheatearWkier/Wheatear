@@ -5,6 +5,7 @@
 
 #include <cstdint>
 #include <string>
+#include <unordered_map>
 #include <vector>
 
 namespace Wheatear::WAO {
@@ -20,7 +21,9 @@ namespace Wheatear::WAO {
         static uint64_t Revision();
 
     private:
-        static std::vector<ActionRecipe>& Recipes();
+        // Keyed by recipe Id for O(1) lookups; node addresses are stable across
+        // insert/erase, so Find()'s returned pointer stays valid.
+        static std::unordered_map<std::string, ActionRecipe>& Recipes();
         static uint64_t& RevisionCounter();
     };
 

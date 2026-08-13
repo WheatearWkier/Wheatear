@@ -515,11 +515,11 @@ namespace Wheatear {
         const uint32_t viewportWidth = scene->GetViewportWidth();
         const uint32_t viewportHeight = scene->GetViewportHeight();
 
-        std::vector<std::pair<int, entt::entity>> entries;
+        m_SortBuffer.clear();
         for (auto e : registry.view<UIWidgetComponent>())
-            entries.emplace_back(registry.get<UIWidgetComponent>(e).SortOrder, e);
+            m_SortBuffer.emplace_back(registry.get<UIWidgetComponent>(e).SortOrder, e);
 
-        std::sort(entries.begin(), entries.end(),
+        std::sort(m_SortBuffer.begin(), m_SortBuffer.end(),
             [](const auto& a, const auto& b) { return a.first < b.first; });
 
         bool scissorEnabled = false;
@@ -556,7 +556,7 @@ namespace Wheatear {
             }
         };
 
-        for (auto [order, e] : entries)
+        for (auto [order, e] : m_SortBuffer)
         {
             (void)order;
             std::unordered_set<uint32_t> hiddenVisiting;

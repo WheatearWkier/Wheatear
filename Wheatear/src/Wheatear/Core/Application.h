@@ -104,7 +104,7 @@ namespace Wheatear {
 		std::vector<Layer*> m_PendingOverlaysToPush;
 		std::vector<Layer*> m_PendingOverlaysToPop;
 
-		float m_LastFrameTime = 0.0f;
+		double m_LastFrameTime = 0.0;
 
 		static Application* s_Instance;
 	};

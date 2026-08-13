@@ -1,13 +1,11 @@
 #include "wtpch.h"
 #include "ActionDatabase.h"
 
-#include <algorithm>
-
 namespace Wheatear::WAO {
 
-    std::vector<ActionRecipe>& ActionDatabase::Recipes()
+    std::unordered_map<std::string, ActionRecipe>& ActionDatabase::Recipes()
     {
-        static std::vector<ActionRecipe> recipes;
+        static std::unordered_map<std::string, ActionRecipe> recipes;
         return recipes;
     }
 
@@ -22,44 +20,29 @@ namespace Wheatear::WAO {
         if (recipe.Id.empty())
             return;
 
-        auto& recipes = Recipes();
-        const auto it = std::find_if(recipes.begin(),
-            recipes.end(),
-            [&](const ActionRecipe& current)
-            {
-                return current.Id == recipe.Id;
-            });
-        if (it != recipes.end())
-        {
-            *it = recipe;
-            ++RevisionCounter();
-            return;
-        }
-
-        recipes.push_back(recipe);
+        Recipes()[recipe.Id] = recipe;
         ++RevisionCounter();
     }
 
     const ActionRecipe* ActionDatabase::Find(const std::string& id)
     {
-        auto& recipes = Recipes();
-        const auto it = std::find_if(recipes.begin(),
-            recipes.end(),
-            [&](const ActionRecipe& current)
-            {
-                return current.Id == id;
-            });
-        return it == recipes.end() ? nullptr : &(*it);
+        const auto& recipes = Recipes();
+        const auto it = recipes.find(id);
+        return it == recipes.end() ? nullptr : &(it->second);
     }
 
     bool ActionDatabase::Has(const std::string& id)
     {
-        return Find(id) != nullptr;
+        return Recipes().count(id) > 0;
     }
 
     std::vector<ActionRecipe> ActionDatabase::All()
     {
-        return Recipes();
+        std::vector<ActionRecipe> all;
+        all.reserve(Recipes().size());
+        for (const auto& [id, recipe] : Recipes())
+            all.push_back(recipe);
+        return all;
     }
 
     void ActionDatabase::Clear()

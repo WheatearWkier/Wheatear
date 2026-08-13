@@ -61,6 +61,17 @@ namespace Wheatear {
 		auto& handlers = m_Handlers[type];
 		handlers.push_back({ id, priority, m_NextOrder++, true, std::move(handler) });
 
+		// Keep the per-type handler list sorted (priority desc, then order asc)
+		// so Dispatch can merge two already-sorted runs instead of re-sorting
+		// on every event. Subscriptions are rare (startup/panel init).
+		std::sort(handlers.begin(), handlers.end(),
+			[](const HandlerEntry& a, const HandlerEntry& b)
+			{
+				if (a.Priority != b.Priority)
+					return a.Priority > b.Priority;
+				return a.Order < b.Order;
+			});
+
 		return EventSubscription(*this, type, id);
 	}
 
@@ -73,15 +84,21 @@ namespace Wheatear {
 	{
 		std::vector<HandlerCall> calls;
 		AppendCallsForType(event.GetEventType(), calls);
+		const size_t typedCount = calls.size();
 		AppendCallsForType(EventType::None, calls);
 
-		std::sort(calls.begin(), calls.end(),
-			[](const HandlerCall& a, const HandlerCall& b)
-			{
-				if (a.Priority != b.Priority)
-					return a.Priority > b.Priority;
-				return a.Order < b.Order;
-			});
+		// Both runs are already sorted by (priority desc, order asc); merge them
+		// linearly instead of re-sorting the combined list per event.
+		if (typedCount > 0 && calls.size() > typedCount)
+		{
+			std::inplace_merge(calls.begin(), calls.begin() + typedCount, calls.end(),
+				[](const HandlerCall& a, const HandlerCall& b)
+				{
+					if (a.Priority != b.Priority)
+						return a.Priority > b.Priority;
+					return a.Order < b.Order;
+				});
+		}
 
 		m_DispatchDepth++;
 

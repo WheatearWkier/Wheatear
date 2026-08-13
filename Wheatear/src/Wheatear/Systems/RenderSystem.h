@@ -2,6 +2,9 @@
 #include "ISystem.h"
 #include "Wheatear/Renderer/EditorCamera.h"
 
+#include "entt.hpp"
+#include <vector>
+
 namespace Wheatear {
 
     class RenderSystem : public ISystem
@@ -22,6 +25,10 @@ namespace Wheatear {
         void CollectLights(Scene* scene, bool respectEditorVisibility);
         void RenderScene2D(Scene* scene, bool respectEditorVisibility);
         void RenderScene3D(Scene* scene, bool respectEditorVisibility);
+
+        // Reused across frames to avoid per-frame heap allocation for the
+        // back-to-front sprite sort.
+        std::vector<entt::entity> m_SpriteSortBuffer;
     };
 
 } // namespace Wheatear

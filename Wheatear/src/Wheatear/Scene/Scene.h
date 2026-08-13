@@ -12,6 +12,7 @@
 #include <filesystem>
 #include <memory>
 #include <string>
+#include <typeindex>
 #include <unordered_map>
 #include <unordered_set>
 #include <utility>
@@ -83,12 +84,23 @@ namespace Wheatear {
         template<typename T>
         T* GetSystem()
         {
-            for (auto& system : m_Systems)
+            // Lazily rebuild the type-indexed cache after any system registration,
+            // so per-frame GetSystem calls (Render/UI wiring, viewport setters)
+            // avoid a linear dynamic_cast scan.
+            if (m_SystemCacheDirty)
             {
-                if (auto* typedSystem = dynamic_cast<T*>(system.get()))
-                    return typedSystem;
+                m_SystemCache.clear();
+                for (const auto& system : m_Systems)
+                {
+                    ISystem* raw = system.get();
+                    if (raw)
+                        m_SystemCache[std::type_index(typeid(*raw))] = raw;
+                }
+                m_SystemCacheDirty = false;
             }
-            return nullptr;
+
+            const auto it = m_SystemCache.find(std::type_index(typeid(T)));
+            return it == m_SystemCache.end() ? nullptr : static_cast<T*>(it->second);
         }
 
         void SetAnimationEditorPreviewActive(bool active);
@@ -106,6 +118,7 @@ namespace Wheatear {
             auto system = CreateScope<T>(std::forward<Args>(args)...);
             T& systemReference = *system;
             m_Systems.push_back(std::move(system));
+            m_SystemCacheDirty = true;
             return systemReference;
         }
 
@@ -124,6 +137,8 @@ namespace Wheatear {
         SceneExecutionMode m_ExecutionMode = SceneExecutionMode::None;
 
         std::vector<Scope<ISystem>> m_Systems;
+        std::unordered_map<std::type_index, ISystem*> m_SystemCache;
+        bool m_SystemCacheDirty = true;
         std::unordered_set<entt::entity> m_DestroyQueue;
 
         friend class Entity;

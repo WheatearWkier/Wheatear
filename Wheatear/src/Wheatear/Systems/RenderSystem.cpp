@@ -104,13 +104,13 @@ namespace Wheatear {
 
         // Sort sprites back-to-front by Z translation before drawing.
         auto group = registry.group<TransformComponent>(entt::get<SpriteRendererComponent>);
-        std::vector<entt::entity> sprites(group.begin(), group.end());
-        std::sort(sprites.begin(), sprites.end(), [&](entt::entity a, entt::entity b) {
+        m_SpriteSortBuffer.assign(group.begin(), group.end());
+        std::sort(m_SpriteSortBuffer.begin(), m_SpriteSortBuffer.end(), [&](entt::entity a, entt::entity b) {
             return group.get<TransformComponent>(a).Translation.z
                 < group.get<TransformComponent>(b).Translation.z;
             });
 
-        for (auto e : sprites)
+        for (auto e : m_SpriteSortBuffer)
         {
             if (IsHiddenInEditor(scene, e, respectEditorVisibility))
                 continue;
