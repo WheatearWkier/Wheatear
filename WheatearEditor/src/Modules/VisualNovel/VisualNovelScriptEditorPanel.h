@@ -34,7 +34,9 @@ enum class RowKind
         Goto,
         End,
         Set,
-        If
+        If,
+        Sheet,
+        Char
     };
 
     struct ChoiceEntry

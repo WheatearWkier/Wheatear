@@ -184,7 +184,10 @@ static void ExtractChoiceRequiredCondition(std::string& target,
                 clause += words[i];
             }
 
-            if (words.size() == 3 && words[words.size() - 2] == "flag")
+            // "if flag <id>" is a 4-token trailing clause ("Label if flag X");
+            // match on the second-last token being "flag" (mirrors runtime
+            // ExtractRequiredCondition in VisualNovelScript.cpp).
+            if (words.size() >= 3 && words[words.size() - 3] == "if" && words[words.size() - 2] == "flag")
             {
                 std::string flagId = words.back();
                 if (flagId.rfind("flag:", 0) == 0 && flagId.size() > 5)
@@ -246,6 +249,8 @@ static void ExtractChoiceRequiredCondition(std::string& target,
                 case VisualNovelScriptEditorPanel::RowKind::End: return "End";
                 case VisualNovelScriptEditorPanel::RowKind::Set: return "Set";
                 case VisualNovelScriptEditorPanel::RowKind::If: return "If";
+                case VisualNovelScriptEditorPanel::RowKind::Sheet: return "Sheet";
+                case VisualNovelScriptEditorPanel::RowKind::Char: return "Char";
             }
             return "Unknown";
         }
@@ -269,6 +274,8 @@ static void ExtractChoiceRequiredCondition(std::string& target,
                 case VisualNovelScriptEditorPanel::RowKind::End: return "end";
                 case VisualNovelScriptEditorPanel::RowKind::Set: return row.Name + " = " + row.Value;
                 case VisualNovelScriptEditorPanel::RowKind::If: return row.Value + " -> " + row.Text;
+                case VisualNovelScriptEditorPanel::RowKind::Sheet: return row.Value;
+                case VisualNovelScriptEditorPanel::RowKind::Char: return row.Name + " (" + row.Value + "," + row.Text + ")";
             }
             return {};
         }
@@ -635,6 +642,29 @@ static void ExtractChoiceRequiredCondition(std::string& target,
                     }
                 }
             }
+            else if (ReadCommandPayload(line, { "sheet" }, payload))
+            {
+                // @sheet <tex> <w> <h>
+                row.Kind = RowKind::Sheet;
+                std::istringstream command(payload);
+                std::string texture;
+                std::string w, h;
+                command >> texture >> w >> h;
+                row.Value = StripQuotes(texture);
+                row.Name = w;
+                row.Text = h;
+            }
+            else if (ReadCommandPayload(line, { "char" }, payload))
+            {
+                // @char <name> <x> <y>
+                row.Kind = RowKind::Char;
+                std::istringstream command(payload);
+                std::string name, x, y;
+                command >> name >> x >> y;
+                row.Name = name;
+                row.Value = x;
+                row.Text = y;
+            }
             else
             {
                 const size_t colon = line.find(':');
@@ -722,6 +752,12 @@ static void ExtractChoiceRequiredCondition(std::string& target,
                 case RowKind::If:
                     out << "@if " << row.Value << " -> " << row.Text;
                     break;
+                case RowKind::Sheet:
+                    out << "@sheet " << row.Value << " " << row.Name << " " << row.Text;
+                    break;
+                case RowKind::Char:
+                    out << "@char " << row.Name << " " << row.Value << " " << row.Text;
+                    break;
             }
             out << "\n";
         }
@@ -780,6 +816,14 @@ static void ExtractChoiceRequiredCondition(std::string& target,
         if (ImGui::Button("+ Set")) AddRow(RowKind::Set);
         ImGui::SameLine();
         if (ImGui::Button("+ If")) AddRow(RowKind::If);
+        ImGui::SameLine();
+        if (ImGui::Button("+ Speed")) AddRow(RowKind::Speed);
+        ImGui::SameLine();
+        if (ImGui::Button("+ Sheet")) AddRow(RowKind::Sheet);
+        ImGui::SameLine();
+        if (ImGui::Button("+ Char")) AddRow(RowKind::Char);
+        ImGui::SameLine();
+        if (ImGui::Button("+ Raw")) AddRow(RowKind::Raw);
 
         ImGui::Separator();
         if (m_Rows.empty())
@@ -969,6 +1013,22 @@ static void ExtractChoiceRequiredCondition(std::string& target,
                 if (EditorContentPickers::DrawStringPicker("Jump To", row.Text, CollectLabels(m_Rows), 256))
                     m_Dirty = true;
                 break;
+            case RowKind::Sheet:
+                if (EditorContentPickers::DrawAssetField("Sheet Texture", row.Value, EditorWidgets::AssetReferenceKind::Texture, 512))
+                    m_Dirty = true;
+                if (InputString("Cell Width", row.Name, 32))
+                    m_Dirty = true;
+                if (InputString("Cell Height", row.Text, 32))
+                    m_Dirty = true;
+                break;
+            case RowKind::Char:
+                if (InputString("Name", row.Name, 128))
+                    m_Dirty = true;
+                if (InputString("Sheet X", row.Value, 32))
+                    m_Dirty = true;
+                if (InputString("Sheet Y", row.Text, 32))
+                    m_Dirty = true;
+                break;
         }
     }
 
@@ -1076,6 +1136,22 @@ static void ExtractChoiceRequiredCondition(std::string& target,
             case RowKind::If:
                 row.Value = "always";
                 row.Text = labels.empty() ? "target_label" : labels.front();
+                break;
+            case RowKind::Sheet:
+                row.Value = "assets/";
+                row.Name = "512";
+                row.Text = "512";
+                break;
+            case RowKind::Char:
+                row.Name = "Character";
+                row.Value = "0";
+                row.Text = "0";
+                break;
+            case RowKind::Speed:
+                row.Value = "42";
+                break;
+            case RowKind::Raw:
+                row.Raw = "";
                 break;
             default:
                 row.Raw = "";
