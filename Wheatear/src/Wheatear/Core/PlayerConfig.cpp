@@ -2,6 +2,7 @@
 #include "PlayerConfig.h"
 
 #include "Wheatear/Core/FileSystem.h"
+#include "Wheatear/Utils/StringUtils.h"
 
 #include <algorithm>
 #include <cctype>
@@ -11,29 +12,14 @@
 
 namespace Wheatear {
 
+    using Wheatear::StringUtils::ToLower;
+    using Wheatear::StringUtils::Trim;
+
     namespace {
-
-        static std::string Trim(const std::string& value)
-        {
-            const char* whitespace = " \t\r\n";
-            const size_t begin = value.find_first_not_of(whitespace);
-            if (begin == std::string::npos)
-                return {};
-
-            const size_t end = value.find_last_not_of(whitespace);
-            return value.substr(begin, end - begin + 1);
-        }
-
-        static std::string Lower(std::string value)
-        {
-            std::transform(value.begin(), value.end(), value.begin(),
-                [](unsigned char c) { return static_cast<char>(std::tolower(c)); });
-            return value;
-        }
 
         static bool ParseBool(const std::string& value, bool fallback)
         {
-            const std::string lowered = Lower(Trim(value));
+            const std::string lowered = ToLower(Trim(value));
             if (lowered == "1" || lowered == "true" || lowered == "yes" || lowered == "on")
                 return true;
             if (lowered == "0" || lowered == "false" || lowered == "no" || lowered == "off")
@@ -89,7 +75,7 @@ namespace Wheatear {
             if (separator == std::string::npos)
                 continue;
 
-            const std::string key = Lower(Trim(line.substr(0, separator)));
+            const std::string key = ToLower(Trim(line.substr(0, separator)));
             const std::string value = Trim(line.substr(separator + 1));
 
             if (key == "startupscene")

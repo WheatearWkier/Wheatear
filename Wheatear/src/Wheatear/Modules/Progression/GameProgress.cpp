@@ -6,6 +6,7 @@
 #include "Wheatear/Core/AssetAliasRegistry.h"
 #include "Wheatear/Core/AssetPath.h"
 #include "Wheatear/Core/UserSettings.h"
+#include "Wheatear/Utils/StringUtils.h"
 
 #include <algorithm>
 #include <cctype>
@@ -17,6 +18,9 @@
 #include <vector>
 
 namespace Wheatear::GameProgress {
+
+    using Wheatear::StringUtils::PayloadAfter;
+    using Wheatear::StringUtils::ToLower;
 
     static bool CanUpgradeMagicSwordToLv2Internal();
     static bool TryUpgradeMagicSwordToLv2Internal();
@@ -66,18 +70,6 @@ namespace Wheatear::GameProgress {
                 : std::to_string(safeSlot);
         }
 
-        static std::string PayloadAfter(const std::string& value, const std::string& prefix)
-        {
-            return value.rfind(prefix, 0) == 0 ? value.substr(prefix.size()) : std::string{};
-        }
-
-        static std::string ToLowerCopy(std::string value)
-        {
-            std::transform(value.begin(), value.end(), value.begin(),
-                [](unsigned char c) { return static_cast<char>(std::tolower(c)); });
-            return value;
-        }
-
         static std::string NormalizeAssetLikePath(std::string value)
         {
             std::replace(value.begin(), value.end(), '\\', '/');
@@ -100,7 +92,7 @@ namespace Wheatear::GameProgress {
             }
 
             const std::string marker = "assets/";
-            const size_t markerPos = ToLowerCopy(value).find(marker);
+            const size_t markerPos = ToLower(value).find(marker);
             if (markerPos != std::string::npos)
                 value = value.substr(markerPos);
 
@@ -114,7 +106,7 @@ namespace Wheatear::GameProgress {
 
         static bool IsSaveLoadScenePath(const std::string& scenePath)
         {
-            return ToLowerCopy(NormalizeAssetLikePath(scenePath)) == ToLowerCopy(SaveLoadScenePath());
+            return ToLower(NormalizeAssetLikePath(scenePath)) == ToLower(SaveLoadScenePath());
         }
 
         static std::string UnescapeSavedField(const std::string& value)
@@ -167,7 +159,7 @@ namespace Wheatear::GameProgress {
 
         static std::string ScenePathFromVNScriptPath(const std::string& scriptPath)
         {
-            const std::string normalized = ToLowerCopy(NormalizeAssetLikePath(scriptPath));
+            const std::string normalized = ToLower(NormalizeAssetLikePath(scriptPath));
             if (normalized.find("vertical_slice_chapter3_preview.vn") != std::string::npos)
                 return "assets/scenes/VerticalSliceChapter3Preview.wt";
             if (normalized.find("vertical_slice_post_fake.vn") != std::string::npos)

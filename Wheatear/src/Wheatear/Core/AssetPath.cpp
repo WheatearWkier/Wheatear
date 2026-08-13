@@ -2,6 +2,7 @@
 #include "AssetPath.h"
 
 #include "Wheatear/Core/FileSystem.h"
+#include "Wheatear/Utils/StringUtils.h"
 
 #include <algorithm>
 #include <cctype>
@@ -9,6 +10,8 @@
 #include <vector>
 
 namespace Wheatear {
+
+    using Wheatear::StringUtils::ToLower;
 
     namespace {
 
@@ -21,13 +24,6 @@ namespace Wheatear {
 
         static AssetPathState s_State;
 
-        static std::string Lower(std::string value)
-        {
-            std::transform(value.begin(), value.end(), value.begin(),
-                [](unsigned char c) { return static_cast<char>(std::tolower(c)); });
-            return value;
-        }
-
         static bool FirstPartEquals(const std::filesystem::path& path, const char* expected)
         {
             for (const auto& part : path)
@@ -35,7 +31,7 @@ namespace Wheatear {
                 const std::string text = part.string();
                 if (text == "." || text.empty())
                     continue;
-                return Lower(text) == expected;
+                return ToLower(text) == expected;
             }
             return false;
         }

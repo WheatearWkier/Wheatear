@@ -215,7 +215,7 @@ namespace Wheatear {
 
         m_Decided = true;
 
-        Application::Get().PushLayer(new EditorLayer2D());
+        Application::Get().PushLayer(std::make_unique<EditorLayer2D>());
         Application::Get().PopLayer(this);
     }
 
@@ -226,7 +226,7 @@ namespace Wheatear {
 
         m_Decided = true;
 
-        Application::Get().PushLayer(new EditorLayer3D());
+        Application::Get().PushLayer(std::make_unique<EditorLayer3D>());
         Application::Get().PopLayer(this);
     }
 

@@ -5,6 +5,7 @@
 #include "Wheatear/Gameplay/Action/ActionDatabase.h"
 #include "Wheatear/Gameplay/Action/ActionRecipeQueries.h"
 #include "Wheatear/Gameplay/Action/StateRegistry.h"
+#include "Wheatear/Utils/StringUtils.h"
 
 #include <algorithm>
 #include <cctype>
@@ -13,14 +14,9 @@
 
 namespace Wheatear::TurnCombatSkillService {
 
-    namespace {
+    using Wheatear::StringUtils::ToLower;
 
-        static std::string ToLower(std::string value)
-        {
-            std::transform(value.begin(), value.end(), value.begin(),
-                [](unsigned char c) { return static_cast<char>(std::tolower(c)); });
-            return value;
-        }
+    namespace {
 
         static TurnSkillCategory CategoryFromRecipe(const WAO::ActionRecipe& recipe)
         {

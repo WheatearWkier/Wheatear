@@ -225,7 +225,7 @@ namespace Wheatear
             UITemplateFactory::WriteBuiltinTemplateAssets(projectRoot);
             AssetRegistry::Get().LoadCache(projectRoot);
 
-            PushLayer(new ModeSelectLayer());
+            PushLayer(std::make_unique<ModeSelectLayer>());
         }
 
         ~WheatearEditor() = default;

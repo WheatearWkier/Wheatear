@@ -1,18 +1,13 @@
 #include "wtpch.h"
 #include "ActionSignalRouter.h"
 
+#include "Wheatear/Utils/StringUtils.h"
+
 #include <utility>
 
 namespace Wheatear::WAO {
 
-    namespace {
-
-        bool StartsWith(const std::string& value, const std::string& prefix)
-        {
-            return prefix.empty() || value.rfind(prefix, 0) == 0;
-        }
-
-    } // namespace
+    using Wheatear::StringUtils::StartsWith;
 
     std::vector<ActionSignalRouter::HandlerEntry>& ActionSignalRouter::Handlers()
     {

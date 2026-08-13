@@ -3,6 +3,7 @@
 
 #include "Wheatear/Core/AssetPath.h"
 #include "Wheatear/Core/Log.h"
+#include "Wheatear/Utils/StringUtils.h"
 
 #include <algorithm>
 #include <cctype>
@@ -11,29 +12,11 @@
 
 namespace Wheatear {
 
+    using Wheatear::StringUtils::StartsWith;
+    using Wheatear::StringUtils::ToLower;
+    using Wheatear::StringUtils::Trim;
+
     namespace {
-
-        static std::string Trim(std::string value)
-        {
-            auto isSpace = [](unsigned char c) { return std::isspace(c) != 0; };
-            value.erase(value.begin(), std::find_if(value.begin(), value.end(),
-                [&](unsigned char c) { return !isSpace(c); }));
-            value.erase(std::find_if(value.rbegin(), value.rend(),
-                [&](unsigned char c) { return !isSpace(c); }).base(), value.end());
-            return value;
-        }
-
-        static std::string ToLower(std::string value)
-        {
-            std::transform(value.begin(), value.end(), value.begin(),
-                [](unsigned char c) { return static_cast<char>(std::tolower(c)); });
-            return value;
-        }
-
-        static bool StartsWith(const std::string& value, const std::string& prefix)
-        {
-            return value.rfind(prefix, 0) == 0;
-        }
 
         static bool IsBareCommand(const std::string& line)
         {

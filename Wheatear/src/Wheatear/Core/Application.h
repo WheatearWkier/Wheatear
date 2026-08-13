@@ -58,9 +58,9 @@ namespace Wheatear {
 		void DispatchEvent(Event& e);
 		void FlushEventQueue();
 
-		void PushLayer(Layer* layer);
+		void PushLayer(std::unique_ptr<Layer> layer);
 		void PopLayer(Layer* layer);
-		void PushOverlay(Layer* overlay);
+		void PushOverlay(std::unique_ptr<Layer> overlay);
 		void PopOverlay(Layer* overlay);
 
 		inline Window& GetWindow() { return *m_Window; }
@@ -99,9 +99,9 @@ namespace Wheatear {
 		bool m_Minimized = false;
 
 		LayerStack m_LayerStack;
-		std::vector<Layer*> m_PendingLayersToPush;
+		std::vector<std::unique_ptr<Layer>> m_PendingLayersToPush;
 		std::vector<Layer*> m_PendingLayersToPop;
-		std::vector<Layer*> m_PendingOverlaysToPush;
+		std::vector<std::unique_ptr<Layer>> m_PendingOverlaysToPush;
 		std::vector<Layer*> m_PendingOverlaysToPop;
 
 		double m_LastFrameTime = 0.0;

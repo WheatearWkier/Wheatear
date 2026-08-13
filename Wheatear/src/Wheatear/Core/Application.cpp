@@ -74,7 +74,9 @@ namespace Wheatear {
 		AudioEngine::Init();
 
 		m_ImGuiLayer = new ImGuiLayer();
-		PushOverlay(m_ImGuiLayer);
+		// The layer stack takes ownership; m_ImGuiLayer stays a non-owning view
+		// used by Run() (Begin/End) and GetImGuiLayer() until Clear() at shutdown.
+		PushOverlay(std::unique_ptr<ImGuiLayer>(m_ImGuiLayer));
 	}
 
 	Application::~Application()
@@ -93,10 +95,10 @@ namespace Wheatear {
 		s_Instance = nullptr;
 	}
 
-	void Application::PushLayer(Layer* layer)
+	void Application::PushLayer(std::unique_ptr<Layer> layer)
 	{
 		WT_PROFILE_FUNCTION();
-		m_PendingLayersToPush.push_back(layer);
+		m_PendingLayersToPush.push_back(std::move(layer));
 	}
 
 	void Application::PopLayer(Layer* layer)
@@ -104,10 +106,10 @@ namespace Wheatear {
 		m_PendingLayersToPop.push_back(layer);
 	}
 
-	void Application::PushOverlay(Layer* overlay)
+	void Application::PushOverlay(std::unique_ptr<Layer> overlay)
 	{
 		WT_PROFILE_FUNCTION();
-		m_PendingOverlaysToPush.push_back(overlay);
+		m_PendingOverlaysToPush.push_back(std::move(overlay));
 	}
 
 	void Application::PopOverlay(Layer* overlay)
@@ -262,17 +264,19 @@ namespace Wheatear {
 		}
 		m_PendingOverlaysToPop.clear();
 
-		for (Layer* layer : m_PendingLayersToPush)
+		for (auto& layer : m_PendingLayersToPush)
 		{
-			m_LayerStack.PushLayer(layer);
-			layer->OnAttach();
+			Layer* raw = layer.get();
+			m_LayerStack.PushLayer(std::move(layer));
+			raw->OnAttach();
 		}
 		m_PendingLayersToPush.clear();
 
-		for (Layer* overlay : m_PendingOverlaysToPush)
+		for (auto& overlay : m_PendingOverlaysToPush)
 		{
-			m_LayerStack.PushOverlay(overlay);
-			overlay->OnAttach();
+			Layer* raw = overlay.get();
+			m_LayerStack.PushOverlay(std::move(overlay));
+			raw->OnAttach();
 		}
 		m_PendingOverlaysToPush.clear();
 

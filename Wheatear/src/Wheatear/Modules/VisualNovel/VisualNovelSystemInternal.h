@@ -22,6 +22,7 @@
 #include "Wheatear/Scene/Scene.h"
 #include "Wheatear/UI/UIRenderer.h"
 #include "Wheatear/UI/UIRuntimeTools.h"
+#include "Wheatear/Utils/StringUtils.h"
 
 #include <yaml-cpp/yaml.h>
 
@@ -39,6 +40,8 @@
 namespace Wheatear::VisualNovelSystemInternal {
 
         using SceneQueries::FindEntityByName;
+        using StringUtils::StartsWith;
+        using StringUtils::ToLower;
         using UIRuntimeTools::IsButtonHovered;
         using UIRuntimeTools::SetText;
         using UIRuntimeTools::SetWidgetVisible;
@@ -50,24 +53,12 @@ namespace Wheatear::VisualNovelSystemInternal {
         constexpr float kVNSkipStepInterval = 0.020f;
         constexpr int kVNMaxSkipStepsPerFrame = 16;
 
-        inline bool StartsWith(const std::string& value, const std::string& prefix)
-        {
-            return value.rfind(prefix, 0) == 0;
-        }
-
         inline bool IsExternalChoiceCommand(const std::string& command)
         {
             return StartsWith(command, "scene:")
                 || StartsWith(command, "newgame:")
                 || StartsWith(command, "loadgame:")
                 || StartsWith(command, "event:");
-        }
-
-        inline std::string ToLower(std::string value)
-        {
-            std::transform(value.begin(), value.end(), value.begin(),
-                [](unsigned char c) { return static_cast<char>(std::tolower(c)); });
-            return value;
         }
 
         inline int ParseInt(const std::string& value, int fallback)

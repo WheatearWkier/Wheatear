@@ -5,6 +5,7 @@
 #include "Wheatear/Runtime/CommandBus.h"
 #include "Wheatear/Scripting/ScriptEngine.h"
 #include "Wheatear/UI/UIWidgetLayout.h"
+#include "Wheatear/Utils/StringUtils.h"
 
 #include <algorithm>
 #include <cmath>
@@ -32,10 +33,7 @@ namespace Wheatear {
         float Bottom = 0.0f;
     };
 
-    static bool StartsWith(const std::string& value, const std::string& prefix)
-    {
-        return value.rfind(prefix, 0) == 0;
-    }
+    using Wheatear::StringUtils::StartsWith;
 
     static bool IsNativeButtonCommand(const std::string& command)
     {

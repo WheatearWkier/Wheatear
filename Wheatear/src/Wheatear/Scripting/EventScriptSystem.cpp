@@ -8,6 +8,7 @@
 #include "Wheatear/Runtime/CommandBus.h"
 #include "Wheatear/Scene/Components.h"
 #include "Wheatear/Scene/Scene.h"
+#include "Wheatear/Utils/StringUtils.h"
 
 #include <algorithm>
 #include <cctype>
@@ -32,12 +33,7 @@ namespace Wheatear {
             return cache;
         }
 
-        static std::string ToLower(std::string value)
-        {
-            std::transform(value.begin(), value.end(), value.begin(),
-                [](unsigned char c) { return static_cast<char>(std::tolower(c)); });
-            return value;
-        }
+        using Wheatear::StringUtils::ToLower;
 
         static std::vector<std::string> SplitWords(const std::string& value)
         {

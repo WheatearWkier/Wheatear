@@ -3,6 +3,7 @@
 
 #include "ActionDatabase.h"
 #include "Wheatear/Core/Log.h"
+#include "Wheatear/Utils/StringUtils.h"
 
 #include <algorithm>
 #include <cctype>
@@ -10,19 +11,14 @@
 
 namespace Wheatear::WAO {
 
+    using Wheatear::StringUtils::ToLower;
+
     namespace {
 
         static std::unordered_set<std::string>& MissingRecipeWarnings()
         {
             static std::unordered_set<std::string> warnings;
             return warnings;
-        }
-
-        static std::string ToLower(std::string value)
-        {
-            std::transform(value.begin(), value.end(), value.begin(),
-                [](unsigned char c) { return static_cast<char>(std::tolower(c)); });
-            return value;
         }
 
     } // namespace

@@ -4,18 +4,16 @@
 #include "ActionDebugHistory.h"
 #include "ActionRecipeQueries.h"
 #include "ActionSignalRouter.h"
+#include "Wheatear/Utils/StringUtils.h"
 
 #include <algorithm>
 #include <utility>
 
 namespace Wheatear::WAO {
 
-    namespace {
+    using Wheatear::StringUtils::StartsWith;
 
-        bool StartsWith(const std::string& value, const std::string& prefix)
-        {
-            return prefix.empty() || value.rfind(prefix, 0) == 0;
-        }
+    namespace {
 
         ActionResolveResult MakeFailure(const ActionResolveContext& context,
             const std::string& detail)

@@ -9,6 +9,7 @@
 #include "Wheatear/UI/UIRenderer.h"
 #include "Wheatear/UI/UIInputSystem.h"
 #include "Wheatear/UI/UIWidgetLayout.h"
+#include "Wheatear/Utils/StringUtils.h"
 
 #include <glm/glm.hpp>
 
@@ -47,12 +48,7 @@ namespace Wheatear {
             return 1.0f + c3 * inv * inv * inv + c1 * inv * inv;
         }
 
-        static std::string ToLower(std::string value)
-        {
-            std::transform(value.begin(), value.end(), value.begin(),
-                [](unsigned char c) { return static_cast<char>(std::tolower(c)); });
-            return value;
-        }
+        using Wheatear::StringUtils::ToLower;
 
         static glm::vec4 WithAlpha(glm::vec4 color, float alphaScale)
         {

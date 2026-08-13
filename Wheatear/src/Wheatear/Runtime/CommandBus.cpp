@@ -8,11 +8,15 @@
 #include "Wheatear/Scene/EntityReference.h"
 #include "Wheatear/Scene/Scene.h"
 #include "Wheatear/UI/UIWidgetLayout.h"
+#include "Wheatear/Utils/StringUtils.h"
 
 #include <algorithm>
 #include <vector>
 
 namespace Wheatear {
+
+    using Wheatear::StringUtils::PayloadAfter;
+    using Wheatear::StringUtils::StartsWith;
 
     namespace {
 
@@ -46,11 +50,6 @@ namespace Wheatear {
             return prefixes;
         }
 
-        static bool StartsWith(const std::string& value, const std::string& prefix)
-        {
-            return value.rfind(prefix, 0) == 0;
-        }
-
         static bool StartsWithAnyRegisteredPrefix(
             const std::string& command,
             const std::vector<std::string>& prefixes)
@@ -79,11 +78,6 @@ namespace Wheatear {
                 return;
 
             prefixes.push_back(prefix);
-        }
-
-        static std::string PayloadAfter(const std::string& value, const std::string& prefix)
-        {
-            return StartsWith(value, prefix) ? value.substr(prefix.size()) : std::string{};
         }
 
         static bool TryParsePositiveInt(const std::string& value, int& result)

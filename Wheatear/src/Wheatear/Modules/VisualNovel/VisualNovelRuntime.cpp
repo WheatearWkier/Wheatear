@@ -3,6 +3,7 @@
 
 #include "Wheatear/Core/Log.h"
 #include "Wheatear/Modules/Progression/GameProgress.h"
+#include "Wheatear/Utils/StringUtils.h"
 
 #include <algorithm>
 #include <cctype>
@@ -12,6 +13,10 @@
 #include <sstream>
 
 namespace Wheatear {
+
+    using Wheatear::StringUtils::PayloadAfter;
+    using Wheatear::StringUtils::StartsWith;
+    using Wheatear::StringUtils::ToLower;
 
     namespace {
 
@@ -106,18 +111,6 @@ namespace Wheatear {
             return fields;
         }
 
-        static bool StartsWith(const std::string& value, const std::string& prefix)
-        {
-            return value.rfind(prefix, 0) == 0;
-        }
-
-        static std::string PayloadAfter(const std::string& value, const std::string& prefix)
-        {
-            if (!StartsWith(value, prefix))
-                return {};
-            return value.substr(prefix.size());
-        }
-
         static size_t AdvanceUTF8(const std::string& text, size_t index)
         {
             if (index >= text.size())
@@ -182,13 +175,6 @@ namespace Wheatear {
             while (stream >> word)
                 words.push_back(word);
             return words;
-        }
-
-        static std::string ToLower(std::string value)
-        {
-            std::transform(value.begin(), value.end(), value.begin(),
-                [](unsigned char c) { return static_cast<char>(std::tolower(c)); });
-            return value;
         }
 
         static bool CompareFloat(float left, const std::string& op, float right)

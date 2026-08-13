@@ -3,6 +3,7 @@
 
 #include "Wheatear/Core/AssetPath.h"
 #include "Wheatear/Core/Log.h"
+#include "Wheatear/Utils/StringUtils.h"
 
 #include <algorithm>
 #include <cctype>
@@ -13,15 +14,9 @@
 
 namespace Wheatear {
 
-    static std::string Trim(const std::string& value)
-    {
-        const char* whitespace = " \t\r\n";
-        const auto begin = value.find_first_not_of(whitespace);
-        if (begin == std::string::npos)
-            return {};
-        const auto end = value.find_last_not_of(whitespace);
-        return value.substr(begin, end - begin + 1);
-    }
+    using Wheatear::StringUtils::StartsWith;
+    using Wheatear::StringUtils::ToLower;
+    using Wheatear::StringUtils::Trim;
 
     static std::string StripQuotes(const std::string& value)
     {
@@ -79,18 +74,6 @@ namespace Wheatear {
         std::string token = text.substr(0, end);
         text = Trim(text.substr(end + 1));
         return token;
-    }
-
-    static bool StartsWith(const std::string& value, const std::string& prefix)
-    {
-        return value.rfind(prefix, 0) == 0;
-    }
-
-    static std::string ToLower(std::string value)
-    {
-        std::transform(value.begin(), value.end(), value.begin(),
-            [](unsigned char c) { return static_cast<char>(std::tolower(c)); });
-        return value;
     }
 
     static bool ReadCommandPayload(const std::string& line,

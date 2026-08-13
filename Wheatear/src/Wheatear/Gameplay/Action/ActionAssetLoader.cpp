@@ -5,6 +5,7 @@
 #include "ActionTypes.h"
 #include "Wheatear/Core/AssetAliasRegistry.h"
 #include "Wheatear/Core/AssetPath.h"
+#include "Wheatear/Utils/StringUtils.h"
 
 #include <yaml-cpp/yaml.h>
 
@@ -15,18 +16,13 @@
 
 namespace Wheatear::WAO {
 
-    namespace {
+    using Wheatear::StringUtils::ToLower;
 
-        std::string Lower(std::string value)
-        {
-            std::transform(value.begin(), value.end(), value.begin(),
-                [](unsigned char c) { return static_cast<char>(std::tolower(c)); });
-            return value;
-        }
+    namespace {
 
         bool IsYamlFile(const std::filesystem::path& path)
         {
-            const std::string extension = Lower(path.extension().generic_string());
+            const std::string extension = ToLower(path.extension().generic_string());
             return extension == ".yaml" || extension == ".yml";
         }
 
@@ -90,7 +86,7 @@ namespace Wheatear::WAO {
 
         EffectType ParseEffectType(const std::string& text)
         {
-            const std::string value = Lower(text);
+            const std::string value = ToLower(text);
             if (value == "damage") return EffectType::Damage;
             if (value == "heal") return EffectType::Heal;
             if (value == "modifyattribute" || value == "modify_attribute") return EffectType::ModifyAttribute;
@@ -106,7 +102,7 @@ namespace Wheatear::WAO {
 
         EffectDurationPolicy ParseDurationPolicy(const std::string& text)
         {
-            const std::string value = Lower(text);
+            const std::string value = ToLower(text);
             if (value == "seconds") return EffectDurationPolicy::Seconds;
             if (value == "turns") return EffectDurationPolicy::Turns;
             if (value == "infinite") return EffectDurationPolicy::Infinite;

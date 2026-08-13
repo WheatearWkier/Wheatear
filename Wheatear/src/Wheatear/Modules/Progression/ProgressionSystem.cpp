@@ -15,6 +15,7 @@
 #include "Wheatear/Scene/SceneQueries.h"
 #include "Wheatear/Scene/Scene.h"
 #include "Wheatear/UI/UIRuntimeTools.h"
+#include "Wheatear/Utils/StringUtils.h"
 
 #include <algorithm>
 #include <cctype>
@@ -28,6 +29,7 @@ namespace Wheatear {
         using SceneQueries::FindEntityByName;
         using UIRuntimeTools::SetProgress;
         using UIRuntimeTools::SetText;
+        using Wheatear::StringUtils::ToLower;
 
         static constexpr const char* kSaveLoadSceneAlias = "progression.scene.save_load";
         static constexpr const char* kFallbackSaveLoadScenePath = "assets/scenes/VerticalSliceSaveLoad.wt";
@@ -44,13 +46,6 @@ namespace Wheatear {
         static bool HasVisualNovelComponent(Scene* scene)
         {
             return scene && !scene->GetRegistry().view<VisualNovelComponent>().empty();
-        }
-
-        static std::string ToLower(std::string value)
-        {
-            std::transform(value.begin(), value.end(), value.begin(),
-                [](unsigned char c) { return static_cast<char>(std::tolower(c)); });
-            return value;
         }
 
         static bool IsSaveLoadScenePath(const std::string& scenePath)
