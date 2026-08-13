@@ -1,3 +1,4 @@
+#include "wepch.h"
 #include "SideCombatTuningEditorPanel.h"
 
 #include "Editor/EditorContentPickers.h"

@@ -5,7 +5,6 @@
 #include "ActionSignalRouter.h"
 
 #include <algorithm>
-#include <sstream>
 
 namespace Wheatear::WAO {
 

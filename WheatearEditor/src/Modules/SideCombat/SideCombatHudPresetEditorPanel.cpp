@@ -1,3 +1,4 @@
+#include "wepch.h"
 #include "SideCombatHudPresetEditorPanel.h"
 
 #include "Editor/CommandBuilder.h"

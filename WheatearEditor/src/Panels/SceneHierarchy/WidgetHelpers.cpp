@@ -1,3 +1,4 @@
+#include "wepch.h"
 #include "WidgetHelpers.h"
 
 #include "Editor/EditorLocale.h"

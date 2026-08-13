@@ -5,6 +5,8 @@
 #include "Entity.h"
 #include "Scene.h"
 
+#include <string>
+
 namespace Wheatear::SceneQueries {
 
     Entity FindEntityByName(Scene* scene, const std::string& name)

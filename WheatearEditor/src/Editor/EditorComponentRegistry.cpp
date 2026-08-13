@@ -1,4 +1,4 @@
-#include "wtpch.h"
+#include "wepch.h"
 #include "EditorComponentRegistry.h"
 
 #include "Wheatear/Core/Log.h"

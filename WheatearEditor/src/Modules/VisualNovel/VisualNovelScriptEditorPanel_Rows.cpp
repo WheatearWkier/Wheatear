@@ -10,7 +10,6 @@
 
 #include <algorithm>
 #include <string>
-#include <vector>
 
 namespace Wheatear {
 

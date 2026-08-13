@@ -14,12 +14,10 @@
 #include <glm/glm.hpp>
 
 #include <algorithm>
-#include <cctype>
 #include <cmath>
 #include <optional>
 #include <string>
 #include <unordered_set>
-#include <vector>
 
 namespace Wheatear {
 

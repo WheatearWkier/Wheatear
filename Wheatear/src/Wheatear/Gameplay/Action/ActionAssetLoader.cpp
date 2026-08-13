@@ -10,7 +10,6 @@
 #include <yaml-cpp/yaml.h>
 
 #include <algorithm>
-#include <cctype>
 #include <system_error>
 #include <vector>
 

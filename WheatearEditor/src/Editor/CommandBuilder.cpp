@@ -1,3 +1,4 @@
+#include "wepch.h"
 #include "CommandBuilder.h"
 
 #include "Editor/EditorContentPickers.h"

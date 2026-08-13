@@ -1,3 +1,4 @@
+#include "wepch.h"
 #include <Wheatear.h>
 #include "Assets/AssetRegistry.h"
 #include "Assets/UITemplateFactory.h"

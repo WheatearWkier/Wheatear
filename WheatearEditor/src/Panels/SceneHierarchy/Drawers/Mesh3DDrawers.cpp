@@ -1,3 +1,4 @@
+#include "wepch.h"
 #include "Mesh3DDrawers.h"
 #include "../ComponentDrawers.h"
 #include "Editor/EditorLocale.h"

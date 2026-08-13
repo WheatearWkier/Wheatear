@@ -4,8 +4,6 @@
 #include "Wheatear/Core/FileSystem.h"
 #include "Wheatear/Utils/StringUtils.h"
 
-#include <algorithm>
-#include <cctype>
 #include <fstream>
 #include <sstream>
 #include <string>

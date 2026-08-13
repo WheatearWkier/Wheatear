@@ -1,3 +1,4 @@
+#include "wepch.h"
 #include "UIDrawers.h"
 #include "../ComponentDrawers.h"
 #include "Editor/CommandBuilder.h"

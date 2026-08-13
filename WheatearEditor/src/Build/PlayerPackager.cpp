@@ -1,3 +1,4 @@
+#include "wepch.h"
 #include "PlayerPackager.h"
 
 #include "AssetDependencyScanner.h"

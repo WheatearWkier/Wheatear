@@ -1,3 +1,4 @@
+#include "wepch.h"
 #include "SpriteRendererDrawer.h"
 
 #include "../ComponentDrawers.h"

@@ -1,3 +1,4 @@
+#include "wepch.h"
 #include "TransformDrawer.h"
 
 #include "../ComponentDrawers.h"

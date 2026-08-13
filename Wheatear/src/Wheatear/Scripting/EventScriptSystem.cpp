@@ -11,7 +11,6 @@
 #include "Wheatear/Utils/StringUtils.h"
 
 #include <algorithm>
-#include <cctype>
 #include <filesystem>
 #include <sstream>
 #include <unordered_map>

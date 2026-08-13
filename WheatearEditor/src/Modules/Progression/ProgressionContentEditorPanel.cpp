@@ -1,3 +1,4 @@
+#include "wepch.h"
 #include "ProgressionContentEditorPanel.h"
 
 #include "Editor/EditorContentPickers.h"
@@ -15,7 +16,6 @@
 #include <algorithm>
 #include <array>
 #include <cmath>
-#include <sstream>
 #include <string>
 #include <unordered_map>
 #include <unordered_set>

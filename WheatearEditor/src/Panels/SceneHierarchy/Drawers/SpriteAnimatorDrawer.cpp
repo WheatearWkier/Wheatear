@@ -1,3 +1,4 @@
+#include "wepch.h"
 #include "SpriteAnimatorDrawer.h"
 #include "../ComponentDrawers.h"
 #include "Editor/EditorLocale.h"

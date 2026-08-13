@@ -1,3 +1,4 @@
+#include "wepch.h"
 #include "CircleRendererDrawer.h"
 
 #include "../ComponentDrawers.h"

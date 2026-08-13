@@ -1,3 +1,4 @@
+#include "wepch.h"
 #include "CameraDrawer.h"
 
 #include "../ComponentDrawers.h"

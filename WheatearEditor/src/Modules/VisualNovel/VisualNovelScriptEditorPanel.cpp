@@ -1,3 +1,4 @@
+#include "wepch.h"
 #include "VisualNovelScriptEditorPanel.h"
 
 #include "Editor/EditorFloatingWindow.h"

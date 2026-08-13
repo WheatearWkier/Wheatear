@@ -6,7 +6,6 @@
 #include "Wheatear/Utils/StringUtils.h"
 
 #include <algorithm>
-#include <cctype>
 #include <cmath>
 #include <fstream>
 #include <limits>

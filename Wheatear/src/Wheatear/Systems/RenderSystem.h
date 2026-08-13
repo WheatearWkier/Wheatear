@@ -3,6 +3,7 @@
 #include "Wheatear/Renderer/EditorCamera.h"
 
 #include "entt.hpp"
+#include <glm/glm.hpp>
 #include <vector>
 
 namespace Wheatear {
