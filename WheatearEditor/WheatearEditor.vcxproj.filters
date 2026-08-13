@@ -327,6 +327,9 @@
     <ClCompile Include="src\Panels\AnimationEditorPanelSections.cpp">
       <Filter>Panels</Filter>
     </ClCompile>
+    <ClCompile Include="src\Panels\AnimationEditorPanel_Timeline.cpp">
+      <Filter>Panels</Filter>
+    </ClCompile>
     <ClCompile Include="src\Panels\ContentBrowserPanel.cpp">
       <Filter>Panels</Filter>
     </ClCompile>

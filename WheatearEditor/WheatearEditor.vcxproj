@@ -248,6 +248,7 @@
     <ClCompile Include="src\Modules\VisualNovel\VisualNovelScriptEditorPanel.cpp" />
     <ClCompile Include="src\Panels\AnimationEditorPanel.cpp" />
     <ClCompile Include="src\Panels\AnimationEditorPanelSections.cpp" />
+    <ClCompile Include="src\Panels\AnimationEditorPanel_Timeline.cpp" />
     <ClCompile Include="src\Panels\ContentBrowserPanel.cpp" />
     <ClCompile Include="src\Panels\SceneHierarchy\Drawers\AudioDrawer.cpp" />
     <ClCompile Include="src\Panels\SceneHierarchy\Drawers\CameraDrawer.cpp" />
