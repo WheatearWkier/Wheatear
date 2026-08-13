@@ -111,6 +111,18 @@ namespace Wheatear {
 		glTextureSubImage2D(m_RendererID, 0, 0, 0, m_Width, m_Height, m_DataFormat, GL_UNSIGNED_BYTE, data);
 	}
 
+	void OpenGLTexture2D::SetSubData(uint32_t x, uint32_t y, uint32_t width, uint32_t height, const void* data)
+	{
+		WT_PROFILE_FUNCTION();
+
+		if (width == 0 || height == 0 || !data)
+			return;
+		glTextureSubImage2D(m_RendererID, 0,
+			static_cast<GLint>(x), static_cast<GLint>(y),
+			static_cast<GLsizei>(width), static_cast<GLsizei>(height),
+			m_DataFormat, GL_UNSIGNED_BYTE, data);
+	}
+
 	void OpenGLTexture2D::Bind(uint32_t slot) const
 	{
 		WT_PROFILE_FUNCTION();

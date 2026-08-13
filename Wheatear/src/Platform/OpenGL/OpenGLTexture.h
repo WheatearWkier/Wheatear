@@ -18,6 +18,7 @@ namespace Wheatear {
 		virtual uint32_t GetRendererID() const override { return m_RendererID; };
 
 		virtual void SetData(void* data, uint32_t size) override;
+		virtual void SetSubData(uint32_t x, uint32_t y, uint32_t width, uint32_t height, const void* data) override;
 
 		virtual void Bind(uint32_t slot = 0) const override;
 

@@ -48,7 +48,10 @@ namespace Wheatear {
 	void OpenGLVertexBuffer::SetData(const void* data, uint32_t size)
 	{
 		glBindBuffer(GL_ARRAY_BUFFER, m_RendererID);
-		glBufferSubData(GL_ARRAY_BUFFER, 0, size, data);
+		// Re-allocate the whole buffer each upload: the driver orphans the old
+		// storage, so the GPU can keep reading the previous frame's vertices
+		// while we write the new ones (no sync stall on glBufferSubData).
+		glBufferData(GL_ARRAY_BUFFER, size, data, GL_DYNAMIC_DRAW);
 	}
 
 

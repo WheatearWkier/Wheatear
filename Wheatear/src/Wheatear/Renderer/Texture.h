@@ -17,6 +17,10 @@ namespace Wheatear {
         virtual uint32_t GetRendererID() const = 0;
 
         virtual void SetData(void* data, uint32_t size) = 0;
+        // Upload a sub-region (x,y,width,height) of the texture; data must point
+        // at the region's top-left row. Used by the font atlas to re-upload only
+        // newly rasterized glyphs instead of the whole 64 MB atlas.
+        virtual void SetSubData(uint32_t x, uint32_t y, uint32_t width, uint32_t height, const void* data) = 0;
         virtual void Bind(uint32_t slot = 0) const = 0;
 
         virtual bool IsLoaded() const = 0;

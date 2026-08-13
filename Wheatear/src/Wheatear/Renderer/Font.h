@@ -6,11 +6,58 @@
 #include <glm/glm.hpp>
 
 #include <cstdint>
+#include <memory>
 #include <string>
 #include <unordered_map>
 #include <vector>
 
+struct stbtt_fontinfo;
+
 namespace Wheatear {
+
+    // Shared UTF-8 decoder (single definition; Font.cpp and TextRenderer.cpp
+    // previously each carried a private copy that could drift).
+    inline uint32_t DecodeNextUTF8(const std::string& text, size_t& index)
+    {
+        const unsigned char c0 = static_cast<unsigned char>(text[index++]);
+        if (c0 < 0x80)
+            return c0;
+
+        auto continuation = [](unsigned char c) { return (c & 0xC0) == 0x80; };
+        if ((c0 & 0xE0) == 0xC0 && index < text.size())
+        {
+            const unsigned char c1 = static_cast<unsigned char>(text[index]);
+            if (continuation(c1))
+            {
+                index++;
+                return ((c0 & 0x1F) << 6) | (c1 & 0x3F);
+            }
+        }
+        else if ((c0 & 0xF0) == 0xE0 && index + 1 < text.size())
+        {
+            const unsigned char c1 = static_cast<unsigned char>(text[index]);
+            const unsigned char c2 = static_cast<unsigned char>(text[index + 1]);
+            if (continuation(c1) && continuation(c2))
+            {
+                index += 2;
+                return ((c0 & 0x0F) << 12) | ((c1 & 0x3F) << 6) | (c2 & 0x3F);
+            }
+        }
+        else if ((c0 & 0xF8) == 0xF0 && index + 2 < text.size())
+        {
+            const unsigned char c1 = static_cast<unsigned char>(text[index]);
+            const unsigned char c2 = static_cast<unsigned char>(text[index + 1]);
+            const unsigned char c3 = static_cast<unsigned char>(text[index + 2]);
+            if (continuation(c1) && continuation(c2) && continuation(c3))
+            {
+                index += 3;
+                return ((c0 & 0x07) << 18) | ((c1 & 0x3F) << 12)
+                    | ((c2 & 0x3F) << 6) | (c3 & 0x3F);
+            }
+        }
+
+        return '?';
+    }
 
     struct FontGlyph
     {
@@ -33,6 +80,10 @@ namespace Wheatear {
         const FontGlyph* GetGlyph(uint32_t codepoint);
         const FontGlyph* GetGlyph(char character) { return GetGlyph(static_cast<uint32_t>(static_cast<unsigned char>(character))); }
         void PreloadText(const std::string& text);
+
+        // Horizontal kerning between two consecutive codepoints (scaled to the
+        // font's pixel size). Cached; returns 0 for unknown pairs.
+        float GetKerning(uint32_t previousCodepoint, uint32_t codepoint);
 
         const Ref<Texture2D>& GetAtlasTexture() const { return m_AtlasTexture; }
         bool IsLoaded() const { return m_Loaded; }
@@ -70,6 +121,15 @@ namespace Wheatear {
         bool m_AtlasDirty = false;
         bool m_DeferAtlasUpload = false;
 
+        // Dirty-region tracking: only newly rasterized glyphs are re-uploaded to
+        // the GPU instead of the whole atlas on every cache miss.
+        bool m_AtlasUploaded = false;
+        bool m_HasDirtyRegion = false;
+        uint32_t m_DirtyMinX = 0;
+        uint32_t m_DirtyMinY = 0;
+        uint32_t m_DirtyMaxX = 0;
+        uint32_t m_DirtyMaxY = 0;
+
         std::vector<unsigned char> m_FontData;
         int m_FontOffset = 0;
         float m_Scale = 1.0f;
@@ -81,6 +141,8 @@ namespace Wheatear {
 
         Ref<Texture2D> m_AtlasTexture;
         std::unordered_map<uint32_t, FontGlyph> m_Glyphs;
+        std::unordered_map<uint64_t, float> m_KerningCache;
+        std::unique_ptr<stbtt_fontinfo> m_FontInfo;
     };
 
 } // namespace Wheatear

@@ -26,48 +26,6 @@ namespace Wheatear {
                 | (static_cast<uint32_t>(a) << 24);
         }
 
-        static uint32_t DecodeNextUTF8(const std::string& text, size_t& index)
-        {
-            const unsigned char c0 = static_cast<unsigned char>(text[index++]);
-            if (c0 < 0x80)
-                return c0;
-
-            auto continuation = [](unsigned char c) { return (c & 0xC0) == 0x80; };
-            if ((c0 & 0xE0) == 0xC0 && index < text.size())
-            {
-                const unsigned char c1 = static_cast<unsigned char>(text[index]);
-                if (continuation(c1))
-                {
-                    index++;
-                    return ((c0 & 0x1F) << 6) | (c1 & 0x3F);
-                }
-            }
-            else if ((c0 & 0xF0) == 0xE0 && index + 1 < text.size())
-            {
-                const unsigned char c1 = static_cast<unsigned char>(text[index]);
-                const unsigned char c2 = static_cast<unsigned char>(text[index + 1]);
-                if (continuation(c1) && continuation(c2))
-                {
-                    index += 2;
-                    return ((c0 & 0x0F) << 12) | ((c1 & 0x3F) << 6) | (c2 & 0x3F);
-                }
-            }
-            else if ((c0 & 0xF8) == 0xF0 && index + 2 < text.size())
-            {
-                const unsigned char c1 = static_cast<unsigned char>(text[index]);
-                const unsigned char c2 = static_cast<unsigned char>(text[index + 1]);
-                const unsigned char c3 = static_cast<unsigned char>(text[index + 2]);
-                if (continuation(c1) && continuation(c2) && continuation(c3))
-                {
-                    index += 3;
-                    return ((c0 & 0x07) << 18) | ((c1 & 0x3F) << 12)
-                        | ((c2 & 0x3F) << 6) | (c3 & 0x3F);
-                }
-            }
-
-            return '?';
-        }
-
     } // namespace
 
     Font::Font(const std::string& filepath, float pixelSize,
@@ -111,17 +69,17 @@ namespace Wheatear {
             return false;
         }
 
-        stbtt_fontinfo info{};
+        m_FontInfo = std::make_unique<stbtt_fontinfo>();
         m_FontOffset = stbtt_GetFontOffsetForIndex(m_FontData.data(), 0);
-        if (m_FontOffset < 0 || !stbtt_InitFont(&info, m_FontData.data(), m_FontOffset))
+        if (m_FontOffset < 0 || !stbtt_InitFont(m_FontInfo.get(), m_FontData.data(), m_FontOffset))
         {
             WT_CORE_WARN("Font: invalid font data {0}", m_Path);
             return false;
         }
 
         int ascent = 0, descent = 0, lineGap = 0;
-        m_Scale = stbtt_ScaleForPixelHeight(&info, m_PixelSize);
-        stbtt_GetFontVMetrics(&info, &ascent, &descent, &lineGap);
+        m_Scale = stbtt_ScaleForPixelHeight(m_FontInfo.get(), m_PixelSize);
+        stbtt_GetFontVMetrics(m_FontInfo.get(), &ascent, &descent, &lineGap);
         m_Ascent = static_cast<float>(ascent) * m_Scale;
         m_Descent = static_cast<float>(descent) * m_Scale;
         m_LineGap = static_cast<float>(lineGap) * m_Scale;
@@ -213,12 +171,10 @@ namespace Wheatear {
 
     const FontGlyph* Font::LoadGlyph(uint32_t codepoint)
     {
-        if (!m_Loaded || m_FontData.empty())
+        if (!m_Loaded || m_FontData.empty() || !m_FontInfo)
             return nullptr;
 
-        stbtt_fontinfo info{};
-        if (!stbtt_InitFont(&info, m_FontData.data(), m_FontOffset))
-            return nullptr;
+        stbtt_fontinfo& info = *m_FontInfo;
 
         int advance = 0;
         int leftBearing = 0;
@@ -299,6 +255,24 @@ namespace Wheatear {
             }
         }
 
+        // Track the dirty region so UploadAtlas only re-uploads this glyph's
+        // rect instead of the whole atlas.
+        if (!m_HasDirtyRegion)
+        {
+            m_DirtyMinX = atlasX;
+            m_DirtyMinY = atlasY;
+            m_DirtyMaxX = atlasX + static_cast<uint32_t>(paddedWidth);
+            m_DirtyMaxY = atlasY + static_cast<uint32_t>(paddedHeight);
+            m_HasDirtyRegion = true;
+        }
+        else
+        {
+            m_DirtyMinX = std::min(m_DirtyMinX, atlasX);
+            m_DirtyMinY = std::min(m_DirtyMinY, atlasY);
+            m_DirtyMaxX = std::max(m_DirtyMaxX, atlasX + static_cast<uint32_t>(paddedWidth));
+            m_DirtyMaxY = std::max(m_DirtyMaxY, atlasY + static_cast<uint32_t>(paddedHeight));
+        }
+
         const float invWidth = 1.0f / static_cast<float>(m_AtlasWidth);
         const float invHeight = 1.0f / static_cast<float>(m_AtlasHeight);
         glyph.UVMin = { atlasX * invWidth, (atlasY + glyph.Size.y) * invHeight };
@@ -317,9 +291,47 @@ namespace Wheatear {
         if (!m_AtlasTexture || m_AtlasPixels.empty() || !m_AtlasDirty)
             return;
 
-        m_AtlasTexture->SetData(m_AtlasPixels.data(),
-            static_cast<uint32_t>(m_AtlasPixels.size() * sizeof(uint32_t)));
+        if (!m_AtlasUploaded)
+        {
+            // First upload covers the whole atlas (the ASCII preload pass).
+            m_AtlasTexture->SetData(m_AtlasPixels.data(),
+                static_cast<uint32_t>(m_AtlasPixels.size() * sizeof(uint32_t)));
+            m_AtlasUploaded = true;
+        }
+        else if (m_HasDirtyRegion)
+        {
+            // Subsequent uploads send only the rect touched since the last
+            // flush (plus a 1 px bleed for the glyph padding edge).
+            const uint32_t x0 = std::max(0u, m_DirtyMinX - 1u);
+            const uint32_t y0 = std::max(0u, m_DirtyMinY - 1u);
+            const uint32_t x1 = std::min(m_AtlasWidth, m_DirtyMaxX + 1u);
+            const uint32_t y1 = std::min(m_AtlasHeight, m_DirtyMaxY + 1u);
+            if (x1 > x0 && y1 > y0)
+            {
+                m_AtlasTexture->SetSubData(x0, y0, x1 - x0, y1 - y0,
+                    &m_AtlasPixels[static_cast<size_t>(y0) * m_AtlasWidth + x0]);
+            }
+        }
+
         m_AtlasDirty = false;
+        m_HasDirtyRegion = false;
+    }
+
+    float Font::GetKerning(uint32_t previousCodepoint, uint32_t codepoint)
+    {
+        if (!m_Loaded || !m_FontInfo || previousCodepoint == 0 || codepoint == 0)
+            return 0.0f;
+
+        const uint64_t key = (static_cast<uint64_t>(previousCodepoint) << 32) | codepoint;
+        const auto it = m_KerningCache.find(key);
+        if (it != m_KerningCache.end())
+            return it->second;
+
+        const float kerning = stbtt_GetCodepointKernAdvance(m_FontInfo.get(),
+            static_cast<int>(previousCodepoint),
+            static_cast<int>(codepoint)) * m_Scale;
+        m_KerningCache[key] = kerning;
+        return kerning;
     }
 
 } // namespace Wheatear
