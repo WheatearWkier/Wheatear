@@ -39,6 +39,9 @@ namespace Wheatear::WAO {
     };
 
     WHEATEAR_API const StateDefinition* FindStateDefinition(const std::string& id);
+    // Snapshot of all registered state ids; used by the editor to drive state
+    // pickers and referential validation without exposing the static vector.
+    WHEATEAR_API std::vector<StateDefinition> AllStateDefinitions();
     WHEATEAR_API RuntimeState MakeState(const std::string& id,
         int turns,
         float power,

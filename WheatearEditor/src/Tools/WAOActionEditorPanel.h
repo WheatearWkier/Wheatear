@@ -1,10 +1,12 @@
 #pragma once
 
 #include "Editor/EditorToolRegistry.h"
-#include "Wheatear/Gameplay/Action/ActionTypes.h"
+#include "Wheatear/Gameplay/Action/ActionRunner.h"
 
 #include <cstdint>
 #include <string>
+#include <unordered_map>
+#include <vector>
 
 namespace Wheatear {
 
@@ -35,6 +37,16 @@ namespace Wheatear {
         bool SaveEditedRecipe();
         bool ReloadActionSources();
 
+        // Runs the selected recipe in isolation against a synthetic ActionRuntime
+        // (no Scene/ECS), surfacing the effect ledger + post-run attribute deltas
+        // so designers can tune numbers without entering Play mode.
+        void RunSandbox(const WAO::ActionRecipe& recipe);
+        void DrawSandboxResult();
+
+        // Id rename modal + project-wide dotted reference rewrite.
+        void DrawRenameDialog(const WAO::ActionRecipe& recipe);
+        bool PerformRename(const std::string& oldId, const std::string& newId);
+
     private:
         bool m_Open = false;
         bool m_GroupByModule = true;
@@ -52,6 +64,18 @@ namespace Wheatear {
         bool m_ActionSetsDirty = false;
         std::string m_ActionSetsStatus;
         std::string m_SelectedActionSetKey;
+
+        // Sandbox run state (see RunSandbox).
+        bool m_SandboxRan = false;
+        std::string m_SandboxStatus;
+        WAO::ActionExecutionResult m_SandboxResult;
+        std::unordered_map<std::string, float> m_SandboxBefore;
+        std::unordered_map<std::string, float> m_SandboxAfter;
+
+        // Id rename state (see RenameActionId).
+        bool m_RenameOpen = false;
+        std::string m_RenameNewId;
+        std::string m_RenameStatus;
     };
 
 } // namespace Wheatear

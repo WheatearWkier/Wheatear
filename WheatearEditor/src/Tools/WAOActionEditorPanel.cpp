@@ -8,15 +8,22 @@
 #include "Wheatear/Core/AssetAliasRegistry.h"
 #include "Wheatear/Core/AssetPath.h"
 #include "Wheatear/Gameplay/Action/ActionAssetLoader.h"
+#include "Wheatear/Gameplay/Action/ActionDatabase.h"
 #include "Wheatear/Gameplay/Action/ActionDebugHistory.h"
 #include "Wheatear/Gameplay/Action/ActionRecipeQueries.h"
+#include "Wheatear/Gameplay/Action/ActionRunner.h"
+#include "Wheatear/Gameplay/Action/StateRegistry.h"
 
 #include <imgui/imgui.h>
 #include <yaml-cpp/yaml.h>
 
 #include <algorithm>
+#include <cctype>
 #include <filesystem>
+#include <fstream>
+#include <iterator>
 #include <map>
+#include <set>
 #include <sstream>
 #include <string>
 #include <unordered_map>
@@ -203,12 +210,12 @@ namespace Wheatear {
                 effect.Turns = 1;
                 break;
             case WAO::EffectType::AddState:
-                effect.StateId = "stunned";
+                effect.StateId = WAO::StateIds::Stun;
                 effect.DurationPolicy = WAO::EffectDurationPolicy::Turns;
                 effect.Turns = 1;
                 break;
             case WAO::EffectType::RemoveState:
-                effect.StateId = "stunned";
+                effect.StateId = WAO::StateIds::Stun;
                 break;
             case WAO::EffectType::StartCooldown:
                 effect.Seconds = 1.0f;
@@ -233,6 +240,40 @@ namespace Wheatear {
                 break;
             }
             return effect;
+        }
+
+        // Known attribute ids: the runner's hardcoded Health key (ActionRunner.cpp
+        // uses the literal "Health" for Damage/Heal), the editor template seeds
+        // (hp/atk/mana), and every attribute referenced by any recipe's effects.
+        // Cached on ActionDatabase::Revision so the set refreshes on recipe reload.
+        const std::unordered_map<std::string, float>& KnownAttributes()
+        {
+            static std::unordered_map<std::string, float> attributes;
+            static uint64_t lastRevision = 0;
+            const uint64_t revision = WAO::ActionDatabase::Revision();
+            if (revision != lastRevision)
+            {
+                lastRevision = revision;
+                attributes.clear();
+                attributes["Health"] = 0.0f;
+                attributes["hp"] = 0.0f;
+                attributes["atk"] = 0.0f;
+                attributes["mana"] = 0.0f;
+                for (const WAO::ActionRecipe& recipe : WAO::ActionDatabase::All())
+                {
+                    for (const WAO::EffectSpec& effect : recipe.Effects)
+                    {
+                        if (!effect.AttributeId.empty())
+                            attributes.emplace(effect.AttributeId, 0.0f);
+                    }
+                }
+            }
+            return attributes;
+        }
+
+        bool IsKnownAttribute(const std::string& id)
+        {
+            return !id.empty() && KnownAttributes().count(id) > 0;
         }
 
         std::string ActionModuleKey(const WAO::ActionRecipe& recipe)
@@ -414,6 +455,126 @@ namespace Wheatear {
                     return true;
             }
             return false;
+        }
+
+        // Token-aware project-wide replacement for a dotted action id. A match
+        // requires word boundaries on both sides so "side.basic1" never matches
+        // inside "side.basic10" or "side.basic1_combo". Only the dotted canonical
+        // form is rewritten; the colon command form ("side:launcher") is left for
+        // manual review because SideCombatSystem.cpp hardcodes it in an if/else chain.
+        bool IsIdBoundaryChar(char c)
+        {
+            const unsigned char u = static_cast<unsigned char>(c);
+            return !(std::isalnum(u) || c == '.');
+        }
+
+        bool ReplaceDottedIdInFile(const std::filesystem::path& path,
+            const std::string& oldId,
+            const std::string& newId,
+            size_t& occurrences)
+        {
+            std::ifstream input(path, std::ios::binary);
+            if (!input)
+                return false;
+
+            std::string text((std::istreambuf_iterator<char>(input)), std::istreambuf_iterator<char>());
+            input.close();
+
+            size_t replaced = 0;
+            std::string output;
+            output.reserve(text.size());
+            size_t pos = 0;
+            while (pos < text.size())
+            {
+                const size_t hit = text.find(oldId, pos);
+                if (hit == std::string::npos)
+                {
+                    output.append(text, pos, std::string::npos);
+                    break;
+                }
+                const size_t end = hit + oldId.size();
+                const bool leftOk = (hit == 0) || IsIdBoundaryChar(text[hit - 1]);
+                const bool rightOk = (end >= text.size()) || IsIdBoundaryChar(text[end]);
+                if (leftOk && rightOk)
+                {
+                    output.append(text, pos, hit - pos);
+                    output += newId;
+                    pos = end;
+                    ++replaced;
+                }
+                else
+                {
+                    output.append(text, pos, end - pos);
+                    pos = end;
+                }
+            }
+
+            if (replaced == 0)
+                return false;
+
+            if (!EditorWidgets::WriteFileText(path, output))
+                return false;
+
+            occurrences += replaced;
+            return true;
+        }
+
+        bool IsReferenceTextFile(const std::filesystem::path& path)
+        {
+            const std::string ext = path.extension().string();
+            static const std::set<std::string> textExts = {
+                ".yaml", ".yml", ".json", ".wt", ".wts", ".vn", ".txt", ".md",
+                ".lua", ".cs", ".ini", ".cfg", ".h", ".hpp", ".cpp", ".cc", ".inl"
+            };
+            return textExts.count(ext) > 0;
+        }
+
+        bool ShouldSkipReferencePath(const std::filesystem::path& path)
+        {
+            const std::string relative = path.generic_string();
+            if (relative.find(".git") != std::string::npos)
+                return true;
+            if (relative.find(".vs/") != std::string::npos)
+                return true;
+            if (relative.find("/bin/") != std::string::npos || relative.find("/bin-int/") != std::string::npos)
+                return true;
+            if (relative.find("/vendor/") != std::string::npos)
+                return true;
+            if (relative.find("assets/.wheatear/archive") != std::string::npos)
+                return true;
+            return false;
+        }
+
+        size_t ReplaceDottedIdInProject(const std::string& oldId,
+            const std::string& newId,
+            const std::filesystem::path& excludedPath = {})
+        {
+            const std::filesystem::path projectRoot = AssetPath::GetProjectRoot();
+            const std::filesystem::path workspaceRoot = projectRoot.parent_path();
+            if (workspaceRoot.empty() || !std::filesystem::exists(workspaceRoot))
+                return 0;
+
+            size_t total = 0;
+            try
+            {
+                for (const auto& entry : std::filesystem::recursive_directory_iterator(workspaceRoot))
+                {
+                    if (!entry.is_regular_file())
+                        continue;
+                    const std::filesystem::path path = entry.path();
+                    if (!excludedPath.empty() && path.lexically_normal() == excludedPath.lexically_normal())
+                        continue;
+                    if (ShouldSkipReferencePath(path))
+                        continue;
+                    if (!IsReferenceTextFile(path))
+                        continue;
+                    ReplaceDottedIdInFile(path, oldId, newId, total);
+                }
+            }
+            catch (...)
+            {
+            }
+            return total;
         }
 
         std::vector<WAO::ActionRecipe> SortedActions()
@@ -926,7 +1087,18 @@ namespace Wheatear {
             ImGui::TextColored(ImVec4(0.55f, 0.85f, 1.0f, 1.0f), "%s", m_SaveStatus.c_str());
         ImGui::Separator();
 
-        LabelValue("Id", recipe->Id);
+        ImGui::AlignTextToFramePadding();
+        ImGui::TextDisabled("Id");
+        ImGui::SameLine();
+        ImGui::TextWrapped("%s", recipe->Id.c_str());
+        ImGui::SameLine();
+        if (ImGui::SmallButton("Rename..."))
+        {
+            m_RenameNewId = recipe->Id;
+            m_RenameStatus.clear();
+            m_RenameOpen = true;
+        }
+        EditorWidgets::HelpTooltip("Renames this action id and updates dotted references project-wide. Colon command forms (side:xxx) are left for manual review.");
         LabelValue("Name", recipe->DisplayName);
         LabelValue("Description", recipe->Description);
         LabelValue("Module", ActionModuleLabel(ActionModuleKey(*recipe)));
@@ -986,6 +1158,153 @@ namespace Wheatear {
             for (const std::string& signal : recipe->Signals)
                 ImGui::BulletText("%s", signal.c_str());
         }
+
+        DrawRenameDialog(*recipe);
+    }
+
+    void WAOActionEditorPanel::DrawRenameDialog(const WAO::ActionRecipe& recipe)
+    {
+        if (!m_RenameOpen)
+            return;
+
+        ImGui::OpenPopup("Rename Action Id");
+        ImGui::SetNextWindowSize(ImVec2(460.0f, 0.0f), ImGuiCond_Appearing);
+        if (ImGui::BeginPopupModal("Rename Action Id", nullptr, ImGuiWindowFlags_AlwaysAutoResize))
+        {
+            ImGui::TextWrapped("Renaming '%s' to a new dotted id will rewrite the recipe YAML "
+                "and update project-wide dotted references. Colon command forms (e.g. "
+                "side:launcher in scenes / SideCombatSystem.cpp) are NOT auto-rewritten - "
+                "review those manually.", recipe.Id.c_str());
+
+            ImGui::Separator();
+            ImGui::TextDisabled("New Id");
+            if (EditorWidgets::InputString("##RenameNewId", m_RenameNewId, 128))
+                m_RenameStatus.clear();
+
+            if (!m_RenameStatus.empty())
+                ImGui::TextColored(ImVec4(1.0f, 0.82f, 0.25f, 1.0f), "%s", m_RenameStatus.c_str());
+
+            const bool newIdValid = !m_RenameNewId.empty()
+                && m_RenameNewId != recipe.Id
+                && !RecipeIdExists(m_RenameNewId)
+                && m_RenameNewId.find(' ') == std::string::npos;
+
+            ImGui::Separator();
+            const bool canConfirm = newIdValid;
+            if (!canConfirm)
+                ImGui::BeginDisabled();
+            if (ImGui::Button("Rename"))
+            {
+                if (PerformRename(recipe.Id, m_RenameNewId))
+                {
+                    m_RenameOpen = false;
+                    m_RenameNewId.clear();
+                    m_RenameStatus.clear();
+                }
+                // On failure keep the modal open; m_RenameStatus shows the reason.
+            }
+            if (!canConfirm)
+                ImGui::EndDisabled();
+            ImGui::SameLine();
+            if (ImGui::Button("Cancel"))
+            {
+                m_RenameOpen = false;
+                m_RenameNewId.clear();
+                m_RenameStatus.clear();
+            }
+            ImGui::EndPopup();
+        }
+    }
+
+    bool WAOActionEditorPanel::PerformRename(const std::string& oldId, const std::string& newId)
+    {
+        const std::string relativePath = RecipeSourcePath(oldId);
+        if (relativePath.empty())
+        {
+            m_RenameStatus = "No YAML source mapping for " + oldId;
+            return false;
+        }
+        if (RecipeIdExists(newId))
+        {
+            m_RenameStatus = "Id already exists: " + newId;
+            return false;
+        }
+        // Guard: oldId must not be a prefix of another recipe id, otherwise the
+        // token-aware replacement would still rewrite the shared prefix.
+        for (const WAO::ActionRecipe& other : WAO::ActionDatabase::All())
+        {
+            if (other.Id != oldId && other.Id.size() > oldId.size()
+                && other.Id.compare(0, oldId.size(), oldId) == 0)
+            {
+                m_RenameStatus = "Cannot rename: '" + oldId + "' is a prefix of '" + other.Id + "'.";
+                return false;
+            }
+        }
+
+        const std::filesystem::path path = EditorWidgets::ResolveProjectAsset(relativePath);
+        if (path.empty() || !std::filesystem::is_regular_file(path))
+        {
+            m_RenameStatus = "Missing YAML source: " + relativePath;
+            return false;
+        }
+
+        try
+        {
+            YAML::Node root = YAML::LoadFile(path.string());
+            bool found = false;
+            YAML::Node actions = root["actions"];
+            if (actions && actions.IsSequence())
+            {
+                for (YAML::Node action : actions)
+                {
+                    if (action && action["id"] && action["id"].as<std::string>() == oldId)
+                    {
+                        action["id"] = newId;
+                        found = true;
+                        break;
+                    }
+                }
+            }
+            else if (root["id"] && root["id"].as<std::string>() == oldId)
+            {
+                root["id"] = newId;
+                found = true;
+            }
+
+            if (!found)
+            {
+                m_RenameStatus = "Recipe not found in " + relativePath;
+                return false;
+            }
+
+            if (!EditorWidgets::WriteFileText(path, std::string(YAML::Dump(root))))
+            {
+                m_RenameStatus = "Failed to write " + path.string();
+                return false;
+            }
+        }
+        catch (const YAML::Exception& exception)
+        {
+            m_RenameStatus = std::string("YAML error: ") + exception.what();
+            return false;
+        }
+        catch (const std::exception& exception)
+        {
+            m_RenameStatus = std::string("Rename failed: ") + exception.what();
+            return false;
+        }
+
+        // Token-aware project-wide dotted replacement, skipping the recipe file
+        // we just rewrote so its own id field is not double-processed.
+        const size_t replaced = ReplaceDottedIdInProject(oldId, newId, path);
+
+        ReloadActionSources();
+        m_SelectedActionId = newId;
+        m_EditMode = false;
+        m_EditDirty = false;
+        m_EditingActionId.clear();
+        m_SaveStatus = "Renamed " + oldId + " -> " + newId + " (" + std::to_string(replaced) + " reference(s) updated).";
+        return true;
     }
 
     void WAOActionEditorPanel::BeginEdit(const WAO::ActionRecipe& recipe)
@@ -1734,9 +2053,15 @@ namespace Wheatear {
             if ((effect.Type == WAO::EffectType::ModifyAttribute || effect.Type == WAO::EffectType::Damage || effect.Type == WAO::EffectType::Heal)
                 && effect.AttributeId.empty())
                 warnings.push_back(prefix + "attribute id is empty.");
+            else if ((effect.Type == WAO::EffectType::ModifyAttribute || effect.Type == WAO::EffectType::Damage || effect.Type == WAO::EffectType::Heal)
+                && !IsKnownAttribute(effect.AttributeId))
+                warnings.push_back(prefix + "attribute id '" + effect.AttributeId + "' is not a known attribute.");
             if ((effect.Type == WAO::EffectType::AddState || effect.Type == WAO::EffectType::RemoveState)
                 && effect.StateId.empty())
                 warnings.push_back(prefix + "state id is empty.");
+            else if ((effect.Type == WAO::EffectType::AddState || effect.Type == WAO::EffectType::RemoveState)
+                && WAO::FindStateDefinition(effect.StateId) == nullptr)
+                warnings.push_back(prefix + "state id '" + effect.StateId + "' is not in StateRegistry.");
             if (effect.Type == WAO::EffectType::EmitSignal && effect.SignalId.empty())
                 warnings.push_back(prefix + "signal id is empty.");
             if (effect.DurationPolicy == WAO::EffectDurationPolicy::Seconds && effect.Seconds <= 0.0f)
@@ -1814,6 +2139,85 @@ namespace Wheatear {
         ImGui::Text("Signals: %s", recipe->Signals.empty() ? "-" : EditorWidgets::JoinList(recipe->Signals).c_str());
         ImGui::Text("Cost: %s", recipe->ResourceCost.empty() ? "-" : JoinResourceCost(recipe->ResourceCost).c_str());
         ImGui::Text("Params: %s", recipe->Params.empty() ? "-" : JoinParams(recipe->Params).c_str());
+
+        SectionHeader("Sandbox");
+        ImGui::TextDisabled("Execute this recipe against a synthetic runtime. No Scene/Play mode required.");
+        if (ImGui::Button("Run in Sandbox"))
+            RunSandbox(*recipe);
+        if (m_SandboxRan)
+            DrawSandboxResult();
+    }
+
+    void WAOActionEditorPanel::RunSandbox(const WAO::ActionRecipe& recipe)
+    {
+        WAO::ActionRuntime runtime;
+        // Seed a baseline so Damage/Heal/Modify land on visible numbers.
+        runtime.Attributes.Set("Health", 100.0f);
+        runtime.Attributes.Set("hp", 100.0f);
+        runtime.Attributes.Set("atk", 10.0f);
+        runtime.Attributes.Set("mana", 50.0f);
+        for (const auto& [id, cost] : recipe.ResourceCost)
+            runtime.Resources[id] = cost + 10.0f; // allow the cost check to pass
+        runtime.Tags = recipe.RequiredTags;
+
+        WAO::ActionIntent intent;
+        intent.Actor = 1;
+        intent.ActionId = recipe.Id;
+
+        m_SandboxBefore.clear();
+        for (const auto& [id, value] : runtime.Attributes.Values)
+            m_SandboxBefore[id] = value;
+        m_SandboxBefore["mana"] = 50.0f;
+
+        m_SandboxResult = WAO::Execute(intent, recipe, runtime);
+        m_SandboxRan = true;
+
+        m_SandboxAfter.clear();
+        for (const auto& [id, value] : runtime.Attributes.Values)
+            m_SandboxAfter[id] = value;
+
+        const bool affordable = WAO::CanAfford(recipe, runtime);
+        if (!m_SandboxResult.Success)
+            m_SandboxStatus = affordable ? "Execution failed (see ledger below)." : "Cannot afford resource cost.";
+        else
+            m_SandboxStatus = "Executed.";
+    }
+
+    void WAOActionEditorPanel::DrawSandboxResult()
+    {
+        ImGui::Separator();
+        ImGui::TextColored(m_SandboxResult.Success ? ImVec4(0.35f, 0.90f, 0.45f, 1.0f) : ImVec4(1.0f, 0.35f, 0.30f, 1.0f),
+            "%s", m_SandboxStatus.c_str());
+        if (!m_SandboxResult.Success)
+            ImGui::TextWrapped("Note: sandbox uses a synthetic runtime; resolver-side logic (module handlers) is bypassed.");
+
+        if (!m_SandboxBefore.empty())
+        {
+            ImGui::TextDisabled("Attribute Deltas");
+            for (const auto& [id, before] : m_SandboxBefore)
+            {
+                const float after = m_SandboxAfter.count(id) > 0 ? m_SandboxAfter.at(id) : before;
+                const float delta = after - before;
+                if (std::abs(delta) > 0.0001f)
+                {
+                    const ImVec4 color = delta < 0.0f ? ImVec4(1.0f, 0.45f, 0.40f, 1.0f) : ImVec4(0.45f, 0.90f, 0.45f, 1.0f);
+                    ImGui::TextColored(color, "  %s: %.2f -> %.2f (%+.2f)", id.c_str(), before, after, delta);
+                }
+            }
+        }
+
+        const auto& entries = m_SandboxResult.Ledger.Entries();
+        if (!entries.empty())
+        {
+            ImGui::TextDisabled("Ledger");
+            for (const auto& entry : entries)
+            {
+                std::string label = EffectTypeName(entry.Type);
+                if (!entry.Detail.empty())
+                    label += " - " + entry.Detail;
+                ImGui::BulletText("%s%s (%.2f)", label.c_str(), entry.Applied ? "" : " [blocked]", entry.Value);
+            }
+        }
     }
 
     bool WAOActionEditorPanel::ReloadActionSources()

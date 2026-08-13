@@ -34,6 +34,11 @@ namespace Wheatear::WAO {
         return it == states.end() ? nullptr : &(*it);
     }
 
+    std::vector<StateDefinition> AllStateDefinitions()
+    {
+        return BuiltInStates();
+    }
+
     RuntimeState MakeState(const std::string& id, int turns, float power, UUID source)
     {
         RuntimeState state;
