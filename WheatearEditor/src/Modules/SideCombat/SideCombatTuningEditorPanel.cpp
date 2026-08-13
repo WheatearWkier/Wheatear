@@ -268,7 +268,7 @@ namespace Wheatear {
 
     void SideCombatTuningEditorPanel::DrawFeelTab()
     {
-        EditorWidgets::SectionHeader("Combat Feel", "Designer-facing controls mirrored from movement and air-combo YAML sections.");
+        EditorWidgets::SectionHeader(EditorLocale::Text("Combat Feel", "战斗手感"), "Designer-facing controls mirrored from movement and air-combo YAML sections.");
 
         YAML::Node root = *m_Root;
         YAML::Node player = EnsureMap(root, "player");
@@ -281,7 +281,7 @@ namespace Wheatear {
         YAML::Node dash = EnsureMap(attacks, "dash");
         YAML::Node breakLimit = EnsureMap(attacks, "break_limit");
 
-        if (ImGui::CollapsingHeader("Movement / Jump", ImGuiTreeNodeFlags_DefaultOpen))
+        if (ImGui::CollapsingHeader(EditorLocale::Text("Movement / Jump", "移动 / 跳跃"), ImGuiTreeNodeFlags_DefaultOpen))
         {
             if (DrawFloat(player, "moveSpeed", "Move Speed", 0.02f, 0.0f, 30.0f)) m_Dirty = true;
             if (DrawInt(player, "maxJumps", "Max Jumps", 1, 3)) m_Dirty = true;
@@ -303,7 +303,7 @@ namespace Wheatear {
             if (DrawVec2(dash, "velocity", "Dash Velocity", 0.05f)) m_Dirty = true;
         }
 
-        if (ImGui::CollapsingHeader("Air Combo", ImGuiTreeNodeFlags_DefaultOpen))
+        if (ImGui::CollapsingHeader(EditorLocale::Text("Air Combo", "空中连段"), ImGuiTreeNodeFlags_DefaultOpen))
         {
             if (DrawInt(airCombo, "airActionLimit", "Air Action Limit", 0, 12)) m_Dirty = true;
             if (DrawFloat(airCombo, "airBasicCooldown", "Air Basic Cooldown", 0.01f, 0.01f, 3.0f)) m_Dirty = true;
@@ -312,7 +312,7 @@ namespace Wheatear {
             if (DrawFloat(airCombo, "highAirSafetyHeight", "High Air Safety Height", 0.02f, 0.0f, 10.0f)) m_Dirty = true;
         }
 
-        if (ImGui::CollapsingHeader("Launcher / Hang", ImGuiTreeNodeFlags_DefaultOpen))
+        if (ImGui::CollapsingHeader(EditorLocale::Text("Launcher / Hang", "挑空 / 滞空"), ImGuiTreeNodeFlags_DefaultOpen))
         {
             if (DrawVec2(launcher, "launchVelocity", "S+J Launch Velocity", 0.05f)) m_Dirty = true;
             if (DrawFloat(launcher, "attackerAirImpulse", "S+J Player Lift", 0.05f, -20.0f, 30.0f)) m_Dirty = true;
@@ -341,7 +341,7 @@ namespace Wheatear {
 
     void SideCombatTuningEditorPanel::DrawRulesTab()
     {
-        EditorWidgets::SectionHeader("Runtime Rules", "Damage, feedback, boss protection, enemy pacing, pickup, and stage visual parameters.");
+        EditorWidgets::SectionHeader(EditorLocale::Text("Runtime Rules", "运行时规则"), "Damage, feedback, boss protection, enemy pacing, pickup, and stage visual parameters.");
 
         YAML::Node root = *m_Root;
         YAML::Node player = EnsureMap(root, "player");
@@ -355,7 +355,7 @@ namespace Wheatear {
         YAML::Node movement = EnsureMap(root, "movement");
         YAML::Node visuals = EnsureMap(root, "visuals");
 
-        if (ImGui::CollapsingHeader("Player", ImGuiTreeNodeFlags_DefaultOpen))
+        if (ImGui::CollapsingHeader(EditorLocale::Text("Player", "玩家"), ImGuiTreeNodeFlags_DefaultOpen))
         {
             if (DrawFloat(player, "groundAcceleration", "Ground Acceleration", 0.05f, 0.0f, 120.0f)) m_Dirty = true;
             if (DrawFloat(player, "groundFriction", "Ground Friction", 0.05f, 0.0f, 120.0f)) m_Dirty = true;
@@ -375,7 +375,7 @@ namespace Wheatear {
             if (DrawFloat(player, "attackBuffItemCooldown", "Attack Buff Item Cooldown", 0.1f, 0.0f, 60.0f)) m_Dirty = true;
         }
 
-        if (ImGui::CollapsingHeader("Damage / Combo"))
+        if (ImGui::CollapsingHeader(EditorLocale::Text("Damage / Combo", "伤害 / 连段")))
         {
             if (DrawFloat(combat, "comboDropDelay", "Combo Drop Delay", 0.02f, 0.0f, 10.0f)) m_Dirty = true;
             if (DrawFloat(combat, "hitInvulnerableTime", "Hit Invulnerable Time", 0.005f, 0.0f, 1.0f)) m_Dirty = true;
@@ -383,7 +383,7 @@ namespace Wheatear {
             if (DrawFloat(combat, "minDamage", "Min Damage", 0.1f, 0.0f, 999.0f)) m_Dirty = true;
         }
 
-        if (ImGui::CollapsingHeader("Feedback"))
+        if (ImGui::CollapsingHeader(EditorLocale::Text("Feedback", "反馈")))
         {
             if (DrawFloat(feedback, "hitPauseTimeScale", "Hit Pause Time Scale", 0.01f, 0.01f, 1.0f)) m_Dirty = true;
             if (DrawString(feedback, "jumpSound", "Jump Sound")) m_Dirty = true;
@@ -416,7 +416,7 @@ namespace Wheatear {
             if (DrawBool(protection, "showCombatStateHud", "Show Combat State HUD")) m_Dirty = true;
         }
 
-        if (ImGui::CollapsingHeader("Enemy / Boss"))
+        if (ImGui::CollapsingHeader(EditorLocale::Text("Enemy / Boss", "敌人 / Boss")))
         {
             if (DrawFloat(enemy, "initialAttackDelay", "Initial Attack Delay", 0.02f, 0.0f, 10.0f)) m_Dirty = true;
             if (DrawFloat(enemy, "attackRangePadding", "Attack Range Padding", 0.02f, 0.0f, 10.0f)) m_Dirty = true;
@@ -443,7 +443,7 @@ namespace Wheatear {
             if (DrawFloat(bearBoss, "chargeSpeed", "Charge Speed", 0.02f, 0.0f, 40.0f)) m_Dirty = true;
         }
 
-        if (ImGui::CollapsingHeader("Pickup / Stage Visuals"))
+        if (ImGui::CollapsingHeader(EditorLocale::Text("Pickup / Stage Visuals", "拾取 / 场景视觉")))
         {
             if (DrawFloat(pickup, "pickupRadius", "Pickup Radius", 0.01f, 0.0f, 10.0f)) m_Dirty = true;
             if (DrawFloat(pickup, "attractRadius", "Attract Radius", 0.05f, 0.0f, 50.0f)) m_Dirty = true;
@@ -463,7 +463,7 @@ namespace Wheatear {
 
     void SideCombatTuningEditorPanel::DrawAttacksTab()
     {
-        EditorWidgets::SectionHeader("Attacks", "Author hitbox, frame, launch, VFX, and SFX parameters for each attack id.");
+        EditorWidgets::SectionHeader(EditorLocale::Text("Attacks", "攻击"), "Author hitbox, frame, launch, VFX, and SFX parameters for each attack id.");
 
         YAML::Node root = *m_Root;
         YAML::Node attacks = EnsureMap(root, "attacks");
@@ -476,7 +476,7 @@ namespace Wheatear {
 
         YAML::Node attack = EnsureMap(attacks, m_SelectedAttackId.c_str());
         ImGui::Separator();
-        ImGui::TextDisabled("Hitbox / Motion");
+        ImGui::TextDisabled(EditorLocale::Text("Hitbox / Motion", "命中框 / 运动"));
         if (DrawVec2(attack, "size", "Size", 0.02f)) m_Dirty = true;
         if (DrawVec2(attack, "offset", "Offset", 0.02f)) m_Dirty = true;
         if (DrawVec2(attack, "velocity", "Projectile Velocity", 0.05f)) m_Dirty = true;
@@ -486,7 +486,7 @@ namespace Wheatear {
         if (DrawFloat(attack, "movementScale", "Movement Scale", 0.01f, 0.0f, 3.0f)) m_Dirty = true;
 
         ImGui::Separator();
-        ImGui::TextDisabled("Damage / Frame Data");
+        ImGui::TextDisabled(EditorLocale::Text("Damage / Frame Data", "伤害 / 帧数据"));
         if (DrawFloat(attack, "damageScale", "Damage Scale", 0.01f, 0.0f, 20.0f)) m_Dirty = true;
         if (DrawFloat(attack, "damageFlat", "Damage Flat", 0.5f, 0.0f, 9999.0f)) m_Dirty = true;
         if (DrawFloat(attack, "lifetime", "Hitbox Lifetime", 0.01f, 0.0f, 10.0f)) m_Dirty = true;
@@ -499,13 +499,13 @@ namespace Wheatear {
         if (DrawBool(attack, "destroyOnHit", "Destroy On Hit")) m_Dirty = true;
 
         ImGui::Separator();
-        ImGui::TextDisabled("Air Combo Influence");
+        ImGui::TextDisabled(EditorLocale::Text("Air Combo Influence", "空中连段影响"));
         if (DrawFloat(attack, "attackerAirImpulse", "Attacker Air Impulse", 0.02f, -20.0f, 30.0f)) m_Dirty = true;
         if (DrawFloat(attack, "attackerAirFallStep", "Attacker Fall Step", 0.005f, 0.0f, 3.0f)) m_Dirty = true;
         if (DrawFloat(attack, "targetAirFallStep", "Target Fall Step", 0.005f, 0.0f, 3.0f)) m_Dirty = true;
 
         ImGui::Separator();
-        ImGui::TextDisabled("VFX / SFX");
+        ImGui::TextDisabled(EditorLocale::Text("VFX / SFX", "特效 / 音效"));
         if (DrawString(attack, "textureFramePattern", "Texture Frame Pattern")) m_Dirty = true;
         if (DrawInt(attack, "textureFrameCount", "Texture Frame Count", 1, 120)) m_Dirty = true;
         if (DrawFloat(attack, "textureFrameRate", "Texture Frame Rate", 0.5f, 1.0f, 120.0f)) m_Dirty = true;
@@ -628,14 +628,14 @@ namespace Wheatear {
 
     void SideCombatTuningEditorPanel::DrawAnimationsTab()
     {
-        EditorWidgets::SectionHeader("Animations",
+        EditorWidgets::SectionHeader(EditorLocale::Text("Animations", "动画"),
             "Atlas-backed animation clips for player / grunt / boss, plus stage shadow visuals. "
             "This is the largest section of the tuning YAML - author it here instead of by hand.");
 
         YAML::Node root = *m_Root;
         YAML::Node visuals = EnsureMap(root, "visuals");
 
-        if (ImGui::CollapsingHeader("Stage Shadow", ImGuiTreeNodeFlags_DefaultOpen))
+        if (ImGui::CollapsingHeader(EditorLocale::Text("Stage Shadow", "场景阴影"), ImGuiTreeNodeFlags_DefaultOpen))
         {
             // shadowColor is a 4-float sequence [r,g,b,a]; EditorWidgets has no DrawVec4,
             // so read/write it manually as two DragFloat2 pairs to stay in the helper idiom.
@@ -692,7 +692,7 @@ namespace Wheatear {
 
     void SideCombatTuningEditorPanel::DrawSkillsTab()
     {
-        EditorWidgets::SectionHeader("Skills", "Skill ids bind display data, inputs, unlocks, and attack id chains.");
+        EditorWidgets::SectionHeader(EditorLocale::Text("Skills", "技能"), "Skill ids bind display data, inputs, unlocks, and attack id chains.");
 
         YAML::Node root = *m_Root;
         YAML::Node skills = EnsureMap(root, "skills");
@@ -715,7 +715,7 @@ namespace Wheatear {
 
     void SideCombatTuningEditorPanel::DrawProgressionTab()
     {
-        EditorWidgets::SectionHeader("Progression", "Profiles decide which skills and HUD systems are visible at runtime.");
+        EditorWidgets::SectionHeader(EditorLocale::Text("Progression", "成长"), "Profiles decide which skills and HUD systems are visible at runtime.");
 
         YAML::Node root = *m_Root;
         YAML::Node progression = EnsureMap(root, "progression");
@@ -738,7 +738,7 @@ namespace Wheatear {
         if (DrawStringList(profile, "debugSkills", "Debug Skills", 1024)) m_Dirty = true;
 
         ImGui::Separator();
-        ImGui::TextDisabled("Visible Systems");
+        ImGui::TextDisabled(EditorLocale::Text("Visible Systems", "可见系统"));
         if (DrawBool(visibleSystems, "bossProtectionHud", "Boss Protection HUD")) m_Dirty = true;
         if (DrawBool(visibleSystems, "combatStateHud", "Combat State HUD")) m_Dirty = true;
         if (DrawBool(visibleSystems, "breakLimitHint", "Break Limit Hint")) m_Dirty = true;

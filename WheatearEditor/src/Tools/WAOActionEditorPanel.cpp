@@ -1023,32 +1023,32 @@ namespace Wheatear {
 
         if (ImGui::BeginTabBar("##WAOActionTabs"))
         {
-            if (hasRecipe && ImGui::BeginTabItem("Recipe"))
+            if (hasRecipe && ImGui::BeginTabItem(EditorLocale::Text("Recipe", "配方")))
             {
                 DrawRecipeOverview();
                 ImGui::EndTabItem();
             }
-            if (hasRecipe && ImGui::BeginTabItem("Effects"))
+            if (hasRecipe && ImGui::BeginTabItem(EditorLocale::Text("Effects", "效果")))
             {
                 DrawEffectsTable();
                 ImGui::EndTabItem();
             }
-            if (hasRecipe && ImGui::BeginTabItem("Validation"))
+            if (hasRecipe && ImGui::BeginTabItem(EditorLocale::Text("Validation", "校验")))
             {
                 DrawValidationPanel();
                 ImGui::EndTabItem();
             }
-            if (hasRecipe && ImGui::BeginTabItem("Preview"))
+            if (hasRecipe && ImGui::BeginTabItem(EditorLocale::Text("Preview", "预览")))
             {
                 DrawPreviewPanel();
                 ImGui::EndTabItem();
             }
-            if (ImGui::BeginTabItem("Action Sets"))
+            if (ImGui::BeginTabItem(EditorLocale::Text("Action Sets", "动作集合")))
             {
                 DrawActionSetsPanel();
                 ImGui::EndTabItem();
             }
-            if (ImGui::BeginTabItem("Ledger"))
+            if (ImGui::BeginTabItem(EditorLocale::Text("Ledger", "运行记录")))
             {
                 DrawDebugLedger();
                 ImGui::EndTabItem();
@@ -1079,7 +1079,7 @@ namespace Wheatear {
             return;
         }
 
-        if (ImGui::Button("Edit Recipe"))
+        if (ImGui::Button(EditorLocale::Text("Edit Recipe", "编辑配方")))
             BeginEdit(*recipe);
         ImGui::SameLine();
         ImGui::TextDisabled("Edits common authoring fields and saves back to YAML.");
@@ -1123,7 +1123,7 @@ namespace Wheatear {
 
         SectionHeader("Resources");
         if (recipe->ResourceCost.empty())
-            ImGui::TextDisabled("No resource cost.");
+            ImGui::TextDisabled(EditorLocale::Text("No resource cost.", "无资源消耗。"));
         else
         {
             for (const auto& [id, cost] : recipe->ResourceCost)
@@ -1132,7 +1132,7 @@ namespace Wheatear {
 
         SectionHeader("Params");
         if (recipe->Params.empty())
-            ImGui::TextDisabled("No recipe params.");
+            ImGui::TextDisabled(EditorLocale::Text("No recipe params.", "无配方参数。"));
         else
         {
             for (const auto& [id, value] : recipe->Params)
@@ -1141,7 +1141,7 @@ namespace Wheatear {
 
         SectionHeader("Tags");
         if (recipe->Tags.empty())
-            ImGui::TextDisabled("No tags.");
+            ImGui::TextDisabled(EditorLocale::Text("No tags.", "无标签。"));
         else
         {
             for (const std::string& tag : recipe->Tags)
@@ -1152,7 +1152,7 @@ namespace Wheatear {
 
         SectionHeader("Signals");
         if (recipe->Signals.empty())
-            ImGui::TextDisabled("No signals.");
+            ImGui::TextDisabled(EditorLocale::Text("No signals.", "无信号。"));
         else
         {
             for (const std::string& signal : recipe->Signals)
@@ -1193,7 +1193,7 @@ namespace Wheatear {
             const bool canConfirm = newIdValid;
             if (!canConfirm)
                 ImGui::BeginDisabled();
-            if (ImGui::Button("Rename"))
+            if (ImGui::Button(EditorLocale::Text("Rename", "重命名")))
             {
                 if (PerformRename(recipe.Id, m_RenameNewId))
                 {
@@ -1206,7 +1206,7 @@ namespace Wheatear {
             if (!canConfirm)
                 ImGui::EndDisabled();
             ImGui::SameLine();
-            if (ImGui::Button("Cancel"))
+            if (ImGui::Button(EditorLocale::Text("Cancel", "取消")))
             {
                 m_RenameOpen = false;
                 m_RenameNewId.clear();
@@ -2142,7 +2142,7 @@ namespace Wheatear {
 
         SectionHeader("Sandbox");
         ImGui::TextDisabled("Execute this recipe against a synthetic runtime. No Scene/Play mode required.");
-        if (ImGui::Button("Run in Sandbox"))
+        if (ImGui::Button(EditorLocale::Text("Run in Sandbox", "沙盒运行")))
             RunSandbox(*recipe);
         if (m_SandboxRan)
             DrawSandboxResult();
@@ -2193,7 +2193,7 @@ namespace Wheatear {
 
         if (!m_SandboxBefore.empty())
         {
-            ImGui::TextDisabled("Attribute Deltas");
+            ImGui::TextDisabled(EditorLocale::Text("Attribute Deltas", "属性变化"));
             for (const auto& [id, before] : m_SandboxBefore)
             {
                 const float after = m_SandboxAfter.count(id) > 0 ? m_SandboxAfter.at(id) : before;
@@ -2209,7 +2209,7 @@ namespace Wheatear {
         const auto& entries = m_SandboxResult.Ledger.Entries();
         if (!entries.empty())
         {
-            ImGui::TextDisabled("Ledger");
+            ImGui::TextDisabled(EditorLocale::Text("Ledger", "运行记录"));
             for (const auto& entry : entries)
             {
                 std::string label = EffectTypeName(entry.Type);

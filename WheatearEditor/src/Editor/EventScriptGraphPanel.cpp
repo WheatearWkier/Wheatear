@@ -327,7 +327,7 @@ namespace Wheatear {
                 int opIndex = 2; // default >=
                 for (int i = 0; i < IM_ARRAYSIZE(ops); ++i)
                     if (op == ops[i]) { opIndex = i; break; }
-                if (ImGui::Combo("Operator", &opIndex, ops, IM_ARRAYSIZE(ops)))
+                if (ImGui::Combo(EditorLocale::Text("Operator", "运算符"), &opIndex, ops, IM_ARRAYSIZE(ops)))
                 {
                     op = ops[opIndex];
                     changed = true;
@@ -337,7 +337,7 @@ namespace Wheatear {
                 {
                     try { n = std::stoi(words[2]); } catch (...) { n = 1; }
                 }
-                if (ImGui::DragInt("Chapter", &n, 1.0f, 0, 999))
+                if (ImGui::DragInt(EditorLocale::Text("Chapter", "章节"), &n, 1.0f, 0, 999))
                     changed = true;
                 if (changed)
                 {
@@ -360,7 +360,7 @@ namespace Wheatear {
                 int opIndex = 0;
                 for (int i = 0; i < IM_ARRAYSIZE(ops); ++i)
                     if (op == ops[i]) { opIndex = i; break; }
-                if (ImGui::Combo("Operator", &opIndex, ops, IM_ARRAYSIZE(ops)))
+                if (ImGui::Combo(EditorLocale::Text("Operator", "运算符"), &opIndex, ops, IM_ARRAYSIZE(ops)))
                 {
                     op = ops[opIndex];
                     changed = true;
@@ -370,7 +370,7 @@ namespace Wheatear {
                 {
                     try { amount = std::stoi(words[3]); } catch (...) { amount = 1; }
                 }
-                if (ImGui::DragInt("Amount", &amount, 1.0f, 0, 9999))
+                if (ImGui::DragInt(EditorLocale::Text("Amount", "数量"), &amount, 1.0f, 0, 9999))
                     changed = true;
                 if (changed)
                 {
@@ -739,7 +739,7 @@ namespace Wheatear {
         ImGui::InputText("Script Path", m_SourcePathInput.data(), m_SourcePathInput.size());
         const bool pathCommitted = ImGui::IsItemDeactivatedAfterEdit();
         ImGui::SameLine();
-        if (ImGui::Button("Load") || pathCommitted)
+        if (ImGui::Button(EditorLocale::Text("Load", "加载")) || pathCommitted)
         {
             m_SourcePath = m_SourcePathInput.data();
             Load();
@@ -805,7 +805,7 @@ namespace Wheatear {
         const EventScriptBlock* block = GetSelectedBlock();
         if (!block)
         {
-            ImGui::TextDisabled("No event selected.");
+            ImGui::TextDisabled(EditorLocale::Text("No event selected.", "未选择事件。"));
             return;
         }
 
@@ -967,7 +967,7 @@ namespace Wheatear {
         if (m_SourceEditorState.Buffer.empty())
             EditorUI::ResetBuffer(m_SourceEditorState, SourceEditorCapacity);
 
-        if (ImGui::Button("Reload"))
+        if (ImGui::Button(EditorLocale::Text("Reload", "重载")))
             Load();
 
         if (m_SourceEditorState.Dirty)

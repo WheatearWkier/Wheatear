@@ -863,7 +863,7 @@ static void ExtractChoiceRequiredCondition(std::string& target,
             m_Loaded = false;
         ImGui::PopItemWidth();
 
-        if (ImGui::Button("Load"))
+        if (ImGui::Button(EditorLocale::Text("Load", "加载")))
             Load();
 
         ImGui::SameLine();
@@ -883,37 +883,37 @@ static void ExtractChoiceRequiredCondition(std::string& target,
         ImGui::BeginChild("##VNRows", ImVec2(leftWidth, 0.0f), true);
         EditorWidgets::SectionHeader("Timeline", "Add, select, and reorder script rows.");
 
-        if (ImGui::Button("+ Dialogue")) AddRow(RowKind::Dialogue);
+        if (ImGui::Button(EditorLocale::Text("+ Dialogue", "+ 对白"))) AddRow(RowKind::Dialogue);
         ImGui::SameLine();
-        if (ImGui::Button("+ BGM")) AddRow(RowKind::Music);
+        if (ImGui::Button(EditorLocale::Text("+ BGM", "+ BGM"))) AddRow(RowKind::Music);
         ImGui::SameLine();
-        if (ImGui::Button("+ Choice")) AddRow(RowKind::Choice);
-        if (ImGui::Button("+ Character")) AddRow(RowKind::Character);
+        if (ImGui::Button(EditorLocale::Text("+ Choice", "+ 选项"))) AddRow(RowKind::Choice);
+        if (ImGui::Button(EditorLocale::Text("+ Character", "+ 角色"))) AddRow(RowKind::Character);
         ImGui::SameLine();
-        if (ImGui::Button("+ Show")) AddRow(RowKind::Show);
+        if (ImGui::Button(EditorLocale::Text("+ Show", "+ 显示"))) AddRow(RowKind::Show);
         ImGui::SameLine();
-        if (ImGui::Button("+ Hide")) AddRow(RowKind::Hide);
+        if (ImGui::Button(EditorLocale::Text("+ Hide", "+ 隐藏"))) AddRow(RowKind::Hide);
         ImGui::SameLine();
-        if (ImGui::Button("+ Expression")) AddRow(RowKind::Expression);
-        if (ImGui::Button("+ Goto")) AddRow(RowKind::Goto);
+        if (ImGui::Button(EditorLocale::Text("+ Expression", "+ 表情"))) AddRow(RowKind::Expression);
+        if (ImGui::Button(EditorLocale::Text("+ Goto", "+ 跳转"))) AddRow(RowKind::Goto);
         ImGui::SameLine();
-        if (ImGui::Button("+ Background")) AddRow(RowKind::Background);
+        if (ImGui::Button(EditorLocale::Text("+ Background", "+ 背景"))) AddRow(RowKind::Background);
         ImGui::SameLine();
-        if (ImGui::Button("+ Label")) AddRow(RowKind::Label);
+        if (ImGui::Button(EditorLocale::Text("+ Label", "+ 标签"))) AddRow(RowKind::Label);
         ImGui::SameLine();
-        if (ImGui::Button("+ End")) AddRow(RowKind::End);
+        if (ImGui::Button(EditorLocale::Text("+ End", "+ 结束"))) AddRow(RowKind::End);
         ImGui::SameLine();
-        if (ImGui::Button("+ Set")) AddRow(RowKind::Set);
+        if (ImGui::Button(EditorLocale::Text("+ Set", "+ 变量"))) AddRow(RowKind::Set);
         ImGui::SameLine();
-        if (ImGui::Button("+ If")) AddRow(RowKind::If);
+        if (ImGui::Button(EditorLocale::Text("+ If", "+ 条件"))) AddRow(RowKind::If);
         ImGui::SameLine();
-        if (ImGui::Button("+ Speed")) AddRow(RowKind::Speed);
+        if (ImGui::Button(EditorLocale::Text("+ Speed", "+ 速度"))) AddRow(RowKind::Speed);
         ImGui::SameLine();
-        if (ImGui::Button("+ Sheet")) AddRow(RowKind::Sheet);
+        if (ImGui::Button(EditorLocale::Text("+ Sheet", "+ 图集"))) AddRow(RowKind::Sheet);
         ImGui::SameLine();
-        if (ImGui::Button("+ Char")) AddRow(RowKind::Char);
+        if (ImGui::Button(EditorLocale::Text("+ Char", "+ 角色格"))) AddRow(RowKind::Char);
         ImGui::SameLine();
-        if (ImGui::Button("+ Raw")) AddRow(RowKind::Raw);
+        if (ImGui::Button(EditorLocale::Text("+ Raw", "+ 原始"))) AddRow(RowKind::Raw);
 
         ImGui::Separator();
         if (m_Rows.empty())
@@ -942,21 +942,21 @@ static void ExtractChoiceRequiredCondition(std::string& target,
             DrawRowEditor(row);
 
             ImGui::Separator();
-            if (ImGui::Button("Move Up") && m_SelectedRow > 0)
+            if (ImGui::Button(EditorLocale::Text("Move Up", "上移")) && m_SelectedRow > 0)
             {
                 std::swap(m_Rows[m_SelectedRow], m_Rows[m_SelectedRow - 1]);
                 --m_SelectedRow;
                 m_Dirty = true;
             }
             ImGui::SameLine();
-            if (ImGui::Button("Move Down") && m_SelectedRow + 1 < static_cast<int>(m_Rows.size()))
+            if (ImGui::Button(EditorLocale::Text("Move Down", "下移")) && m_SelectedRow + 1 < static_cast<int>(m_Rows.size()))
             {
                 std::swap(m_Rows[m_SelectedRow], m_Rows[m_SelectedRow + 1]);
                 ++m_SelectedRow;
                 m_Dirty = true;
             }
             ImGui::SameLine();
-            if (ImGui::Button("Delete"))
+            if (ImGui::Button(EditorLocale::Text("Delete", "删除")))
             {
                 m_Rows.erase(m_Rows.begin() + m_SelectedRow);
                 if (m_SelectedRow >= static_cast<int>(m_Rows.size()))
@@ -1051,26 +1051,26 @@ static void ExtractChoiceRequiredCondition(std::string& target,
                     m_Dirty = true;
                 break;
             case RowKind::Choice:
-                if (InputString("Prompt", row.Value, 256))
+                if (InputString(EditorLocale::Text("Prompt", "提示语"), row.Value, 256))
                     m_Dirty = true;
                 EditorWidgets::HelpTooltip("Text shown while waiting for a choice. Empty uses the default.");
                 ImGui::Separator();
                 for (int i = 0; i < static_cast<int>(row.Choices.size()); ++i)
                 {
                     ImGui::PushID(i);
-                    ImGui::Text("Choice %d", i + 1);
-                    if (InputString("Text", row.Choices[i].Text, 512))
+                    ImGui::Text(EditorLocale::Text("Choice %d", "选项 %d"), i + 1);
+                    if (InputString(EditorLocale::Text("Text", "文本"), row.Choices[i].Text, 512))
                         m_Dirty = true;
                     if (EditorContentPickers::DrawStringPicker("Target", row.Choices[i].Target, CollectLabels(m_Rows), 512))
                         m_Dirty = true;
                     if (EditorContentPickers::DrawStoryFlagField("Required Flag", row.Choices[i].RequiredFlag, 256))
                         m_Dirty = true;
                     EditorWidgets::HelpTooltip("Optional. The choice only renders when this story flag is set.");
-                    if (EditorWidgets::InputString("Required Condition", row.Choices[i].RequiredCondition, 256))
+                    if (EditorWidgets::InputString(EditorLocale::Text("Required Condition", "条件表达式"), row.Choices[i].RequiredCondition, 256))
                         m_Dirty = true;
                     EditorWidgets::HelpTooltip("Optional expression, e.g. \"gold >= 5\" or \"not flag FLAG_X\". Evaluated against script variables when Required Flag is empty.");
                     ImGui::SameLine();
-                    if (ImGui::Button("Remove"))
+                    if (ImGui::Button(EditorLocale::Text("Remove", "移除")))
                     {
                         row.Choices.erase(row.Choices.begin() + i);
                         m_Dirty = true;
@@ -1080,7 +1080,7 @@ static void ExtractChoiceRequiredCondition(std::string& target,
                     ImGui::Separator();
                     ImGui::PopID();
                 }
-                if (ImGui::Button("+ Choice Option"))
+                if (ImGui::Button(EditorLocale::Text("+ Choice Option", "+ 选项项")))
                 {
                     row.Choices.push_back({ EditorLocale::Text("New option", "新选项"), "target_label", {}, {} });
                     m_Dirty = true;
@@ -1094,14 +1094,14 @@ static void ExtractChoiceRequiredCondition(std::string& target,
                 ImGui::TextDisabled("Ends this VN script.");
                 break;
             case RowKind::Set:
-                if (InputString("Variable", row.Name, 128))
+                if (InputString(EditorLocale::Text("Variable", "变量"), row.Name, 128))
                     m_Dirty = true;
-                if (InputString("Value", row.Value, 128))
+                if (InputString(EditorLocale::Text("Value", "值"), row.Value, 128))
                     m_Dirty = true;
                 EditorWidgets::HelpTooltip("Assigns a literal number or copies another variable (e.g. \"5\" or \"maxhp\").");
                 break;
             case RowKind::If:
-                if (EditorWidgets::InputString("Condition", row.Value, 256))
+                if (EditorWidgets::InputString(EditorLocale::Text("Condition", "条件"), row.Value, 256))
                     m_Dirty = true;
                 EditorWidgets::HelpTooltip("Expression: always | never | flag <id> | <var> OP <number> | <number> OP <number>, optional leading \"not \".");
                 if (EditorContentPickers::DrawStringPicker("Jump To", row.Text, CollectLabels(m_Rows), 256))
@@ -1110,17 +1110,17 @@ static void ExtractChoiceRequiredCondition(std::string& target,
             case RowKind::Sheet:
                 if (EditorContentPickers::DrawAssetField("Sheet Texture", row.Value, EditorWidgets::AssetReferenceKind::Texture, 512))
                     m_Dirty = true;
-                if (InputString("Cell Width", row.Name, 32))
+                if (InputString(EditorLocale::Text("Cell Width", "单元格宽"), row.Name, 32))
                     m_Dirty = true;
-                if (InputString("Cell Height", row.Text, 32))
+                if (InputString(EditorLocale::Text("Cell Height", "单元格高"), row.Text, 32))
                     m_Dirty = true;
                 break;
             case RowKind::Char:
-                if (InputString("Name", row.Name, 128))
+                if (InputString(EditorLocale::Text("Name", "名称"), row.Name, 128))
                     m_Dirty = true;
-                if (InputString("Sheet X", row.Value, 32))
+                if (InputString(EditorLocale::Text("Sheet X", "图集 X"), row.Value, 32))
                     m_Dirty = true;
-                if (InputString("Sheet Y", row.Text, 32))
+                if (InputString(EditorLocale::Text("Sheet Y", "图集 Y"), row.Text, 32))
                     m_Dirty = true;
                 break;
         }
