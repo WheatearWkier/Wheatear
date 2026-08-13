@@ -43,8 +43,6 @@ project "Wheatear"
         "Box2D",
     }
 
-    filter "files:vendor/ImGuizmo/**.cpp"
-        enablepch "Off"
 
     filter "system:windows"
         defines {

@@ -201,6 +201,16 @@
     <ClInclude Include="src\Wheatear\Gameplay\Action\ActionSignalRouter.h" />
     <ClInclude Include="src\Wheatear\Gameplay\Action\ActionTypes.h" />
     <ClInclude Include="src\Wheatear\Gameplay\Action\StateRegistry.h" />
+    <ClInclude Include="src\Wheatear\Gameplay\Services\GameplayAudioService.h" />
+    <ClInclude Include="src\Wheatear\Gameplay\Services\GameplayCombatService.h" />
+    <ClInclude Include="src\Wheatear\Gameplay\Services\GameplayEntityService.h" />
+    <ClInclude Include="src\Wheatear\Gameplay\Services\GameplayFlowService.h" />
+    <ClInclude Include="src\Wheatear\Gameplay\Services\GameplayRewardService.h" />
+    <ClInclude Include="src\Wheatear\Gameplay\Services\GameplayTargetingService.h" />
+    <ClInclude Include="src\Wheatear\Gameplay\Services\GameplayTextService.h" />
+    <ClInclude Include="src\Wheatear\Gameplay\Services\GameplayUILayoutService.h" />
+    <ClInclude Include="src\Wheatear\Gameplay\Services\GameplayUIService.h" />
+    <ClInclude Include="src\Wheatear\Gameplay\Services\GameplayVisualService.h" />
     <ClInclude Include="src\Wheatear\ImGui\ImGuiLayer.h" />
     <ClInclude Include="src\Wheatear\Math\Math.h" />
     <ClInclude Include="src\Wheatear\Modules\ArcadeCombat\ArcadeCombatActionResolver.h" />
@@ -215,16 +225,6 @@
     <ClInclude Include="src\Wheatear\Modules\ArcadeCombat\ArcadeCombatProjectileService.h" />
     <ClInclude Include="src\Wheatear\Modules\ArcadeCombat\ArcadeCombatSignalHandlers.h" />
     <ClInclude Include="src\Wheatear\Modules\ArcadeCombat\ArcadeCombatSystem.h" />
-    <ClInclude Include="src\Wheatear\Modules\Common\GameplayAudioService.h" />
-    <ClInclude Include="src\Wheatear\Modules\Common\GameplayCombatService.h" />
-    <ClInclude Include="src\Wheatear\Modules\Common\GameplayEntityService.h" />
-    <ClInclude Include="src\Wheatear\Modules\Common\GameplayFlowService.h" />
-    <ClInclude Include="src\Wheatear\Modules\Common\GameplayRewardService.h" />
-    <ClInclude Include="src\Wheatear\Modules\Common\GameplayTargetingService.h" />
-    <ClInclude Include="src\Wheatear\Modules\Common\GameplayTextService.h" />
-    <ClInclude Include="src\Wheatear\Modules\Common\GameplayUILayoutService.h" />
-    <ClInclude Include="src\Wheatear\Modules\Common\GameplayUIService.h" />
-    <ClInclude Include="src\Wheatear\Modules\Common\GameplayVisualService.h" />
     <ClInclude Include="src\Wheatear\Modules\GameplayModuleComponents.h" />
     <ClInclude Include="src\Wheatear\Modules\GameplayModuleRuntime.h" />
     <ClInclude Include="src\Wheatear\Modules\ModuleBootstrap.h" />
@@ -320,10 +320,10 @@
     <ClInclude Include="src\Wheatear\Scene\SceneComponentGroups.h" />
     <ClInclude Include="src\Wheatear\Scene\SceneQueries.h" />
     <ClInclude Include="src\Wheatear\Scene\SceneSerializer.h" />
-    <ClInclude Include="src\Wheatear\Scene\SceneSerializerComponentGroups.h" />
-    <ClInclude Include="src\Wheatear\Scene\SceneSerializerComponentSupport.h" />
     <ClInclude Include="src\Wheatear\Scene\SceneSystemRegistry.h" />
     <ClInclude Include="src\Wheatear\Scene\ScriptableEntity.h" />
+    <ClInclude Include="src\Wheatear\Scene\Serialization\SceneSerializerComponentGroups.h" />
+    <ClInclude Include="src\Wheatear\Scene\Serialization\SceneSerializerComponentSupport.h" />
     <ClInclude Include="src\Wheatear\Scripting\EventScript.h" />
     <ClInclude Include="src\Wheatear\Scripting\EventScriptSystem.h" />
     <ClInclude Include="src\Wheatear\Scripting\ScriptEngine.h" />
@@ -340,6 +340,7 @@
     <ClInclude Include="src\Wheatear\UI\UIRuntimeTools.h" />
     <ClInclude Include="src\Wheatear\UI\UIWidgetLayout.h" />
     <ClInclude Include="src\Wheatear\Utils\PlatformUtils.h" />
+    <ClInclude Include="src\Wheatear\Utils\StringUtils.h" />
     <ClInclude Include="src\wtpch.h" />
     <ClInclude Include="vendor\ImGuizmo\ImGuizmo.h" />
     <ClInclude Include="vendor\glm\glm\common.hpp" />
@@ -742,6 +743,15 @@
     <ClCompile Include="src\Wheatear\Gameplay\Action\ActionSignalRouter.cpp" />
     <ClCompile Include="src\Wheatear\Gameplay\Action\ActionTypes.cpp" />
     <ClCompile Include="src\Wheatear\Gameplay\Action\StateRegistry.cpp" />
+    <ClCompile Include="src\Wheatear\Gameplay\Services\GameplayAudioService.cpp" />
+    <ClCompile Include="src\Wheatear\Gameplay\Services\GameplayCombatService.cpp" />
+    <ClCompile Include="src\Wheatear\Gameplay\Services\GameplayEntityService.cpp" />
+    <ClCompile Include="src\Wheatear\Gameplay\Services\GameplayFlowService.cpp" />
+    <ClCompile Include="src\Wheatear\Gameplay\Services\GameplayRewardService.cpp" />
+    <ClCompile Include="src\Wheatear\Gameplay\Services\GameplayTextService.cpp" />
+    <ClCompile Include="src\Wheatear\Gameplay\Services\GameplayUILayoutService.cpp" />
+    <ClCompile Include="src\Wheatear\Gameplay\Services\GameplayUIService.cpp" />
+    <ClCompile Include="src\Wheatear\Gameplay\Services\GameplayVisualService.cpp" />
     <ClCompile Include="src\Wheatear\ImGui\ImGuiBuild.cpp" />
     <ClCompile Include="src\Wheatear\ImGui\ImGuiLayer.cpp" />
     <ClCompile Include="src\Wheatear\Math\Math.cpp" />
@@ -755,15 +765,6 @@
     <ClCompile Include="src\Wheatear\Modules\ArcadeCombat\ArcadeCombatProjectileService.cpp" />
     <ClCompile Include="src\Wheatear\Modules\ArcadeCombat\ArcadeCombatSignalHandlers.cpp" />
     <ClCompile Include="src\Wheatear\Modules\ArcadeCombat\ArcadeCombatSystem.cpp" />
-    <ClCompile Include="src\Wheatear\Modules\Common\GameplayAudioService.cpp" />
-    <ClCompile Include="src\Wheatear\Modules\Common\GameplayCombatService.cpp" />
-    <ClCompile Include="src\Wheatear\Modules\Common\GameplayEntityService.cpp" />
-    <ClCompile Include="src\Wheatear\Modules\Common\GameplayFlowService.cpp" />
-    <ClCompile Include="src\Wheatear\Modules\Common\GameplayRewardService.cpp" />
-    <ClCompile Include="src\Wheatear\Modules\Common\GameplayTextService.cpp" />
-    <ClCompile Include="src\Wheatear\Modules\Common\GameplayUILayoutService.cpp" />
-    <ClCompile Include="src\Wheatear\Modules\Common\GameplayUIService.cpp" />
-    <ClCompile Include="src\Wheatear\Modules\Common\GameplayVisualService.cpp" />
     <ClCompile Include="src\Wheatear\Modules\ModuleBootstrap.cpp" />
     <ClCompile Include="src\Wheatear\Modules\Progression\GameProgress.cpp" />
     <ClCompile Include="src\Wheatear\Modules\Progression\ProgressionContent.cpp" />
@@ -845,16 +846,16 @@
     <ClCompile Include="src\Wheatear\Scene\SceneCopy.cpp" />
     <ClCompile Include="src\Wheatear\Scene\SceneQueries.cpp" />
     <ClCompile Include="src\Wheatear\Scene\SceneSerializer.cpp" />
-    <ClCompile Include="src\Wheatear\Scene\SceneSerializerAnimationComponents.cpp" />
-    <ClCompile Include="src\Wheatear\Scene\SceneSerializerCoreComponents.cpp" />
-    <ClCompile Include="src\Wheatear\Scene\SceneSerializerModuleComponents.cpp" />
-    <ClCompile Include="src\Wheatear\Scene\SceneSerializerModuleComponents_Arcade.cpp" />
-    <ClCompile Include="src\Wheatear\Scene\SceneSerializerModuleComponents_SideCombat.cpp" />
-    <ClCompile Include="src\Wheatear\Scene\SceneSerializerModuleComponents_Tactical.cpp" />
-    <ClCompile Include="src\Wheatear\Scene\SceneSerializerModuleComponents_Turn.cpp" />
-    <ClCompile Include="src\Wheatear\Scene\SceneSerializerScriptingComponents.cpp" />
-    <ClCompile Include="src\Wheatear\Scene\SceneSerializerUIComponents.cpp" />
     <ClCompile Include="src\Wheatear\Scene\SceneSystemRegistry.cpp" />
+    <ClCompile Include="src\Wheatear\Scene\Serialization\SceneSerializerAnimationComponents.cpp" />
+    <ClCompile Include="src\Wheatear\Scene\Serialization\SceneSerializerCoreComponents.cpp" />
+    <ClCompile Include="src\Wheatear\Scene\Serialization\SceneSerializerModuleComponents.cpp" />
+    <ClCompile Include="src\Wheatear\Scene\Serialization\SceneSerializerModuleComponents_Arcade.cpp" />
+    <ClCompile Include="src\Wheatear\Scene\Serialization\SceneSerializerModuleComponents_SideCombat.cpp" />
+    <ClCompile Include="src\Wheatear\Scene\Serialization\SceneSerializerModuleComponents_Tactical.cpp" />
+    <ClCompile Include="src\Wheatear\Scene\Serialization\SceneSerializerModuleComponents_Turn.cpp" />
+    <ClCompile Include="src\Wheatear\Scene\Serialization\SceneSerializerScriptingComponents.cpp" />
+    <ClCompile Include="src\Wheatear\Scene\Serialization\SceneSerializerUIComponents.cpp" />
     <ClCompile Include="src\Wheatear\Scripting\EventScript.cpp" />
     <ClCompile Include="src\Wheatear\Scripting\EventScriptSystem.cpp" />
     <ClCompile Include="src\Wheatear\Scripting\ScriptEngine.cpp" />
@@ -871,9 +872,7 @@
     <ClCompile Include="src\wtpch.cpp">
       <PrecompiledHeader>Create</PrecompiledHeader>
     </ClCompile>
-    <ClCompile Include="vendor\ImGuizmo\ImGuizmo.cpp">
-      <PrecompiledHeader>NotUsing</PrecompiledHeader>
-    </ClCompile>
+    <ClCompile Include="vendor\ImGuizmo\ImGuizmo.cpp" />
     <ClCompile Include="vendor\stb_image\stb_image.cpp" />
   </ItemGroup>
   <ItemGroup>

@@ -161,6 +161,7 @@
     <ClInclude Include="src\Editor\CommandBuilder.h" />
     <ClInclude Include="src\Editor\CoreEditorComponents.h" />
     <ClInclude Include="src\Editor\EditorCanvasTools.h" />
+    <ClInclude Include="src\Editor\EditorCommands.h" />
     <ClInclude Include="src\Editor\EditorComponentRegistry.h" />
     <ClInclude Include="src\Editor\EditorContentPickers.h" />
     <ClInclude Include="src\Editor\EditorFloatingWindow.h" />
@@ -171,8 +172,6 @@
     <ClInclude Include="src\Editor\EditorPlatform.h" />
     <ClInclude Include="src\Editor\EditorToolRegistry.h" />
     <ClInclude Include="src\Editor\EditorWidgets.h" />
-    <ClInclude Include="src\Editor\EventScriptGraphPanel.h" />
-    <ClInclude Include="src\Editor\EventScriptGraphPanelInternal.h" />
     <ClInclude Include="src\Editor\GameplayEditorShell.h" />
     <ClInclude Include="src\Editor\ModeSelectLayer.h" />
     <ClInclude Include="src\Editor\TextAssetEditor.h" />
@@ -190,8 +189,12 @@
     <ClInclude Include="src\Modules\VisualNovel\VisualNovelScriptEditorPanel.h" />
     <ClInclude Include="src\Modules\VisualNovel\VisualNovelScriptEditorPanelInternal.h" />
     <ClInclude Include="src\Panels\AnimationEditorPanel.h" />
+    <ClInclude Include="src\Panels\AssetAliasManifestEditorPanel.h" />
     <ClInclude Include="src\Panels\ContentBrowserPanel.h" />
-    <ClInclude Include="src\Panels\EditorCommands.h" />
+    <ClInclude Include="src\Panels\EventScriptGraphPanel.h" />
+    <ClInclude Include="src\Panels\EventScriptGraphPanelInternal.h" />
+    <ClInclude Include="src\Panels\ProjectHealthPanel.h" />
+    <ClInclude Include="src\Panels\ProjectHealthPanelInternal.h" />
     <ClInclude Include="src\Panels\SceneHierarchy\ComponentDrawers.h" />
     <ClInclude Include="src\Panels\SceneHierarchy\Drawers\AudioDrawer.h" />
     <ClInclude Include="src\Panels\SceneHierarchy\Drawers\CameraDrawer.h" />
@@ -203,14 +206,11 @@
     <ClInclude Include="src\Panels\SceneHierarchy\Drawers\SpriteRendererDrawer.h" />
     <ClInclude Include="src\Panels\SceneHierarchy\Drawers\TransformDrawer.h" />
     <ClInclude Include="src\Panels\SceneHierarchy\Drawers\UIDrawers.h" />
+    <ClInclude Include="src\Panels\SceneHierarchy\SceneHierarchyPanel.h" />
     <ClInclude Include="src\Panels\SceneHierarchy\WidgetHelpers.h" />
-    <ClInclude Include="src\Panels\SceneHierarchyPanel.h" />
     <ClInclude Include="src\Panels\SpriteSheetPickerPanel.h" />
-    <ClInclude Include="src\Tools\AssetAliasManifestEditorPanel.h" />
-    <ClInclude Include="src\Tools\ProjectHealthPanel.h" />
-    <ClInclude Include="src\Tools\ProjectHealthPanelInternal.h" />
-    <ClInclude Include="src\Tools\WAOActionEditorPanel.h" />
-    <ClInclude Include="src\Tools\WAOActionEditorPanelInternal.h" />
+    <ClInclude Include="src\Panels\WAOActionEditorPanel.h" />
+    <ClInclude Include="src\Panels\WAOActionEditorPanelInternal.h" />
     <ClInclude Include="src\wepch.h" />
   </ItemGroup>
   <ItemGroup>
@@ -233,8 +233,6 @@
     <ClCompile Include="src\Editor\EditorLayerDockspace.cpp" />
     <ClCompile Include="src\Editor\EditorPlatform.cpp" />
     <ClCompile Include="src\Editor\EditorWidgets.cpp" />
-    <ClCompile Include="src\Editor\EventScriptGraphPanel.cpp" />
-    <ClCompile Include="src\Editor\EventScriptGraphPanel_Graph.cpp" />
     <ClCompile Include="src\Editor\ModeSelectLayer.cpp" />
     <ClCompile Include="src\Modules\ArcadeCombat\ArcadeCombatDrawer.cpp" />
     <ClCompile Include="src\Modules\ModuleEditorBootstrap.cpp" />
@@ -252,7 +250,12 @@
     <ClCompile Include="src\Panels\AnimationEditorPanel.cpp" />
     <ClCompile Include="src\Panels\AnimationEditorPanelSections.cpp" />
     <ClCompile Include="src\Panels\AnimationEditorPanel_Timeline.cpp" />
+    <ClCompile Include="src\Panels\AssetAliasManifestEditorPanel.cpp" />
     <ClCompile Include="src\Panels\ContentBrowserPanel.cpp" />
+    <ClCompile Include="src\Panels\EventScriptGraphPanel.cpp" />
+    <ClCompile Include="src\Panels\EventScriptGraphPanel_Graph.cpp" />
+    <ClCompile Include="src\Panels\ProjectHealthPanel.cpp" />
+    <ClCompile Include="src\Panels\ProjectHealthPanel_Hygiene.cpp" />
     <ClCompile Include="src\Panels\SceneHierarchy\Drawers\AudioDrawer.cpp" />
     <ClCompile Include="src\Panels\SceneHierarchy\Drawers\CameraDrawer.cpp" />
     <ClCompile Include="src\Panels\SceneHierarchy\Drawers\CircleRendererDrawer.cpp" />
@@ -263,18 +266,15 @@
     <ClCompile Include="src\Panels\SceneHierarchy\Drawers\SpriteRendererDrawer.cpp" />
     <ClCompile Include="src\Panels\SceneHierarchy\Drawers\TransformDrawer.cpp" />
     <ClCompile Include="src\Panels\SceneHierarchy\Drawers\UIDrawers.cpp" />
+    <ClCompile Include="src\Panels\SceneHierarchy\SceneHierarchyPanel.cpp" />
+    <ClCompile Include="src\Panels\SceneHierarchy\SceneHierarchyPanelComponents.cpp" />
+    <ClCompile Include="src\Panels\SceneHierarchy\SceneHierarchyPanelTree.cpp" />
     <ClCompile Include="src\Panels\SceneHierarchy\WidgetHelpers.cpp" />
-    <ClCompile Include="src\Panels\SceneHierarchyPanel.cpp" />
-    <ClCompile Include="src\Panels\SceneHierarchyPanelComponents.cpp" />
-    <ClCompile Include="src\Panels\SceneHierarchyPanelTree.cpp" />
     <ClCompile Include="src\Panels\SpriteSheetPickerPanel.cpp" />
-    <ClCompile Include="src\Tools\AssetAliasManifestEditorPanel.cpp" />
-    <ClCompile Include="src\Tools\ProjectHealthPanel.cpp" />
-    <ClCompile Include="src\Tools\ProjectHealthPanel_Hygiene.cpp" />
-    <ClCompile Include="src\Tools\WAOActionEditorPanel.cpp" />
-    <ClCompile Include="src\Tools\WAOActionEditorPanel_Effects.cpp" />
-    <ClCompile Include="src\Tools\WAOActionEditorPanel_Sandbox.cpp" />
-    <ClCompile Include="src\Tools\WAOActionEditorPanel_Sets.cpp" />
+    <ClCompile Include="src\Panels\WAOActionEditorPanel.cpp" />
+    <ClCompile Include="src\Panels\WAOActionEditorPanel_Effects.cpp" />
+    <ClCompile Include="src\Panels\WAOActionEditorPanel_Sandbox.cpp" />
+    <ClCompile Include="src\Panels\WAOActionEditorPanel_Sets.cpp" />
     <ClCompile Include="src\WheatearEditorApp.cpp" />
     <ClCompile Include="src\wepch.cpp">
       <PrecompiledHeader>Create</PrecompiledHeader>
