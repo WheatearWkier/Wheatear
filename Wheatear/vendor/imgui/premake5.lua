@@ -1,5 +1,8 @@
 project "ImGui"
 	kind "StaticLib"
+	pchheader "pch.h"
+	pchsource "pch.cpp"
+	forceincludes { "pch.h" }
 	language "C++"
 	cppdialect "C++17"
 	staticruntime "off"
@@ -10,6 +13,8 @@ project "ImGui"
 	files
 	{
 		"imconfig.h",
+		"pch.h",
+		"pch.cpp",
 		"imgui.h",
 		"imgui.cpp",
 		"imgui_draw.cpp",

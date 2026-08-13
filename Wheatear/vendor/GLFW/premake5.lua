@@ -1,5 +1,8 @@
 project "GLFW"
 	kind "StaticLib"
+	pchheader "pch.h"
+	pchsource "src/pch.c"
+	forceincludes { "pch.h" }
 	language "C"
 	staticruntime "off"
 	warnings "off"
@@ -12,6 +15,7 @@ project "GLFW"
 		"include/GLFW/glfw3.h",
 		"include/GLFW/glfw3native.h",
 		"src/glfw_config.h",
+		"src/pch.c",
 		"src/context.c",
 		"src/init.c",
 		"src/input.c",

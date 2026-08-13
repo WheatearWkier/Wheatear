@@ -1,5 +1,8 @@
 project "yaml-cpp"
 	kind "StaticLib"
+	pchheader "pch.h"
+	pchsource "src/pch.cpp"
+	forceincludes { "pch.h" }
 	language "C++"
 
 	targetdir ("bin/" .. outputdir .. "/%{prj.name}")

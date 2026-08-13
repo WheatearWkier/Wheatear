@@ -1,5 +1,8 @@
 project "Box2D"
 	kind "StaticLib"
+	pchheader "pch.h"
+	pchsource "src/pch.cpp"
+	forceincludes { "pch.h" }
 	language "C++"
 	cppdialect "C++11"
 	staticruntime "off"
