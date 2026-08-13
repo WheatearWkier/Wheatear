@@ -207,6 +207,9 @@
     <ClInclude Include="src\Tools\ProjectHealthPanel.h">
       <Filter>Tools</Filter>
     </ClInclude>
+    <ClInclude Include="src\Tools\ProjectHealthPanelInternal.h">
+      <Filter>Tools</Filter>
+    </ClInclude>
     <ClInclude Include="src\Tools\WAOActionEditorPanel.h">
       <Filter>Tools</Filter>
     </ClInclude>
@@ -370,6 +373,9 @@
       <Filter>Tools</Filter>
     </ClCompile>
     <ClCompile Include="src\Tools\ProjectHealthPanel.cpp">
+      <Filter>Tools</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Tools\ProjectHealthPanel_Hygiene.cpp">
       <Filter>Tools</Filter>
     </ClCompile>
     <ClCompile Include="src\Tools\WAOActionEditorPanel.cpp">

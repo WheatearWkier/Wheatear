@@ -206,6 +206,7 @@
     <ClInclude Include="src\Panels\SpriteSheetPickerPanel.h" />
     <ClInclude Include="src\Tools\AssetAliasManifestEditorPanel.h" />
     <ClInclude Include="src\Tools\ProjectHealthPanel.h" />
+    <ClInclude Include="src\Tools\ProjectHealthPanelInternal.h" />
     <ClInclude Include="src\Tools\WAOActionEditorPanel.h" />
     <ClInclude Include="src\Tools\WAOActionEditorPanelInternal.h" />
     <ClInclude Include="src\wepch.h" />
@@ -263,6 +264,7 @@
     <ClCompile Include="src\Panels\SpriteSheetPickerPanel.cpp" />
     <ClCompile Include="src\Tools\AssetAliasManifestEditorPanel.cpp" />
     <ClCompile Include="src\Tools\ProjectHealthPanel.cpp" />
+    <ClCompile Include="src\Tools\ProjectHealthPanel_Hygiene.cpp" />
     <ClCompile Include="src\Tools\WAOActionEditorPanel.cpp" />
     <ClCompile Include="src\Tools\WAOActionEditorPanel_Effects.cpp" />
     <ClCompile Include="src\Tools\WAOActionEditorPanel_Sandbox.cpp" />
