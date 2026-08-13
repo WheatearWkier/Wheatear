@@ -2,6 +2,7 @@
 #include "ActionDebugHistory.h"
 
 #include <algorithm>
+#include <deque>
 #include <utility>
 
 namespace Wheatear::WAO {
@@ -10,9 +11,11 @@ namespace Wheatear::WAO {
 
         constexpr size_t MaxRecords = 256;
 
-        std::vector<ActionDebugRecord>& Records()
+        // deque so the overflow trim is a constant-time pop_front instead of an
+        // O(n) vector front-erase.
+        std::deque<ActionDebugRecord>& Records()
         {
-            static std::vector<ActionDebugRecord> records;
+            static std::deque<ActionDebugRecord> records;
             return records;
         }
 
@@ -30,20 +33,29 @@ namespace Wheatear::WAO {
 
         auto& records = Records();
         records.push_back(std::move(record));
-        if (records.size() > MaxRecords)
-            records.erase(records.begin(), records.begin() + static_cast<std::ptrdiff_t>(records.size() - MaxRecords));
+        while (records.size() > MaxRecords)
+            records.pop_front();
     }
 
     void ActionDebugHistory::Record(const EffectLedger& ledger,
         bool success,
         const std::string& detail)
     {
+#ifndef WT_DEBUG
+        // Debug-only telemetry: skip the ledger deep-copy entirely in release
+        // builds so every action activation does not allocate on the hot path.
+        (void)ledger;
+        (void)success;
+        (void)detail;
+        return;
+#else
         ActionDebugRecord record;
         record.Intent = ledger.CurrentIntent();
         record.Success = success;
         record.Detail = detail;
         record.Entries = ledger.Entries();
         Push(std::move(record));
+#endif
     }
 
     void ActionDebugHistory::RecordSimple(const std::string& actionId,
@@ -51,6 +63,13 @@ namespace Wheatear::WAO {
         const std::string& detail,
         bool success)
     {
+#ifndef WT_DEBUG
+        (void)actionId;
+        (void)source;
+        (void)detail;
+        (void)success;
+        return;
+#else
         ActionDebugRecord record;
         record.Intent.ActionId = actionId;
         record.Intent.Source = source;
@@ -66,6 +85,7 @@ namespace Wheatear::WAO {
             success
         });
         Push(std::move(record));
+#endif
     }
 
     std::vector<ActionDebugRecord> ActionDebugHistory::Recent(size_t limit)

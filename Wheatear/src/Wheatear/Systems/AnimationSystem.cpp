@@ -251,50 +251,65 @@ namespace Wheatear {
 
             TransformComponent* tc = registry.try_get<TransformComponent>(e);
 
-            for (auto& trackBase : clip->GetPropertyTracks())
+            // Bind property-track writers only when the playing clip changes
+            // (clips are shared assets, so writers are per-entity bindings into
+            // this entity's components); steady-state playback rebinds nothing.
+            const AnimationClip* clipKey = clip.get();
+            if (m_BoundClipForEntity[e] != clipKey)
             {
-                switch (trackBase->Property)
+                for (auto& trackBase : clip->GetPropertyTracks())
                 {
-                case AnimatedProperty::SpriteColorA:
-                    std::static_pointer_cast<PropertyTrack<float>>(trackBase)->Writer =
-                        [&sprite](const float& v) { sprite.Color.a = v; }; break;
-                case AnimatedProperty::SpriteColorR:
-                    std::static_pointer_cast<PropertyTrack<float>>(trackBase)->Writer =
-                        [&sprite](const float& v) { sprite.Color.r = v; }; break;
-                case AnimatedProperty::SpriteColorG:
-                    std::static_pointer_cast<PropertyTrack<float>>(trackBase)->Writer =
-                        [&sprite](const float& v) { sprite.Color.g = v; }; break;
-                case AnimatedProperty::SpriteColorB:
-                    std::static_pointer_cast<PropertyTrack<float>>(trackBase)->Writer =
-                        [&sprite](const float& v) { sprite.Color.b = v; }; break;
-                case AnimatedProperty::SpriteColor:
-                    std::static_pointer_cast<PropertyTrack<glm::vec4>>(trackBase)->Writer =
-                        [&sprite](const glm::vec4& v) { sprite.Color = v; }; break;
-                case AnimatedProperty::PositionX:
-                    if (tc) std::static_pointer_cast<PropertyTrack<float>>(trackBase)->Writer =
-                        [tc](const float& v) { tc->Translation.x = v; }; break;
-                case AnimatedProperty::PositionY:
-                    if (tc) std::static_pointer_cast<PropertyTrack<float>>(trackBase)->Writer =
-                        [tc](const float& v) { tc->Translation.y = v; }; break;
-                case AnimatedProperty::PositionZ:
-                    if (tc) std::static_pointer_cast<PropertyTrack<float>>(trackBase)->Writer =
-                        [tc](const float& v) { tc->Translation.z = v; }; break;
-                case AnimatedProperty::RotationZ:
-                    if (tc) std::static_pointer_cast<PropertyTrack<float>>(trackBase)->Writer =
-                        [tc](const float& v) { tc->Rotation.z = v; }; break;
-                case AnimatedProperty::ScaleX:
-                    if (tc) std::static_pointer_cast<PropertyTrack<float>>(trackBase)->Writer =
-                        [tc](const float& v) { tc->Scale.x = v; }; break;
-                case AnimatedProperty::ScaleY:
-                    if (tc) std::static_pointer_cast<PropertyTrack<float>>(trackBase)->Writer =
-                        [tc](const float& v) { tc->Scale.y = v; }; break;
-                case AnimatedProperty::ScaleUniform:
-                    if (tc) std::static_pointer_cast<PropertyTrack<float>>(trackBase)->Writer =
-                        [tc](const float& v) { tc->Scale.x = tc->Scale.y = v; }; break;
+                    switch (trackBase->Property)
+                    {
+                    case AnimatedProperty::SpriteColorA:
+                        std::static_pointer_cast<PropertyTrack<float>>(trackBase)->Writer =
+                            [&sprite](const float& v) { sprite.Color.a = v; }; break;
+                    case AnimatedProperty::SpriteColorR:
+                        std::static_pointer_cast<PropertyTrack<float>>(trackBase)->Writer =
+                            [&sprite](const float& v) { sprite.Color.r = v; }; break;
+                    case AnimatedProperty::SpriteColorG:
+                        std::static_pointer_cast<PropertyTrack<float>>(trackBase)->Writer =
+                            [&sprite](const float& v) { sprite.Color.g = v; }; break;
+                    case AnimatedProperty::SpriteColorB:
+                        std::static_pointer_cast<PropertyTrack<float>>(trackBase)->Writer =
+                            [&sprite](const float& v) { sprite.Color.b = v; }; break;
+                    case AnimatedProperty::SpriteColor:
+                        std::static_pointer_cast<PropertyTrack<glm::vec4>>(trackBase)->Writer =
+                            [&sprite](const glm::vec4& v) { sprite.Color = v; }; break;
+                    case AnimatedProperty::PositionX:
+                        if (tc) std::static_pointer_cast<PropertyTrack<float>>(trackBase)->Writer =
+                            [tc](const float& v) { tc->Translation.x = v; }; break;
+                    case AnimatedProperty::PositionY:
+                        if (tc) std::static_pointer_cast<PropertyTrack<float>>(trackBase)->Writer =
+                            [tc](const float& v) { tc->Translation.y = v; }; break;
+                    case AnimatedProperty::PositionZ:
+                        if (tc) std::static_pointer_cast<PropertyTrack<float>>(trackBase)->Writer =
+                            [tc](const float& v) { tc->Translation.z = v; }; break;
+                    case AnimatedProperty::RotationZ:
+                        if (tc) std::static_pointer_cast<PropertyTrack<float>>(trackBase)->Writer =
+                            [tc](const float& v) { tc->Rotation.z = v; }; break;
+                    case AnimatedProperty::ScaleX:
+                        if (tc) std::static_pointer_cast<PropertyTrack<float>>(trackBase)->Writer =
+                            [tc](const float& v) { tc->Scale.x = v; }; break;
+                    case AnimatedProperty::ScaleY:
+                        if (tc) std::static_pointer_cast<PropertyTrack<float>>(trackBase)->Writer =
+                            [tc](const float& v) { tc->Scale.y = v; }; break;
+                    case AnimatedProperty::ScaleUniform:
+                        if (tc) std::static_pointer_cast<PropertyTrack<float>>(trackBase)->Writer =
+                            [tc](const float& v) { tc->Scale.x = tc->Scale.y = v; }; break;
+                    }
                 }
-                trackBase->Sample(animator.ElapsedTime, clip->IsLooping(), totalDur);
+                m_BoundClipForEntity[e] = clipKey;
             }
+
+            for (auto& trackBase : clip->GetPropertyTracks())
+                trackBase->Sample(animator.ElapsedTime, clip->IsLooping(), totalDur);
         }
+    }
+
+    void AnimationSystem::OnEntityDestroy(Scene* scene, Entity& entity)
+    {
+        m_BoundClipForEntity.erase(static_cast<entt::entity>(static_cast<uint32_t>(entity)));
     }
 
 } // namespace Wheatear

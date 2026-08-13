@@ -24,6 +24,10 @@ namespace Wheatear::UIWidgetLayout {
         std::unordered_map<UUID, entt::entity> Entities;
         mutable std::unordered_map<uint32_t, Rect> RectCache;
         mutable std::unordered_map<uint32_t, bool> VisibilityCache;
+        // Reusable recursion guard for the Resolve* entry points; the recursion
+        // erases its keys on exit, so one shared set per context (per frame) is
+        // safe and avoids allocating a fresh set per widget per frame.
+        std::unordered_set<uint32_t> ScratchVisiting;
 
         explicit Context(Scene* scene)
             : ScenePtr(scene)
@@ -155,8 +159,8 @@ namespace Wheatear::UIWidgetLayout {
 
     inline Rect ResolveRect(Context& context, entt::entity entity)
     {
-        std::unordered_set<uint32_t> visiting;
-        return ResolveRect(context, entity, visiting);
+        context.ScratchVisiting.clear();
+        return ResolveRect(context, entity, context.ScratchVisiting);
     }
 
     inline bool ResolveVisible(Context& context,
@@ -209,8 +213,8 @@ namespace Wheatear::UIWidgetLayout {
 
     inline bool ResolveVisible(Context& context, entt::entity entity)
     {
-        std::unordered_set<uint32_t> visiting;
-        return ResolveVisible(context, entity, visiting);
+        context.ScratchVisiting.clear();
+        return ResolveVisible(context, entity, context.ScratchVisiting);
     }
 
     inline bool ResolveEditorVisible(Context& context,
@@ -245,8 +249,8 @@ namespace Wheatear::UIWidgetLayout {
 
     inline bool ResolveEditorVisible(Context& context, entt::entity entity)
     {
-        std::unordered_set<uint32_t> visiting;
-        return ResolveEditorVisible(context, entity, visiting);
+        context.ScratchVisiting.clear();
+        return ResolveEditorVisible(context, entity, context.ScratchVisiting);
     }
 
     inline UIWidgetComponent ResolveWidget(Context& context, entt::entity entity)

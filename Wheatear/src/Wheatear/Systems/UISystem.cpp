@@ -556,10 +556,13 @@ namespace Wheatear {
             }
         };
 
+        // Scratch set reused across widgets (IsEditorUIHidden erases its keys on
+        // exit, so one frame-scoped set is safe).
+        std::unordered_set<uint32_t> hiddenVisiting;
         for (auto [order, e] : m_SortBuffer)
         {
             (void)order;
-            std::unordered_set<uint32_t> hiddenVisiting;
+            hiddenVisiting.clear();
             if (IsEditorUIHidden(scene, layout, e, hiddenVisiting))
                 continue;
 

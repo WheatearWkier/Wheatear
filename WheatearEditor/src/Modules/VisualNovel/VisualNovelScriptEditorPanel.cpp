@@ -383,11 +383,16 @@ static void ExtractChoiceRequiredCondition(std::string& target,
             return ids;
         }
 
-        static std::vector<std::string> PortraitStyleChoices()
+        std::vector<std::string>& PortraitStyleChoicesCache()
         {
-            std::vector<std::string> choices = {
-                AssetAliasRegistry::Path("vn.default.portrait_pattern")
-            };
+            static std::vector<std::string> cache;
+            return cache;
+        }
+
+        void RefreshPortraitStyleChoices()
+        {
+            auto& choices = PortraitStyleChoicesCache();
+            choices = { AssetAliasRegistry::Path("vn.default.portrait_pattern") };
             const std::filesystem::path portraitRoot = AssetPath::Resolve("assets/vertical_slice/vn/portraits");
             if (std::filesystem::is_directory(portraitRoot))
             {
@@ -407,7 +412,14 @@ static void ExtractChoiceRequiredCondition(std::string& target,
                 }
             }
             SortUnique(choices);
-            return choices;
+        }
+
+        const std::vector<std::string>& PortraitStyleChoices()
+        {
+            auto& cache = PortraitStyleChoicesCache();
+            if (cache.empty())
+                RefreshPortraitStyleChoices();
+            return cache;
         }
 
     } // namespace
@@ -519,6 +531,7 @@ static void ExtractChoiceRequiredCondition(std::string& target,
         m_Rows.clear();
         m_SelectedRow = -1;
         m_BGMAssets.clear();
+        RefreshPortraitStyleChoices();
 
         const std::filesystem::path bgmDirectory = AssetPath::Resolve(AssetAliasRegistry::Path("vn.path.bgm"));
         if (std::filesystem::is_directory(bgmDirectory))
