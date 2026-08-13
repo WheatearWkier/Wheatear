@@ -498,6 +498,20 @@ namespace Wheatear {
             ImGui::DragFloat("Dash Invulnerable Time", &controller.DashInvulnerableTime, 0.005f, 0.0f, 2.0f);
 
             ImGui::Separator();
+            ImGui::TextDisabled("Items / Mana / Buffs");
+            ImGui::DragFloat("Heal Item Cooldown", &controller.HealItemCooldown, 0.1f, 0.0f, 30.0f);
+            ImGui::DragFloat("Mana Item Cooldown", &controller.ManaItemCooldown, 0.1f, 0.0f, 30.0f);
+            ImGui::DragFloat("Attack Buff Item Cooldown", &controller.AttackBuffItemCooldown, 0.1f, 0.0f, 60.0f);
+            ImGui::DragFloat("Max Mana", &controller.MaxMana, 1.0f, 0.0f, 500.0f);
+            ImGui::DragFloat("Launcher Mana Cost", &controller.LauncherManaCost, 0.5f, 0.0f, 100.0f);
+            ImGui::DragFloat("Magic Bolt Mana Cost", &controller.MagicBoltManaCost, 0.5f, 0.0f, 100.0f);
+            ImGui::DragFloat("Ally Support Mana Cost", &controller.AllySupportManaCost, 0.5f, 0.0f, 100.0f);
+            ImGui::DragFloat("Heal Item Amount", &controller.HealItemAmount, 1.0f, 0.0f, 500.0f);
+            ImGui::DragFloat("Mana Item Amount", &controller.ManaItemAmount, 1.0f, 0.0f, 500.0f);
+            ImGui::DragFloat("Attack Buff Multiplier", &controller.AttackBuffMultiplier, 0.01f, 1.0f, 3.0f);
+            ImGui::DragFloat("Attack Buff Duration", &controller.AttackBuffDuration, 0.1f, 0.0f, 30.0f);
+
+            ImGui::Separator();
             ImGui::TextDisabled("Runtime Cooldowns");
             ImGui::Text("Basic %.2f / Launcher %.2f / Magic %.2f / Support %.2f / Dash %.2f",
                 controller.RuntimeBasicCooldown,

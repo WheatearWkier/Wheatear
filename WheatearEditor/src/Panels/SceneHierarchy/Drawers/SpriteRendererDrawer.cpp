@@ -61,6 +61,8 @@ namespace Wheatear {
                 ImGui::Checkbox("Flip X", &c.FlipX);
                 // ImGui::Checkbox("Flip Y", &c.FlipY);
                 ImGui::DragFloat("Tiling Factor", &c.TilingFactor, 0.1f, 0.0f, 100.0f);
+                ImGui::DragFloat2("Draw Offset", glm::value_ptr(c.DrawOffset), 0.01f);
+                ImGui::DragFloat2("Draw Scale", glm::value_ptr(c.DrawScale), 0.01f);
                 if (ImGui::Button("Open Sprite Sheet Picker"))
                     SpriteSheetPickerPanel::RequestOpen(entity);
                 if (ImGui::IsItemHovered(ImGuiHoveredFlags_DelayShort))

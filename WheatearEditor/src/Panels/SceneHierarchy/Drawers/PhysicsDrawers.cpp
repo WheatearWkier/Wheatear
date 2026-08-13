@@ -31,6 +31,7 @@ namespace Wheatear {
                 }
 
                 ImGui::Checkbox("Fixed Rotation", &c.FixedRotation);
+                ImGui::DragFloat("Gravity Scale", &c.GravityScale, 0.01f, -10.0f, 10.0f);
             });
     }
 
