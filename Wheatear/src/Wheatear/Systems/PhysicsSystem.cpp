@@ -31,12 +31,13 @@ namespace Wheatear {
 
     } // anonymous namespace
 
+    PhysicsSystem::~PhysicsSystem() = default;
 
     void PhysicsSystem::OnRuntimeStart(Scene* scene)
     {
-        m_PhysicsWorld = new b2World({ 0.0f, -9.8f });
-        m_ContactListener = new ContactListener(scene);
-        m_PhysicsWorld->SetContactListener(m_ContactListener);
+        m_PhysicsWorld = std::make_unique<b2World>(b2Vec2{ 0.0f, -9.8f });
+        m_ContactListener = std::make_unique<ContactListener>(scene);
+        m_PhysicsWorld->SetContactListener(m_ContactListener.get());
 
         for (auto e : scene->GetRegistry().view<Rigidbody2DComponent>())
             InitEntityPhysics(scene, { e, scene });
@@ -44,8 +45,9 @@ namespace Wheatear {
 
     void PhysicsSystem::OnRuntimeStop(Scene* scene)
     {
-        delete m_PhysicsWorld;    m_PhysicsWorld = nullptr;
-        delete m_ContactListener; m_ContactListener = nullptr;
+        // unique_ptr members release the world and listener automatically.
+        m_PhysicsWorld.reset();
+        m_ContactListener.reset();
     }
 
     void PhysicsSystem::OnUpdateRuntime(Scene* scene, Timestep ts)
@@ -55,10 +57,11 @@ namespace Wheatear {
         m_PhysicsWorld->Step(ts, velocityIterations, positionIterations);
 
         auto& registry = scene->GetRegistry();
-        for (auto e : registry.view<Rigidbody2DComponent>())
+        auto view = registry.view<TransformComponent, Rigidbody2DComponent>();
+        for (auto e : view)
         {
-            auto& tc = registry.get<TransformComponent>(e);
-            auto& rb2d = registry.get<Rigidbody2DComponent>(e);
+            auto& tc = view.get<TransformComponent>(e);
+            auto& rb2d = view.get<Rigidbody2DComponent>(e);
 
             b2Body* body = static_cast<b2Body*>(rb2d.RuntimeBody);
             if (!body) continue;

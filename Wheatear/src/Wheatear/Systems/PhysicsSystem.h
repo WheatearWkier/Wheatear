@@ -1,17 +1,21 @@
 #pragma once
 
 #include "ISystem.h"
+#include "Wheatear/Physics/ContactListener.h"
+#include <box2d/b2_world.h>
 
-class b2World;
+#include <memory>
+
 
 namespace Wheatear {
 
-    class ContactListener;
 
     /// 
     class PhysicsSystem : public ISystem
     {
     public:
+        ~PhysicsSystem() override;
+
         void OnRuntimeStart(Scene* scene) override;
         void OnRuntimeStop(Scene* scene) override;
         void OnUpdateRuntime(Scene* scene, Timestep ts) override;
@@ -20,11 +24,13 @@ namespace Wheatear {
 
         void InitEntityPhysics(Scene* scene, Entity entity);
 
-        b2World* GetPhysicsWorld() const { return m_PhysicsWorld; }
+        b2World* GetPhysicsWorld() const { return m_PhysicsWorld.get(); }
 
     private:
-        b2World* m_PhysicsWorld = nullptr;
-        ContactListener* m_ContactListener = nullptr;
+        // RAII ownership: world and listener are created per play session and
+        // released automatically on stop (b2World is non-copyable/non-movable).
+        std::unique_ptr<b2World> m_PhysicsWorld;
+        std::unique_ptr<ContactListener> m_ContactListener;
     };
 
 } // namespace Wheatear

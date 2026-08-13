@@ -655,7 +655,9 @@ namespace Wheatear {
             }
         }
 
-        std::unordered_map<std::string, const UISkillTreeNodeView*> nodeById;
+        // string_view keys (no per-frame string copies; the component owns the
+        // node Ids, which outlive this call).
+        std::unordered_map<std::string_view, const UISkillTreeNodeView*> nodeById;
         nodeById.reserve(tree.Nodes.size());
         for (const auto& node : tree.Nodes)
             nodeById[node.Id] = &node;

@@ -217,18 +217,15 @@ namespace Wheatear::ArcadeCombatProjectileService {
             return;
 
         auto& registry = scene->GetRegistry();
-        std::vector<entt::entity> projectiles;
-        for (auto e : registry.view<TransformComponent, ArcadeProjectileComponent>())
-            projectiles.push_back(e);
-
-        for (auto e : projectiles)
+        // Iterate the view directly (DestroyEntity is deferred via the scene's
+        // destroy queue, so the view stays valid during iteration); avoids the
+        // per-frame snapshot vector and get-after-view lookups.
+        auto view = registry.view<TransformComponent, ArcadeProjectileComponent>();
+        for (auto e : view)
         {
-            if (!registry.valid(e))
-                continue;
-
             Entity projectileEntity{ e, scene };
-            auto& transform = registry.get<TransformComponent>(e);
-            auto& projectile = registry.get<ArcadeProjectileComponent>(e);
+            auto& transform = view.get<TransformComponent>(e);
+            auto& projectile = view.get<ArcadeProjectileComponent>(e);
 
             projectile.Lifetime -= dt;
             transform.Translation += glm::vec3(projectile.Velocity * dt, 0.0f);

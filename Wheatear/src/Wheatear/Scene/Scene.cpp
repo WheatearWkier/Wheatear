@@ -58,7 +58,7 @@ namespace Wheatear {
 
     void Scene::DestroyEntity(Entity entity)
     {
-        m_DestroyQueue.insert(static_cast<entt::entity>(entity));
+        m_DestroyQueue.push_back(static_cast<entt::entity>(entity));
         InvalidateEntityLookupCache();
     }
 
@@ -92,6 +92,10 @@ namespace Wheatear {
         if (m_DestroyQueue.empty())
             return;
 
+        // Deterministic order + dedup (handlers may enqueue during iteration).
+        std::sort(m_DestroyQueue.begin(), m_DestroyQueue.end());
+        m_DestroyQueue.erase(std::unique(m_DestroyQueue.begin(), m_DestroyQueue.end()), m_DestroyQueue.end());
+
         for (entt::entity e : m_DestroyQueue)
             if (m_Registry.valid(e))
                 m_Registry.destroy(e);
@@ -103,6 +107,11 @@ namespace Wheatear {
     {
         if (m_DestroyQueue.empty())
             return;
+
+        // Deterministic order + dedup (OnEntityDestroy handlers may enqueue
+        // during iteration; a sorted vector makes that safe and repeatable).
+        std::sort(m_DestroyQueue.begin(), m_DestroyQueue.end());
+        m_DestroyQueue.erase(std::unique(m_DestroyQueue.begin(), m_DestroyQueue.end()), m_DestroyQueue.end());
 
         for (entt::entity e : m_DestroyQueue)
         {

@@ -7,8 +7,11 @@
 #include "miniaudio.h"
 
 #include <algorithm>
+#include <array>
 #include <cmath>
 #include <filesystem>
+#include <memory>
+#include <vector>
 
 namespace Wheatear {
 
@@ -19,6 +22,75 @@ namespace Wheatear {
     {
         return AssetPath::ResolveAsset(filepath).string();
     }
+
+    namespace {
+
+        // Decoded-once SFX cache. ma_sound_init_from_file(MA_SOUND_FLAG_DECODE)
+        // re-reads and re-decodes the whole file from disk on every one-shot
+        // (hits/landings/attacks at 60fps), stalling the main thread. Instead
+        // decode each path once into a pair of ma_audio_buffers (two copies so
+        // rapid overlapping plays do not fight over one data source) and create
+        // sounds from memory via ma_sound_init_from_data_source.
+        struct CachedSfx
+        {
+            std::array<std::unique_ptr<ma_audio_buffer>, 2> Buffers;
+            int Next = 0;
+        };
+
+        std::unordered_map<std::string, CachedSfx>& SfxBufferCache()
+        {
+            static std::unordered_map<std::string, CachedSfx> cache;
+            return cache;
+        }
+
+        ma_audio_buffer* GetOrLoadSfxBuffer(const std::string& resolvedPath)
+        {
+            CachedSfx& cached = SfxBufferCache()[resolvedPath];
+            ma_audio_buffer* buffer = cached.Buffers[cached.Next].get();
+
+            // Round-robin between the two buffer slots so consecutive plays of
+            // the same SFX do not start from a half-consumed data source.
+            cached.Next = (cached.Next + 1) % 2;
+            if (buffer)
+                return buffer;
+
+            ma_decoder decoder;
+            if (ma_decoder_init_file(resolvedPath.c_str(), nullptr, &decoder) != MA_SUCCESS)
+                return nullptr;
+
+            // Decode the whole file to f32 PCM in memory (one-time cost).
+            std::vector<float> pcm;
+            pcm.reserve(decoder.outputSampleRate * decoder.outputChannels);
+            std::array<float, 8192> chunk{};
+            for (;;)
+            {
+                ma_uint64 framesRead = 0;
+                const ma_result readResult = ma_decoder_read_pcm_frames(
+                    &decoder, chunk.data(), chunk.size() / decoder.outputChannels, &framesRead);
+                pcm.insert(pcm.end(), chunk.begin(), chunk.begin() + static_cast<ptrdiff_t>(framesRead * decoder.outputChannels));
+                if (readResult != MA_SUCCESS || framesRead == 0)
+                    break;
+            }
+            ma_decoder_uninit(&decoder);
+            if (pcm.empty())
+                return nullptr;
+
+            cached.Buffers[cached.Next] = std::make_unique<ma_audio_buffer>();
+            const ma_audio_buffer_config config = ma_audio_buffer_config_init(
+                ma_format_f32,
+                decoder.outputChannels,
+                static_cast<ma_uint64>(pcm.size() / decoder.outputChannels),
+                pcm.data(),
+                nullptr);
+            if (ma_audio_buffer_init(&config, cached.Buffers[cached.Next].get()) != MA_SUCCESS)
+            {
+                cached.Buffers[cached.Next].reset();
+                return nullptr;
+            }
+            return cached.Buffers[cached.Next].get();
+        }
+
+    } // namespace
 
     void AudioEngine::Init()
     {
@@ -52,6 +124,9 @@ namespace Wheatear {
         }
         s_Sounds.clear();
 
+        // Release decoded SFX buffers (owned before the engine is destroyed).
+        SfxBufferCache().clear();
+
         if (s_Engine)
         {
             ma_engine_uninit(s_Engine);
@@ -78,20 +153,24 @@ namespace Wheatear {
 
         CollectFinishedSounds();
 
-        std::string resolvedPath = ResolvePath(filepath);
+        const std::string resolvedPath = ResolvePath(filepath);
 
         ma_sound* sound = new ma_sound();
-        ma_result result = ma_sound_init_from_file(
-            s_Engine,
-            resolvedPath.c_str(),
-            MA_SOUND_FLAG_DECODE,
-            nullptr, nullptr,
-            sound
-        );
+        ma_audio_buffer* buffer = GetOrLoadSfxBuffer(resolvedPath);
+        if (!buffer)
+        {
+            WT_CORE_WARN("AudioEngine: failed to load [{0}]", filepath);
+            delete sound;
+            return 0;
+        }
 
+        // Play from the in-memory buffer; the data source is owned by the cache
+        // and outlives the sound, so no per-play disk I/O or decode.
+        const ma_result result = ma_sound_init_from_data_source(
+            s_Engine, buffer, 0, nullptr, sound);
         if (result != MA_SUCCESS)
         {
-            WT_CORE_WARN("AudioEngine: failed to load [{0}], error code = {1}", filepath, (int)result);
+            WT_CORE_WARN("AudioEngine: failed to init sound from buffer [{0}], error code = {1}", filepath, (int)result);
             delete sound;
             return 0;
         }
@@ -156,6 +235,10 @@ namespace Wheatear {
         }
         s_Sounds.clear();
         s_NextHandle = 1;
+
+        // Drop decoded buffers on scene change so BGM/SFX of the previous scene
+        // do not pin memory; they re-decode once on next use.
+        SfxBufferCache().clear();
     }
 
     void AudioEngine::CollectFinishedSounds()

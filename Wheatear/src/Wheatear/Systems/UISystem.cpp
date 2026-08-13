@@ -169,6 +169,7 @@ namespace Wheatear {
                 animator.RuntimeBaseProgressBackground = bar->BackgroundColor;
             }
 
+            animator.RuntimePresetLower = ToLower(animator.Preset);
             animator.RuntimeInitialized = true;
         }
 
@@ -306,7 +307,7 @@ namespace Wheatear {
 
                 RestoreBaseState(registry, entity, widget, animator);
 
-                const std::string preset = ToLower(animator.Preset);
+                const std::string& preset = animator.RuntimePresetLower;
                 if (!animator.PlayOnStart && preset != "pulse" && preset != "hover_pulse")
                     continue;
 
@@ -399,8 +400,9 @@ namespace Wheatear {
         const uint32_t viewportHeight = scene->GetViewportHeight();
 
         m_SortBuffer.clear();
-        for (auto e : registry.view<UIWidgetComponent>())
-            m_SortBuffer.emplace_back(registry.get<UIWidgetComponent>(e).SortOrder, e);
+        auto widgetView = registry.view<UIWidgetComponent>();
+        for (auto e : widgetView)
+            m_SortBuffer.emplace_back(widgetView.get<UIWidgetComponent>(e).SortOrder, e);
 
         std::sort(m_SortBuffer.begin(), m_SortBuffer.end(),
             [](const auto& a, const auto& b) { return a.first < b.first; });

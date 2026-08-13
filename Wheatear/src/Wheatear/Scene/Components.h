@@ -350,6 +350,7 @@ namespace Wheatear {
         // Runtime cache. Stored on the component so UI animations survive system-only updates.
         bool RuntimeInitialized = false;
         bool RuntimeWasVisible = false;
+        std::string RuntimePresetLower; // ToLower(Preset), computed once to avoid per-frame allocation
         float RuntimeTime = 0.0f;
         glm::vec2 RuntimeBasePosition = { 0.5f, 0.5f };
         glm::vec2 RuntimeBaseSize = { 0.1f, 0.05f };

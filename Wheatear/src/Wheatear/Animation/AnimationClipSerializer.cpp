@@ -151,7 +151,15 @@ namespace Wheatear {
         {
             for (auto t : tn)
             {
-                const auto prop = (AnimatedProperty)t["Property"].as<int>();
+                // Validate the property enum (hand-edited or older assets may
+                // carry out-of-range values); a missing key defaults to -1.
+                const int propValue = t["Property"].as<int>(-1);
+                if (propValue < 0 || propValue > static_cast<int>(AnimatedProperty::ScaleUniform))
+                {
+                    WT_CORE_WARN("AnimationClipSerializer: skipping track with invalid Property={}", propValue);
+                    continue;
+                }
+                const auto prop = static_cast<AnimatedProperty>(propValue);
                 if (prop == AnimatedProperty::SpriteColor)
                 {
                     auto track = clip->AddVec4Track(prop);

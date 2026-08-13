@@ -139,7 +139,10 @@ namespace Wheatear {
         std::vector<Scope<ISystem>> m_Systems;
         std::unordered_map<std::type_index, ISystem*> m_SystemCache;
         bool m_SystemCacheDirty = true;
-        std::unordered_set<entt::entity> m_DestroyQueue;
+        // Deferred-destroy batch: vector + sort/unique at flush gives deterministic
+        // destroy order and avoids per-insert node allocations (an unordered_set
+        // would also rehash if a handler destroys during flush iteration).
+        std::vector<entt::entity> m_DestroyQueue;
 
         friend class Entity;
         friend class SceneSerializer;

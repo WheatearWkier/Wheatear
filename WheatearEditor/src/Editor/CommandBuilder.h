@@ -4,6 +4,7 @@
 #include "Editor/EditorLocale.h"
 #include "Editor/EditorWidgets.h"
 #include "Wheatear/Core/AssetPath.h"
+#include "Wheatear/Utils/StringUtils.h"
 
 #include <imgui/imgui.h>
 
@@ -18,6 +19,11 @@
 #include <vector>
 
 namespace Wheatear::EditorCommandBuilder {
+
+    using StringUtils::StartsWith;
+    using StringUtils::PayloadAfter;
+    using StringUtils::Trim;
+    using StringUtils::ToLower;
 
     enum class CommandKind
     {
@@ -105,35 +111,6 @@ namespace Wheatear::EditorCommandBuilder {
     inline void RefreshAssetChoices()
     {
         GetAssetCache() = {};
-    }
-
-    inline bool StartsWith(const std::string& value, const std::string& prefix)
-    {
-        return value.rfind(prefix, 0) == 0;
-    }
-
-    inline std::string PayloadAfter(const std::string& value, const std::string& prefix)
-    {
-        return StartsWith(value, prefix) ? value.substr(prefix.size()) : std::string{};
-    }
-
-    inline std::string Trim(std::string value)
-    {
-        const size_t start = value.find_first_not_of(" \t\r\n");
-        if (start == std::string::npos)
-            return {};
-
-        const size_t end = value.find_last_not_of(" \t\r\n");
-        return value.substr(start, end - start + 1);
-    }
-
-    inline std::string ToLower(std::string value)
-    {
-        std::transform(value.begin(), value.end(), value.begin(), [](unsigned char c)
-        {
-            return static_cast<char>(std::tolower(c));
-        });
-        return value;
     }
 
     inline std::string StripEventName(std::string value)

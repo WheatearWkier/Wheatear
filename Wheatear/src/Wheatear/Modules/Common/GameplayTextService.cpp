@@ -60,9 +60,11 @@ namespace Wheatear::GameplayTextService {
 
     std::string FormatFloat(float value, int precision)
     {
-        std::ostringstream stream;
-        stream << std::fixed << std::setprecision(std::max(0, precision)) << value;
-        return stream.str();
+        // Stack-buffer formatting: called every frame by HUD text updates, so
+        // avoid the ostringstream allocation per call.
+        char buffer[32];
+        std::snprintf(buffer, sizeof(buffer), "%.*f", std::max(0, precision), static_cast<double>(value));
+        return std::string(buffer);
     }
 
 } // namespace Wheatear::GameplayTextService
