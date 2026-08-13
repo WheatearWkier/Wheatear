@@ -2204,6 +2204,18 @@
     <ClCompile Include="src\Wheatear\Scene\SceneSerializerModuleComponents.cpp">
       <Filter>src\Wheatear\Scene</Filter>
     </ClCompile>
+    <ClCompile Include="src\Wheatear\Scene\SceneSerializerModuleComponents_Arcade.cpp">
+      <Filter>src\Wheatear\Scene</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Wheatear\Scene\SceneSerializerModuleComponents_SideCombat.cpp">
+      <Filter>src\Wheatear\Scene</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Wheatear\Scene\SceneSerializerModuleComponents_Tactical.cpp">
+      <Filter>src\Wheatear\Scene</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Wheatear\Scene\SceneSerializerModuleComponents_Turn.cpp">
+      <Filter>src\Wheatear\Scene</Filter>
+    </ClCompile>
     <ClCompile Include="src\Wheatear\Scene\SceneSerializerScriptingComponents.cpp">
       <Filter>src\Wheatear\Scene</Filter>
     </ClCompile>

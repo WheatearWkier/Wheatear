@@ -848,6 +848,10 @@
     <ClCompile Include="src\Wheatear\Scene\SceneSerializerAnimationComponents.cpp" />
     <ClCompile Include="src\Wheatear\Scene\SceneSerializerCoreComponents.cpp" />
     <ClCompile Include="src\Wheatear\Scene\SceneSerializerModuleComponents.cpp" />
+    <ClCompile Include="src\Wheatear\Scene\SceneSerializerModuleComponents_Arcade.cpp" />
+    <ClCompile Include="src\Wheatear\Scene\SceneSerializerModuleComponents_SideCombat.cpp" />
+    <ClCompile Include="src\Wheatear\Scene\SceneSerializerModuleComponents_Tactical.cpp" />
+    <ClCompile Include="src\Wheatear\Scene\SceneSerializerModuleComponents_Turn.cpp" />
     <ClCompile Include="src\Wheatear\Scene\SceneSerializerScriptingComponents.cpp" />
     <ClCompile Include="src\Wheatear\Scene\SceneSerializerUIComponents.cpp" />
     <ClCompile Include="src\Wheatear\Scene\SceneSystemRegistry.cpp" />
