@@ -3,6 +3,7 @@
 
 #include "ContentBrowserPanel.h"
 #include "EditorCommands.h"
+#include "Editor/EditorLocale.h"
 #include "Editor/EditorWidgets.h"
 #include "SpriteSheetPickerPanel.h"
 #include "Wheatear/Core/AssetPath.h"
@@ -28,12 +29,12 @@ namespace Wheatear {
         if (!clip)
             return;
 
-        if (!ImGui::CollapsingHeader("Spritesheet / Atlas Generator"))
+        if (!ImGui::CollapsingHeader(EditorLocale::Text("Spritesheet / Atlas Generator", "序列帧 / 图集生成器")))
             return;
 
         AtlasConfig& atlas = m_AtlasConfigs[m_CurrentClipName];
         ImGui::TextDisabled("Preferred runtime path: one spritesheet texture + UV frames for fewer texture swaps.");
-        if (ImGui::Button("Open Sprite Sheet Picker"))
+        if (ImGui::Button(EditorLocale::Text("Open Sprite Sheet Picker", "打开序列帧选择器")))
             SpriteSheetPickerPanel::RequestOpen(m_Entity);
         if (ImGui::IsItemHovered(ImGuiHoveredFlags_DelayShort))
             ImGui::SetTooltip("Use the visual atlas picker for cell selection and frame sequence generation.");
@@ -57,23 +58,23 @@ namespace Wheatear {
         ImGui::SameLine();
         ImGui::BeginGroup();
         ImGui::SetNextItemWidth(60);
-        ImGui::DragInt("Cols", &atlas.Cols, 1, 1, 64);
+        ImGui::DragInt(EditorLocale::Text("Cols", "列数"), &atlas.Cols, 1, 1, 64);
         ImGui::SetNextItemWidth(60);
-        ImGui::DragInt("Rows", &atlas.Rows, 1, 1, 64);
+        ImGui::DragInt(EditorLocale::Text("Rows", "行数"), &atlas.Rows, 1, 1, 64);
         ImGui::EndGroup();
         ImGui::SameLine();
         ImGui::BeginGroup();
         ImGui::SetNextItemWidth(60);
-        ImGui::DragInt("Start Col", &atlas.StartCol, 1, 0, 63);
+        ImGui::DragInt(EditorLocale::Text("Start Col", "起始列"), &atlas.StartCol, 1, 0, 63);
         ImGui::SetNextItemWidth(60);
-        ImGui::DragInt("Start Row", &atlas.StartRow, 1, 0, 63);
+        ImGui::DragInt(EditorLocale::Text("Start Row", "起始行"), &atlas.StartRow, 1, 0, 63);
         ImGui::EndGroup();
         ImGui::SameLine();
         ImGui::BeginGroup();
         ImGui::SetNextItemWidth(60);
-        ImGui::DragInt("Frame Count", &atlas.FrameCount, 1, 1, 256);
+        ImGui::DragInt(EditorLocale::Text("Frame Count", "帧数"), &atlas.FrameCount, 1, 1, 256);
         ImGui::SetNextItemWidth(60);
-        ImGui::DragFloat("Dur/frame", &atlas.Duration, 0.01f, 0.01f, 2.0f, "%.2fs");
+        ImGui::DragFloat(EditorLocale::Text("Dur/frame", "时长/帧"), &atlas.Duration, 0.01f, 0.01f, 2.0f, "%.2fs");
         ImGui::EndGroup();
 
         const bool canGenerate = atlas.Texture && atlas.Cols > 0 && atlas.Rows > 0 && atlas.FrameCount > 0;
@@ -83,7 +84,7 @@ namespace Wheatear {
             ImGui::PushStyleVar(ImGuiStyleVar_Alpha, ImGui::GetStyle().Alpha * 0.5f);
         }
 
-        if (ImGui::Button("Generate Frames"))
+        if (ImGui::Button(EditorLocale::Text("Generate Frames", "生成帧")))
         {
             const std::string clipName = m_CurrentClipName;
             const AtlasConfig generation = atlas; // copy; mutation runs against component data
@@ -128,11 +129,11 @@ namespace Wheatear {
         if (!clip)
             return;
 
-        if (!ImGui::CollapsingHeader("Events", ImGuiTreeNodeFlags_DefaultOpen))
+        if (!ImGui::CollapsingHeader(EditorLocale::Text("Events", "事件"), ImGuiTreeNodeFlags_DefaultOpen))
             return;
 
         auto& events = clip->GetEvents();
-        if (ImGui::Button("+ Event At Cursor"))
+        if (ImGui::Button(EditorLocale::Text("+ Event At Cursor", "+ 在光标处添加事件")))
         {
             const std::string clipName = m_CurrentClipName;
             const float eventTime = std::max(0.0f, m_PlaybackTime);
@@ -189,7 +190,7 @@ namespace Wheatear {
                 ImGui::SetNextItemWidth(-FLT_MIN);
                 InputString("##command", event.Command, 320);
                 if (ImGui::IsItemHovered())
-                    ImGui::SetTooltip("Placeholders: {entity} {clip} {event}");
+                    ImGui::SetTooltip(EditorLocale::Text("Placeholders: {entity} {clip} {event}", "占位符: {entity} {clip} {event}"));
 
                 ImGui::TableSetColumnIndex(4);
                 if (ImGui::SmallButton("X"))
@@ -222,7 +223,7 @@ namespace Wheatear {
         if (!clip)
             return;
 
-        if (!ImGui::CollapsingHeader("Frames"))
+        if (!ImGui::CollapsingHeader(EditorLocale::Text("Frames", "帧")))
             return;
 
         auto& frames = clip->GetFrames();
@@ -255,14 +256,14 @@ namespace Wheatear {
             }
 
             if (ImGui::IsItemHovered())
-                ImGui::SetTooltip("Drop texture here");
+                ImGui::SetTooltip(EditorLocale::Text("Drop texture here", "拖入纹理"));
 
             ImGui::SameLine();
             ImGui::BeginGroup();
 
-            ImGui::TextDisabled("Frame %d", i);
+            ImGui::TextDisabled(EditorLocale::Text("Frame %d", "帧 %d"), i);
             ImGui::SetNextItemWidth(80.0f);
-            ImGui::DragFloat("Duration##dur", &frame.Duration, 0.01f, 0.01f, 5.0f, "%.2fs");
+            ImGui::DragFloat(EditorLocale::Text("Duration##dur", "时长##dur"), &frame.Duration, 0.01f, 0.01f, 5.0f, "%.2fs");
 
             if (ImGui::TreeNode("UV##uv"))
             {
@@ -301,7 +302,7 @@ namespace Wheatear {
             });
         }
 
-        if (ImGui::Button("+ Add Frame"))
+        if (ImGui::Button(EditorLocale::Text("+ Add Frame", "+ 添加帧")))
         {
             const std::string clipName = m_CurrentClipName;
             ApplyAnimatorEdit(m_Entity,

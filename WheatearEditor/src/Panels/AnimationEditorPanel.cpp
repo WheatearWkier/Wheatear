@@ -3,6 +3,7 @@
 
 #include "Editor/EditorContentPickers.h"
 #include "Editor/EditorFloatingWindow.h"
+#include "Editor/EditorLocale.h"
 #include "Editor/EditorWidgets.h"
 #include "EditorCommands.h"
 
@@ -399,21 +400,21 @@ namespace Wheatear {
         ImGui::SameLine(0, 20);
 
         bool playOnStart = m_Animator->PlayOnStart;
-        if (ImGui::Checkbox("Play On Start", &playOnStart))
+        if (ImGui::Checkbox(EditorLocale::Text("Play On Start", "开始时播放"), &playOnStart))
             m_Animator->PlayOnStart = playOnStart;
         if (ImGui::IsItemHovered())
             ImGui::SetTooltip("Auto-play default clip when scene starts");
 
         ImGui::SameLine(0, 20);
         bool fireEvents = m_Animator->FireEvents;
-        if (ImGui::Checkbox("Fire Events", &fireEvents))
+        if (ImGui::Checkbox(EditorLocale::Text("Fire Events", "触发事件"), &fireEvents))
             m_Animator->FireEvents = fireEvents;
         if (ImGui::IsItemHovered())
             ImGui::SetTooltip("Animation events execute CommandBus commands at runtime");
 
         ImGui::SameLine(0, 20);
 
-        if (ImGui::Button("+ Add Clip"))
+        if (ImGui::Button(EditorLocale::Text("+ Add Clip", "+ 添加片段")))
         {
             std::string newName = "NewClip";
             int suffix = 0;
@@ -502,12 +503,12 @@ namespace Wheatear {
         }
         ImGui::PopID();
         if (ImGui::IsItemHovered())
-            ImGui::SetTooltip("Press Enter to rename clip");
+            ImGui::SetTooltip(EditorLocale::Text("Press Enter to rename clip", "按回车重命名片段"));
 
         if (!m_CurrentClipName.empty())
         {
             ImGui::SameLine();
-            if (ImGui::Button("Delete Clip"))
+            if (ImGui::Button(EditorLocale::Text("Delete Clip", "删除片段")))
             {
                 StopPreview();
                 const std::string deletedName = m_CurrentClipName;
@@ -558,7 +559,7 @@ namespace Wheatear {
 
         ImGui::SameLine(0, 20);
         bool looping = clip->IsLooping();
-        if (ImGui::Checkbox("Loop", &looping))
+        if (ImGui::Checkbox(EditorLocale::Text("Loop", "循环"), &looping))
         {
             const std::string clipName = m_CurrentClipName;
             ApplyAnimatorEdit(m_Entity,
@@ -571,7 +572,7 @@ namespace Wheatear {
         }
 
         ImGui::SameLine(0, 20);
-        if (ImGui::Button("Set Default"))
+        if (ImGui::Button(EditorLocale::Text("Set Default", "设为默认")))
         {
             const std::string defaultName = m_CurrentClipName;
             ApplyAnimatorEdit(m_Entity,
@@ -584,7 +585,7 @@ namespace Wheatear {
         if (!m_Animator->DefaultClipName.empty())
         {
             ImGui::SameLine();
-            if (ImGui::Button("Clear Default"))
+            if (ImGui::Button(EditorLocale::Text("Clear Default", "清除默认")))
             {
                 ApplyAnimatorEdit(m_Entity,
                     [](SpriteAnimatorComponent& component)
@@ -595,7 +596,7 @@ namespace Wheatear {
         }
 
         ImGui::SameLine(0, 20);
-        if (ImGui::Button("Save Clip As..."))
+        if (ImGui::Button(EditorLocale::Text("Save Clip As...", "另存片段为...")))
         {
             std::string path = m_ClipAssetPath;
             if (path.empty())
@@ -612,7 +613,7 @@ namespace Wheatear {
             }
         }
         ImGui::SameLine();
-        if (ImGui::Button("Load .wtanim..."))
+        if (ImGui::Button(EditorLocale::Text("Load .wtanim...", "加载 .wtanim...")))
         {
             if (EditorContentPickers::DrawAssetField("Clip Asset", m_ClipAssetPath,
                     EditorWidgets::AssetReferenceKind::AnimationClip, 512))
@@ -641,10 +642,10 @@ namespace Wheatear {
         }
 
         ImGui::SameLine(0, 20);
-        ImGui::TextDisabled("Duration: %.2fs", clip->GetTotalDuration());
+        ImGui::TextDisabled(EditorLocale::Text("Duration: %.2fs", "时长: %.2fs"), clip->GetTotalDuration());
 
         ImGui::SameLine(0, 20);
-        ImGui::TextDisabled("Zoom:");
+        ImGui::TextDisabled(EditorLocale::Text("Zoom:", "缩放:"));
         ImGui::SameLine();
         ImGui::SetNextItemWidth(100.0f);
         ImGui::SliderFloat("##zoom", &m_PixelsPerSecond, 40.0f, 400.0f, "%.0fpx/s");
@@ -681,7 +682,7 @@ namespace Wheatear {
             ImGui::EndCombo();
         }
         ImGui::SameLine();
-        if (ImGui::Button("+ Add Track"))
+        if (ImGui::Button(EditorLocale::Text("+ Add Track", "+ 添加轨道")))
         {
             const AnimatedProperty prop = kAllProperties[s_SelectedPropIdx];
             const std::string clipName = m_CurrentClipName;
@@ -699,7 +700,7 @@ namespace Wheatear {
         }
 
         ImGui::SameLine(0, 20);
-        if (ImGui::Button("+ Add Event"))
+        if (ImGui::Button(EditorLocale::Text("+ Add Event", "+ 添加事件")))
         {
             const std::string clipName = m_CurrentClipName;
             const float eventTime = std::max(0.0f, m_PlaybackTime);
@@ -724,7 +725,7 @@ namespace Wheatear {
         auto clip = GetCurrentClip();
         if (!clip)
         {
-            ImGui::TextDisabled("No clip selected.");
+            ImGui::TextDisabled(EditorLocale::Text("No clip selected.", "未选择片段。"));
             return;
         }
 
@@ -950,7 +951,7 @@ namespace Wheatear {
                     sortEvents = true;
                 InputString("Name", event.Name, 128);
                 InputString("Command", event.Command, 320);
-                ImGui::TextDisabled("Placeholders: {entity} {clip} {event}");
+                ImGui::TextDisabled(EditorLocale::Text("Placeholders: {entity} {clip} {event}", "占位符: {entity} {clip} {event}"));
                 ImGui::Separator();
                 if (ImGui::MenuItem("Delete"))
                     eventToDelete = i;
@@ -1128,7 +1129,7 @@ namespace Wheatear {
 
                 if (ImGui::BeginPopupContextItem("##kf_ctx"))
                 {
-                    ImGui::Text("Keyframe %d", ki);
+                    ImGui::Text(EditorLocale::Text("Keyframe %d", "关键帧 %d"), ki);
                     ImGui::Separator();
                     ImGui::SetNextItemWidth(80.0f);
                     ImGui::DragFloat("Time##kft", &kf.Time, 0.01f, 0.0f, 999.0f, "%.3fs");
@@ -1240,7 +1241,7 @@ namespace Wheatear {
 
                 if (ImGui::BeginPopupContextItem("##kf4_ctx"))
                 {
-                    ImGui::Text("Keyframe %d", ki);
+                    ImGui::Text(EditorLocale::Text("Keyframe %d", "关键帧 %d"), ki);
                     ImGui::Separator();
                     ImGui::SetNextItemWidth(80.0f);
                     ImGui::DragFloat("Time##kft4", &kf.Time, 0.01f, 0.0f, 999.0f, "%.3fs");

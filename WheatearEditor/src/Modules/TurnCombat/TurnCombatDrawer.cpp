@@ -2,6 +2,7 @@
 
 #include "Editor/CommandBuilder.h"
 #include "Editor/EditorContentPickers.h"
+#include "Editor/EditorLocale.h"
 #include "Editor/EditorWidgets.h"
 #include "Panels/SceneHierarchy/ComponentDrawers.h"
 #include "Wheatear/Modules/TurnCombat/TurnCombatComponents.h"
@@ -61,13 +62,13 @@ namespace Wheatear {
         DrawComponent<TurnCombatLevelComponent>("Turn Combat Level", entity, [entity](auto& level)
         {
             EditorWidgets::StatusBadge("Edits Scene", EditorWidgets::StatusKind::Success);
-            ImGui::Checkbox("Play On Start", &level.PlayOnStart);
+            ImGui::Checkbox(EditorLocale::Text("Play On Start", "开始时播放"), &level.PlayOnStart);
             InputString("Level Id", level.LevelId, 220);
             ImGui::DragFloat("Start Fade", &level.StartFadeDuration, 0.02f, 0.0f, 5.0f);
             ImGui::DragFloat("Intro Duration", &level.IntroDuration, 0.02f, 0.0f, 10.0f);
-            ImGui::DragFloat("Action Duration", &level.ActionDuration, 0.02f, 0.1f, 5.0f);
+            ImGui::DragFloat(EditorLocale::Text("Action Duration", "行动时长"), &level.ActionDuration, 0.02f, 0.1f, 5.0f);
             ImGui::DragFloat("Victory Return Delay", &level.VictoryReturnDelay, 0.05f, 0.0f, 10.0f);
-            ImGui::DragFloat("Defeat Return Delay", &level.DefeatReturnDelay, 0.05f, 0.0f, 10.0f);
+            ImGui::DragFloat(EditorLocale::Text("Defeat Return Delay", "战败返回延迟"), &level.DefeatReturnDelay, 0.05f, 0.0f, 10.0f);
             DrawCommandBuilder("Victory Command", level.VictorySceneCommand, 260);
             DrawCommandBuilder("Defeat Command", level.DefeatSceneCommand, 260);
 
@@ -102,17 +103,17 @@ namespace Wheatear {
             ImGui::DragInt("Slot", &combatant.Slot, 1.0f, 0, 16);
             InputString("Display Name", combatant.DisplayName);
             InputString("Role Name", combatant.RoleName);
-            ImGui::Checkbox("Controllable", &combatant.Controllable);
-            ImGui::Checkbox("Invulnerable", &combatant.Invulnerable);
+            ImGui::Checkbox(EditorLocale::Text("Controllable", "可控制"), &combatant.Controllable);
+            ImGui::Checkbox(EditorLocale::Text("Invulnerable", "无敌"), &combatant.Invulnerable);
 
             ImGui::Separator();
             ImGui::DragFloat("Max HP", &combatant.MaxHealth, 1.0f, 1.0f, 99999.0f);
-            ImGui::DragFloat("HP", &combatant.Health, 1.0f, 0.0f, combatant.MaxHealth);
+            ImGui::DragFloat(EditorLocale::Text("HP", "HP"), &combatant.Health, 1.0f, 0.0f, combatant.MaxHealth);
             ImGui::DragFloat("Max MP", &combatant.MaxMana, 1.0f, 0.0f, 99999.0f);
-            ImGui::DragFloat("MP", &combatant.Mana, 1.0f, 0.0f, combatant.MaxMana);
-            ImGui::DragFloat("Attack", &combatant.Attack, 0.5f, 0.0f, 9999.0f);
-            ImGui::DragFloat("Magic", &combatant.Magic, 0.5f, 0.0f, 9999.0f);
-            ImGui::DragFloat("Defense", &combatant.Defense, 0.5f, 0.0f, 9999.0f);
+            ImGui::DragFloat(EditorLocale::Text("MP", "MP"), &combatant.Mana, 1.0f, 0.0f, combatant.MaxMana);
+            ImGui::DragFloat(EditorLocale::Text("Attack", "攻击"), &combatant.Attack, 0.5f, 0.0f, 9999.0f);
+            ImGui::DragFloat(EditorLocale::Text("Magic", "魔法"), &combatant.Magic, 0.5f, 0.0f, 9999.0f);
+            ImGui::DragFloat(EditorLocale::Text("Defense", "防御"), &combatant.Defense, 0.5f, 0.0f, 9999.0f);
             ImGui::DragFloat("Speed", &combatant.Speed, 0.5f, 0.0f, 9999.0f);
 
             ImGui::Separator();

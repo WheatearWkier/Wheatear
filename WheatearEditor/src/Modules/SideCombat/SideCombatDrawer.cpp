@@ -2,6 +2,7 @@
 
 #include "Editor/CommandBuilder.h"
 #include "Editor/EditorContentPickers.h"
+#include "Editor/EditorLocale.h"
 #include "Editor/EditorWidgets.h"
 #include "Editor/TextAssetEditor.h"
 #include "Modules/SideCombat/SideCombatHudPresetEditorPanel.h"
@@ -30,7 +31,7 @@ namespace Wheatear {
         {
             static const char* labels[] = { "Grunt", "Thrower", "Pouncer", "Bear Boss" };
             int index = std::clamp((int)kind, 0, 3);
-            if (ImGui::Combo("Kind", &index, labels, 4))
+            if (ImGui::Combo(EditorLocale::Text("Kind", "类型"), &index, labels, 4))
                 kind = (SideEnemyKind)index;
         }
 
@@ -48,14 +49,14 @@ namespace Wheatear {
                 "Dash"
             };
             int index = std::clamp((int)kind, 0, 8);
-            if (ImGui::Combo("Attack Kind", &index, labels, 9))
+            if (ImGui::Combo(EditorLocale::Text("Attack Kind", "攻击类型"), &index, labels, 9))
                 kind = (SideAttackKind)index;
         }
 
         static const char* GetStateLabel(SideCombatState state)
         {
             static const char* labels[] = {
-                "Normal",
+                EditorLocale::Text("Normal", "普通"),
                 "Hit Stun",
                 "Launched",
                 "Knockdown",
@@ -75,8 +76,8 @@ namespace Wheatear {
         static void DrawDeathRewardRow(Entity entity, SideCombatLevelComponent::DeathReward& reward, int index)
         {
             ImGui::PushID(index);
-            ImGui::Checkbox("Enabled", &reward.Enabled);
-            ImGui::DragInt("Enemy Kind", &reward.EnemyKind, 1.0f, -1, 3);
+            ImGui::Checkbox(EditorLocale::Text("Enabled", "启用"), &reward.Enabled);
+            ImGui::DragInt(EditorLocale::Text("Enemy Kind", "敌人类型"), &reward.EnemyKind, 1.0f, -1, 3);
             DrawSceneBinding(entity, "Source Entity", reward.SourceEntityName);
             DrawSceneBinding(entity, "Spawn Entity", reward.SpawnEntityName);
             EditorContentPickers::DrawProgressionIdField("Item Id",
@@ -84,9 +85,9 @@ namespace Wheatear {
                 EditorContentPickers::ProgressionIdKind::Material,
                 260);
             InputString("Display Name", reward.DisplayName, 260);
-            ImGui::DragInt("Amount", &reward.Amount, 1.0f, 1, 999);
-            ImGui::DragFloat3("Offset", glm::value_ptr(reward.Offset), 0.02f);
-            ImGui::DragFloat3("Scale", glm::value_ptr(reward.Scale), 0.02f, 0.01f, 20.0f);
+            ImGui::DragInt(EditorLocale::Text("Amount", "数量"), &reward.Amount, 1.0f, 1, 999);
+            ImGui::DragFloat3(EditorLocale::Text("Offset", "偏移"), glm::value_ptr(reward.Offset), 0.02f);
+            ImGui::DragFloat3(EditorLocale::Text("Scale", "缩放"), glm::value_ptr(reward.Scale), 0.02f, 0.01f, 20.0f);
             EditorWidgets::DrawAssetReferenceField("Texture",
                 reward.TexturePath,
                 EditorWidgets::AssetReferenceKind::Texture,
@@ -111,10 +112,10 @@ namespace Wheatear {
             ImGui::PushID(label);
             if (ImGui::TreeNodeEx(label, ImGuiTreeNodeFlags_DefaultOpen))
             {
-                ImGui::DragFloat2("Buff Start", glm::value_ptr(layout.BuffStart), 0.001f, 0.0f, 1.0f, "%.3f");
-                ImGui::DragFloat2("Debuff Start", glm::value_ptr(layout.DebuffStart), 0.001f, 0.0f, 1.0f, "%.3f");
+                ImGui::DragFloat2(EditorLocale::Text("Buff Start", "增益起始"), glm::value_ptr(layout.BuffStart), 0.001f, 0.0f, 1.0f, "%.3f");
+                ImGui::DragFloat2(EditorLocale::Text("Debuff Start", "减益起始"), glm::value_ptr(layout.DebuffStart), 0.001f, 0.0f, 1.0f, "%.3f");
                 ImGui::DragFloat2("Size", glm::value_ptr(layout.Size), 0.001f, 0.0f, 1.0f, "%.3f");
-                ImGui::DragFloat("Gap", &layout.Gap, 0.001f, 0.0f, 1.0f, "%.3f");
+                ImGui::DragFloat(EditorLocale::Text("Gap", "间距"), &layout.Gap, 0.001f, 0.0f, 1.0f, "%.3f");
                 ImGui::TreePop();
             }
             ImGui::PopID();
@@ -123,15 +124,15 @@ namespace Wheatear {
         static void DrawSkillHudSlotRow(SideCombatLevelComponent::SkillHudSlot& slot, int index)
         {
             ImGui::PushID(index);
-            ImGui::Checkbox("Enabled", &slot.Enabled);
+            ImGui::Checkbox(EditorLocale::Text("Enabled", "启用"), &slot.Enabled);
             InputString("Key", slot.Key, 64);
             InputString("Key Label", slot.KeyLabel, 64);
             DrawCommandBuilder("Command", slot.Command, 260);
             ImGui::DragFloat2("Position", glm::value_ptr(slot.Position), 0.001f, 0.0f, 1.0f, "%.3f");
             ImGui::DragFloat2("Size", glm::value_ptr(slot.Size), 0.001f, 0.0f, 1.0f, "%.3f");
             ImGui::DragFloat2("Tooltip Position", glm::value_ptr(slot.TooltipPosition), 0.001f, 0.0f, 1.0f, "%.3f");
-            ImGui::Checkbox("Use Sheet Icon", &slot.UseSheetIcon);
-            ImGui::DragFloat4("Icon Sheet Pixels", glm::value_ptr(slot.IconSheetPixels), 1.0f, 0.0f, 8192.0f, "%.1f");
+            ImGui::Checkbox(EditorLocale::Text("Use Sheet Icon", "使用图集图标"), &slot.UseSheetIcon);
+            ImGui::DragFloat4(EditorLocale::Text("Icon Sheet Pixels", "图标图集像素"), glm::value_ptr(slot.IconSheetPixels), 1.0f, 0.0f, 8192.0f, "%.1f");
             EditorWidgets::DrawAssetReferenceField("Icon Texture",
                 slot.IconTexturePath,
                 EditorWidgets::AssetReferenceKind::Texture,
@@ -143,7 +144,7 @@ namespace Wheatear {
         static void DrawCombatItemHudSlotRow(SideCombatLevelComponent::CombatItemHudSlot& slot, int index)
         {
             ImGui::PushID(index);
-            ImGui::Checkbox("Enabled", &slot.Enabled);
+            ImGui::Checkbox(EditorLocale::Text("Enabled", "启用"), &slot.Enabled);
             InputString("Key", slot.Key, 64);
             InputString("Shortcut", slot.Shortcut, 64);
             DrawCommandBuilder("Command", slot.Command, 260);
@@ -152,8 +153,8 @@ namespace Wheatear {
             ImGui::DragFloat2("Icon Inset", glm::value_ptr(slot.IconInset), 0.001f, 0.0f, 1.0f, "%.3f");
             ImGui::DragFloat2("Icon Size", glm::value_ptr(slot.IconSize), 0.001f, 0.0f, 1.0f, "%.3f");
             ImGui::DragFloat2("Tooltip Position", glm::value_ptr(slot.TooltipPosition), 0.001f, 0.0f, 1.0f, "%.3f");
-            ImGui::Checkbox("Use Sheet Icon", &slot.UseSheetIcon);
-            ImGui::DragFloat4("Icon Sheet Pixels", glm::value_ptr(slot.IconSheetPixels), 1.0f, 0.0f, 8192.0f, "%.1f");
+            ImGui::Checkbox(EditorLocale::Text("Use Sheet Icon", "使用图集图标"), &slot.UseSheetIcon);
+            ImGui::DragFloat4(EditorLocale::Text("Icon Sheet Pixels", "图标图集像素"), glm::value_ptr(slot.IconSheetPixels), 1.0f, 0.0f, 8192.0f, "%.1f");
             EditorWidgets::DrawAssetReferenceField("Icon Texture",
                 slot.IconTexturePath,
                 EditorWidgets::AssetReferenceKind::Texture,
@@ -174,14 +175,14 @@ namespace Wheatear {
         DrawComponent<SideCombatLevelComponent>("Side Combat Level", entity, [entity](auto& level)
         {
             EditorWidgets::StatusBadge("Edits Scene", EditorWidgets::StatusKind::Success);
-            ImGui::Checkbox("Play On Start", &level.PlayOnStart);
+            ImGui::Checkbox(EditorLocale::Text("Play On Start", "开始时播放"), &level.PlayOnStart);
             InputString("Level Id / Unlock Profile", level.LevelId);
             ImGui::TextDisabled("Level Id selects progression.profiles in the tuning YAML.");
             EditorWidgets::DrawAssetReferenceField("Tuning",
                 level.TuningPath,
                 EditorWidgets::AssetReferenceKind::Data,
                 260);
-            if (ImGui::Button("Open Side Combat Tuning Editor"))
+            if (ImGui::Button(EditorLocale::Text("Open Side Combat Tuning Editor", "打开横版战斗调参编辑器")))
                 SideCombatEditorRequests::RequestOpenTuning(level.TuningPath);
             if (ImGui::CollapsingHeader("Advanced Raw Side Combat Tuning YAML"))
             {
@@ -199,8 +200,8 @@ namespace Wheatear {
                 260);
             if (ImGui::Button("Open Side Combat HUD Preset Editor"))
                 SideCombatEditorRequests::RequestOpenHudPreset(level.HudPresetPath);
-            ImGui::Checkbox("HUD Preset Overrides", &level.HudPresetOverridesEnabled);
-            if (ImGui::Button("Apply HUD Preset"))
+            ImGui::Checkbox(EditorLocale::Text("HUD Preset Overrides", "HUD 预设覆盖"), &level.HudPresetOverridesEnabled);
+            if (ImGui::Button(EditorLocale::Text("Apply HUD Preset", "应用 HUD 预设")))
             {
                 const bool applied = SideCombatHudPreset::Apply(level);
                 s_HudPresetStatus = applied
@@ -208,7 +209,7 @@ namespace Wheatear {
                     : "Failed to apply HUD preset.";
             }
             ImGui::SameLine();
-            if (ImGui::Button("Capture Scene HUD Layout"))
+            if (ImGui::Button(EditorLocale::Text("Capture Scene HUD Layout", "捕获场景 HUD 布局")))
             {
                 const int captured = SideCombatHudPreset::CaptureSceneLayout(level, entity.GetScene());
                 s_HudPresetStatus = captured > 0
@@ -246,7 +247,7 @@ namespace Wheatear {
             ImGui::DragFloat("Lane Max Y", &level.LaneMaxY, 0.02f, -20.0f, 20.0f);
             ImGui::DragFloat("Start Fade", &level.StartFadeDuration, 0.02f, 0.0f, 5.0f);
             ImGui::DragFloat("Victory Return Delay", &level.VictoryReturnDelay, 0.05f, 0.0f, 20.0f);
-            ImGui::DragFloat("Defeat Return Delay", &level.DefeatReturnDelay, 0.05f, 0.0f, 20.0f);
+            ImGui::DragFloat(EditorLocale::Text("Defeat Return Delay", "战败返回延迟"), &level.DefeatReturnDelay, 0.05f, 0.0f, 20.0f);
             ImGui::DragFloat("Result Fade", &level.ResultSceneFadeDuration, 0.02f, 0.0f, 5.0f);
             ImGui::DragFloat("Combo Drop Delay", &level.ComboDropDelay, 0.02f, 0.2f, 5.0f);
             DrawCommandBuilder("Victory Command", level.VictorySceneCommand, 260);
@@ -454,14 +455,14 @@ namespace Wheatear {
             DrawTeamCombo(combatant.Team);
             ImGui::DragFloat("Max Health", &combatant.MaxHealth, 1.0f, 1.0f, 99999.0f);
             ImGui::DragFloat("Health", &combatant.Health, 1.0f, 0.0f, combatant.MaxHealth);
-            ImGui::DragFloat("Attack", &combatant.Attack, 0.5f, 0.0f, 9999.0f);
-            ImGui::DragFloat("Defense", &combatant.Defense, 0.5f, 0.0f, 9999.0f);
+            ImGui::DragFloat(EditorLocale::Text("Attack", "攻击"), &combatant.Attack, 0.5f, 0.0f, 9999.0f);
+            ImGui::DragFloat(EditorLocale::Text("Defense", "防御"), &combatant.Defense, 0.5f, 0.0f, 9999.0f);
             ImGui::DragFloat("Move Speed", &combatant.MoveSpeed, 0.05f, 0.0f, 80.0f);
             ImGui::DragFloat2("Collision Size", glm::value_ptr(combatant.CollisionSize), 0.02f, 0.05f, 20.0f);
             ImGui::DragFloat("Collision Height", &combatant.CollisionHeight, 0.02f, 0.05f, 20.0f);
             ImGui::DragFloat("Gravity Scale", &combatant.GravityScale, 0.02f, 0.0f, 5.0f);
             ImGui::DragFloat("Knockback Resistance", &combatant.KnockbackResistance, 0.01f, 0.0f, 0.95f);
-            ImGui::Checkbox("Invulnerable", &combatant.Invulnerable);
+            ImGui::Checkbox(EditorLocale::Text("Invulnerable", "无敌"), &combatant.Invulnerable);
 
             ImGui::Separator();
             ImGui::TextDisabled("Runtime");
@@ -539,7 +540,7 @@ namespace Wheatear {
             DrawEnemyKindCombo(ai.Kind);
             ImGui::DragInt("Wave Index", &ai.WaveIndex, 1.0f, -1, 3);
             ImGui::DragFloat("Aggro Range", &ai.AggroRange, 0.05f, 0.0f, 80.0f);
-            ImGui::DragFloat("Attack Range", &ai.AttackRange, 0.05f, 0.0f, 20.0f);
+            ImGui::DragFloat(EditorLocale::Text("Attack Range", "攻击范围"), &ai.AttackRange, 0.05f, 0.0f, 20.0f);
             ImGui::DragFloat("Preferred Range", &ai.PreferredRange, 0.05f, 0.0f, 20.0f);
             ImGui::DragFloat("Attack Interval", &ai.AttackInterval, 0.02f, 0.05f, 20.0f);
             ImGui::DragFloat("Patrol Min X", &ai.PatrolMinX, 0.05f);
@@ -564,7 +565,7 @@ namespace Wheatear {
             ImGui::DragFloat2("Launch Velocity", glm::value_ptr(hitbox.LaunchVelocity), 0.05f);
             ImGui::DragFloat("Air Height", &hitbox.AirHeight, 0.02f, 0.0f, 20.0f);
             ImGui::DragFloat("Air Range", &hitbox.AirRange, 0.02f, 0.01f, 20.0f);
-            ImGui::DragFloat("Damage", &hitbox.Damage, 0.5f, 0.0f, 9999.0f);
+            ImGui::DragFloat(EditorLocale::Text("Damage", "伤害"), &hitbox.Damage, 0.5f, 0.0f, 9999.0f);
             ImGui::DragFloat("Lifetime", &hitbox.Lifetime, 0.01f, 0.0f, 20.0f);
             ImGui::DragFloat("Hit Stun", &hitbox.HitStun, 0.01f, 0.0f, 5.0f);
             ImGui::DragFloat("Attacker Air Impulse", &hitbox.AttackerAirImpulse, 0.02f, -20.0f, 20.0f);
@@ -586,7 +587,7 @@ namespace Wheatear {
                 pickup.ItemId,
                 EditorContentPickers::ProgressionIdKind::Material);
             InputString("Display Name", pickup.DisplayName);
-            ImGui::DragInt("Amount", &pickup.Amount, 1.0f, 1, 999);
+            ImGui::DragInt(EditorLocale::Text("Amount", "数量"), &pickup.Amount, 1.0f, 1, 999);
             ImGui::DragFloat("Pickup Radius", &pickup.PickupRadius, 0.01f, 0.01f, 5.0f);
             ImGui::DragFloat("Attract Radius", &pickup.AttractRadius, 0.05f, 0.0f, 20.0f);
             ImGui::DragFloat("Attract Speed", &pickup.AttractSpeed, 0.05f, 0.0f, 40.0f);

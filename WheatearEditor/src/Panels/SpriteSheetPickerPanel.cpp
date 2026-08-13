@@ -3,6 +3,7 @@
 
 #include "ContentBrowserPanel.h"
 #include "Editor/EditorFloatingWindow.h"
+#include "Editor/EditorLocale.h"
 #include "Wheatear/Animation/AnimationClip.h"
 #include "Wheatear/Core/AssetPath.h"
 #include "Wheatear/Renderer/Texture.h"
@@ -225,7 +226,7 @@ namespace Wheatear {
 
     void SpriteSheetPickerPanel::DrawTargetSummary()
     {
-        ImGui::TextUnformatted("Target");
+        ImGui::TextUnformatted(EditorLocale::Text("Target", "目标"));
         ImGui::SameLine();
         if (m_Entity)
             ImGui::TextColored(ImVec4(0.75f, 0.92f, 1.0f, 1.0f), "%s", m_Entity.GetName().c_str());
@@ -261,30 +262,30 @@ namespace Wheatear {
         }
         else
         {
-            ImGui::TextDisabled("Drag a texture from Content Browser, then click a cell or generate a frame sequence.");
+            ImGui::TextDisabled(EditorLocale::Text("Drag a texture from Content Browser, then click a cell or generate a frame sequence.", "从资源浏览器拖入纹理，然后点击单元格或生成帧序列。"));
         }
     }
 
     void SpriteSheetPickerPanel::DrawGridControls()
     {
-        ImGui::TextUnformatted("Grid");
+        ImGui::TextUnformatted(EditorLocale::Text("Grid", "网格"));
 
         ImGui::SetNextItemWidth(92.0f);
-        if (ImGui::DragInt("Columns", &m_Cols, 1, 1, 256))
+        if (ImGui::DragInt(EditorLocale::Text("Columns", "列数"), &m_Cols, 1, 1, 256))
             m_SelectedCol = std::clamp(m_SelectedCol, 0, m_Cols - 1);
         ImGui::SetNextItemWidth(92.0f);
-        if (ImGui::DragInt("Rows", &m_Rows, 1, 1, 256))
+        if (ImGui::DragInt(EditorLocale::Text("Rows", "行数"), &m_Rows, 1, 1, 256))
             m_SelectedRow = std::clamp(m_SelectedRow, 0, m_Rows - 1);
 
         ImGui::SetNextItemWidth(92.0f);
-        ImGui::DragFloat("Zoom", &m_Zoom, 0.02f, 0.1f, 8.0f, "%.2fx");
+        ImGui::DragFloat(EditorLocale::Text("Zoom", "缩放"), &m_Zoom, 0.02f, 0.1f, 8.0f, "%.2fx");
         HelpMarker("Zoom only changes the editor preview, not the actual sprite data.");
 
-        ImGui::Checkbox("Top-origin rows", &m_RowOriginTop);
+        ImGui::Checkbox(EditorLocale::Text("Top-origin rows", "顶部起始行"), &m_RowOriginTop);
         HelpMarker("When enabled, Row 0 means the top visual row of the atlas. This is the usual UI-artist workflow.");
 
         ImGui::Separator();
-        ImGui::TextUnformatted("Selection");
+        ImGui::TextUnformatted(EditorLocale::Text("Selection", "选择"));
         ImGui::SetNextItemWidth(92.0f);
         ImGui::DragInt("Column", &m_SelectedCol, 1, 0, std::max(0, m_Cols - 1));
         ImGui::SetNextItemWidth(92.0f);
@@ -297,21 +298,21 @@ namespace Wheatear {
         ImGui::TextDisabled("UV %.3f %.3f -> %.3f %.3f", uvMin.x, uvMin.y, uvMax.x, uvMax.y);
 
         ImGui::Separator();
-        ImGui::TextUnformatted("Sequence");
+        ImGui::TextUnformatted(EditorLocale::Text("Sequence", "序列"));
         int modeIndex = static_cast<int>(m_SequenceMode);
         const char* modes[] = { "Horizontal Strip", "Row Major", "Vertical Strip" };
         ImGui::SetNextItemWidth(160.0f);
-        if (ImGui::Combo("Mode", &modeIndex, modes, IM_ARRAYSIZE(modes)))
+        if (ImGui::Combo(EditorLocale::Text("Mode", "模式"), &modeIndex, modes, IM_ARRAYSIZE(modes)))
             m_SequenceMode = static_cast<SequenceMode>(modeIndex);
         HelpMarker("Horizontal is best for animation frames laid out left-to-right in one row. Row Major wraps to the next row.");
 
         ImGui::SetNextItemWidth(92.0f);
-        ImGui::DragInt("Frame Count", &m_FrameCount, 1, 1, 512);
+        ImGui::DragInt(EditorLocale::Text("Frame Count", "帧数"), &m_FrameCount, 1, 1, 512);
         ImGui::SetNextItemWidth(92.0f);
-        ImGui::DragInt("Frame Step", &m_FrameStep, 1, 1, 64);
+        ImGui::DragInt(EditorLocale::Text("Frame Step", "帧步进"), &m_FrameStep, 1, 1, 64);
         ImGui::SetNextItemWidth(92.0f);
-        ImGui::DragFloat("Duration", &m_FrameDuration, 0.005f, 0.01f, 2.0f, "%.3fs");
-        ImGui::Checkbox("Append frames", &m_AppendFrames);
+        ImGui::DragFloat(EditorLocale::Text("Duration", "时长"), &m_FrameDuration, 0.005f, 0.01f, 2.0f, "%.3fs");
+        ImGui::Checkbox(EditorLocale::Text("Append frames", "追加帧"), &m_AppendFrames);
     }
 
     bool SpriteSheetPickerPanel::IsCellValid(int col, int row) const
@@ -368,7 +369,7 @@ namespace Wheatear {
 
         if (!m_Texture)
         {
-            ImGui::TextDisabled("No spritesheet loaded.");
+            ImGui::TextDisabled(EditorLocale::Text("No spritesheet loaded.", "未加载序列帧图。"));
             ImGui::EndChild();
             return;
         }
@@ -434,7 +435,7 @@ namespace Wheatear {
             const glm::vec2 uvMin = GetCellUVMin(hoverCol, hoverRow);
             const glm::vec2 uvMax = GetCellUVMax(hoverCol, hoverRow);
             ImGui::BeginTooltip();
-            ImGui::Text("Cell %d, %d", hoverCol, hoverRow);
+            ImGui::Text(EditorLocale::Text("Cell %d, %d", "单元格 %d, %d"), hoverCol, hoverRow);
             ImGui::Text("UV %.3f %.3f -> %.3f %.3f", uvMin.x, uvMin.y, uvMax.x, uvMax.y);
             ImGui::EndTooltip();
         }
@@ -501,10 +502,10 @@ namespace Wheatear {
         const bool canUIImage = hasTexture && m_Entity && m_Entity.HasComponent<UIImageComponent>();
         const bool canAnimator = hasTexture && m_Entity && m_Entity.HasComponent<SpriteAnimatorComponent>();
 
-        ImGui::TextUnformatted("Apply");
+        ImGui::TextUnformatted(EditorLocale::Text("Apply", "应用"));
         const ImVec2 wideButton(-1.0f, 0.0f);
 
-        if (ButtonDisabled("Apply To SpriteRenderer", !canSprite, wideButton))
+        if (ButtonDisabled(EditorLocale::Text("Apply To SpriteRenderer", "应用到精灵渲染器"), !canSprite, wideButton))
         {
             auto& sprite = m_Entity.GetComponent<SpriteRendererComponent>();
             sprite.Texture = m_Texture;
@@ -514,7 +515,7 @@ namespace Wheatear {
         }
         HelpMarker("Writes texture + UV to the selected SpriteRenderer component.");
 
-        if (ButtonDisabled("Apply To UI Image", !canUIImage, wideButton))
+        if (ButtonDisabled(EditorLocale::Text("Apply To UI Image", "应用到 UI 图片"), !canUIImage, wideButton))
         {
             auto& image = m_Entity.GetComponent<UIImageComponent>();
             image.Texture = m_Texture;
@@ -553,7 +554,7 @@ namespace Wheatear {
         }
         HelpMarker("Creates frame entries from the selected cell and sequence settings. The animation uses one texture and per-frame UVs.");
 
-        if (ButtonDisabled("Sync Texture From Target", !m_Entity, wideButton))
+        if (ButtonDisabled(EditorLocale::Text("Sync Texture From Target", "从目标同步纹理"), !m_Entity, wideButton))
         {
             SyncTextureFromEntity();
             m_LastAction = "Synced texture from selected entity.";

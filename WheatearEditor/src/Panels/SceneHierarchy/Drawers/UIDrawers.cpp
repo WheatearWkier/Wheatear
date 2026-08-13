@@ -2,6 +2,7 @@
 #include "../ComponentDrawers.h"
 #include "Editor/CommandBuilder.h"
 #include "Editor/EditorCanvasTools.h"
+#include "Editor/EditorLocale.h"
 #include "Editor/EditorWidgets.h"
 #include "Panels/SpriteSheetPickerPanel.h"
 #include <imgui/imgui.h>
@@ -63,7 +64,7 @@ namespace Wheatear {
 
         static void DrawAnchorGrid(UIAnchor& anchor)
         {
-            ImGui::TextUnformatted("Anchor");
+            ImGui::TextUnformatted(EditorLocale::Text("Anchor", "锚点"));
             ImGui::SameLine();
             ImGui::TextDisabled("%s", AnchorLabel(anchor));
 
@@ -91,43 +92,43 @@ namespace Wheatear {
 
         static void DrawUIWidgetPresets(UIWidgetComponent& widget)
         {
-            ImGui::TextUnformatted("Layout Presets");
-            if (ImGui::Button("Center Panel"))
+            ImGui::TextUnformatted(EditorLocale::Text("Layout Presets", "布局预设"));
+            if (ImGui::Button(EditorLocale::Text("Center Panel", "居中面板")))
             {
                 widget.Anchor = UIAnchor::MiddleCenter;
                 widget.Position = { 0.5f, 0.5f };
                 widget.Size = { 0.42f, 0.28f };
             }
             ImGui::SameLine();
-            if (ImGui::Button("Full Screen"))
+            if (ImGui::Button(EditorLocale::Text("Full Screen", "全屏")))
             {
                 widget.Anchor = UIAnchor::TopLeft;
                 widget.Position = { 0.0f, 0.0f };
                 widget.Size = { 1.0f, 1.0f };
             }
 
-            if (ImGui::Button("Top Bar"))
+            if (ImGui::Button(EditorLocale::Text("Top Bar", "顶部栏")))
             {
                 widget.Anchor = UIAnchor::TopLeft;
                 widget.Position = { 0.0f, 0.0f };
                 widget.Size = { 1.0f, 0.12f };
             }
             ImGui::SameLine();
-            if (ImGui::Button("Bottom Bar"))
+            if (ImGui::Button(EditorLocale::Text("Bottom Bar", "底部栏")))
             {
                 widget.Anchor = UIAnchor::BottomLeft;
                 widget.Position = { 0.0f, 1.0f };
                 widget.Size = { 1.0f, 0.14f };
             }
 
-            if (ImGui::Button("Left Panel"))
+            if (ImGui::Button(EditorLocale::Text("Left Panel", "左面板")))
             {
                 widget.Anchor = UIAnchor::TopLeft;
                 widget.Position = { 0.0f, 0.0f };
                 widget.Size = { 0.28f, 1.0f };
             }
             ImGui::SameLine();
-            if (ImGui::Button("Right Panel"))
+            if (ImGui::Button(EditorLocale::Text("Right Panel", "右面板")))
             {
                 widget.Anchor = UIAnchor::TopRight;
                 widget.Position = { 1.0f, 0.0f };
@@ -210,8 +211,8 @@ namespace Wheatear {
     {
         DrawComponent<UICanvasComponent>("UI Canvas", entity, [entity](auto& canvas)
             {
-                ImGui::Checkbox("Visible", &canvas.Visible);
-                ImGui::DragFloat("Ref Width", &canvas.ReferenceWidth, 1.0f, 1.0f, 7680.0f);
+                ImGui::Checkbox(EditorLocale::Text("Visible", "可见"), &canvas.Visible);
+                ImGui::DragFloat(EditorLocale::Text("Ref Width", "参考宽度"), &canvas.ReferenceWidth, 1.0f, 1.0f, 7680.0f);
                 ImGui::DragFloat("Ref Height", &canvas.ReferenceHeight, 1.0f, 1.0f, 4320.0f);
                 EditorCanvasTools::DrawCanvasInspectorTools(entity);
             });
@@ -221,8 +222,8 @@ namespace Wheatear {
     {
         DrawComponent<UIWidgetComponent>("UI Widget", entity, [entity](auto& widget)
             {
-                ImGui::Checkbox("Visible At Runtime", &widget.Visible);
-                ImGui::Checkbox("Show In Editor", &widget.EditorVisible);
+                ImGui::Checkbox(EditorLocale::Text("Visible At Runtime", "运行时可见"), &widget.Visible);
+                ImGui::Checkbox(EditorLocale::Text("Show In Editor", "编辑器中显示"), &widget.EditorVisible);
                 if (ImGui::Button("Show In Editor##UIWidgetShowInEditor"))
                     widget.EditorVisible = true;
                 ImGui::SameLine();
@@ -231,26 +232,26 @@ namespace Wheatear {
 
                 SectionLabel("Rect");
                 ImGui::TextDisabled("Normalized screen-space values. Drag the widget in Viewport for rough layout.");
-                ImGui::DragFloat2("Position", glm::value_ptr(widget.Position), 0.001f, -2.0f, 2.0f, "%.3f");
-                ImGui::DragFloat2("Size", glm::value_ptr(widget.Size), 0.001f, 0.001f, 2.0f, "%.3f");
+                ImGui::DragFloat2(EditorLocale::Text("Position", "位置"), glm::value_ptr(widget.Position), 0.001f, -2.0f, 2.0f, "%.3f");
+                ImGui::DragFloat2(EditorLocale::Text("Size", "大小"), glm::value_ptr(widget.Size), 0.001f, 0.001f, 2.0f, "%.3f");
                 widget.Size.x = std::max(widget.Size.x, 0.001f);
                 widget.Size.y = std::max(widget.Size.y, 0.001f);
 
-                if (ImGui::Button("Nudge Left")) widget.Position.x -= 0.001f;
+                if (ImGui::Button(EditorLocale::Text("Nudge Left", "微调左移"))) widget.Position.x -= 0.001f;
                 ImGui::SameLine();
-                if (ImGui::Button("Right")) widget.Position.x += 0.001f;
+                if (ImGui::Button(EditorLocale::Text("Right", "右"))) widget.Position.x += 0.001f;
                 ImGui::SameLine();
-                if (ImGui::Button("Up")) widget.Position.y -= 0.001f;
+                if (ImGui::Button(EditorLocale::Text("Up", "上"))) widget.Position.y -= 0.001f;
                 ImGui::SameLine();
-                if (ImGui::Button("Down")) widget.Position.y += 0.001f;
+                if (ImGui::Button(EditorLocale::Text("Down", "下"))) widget.Position.y += 0.001f;
 
-                ImGui::DragFloat("Rotation", &widget.Rotation, 0.5f);
+                ImGui::DragFloat(EditorLocale::Text("Rotation", "旋转"), &widget.Rotation, 0.5f);
 
                 SectionLabel("Layering");
-                ImGui::DragInt("Sort Order", &widget.SortOrder);
-                if (ImGui::Button("Send Back")) widget.SortOrder -= 10;
+                ImGui::DragInt(EditorLocale::Text("Sort Order", "排序"), &widget.SortOrder);
+                if (ImGui::Button(EditorLocale::Text("Send Back", "置底"))) widget.SortOrder -= 10;
                 ImGui::SameLine();
-                if (ImGui::Button("Bring Front")) widget.SortOrder += 10;
+                if (ImGui::Button(EditorLocale::Text("Bring Front", "置顶"))) widget.SortOrder += 10;
 
                 SectionLabel("Hierarchy");
                 DrawUIReferenceCombo(entity, "Parent", widget.ParentEntity, false, false);
@@ -284,23 +285,23 @@ namespace Wheatear {
                         break;
                     }
                 }
-                if (ImGui::Combo("Preset", &currentPreset, presets, IM_ARRAYSIZE(presets)))
+                if (ImGui::Combo(EditorLocale::Text("Preset", "预设"), &currentPreset, presets, IM_ARRAYSIZE(presets)))
                     animator.Preset = presets[currentPreset];
 
                 ImGui::Checkbox("Play On Start", &animator.PlayOnStart);
                 ImGui::Checkbox("Loop", &animator.Loop);
-                ImGui::DragFloat("Delay", &animator.Delay, 0.01f, 0.0f, 10.0f);
+                ImGui::DragFloat(EditorLocale::Text("Delay", "延迟"), &animator.Delay, 0.01f, 0.0f, 10.0f);
                 ImGui::DragFloat("Duration", &animator.Duration, 0.01f, 0.01f, 10.0f);
-                ImGui::DragFloat("Amplitude", &animator.Amplitude, 0.001f, 0.0f, 0.5f);
-                ImGui::DragFloat("Speed", &animator.Speed, 0.01f, 0.0f, 10.0f);
-                ImGui::DragFloat2("From Offset", glm::value_ptr(animator.FromOffset), 0.001f, -1.0f, 1.0f);
+                ImGui::DragFloat(EditorLocale::Text("Amplitude", "振幅"), &animator.Amplitude, 0.001f, 0.0f, 0.5f);
+                ImGui::DragFloat(EditorLocale::Text("Speed", "速度"), &animator.Speed, 0.01f, 0.0f, 10.0f);
+                ImGui::DragFloat2(EditorLocale::Text("From Offset", "起始偏移"), glm::value_ptr(animator.FromOffset), 0.001f, -1.0f, 1.0f);
 
                 ImGui::PushItemFlag(ImGuiItemFlags_Disabled, true);
                 ImGui::PushStyleVar(ImGuiStyleVar_Alpha, ImGui::GetStyle().Alpha * 0.5f);
                 bool initialized = animator.RuntimeInitialized;
                 float runtimeTime = animator.RuntimeTime;
-                ImGui::Checkbox("Runtime Initialized", &initialized);
-                ImGui::DragFloat("Runtime Time", &runtimeTime, 0.01f);
+                ImGui::Checkbox(EditorLocale::Text("Runtime Initialized", "运行时已初始化"), &initialized);
+                ImGui::DragFloat(EditorLocale::Text("Runtime Time", "运行时时间"), &runtimeTime, 0.01f);
                 ImGui::PopStyleVar();
                 ImGui::PopItemFlag();
             });
@@ -310,7 +311,7 @@ namespace Wheatear {
     {
         DrawComponent<UIImageComponent>("UI Image", entity, [entity](auto& image)
             {
-                ImGui::ColorEdit4("Color", glm::value_ptr(image.Color));
+                ImGui::ColorEdit4(EditorLocale::Text("Color", "颜色"), glm::value_ptr(image.Color));
 
                 ImVec2 buttonSize = { 80.0f, 80.0f };
                 const ImTextureID textureID = image.Texture
@@ -371,7 +372,7 @@ namespace Wheatear {
                 }
 
                 std::string texturePath = image.Texture ? image.Texture->GetPath() : std::string{};
-                if (EditorWidgets::DrawAssetReferenceField("Texture",
+                if (EditorWidgets::DrawAssetReferenceField(EditorLocale::Text("Texture", "纹理"),
                     texturePath,
                     EditorWidgets::AssetReferenceKind::Texture))
                 {
@@ -398,18 +399,18 @@ namespace Wheatear {
         DrawComponent<UITextComponent>("UI Text", entity, [entity](auto& text)
             {
                 ImGui::PushID((int)(uint32_t)entity);
-                EditorWidgets::InputMultilineString("Text",
+                EditorWidgets::InputMultilineString(EditorLocale::Text("Text", "文本"),
                     text.Text,
                     ImVec2(-1.0f, ImGui::GetTextLineHeight() * 3),
                     1024);
                 ImGui::PopID();
 
-                ImGui::ColorEdit4("Color", glm::value_ptr(text.Color));
+                ImGui::ColorEdit4(EditorLocale::Text("Color", "颜色"), glm::value_ptr(text.Color));
                 ImGui::DragFloat("Font Size", &text.FontSize, 0.5f, 1.0f, 256.0f);
                 ImGui::DragFloat4("Padding px", glm::value_ptr(text.Padding), 0.5f, -1.0f, 256.0f);
                 ImGui::Checkbox("Auto Fit", &text.AutoFit);
                 int horizontalAlign = static_cast<int>(text.HorizontalAlign);
-                const char* horizontalItems[] = { "Left", "Center", "Right" };
+                const char* horizontalItems[] = { "Left", "Center", EditorLocale::Text("Right", "右") };
                 if (ImGui::Combo("Horizontal Align", &horizontalAlign, horizontalItems, IM_ARRAYSIZE(horizontalItems)))
                     text.HorizontalAlign = static_cast<UITextHorizontalAlign>(horizontalAlign);
                 int verticalAlign = static_cast<int>(text.VerticalAlign);
@@ -449,13 +450,13 @@ namespace Wheatear {
                 ImGui::ColorEdit4("Hover Color", glm::value_ptr(button.HoverColor));
                 ImGui::ColorEdit4("Pressed Color", glm::value_ptr(button.PressedColor));
 
-                EditorCommandBuilder::DrawCommandBuilder("On Click", button.OnClickFunction, 256);
+                EditorCommandBuilder::DrawCommandBuilder(EditorLocale::Text("On Click", "点击时"), button.OnClickFunction, 256);
 
                 char tooltipBuffer[128];
                 memset(tooltipBuffer, 0, sizeof(tooltipBuffer));
                 strncpy_s(tooltipBuffer, sizeof(tooltipBuffer), button.TooltipText.c_str(), _TRUNCATE);
 
-                if (ImGui::InputText("Tooltip Text", tooltipBuffer, sizeof(tooltipBuffer)))
+                if (ImGui::InputText(EditorLocale::Text("Tooltip Text", "提示文本"), tooltipBuffer, sizeof(tooltipBuffer)))
                     button.TooltipText = tooltipBuffer;
 
                 ImGui::PushItemFlag(ImGuiItemFlags_Disabled, true);
@@ -474,8 +475,8 @@ namespace Wheatear {
     {
         DrawComponent<UIProgressBarComponent>("UI Progress Bar", entity, [](auto& bar)
             {
-                ImGui::DragFloat("Value", &bar.Value, 0.1f, 0.0f, bar.MaxValue);
-                ImGui::DragFloat("Max Value", &bar.MaxValue, 0.1f, 0.1f, 99999.0f);
+                ImGui::DragFloat(EditorLocale::Text("Value", "值"), &bar.Value, 0.1f, 0.0f, bar.MaxValue);
+                ImGui::DragFloat(EditorLocale::Text("Max Value", "最大值"), &bar.MaxValue, 0.1f, 0.1f, 99999.0f);
 
                 float normalized = bar.GetNormalized();
                 char overlay[32];
@@ -483,7 +484,7 @@ namespace Wheatear {
                 ImGui::ProgressBar(normalized, ImVec2(-1.0f, 0.0f), overlay);
 
                 ImGui::ColorEdit4("Foreground", glm::value_ptr(bar.ForegroundColor));
-                ImGui::ColorEdit4("Background", glm::value_ptr(bar.BackgroundColor));
+                ImGui::ColorEdit4(EditorLocale::Text("Background", "背景"), glm::value_ptr(bar.BackgroundColor));
             });
     }
 
@@ -492,10 +493,10 @@ namespace Wheatear {
         DrawComponent<UIRadialCooldownComponent>("UI Radial Cooldown", entity, [](auto& cooldown)
             {
                 ImGui::SliderFloat("Progress", &cooldown.Progress, 0.0f, 1.0f);
-                ImGui::DragFloat("Start Angle", &cooldown.StartAngle, 0.01f, -6.283185f, 6.283185f);
-                ImGui::DragFloat("Thickness", &cooldown.Thickness, 0.01f, 0.0f, 1.0f);
+                ImGui::DragFloat(EditorLocale::Text("Start Angle", "起始角度"), &cooldown.StartAngle, 0.01f, -6.283185f, 6.283185f);
+                ImGui::DragFloat(EditorLocale::Text("Thickness", "厚度"), &cooldown.Thickness, 0.01f, 0.0f, 1.0f);
                 ImGui::DragFloat("Fade", &cooldown.Fade, 0.001f, 0.0f, 0.25f);
-                ImGui::ColorEdit4("Color", glm::value_ptr(cooldown.Color));
+                ImGui::ColorEdit4(EditorLocale::Text("Color", "颜色"), glm::value_ptr(cooldown.Color));
             });
     }
 
@@ -504,9 +505,9 @@ namespace Wheatear {
     {
         DrawComponent<UIPanelComponent>("UI Panel", entity, [](auto& panel)
             {
-                ImGui::ColorEdit4("Background", glm::value_ptr(panel.BackgroundColor));
+                ImGui::ColorEdit4(EditorLocale::Text("Background", "背景"), glm::value_ptr(panel.BackgroundColor));
                 ImGui::ColorEdit4("Border", glm::value_ptr(panel.BorderColor));
-                ImGui::DragFloat("Border Thickness", &panel.BorderThickness, 0.1f, 0.0f, 12.0f);
+                ImGui::DragFloat(EditorLocale::Text("Border Thickness", "边框厚度"), &panel.BorderThickness, 0.1f, 0.0f, 12.0f);
                 ImGui::Checkbox("Clip Children", &panel.ClipChildren);
                 ImGui::Separator();
                 ImGui::TextDisabled("Drag");
@@ -528,14 +529,14 @@ namespace Wheatear {
                 ImGui::DragFloat("Max", &slider.MaxValue, 0.01f);
                 if (slider.MaxValue < slider.MinValue)
                     slider.MaxValue = slider.MinValue;
-                ImGui::SliderFloat("Value", &slider.Value, slider.MinValue, slider.MaxValue);
+                ImGui::SliderFloat(EditorLocale::Text("Value", "值"), &slider.Value, slider.MinValue, slider.MaxValue);
 
                 ImGui::ColorEdit4("Track", glm::value_ptr(slider.TrackColor));
                 ImGui::ColorEdit4("Fill", glm::value_ptr(slider.FillColor));
                 ImGui::ColorEdit4("Handle", glm::value_ptr(slider.HandleColor));
                 ImGui::ColorEdit4("Hover", glm::value_ptr(slider.HoverColor));
 
-                EditorCommandBuilder::DrawCommandBuilder("On Value Changed", slider.OnValueChangedFunction, 256);
+                EditorCommandBuilder::DrawCommandBuilder(EditorLocale::Text("On Value Changed", "值变化时"), slider.OnValueChangedFunction, 256);
 
                 ImGui::PushItemFlag(ImGuiItemFlags_Disabled, true);
                 ImGui::PushStyleVar(ImGuiStyleVar_Alpha, ImGui::GetStyle().Alpha * 0.5f);
@@ -557,12 +558,12 @@ namespace Wheatear {
                 pager.PageCount = std::max(pager.PageCount, 1);
                 pager.CurrentPage = std::clamp(pager.CurrentPage, 1, pager.PageCount);
 
-                ImGui::DragInt("Current Page", &pager.CurrentPage, 1.0f, 1, pager.PageCount);
-                ImGui::DragInt("Page Count", &pager.PageCount, 1.0f, 1, 999);
+                ImGui::DragInt(EditorLocale::Text("Current Page", "当前页"), &pager.CurrentPage, 1.0f, 1, pager.PageCount);
+                ImGui::DragInt(EditorLocale::Text("Page Count", "页数"), &pager.PageCount, 1.0f, 1, 999);
                 if (pager.PageCount < 1)
                     pager.PageCount = 1;
                 pager.CurrentPage = std::clamp(pager.CurrentPage, 1, pager.PageCount);
-                ImGui::Checkbox("Wrap", &pager.Wrap);
+                ImGui::Checkbox(EditorLocale::Text("Wrap", "循环翻页"), &pager.Wrap);
 
                 const std::string tag = entity.HasComponent<TagComponent>()
                     ? entity.GetComponent<TagComponent>().Tag
@@ -587,7 +588,7 @@ namespace Wheatear {
                 ImGui::DragFloat("Wheel Step", &scrollView.WheelStep, 0.005f, 0.001f, 1.0f, "%.3f");
                 ImGui::DragFloat("Scrollbar Width", &scrollView.ScrollbarWidth, 0.001f, 0.004f, 0.10f, "%.3f");
                 ImGui::Checkbox("Enable Wheel", &scrollView.EnableWheel);
-                ImGui::Checkbox("Show Scrollbar", &scrollView.ShowScrollbar);
+                ImGui::Checkbox(EditorLocale::Text("Show Scrollbar", "显示滚动条"), &scrollView.ShowScrollbar);
                 ImGui::Checkbox("Drag Scrollbar", &scrollView.DragScrollbar);
                 ImGui::Checkbox("Clamp To Content", &scrollView.ClampToContent);
                 scrollView.ClampOffset();
@@ -624,12 +625,12 @@ namespace Wheatear {
                 if (ImGui::Combo("Mode", &mode, modes, IM_ARRAYSIZE(modes)))
                     path.Mode = static_cast<UIPathMode>(std::clamp(mode, 0, 2));
 
-                ImGui::DragFloat("Thickness", &path.Thickness, 0.0005f, 0.001f, 0.05f, "%.4f");
+                ImGui::DragFloat(EditorLocale::Text("Thickness", "厚度"), &path.Thickness, 0.0005f, 0.001f, 0.05f, "%.4f");
                 ImGui::DragInt("Segments", &path.Segments, 1.0f, 2, 96);
-                ImGui::Checkbox("Closed", &path.Closed);
+                ImGui::Checkbox(EditorLocale::Text("Closed", "闭合"), &path.Closed);
                 ImGui::Checkbox("Draw Glow", &path.DrawGlow);
                 ImGui::DragFloat("Glow Multiplier", &path.GlowThicknessMultiplier, 0.05f, 1.0f, 8.0f, "%.2f");
-                ImGui::ColorEdit4("Color", glm::value_ptr(path.Color));
+                ImGui::ColorEdit4(EditorLocale::Text("Color", "颜色"), glm::value_ptr(path.Color));
                 ImGui::ColorEdit4("Glow Color", glm::value_ptr(path.GlowColor));
 
                 ImGui::Separator();
@@ -694,7 +695,7 @@ namespace Wheatear {
                 ImGui::DragFloat2("Pan", glm::value_ptr(tree.Pan), 0.005f, -2.0f, 2.0f, "%.3f");
                 ImGui::DragFloat2("Min Pan", glm::value_ptr(tree.MinPan), 0.005f, -2.0f, 2.0f, "%.3f");
                 ImGui::DragFloat2("Max Pan", glm::value_ptr(tree.MaxPan), 0.005f, -2.0f, 2.0f, "%.3f");
-                ImGui::DragFloat2("Node Size", glm::value_ptr(tree.NodeSize), 0.001f, 0.01f, 0.30f, "%.3f");
+                ImGui::DragFloat2(EditorLocale::Text("Node Size", "节点大小"), glm::value_ptr(tree.NodeSize), 0.001f, 0.01f, 0.30f, "%.3f");
                 ImGui::DragFloat("Node Edge Inset", &tree.NodeEdgeInset, 0.001f, 0.0f, 0.20f, "%.3f");
                 ImGui::DragFloat("Line Thickness", &tree.LineThickness, 0.0005f, 0.001f, 0.05f, "%.4f");
                 ImGui::DragFloat("Curve Amount", &tree.CurveAmount, 0.001f, -0.30f, 0.30f, "%.3f");
@@ -713,7 +714,7 @@ namespace Wheatear {
 
                 if (ImGui::TreeNode("Colors"))
                 {
-                    ImGui::ColorEdit4("Background", glm::value_ptr(tree.BackgroundColor));
+                    ImGui::ColorEdit4(EditorLocale::Text("Background", "背景"), glm::value_ptr(tree.BackgroundColor));
                     ImGui::ColorEdit4("Grid", glm::value_ptr(tree.GridColor));
                     ImGui::ColorEdit4("Line", glm::value_ptr(tree.LineColor));
                     ImGui::ColorEdit4("Active Line", glm::value_ptr(tree.ActiveLineColor));
@@ -728,9 +729,9 @@ namespace Wheatear {
                 }
 
                 ImGui::Separator();
-                ImGui::Text("Nodes: %d", static_cast<int>(tree.Nodes.size()));
-                ImGui::TextDisabled("Selected: %s", tree.SelectedNodeId.empty() ? "-" : tree.SelectedNodeId.c_str());
-                ImGui::TextDisabled("Hovered: %s", tree.RuntimeHoveredNodeId.empty() ? "-" : tree.RuntimeHoveredNodeId.c_str());
+                ImGui::Text(EditorLocale::Text("Nodes: %d", "节点数: %d"), static_cast<int>(tree.Nodes.size()));
+                ImGui::TextDisabled(EditorLocale::Text("Selected: %s", "选中: %s"), tree.SelectedNodeId.empty() ? "-" : tree.SelectedNodeId.c_str());
+                ImGui::TextDisabled(EditorLocale::Text("Hovered: %s", "悬停: %s"), tree.RuntimeHoveredNodeId.empty() ? "-" : tree.RuntimeHoveredNodeId.c_str());
 
                 ImGui::PushItemFlag(ImGuiItemFlags_Disabled, true);
                 ImGui::PushStyleVar(ImGuiStyleVar_Alpha, ImGui::GetStyle().Alpha * 0.5f);
@@ -763,13 +764,13 @@ namespace Wheatear {
     {
         DrawComponent<UICheckboxComponent>("UI Checkbox", entity, [](auto& checkbox)
             {
-                ImGui::Checkbox("Checked", &checkbox.Checked);
+                ImGui::Checkbox(EditorLocale::Text("Checked", "已勾选"), &checkbox.Checked);
                 ImGui::ColorEdit4("Box", glm::value_ptr(checkbox.BoxColor));
                 ImGui::ColorEdit4("Check", glm::value_ptr(checkbox.CheckColor));
                 ImGui::ColorEdit4("Hover", glm::value_ptr(checkbox.HoverColor));
                 ImGui::ColorEdit4("Pressed", glm::value_ptr(checkbox.PressedColor));
 
-                EditorCommandBuilder::DrawCommandBuilder("On Value Changed", checkbox.OnValueChangedFunction, 256);
+                EditorCommandBuilder::DrawCommandBuilder(EditorLocale::Text("On Value Changed", "值变化时"), checkbox.OnValueChangedFunction, 256);
 
                 ImGui::PushItemFlag(ImGuiItemFlags_Disabled, true);
                 ImGui::PushStyleVar(ImGuiStyleVar_Alpha, ImGui::GetStyle().Alpha * 0.5f);

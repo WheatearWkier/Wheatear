@@ -2,6 +2,7 @@
 
 #include "Editor/CommandBuilder.h"
 #include "Editor/EditorContentPickers.h"
+#include "Editor/EditorLocale.h"
 #include "Editor/EditorWidgets.h"
 #include "Panels/SceneHierarchy/ComponentDrawers.h"
 #include "Wheatear/Modules/TacticalCombat/TacticalCombatComponents.h"
@@ -62,7 +63,7 @@ namespace Wheatear {
         DrawComponent<TacticalCombatLevelComponent>("Tactical Combat Level", entity, [entity](auto& level)
         {
             EditorWidgets::StatusBadge("Edits Scene", EditorWidgets::StatusKind::Success);
-            ImGui::Checkbox("Play On Start", &level.PlayOnStart);
+            ImGui::Checkbox(EditorLocale::Text("Play On Start", "开始时播放"), &level.PlayOnStart);
             InputString("Level Id", level.LevelId, 240);
 
             ImGui::Separator();
@@ -78,10 +79,10 @@ namespace Wheatear {
             ImGui::TextDisabled("Timing");
             ImGui::DragFloat("Start Fade", &level.StartFadeDuration, 0.02f, 0.0f, 5.0f);
             ImGui::DragFloat("Intro Duration", &level.IntroDuration, 0.02f, 0.0f, 10.0f);
-            ImGui::DragFloat("Action Duration", &level.ActionDuration, 0.02f, 0.1f, 5.0f);
-            ImGui::DragFloat("Enemy Step", &level.EnemyStepDuration, 0.02f, 0.1f, 5.0f);
+            ImGui::DragFloat(EditorLocale::Text("Action Duration", "行动时长"), &level.ActionDuration, 0.02f, 0.1f, 5.0f);
+            ImGui::DragFloat(EditorLocale::Text("Enemy Step", "敌人步数"), &level.EnemyStepDuration, 0.02f, 0.1f, 5.0f);
             ImGui::DragFloat("Victory Delay", &level.VictoryReturnDelay, 0.05f, 0.0f, 10.0f);
-            ImGui::DragFloat("Defeat Delay", &level.DefeatReturnDelay, 0.05f, 0.0f, 10.0f);
+            ImGui::DragFloat(EditorLocale::Text("Defeat Delay", "战败延迟"), &level.DefeatReturnDelay, 0.05f, 0.0f, 10.0f);
 
             ImGui::Separator();
             ImGui::TextDisabled("Scene Bindings");
@@ -96,10 +97,10 @@ namespace Wheatear {
 
             ImGui::Separator();
             ImGui::TextDisabled("Tile Highlight Colors");
-            ImGui::ColorEdit4("Normal", &level.TileNormalColor.x);
-            ImGui::ColorEdit4("Move", &level.TileMoveColor.x);
-            ImGui::ColorEdit4("Attack", &level.TileAttackColor.x);
-            ImGui::ColorEdit4("Selected", &level.TileSelectedColor.x);
+            ImGui::ColorEdit4(EditorLocale::Text("Normal", "普通"), &level.TileNormalColor.x);
+            ImGui::ColorEdit4(EditorLocale::Text("Move", "移动"), &level.TileMoveColor.x);
+            ImGui::ColorEdit4(EditorLocale::Text("Attack", "攻击"), &level.TileAttackColor.x);
+            ImGui::ColorEdit4(EditorLocale::Text("Selected", "选中"), &level.TileSelectedColor.x);
 
             ImGui::Separator();
             ImGui::TextDisabled("Runtime");
@@ -122,18 +123,18 @@ namespace Wheatear {
             ImGui::DragInt("Grid Y", &unit.GridY, 1.0f, 0, 64);
             InputString("Display Name", unit.DisplayName);
             InputString("Class Name", unit.ClassName);
-            ImGui::Checkbox("Controllable", &unit.Controllable);
-            ImGui::Checkbox("Invulnerable", &unit.Invulnerable);
+            ImGui::Checkbox(EditorLocale::Text("Controllable", "可控制"), &unit.Controllable);
+            ImGui::Checkbox(EditorLocale::Text("Invulnerable", "无敌"), &unit.Invulnerable);
 
             ImGui::Separator();
             ImGui::TextDisabled("Stats");
             ImGui::DragFloat("Max HP", &unit.MaxHealth, 1.0f, 1.0f, 99999.0f);
-            ImGui::DragFloat("HP", &unit.Health, 1.0f, 0.0f, unit.MaxHealth);
-            ImGui::DragFloat("Attack", &unit.Attack, 0.5f, 0.0f, 9999.0f);
-            ImGui::DragFloat("Magic", &unit.Magic, 0.5f, 0.0f, 9999.0f);
-            ImGui::DragFloat("Defense", &unit.Defense, 0.5f, 0.0f, 9999.0f);
-            ImGui::DragInt("Move Range", &unit.MoveRange, 1.0f, 0, 16);
-            ImGui::DragInt("Attack Range", &unit.AttackRange, 1.0f, 0, 16);
+            ImGui::DragFloat(EditorLocale::Text("HP", "HP"), &unit.Health, 1.0f, 0.0f, unit.MaxHealth);
+            ImGui::DragFloat(EditorLocale::Text("Attack", "攻击"), &unit.Attack, 0.5f, 0.0f, 9999.0f);
+            ImGui::DragFloat(EditorLocale::Text("Magic", "魔法"), &unit.Magic, 0.5f, 0.0f, 9999.0f);
+            ImGui::DragFloat(EditorLocale::Text("Defense", "防御"), &unit.Defense, 0.5f, 0.0f, 9999.0f);
+            ImGui::DragInt(EditorLocale::Text("Move Range", "移动范围"), &unit.MoveRange, 1.0f, 0, 16);
+            ImGui::DragInt(EditorLocale::Text("Attack Range", "攻击范围"), &unit.AttackRange, 1.0f, 0, 16);
 
             ImGui::Separator();
             ImGui::TextDisabled("Skill Slots");

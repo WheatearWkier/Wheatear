@@ -497,9 +497,9 @@ namespace Wheatear {
             ImGui::SameLine(150.0f);
             ImGui::PushID(label ? label : "id_combo");
             ImGui::SetNextItemWidth(260.0f);
-            if (ImGui::BeginCombo("##value", value.empty() ? "(none)" : value.c_str()))
+            if (ImGui::BeginCombo("##value", value.empty() ? EditorLocale::Text("(none)", "(无)") : value.c_str()))
             {
-                if (ImGui::Selectable("(none)", value.empty()))
+                if (ImGui::Selectable(EditorLocale::Text("(none)", "(无)"), value.empty()))
                 {
                     value.clear();
                     changed = true;
@@ -519,7 +519,7 @@ namespace Wheatear {
                 ImGui::EndCombo();
             }
             ImGui::SameLine();
-            if (ImGui::SmallButton("Clear"))
+            if (ImGui::SmallButton(EditorLocale::Text("Clear", "清空")))
             {
                 value.clear();
                 changed = true;
@@ -635,7 +635,7 @@ namespace Wheatear {
         {
             std::vector<std::string> choices = {
                 "Main",
-                "Material",
+                EditorLocale::Text("Material", "材料"),
                 "Side",
                 "Boss",
                 "Tutorial"
@@ -707,7 +707,7 @@ namespace Wheatear {
         {
             bool changed = false;
             YAML::Node summaries = EnsureSequence(root, "dungeonRewardSummary");
-            EditorWidgets::SectionHeader("Dungeon Reward Summary",
+            EditorWidgets::SectionHeader(EditorLocale::Text("Dungeon Reward Summary", "地牢奖励摘要"),
                 "Narrative reward lines shown by progression result pages.");
 
             int removeIndex = -1;
@@ -723,7 +723,7 @@ namespace Wheatear {
                     std::max<size_t>(1024, value.size() + 256));
                 lineChanged |= DrawRewardTokenButtons(value);
                 ImGui::SameLine();
-                if (ImGui::SmallButton("Remove"))
+                if (ImGui::SmallButton(EditorLocale::Text("Remove", "移除")))
                     removeIndex = static_cast<int>(i);
                 if (lineChanged)
                 {
@@ -740,7 +740,7 @@ namespace Wheatear {
                 changed = true;
             }
 
-            if (ImGui::Button("Add Reward Summary"))
+            if (ImGui::Button(EditorLocale::Text("Add Reward Summary", "添加奖励摘要")))
             {
                 summaries.push_back("");
                 changed = true;
@@ -823,7 +823,7 @@ namespace Wheatear {
                     if (!choices.empty())
                     {
                         ImGui::SameLine();
-                        if (ImGui::SmallButton("Select"))
+                        if (ImGui::SmallButton(EditorLocale::Text("Select", "选择")))
                             ImGui::OpenPopup("##select_item");
                         if (ImGui::BeginPopup("##select_item"))
                         {
@@ -842,7 +842,7 @@ namespace Wheatear {
                         }
                     }
                     ImGui::SameLine();
-                    if (ImGui::SmallButton("Remove"))
+                    if (ImGui::SmallButton(EditorLocale::Text("Remove", "移除")))
                         removeIndex = static_cast<int>(i);
                     ImGui::PopID();
                 }
@@ -853,7 +853,7 @@ namespace Wheatear {
                     changed = true;
                 }
 
-                if (ImGui::SmallButton("Add Item"))
+                if (ImGui::SmallButton(EditorLocale::Text("Add Item", "添加条目")))
                 {
                     sequence.push_back(choices.empty() ? "" : choices.front());
                     changed = true;
@@ -881,7 +881,7 @@ namespace Wheatear {
                     std::string editableKey = entryKey;
                     std::string value = ScalarText(map[entryKey]);
                     ImGui::SetNextItemWidth(150.0f);
-                    if (EditorWidgets::InputString("Key", editableKey, 128) && !editableKey.empty() && editableKey != entryKey)
+                    if (EditorWidgets::InputString(EditorLocale::Text("Key", "键"), editableKey, 128) && !editableKey.empty() && editableKey != entryKey)
                     {
                         map[editableKey] = value;
                         map.remove(entryKey);
@@ -890,7 +890,7 @@ namespace Wheatear {
                     if (!keyChoices.empty())
                     {
                         ImGui::SameLine();
-                        if (ImGui::SmallButton("Slot"))
+                        if (ImGui::SmallButton(EditorLocale::Text("Slot", "槽位")))
                             ImGui::OpenPopup("##select_key");
                         if (ImGui::BeginPopup("##select_key"))
                         {
@@ -912,7 +912,7 @@ namespace Wheatear {
                     }
                     ImGui::SameLine();
                     ImGui::SetNextItemWidth(-64.0f);
-                    if (EditorWidgets::InputString("Value", value, 256))
+                    if (EditorWidgets::InputString(EditorLocale::Text("Value", "值"), value, 256))
                     {
                         map[editableKey] = value;
                         changed = true;
@@ -939,7 +939,7 @@ namespace Wheatear {
                         }
                     }
                     ImGui::SameLine();
-                    if (ImGui::SmallButton("Remove"))
+                    if (ImGui::SmallButton(EditorLocale::Text("Remove", "移除")))
                         removeKey = editableKey;
                     ImGui::PopID();
                 }
@@ -950,7 +950,7 @@ namespace Wheatear {
                     changed = true;
                 }
 
-                if (ImGui::SmallButton("Add Pair"))
+                if (ImGui::SmallButton(EditorLocale::Text("Add Pair", "添加键值对")))
                 {
                     std::string keyName = "item";
                     for (int i = 2; MapContainsKey(map, keyName); ++i)
@@ -967,7 +967,7 @@ namespace Wheatear {
         {
             bool changed = false;
             YAML::Node costs = EnsureSequence(node, "costs");
-            if (ImGui::TreeNodeEx("Costs", ImGuiTreeNodeFlags_DefaultOpen, "Costs (%d)", static_cast<int>(costs.size())))
+            if (ImGui::TreeNodeEx(EditorLocale::Text("Costs", "消耗"), ImGuiTreeNodeFlags_DefaultOpen, "Costs (%d)", static_cast<int>(costs.size())))
             {
                 int removeIndex = -1;
                 for (size_t i = 0; i < costs.size(); ++i)
@@ -980,7 +980,7 @@ namespace Wheatear {
                     ImGui::SetNextItemWidth(110.0f);
                     changed |= DrawIntField(cost, "Amount", "amount", 1, 0, 999);
                     ImGui::SameLine();
-                    if (ImGui::SmallButton("Remove"))
+                    if (ImGui::SmallButton(EditorLocale::Text("Remove", "移除")))
                         removeIndex = static_cast<int>(i);
                     ImGui::PopID();
                 }
@@ -991,7 +991,7 @@ namespace Wheatear {
                     changed = true;
                 }
 
-                if (ImGui::SmallButton("Add Cost"))
+                if (ImGui::SmallButton(EditorLocale::Text("Add Cost", "添加消耗")))
                 {
                     YAML::Node cost(YAML::NodeType::Map);
                     cost["item"] = "";
@@ -1363,7 +1363,7 @@ namespace Wheatear {
                 ImGui::EndTabItem();
             }
 
-            if (isSkillNodes && ImGui::BeginTabItem("Skill Tree"))
+            if (isSkillNodes && ImGui::BeginTabItem(EditorLocale::Text("Skill Tree", "技能树")))
             {
                 DrawSkillTreeTab();
                 ImGui::EndTabItem();
@@ -1676,13 +1676,13 @@ namespace Wheatear {
                     m_SelectedDocument.MarkDirty();
                 if (DrawSkillTextField(selectedYamlNode, "Combo Role", "comboRole", 256))
                     m_SelectedDocument.MarkDirty();
-                if (DrawRequirementField(selectedYamlNode, "Requirement", "requirement"))
+                if (DrawRequirementField(selectedYamlNode, EditorLocale::Text("Requirement", "需求"), "requirement"))
                     m_SelectedDocument.MarkDirty();
-                if (DrawSkillMultilineField(selectedYamlNode, "Description", "description"))
+                if (DrawSkillMultilineField(selectedYamlNode, EditorLocale::Text("Description", "描述"), "description"))
                     m_SelectedDocument.MarkDirty();
 
                 int unlockChapter = selectedYamlNode["unlockChapter"].as<int>(selectedNode->UnlockChapter);
-                if (ImGui::DragInt("Unlock Chapter", &unlockChapter, 1.0f, 0, 99))
+                if (ImGui::DragInt(EditorLocale::Text("Unlock Chapter", "解锁章节"), &unlockChapter, 1.0f, 0, 99))
                 {
                     selectedYamlNode["unlockChapter"] = unlockChapter;
                     m_SelectedDocument.MarkDirty();
@@ -1905,11 +1905,11 @@ namespace Wheatear {
             changed |= DrawTextField(record, "Slot Label", "slot", 128);
             changed |= DrawIntField(record, "Page", "page", 1, 1, 99);
             changed |= DrawTextField(record, "Status", "status", 256);
-            changed |= DrawTextField(record, "Stats", "stats", 512);
-            changed |= DrawTextField(record, "Source", "source", 512);
-            changed |= DrawMultilineField(record, "Description", "description");
+            changed |= DrawTextField(record, EditorLocale::Text("Stats", "属性"), "stats", 512);
+            changed |= DrawTextField(record, EditorLocale::Text("Source", "来源"), "source", 512);
+            changed |= DrawMultilineField(record, EditorLocale::Text("Description", "描述"), "description");
             changed |= DrawIdField(record, "Slot Id", "slotId", "equipmentSlot");
-            changed |= DrawAssetField(record, "Icon", "icon", EditorWidgets::AssetReferenceKind::Texture, 512);
+            changed |= DrawAssetField(record, EditorLocale::Text("Icon", "图标"), "icon", EditorWidgets::AssetReferenceKind::Texture, 512);
         }
         else if (m_SelectedKey == "equipmentSlots")
         {
@@ -1919,11 +1919,11 @@ namespace Wheatear {
         {
             changed |= DrawTextField(record, "Name", "name", 256);
             changed |= DrawChoiceField(record, "Category", "category", DungeonCategoryChoices(), 256);
-            changed |= DrawIntField(record, "Recommended Level", "recommendedLevel", 1, 1, 99);
+            changed |= DrawIntField(record, EditorLocale::Text("Recommended Level", "推荐等级"), "recommendedLevel", 1, 1, 99);
             changed |= DrawTextField(record, "Locked Status", "statusWhenLocked", 512);
             changed |= DrawTextField(record, "Unlocked Status", "statusWhenUnlocked", 512);
-            changed |= DrawRewardTextField(record, "First Clear Reward", "firstClearRewardText");
-            changed |= DrawRewardTextField(record, "Repeat Reward", "repeatRewardText");
+            changed |= DrawRewardTextField(record, EditorLocale::Text("First Clear Reward", "首通奖励"), "firstClearRewardText");
+            changed |= DrawRewardTextField(record, EditorLocale::Text("Repeat Reward", "重复奖励"), "repeatRewardText");
             changed |= DrawStringListField(record, "Unlocks On First Clear", "unlocksOnFirstClear", BuildContentIds("dungeon"));
             changed |= DrawStoryFlagListField(record, "Flags On Clear", "flagsOnClear");
             changed |= DrawMultilineField(record, "Objective On Clear", "objectiveOnClear");
@@ -1932,11 +1932,11 @@ namespace Wheatear {
         else if (m_SelectedKey == "relationships")
         {
             changed |= DrawTextField(record, "Name", "name", 256);
-            changed |= DrawIntField(record, "Affinity", "affinity", 0, -999, 999);
-            changed |= DrawIntField(record, "Support Level", "supportLevel", 0, 0, 99);
-            changed |= DrawBoolField(record, "Unlocked", "unlocked", false);
-            changed |= DrawTextField(record, "Role", "role", 512);
-            changed |= DrawMultilineField(record, "Next Milestone", "nextMilestone");
+            changed |= DrawIntField(record, EditorLocale::Text("Affinity", "好感度"), "affinity", 0, -999, 999);
+            changed |= DrawIntField(record, EditorLocale::Text("Support Level", "支援等级"), "supportLevel", 0, 0, 99);
+            changed |= DrawBoolField(record, EditorLocale::Text("Unlocked", "已解锁"), "unlocked", false);
+            changed |= DrawTextField(record, EditorLocale::Text("Role", "角色定位"), "role", 512);
+            changed |= DrawMultilineField(record, EditorLocale::Text("Next Milestone", "下一里程碑"), "nextMilestone");
         }
 
         ImGui::Separator();
@@ -1983,7 +1983,7 @@ namespace Wheatear {
         const float listWidth = std::max(260.0f, ImGui::GetContentRegionAvail().x * 0.28f);
         ImGui::BeginChild("##ProgressionUpgradeList", ImVec2(listWidth, 0.0f), true);
         EditorWidgets::SectionHeader(
-            EditorLocale::Text("Upgrades", "升级"),
+            EditorLocale::Text(EditorLocale::Text("Upgrades", "升级"), "升级"),
             EditorLocale::Text("Named upgrade recipes.", "带名称的升级配方。"));
         if (ImGui::Button("Add Upgrade"))
         {
@@ -2347,7 +2347,7 @@ namespace Wheatear {
                 const ImGuiTreeNodeFlags flags = depth < 1 ? ImGuiTreeNodeFlags_DefaultOpen : 0;
                 const bool open = ImGui::TreeNodeEx("##Node", flags, "%s (%s)", key.c_str(), NodeTypeLabel(child));
                 ImGui::SameLine();
-                if (ImGui::SmallButton("Remove"))
+                if (ImGui::SmallButton(EditorLocale::Text("Remove", "移除")))
                     removeKey = key;
 
                 if (open)
@@ -2362,7 +2362,7 @@ namespace Wheatear {
                 ImGui::SameLine(220.0f);
                 changed |= DrawYamlScalar(child, childPath);
                 ImGui::SameLine();
-                if (ImGui::SmallButton("Remove"))
+                if (ImGui::SmallButton(EditorLocale::Text("Remove", "移除")))
                     removeKey = key;
             }
 
@@ -2396,7 +2396,7 @@ namespace Wheatear {
             {
                 const bool open = ImGui::TreeNodeEx("##Item", 0, "[%d] (%s)", static_cast<int>(i + 1), NodeTypeLabel(child));
                 ImGui::SameLine();
-                if (ImGui::SmallButton("Remove"))
+                if (ImGui::SmallButton(EditorLocale::Text("Remove", "移除")))
                     removeIndex = static_cast<int>(i);
 
                 if (open)
@@ -2411,7 +2411,7 @@ namespace Wheatear {
                 ImGui::SameLine(80.0f);
                 changed |= DrawYamlScalar(child, childPath);
                 ImGui::SameLine();
-                if (ImGui::SmallButton("Remove"))
+                if (ImGui::SmallButton(EditorLocale::Text("Remove", "移除")))
                     removeIndex = static_cast<int>(i);
             }
 
@@ -2436,47 +2436,47 @@ namespace Wheatear {
         bool changed = false;
         if (ContainsInsensitive(key, "icon") || ContainsInsensitive(key, "texture") || ContainsInsensitive(key, "image"))
         {
-            changed = EditorContentPickers::DrawAssetField("Value", value, EditorWidgets::AssetReferenceKind::Texture, 512);
+            changed = EditorContentPickers::DrawAssetField(EditorLocale::Text("Value", "值"), value, EditorWidgets::AssetReferenceKind::Texture, 512);
         }
         else if (ContainsInsensitive(key, "audio") || ContainsInsensitive(key, "sound") || ContainsInsensitive(key, "sfx") || ContainsInsensitive(key, "bgm"))
         {
-            changed = EditorContentPickers::DrawAssetField("Value", value, EditorWidgets::AssetReferenceKind::Audio, 512);
+            changed = EditorContentPickers::DrawAssetField(EditorLocale::Text("Value", "值"), value, EditorWidgets::AssetReferenceKind::Audio, 512);
         }
         else if (ContainsInsensitive(key, "scene"))
         {
-            changed = EditorContentPickers::DrawAssetField("Value", value, EditorWidgets::AssetReferenceKind::Scene, 512);
+            changed = EditorContentPickers::DrawAssetField(EditorLocale::Text("Value", "值"), value, EditorWidgets::AssetReferenceKind::Scene, 512);
         }
         else if (ContainsInsensitive(key, "script") || ContainsInsensitive(key, "event"))
         {
-            changed = EditorContentPickers::DrawAssetField("Value", value, EditorWidgets::AssetReferenceKind::Script, 512);
+            changed = EditorContentPickers::DrawAssetField(EditorLocale::Text("Value", "值"), value, EditorWidgets::AssetReferenceKind::Script, 512);
         }
         else if (ContainsInsensitive(key, "slot"))
         {
-            changed = EditorContentPickers::DrawProgressionIdField("Value", value, EditorContentPickers::ProgressionIdKind::EquipmentSlot, 256);
+            changed = EditorContentPickers::DrawProgressionIdField(EditorLocale::Text("Value", "值"), value, EditorContentPickers::ProgressionIdKind::EquipmentSlot, 256);
         }
         else if (ContainsInsensitive(key, "equipment"))
         {
-            changed = EditorContentPickers::DrawProgressionIdField("Value", value, EditorContentPickers::ProgressionIdKind::Equipment, 256);
+            changed = EditorContentPickers::DrawProgressionIdField(EditorLocale::Text("Value", "值"), value, EditorContentPickers::ProgressionIdKind::Equipment, 256);
         }
         else if (ContainsInsensitive(key, "dungeon"))
         {
-            changed = EditorContentPickers::DrawProgressionIdField("Value", value, EditorContentPickers::ProgressionIdKind::Dungeon, 256);
+            changed = EditorContentPickers::DrawProgressionIdField(EditorLocale::Text("Value", "值"), value, EditorContentPickers::ProgressionIdKind::Dungeon, 256);
         }
         else if (ContainsInsensitive(key, "skill"))
         {
-            changed = EditorContentPickers::DrawProgressionIdField("Value", value, EditorContentPickers::ProgressionIdKind::Skill, 256);
+            changed = EditorContentPickers::DrawProgressionIdField(EditorLocale::Text("Value", "值"), value, EditorContentPickers::ProgressionIdKind::Skill, 256);
         }
         else if (ContainsInsensitive(key, "material") || key == "item" || ContainsInsensitive(key, "itemid"))
         {
-            changed = EditorContentPickers::DrawProgressionIdField("Value", value, EditorContentPickers::ProgressionIdKind::Material, 256);
+            changed = EditorContentPickers::DrawProgressionIdField(EditorLocale::Text("Value", "值"), value, EditorContentPickers::ProgressionIdKind::Material, 256);
         }
         else if (ContainsInsensitive(key, "flag"))
         {
-            changed = EditorContentPickers::DrawStoryFlagField("Value", value, 256);
+            changed = EditorContentPickers::DrawStoryFlagField(EditorLocale::Text("Value", "值"), value, 256);
         }
         else
         {
-            changed = EditorWidgets::InputString("Value", value, 512);
+            changed = EditorWidgets::InputString(EditorLocale::Text("Value", "值"), value, 512);
         }
         if (changed)
             node = value;

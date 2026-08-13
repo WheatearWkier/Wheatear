@@ -1,6 +1,7 @@
 #include "VisualNovelDrawer.h"
 
 #include "Editor/EditorContentPickers.h"
+#include "Editor/EditorLocale.h"
 #include "Editor/EditorWidgets.h"
 #include "Modules/VisualNovel/VisualNovelScriptEditorPanel.h"
 #include "Panels/SceneHierarchy/ComponentDrawers.h"
@@ -56,13 +57,13 @@ namespace Wheatear {
                 EditorContentPickers::DrawAssetField("Script Path",
                     component.ScriptPath,
                     EditorWidgets::AssetReferenceKind::Script);
-                if (ImGui::Button("Open VN Script Editor"))
+                if (ImGui::Button(EditorLocale::Text("Open VN Script Editor", "打开视觉小说脚本编辑器")))
                     VisualNovelEditorRequests::RequestOpenScript(component.ScriptPath);
                 ImGui::SameLine();
                 EditorWidgets::StatusBadge("Edits Asset", EditorWidgets::StatusKind::Info);
                 ImGui::DragFloat("Characters / Second", &component.CharactersPerSecond, 1.0f, 1.0f, 240.0f);
-                ImGui::Checkbox("Play On Start", &component.PlayOnStart);
-                ImGui::Checkbox("Restart On Finish", &component.RestartOnFinish);
+                ImGui::Checkbox(EditorLocale::Text("Play On Start", "开始时播放"), &component.PlayOnStart);
+                ImGui::Checkbox(EditorLocale::Text("Restart On Finish", "结束后重播"), &component.RestartOnFinish);
 
                 ImGui::Separator();
                 ImGui::TextDisabled("Scene Bindings");
@@ -81,12 +82,12 @@ namespace Wheatear {
                 ImGui::Separator();
                 ImGui::TextDisabled("Runtime Controls");
                 ImGui::Checkbox("Auto Play On Start", &component.AutoPlayOnStart);
-                ImGui::DragFloat("Auto Play Delay", &component.AutoPlayDelay, 0.05f, 0.2f, 10.0f);
+                ImGui::DragFloat(EditorLocale::Text("Auto Play Delay", "自动播放延迟"), &component.AutoPlayDelay, 0.05f, 0.2f, 10.0f);
                 EditorContentPickers::DrawSceneEntityField("History Text", entity, component.HistoryTextEntityName);
                 EditorContentPickers::DrawSceneEntityField("Auto Play Indicator", entity, component.AutoPlayIndicatorEntityName);
                 EditorContentPickers::DrawSceneEntityField("Command Bar", entity, component.CommandBarEntityName);
                 EditorContentPickers::DrawSceneEntityField("Command Tooltip", entity, component.CommandTooltipEntityName);
-                ImGui::Checkbox("Command Tooltip Follow Mouse", &component.CommandTooltipFollowMouse);
+                ImGui::Checkbox(EditorLocale::Text("Command Tooltip Follow Mouse", "命令提示跟随鼠标"), &component.CommandTooltipFollowMouse);
                 ImGui::DragFloat2("Command Tooltip Mouse Offset", &component.CommandTooltipMouseOffset.x, 0.001f, -1.0f, 1.0f, "%.3f");
                 EditorContentPickers::DrawSceneEntityField("History Panel", entity, component.HistoryPanelEntityName);
                 EditorContentPickers::DrawSceneEntityField("History Scroll", entity, component.HistoryScrollEntityName);
@@ -102,10 +103,10 @@ namespace Wheatear {
 
                 ImGui::Separator();
                 ImGui::TextDisabled("Editor UI Preview");
-                if (ImGui::Button("Show All VN UI"))
+                if (ImGui::Button(EditorLocale::Text("Show All VN UI", "显示全部 VN 界面")))
                     SetVNEditorPreview(entity, {});
                 ImGui::SameLine();
-                if (ImGui::Button("Hide Auxiliary Pages"))
+                if (ImGui::Button(EditorLocale::Text("Hide Auxiliary Pages", "隐藏辅助页")))
                 {
                     SetVNEditorPreview(entity, {
                         "VN_DialoguePanel",
@@ -119,15 +120,15 @@ namespace Wheatear {
                     });
                 }
 
-                if (ImGui::Button("Show History Page"))
+                if (ImGui::Button(EditorLocale::Text("Show History Page", "显示历史页")))
                     SetVNEditorPreview(entity, { "VN_History" });
                 ImGui::SameLine();
-                if (ImGui::Button("Show Settings Page"))
+                if (ImGui::Button(EditorLocale::Text("Show Settings Page", "显示设置页")))
                     SetVNEditorPreview(entity, { "VN_Settings" });
                 ImGui::SameLine();
-                if (ImGui::Button("Show Save/Load Page"))
+                if (ImGui::Button(EditorLocale::Text("Show Save/Load Page", "显示存档页")))
                     SetVNEditorPreview(entity, { "VN_SaveLoad" });
-                if (ImGui::Button("Show Music Notice"))
+                if (ImGui::Button(EditorLocale::Text("Show Music Notice", "显示音乐提示")))
                     SetVNEditorPreview(entity, { "VN_MusicNotice" });
             });
     }

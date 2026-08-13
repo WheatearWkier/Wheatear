@@ -3,6 +3,7 @@
 
 #include "Assets/AssetRegistry.h"
 #include "Editor/EditorFloatingWindow.h"
+#include "Editor/EditorLocale.h"
 #include "Editor/EditorWidgets.h"
 #include "Editor/GameplayEditorShell.h"
 #include "Wheatear/Core/AssetAliasRegistry.h"
@@ -911,7 +912,7 @@ namespace Wheatear {
         if (!m_Open)
             return;
 
-        if (!EditorFloatingWindow::Begin("Project Health", &m_Open, 0, { 1120.0f, 720.0f }))
+        if (!EditorFloatingWindow::Begin(EditorLocale::Text("Project Health", "项目健康检查"), &m_Open, 0, { 1120.0f, 720.0f }))
         {
             EditorFloatingWindow::End();
             return;
@@ -923,7 +924,7 @@ namespace Wheatear {
             + m_SourceReport.StaleProjectEntries.size()
             + m_HygieneReport.DuplicateGroups.size()
             + m_HygieneReport.AliasIssues.size();
-        EditorWidgets::PanelHeader("Project Health", "Package dependency, asset hygiene, registry, and source/project sync validation.");
+        EditorWidgets::PanelHeader(EditorLocale::Text("Project Health", "项目健康检查"), "Package dependency, asset hygiene, registry, and source/project sync validation.");
         EditorWidgets::StatusBadge(issueCount == 0 ? "Ready" : "Needs Attention",
             issueCount == 0 ? EditorWidgets::StatusKind::Success : EditorWidgets::StatusKind::Error);
         ImGui::SameLine();
@@ -938,60 +939,60 @@ namespace Wheatear {
         EditorWidgets::StatusBadge((std::to_string(m_HygieneReport.HardcodedAssetPaths.size()) + " hardcoded path(s)").c_str(),
             m_HygieneReport.HardcodedAssetPaths.empty() ? EditorWidgets::StatusKind::Neutral : EditorWidgets::StatusKind::Warning);
         ImGui::SameLine();
-        EditorFloatingWindow::DrawToggleButton("Project Health");
+        EditorFloatingWindow::DrawToggleButton(EditorLocale::Text("Project Health", "项目健康检查"));
 
-        EditorWidgets::SectionHeader("Scan Scope", "The startup scene defines the package dependency closure.");
-        EditorWidgets::InputString("Startup Scene", m_StartupScene, 384);
-        ImGui::Checkbox("Enable C# Script Assets", &m_EnableScripts);
+        EditorWidgets::SectionHeader(EditorLocale::Text("Scan Scope", "扫描范围"), "The startup scene defines the package dependency closure.");
+        EditorWidgets::InputString(EditorLocale::Text("Startup Scene", "启动场景"), m_StartupScene, 384);
+        ImGui::Checkbox(EditorLocale::Text("Enable C# Script Assets", "启用 C# 脚本资源"), &m_EnableScripts);
         ImGui::SameLine();
-        ImGui::Checkbox("Scan Unused Assets", &m_IncludeUnusedAssets);
+        ImGui::Checkbox(EditorLocale::Text("Scan Unused Assets", "扫描未使用资源"), &m_IncludeUnusedAssets);
 
-        if (ImGui::Button("Refresh"))
+        if (ImGui::Button(EditorLocale::Text("Refresh", "刷新")))
             Refresh();
         ImGui::SameLine();
         EditorWidgets::InlineStatus(m_Status, issueCount == 0 ? EditorWidgets::StatusKind::Success : EditorWidgets::StatusKind::Warning);
 
-        EditorWidgets::SectionHeader("Summary");
+        EditorWidgets::SectionHeader(EditorLocale::Text("Summary", "摘要"));
         DrawSummary();
         ImGui::Separator();
 
         if (ImGui::BeginTabBar("ProjectHealthTabs"))
         {
-            if (ImGui::BeginTabItem("Missing"))
+            if (ImGui::BeginTabItem(EditorLocale::Text("Missing", "缺失引用")))
             {
                 DrawMissingReferences();
                 ImGui::EndTabItem();
             }
-            if (ImGui::BeginTabItem("Asset Registry"))
+            if (ImGui::BeginTabItem(EditorLocale::Text("Asset Registry", "资源注册表")))
             {
                 DrawAssetRegistry();
                 ImGui::EndTabItem();
             }
-            if (ImGui::BeginTabItem("Packed Assets"))
+            if (ImGui::BeginTabItem(EditorLocale::Text("Packed Assets", "打包资源")))
             {
                 DrawAssetList("PackedAssetTable", m_Report.IncludedAssets);
                 ImGui::EndTabItem();
             }
-            if (ImGui::BeginTabItem("Scene Links"))
+            if (ImGui::BeginTabItem(EditorLocale::Text("Scene Links", "场景链接")))
             {
                 DrawSceneTransitions();
                 ImGui::EndTabItem();
             }
-            if (ImGui::BeginTabItem("Unused Assets"))
+            if (ImGui::BeginTabItem(EditorLocale::Text("Unused Assets", "未使用资源")))
             {
                 DrawAssetList("UnusedAssetTable", m_Report.UnusedAssets);
                 ImGui::EndTabItem();
             }
-            if (ImGui::BeginTabItem("Parsed Text"))
+            if (ImGui::BeginTabItem(EditorLocale::Text("Parsed Text", "解析文本")))
             {
                 DrawAssetList("ParsedTextAssetTable", m_Report.ParsedTextAssets);
                 ImGui::EndTabItem();
             }
-            if (ImGui::BeginTabItem("Warnings"))
+            if (ImGui::BeginTabItem(EditorLocale::Text("Warnings", "警告")))
             {
                 if (m_Report.Warnings.empty())
                 {
-                    EditorWidgets::EmptyState("No warnings.", "The current scan did not find legacy commands or package risk notes.");
+                    EditorWidgets::EmptyState(EditorLocale::Text("No warnings.", "无警告。"), "The current scan did not find legacy commands or package risk notes.");
                 }
                 else
                 {
@@ -1000,17 +1001,17 @@ namespace Wheatear {
                 }
                 ImGui::EndTabItem();
             }
-            if (ImGui::BeginTabItem("Asset Hygiene"))
+            if (ImGui::BeginTabItem(EditorLocale::Text("Asset Hygiene", "资源卫生")))
             {
                 DrawAssetHygiene();
                 ImGui::EndTabItem();
             }
-            if (ImGui::BeginTabItem("Alias Manifest"))
+            if (ImGui::BeginTabItem(EditorLocale::Text("Alias Manifest", "别名清单")))
             {
                 DrawAliasManifestEditor();
                 ImGui::EndTabItem();
             }
-            if (ImGui::BeginTabItem("Source Sync"))
+            if (ImGui::BeginTabItem(EditorLocale::Text("Source Sync", "源码同步")))
             {
                 DrawSourceSync();
                 ImGui::EndTabItem();
@@ -1023,18 +1024,18 @@ namespace Wheatear {
 
     void ProjectHealthPanel::DrawSummary() const
     {
-        SummaryLine("Packed Assets", m_Report.IncludedAssets.size());
+        SummaryLine(EditorLocale::Text("Packed Assets", "打包资源"), m_Report.IncludedAssets.size());
         SummaryLine("Packed Source Size", FormatBytes(m_Report.IncludedBytes));
         SummaryLine("Packable Assets", m_Report.PackableAssetCount);
         SummaryLine("Packable Source Size", FormatBytes(m_Report.PackableBytes));
-        SummaryLine("Unused Assets", m_Report.UnusedAssets.size());
+        SummaryLine(EditorLocale::Text("Unused Assets", "未使用资源"), m_Report.UnusedAssets.size());
         SummaryLine("Parsed Text Assets", m_Report.ParsedTextAssets.size());
         SummaryLine("Scene Transitions", m_Report.SceneTransitions.size());
         SummaryLine("Missing Scene Transitions", m_Report.MissingSceneTransitions.size());
-        SummaryLine("Missing References", m_Report.MissingReferences.size());
+        SummaryLine(EditorLocale::Text("Missing References", "缺失引用"), m_Report.MissingReferences.size());
         SummaryLine("Asset Registry Assets", AssetRegistry::Get().GetAssetCount());
         SummaryLine("Asset Registry References", AssetRegistry::Get().GetReferenceCount());
-        SummaryLine("Warnings", m_Report.Warnings.size());
+        SummaryLine(EditorLocale::Text("Warnings", "警告"), m_Report.Warnings.size());
         SummaryLine("Duplicate Groups", m_HygieneReport.DuplicateGroups.size());
         SummaryLine("Duplicate Extra Assets", m_HygieneReport.DuplicateExtraAssetCount);
         SummaryLine("Alias Issues", m_HygieneReport.AliasIssues.size());
@@ -1058,9 +1059,9 @@ namespace Wheatear {
         {
             ImGui::TableSetupColumn("Type");
             ImGui::TableSetupColumn("UUID");
-            ImGui::TableSetupColumn("Asset");
-            ImGui::TableSetupColumn("Refs");
-            ImGui::TableSetupColumn("Used By");
+            ImGui::TableSetupColumn(EditorLocale::Text("Asset", "资源"));
+            ImGui::TableSetupColumn(EditorLocale::Text("Refs", "引用数"));
+            ImGui::TableSetupColumn(EditorLocale::Text("Used By", "被引用"));
             ImGui::TableHeadersRow();
 
             const auto& assets = registry.GetAssets();
@@ -1089,7 +1090,7 @@ namespace Wheatear {
     {
         if (m_Report.MissingReferences.empty())
         {
-            EditorWidgets::EmptyState("No missing asset references found.", "All scanned scene, YAML, script, and manifest references resolve.");
+            EditorWidgets::EmptyState(EditorLocale::Text("No missing asset references found.", "未发现缺失的资源引用。"), "All scanned scene, YAML, script, and manifest references resolve.");
             return;
         }
 
@@ -1173,7 +1174,7 @@ namespace Wheatear {
         SummaryLine("Duplicate Extra Size", FormatBytes(m_HygieneReport.DuplicateExtraBytes));
         SummaryLine("Alias Issues", m_HygieneReport.AliasIssues.size());
         SummaryLine("Hardcoded Asset Paths", m_HygieneReport.HardcodedAssetPaths.size());
-        SummaryLine("Unused Assets", m_Report.UnusedAssets.size());
+        SummaryLine(EditorLocale::Text("Unused Assets", "未使用资源"), m_Report.UnusedAssets.size());
 
         ImGui::Spacing();
         ImGui::Separator();
@@ -1182,13 +1183,13 @@ namespace Wheatear {
         if (!ImGui::BeginTabBar("AssetHygieneTabs"))
             return;
 
-        if (ImGui::BeginTabItem("Cleanup Plan"))
+        if (ImGui::BeginTabItem(EditorLocale::Text("Cleanup Plan", "清理计划")))
         {
             DrawHygieneCleanupPlan();
             ImGui::EndTabItem();
         }
 
-        if (ImGui::BeginTabItem("Duplicates"))
+        if (ImGui::BeginTabItem(EditorLocale::Text("Duplicates", "重复资源")))
         {
             if (m_HygieneReport.DuplicateGroups.empty())
             {
@@ -1214,7 +1215,7 @@ namespace Wheatear {
             ImGui::EndTabItem();
         }
 
-        if (ImGui::BeginTabItem("Largest Files"))
+        if (ImGui::BeginTabItem(EditorLocale::Text("Largest Files", "最大文件")))
         {
             if (m_HygieneReport.LargestAssets.empty())
             {
@@ -1231,9 +1232,9 @@ namespace Wheatear {
                     ImVec2(0, 420)))
                 {
                     ImGui::TableSetupColumn("Size");
-                    ImGui::TableSetupColumn("Packed");
+                    ImGui::TableSetupColumn(EditorLocale::Text("Packed", "已打包"));
                     ImGui::TableSetupColumn("Unused");
-                    ImGui::TableSetupColumn("Asset");
+                    ImGui::TableSetupColumn(EditorLocale::Text("Asset", "资源"));
                     ImGui::TableHeadersRow();
 
                     for (size_t i = 0; i < maxRows; ++i)
@@ -1256,7 +1257,7 @@ namespace Wheatear {
             ImGui::EndTabItem();
         }
 
-        if (ImGui::BeginTabItem("Aliases"))
+        if (ImGui::BeginTabItem(EditorLocale::Text("Aliases", "别名")))
         {
             if (m_HygieneReport.AliasIssues.empty())
             {
@@ -1266,9 +1267,9 @@ namespace Wheatear {
                 ImGuiTableFlags_Borders | ImGuiTableFlags_RowBg | ImGuiTableFlags_Resizable | ImGuiTableFlags_ScrollY,
                 ImVec2(0, 420)))
             {
-                ImGui::TableSetupColumn("Alias");
-                ImGui::TableSetupColumn("Target");
-                ImGui::TableSetupColumn("Issue");
+                ImGui::TableSetupColumn(EditorLocale::Text("Alias", "别名"));
+                ImGui::TableSetupColumn(EditorLocale::Text("Target", "目标"));
+                ImGui::TableSetupColumn(EditorLocale::Text("Issue", "问题"));
                 ImGui::TableHeadersRow();
 
                 for (const AssetAliasIssue& issue : m_HygieneReport.AliasIssues)
@@ -1287,7 +1288,7 @@ namespace Wheatear {
             ImGui::EndTabItem();
         }
 
-        if (ImGui::BeginTabItem("Source Paths"))
+        if (ImGui::BeginTabItem(EditorLocale::Text("Source Paths", "源码路径")))
         {
             if (m_HygieneReport.HardcodedAssetPaths.empty())
             {
@@ -1303,7 +1304,7 @@ namespace Wheatear {
                     ImGuiTableFlags_Borders | ImGuiTableFlags_RowBg | ImGuiTableFlags_Resizable | ImGuiTableFlags_ScrollY,
                     ImVec2(0, 420)))
                 {
-                    ImGui::TableSetupColumn("Source File");
+                    ImGui::TableSetupColumn(EditorLocale::Text("Source File", "源文件"));
                     ImGui::TableSetupColumn("Reference");
                     ImGui::TableHeadersRow();
 
@@ -1328,11 +1329,11 @@ namespace Wheatear {
 
     void ProjectHealthPanel::DrawHygieneCleanupPlan()
     {
-        if (ImGui::Button("Generate Cleanup Plan"))
+        if (ImGui::Button(EditorLocale::Text("Generate Cleanup Plan", "生成清理计划")))
             BuildHygieneCleanupPlan();
 
         ImGui::SameLine();
-        if (ImGui::Button("Select Safe Archive Actions"))
+        if (ImGui::Button(EditorLocale::Text("Select Safe Archive Actions", "选择安全归档项")))
         {
             for (AssetHygieneAction& action : m_HygieneActions)
             {
@@ -1343,7 +1344,7 @@ namespace Wheatear {
         }
 
         ImGui::SameLine();
-        if (ImGui::Button("Clear Selection"))
+        if (ImGui::Button(EditorLocale::Text("Clear Selection", "清空选择")))
         {
             for (AssetHygieneAction& action : m_HygieneActions)
                 action.Selected = false;
@@ -1363,7 +1364,7 @@ namespace Wheatear {
 
         ImGui::SameLine();
         ImGui::BeginDisabled(selectedCount == 0);
-        if (ImGui::Button("Apply Selected"))
+        if (ImGui::Button(EditorLocale::Text("Apply Selected", "应用选中项")))
             ImGui::OpenPopup("Apply Hygiene Actions?");
         ImGui::EndDisabled();
 
@@ -1451,7 +1452,7 @@ namespace Wheatear {
 
     void ProjectHealthPanel::DrawAliasManifestEditor()
     {
-        EditorWidgets::SectionHeader("Alias Manifest", "Edit content_manifest.yaml aliases used by runtime asset lookup.");
+        EditorWidgets::SectionHeader(EditorLocale::Text("Alias Manifest", "别名清单"), "Edit content_manifest.yaml aliases used by runtime asset lookup.");
 
         ImGui::SetNextItemWidth(420.0f);
         EditorWidgets::InputString("Manifest", m_AliasManifestPath, 512);
@@ -1491,8 +1492,8 @@ namespace Wheatear {
             ImGuiTableFlags_Borders | ImGuiTableFlags_RowBg | ImGuiTableFlags_Resizable | ImGuiTableFlags_ScrollY,
             ImVec2(0, 420)))
         {
-            ImGui::TableSetupColumn("Alias");
-            ImGui::TableSetupColumn("Target");
+            ImGui::TableSetupColumn(EditorLocale::Text("Alias", "别名"));
+            ImGui::TableSetupColumn(EditorLocale::Text("Target", "目标"));
             ImGui::TableHeadersRow();
 
             for (const AliasManifestRow& row : rows)
@@ -1510,15 +1511,15 @@ namespace Wheatear {
         }
 
         ImGui::Separator();
-        EditorWidgets::SectionHeader("Add Alias");
-        EditorWidgets::InputString("New Alias", m_NewAliasName, 256);
+        EditorWidgets::SectionHeader(EditorLocale::Text("Add Alias", "添加别名"));
+        EditorWidgets::InputString(EditorLocale::Text("New Alias", "新别名"), m_NewAliasName, 256);
         EditorWidgets::DrawAssetReferenceField("New Target",
             m_NewAliasTarget,
             EditorWidgets::AssetReferenceKind::Any,
             512);
         const bool canAdd = !m_NewAliasName.empty() && !m_NewAliasTarget.empty();
         ImGui::BeginDisabled(!canAdd);
-        if (ImGui::Button("Add Alias") && canAdd)
+        if (ImGui::Button(EditorLocale::Text("Add Alias", "添加别名")) && canAdd)
         {
             if (SetAliasTarget(root, m_NewAliasName, m_NewAliasTarget))
             {
@@ -1534,7 +1535,7 @@ namespace Wheatear {
 
         ImGui::SameLine();
         ImGui::BeginChild("##AliasManifestDetails", ImVec2(0.0f, 0.0f), true);
-        EditorWidgets::SectionHeader("Alias Details", "Rename aliases or retarget them to project assets.");
+        EditorWidgets::SectionHeader(EditorLocale::Text("Alias Details", "别名详情"), "Rename aliases or retarget them to project assets.");
 
         auto selected = std::find_if(rows.begin(), rows.end(), [&](const AliasManifestRow& row)
         {
@@ -1550,7 +1551,7 @@ namespace Wheatear {
 
         std::string alias = selected->Alias;
         std::string target = selected->Target;
-        if (EditorWidgets::InputString("Alias", alias, 256)
+        if (EditorWidgets::InputString(EditorLocale::Text("Alias", "别名"), alias, 256)
             && !alias.empty()
             && alias != selected->Alias)
         {
@@ -1561,7 +1562,7 @@ namespace Wheatear {
             m_AliasStatus = "Alias renamed.";
         }
 
-        if (EditorWidgets::DrawAssetReferenceField("Target",
+        if (EditorWidgets::DrawAssetReferenceField(EditorLocale::Text("Target", "目标"),
             target,
             EditorWidgets::AssetReferenceKind::Any,
             512))
@@ -1582,7 +1583,7 @@ namespace Wheatear {
         }
 
         ImGui::Separator();
-        if (ImGui::Button("Delete Alias"))
+        if (ImGui::Button(EditorLocale::Text("Delete Alias", "删除别名")))
         {
             if (RemoveAliasTarget(root, m_SelectedAlias))
             {
@@ -1610,7 +1611,7 @@ namespace Wheatear {
         if (ImGui::BeginTable(tableId, 1,
             ImGuiTableFlags_Borders | ImGuiTableFlags_RowBg | ImGuiTableFlags_Resizable))
         {
-            ImGui::TableSetupColumn("Asset");
+            ImGui::TableSetupColumn(EditorLocale::Text("Asset", "资源"));
             ImGui::TableHeadersRow();
 
             const size_t rowCount = std::min(maxRows, assets.size());
