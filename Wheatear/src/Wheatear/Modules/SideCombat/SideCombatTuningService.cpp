@@ -3,7 +3,7 @@
 
 #include "Wheatear/Core/AssetAliasRegistry.h"
 #include "Wheatear/Core/AssetPath.h"
-#include "Wheatear/Modules/Common/GameplayTextService.h"
+#include "Wheatear/Gameplay/Services/GameplayTextService.h"
 
 #include <algorithm>
 #include <chrono>

@@ -6,8 +6,8 @@
 #include "TurnCombatTargetService.h"
 #include "TurnCombatUIService.h"
 #include "TurnCombatVisualService.h"
-#include "Wheatear/Modules/Common/GameplayEntityService.h"
-#include "Wheatear/Modules/Common/GameplayFlowService.h"
+#include "Wheatear/Gameplay/Services/GameplayEntityService.h"
+#include "Wheatear/Gameplay/Services/GameplayFlowService.h"
 #include "Wheatear/UI/UIRuntimeTools.h"
 
 #include <algorithm>

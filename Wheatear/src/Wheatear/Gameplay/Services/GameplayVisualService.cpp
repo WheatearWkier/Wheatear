@@ -2,7 +2,7 @@
 #include "GameplayVisualService.h"
 
 #include "Wheatear/Core/AssetAliasRegistry.h"
-#include "Wheatear/Modules/Common/GameplayTextService.h"
+#include "Wheatear/Gameplay/Services/GameplayTextService.h"
 #include "Wheatear/Renderer/Texture.h"
 #include "Wheatear/Scene/Components.h"
 #include "Wheatear/Scene/Entity.h"

@@ -40,9 +40,6 @@
     <Filter Include="Panels\SceneHierarchy\Drawers">
       <UniqueIdentifier>{EBA8C363-57C1-AA8D-206E-3A278C453F27}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Tools">
-      <UniqueIdentifier>{16CF2D0E-82E3-55BF-4B65-F91EB73852F0}</UniqueIdentifier>
-    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\Assets\AssetRegistry.h">
@@ -70,6 +67,9 @@
       <Filter>Editor</Filter>
     </ClInclude>
     <ClInclude Include="src\Editor\EditorCanvasTools.h">
+      <Filter>Editor</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Editor\EditorCommands.h">
       <Filter>Editor</Filter>
     </ClInclude>
     <ClInclude Include="src\Editor\EditorComponentRegistry.h">
@@ -100,12 +100,6 @@
       <Filter>Editor</Filter>
     </ClInclude>
     <ClInclude Include="src\Editor\EditorWidgets.h">
-      <Filter>Editor</Filter>
-    </ClInclude>
-    <ClInclude Include="src\Editor\EventScriptGraphPanel.h">
-      <Filter>Editor</Filter>
-    </ClInclude>
-    <ClInclude Include="src\Editor\EventScriptGraphPanelInternal.h">
       <Filter>Editor</Filter>
     </ClInclude>
     <ClInclude Include="src\Editor\GameplayEditorShell.h">
@@ -159,10 +153,22 @@
     <ClInclude Include="src\Panels\AnimationEditorPanel.h">
       <Filter>Panels</Filter>
     </ClInclude>
+    <ClInclude Include="src\Panels\AssetAliasManifestEditorPanel.h">
+      <Filter>Panels</Filter>
+    </ClInclude>
     <ClInclude Include="src\Panels\ContentBrowserPanel.h">
       <Filter>Panels</Filter>
     </ClInclude>
-    <ClInclude Include="src\Panels\EditorCommands.h">
+    <ClInclude Include="src\Panels\EventScriptGraphPanel.h">
+      <Filter>Panels</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Panels\EventScriptGraphPanelInternal.h">
+      <Filter>Panels</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Panels\ProjectHealthPanel.h">
+      <Filter>Panels</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Panels\ProjectHealthPanelInternal.h">
       <Filter>Panels</Filter>
     </ClInclude>
     <ClInclude Include="src\Panels\SceneHierarchy\ComponentDrawers.h">
@@ -198,29 +204,20 @@
     <ClInclude Include="src\Panels\SceneHierarchy\Drawers\UIDrawers.h">
       <Filter>Panels\SceneHierarchy\Drawers</Filter>
     </ClInclude>
-    <ClInclude Include="src\Panels\SceneHierarchy\WidgetHelpers.h">
+    <ClInclude Include="src\Panels\SceneHierarchy\SceneHierarchyPanel.h">
       <Filter>Panels\SceneHierarchy</Filter>
     </ClInclude>
-    <ClInclude Include="src\Panels\SceneHierarchyPanel.h">
-      <Filter>Panels</Filter>
+    <ClInclude Include="src\Panels\SceneHierarchy\WidgetHelpers.h">
+      <Filter>Panels\SceneHierarchy</Filter>
     </ClInclude>
     <ClInclude Include="src\Panels\SpriteSheetPickerPanel.h">
       <Filter>Panels</Filter>
     </ClInclude>
-    <ClInclude Include="src\Tools\AssetAliasManifestEditorPanel.h">
-      <Filter>Tools</Filter>
+    <ClInclude Include="src\Panels\WAOActionEditorPanel.h">
+      <Filter>Panels</Filter>
     </ClInclude>
-    <ClInclude Include="src\Tools\ProjectHealthPanel.h">
-      <Filter>Tools</Filter>
-    </ClInclude>
-    <ClInclude Include="src\Tools\ProjectHealthPanelInternal.h">
-      <Filter>Tools</Filter>
-    </ClInclude>
-    <ClInclude Include="src\Tools\WAOActionEditorPanel.h">
-      <Filter>Tools</Filter>
-    </ClInclude>
-    <ClInclude Include="src\Tools\WAOActionEditorPanelInternal.h">
-      <Filter>Tools</Filter>
+    <ClInclude Include="src\Panels\WAOActionEditorPanelInternal.h">
+      <Filter>Panels</Filter>
     </ClInclude>
     <ClInclude Include="src\wepch.h" />
   </ItemGroup>
@@ -282,12 +279,6 @@
     <ClCompile Include="src\Editor\EditorWidgets.cpp">
       <Filter>Editor</Filter>
     </ClCompile>
-    <ClCompile Include="src\Editor\EventScriptGraphPanel.cpp">
-      <Filter>Editor</Filter>
-    </ClCompile>
-    <ClCompile Include="src\Editor\EventScriptGraphPanel_Graph.cpp">
-      <Filter>Editor</Filter>
-    </ClCompile>
     <ClCompile Include="src\Editor\ModeSelectLayer.cpp">
       <Filter>Editor</Filter>
     </ClCompile>
@@ -339,7 +330,22 @@
     <ClCompile Include="src\Panels\AnimationEditorPanel_Timeline.cpp">
       <Filter>Panels</Filter>
     </ClCompile>
+    <ClCompile Include="src\Panels\AssetAliasManifestEditorPanel.cpp">
+      <Filter>Panels</Filter>
+    </ClCompile>
     <ClCompile Include="src\Panels\ContentBrowserPanel.cpp">
+      <Filter>Panels</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Panels\EventScriptGraphPanel.cpp">
+      <Filter>Panels</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Panels\EventScriptGraphPanel_Graph.cpp">
+      <Filter>Panels</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Panels\ProjectHealthPanel.cpp">
+      <Filter>Panels</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Panels\ProjectHealthPanel_Hygiene.cpp">
       <Filter>Panels</Filter>
     </ClCompile>
     <ClCompile Include="src\Panels\SceneHierarchy\Drawers\AudioDrawer.cpp">
@@ -372,41 +378,32 @@
     <ClCompile Include="src\Panels\SceneHierarchy\Drawers\UIDrawers.cpp">
       <Filter>Panels\SceneHierarchy\Drawers</Filter>
     </ClCompile>
-    <ClCompile Include="src\Panels\SceneHierarchy\WidgetHelpers.cpp">
+    <ClCompile Include="src\Panels\SceneHierarchy\SceneHierarchyPanel.cpp">
       <Filter>Panels\SceneHierarchy</Filter>
     </ClCompile>
-    <ClCompile Include="src\Panels\SceneHierarchyPanel.cpp">
-      <Filter>Panels</Filter>
+    <ClCompile Include="src\Panels\SceneHierarchy\SceneHierarchyPanelComponents.cpp">
+      <Filter>Panels\SceneHierarchy</Filter>
     </ClCompile>
-    <ClCompile Include="src\Panels\SceneHierarchyPanelComponents.cpp">
-      <Filter>Panels</Filter>
+    <ClCompile Include="src\Panels\SceneHierarchy\SceneHierarchyPanelTree.cpp">
+      <Filter>Panels\SceneHierarchy</Filter>
     </ClCompile>
-    <ClCompile Include="src\Panels\SceneHierarchyPanelTree.cpp">
-      <Filter>Panels</Filter>
+    <ClCompile Include="src\Panels\SceneHierarchy\WidgetHelpers.cpp">
+      <Filter>Panels\SceneHierarchy</Filter>
     </ClCompile>
     <ClCompile Include="src\Panels\SpriteSheetPickerPanel.cpp">
       <Filter>Panels</Filter>
     </ClCompile>
-    <ClCompile Include="src\Tools\AssetAliasManifestEditorPanel.cpp">
-      <Filter>Tools</Filter>
+    <ClCompile Include="src\Panels\WAOActionEditorPanel.cpp">
+      <Filter>Panels</Filter>
     </ClCompile>
-    <ClCompile Include="src\Tools\ProjectHealthPanel.cpp">
-      <Filter>Tools</Filter>
+    <ClCompile Include="src\Panels\WAOActionEditorPanel_Effects.cpp">
+      <Filter>Panels</Filter>
     </ClCompile>
-    <ClCompile Include="src\Tools\ProjectHealthPanel_Hygiene.cpp">
-      <Filter>Tools</Filter>
+    <ClCompile Include="src\Panels\WAOActionEditorPanel_Sandbox.cpp">
+      <Filter>Panels</Filter>
     </ClCompile>
-    <ClCompile Include="src\Tools\WAOActionEditorPanel.cpp">
-      <Filter>Tools</Filter>
-    </ClCompile>
-    <ClCompile Include="src\Tools\WAOActionEditorPanel_Effects.cpp">
-      <Filter>Tools</Filter>
-    </ClCompile>
-    <ClCompile Include="src\Tools\WAOActionEditorPanel_Sandbox.cpp">
-      <Filter>Tools</Filter>
-    </ClCompile>
-    <ClCompile Include="src\Tools\WAOActionEditorPanel_Sets.cpp">
-      <Filter>Tools</Filter>
+    <ClCompile Include="src\Panels\WAOActionEditorPanel_Sets.cpp">
+      <Filter>Panels</Filter>
     </ClCompile>
     <ClCompile Include="src\WheatearEditorApp.cpp" />
     <ClCompile Include="src\wepch.cpp" />

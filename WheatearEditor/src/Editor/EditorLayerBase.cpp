@@ -1,10 +1,10 @@
-#include "wtpch.h"
+#include "wepch.h"
 #include "EditorLayerBase.h"
 
 #include "Wheatear/Scene/Components.h"
 #include "Panels/AnimationEditorPanel.h"
 #include "Panels/ContentBrowserPanel.h"
-#include "Panels/SceneHierarchyPanel.h"
+#include "Panels/SceneHierarchy/SceneHierarchyPanel.h"
 #include "Panels/SpriteSheetPickerPanel.h"
 
 #include <ImGuizmo.h>

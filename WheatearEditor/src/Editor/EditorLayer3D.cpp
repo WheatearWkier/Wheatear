@@ -1,4 +1,4 @@
-#include "wtpch.h"
+#include "wepch.h"
 #include "EditorLayer3D.h"
 
 #include "Editor/EditorLocale.h"
@@ -11,7 +11,7 @@
 #include "Wheatear/Scene/Components.h"
 #include "Wheatear/Scene/Scene.h"
 #include "Wheatear/Utils/PlatformUtils.h"
-#include "Panels/SceneHierarchyPanel.h"
+#include "Panels/SceneHierarchy/SceneHierarchyPanel.h"
 
 #include <imgui/imgui.h>
 #include <glm/gtc/matrix_transform.hpp>

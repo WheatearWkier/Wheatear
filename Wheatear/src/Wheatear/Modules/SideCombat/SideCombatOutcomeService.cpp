@@ -4,7 +4,7 @@
 #include "SideCombatPickupService.h"
 #include "SideCombatResultService.h"
 #include "SideCombatTuningService.h"
-#include "Wheatear/Modules/Common/GameplayFlowService.h"
+#include "Wheatear/Gameplay/Services/GameplayFlowService.h"
 #include "Wheatear/Modules/Progression/GameProgress.h"
 #include "Wheatear/Scene/Components.h"
 #include "Wheatear/Scene/Scene.h"

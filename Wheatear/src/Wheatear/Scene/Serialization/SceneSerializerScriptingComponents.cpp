@@ -1,6 +1,8 @@
 ﻿#include "wtpch.h"
 #include "SceneSerializerComponentSupport.h"
 
+#include <string>
+
 namespace Wheatear {
 
     template<> struct ComponentSerializer<ScriptComponent> {

@@ -1,7 +1,7 @@
 #include "wtpch.h"
 #include "TacticalCombatFeedbackService.h"
 
-#include "Wheatear/Modules/Common/GameplayAudioService.h"
+#include "Wheatear/Gameplay/Services/GameplayAudioService.h"
 
 namespace Wheatear::TacticalCombatFeedbackService {
 

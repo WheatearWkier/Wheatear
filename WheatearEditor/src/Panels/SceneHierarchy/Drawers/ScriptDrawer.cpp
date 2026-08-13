@@ -1,11 +1,12 @@
-﻿#include "ScriptDrawer.h"
+#include "wepch.h"
+#include "ScriptDrawer.h"
 #include "Wheatear/Core/EngineInfo.h"
 
 #include "../ComponentDrawers.h"
 
 #include "Editor/EditorLocale.h"
 #include "Editor/EditorWidgets.h"
-#include "Editor/EventScriptGraphPanel.h"
+#include "Panels/EventScriptGraphPanel.h"
 #include "Wheatear/Scene/Components.h"
 #include "Wheatear/Scripting/ScriptEngine.h"
 

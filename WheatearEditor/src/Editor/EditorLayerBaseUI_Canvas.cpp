@@ -1,4 +1,4 @@
-#include "wtpch.h"
+#include "wepch.h"
 #include "EditorLayerBase.h"
 
 #include "Wheatear/Core/Application.h"
@@ -20,8 +20,8 @@
 #include "Editor/EditorLocale.h"
 #include "Editor/EditorWidgets.h"
 #include "Panels/ContentBrowserPanel.h"
-#include "Panels/EditorCommands.h"
-#include "Panels/SceneHierarchyPanel.h"
+#include "Editor/EditorCommands.h"
+#include "Panels/SceneHierarchy/SceneHierarchyPanel.h"
 
 #include <imgui/imgui.h>
 #include <imgui/imgui_internal.h>

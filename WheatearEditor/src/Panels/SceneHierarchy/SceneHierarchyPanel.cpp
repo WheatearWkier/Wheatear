@@ -1,6 +1,6 @@
-﻿#include "wtpch.h"
+#include "wepch.h"
 #include "SceneHierarchyPanel.h"
-#include "EditorCommands.h"
+#include "Editor/EditorCommands.h"
 #include "Assets/UITemplateFactory.h"
 #include "Editor/EditorLocale.h"
 

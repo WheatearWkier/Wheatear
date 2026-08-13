@@ -3,7 +3,7 @@
 
 #include "GameProgress.h"
 #include "ProgressionContent.h"
-#include "Wheatear/Modules/Common/GameplayUILayoutService.h"
+#include "Wheatear/Gameplay/Services/GameplayUILayoutService.h"
 #include "Wheatear/Scene/Components.h"
 #include "Wheatear/Scene/Entity.h"
 #include "Wheatear/Scene/EntityReference.h"

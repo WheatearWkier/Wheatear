@@ -1,7 +1,7 @@
 #include "wtpch.h"
 #include "ArcadeCombatHudService.h"
 
-#include "Wheatear/Modules/Common/GameplayUIService.h"
+#include "Wheatear/Gameplay/Services/GameplayUIService.h"
 #include "Wheatear/UI/UIRuntimeTools.h"
 
 #include <string>

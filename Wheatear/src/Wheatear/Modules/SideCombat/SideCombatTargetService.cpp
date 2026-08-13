@@ -2,7 +2,7 @@
 #include "SideCombatTargetService.h"
 
 #include "SideCombatMath.h"
-#include "Wheatear/Modules/Common/GameplayTargetingService.h"
+#include "Wheatear/Gameplay/Services/GameplayTargetingService.h"
 #include "Wheatear/Scene/Components.h"
 #include "Wheatear/Scene/Scene.h"
 

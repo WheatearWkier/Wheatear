@@ -1,7 +1,7 @@
 #include "wtpch.h"
 #include "ProgressionSaveLoadPageService.h"
 
-#include "Wheatear/Modules/Common/GameplayUILayoutService.h"
+#include "Wheatear/Gameplay/Services/GameplayUILayoutService.h"
 #include "Wheatear/Modules/Progression/GameProgress.h"
 #include "Wheatear/Scene/SceneQueries.h"
 #include "Wheatear/UI/UIRuntimeTools.h"

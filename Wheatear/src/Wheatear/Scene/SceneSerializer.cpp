@@ -2,7 +2,7 @@
 #include "SceneSerializer.h"
 #include "Entity.h"
 #include "Components.h"
-#include "SceneSerializerComponentGroups.h"
+#include "Wheatear/Scene/Serialization/SceneSerializerComponentGroups.h"
 
 #include "Wheatear/Core/AssetPath.h"
 

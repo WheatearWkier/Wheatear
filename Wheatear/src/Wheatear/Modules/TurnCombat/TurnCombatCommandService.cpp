@@ -5,9 +5,9 @@
 #include "TurnCombatSkillService.h"
 #include "TurnCombatTargetService.h"
 #include "Wheatear/Core/AssetAliasRegistry.h"
-#include "Wheatear/Modules/Common/GameplayAudioService.h"
-#include "Wheatear/Modules/Common/GameplayEntityService.h"
-#include "Wheatear/Modules/Common/GameplayTextService.h"
+#include "Wheatear/Gameplay/Services/GameplayAudioService.h"
+#include "Wheatear/Gameplay/Services/GameplayEntityService.h"
+#include "Wheatear/Gameplay/Services/GameplayTextService.h"
 
 #include <optional>
 #include <string>

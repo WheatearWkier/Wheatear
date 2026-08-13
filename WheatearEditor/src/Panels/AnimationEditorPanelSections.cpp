@@ -2,7 +2,7 @@
 #include "AnimationEditorPanel.h"
 
 #include "ContentBrowserPanel.h"
-#include "EditorCommands.h"
+#include "Editor/EditorCommands.h"
 #include "Editor/EditorLocale.h"
 #include "Editor/EditorWidgets.h"
 #include "SpriteSheetPickerPanel.h"
@@ -13,7 +13,6 @@
 #include <glm/gtc/type_ptr.hpp>
 
 #include <cfloat>
-#include <vector>
 
 namespace Wheatear {
 

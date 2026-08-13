@@ -1,7 +1,7 @@
 #pragma once
 
 #include "TurnCombatComponents.h"
-#include "Wheatear/Modules/Common/GameplayVisualService.h"
+#include "Wheatear/Gameplay/Services/GameplayVisualService.h"
 #include "Wheatear/Core/Core.h"
 
 #include <optional>

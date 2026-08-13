@@ -12,7 +12,7 @@
 #include "Wheatear/Core/Input.h"
 #include "Wheatear/Core/Log.h"
 #include "Wheatear/Core/UserSettings.h"
-#include "Wheatear/Modules/Common/GameplayAudioService.h"
+#include "Wheatear/Gameplay/Services/GameplayAudioService.h"
 #include "Wheatear/Modules/Progression/GameProgress.h"
 #include "Wheatear/Runtime/CommandBus.h"
 #include "Wheatear/Renderer/Texture.h"

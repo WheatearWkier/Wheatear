@@ -1,11 +1,12 @@
 #pragma once
 #include <imgui/imgui.h>
 #include <imgui/imgui_internal.h>
+#include <string>
 #include <typeinfo>
 #include <unordered_map>
 #include "Wheatear/Scene/Entity.h"
 #include "Editor/EditorLocale.h"
-#include "Panels/EditorCommands.h"
+#include "Editor/EditorCommands.h"
 namespace Wheatear {
     template<typename T, typename UIFunction>
     void DrawComponent(const std::string& name, Entity entity, UIFunction uiFunction)

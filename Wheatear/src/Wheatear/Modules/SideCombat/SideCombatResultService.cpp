@@ -1,7 +1,7 @@
 #include "wtpch.h"
 #include "SideCombatResultService.h"
 
-#include "Wheatear/Modules/Common/GameplayTextService.h"
+#include "Wheatear/Gameplay/Services/GameplayTextService.h"
 
 #include <sstream>
 

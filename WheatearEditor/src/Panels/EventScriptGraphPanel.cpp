@@ -1,3 +1,4 @@
+#include "wepch.h"
 #include "EventScriptGraphPanel.h"
 
 #include "Editor/CommandBuilder.h"
@@ -14,8 +15,6 @@
 #include <cmath>
 #include <cstring>
 #include <iomanip>
-#include <sstream>
-#include <vector>
 
 namespace Wheatear {
 

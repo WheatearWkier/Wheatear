@@ -1,9 +1,9 @@
-#include "wtpch.h"
+#include "wepch.h"
 #include "CoreEditorComponents.h"
 
 #include "Editor/EditorComponentRegistry.h"
 #include "Editor/EditorLocale.h"
-#include "Panels/EditorCommands.h"
+#include "Editor/EditorCommands.h"
 #include "Panels/SceneHierarchy/ComponentDrawers.h"
 #include "Wheatear/Scene/Components.h"
 #include "Wheatear/UI/UIWidgetLayout.h"

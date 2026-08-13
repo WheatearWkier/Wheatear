@@ -6,7 +6,7 @@
 #include "Wheatear/Gameplay/Action/ActionRecipeQueries.h"
 #include "Wheatear/Gameplay/Action/ActionResolver.h"
 #include "Wheatear/Gameplay/Action/ActionSignalRouter.h"
-#include "Wheatear/Modules/Common/GameplayAudioService.h"
+#include "Wheatear/Gameplay/Services/GameplayAudioService.h"
 
 namespace Wheatear::ArcadeCombatActionResolver {
 

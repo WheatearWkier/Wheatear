@@ -2,7 +2,7 @@
 #include "SideCombatFeedbackService.h"
 
 #include "Wheatear/Core/UserSettings.h"
-#include "Wheatear/Modules/Common/GameplayAudioService.h"
+#include "Wheatear/Gameplay/Services/GameplayAudioService.h"
 #include "Wheatear/Scene/Components.h"
 #include "Wheatear/Scene/Entity.h"
 #include "Wheatear/Scene/Scene.h"

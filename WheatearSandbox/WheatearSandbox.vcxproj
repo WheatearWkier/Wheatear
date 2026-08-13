@@ -147,14 +147,10 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="src\RuntimeSceneLayer.h" />
-    <ClInclude Include="resource.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\RuntimeSceneLayer.cpp" />
     <ClCompile Include="src\WheatearSandboxApp.cpp" />
-  </ItemGroup>
-  <ItemGroup>
-    <ResourceCompile Include="WheatearSandbox.rc" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Wheatear\Wheatear.vcxproj">

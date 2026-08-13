@@ -1,4 +1,4 @@
-﻿#include "wtpch.h"
+#include "wepch.h"
 #include "EditorLayerBase.h"
 
 #include "Wheatear/Core/Application.h"
@@ -30,8 +30,8 @@
 #include "Assets/UITemplateFactory.h"
 #include "Editor/EditorCanvasTools.h"
 #include "Panels/AnimationEditorPanel.h"
-#include "Panels/EditorCommands.h"
-#include "Panels/SceneHierarchyPanel.h"
+#include "Editor/EditorCommands.h"
+#include "Panels/SceneHierarchy/SceneHierarchyPanel.h"
 #include "Panels/SpriteSheetPickerPanel.h"
 
 #include <imgui/imgui.h>

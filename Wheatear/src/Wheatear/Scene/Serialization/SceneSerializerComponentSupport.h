@@ -1,8 +1,8 @@
 ﻿#pragma once
 
-#include "SceneSerializer.h"
-#include "Entity.h"
-#include "Components.h"
+#include "Wheatear/Scene/SceneSerializer.h"
+#include "Wheatear/Scene/Entity.h"
+#include "Wheatear/Scene/Components.h"
 #include "Wheatear/Animation/AnimationClip.h"
 #include "Wheatear/Scripting/ScriptEngine.h"
 

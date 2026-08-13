@@ -1,3 +1,4 @@
+#include "wepch.h"
 #include "ArcadeCombatDrawer.h"
 
 #include "Editor/CommandBuilder.h"
@@ -11,7 +12,6 @@
 #include <glm/gtc/type_ptr.hpp>
 
 #include <algorithm>
-#include <vector>
 
 namespace Wheatear {
 

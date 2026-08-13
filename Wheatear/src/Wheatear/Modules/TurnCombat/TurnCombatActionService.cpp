@@ -8,9 +8,9 @@
 #include "Wheatear/Gameplay/Action/ActionDebugHistory.h"
 #include "Wheatear/Gameplay/Action/ActionRecipeQueries.h"
 #include "Wheatear/Gameplay/Action/StateRegistry.h"
-#include "Wheatear/Modules/Common/GameplayAudioService.h"
-#include "Wheatear/Modules/Common/GameplayCombatService.h"
-#include "Wheatear/Modules/Common/GameplayEntityService.h"
+#include "Wheatear/Gameplay/Services/GameplayAudioService.h"
+#include "Wheatear/Gameplay/Services/GameplayCombatService.h"
+#include "Wheatear/Gameplay/Services/GameplayEntityService.h"
 #include "Wheatear/UI/UIRuntimeTools.h"
 
 #include <algorithm>

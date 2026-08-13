@@ -1,4 +1,4 @@
-#include "wtpch.h"
+#include "wepch.h"
 #include "ContentBrowserPanel.h"
 
 #include "Assets/AssetRegistry.h"
@@ -6,7 +6,7 @@
 #include "Editor/EditorLocale.h"
 #include "Editor/EditorPlatform.h"
 #include "Editor/EditorWidgets.h"
-#include "Editor/EventScriptGraphPanel.h"
+#include "Panels/EventScriptGraphPanel.h"
 #include "Modules/VisualNovel/VisualNovelScriptEditorPanel.h"
 #include "Wheatear/Core/AssetPath.h"
 #include "Wheatear/Core/EngineInfo.h"

@@ -3,7 +3,7 @@
 
 #include "GameProgress.h"
 #include "Wheatear/Core/UserSettings.h"
-#include "Wheatear/Modules/Common/GameplayUILayoutService.h"
+#include "Wheatear/Gameplay/Services/GameplayUILayoutService.h"
 #include "Wheatear/Scene/SceneQueries.h"
 
 #include <array>

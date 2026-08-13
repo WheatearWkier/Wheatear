@@ -2,8 +2,8 @@
 #include "SideCombatVisualService.h"
 
 #include "Wheatear/Animation/AnimationClip.h"
-#include "Wheatear/Modules/Common/GameplayTextService.h"
-#include "Wheatear/Modules/Common/GameplayVisualService.h"
+#include "Wheatear/Gameplay/Services/GameplayTextService.h"
+#include "Wheatear/Gameplay/Services/GameplayVisualService.h"
 #include "Wheatear/Renderer/Texture.h"
 #include "Wheatear/Scene/Components.h"
 #include "Wheatear/Scene/Scene.h"

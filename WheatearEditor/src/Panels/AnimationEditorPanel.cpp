@@ -1,11 +1,11 @@
-#include "wtpch.h"
+#include "wepch.h"
 #include "AnimationEditorPanel.h"
 
 #include "Editor/EditorContentPickers.h"
 #include "Editor/EditorFloatingWindow.h"
 #include "Editor/EditorLocale.h"
 #include "Editor/EditorWidgets.h"
-#include "EditorCommands.h"
+#include "Editor/EditorCommands.h"
 
 #include <imgui/imgui.h>
 #include <imgui/imgui_internal.h>

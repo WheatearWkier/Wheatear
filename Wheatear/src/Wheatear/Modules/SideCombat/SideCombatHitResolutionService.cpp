@@ -3,7 +3,7 @@
 
 #include "SideCombatActionService.h"
 #include "Wheatear/Gameplay/Action/ActionDebugHistory.h"
-#include "Wheatear/Modules/Common/GameplayCombatService.h"
+#include "Wheatear/Gameplay/Services/GameplayCombatService.h"
 #include "Wheatear/Scene/Components.h"
 #include "Wheatear/Scene/Scene.h"
 

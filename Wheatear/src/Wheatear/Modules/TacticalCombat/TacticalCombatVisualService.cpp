@@ -3,8 +3,8 @@
 
 #include "TacticalCombatBoardService.h"
 #include "TacticalCombatSkillService.h"
-#include "Wheatear/Modules/Common/GameplayEntityService.h"
-#include "Wheatear/Modules/Common/GameplayVisualService.h"
+#include "Wheatear/Gameplay/Services/GameplayEntityService.h"
+#include "Wheatear/Gameplay/Services/GameplayVisualService.h"
 #include "Wheatear/UI/UIRuntimeTools.h"
 
 #include <algorithm>

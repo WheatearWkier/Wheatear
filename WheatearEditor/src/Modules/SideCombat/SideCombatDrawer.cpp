@@ -1,3 +1,4 @@
+#include "wepch.h"
 #include "SideCombatDrawer.h"
 
 #include "Editor/CommandBuilder.h"
@@ -17,7 +18,6 @@
 
 #include <algorithm>
 #include <unordered_map>
-#include <vector>
 
 namespace Wheatear {
 

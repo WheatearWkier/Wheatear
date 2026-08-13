@@ -2,7 +2,7 @@
 #include "AnimationClipSerializer.h"
 
 #include "Wheatear/Renderer/Texture.h"
-#include "Wheatear/Scene/SceneSerializerComponentSupport.h"
+#include "Wheatear/Scene/Serialization/SceneSerializerComponentSupport.h"
 
 #include <yaml-cpp/yaml.h>
 

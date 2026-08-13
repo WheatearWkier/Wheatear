@@ -3,9 +3,9 @@
 
 #include "ArcadeCombatComponents.h"
 #include "Wheatear/Core/AssetAliasRegistry.h"
-#include "Wheatear/Modules/Common/GameplayCombatService.h"
-#include "Wheatear/Modules/Common/GameplayAudioService.h"
-#include "Wheatear/Modules/Common/GameplayVisualService.h"
+#include "Wheatear/Gameplay/Services/GameplayCombatService.h"
+#include "Wheatear/Gameplay/Services/GameplayAudioService.h"
+#include "Wheatear/Gameplay/Services/GameplayVisualService.h"
 #include "Wheatear/Renderer/Texture.h"
 #include "Wheatear/Scene/Components.h"
 #include "Wheatear/Scene/Entity.h"

@@ -3,7 +3,7 @@
 
 #include "Wheatear/Gameplay/Action/ActionRecipeQueries.h"
 #include "Wheatear/Gameplay/Action/ActionResolver.h"
-#include "Wheatear/Modules/Common/GameplayAudioService.h"
+#include "Wheatear/Gameplay/Services/GameplayAudioService.h"
 
 #include <algorithm>
 #include <cmath>

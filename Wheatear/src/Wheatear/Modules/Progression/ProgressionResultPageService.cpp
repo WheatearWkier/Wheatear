@@ -3,8 +3,8 @@
 
 #include "GameProgress.h"
 #include "Wheatear/Core/AssetAliasRegistry.h"
-#include "Wheatear/Modules/Common/GameplayRewardService.h"
-#include "Wheatear/Modules/Common/GameplayUIService.h"
+#include "Wheatear/Gameplay/Services/GameplayRewardService.h"
+#include "Wheatear/Gameplay/Services/GameplayUIService.h"
 #include "Wheatear/Scene/Entity.h"
 #include "Wheatear/Scene/SceneQueries.h"
 #include "Wheatear/UI/UIRuntimeTools.h"

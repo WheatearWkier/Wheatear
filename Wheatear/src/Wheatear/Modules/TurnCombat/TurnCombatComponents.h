@@ -2,7 +2,7 @@
 
 #include "Wheatear/Core/UUID.h"
 #include "Wheatear/Gameplay/Action/ActionTypes.h"
-#include "Wheatear/Modules/Common/GameplayVisualService.h"
+#include "Wheatear/Gameplay/Services/GameplayVisualService.h"
 
 #include <string>
 #include <vector>

@@ -1,4 +1,4 @@
-﻿#include "wtpch.h"
+#include "wepch.h"
 #include "SceneHierarchyPanel.h"
 
 #include "Wheatear/Scene/Components.h"

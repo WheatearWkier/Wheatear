@@ -1,7 +1,7 @@
 #include "wtpch.h"
 #include "ArcadeCombatOutcomeService.h"
 
-#include "Wheatear/Modules/Common/GameplayFlowService.h"
+#include "Wheatear/Gameplay/Services/GameplayFlowService.h"
 #include "Wheatear/Scene/Components.h"
 #include "Wheatear/UI/UIRuntimeTools.h"
 

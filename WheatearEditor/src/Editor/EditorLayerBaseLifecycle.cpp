@@ -1,4 +1,4 @@
-#include "wtpch.h"
+#include "wepch.h"
 #include "EditorLayerBase.h"
 #include "Editor/EditorLocale.h"
 
@@ -25,8 +25,8 @@
 #include "Wheatear/Math/Math.h"
 #include "Editor/EditorCanvasTools.h"
 #include "Panels/AnimationEditorPanel.h"
-#include "Panels/EditorCommands.h"
-#include "Panels/SceneHierarchyPanel.h"
+#include "Editor/EditorCommands.h"
+#include "Panels/SceneHierarchy/SceneHierarchyPanel.h"
 
 #include <imgui/imgui.h>
 #include <imgui/imgui_internal.h>
@@ -42,7 +42,6 @@
 #include <memory>
 #include <system_error>
 #include <unordered_set>
-#include <vector>
 
 
 namespace Wheatear {

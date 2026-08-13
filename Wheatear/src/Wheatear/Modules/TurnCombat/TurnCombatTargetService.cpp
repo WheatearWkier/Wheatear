@@ -1,8 +1,8 @@
 #include "wtpch.h"
 #include "TurnCombatTargetService.h"
 
-#include "Wheatear/Modules/Common/GameplayEntityService.h"
-#include "Wheatear/Modules/Common/GameplayTargetingService.h"
+#include "Wheatear/Gameplay/Services/GameplayEntityService.h"
+#include "Wheatear/Gameplay/Services/GameplayTargetingService.h"
 #include "Wheatear/Scene/Scene.h"
 #include "Wheatear/Scene/SceneQueries.h"
 

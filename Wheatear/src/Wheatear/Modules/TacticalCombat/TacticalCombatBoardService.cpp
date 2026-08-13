@@ -1,7 +1,7 @@
 #include "wtpch.h"
 #include "TacticalCombatBoardService.h"
 
-#include "Wheatear/Modules/Common/GameplayTargetingService.h"
+#include "Wheatear/Gameplay/Services/GameplayTargetingService.h"
 #include "Wheatear/Scene/Scene.h"
 
 #include <algorithm>

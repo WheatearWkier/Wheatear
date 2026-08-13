@@ -1,7 +1,7 @@
 ﻿#pragma once
 
-#include "Entity.h"
-#include "Wheatear/Modules/Common/GameplayVisualService.h"
+#include "Wheatear/Scene/Entity.h"
+#include "Wheatear/Gameplay/Services/GameplayVisualService.h"
 
 #include <yaml-cpp/yaml.h>
 

@@ -5,13 +5,11 @@
 #include "Wheatear/Gameplay/Action/ActionDatabase.h"
 #include "Wheatear/Gameplay/Action/ActionRecipeQueries.h"
 #include "Wheatear/Gameplay/Action/StateRegistry.h"
-#include "Wheatear/Modules/Common/GameplayTextService.h"
+#include "Wheatear/Gameplay/Services/GameplayTextService.h"
 #include "Wheatear/Utils/StringUtils.h"
 
 #include <algorithm>
-#include <cctype>
 #include <cmath>
-#include <sstream>
 
 namespace Wheatear::TacticalCombatSkillService {
 

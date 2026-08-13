@@ -7,7 +7,7 @@
 #include "TacticalCombatSkillService.h"
 #include "TacticalCombatUIService.h"
 #include "TacticalCombatVisualService.h"
-#include "Wheatear/Modules/Common/GameplayFlowService.h"
+#include "Wheatear/Gameplay/Services/GameplayFlowService.h"
 #include "Wheatear/UI/UIRuntimeTools.h"
 
 #include <algorithm>

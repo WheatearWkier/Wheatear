@@ -1,7 +1,7 @@
 #include "wepch.h"
 #include "AnimationEditorPanel.h"
 
-#include "EditorCommands.h"
+#include "Editor/EditorCommands.h"
 #include "Editor/EditorLocale.h"
 #include "Editor/EditorWidgets.h"
 #include "Wheatear/Animation/AnimationClip.h"
@@ -14,7 +14,6 @@
 #include <algorithm>
 #include <cmath>
 #include <string>
-#include <vector>
 
 namespace Wheatear {
 

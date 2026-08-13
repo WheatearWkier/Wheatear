@@ -1,3 +1,4 @@
+#include "wepch.h"
 #include "VisualNovelDrawer.h"
 
 #include "Editor/EditorContentPickers.h"
@@ -9,7 +10,6 @@
 
 #include <imgui/imgui.h>
 
-#include <algorithm>
 #include <vector>
 
 namespace Wheatear {

@@ -1,3 +1,4 @@
+#include "wepch.h"
 #include "TurnCombatDrawer.h"
 
 #include "Editor/CommandBuilder.h"
@@ -10,9 +11,7 @@
 
 #include <imgui/imgui.h>
 
-#include <algorithm>
 #include <string>
-#include <vector>
 
 namespace Wheatear {
 

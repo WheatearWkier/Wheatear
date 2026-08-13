@@ -6,8 +6,8 @@
 #include "TacticalCombatFeedbackService.h"
 #include "TacticalCombatSkillService.h"
 #include "Wheatear/Core/AssetAliasRegistry.h"
-#include "Wheatear/Modules/Common/GameplayEntityService.h"
-#include "Wheatear/Modules/Common/GameplayTextService.h"
+#include "Wheatear/Gameplay/Services/GameplayEntityService.h"
+#include "Wheatear/Gameplay/Services/GameplayTextService.h"
 
 #include <optional>
 #include <string>
