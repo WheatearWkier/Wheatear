@@ -1,5 +1,6 @@
 #pragma once
 
+#include "Editor/EditorLocale.h"
 #include "Editor/AssetDocument.h"
 
 #include <imgui/imgui.h>
@@ -116,15 +117,15 @@ namespace Wheatear::EditorUI {
             if (!state.Loaded)
                 LoadTextAsset(state, sourcePath, defaultCapacity);
 
-            ImGui::TextDisabled("Resolved: %s", state.ResolvedPath.generic_string().c_str());
+            ImGui::TextDisabled(EditorLocale::Text("Resolved: %s", "解析路径: %s"), state.ResolvedPath.generic_string().c_str());
 
-            if (ImGui::Button("Reload"))
+            if (ImGui::Button(EditorLocale::Text("Reload", "重载")))
                 LoadTextAsset(state, sourcePath, defaultCapacity);
 
             if ((textFlags & ImGuiInputTextFlags_ReadOnly) == 0)
             {
                 ImGui::SameLine();
-                if (ImGui::Button("Save"))
+                if (ImGui::Button(EditorLocale::Text("Save", "保存")))
                     SaveTextAsset(state, sourcePath);
             }
 

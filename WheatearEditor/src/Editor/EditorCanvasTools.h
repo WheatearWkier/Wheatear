@@ -2,6 +2,7 @@
 
 #include "Wheatear/Scene/Entity.h"
 
+#include "Editor/EditorLocale.h"
 #include <functional>
 #include <utility>
 
@@ -37,9 +38,9 @@ namespace Wheatear::EditorCanvasTools {
             return;
 
         ImGui::Separator();
-        ImGui::TextDisabled("Editor Tools");
+        ImGui::TextDisabled(EditorLocale::Text("Editor Tools", "编辑器工具"));
 
-        if (ImGui::Button("Edit Canvas"))
+        if (ImGui::Button(EditorLocale::Text("Edit Canvas", "编辑画布")))
             callbacks.OpenCanvasEditor(canvasEntity);
     }
 

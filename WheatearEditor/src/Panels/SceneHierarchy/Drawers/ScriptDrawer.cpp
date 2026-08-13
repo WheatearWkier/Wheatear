@@ -3,6 +3,7 @@
 
 #include "../ComponentDrawers.h"
 
+#include "Editor/EditorLocale.h"
 #include "Editor/EditorWidgets.h"
 #include "Editor/EventScriptGraphPanel.h"
 #include "Wheatear/Scene/Components.h"
@@ -304,9 +305,9 @@ namespace Wheatear {
                 }
 
                 if (!anyVisible && classNames.empty())
-                    ImGui::TextDisabled("No script classes loaded.");
+                    ImGui::TextDisabled(EditorLocale::Text("No script classes loaded.", "未加载脚本类。"));
                 else if (!anyVisible)
-                    ImGui::TextDisabled("No matches.");
+                    ImGui::TextDisabled(EditorLocale::Text("No matches.", "无匹配。"));
 
                 ImGui::EndCombo();
             }
@@ -320,7 +321,7 @@ namespace Wheatear {
             if (!component.ClassName.empty())
             {
                 ImGui::SameLine();
-                if (ImGui::SmallButton("Clear"))
+                if (ImGui::SmallButton(EditorLocale::Text("Clear", "清空")))
                 {
                     component.ClassName.clear();
                     ScriptEngine::ClearScriptFieldMap(entity);
@@ -360,7 +361,7 @@ namespace Wheatear {
             const auto& fields = scriptClass->GetFields();
             if (fields.empty())
             {
-                ImGui::TextDisabled("No public editable fields.");
+                ImGui::TextDisabled(EditorLocale::Text("No public editable fields.", "无公开可编辑字段。"));
                 ImGui::PopID();
                 return;
             }
@@ -392,12 +393,12 @@ namespace Wheatear {
         {
             ImGui::PushID(static_cast<int>(static_cast<uint32_t>(entity.GetUUID())));
 
-            InputString("Script Path", component.ScriptPath, 320);
-            InputString("Start Event", component.StartEvent, 128);
-            ImGui::Checkbox("Enabled", &component.Enabled);
-            ImGui::Checkbox("Run On Start", &component.RunOnStart);
-            ImGui::Checkbox("Run Once", &component.RunOnce);
-            if (ImGui::Button("Open Event Script Editor"))
+            InputString(EditorLocale::Text("Script Path", "脚本路径"), component.ScriptPath, 320);
+            InputString(EditorLocale::Text("Start Event", "起始事件"), component.StartEvent, 128);
+            ImGui::Checkbox(EditorLocale::Text("Enabled", "启用"), &component.Enabled);
+            ImGui::Checkbox(EditorLocale::Text("Run On Start", "开始时运行"), &component.RunOnStart);
+            ImGui::Checkbox(EditorLocale::Text("Run Once", "仅运行一次"), &component.RunOnce);
+            if (ImGui::Button(EditorLocale::Text("Open Event Script Editor", "打开事件脚本编辑器")))
                 EventScriptGraphRequests::RequestOpenScript(component.ScriptPath, component.StartEvent);
             ImGui::SameLine();
             EditorWidgets::StatusBadge("Edits Asset", EditorWidgets::StatusKind::Info);
@@ -405,13 +406,13 @@ namespace Wheatear {
             EditorWidgets::StatusBadge("Edits Scene", EditorWidgets::StatusKind::Success);
 
             ImGui::Separator();
-            ImGui::TextDisabled("Runtime");
-            ImGui::TextDisabled("Active: %s", component.RuntimeActive ? "true" : "false");
-            ImGui::TextDisabled("Started: %s", component.RuntimeStarted ? "true" : "false");
-            ImGui::TextDisabled("Completed: %s", component.RuntimeCompleted ? "true" : "false");
-            ImGui::TextDisabled("Current Event: %s",
+            ImGui::TextDisabled(EditorLocale::Text("Runtime", "运行时"));
+            ImGui::TextDisabled(EditorLocale::Text("Active: %s", "激活: %s"), component.RuntimeActive ? "true" : "false");
+            ImGui::TextDisabled(EditorLocale::Text("Started: %s", "已开始: %s"), component.RuntimeStarted ? "true" : "false");
+            ImGui::TextDisabled(EditorLocale::Text("Completed: %s", "已完成: %s"), component.RuntimeCompleted ? "true" : "false");
+            ImGui::TextDisabled(EditorLocale::Text("Current Event: %s", "当前事件: %s"),
                 component.RuntimeEventName.empty() ? "(none)" : component.RuntimeEventName.c_str());
-            ImGui::TextDisabled("Instruction: %zu / Wait: %.2fs",
+            ImGui::TextDisabled(EditorLocale::Text("Instruction: %zu / Wait: %.2fs", "指令: %zu / 等待: %.2fs"),
                 component.RuntimeInstructionIndex,
                 component.RuntimeWaitRemaining);
 

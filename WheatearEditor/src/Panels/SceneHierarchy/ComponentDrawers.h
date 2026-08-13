@@ -4,6 +4,7 @@
 #include <typeinfo>
 #include <unordered_map>
 #include "Wheatear/Scene/Entity.h"
+#include "Editor/EditorLocale.h"
 #include "Panels/EditorCommands.h"
 namespace Wheatear {
     template<typename T, typename UIFunction>
@@ -36,7 +37,7 @@ namespace Wheatear {
         bool removeComponent = false;
         if (ImGui::BeginPopup("ComponentSettings"))
         {
-            if (ImGui::MenuItem("Reset"))
+            if (ImGui::MenuItem(EditorLocale::Text("Reset", "重置")))
             {
                 T before = entity.GetComponent<T>();
                 T after{};
@@ -45,7 +46,7 @@ namespace Wheatear {
                 ImGui::CloseCurrentPopup();
             }
             ImGui::Separator();
-            if (ImGui::MenuItem("Remove Component"))
+            if (ImGui::MenuItem(EditorLocale::Text("Remove Component", "移除组件")))
                 removeComponent = true;
             ImGui::EndPopup();
         }

@@ -1,5 +1,6 @@
 #include "Mesh3DDrawers.h"
 #include "../ComponentDrawers.h"
+#include "Editor/EditorLocale.h"
 #include "Wheatear/Core/AssetPath.h"
 #include "Wheatear/Core/EngineInfo.h"
 #include "Wheatear/Scene/Components.h"
@@ -24,7 +25,7 @@ namespace Wheatear {
                     meshName = path.empty() ? "[Built-in]"
                         : std::filesystem::path(path).filename().string();
                 }
-                ImGui::Text("Mesh");
+                ImGui::Text(EditorLocale::Text("Mesh", "网格"));
                 ImGui::SameLine();
                 const std::string meshButtonLabel = meshName + "##MeshDropSlot";
                 ImGui::Button(meshButtonLabel.c_str(), ImVec2(-1, 0));
@@ -42,12 +43,12 @@ namespace Wheatear {
                     ImGui::EndDragDropTarget();
                 }
                 ImGui::Spacing();
-                if (ImGui::Button("Cube"))   c.Mesh = Mesh::CreateCube();
+                if (ImGui::Button(EditorLocale::Text("Cube", "立方体")))   c.Mesh = Mesh::CreateCube();
                 ImGui::SameLine();
-                if (ImGui::Button("Sphere")) c.Mesh = Mesh::CreateSphere();
+                if (ImGui::Button(EditorLocale::Text("Sphere", "球体"))) c.Mesh = Mesh::CreateSphere();
                 ImGui::Separator();
 
-                ImGui::Text("Material");
+                ImGui::Text(EditorLocale::Text("Material", "材质"));
                 ImGui::SameLine();
 
                 std::string matName = c.Material && !c.Material->GetPath().empty()
@@ -71,12 +72,12 @@ namespace Wheatear {
                     ImGui::EndDragDropTarget();
                 }
 
-                if (ImGui::Button("New Material"))
+                if (ImGui::Button(EditorLocale::Text("New Material", "新建材质")))
                     c.Material = Material::Create();
 
                 ImGui::SameLine();
 
-                if (ImGui::Button("Save Material"))
+                if (ImGui::Button(EditorLocale::Text("Save Material", "保存材质")))
                 {
                     if (c.Material)
                     {
@@ -97,9 +98,9 @@ namespace Wheatear {
                     auto& mat = *c.Material;
 
                     ImGui::ColorEdit4("Albedo", glm::value_ptr(mat.Albedo));
-                    ImGui::DragFloat("Metallic", &mat.Metallic, 0.01f, 0.0f, 1.0f);
-                    ImGui::DragFloat("Roughness", &mat.Roughness, 0.01f, 0.0f, 1.0f);
-                    ImGui::Checkbox("Flip Normals", &mat.FlipNormals);
+                    ImGui::DragFloat(EditorLocale::Text("Metallic", "金属度"), &mat.Metallic, 0.01f, 0.0f, 1.0f);
+                    ImGui::DragFloat(EditorLocale::Text("Roughness", "粗糙度"), &mat.Roughness, 0.01f, 0.0f, 1.0f);
+                    ImGui::Checkbox(EditorLocale::Text("Flip Normals", "翻转法线"), &mat.FlipNormals);
                     ImGui::Separator();
 
                     // AlbedoMap
@@ -162,9 +163,9 @@ namespace Wheatear {
         DrawComponent<DirectionalLightComponent>("Directional Light", entity, [](auto& c)
             {
                 ImGui::ColorEdit3("Color", glm::value_ptr(c.Color));
-                ImGui::DragFloat("Intensity", &c.Intensity, 0.01f, 0.0f, 10.0f);
+                ImGui::DragFloat(EditorLocale::Text("Intensity", "强度"), &c.Intensity, 0.01f, 0.0f, 10.0f);
                 ImGui::Spacing();
-                ImGui::TextDisabled("Direction is controlled by Transform Rotation");
+                ImGui::TextDisabled(EditorLocale::Text("Direction is controlled by Transform Rotation", "方向由 Transform 旋转控制"));
             });
     }
 
@@ -176,12 +177,12 @@ namespace Wheatear {
         DrawComponent<PointLightComponent>("Point Light", entity, [](auto& c)
             {
                 ImGui::ColorEdit3("Color", glm::value_ptr(c.Color));
-                ImGui::DragFloat("Intensity", &c.Intensity, 0.01f, 0.0f, 10.0f);
+                ImGui::DragFloat(EditorLocale::Text("Intensity", "强度"), &c.Intensity, 0.01f, 0.0f, 10.0f);
                 ImGui::Separator();
-                ImGui::Text("Attenuation");
-                ImGui::DragFloat("Constant", &c.Constant, 0.001f, 0.001f, 2.0f);
-                ImGui::DragFloat("Linear", &c.Linear, 0.001f, 0.0f, 1.0f);
-                ImGui::DragFloat("Quadratic", &c.Quadratic, 0.001f, 0.0f, 1.0f);
+                ImGui::Text(EditorLocale::Text("Attenuation", "衰减"));
+                ImGui::DragFloat(EditorLocale::Text("Constant", "常数"), &c.Constant, 0.001f, 0.001f, 2.0f);
+                ImGui::DragFloat(EditorLocale::Text("Linear", "线性"), &c.Linear, 0.001f, 0.0f, 1.0f);
+                ImGui::DragFloat(EditorLocale::Text("Quadratic", "二次"), &c.Quadratic, 0.001f, 0.0f, 1.0f);
 
                 if (c.Constant > 0.0f)
                 {
@@ -193,7 +194,7 @@ namespace Wheatear {
                     {
                         float r = (-b + std::sqrt(disc)) / (2.0f * a);
                         ImGui::Spacing();
-                        ImGui::TextDisabled("Effective radius: ~%.1f units", r > 0 ? r : 0.0f);
+                        ImGui::TextDisabled(EditorLocale::Text("Effective radius: ~%.1f units", "有效半径: ~%.1f 单位"), r > 0 ? r : 0.0f);
                     }
                 }
             });

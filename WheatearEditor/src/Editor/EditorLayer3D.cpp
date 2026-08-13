@@ -1,6 +1,7 @@
 #include "wtpch.h"
 #include "EditorLayer3D.h"
 
+#include "Editor/EditorLocale.h"
 #include "Wheatear/Core/AssetPath.h"
 
 #include "Wheatear/Renderer/Framebuffer.h"
@@ -187,7 +188,7 @@ namespace Wheatear {
     {
         ImGui::Begin("Settings (3D)");
 
-        ImGui::Text("Environment (IBL)");
+        ImGui::Text(EditorLocale::Text("Environment (IBL)", "环境 (IBL)"));
 
         if (m_IBL && m_IBL->IsValid())
         {
@@ -201,10 +202,10 @@ namespace Wheatear {
             ImGui::TextColored(ImVec4(1.0f, 0.6f, 0.2f, 1.0f), "None (gradient fallback)");
         }
 
-        if (ImGui::SliderFloat("IBL Intensity", &m_IBLIntensity, 0.0f, 3.0f))
+        if (ImGui::SliderFloat(EditorLocale::Text("IBL Intensity", "IBL 强度"), &m_IBLIntensity, 0.0f, 3.0f))
             Renderer3D::SetIBLIntensity(m_IBLIntensity);
 
-        if (ImGui::Button("Load HDR..."))
+        if (ImGui::Button(EditorLocale::Text("Load HDR...", "加载 HDR...")))
         {
             std::string path = FileDialogs::OpenFile("HDR Image (*.hdr)\0*.hdr\0");
             if (!path.empty())
@@ -220,7 +221,7 @@ namespace Wheatear {
         if (m_IBL && m_IBL->IsValid())
         {
             ImGui::SameLine();
-            if (ImGui::Button("Clear"))
+            if (ImGui::Button(EditorLocale::Text("Clear", "清空")))
             {
                 m_IBL.reset();
                 m_IBLPath.clear();
@@ -230,19 +231,19 @@ namespace Wheatear {
 
         // SSAO
         ImGui::Separator();
-        ImGui::Text("SSAO (Screen Space Ambient Occlusion)");
+        ImGui::Text(EditorLocale::Text("SSAO (Screen Space Ambient Occlusion)", "SSAO（屏幕空间环境光遮蔽）"));
 
         ImGui::Checkbox("Enable##ssao", &Renderer3D::SSAOEnabled());
         if (Renderer3D::SSAOEnabled())
         {
-            ImGui::SliderFloat("Radius##ssao", &Renderer3D::SSAORadius(), 0.05f, 2.0f);
-            ImGui::SliderFloat("Bias##ssao", &Renderer3D::SSAOBias(), 0.001f, 0.1f);
-            ImGui::SliderFloat("Power##ssao", &Renderer3D::SSAOPower(), 0.5f, 4.0f);
+            ImGui::SliderFloat(EditorLocale::Text("Radius##ssao", "半径##ssao"), &Renderer3D::SSAORadius(), 0.05f, 2.0f);
+            ImGui::SliderFloat(EditorLocale::Text("Bias##ssao", "偏移##ssao"), &Renderer3D::SSAOBias(), 0.001f, 0.1f);
+            ImGui::SliderFloat(EditorLocale::Text("Power##ssao", "强度##ssao"), &Renderer3D::SSAOPower(), 0.5f, 4.0f);
         }
 
         // ImGui::Separator();
-        // ImGui::Text("3D Physics (coming soon)");
-        // ImGui::Text("3D Animation (coming soon)");
+        // ImGui::Text(EditorLocale::Text("3D Physics (coming soon)", "3D 物理（即将推出）"));
+        // ImGui::Text(EditorLocale::Text("3D Animation (coming soon)", "3D 动画（即将推出）"));
 
         ImGui::End();
     }

@@ -1,5 +1,6 @@
 #include "WidgetHelpers.h"
 
+#include "Editor/EditorLocale.h"
 #include <imgui/imgui.h>
 #include <imgui/imgui_internal.h>
 
@@ -30,7 +31,7 @@ namespace Wheatear::UI {
         ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4{ 0.9f, 0.2f, 0.2f,  1.0f });
         ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4{ 0.8f, 0.1f, 0.15f, 1.0f });
         ImGui::PushFont(boldFont);
-        if (ImGui::Button("X", buttonSize)) values.x = resetValue;
+        if (ImGui::Button(EditorLocale::Text("X", "X"), buttonSize)) values.x = resetValue;
         ImGui::PopFont();
         ImGui::PopStyleColor(3);
         ImGui::SameLine();
@@ -42,7 +43,7 @@ namespace Wheatear::UI {
         ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4{ 0.3f, 0.8f, 0.3f, 1.0f });
         ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4{ 0.2f, 0.7f, 0.2f, 1.0f });
         ImGui::PushFont(boldFont);
-        if (ImGui::Button("Y", buttonSize)) values.y = resetValue;
+        if (ImGui::Button(EditorLocale::Text("Y", "Y"), buttonSize)) values.y = resetValue;
         ImGui::PopFont();
         ImGui::PopStyleColor(3);
         ImGui::SameLine();
@@ -54,7 +55,7 @@ namespace Wheatear::UI {
         ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4{ 0.2f, 0.35f, 0.9f, 1.0f });
         ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4{ 0.1f, 0.25f, 0.8f, 1.0f });
         ImGui::PushFont(boldFont);
-        if (ImGui::Button("Z", buttonSize)) values.z = resetValue;
+        if (ImGui::Button(EditorLocale::Text("Z", "Z"), buttonSize)) values.z = resetValue;
         ImGui::PopFont();
         ImGui::PopStyleColor(3);
         ImGui::SameLine();
