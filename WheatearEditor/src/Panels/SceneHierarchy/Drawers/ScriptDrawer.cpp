@@ -270,7 +270,7 @@ namespace Wheatear {
             const char* preview = component.ClassName.empty() ? "None" : component.ClassName.c_str();
 
             if (classMissing)
-                ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(0.95f, 0.28f, 0.22f, 1.0f));
+                ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(0.880f, 0.420f, 0.360f, 1.0f));
 
             if (ImGui::BeginCombo("Class", preview))
             {

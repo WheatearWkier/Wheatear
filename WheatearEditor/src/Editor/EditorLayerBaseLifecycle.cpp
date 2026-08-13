@@ -209,7 +209,7 @@ namespace Wheatear {
         Renderer2D::ResetStats();
 
         m_Framebuffer->Bind();
-        RenderCommand::SetClearColor({ 0.1f, 0.1f, 0.1f, 1.0f });
+        RenderCommand::SetClearColor({ 0.07f, 0.08f, 0.10f, 1.0f });
         RenderCommand::Clear();
         m_Framebuffer->ClearAttachment(2, -1);
 
@@ -257,7 +257,7 @@ namespace Wheatear {
                         m_ActiveScene->OnViewportResize(referenceSize.x, referenceSize.y);
 
                     m_UIReferenceFramebuffer->Bind();
-                    RenderCommand::SetClearColor({ 0.08f, 0.09f, 0.11f, 1.0f });
+                    RenderCommand::SetClearColor({ 0.07f, 0.08f, 0.10f, 1.0f });
                     RenderCommand::Clear();
                     m_UIReferenceFramebuffer->ClearAttachment(2, -1);
                     m_ActiveScene->RenderWithSceneCamera(

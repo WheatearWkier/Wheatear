@@ -246,7 +246,7 @@ namespace Wheatear {
         ImGuiIO&    io    = ImGui::GetIO();
         ImGuiStyle& style = ImGui::GetStyle();
         const float prevMinX = style.WindowMinSize.x;
-        style.WindowMinSize.x = 400.0f;
+        style.WindowMinSize.x = 480.0f;
         if (io.ConfigFlags & ImGuiConfigFlags_DockingEnable)
         {
             ImGuiID id = ImGui::GetID("MyDockSpace");
@@ -632,6 +632,7 @@ namespace Wheatear {
                 EditorLocale::DrawLanguageMenu();
                 ImGui::EndMenu();
             }
+            ImGui::Separator();
             if (ImGui::MenuItem(EditorLocale::Text("Exit", "退出"))) Application::Get().Close();
             ImGui::EndMenu();
         }

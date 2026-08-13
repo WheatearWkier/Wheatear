@@ -103,13 +103,26 @@ namespace Wheatear {
 		float fontSize = 30.0f;
 		std::filesystem::path fontPath = ResolveImGuiFontPath();
 		if (!fontPath.empty())
+		{
 			io.FontDefault = io.Fonts->AddFontFromFileTTF(
 				fontPath.string().c_str(),
 				fontSize,
 				nullptr,
 				io.Fonts->GetGlyphRangesChineseFull());
+
+			// Compact variant for status bars, badges and dense rows. Loading
+			// the same TTF at a smaller size keeps the glyph set consistent.
+			m_SmallFont = io.Fonts->AddFontFromFileTTF(
+				fontPath.string().c_str(),
+				20.0f,
+				nullptr,
+				io.Fonts->GetGlyphRangesChineseFull());
+		}
 		else
+		{
 			io.FontDefault = io.Fonts->AddFontDefault();
+			m_SmallFont = io.FontDefault;
+		}
 
 		// Setup Dear ImGui style
 		ImGui::StyleColorsDark();
@@ -189,97 +202,104 @@ namespace Wheatear {
 	void ImGuiLayer::SetDarkThemeColors()
 	{
 		ImGuiStyle& style = ImGui::GetStyle();
-		style.WindowPadding = ImVec2(11.0f, 9.0f);
+		style.WindowPadding = ImVec2(12.0f, 10.0f);
 		style.FramePadding = ImVec2(8.0f, 5.0f);
 		style.CellPadding = ImVec2(6.0f, 4.0f);
-		style.ItemSpacing = ImVec2(8.0f, 7.0f);
+		style.ItemSpacing = ImVec2(8.0f, 6.0f);
 		style.ItemInnerSpacing = ImVec2(6.0f, 4.0f);
 		style.IndentSpacing = 15.0f;
-		style.ScrollbarSize = 14.0f;
-		style.GrabMinSize = 11.0f;
+		style.ScrollbarSize = 15.0f;
+		style.GrabMinSize = 12.0f;
 		style.WindowBorderSize = 1.0f;
 		style.ChildBorderSize = 1.0f;
 		style.PopupBorderSize = 1.0f;
 		style.FrameBorderSize = 1.0f;
 		style.TabBorderSize = 0.0f;
-		style.WindowRounding = 7.0f;
-		style.ChildRounding = 7.0f;
+		style.WindowRounding = 8.0f;
+		style.ChildRounding = 8.0f;
 		style.FrameRounding = 6.0f;
-		style.PopupRounding = 7.0f;
+		style.PopupRounding = 8.0f;
 		style.ScrollbarRounding = 7.0f;
 		style.GrabRounding = 6.0f;
 		style.TabRounding = 6.0f;
+		style.DockingSeparatorSize = 2.0f;   // Thicker dock splitter for easier grabbing
+		style.TabBarOverlineSize = 2.0f;     // Selected-tab top highlight bar (TabSelectedOverline)
 
 		auto& colors = style.Colors;
 
-		const ImVec4 ink = ImVec4{ 0.105f, 0.135f, 0.145f, 1.0f };
-		const ImVec4 disabled = ImVec4{ 0.405f, 0.465f, 0.475f, 1.0f };
-		const ImVec4 paper = ImVec4{ 0.785f, 0.815f, 0.810f, 1.0f };
-		const ImVec4 panel = ImVec4{ 0.835f, 0.865f, 0.860f, 1.0f };
-		const ImVec4 mist = ImVec4{ 0.875f, 0.900f, 0.895f, 1.0f };
-		const ImVec4 line = ImVec4{ 0.575f, 0.655f, 0.650f, 1.0f };
-		const ImVec4 teal = ImVec4{ 0.140f, 0.540f, 0.565f, 1.0f };
-		const ImVec4 tealHot = ImVec4{ 0.090f, 0.640f, 0.670f, 1.0f };
-		const ImVec4 wheat = ImVec4{ 0.760f, 0.565f, 0.245f, 1.0f };
-		const ImVec4 coral = ImVec4{ 0.805f, 0.380f, 0.330f, 1.0f };
+		// Deep slate-blue surface scale with a teal accent (brand color).
+		const ImVec4 bg0 = ImVec4{ 0.085f, 0.095f, 0.115f, 1.0f };    // window
+		const ImVec4 bg1 = ImVec4{ 0.105f, 0.118f, 0.142f, 1.0f };    // child / menu bar / scrollbar bg
+		const ImVec4 bg2 = ImVec4{ 0.155f, 0.172f, 0.200f, 1.0f };    // frame / button / header resting
+		const ImVec4 bg3 = ImVec4{ 0.205f, 0.225f, 0.260f, 1.0f };    // hovered
+		const ImVec4 bg4 = ImVec4{ 0.255f, 0.280f, 0.320f, 1.0f };    // active / selected
+		const ImVec4 border = ImVec4{ 0.205f, 0.220f, 0.255f, 1.0f };
+		const ImVec4 text = ImVec4{ 0.900f, 0.910f, 0.920f, 1.0f };
+		const ImVec4 textDisabled = ImVec4{ 0.500f, 0.540f, 0.590f, 1.0f };
+		const ImVec4 teal = ImVec4{ 0.230f, 0.720f, 0.800f, 1.0f };
+		const ImVec4 tealHot = ImVec4{ 0.320f, 0.820f, 0.900f, 1.0f };
+		const ImVec4 wheat = ImVec4{ 0.850f, 0.650f, 0.360f, 1.0f };
+		const ImVec4 coral = ImVec4{ 0.880f, 0.420f, 0.360f, 1.0f };
 
-		colors[ImGuiCol_Text] = ink;
-		colors[ImGuiCol_TextDisabled] = disabled;
-		colors[ImGuiCol_WindowBg] = paper;
-		colors[ImGuiCol_ChildBg] = panel;
-		colors[ImGuiCol_PopupBg] = ImVec4{ 0.890f, 0.915f, 0.910f, 0.98f };
-		colors[ImGuiCol_Border] = line;
+		colors[ImGuiCol_Text] = text;
+		colors[ImGuiCol_TextDisabled] = textDisabled;
+		colors[ImGuiCol_WindowBg] = bg0;
+		colors[ImGuiCol_ChildBg] = bg1;
+		colors[ImGuiCol_PopupBg] = ImVec4{ 0.100f, 0.110f, 0.130f, 0.98f };
+		colors[ImGuiCol_Border] = border;
 		colors[ImGuiCol_BorderShadow] = ImVec4{ 0.000f, 0.000f, 0.000f, 0.0f };
 
-		colors[ImGuiCol_FrameBg] = ImVec4{ 0.875f, 0.900f, 0.895f, 1.0f };
-		colors[ImGuiCol_FrameBgHovered] = ImVec4{ 0.805f, 0.870f, 0.860f, 1.0f };
-		colors[ImGuiCol_FrameBgActive] = ImVec4{ 0.735f, 0.815f, 0.805f, 1.0f };
-		colors[ImGuiCol_TitleBg] = ImVec4{ 0.745f, 0.785f, 0.780f, 1.0f };
-		colors[ImGuiCol_TitleBgActive] = ImVec4{ 0.815f, 0.850f, 0.845f, 1.0f };
-		colors[ImGuiCol_TitleBgCollapsed] = panel;
-		colors[ImGuiCol_MenuBarBg] = ImVec4{ 0.760f, 0.800f, 0.795f, 1.0f };
+		colors[ImGuiCol_FrameBg] = bg2;
+		colors[ImGuiCol_FrameBgHovered] = bg3;
+		colors[ImGuiCol_FrameBgActive] = bg4;
+		colors[ImGuiCol_TitleBg] = ImVec4{ 0.065f, 0.072f, 0.088f, 1.0f };
+		colors[ImGuiCol_TitleBgActive] = ImVec4{ 0.155f, 0.185f, 0.220f, 1.0f };
+		colors[ImGuiCol_TitleBgCollapsed] = bg1;
+		colors[ImGuiCol_MenuBarBg] = bg1;
 
-		colors[ImGuiCol_Button] = ImVec4{ 0.860f, 0.890f, 0.885f, 1.0f };
-		colors[ImGuiCol_ButtonHovered] = ImVec4{ 0.755f, 0.845f, 0.835f, 1.0f };
-		colors[ImGuiCol_ButtonActive] = ImVec4{ 0.670f, 0.775f, 0.765f, 1.0f };
-		colors[ImGuiCol_Header] = ImVec4{ 0.820f, 0.875f, 0.865f, 1.0f };
-		colors[ImGuiCol_HeaderHovered] = ImVec4{ 0.725f, 0.830f, 0.815f, 1.0f };
-		colors[ImGuiCol_HeaderActive] = ImVec4{ 0.640f, 0.760f, 0.745f, 1.0f };
+		colors[ImGuiCol_Button] = bg2;
+		colors[ImGuiCol_ButtonHovered] = bg3;
+		colors[ImGuiCol_ButtonActive] = ImVec4{ teal.x, teal.y, teal.z, 0.35f };
+		colors[ImGuiCol_Header] = bg2;
+		colors[ImGuiCol_HeaderHovered] = bg3;
+		colors[ImGuiCol_HeaderActive] = bg4;
 		colors[ImGuiCol_CheckMark] = tealHot;
 		colors[ImGuiCol_SliderGrab] = teal;
 		colors[ImGuiCol_SliderGrabActive] = tealHot;
 
-		colors[ImGuiCol_Tab] = ImVec4{ 0.800f, 0.845f, 0.838f, 1.0f };
-		colors[ImGuiCol_TabHovered] = ImVec4{ 0.710f, 0.825f, 0.810f, 1.0f };
-		colors[ImGuiCol_TabActive] = ImVec4{ 0.885f, 0.915f, 0.910f, 1.0f };
-		colors[ImGuiCol_TabUnfocused] = ImVec4{ 0.750f, 0.790f, 0.785f, 1.0f };
-		colors[ImGuiCol_TabUnfocusedActive] = ImVec4{ 0.830f, 0.865f, 0.860f, 1.0f };
+		colors[ImGuiCol_Tab] = bg1;
+		colors[ImGuiCol_TabHovered] = bg3;
+		colors[ImGuiCol_TabActive] = bg2;
+		colors[ImGuiCol_TabSelectedOverline] = teal;
+		colors[ImGuiCol_TabDimmed] = ImVec4{ 0.090f, 0.100f, 0.120f, 1.0f };
+		colors[ImGuiCol_TabDimmedSelected] = bg2;
+		colors[ImGuiCol_TabDimmedSelectedOverline] = ImVec4{ teal.x, teal.y, teal.z, 0.45f };
+		colors[ImGuiCol_TabUnfocused] = ImVec4{ 0.085f, 0.095f, 0.112f, 1.0f };
+		colors[ImGuiCol_TabUnfocusedActive] = bg1;
 
-		colors[ImGuiCol_Separator] = line;
+		colors[ImGuiCol_Separator] = border;
 		colors[ImGuiCol_SeparatorHovered] = teal;
 		colors[ImGuiCol_SeparatorActive] = tealHot;
 		colors[ImGuiCol_ResizeGrip] = ImVec4{ teal.x, teal.y, teal.z, 0.25f };
 		colors[ImGuiCol_ResizeGripHovered] = ImVec4{ teal.x, teal.y, teal.z, 0.55f };
 		colors[ImGuiCol_ResizeGripActive] = tealHot;
-		colors[ImGuiCol_ScrollbarBg] = ImVec4{ 0.770f, 0.810f, 0.805f, 1.0f };
-		colors[ImGuiCol_ScrollbarGrab] = ImVec4{ 0.610f, 0.690f, 0.680f, 1.0f };
-		colors[ImGuiCol_ScrollbarGrabHovered] = ImVec4{ 0.520f, 0.635f, 0.620f, 1.0f };
+		colors[ImGuiCol_ScrollbarBg] = bg1;
+		colors[ImGuiCol_ScrollbarGrab] = bg3;
+		colors[ImGuiCol_ScrollbarGrabHovered] = bg4;
 		colors[ImGuiCol_ScrollbarGrabActive] = teal;
 
-		colors[ImGuiCol_DockingPreview] = ImVec4{ tealHot.x, tealHot.y, tealHot.z, 0.42f };
-		colors[ImGuiCol_DockingEmptyBg] = ImVec4{ 0.720f, 0.765f, 0.760f, 1.0f };
-		colors[ImGuiCol_TableHeaderBg] = ImVec4{ 0.775f, 0.830f, 0.820f, 1.0f };
-		colors[ImGuiCol_TableBorderStrong] = line;
-		colors[ImGuiCol_TableBorderLight] = ImVec4{ 0.665f, 0.745f, 0.735f, 1.0f };
+		colors[ImGuiCol_DockingPreview] = ImVec4{ teal.x, teal.y, teal.z, 0.35f };
+		colors[ImGuiCol_DockingEmptyBg] = bg1;
+		colors[ImGuiCol_TableHeaderBg] = bg2;
+		colors[ImGuiCol_TableBorderStrong] = border;
+		colors[ImGuiCol_TableBorderLight] = ImVec4{ 0.220f, 0.240f, 0.280f, 1.0f };
 		colors[ImGuiCol_TableRowBg] = ImVec4{ 1.000f, 1.000f, 1.000f, 0.0f };
-		colors[ImGuiCol_TableRowBgAlt] = ImVec4{ 0.900f, 0.930f, 0.925f, 0.38f };
-		colors[ImGuiCol_TextSelectedBg] = ImVec4{ teal.x, teal.y, teal.z, 0.24f };
-		colors[ImGuiCol_DragDropTarget] = wheat;
+		colors[ImGuiCol_TableRowBgAlt] = ImVec4{ 1.000f, 1.000f, 1.000f, 0.030f };
+		colors[ImGuiCol_TextSelectedBg] = ImVec4{ teal.x, teal.y, teal.z, 0.30f };
+		colors[ImGuiCol_DragDropTarget] = teal;
 		colors[ImGuiCol_NavHighlight] = tealHot;
-		colors[ImGuiCol_ModalWindowDimBg] = ImVec4{ 0.190f, 0.250f, 0.260f, 0.38f };
+		colors[ImGuiCol_ModalWindowDimBg] = ImVec4{ 0.020f, 0.025f, 0.040f, 0.55f };
 		colors[ImGuiCol_PlotLines] = teal;
 		colors[ImGuiCol_PlotHistogram] = wheat;
-		colors[ImGuiCol_TextSelectedBg] = ImVec4{ 0.225f, 0.670f, 0.680f, 0.30f };
-		colors[ImGuiCol_DragDropTarget] = coral;
 	}
 }

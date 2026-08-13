@@ -670,12 +670,14 @@ namespace Wheatear {
         ImGui::SetNextItemWidth(80.0f);
         ImGui::SliderFloat("##thumb", &m_ThumbnailSize, 32.0f, 128.0f, "%.0f");
         if (ImGui::IsItemHovered())
-            ImGui::SetTooltip("Thumbnail size");
+            ImGui::SetTooltip("%s", EditorLocale::Text("Thumbnail size", "缩略图大小"));
         ImGui::SameLine();
-        ImGui::TextDisabled("size");
+        ImGui::TextDisabled("%s", EditorLocale::Text("size", "大小"));
 
         ImGui::SameLine(0, 20);
-        EditorWidgets::StatusBadge((std::to_string(GetFilteredEntries().size()) + " item(s)").c_str(), EditorWidgets::StatusKind::Neutral);
+        const std::string countLabel = std::to_string(GetFilteredEntries().size())
+            + EditorLocale::Text(" item(s)", " 项");
+        EditorWidgets::StatusBadge(countLabel.c_str(), EditorWidgets::StatusKind::Neutral);
 
         if (!m_SelectedPath.empty())
         {
@@ -687,7 +689,7 @@ namespace Wheatear {
         if (ImGui::SmallButton("i"))
             m_ShowInspector = !m_ShowInspector;
         if (ImGui::IsItemHovered())
-            ImGui::SetTooltip("Toggle Inspector");
+            ImGui::SetTooltip("%s", EditorLocale::Text("Toggle Inspector", "切换检查器"));
     }
 
     void ContentBrowserPanel::OnImGuiRender()

@@ -2,6 +2,8 @@
 
 #include "Wheatear/Core/Layer.h"
 
+struct ImFont;
+
 namespace Wheatear {
 
 	class Event;
@@ -21,9 +23,14 @@ namespace Wheatear {
 		void BlockEvents(bool block) { m_BlockEvents = block; }
 		void SetDarkThemeColors();
 
+		// Compact (20px) variant of the UI font for status bars, badges and
+		// dense tool rows. Push with ImGui::PushFont(ImGuiLayer::Get().GetSmallFont()).
+		ImFont* GetSmallFont() const { return m_SmallFont; }
+
 	private:
 		bool m_BlockEvents = true;
 		float m_Time = 0.0f;
+		ImFont* m_SmallFont = nullptr;
 	};
 
 }

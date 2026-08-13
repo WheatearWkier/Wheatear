@@ -228,20 +228,30 @@ namespace Wheatear::EditorWidgets {
 
     void PanelHeader(const char* title, const char* subtitle)
     {
-        ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(0.12f, 0.20f, 0.22f, 1.0f));
-        ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(0.0f, 2.0f));
+        // Teal accent bar on the left keeps the header readable in the dark
+        // theme without hard-coded text colors.
+        const float barWidth = 3.0f;
+        const float indentX = barWidth + 6.0f;
+        const ImVec2 cursor = ImGui::GetCursorScreenPos();
+        ImGui::GetWindowDrawList()->AddRectFilled(
+            cursor,
+            ImVec2(cursor.x + barWidth, cursor.y + ImGui::GetTextLineHeight()),
+            ImGui::GetColorU32(ImGuiCol_CheckMark));
+        ImGui::SetCursorPosX(ImGui::GetCursorPosX() + indentX);
         ImGui::TextUnformatted(title ? title : "");
-        ImGui::PopStyleVar();
-        ImGui::PopStyleColor();
         if (subtitle && subtitle[0] != '\0')
+        {
+            ImGui::SetCursorPosX(ImGui::GetCursorPosX() + indentX);
             ImGui::TextDisabled("%s", subtitle);
+        }
         ImGui::Separator();
     }
 
     void SectionHeader(const char* label, const char* description)
     {
         ImGui::Spacing();
-        ImGui::TextColored(ImVec4(0.12f, 0.45f, 0.48f, 1.0f), "%s", label ? label : "");
+        if (label && label[0] != '\0')
+            ImGui::SeparatorText(label ? label : "");
         if (description && description[0] != '\0')
             ImGui::TextDisabled("%s", description);
     }
@@ -311,6 +321,20 @@ namespace Wheatear::EditorWidgets {
             ImVec4(0.0f, 0.0f, 0.0f, 0.0f),
             ImVec4(1.0f, 1.0f, 1.0f, enabled ? 1.0f : 0.55f));
         ImGui::PopStyleVar();
+
+        // Hover feedback: soft teal circle behind the icon so toolbar buttons
+        // read as interactive in the dark theme.
+        if (enabled && ImGui::IsItemHovered())
+        {
+            const ImVec2 itemMin = ImGui::GetItemRectMin();
+            const ImVec2 itemMax = ImGui::GetItemRectMax();
+            const ImVec2 center((itemMin.x + itemMax.x) * 0.5f, (itemMin.y + itemMax.y) * 0.5f);
+            const float radius = (itemMax.x - itemMin.x) * 0.6f;
+            ImVec4 accent = ImGui::GetStyleColorVec4(ImGuiCol_CheckMark);
+            accent.w = 0.22f;
+            ImGui::GetWindowDrawList()->AddCircleFilled(
+                center, radius, ImGui::ColorConvertFloat4ToU32(accent));
+        }
 
         if (!enabled)
             ImGui::PopStyleVar();
@@ -527,7 +551,7 @@ namespace Wheatear::EditorWidgets {
         else if (exists)
             ImGui::TextDisabled("%s", reference.c_str());
         else
-            ImGui::TextColored(ImVec4(0.95f, 0.55f, 0.45f, 1.0f), "%s", reference.c_str());
+            ImGui::TextColored(ImVec4(0.880f, 0.420f, 0.360f, 1.0f), "%s", reference.c_str());
 
         if (ImGui::BeginPopup(popupId.c_str()))
         {

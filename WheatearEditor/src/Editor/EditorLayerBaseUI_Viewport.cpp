@@ -152,7 +152,7 @@ namespace Wheatear {
                 m_ActiveScene->SetViewportOffset(m_ViewportBounds[0].x, m_ViewportBounds[0].y);
 
                 m_Framebuffer->Bind();
-                RenderCommand::SetClearColor({ 0.1f, 0.1f, 0.1f, 1.0f });
+                RenderCommand::SetClearColor({ 0.07f, 0.08f, 0.10f, 1.0f });
                 RenderCommand::Clear();
                 m_Framebuffer->ClearAttachment(2, -1);
 
@@ -286,11 +286,10 @@ namespace Wheatear {
         ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(6.0f, 0.0f));
         ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 10.0f);
         ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, 8.0f);
-        ImGui::PushStyleColor(ImGuiCol_WindowBg, ImVec4(0.78f, 0.82f, 0.81f, 0.94f));
-        ImGui::PushStyleColor(ImGuiCol_Border, ImVec4(0.54f, 0.66f, 0.65f, 0.62f));
-        ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.88f, 0.91f, 0.90f, 0.78f));
-        ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(0.74f, 0.84f, 0.83f, 1.0f));
-        ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4(0.64f, 0.77f, 0.76f, 1.0f));
+        // Floating toolbar follows the theme; buttons keep the default themed
+        // colors and get their hover glow from EditorWidgets::IconButton.
+        ImGui::PushStyleColor(ImGuiCol_WindowBg, ImVec4(0.100f, 0.110f, 0.130f, 0.92f));
+        ImGui::PushStyleColor(ImGuiCol_Border, ImGui::GetStyleColorVec4(ImGuiCol_Border));
 
         ImGui::Begin("##toolbar", nullptr,
             ImGuiWindowFlags_NoDecoration |
@@ -305,7 +304,7 @@ namespace Wheatear {
         auto groupGap = []()
         {
             ImGui::SameLine(0.0f, 10.0f);
-            ImGui::TextDisabled("|");
+            ImGui::SeparatorEx(ImGuiSeparatorFlags_Vertical, 20.0f);
             ImGui::SameLine(0.0f, 10.0f);
         };
         auto openToolByLabel = [&](const char* label)
@@ -397,7 +396,7 @@ namespace Wheatear {
         }
 
         ImGui::End();
-        ImGui::PopStyleColor(5);
+        ImGui::PopStyleColor(2);
         ImGui::PopStyleVar(4);
     }
 } // namespace Wheatear

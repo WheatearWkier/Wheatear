@@ -37,7 +37,7 @@ namespace Wheatear {
         ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 0.0f);
         ImGui::PushStyleColor(
             ImGuiCol_WindowBg,
-            ImVec4(0.08f, 0.08f, 0.08f, 0.95f));
+            ImVec4(0.050f, 0.055f, 0.068f, 1.0f));
 
         ImGui::Begin(
             "##ModeSelectBg",
@@ -82,7 +82,7 @@ namespace Wheatear {
 
         ImGui::PushStyleColor(
             ImGuiCol_WindowBg,
-            ImVec4(0.13f, 0.14f, 0.16f, 1.0f));
+            ImVec4(0.125f, 0.140f, 0.168f, 1.0f));
 
         ImGui::Begin(
             "##ModeSelect",
@@ -93,6 +93,28 @@ namespace Wheatear {
 
         // =====================================================================
         // =====================================================================
+
+        // Engine monogram: rounded teal tile with the initial, drawn in code so
+        // the launcher needs no external asset and matches the editor theme.
+        const float logoSize = 76.0f;
+        const float availWidth = ImGui::GetContentRegionAvail().x;
+        const ImVec2 logoOrigin = ImGui::GetCursorScreenPos();
+        const ImVec2 logoMin(logoOrigin.x + (availWidth - logoSize) * 0.5f, logoOrigin.y);
+        const ImVec2 logoMax(logoMin.x + logoSize, logoMin.y + logoSize);
+        ImDrawList* drawList = ImGui::GetWindowDrawList();
+        drawList->AddRectFilled(
+            logoMin, logoMax,
+            ImGui::ColorConvertFloat4ToU32(ImVec4(0.230f, 0.720f, 0.800f, 1.0f)),
+            16.0f);
+        ImGui::SetWindowFontScale(2.8f);
+        const ImVec2 markSize = ImGui::CalcTextSize("W");
+        drawList->AddText(
+            ImVec2(logoMin.x + (logoSize - markSize.x) * 0.5f,
+                logoMin.y + (logoSize - markSize.y) * 0.5f),
+            IM_COL32(9, 11, 15, 255),
+            "W");
+        ImGui::SetWindowFontScale(1.0f);
+        ImGui::Dummy(ImVec2(0.0f, logoSize + 10.0f));
 
         ImGui::SetWindowFontScale(1.8f);
 
@@ -105,7 +127,7 @@ namespace Wheatear {
 
         ImGui::PushStyleColor(
             ImGuiCol_Text,
-            ImVec4(0.95f, 0.78f, 0.25f, 1.0f));
+            ImVec4(0.850f, 0.650f, 0.360f, 1.0f));
 
         ImGui::Text("%s", title);
 
@@ -122,7 +144,7 @@ namespace Wheatear {
         ImGui::SetWindowFontScale(1.3f);
 
         ImGui::TextWrapped(
-            "Select the editing mode to launch:");
+            "选择编辑模式启动：");
 
         ImGui::SetWindowFontScale(1.0f);
 
@@ -144,20 +166,21 @@ namespace Wheatear {
             ImGuiStyleVar_FramePadding,
             ImVec2(12, 12));
 
+        // 2D is the primary path: teal accent button.
         ImGui::PushStyleColor(
             ImGuiCol_Button,
-            ImVec4(0.18f, 0.38f, 0.62f, 1.0f));
+            ImVec4(0.150f, 0.420f, 0.480f, 1.0f));
 
         ImGui::PushStyleColor(
             ImGuiCol_ButtonHovered,
-            ImVec4(0.25f, 0.50f, 0.80f, 1.0f));
+            ImVec4(0.190f, 0.520f, 0.600f, 1.0f));
 
         ImGui::PushStyleColor(
             ImGuiCol_ButtonActive,
-            ImVec4(0.15f, 0.30f, 0.55f, 1.0f));
+            ImVec4(0.120f, 0.340f, 0.400f, 1.0f));
 
         if (ImGui::Button(
-            "2D Mode\nSprites | Physics | Animation",
+            "2D 模式\n精灵 | 物理 | 动画",
             buttonSize))
         {
             LaunchEditor2D();
@@ -175,20 +198,21 @@ namespace Wheatear {
             ImGuiStyleVar_FramePadding,
             ImVec2(12, 12));
 
+        // 3D is the secondary path: neutral surface that brightens on hover.
         ImGui::PushStyleColor(
             ImGuiCol_Button,
-            ImVec4(0.22f, 0.48f, 0.30f, 1.0f));
+            ImVec4(0.170f, 0.190f, 0.230f, 1.0f));
 
         ImGui::PushStyleColor(
             ImGuiCol_ButtonHovered,
-            ImVec4(0.30f, 0.62f, 0.40f, 1.0f));
+            ImVec4(0.220f, 0.250f, 0.310f, 1.0f));
 
         ImGui::PushStyleColor(
             ImGuiCol_ButtonActive,
-            ImVec4(0.18f, 0.40f, 0.25f, 1.0f));
+            ImVec4(0.130f, 0.150f, 0.190f, 1.0f));
 
         if (ImGui::Button(
-            "3D Mode\nMesh | PBR / IBL | Lighting",
+            "3D 模式\n网格 | PBR / IBL | 光照",
             buttonSize))
         {
             LaunchEditor3D();
