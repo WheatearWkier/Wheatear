@@ -249,19 +249,16 @@ namespace Wheatear {
 		if (routeDirty)
 			m_LayerEventSubscriptions.clear();
 
+		// LayerStack owns layers: PopLayer/PopOverlay detach and delete.
 		for (Layer* layer : m_PendingLayersToPop)
 		{
-			layer->OnDetach();
 			m_LayerStack.PopLayer(layer);
-			delete layer;
 		}
 		m_PendingLayersToPop.clear();
 
 		for (Layer* overlay : m_PendingOverlaysToPop)
 		{
-			overlay->OnDetach();
 			m_LayerStack.PopOverlay(overlay);
-			delete overlay;
 		}
 		m_PendingOverlaysToPop.clear();
 

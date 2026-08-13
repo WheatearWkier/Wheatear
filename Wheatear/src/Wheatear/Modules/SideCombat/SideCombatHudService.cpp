@@ -41,6 +41,43 @@ namespace Wheatear::SideCombatHudService {
         static constexpr float kComboFontSheetHeight = 288.0f;
         static std::string s_SkillPrefix = "SC_Skill";
 
+        // Skill-slot entity names are built from a fixed prefix + slot key and
+        // reconstructed every frame (~5 strings per slot × 7 slots). Cache the
+        // composed names per key with transparent lookup so the hot path only
+        // pays for the initial build.
+        struct SkillSlotNames
+        {
+            std::string Slot;
+            std::string Icon;
+            std::string Cooldown;
+            std::string CooldownText;
+            std::string KeyText;
+        };
+
+        struct TransparentStringHash
+        {
+            using is_transparent = void;
+            size_t operator()(const std::string& s) const { return std::hash<std::string>{}(s); }
+            size_t operator()(std::string_view s) const { return std::hash<std::string_view>{}(s); }
+        };
+
+        static const SkillSlotNames& CachedSkillSlotNames(std::string_view key)
+        {
+            static std::unordered_map<std::string, SkillSlotNames, TransparentStringHash, std::equal_to<>> cache;
+            auto it = cache.find(key);
+            if (it == cache.end())
+            {
+                SkillSlotNames names;
+                names.Slot = s_SkillPrefix + "Slot_" + std::string(key);
+                names.Icon = s_SkillPrefix + "Icon_" + std::string(key);
+                names.Cooldown = s_SkillPrefix + "Cooldown_" + std::string(key);
+                names.CooldownText = s_SkillPrefix + "CooldownText_" + std::string(key);
+                names.KeyText = s_SkillPrefix + "Key_" + std::string(key);
+                it = cache.emplace(std::string(key), std::move(names)).first;
+            }
+            return it->second;
+        }
+
         static void WarnMissingAuthoredHud(Scene* scene,
             const std::string& entityName,
             const char* missing)
@@ -445,11 +482,12 @@ namespace Wheatear::SideCombatHudService {
 
         static void SetSkillSlotVisible(Scene* scene, const std::string& key, bool visible)
         {
-            SetWidgetVisible(scene, s_SkillPrefix + "Slot_" + key, visible);
-            SetWidgetVisible(scene, s_SkillPrefix + "Icon_" + key, visible);
-            SetWidgetVisible(scene, s_SkillPrefix + "Cooldown_" + key, visible);
-            SetWidgetVisible(scene, s_SkillPrefix + "CooldownText_" + key, visible);
-            SetWidgetVisible(scene, s_SkillPrefix + "Key_" + key, visible);
+            const SkillSlotNames& names = CachedSkillSlotNames(key);
+            SetWidgetVisible(scene, names.Slot, visible);
+            SetWidgetVisible(scene, names.Icon, visible);
+            SetWidgetVisible(scene, names.Cooldown, visible);
+            SetWidgetVisible(scene, names.CooldownText, visible);
+            SetWidgetVisible(scene, names.KeyText, visible);
         }
 
         static void UpdateCooldownMask(Scene* scene,
@@ -474,11 +512,12 @@ namespace Wheatear::SideCombatHudService {
             float maxCooldown,
             const std::string& unavailableText = "")
         {
-            const std::string slot = s_SkillPrefix + "Slot_" + key;
-            const std::string icon = s_SkillPrefix + "Icon_" + key;
-            const std::string overlay = s_SkillPrefix + "Cooldown_" + key;
-            const std::string text = s_SkillPrefix + "CooldownText_" + key;
-            const std::string keyText = s_SkillPrefix + "Key_" + key;
+            const SkillSlotNames& names = CachedSkillSlotNames(key);
+            const std::string& slot = names.Slot;
+            const std::string& icon = names.Icon;
+            const std::string& overlay = names.Cooldown;
+            const std::string& text = names.CooldownText;
+            const std::string& keyText = names.KeyText;
 
             if (!FindEntityByName(scene, slot))
                 return;

@@ -683,6 +683,16 @@ namespace Wheatear {
                     "Scene path must start with assets/scenes/");
 
             ImGui::Separator();
+            static const char* kConfigurations[] = { "Debug", "Release", "Dist" };
+            int configIndex = 0;
+            for (int i = 0; i < IM_ARRAYSIZE(kConfigurations); ++i)
+                if (m_PackageConfiguration == kConfigurations[i]) { configIndex = i; break; }
+            if (ImGui::Combo("Build Configuration", &configIndex, kConfigurations, IM_ARRAYSIZE(kConfigurations)))
+                m_PackageConfiguration = kConfigurations[configIndex];
+            ImGui::SameLine();
+            EditorWidgets::HelpTooltip("MSBuild configuration used to build the player and editor.");
+
+            ImGui::Separator();
             if (ImGui::Button("Package"))
             {
                 m_PackageScenePath = m_PackageSceneInput;

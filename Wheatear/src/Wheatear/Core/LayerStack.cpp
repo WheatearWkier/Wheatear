@@ -26,9 +26,13 @@ namespace Wheatear {
 		m_Layers.emplace_back(overlay);
 	}
 
+	// LayerStack owns the layers: pop detaches and deletes. Callers must NOT
+	// delete after popping; Clear() releases any remaining layers.
 	void LayerStack::PopLayer(Layer* layer) {
 		auto it = std::find(m_Layers.begin(), m_Layers.end(), layer); 
 		if (it != m_Layers.end()) {
+			layer->OnDetach();
+			delete layer;
 			m_Layers.erase(it);
 			m_LayerInsertIndex--;
 		}
@@ -36,8 +40,11 @@ namespace Wheatear {
 		
 	void LayerStack::PopOverlay(Layer* overlay) {
 		auto it = std::find(m_Layers.begin(), m_Layers.end(), overlay);
-		if (it != m_Layers.end())
+		if (it != m_Layers.end()) {
+			overlay->OnDetach();
+			delete overlay;
 			m_Layers.erase(it);
+		}
 	}
 
 	void LayerStack::Clear()

@@ -565,7 +565,7 @@ namespace Wheatear {
 
         PlayerPackageOptions options;
         options.StartupScene = m_PackageScenePath.empty() ? m_EditorScenePath : std::filesystem::path(m_PackageScenePath);
-        options.Configuration = "Debug";
+        options.Configuration = m_PackageConfiguration;
         options.EnableScripts = enableScripts;
         options.IncludeDebugSymbols = false;
 

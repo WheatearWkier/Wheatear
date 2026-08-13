@@ -225,6 +225,7 @@ namespace Wheatear {
         std::string m_PackageScenePath;
         std::string m_PackageSceneInput;
         bool m_PackageEnableScripts = false;
+        std::string m_PackageConfiguration = "Debug";
         std::filesystem::path m_LastPlayerBuildDirectory;
         std::filesystem::path m_LastEditorBuildDirectory;
         std::filesystem::path m_DeferredSceneOpenPath;
