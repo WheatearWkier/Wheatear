@@ -188,6 +188,7 @@
     <ClInclude Include="src\Modules\TurnCombat\TurnCombatDrawer.h" />
     <ClInclude Include="src\Modules\VisualNovel\VisualNovelDrawer.h" />
     <ClInclude Include="src\Modules\VisualNovel\VisualNovelScriptEditorPanel.h" />
+    <ClInclude Include="src\Modules\VisualNovel\VisualNovelScriptEditorPanelInternal.h" />
     <ClInclude Include="src\Panels\AnimationEditorPanel.h" />
     <ClInclude Include="src\Panels\ContentBrowserPanel.h" />
     <ClInclude Include="src\Panels\EditorCommands.h" />
@@ -246,6 +247,7 @@
     <ClCompile Include="src\Modules\TurnCombat\TurnCombatDrawer.cpp" />
     <ClCompile Include="src\Modules\VisualNovel\VisualNovelDrawer.cpp" />
     <ClCompile Include="src\Modules\VisualNovel\VisualNovelScriptEditorPanel.cpp" />
+    <ClCompile Include="src\Modules\VisualNovel\VisualNovelScriptEditorPanel_Rows.cpp" />
     <ClCompile Include="src\Panels\AnimationEditorPanel.cpp" />
     <ClCompile Include="src\Panels\AnimationEditorPanelSections.cpp" />
     <ClCompile Include="src\Panels\AnimationEditorPanel_Timeline.cpp" />

@@ -153,6 +153,9 @@
     <ClInclude Include="src\Modules\VisualNovel\VisualNovelScriptEditorPanel.h">
       <Filter>Modules\VisualNovel</Filter>
     </ClInclude>
+    <ClInclude Include="src\Modules\VisualNovel\VisualNovelScriptEditorPanelInternal.h">
+      <Filter>Modules\VisualNovel</Filter>
+    </ClInclude>
     <ClInclude Include="src\Panels\AnimationEditorPanel.h">
       <Filter>Panels</Filter>
     </ClInclude>
@@ -319,6 +322,9 @@
       <Filter>Modules\VisualNovel</Filter>
     </ClCompile>
     <ClCompile Include="src\Modules\VisualNovel\VisualNovelScriptEditorPanel.cpp">
+      <Filter>Modules\VisualNovel</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Modules\VisualNovel\VisualNovelScriptEditorPanel_Rows.cpp">
       <Filter>Modules\VisualNovel</Filter>
     </ClCompile>
     <ClCompile Include="src\Panels\AnimationEditorPanel.cpp">
