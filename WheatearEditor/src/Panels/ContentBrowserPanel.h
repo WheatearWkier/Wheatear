@@ -94,6 +94,8 @@ namespace Wheatear {
         std::string m_RegistryStatus;
 
         std::unordered_map<AssetType, Ref<Texture2D>> m_Icons;
+        // path -> real texture preview for image assets (nullptr = failed load).
+        std::unordered_map<std::string, Ref<Texture2D>> m_ThumbnailCache;
 
         std::function<void(const std::filesystem::path&)> m_OnOpenScene;
         std::function<void(const std::filesystem::path&)> m_OnInstantiatePrefab;

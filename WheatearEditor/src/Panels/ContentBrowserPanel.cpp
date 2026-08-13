@@ -88,7 +88,7 @@ namespace Wheatear {
             return AssetType::UITemplate;
         if (ext == AssetFileType::MetadataExtension)
             return AssetType::Metadata;
-        if (ext == ".png" || ext == ".jpg" || ext == ".jpeg" || ext == ".tga")
+        if (ext == ".png" || ext == ".jpg" || ext == ".jpeg" || ext == ".tga" || ext == ".bmp")
             return AssetType::Texture;
         if (ext == ".glsl" || ext == ".hlsl")
             return AssetType::Shader;
@@ -428,6 +428,23 @@ namespace Wheatear {
             const AssetType type = GetAssetType(path);
             const Ref<Texture2D>& icon = GetIconForType(type);
 
+            // Real thumbnail preview for image assets (cached; failed loads
+            // fall back to the type icon and are not retried this session).
+            Ref<Texture2D> displayIcon = icon;
+            if (type == AssetType::Texture)
+            {
+                const std::string thumbKey = path.string();
+                auto thumbIt = m_ThumbnailCache.find(thumbKey);
+                if (thumbIt == m_ThumbnailCache.end())
+                {
+                    Ref<Texture2D> loaded = Texture2D::Create(thumbKey);
+                    m_ThumbnailCache[thumbKey] = (loaded && loaded->IsLoaded()) ? loaded : nullptr;
+                    thumbIt = m_ThumbnailCache.find(thumbKey);
+                }
+                if (thumbIt->second)
+                    displayIcon = thumbIt->second;
+            }
+
             if (isSelected)
             {
                 const ImVec2 pos = ImGui::GetCursorScreenPos();
@@ -444,7 +461,7 @@ namespace Wheatear {
             ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4(0.23f, 0.72f, 0.80f, 0.20f));
             ImGui::ImageButton(
                 "##AssetIcon",
-                static_cast<ImTextureID>(static_cast<uintptr_t>(icon->GetRendererID())),
+                static_cast<ImTextureID>(static_cast<uintptr_t>(displayIcon->GetRendererID())),
                 { m_ThumbnailSize, m_ThumbnailSize },
                 { 0, 1 }, { 1, 0 }
             );
@@ -455,7 +472,7 @@ namespace Wheatear {
                 const std::wstring itemPath = relativePath.wstring();
                 ImGui::SetDragDropPayload("CONTENT_BROWSER_ITEM", itemPath.c_str(), (itemPath.size() + 1) * sizeof(wchar_t));
                 ImGui::Image(
-                    static_cast<ImTextureID>(static_cast<uintptr_t>(icon->GetRendererID())),
+                    static_cast<ImTextureID>(static_cast<uintptr_t>(displayIcon->GetRendererID())),
                     { 32, 32 }, { 0, 1 }, { 1, 0 }
                 );
                 ImGui::SameLine();
@@ -468,6 +485,29 @@ namespace Wheatear {
 
             if (ImGui::IsItemHovered() && ImGui::IsMouseDoubleClicked(ImGuiMouseButton_Left))
                 OpenEntry(path);
+
+            // Rich hover tooltip: name, type, size, full path.
+            if (ImGui::IsItemHovered())
+            {
+                ImGui::BeginTooltip();
+                ImGui::TextUnformatted(filename.c_str());
+                ImGui::Separator();
+                ImGui::TextDisabled("%s", AssetTypeLabel(type));
+                if (!entry.is_directory())
+                {
+                    std::error_code sizeError;
+                    const uintmax_t bytes = std::filesystem::file_size(path, sizeError);
+                    if (!sizeError)
+                    {
+                        if (bytes >= 1024 * 1024)
+                            ImGui::TextDisabled("%.1f MB", static_cast<double>(bytes) / (1024.0 * 1024.0));
+                        else
+                            ImGui::TextDisabled("%.1f KB", static_cast<double>(bytes) / 1024.0);
+                    }
+                }
+                ImGui::TextDisabled("%s", path.string().c_str());
+                ImGui::EndTooltip();
+            }
 
             if (ImGui::BeginPopupContextItem())
             {
@@ -512,7 +552,21 @@ namespace Wheatear {
             }
             else
             {
-                ImGui::TextWrapped("%s", filename.c_str());
+                // Single-line filename clipped to the cell width with an
+                // ellipsis, centered under the thumbnail.
+                const float nameMaxWidth = m_ThumbnailSize + m_Padding - 4.0f;
+                std::string shortName = filename;
+                if (ImGui::CalcTextSize(shortName.c_str()).x > nameMaxWidth)
+                {
+                    while (!shortName.empty()
+                        && ImGui::CalcTextSize((shortName + "...").c_str()).x > nameMaxWidth)
+                        shortName.pop_back();
+                    shortName += "...";
+                }
+                const float nameTextWidth = ImGui::CalcTextSize(shortName.c_str()).x;
+                ImGui::SetCursorPosX(
+                    ImGui::GetCursorPosX() + std::max(0.0f, (m_ThumbnailSize + m_Padding - nameTextWidth) * 0.5f));
+                ImGui::TextUnformatted(shortName.c_str());
             }
 
             ImGui::NextColumn();
