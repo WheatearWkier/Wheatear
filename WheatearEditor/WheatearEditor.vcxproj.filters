@@ -207,6 +207,9 @@
     <ClInclude Include="src\Tools\WAOActionEditorPanel.h">
       <Filter>Tools</Filter>
     </ClInclude>
+    <ClInclude Include="src\Tools\WAOActionEditorPanelInternal.h">
+      <Filter>Tools</Filter>
+    </ClInclude>
     <ClInclude Include="src\wepch.h" />
   </ItemGroup>
   <ItemGroup>
@@ -361,6 +364,15 @@
       <Filter>Tools</Filter>
     </ClCompile>
     <ClCompile Include="src\Tools\WAOActionEditorPanel.cpp">
+      <Filter>Tools</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Tools\WAOActionEditorPanel_Effects.cpp">
+      <Filter>Tools</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Tools\WAOActionEditorPanel_Sandbox.cpp">
+      <Filter>Tools</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Tools\WAOActionEditorPanel_Sets.cpp">
       <Filter>Tools</Filter>
     </ClCompile>
     <ClCompile Include="src\WheatearEditorApp.cpp" />

@@ -206,6 +206,7 @@
     <ClInclude Include="src\Tools\AssetAliasManifestEditorPanel.h" />
     <ClInclude Include="src\Tools\ProjectHealthPanel.h" />
     <ClInclude Include="src\Tools\WAOActionEditorPanel.h" />
+    <ClInclude Include="src\Tools\WAOActionEditorPanelInternal.h" />
     <ClInclude Include="src\wepch.h" />
   </ItemGroup>
   <ItemGroup>
@@ -260,6 +261,9 @@
     <ClCompile Include="src\Tools\AssetAliasManifestEditorPanel.cpp" />
     <ClCompile Include="src\Tools\ProjectHealthPanel.cpp" />
     <ClCompile Include="src\Tools\WAOActionEditorPanel.cpp" />
+    <ClCompile Include="src\Tools\WAOActionEditorPanel_Effects.cpp" />
+    <ClCompile Include="src\Tools\WAOActionEditorPanel_Sandbox.cpp" />
+    <ClCompile Include="src\Tools\WAOActionEditorPanel_Sets.cpp" />
     <ClCompile Include="src\WheatearEditorApp.cpp" />
     <ClCompile Include="src\wepch.cpp">
       <PrecompiledHeader>Create</PrecompiledHeader>
