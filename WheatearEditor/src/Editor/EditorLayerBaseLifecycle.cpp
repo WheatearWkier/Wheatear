@@ -26,6 +26,7 @@
 #include "Editor/EditorCanvasTools.h"
 #include "Panels/AnimationEditorPanel.h"
 #include "Editor/EditorCommands.h"
+#include "Panels/ContentBrowserPanel.h"
 #include "Panels/SceneHierarchy/SceneHierarchyPanel.h"
 
 #include <imgui/imgui.h>
@@ -424,8 +425,14 @@ namespace Wheatear {
         switch (e.GetKeyCode())
         {
         case WT_KEY_ESCAPE:
-            // Esc: stop play mode first, otherwise clear the selection.
-            if (m_SceneState == SceneState::Play)
+            // Esc: close the content drawer, then stop play mode, then clear
+            // the selection.
+            if (m_ContentDrawerOpen)
+            {
+                m_ContentDrawerOpen = false;
+                m_ContentBrowserPanel->SetDrawerMode(false);
+            }
+            else if (m_SceneState == SceneState::Play)
                 TransitionToStop();
             else if (Entity selected = m_SceneHierarchyPanel->GetSelectedEntity())
                 m_SceneHierarchyPanel->SetSelectedEntity({});

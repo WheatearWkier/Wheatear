@@ -54,8 +54,8 @@ namespace Wheatear {
     ContentBrowserPanel::ContentBrowserPanel()
         : m_CurrentDirectory(GetEditorAssetPath())
     {
-        m_Icons[AssetType::Directory] = Texture2D::Create("Resources/Icons/ContentBrowser/DirectoryIcon.png");
-        m_Icons[AssetType::Unknown]   = Texture2D::Create("Resources/Icons/ContentBrowser/FileIcon.png");
+        m_Icons[AssetType::Directory] = Texture2D::Create("Resources/Icons/Editor/folder.png");
+        m_Icons[AssetType::Unknown]   = Texture2D::Create("Resources/Icons/Editor/file_text.png");
         // Per-type Lucide icons so the grid reads at a glance.
         m_Icons[AssetType::Scene]     = Texture2D::Create("Resources/Icons/Editor/open_scene.png");
         m_Icons[AssetType::Texture]   = Texture2D::Create("Resources/Icons/Editor/sprite_sheet.png");
@@ -135,12 +135,66 @@ namespace Wheatear {
                 result.push_back(entry);
         }
 
+        // Folders first, then case-insensitive name order.
         std::stable_sort(result.begin(), result.end(), [](const auto& a, const auto& b)
             {
-                return a.is_directory() > b.is_directory();
+                if (a.is_directory() != b.is_directory())
+                    return a.is_directory() > b.is_directory();
+                return StringUtils::ToLower(a.path().filename().string())
+                    < StringUtils::ToLower(b.path().filename().string());
             });
 
         return result;
+    }
+
+    void ContentBrowserPanel::OpenEntry(const std::filesystem::path& path)
+    {
+        if (std::filesystem::is_directory(path))
+        {
+            NavigateTo(path);
+            return;
+        }
+
+        const std::string ext = path.extension().string();
+        const std::string relative = AssetPath::ToProjectRelative(path).generic_string();
+        if (ext == ".vn")
+            VisualNovelEditorRequests::RequestOpenScript(relative);
+        else if (ext == ".wts")
+            EventScriptGraphRequests::RequestOpenScript(relative);
+        else if (ext == AssetFileType::SceneExtension)
+        {
+            if (m_OnOpenScene) m_OnOpenScene(path);
+        }
+        else if (ext == AssetFileType::PrefabExtension)
+        {
+            if (m_OnInstantiatePrefab) m_OnInstantiatePrefab(path);
+        }
+        else if (ext == AssetFileType::UITemplateExtension)
+        {
+            if (m_OnInstantiateUITemplate) m_OnInstantiateUITemplate(path);
+        }
+    }
+
+    void ContentBrowserPanel::CommitRename(const std::filesystem::path& oldPath, const char* newName)
+    {
+        m_RenameTarget.clear();
+
+        std::string name = StringUtils::Trim(newName);
+        if (name.empty() || name == oldPath.filename().string())
+            return;
+
+        std::filesystem::path newPath = oldPath.parent_path() / name;
+        std::error_code error;
+        std::filesystem::rename(oldPath, newPath, error);
+        if (error)
+        {
+            m_RegistryStatus = "Rename failed: " + error.message();
+        }
+        else
+        {
+            m_SelectedPath = newPath;
+            m_RegistryStatus = "Renamed to: " + name;
+        }
     }
 
     void ContentBrowserPanel::NavigateTo(const std::filesystem::path& path)
@@ -342,6 +396,24 @@ namespace Wheatear {
             // Reserved for future multi-selection.
         }
 
+        // Keyboard navigation for the file grid (guarded while typing).
+        if (ImGui::IsWindowFocused() && !ImGui::IsAnyItemActive())
+        {
+            if (ImGui::IsKeyPressed(ImGuiKey_Enter) && !m_SelectedPath.empty())
+                OpenEntry(m_SelectedPath);
+            else if (ImGui::IsKeyPressed(ImGuiKey_Backspace))
+                NavigateBack();
+            else if (ImGui::IsKeyPressed(ImGuiKey_Delete) && !m_SelectedPath.empty())
+                m_ConfirmDeletePath = m_SelectedPath;
+            else if (ImGui::IsKeyPressed(ImGuiKey_F2) && !m_SelectedPath.empty())
+            {
+                m_RenameTarget = m_SelectedPath;
+                std::strncpy(m_RenameBuffer,
+                    m_SelectedPath.filename().string().c_str(),
+                    sizeof(m_RenameBuffer) - 1);
+            }
+        }
+
         ImGui::Columns(columnCount, nullptr, false);
 
         for (const auto& entry : entries)
@@ -360,12 +432,16 @@ namespace Wheatear {
             {
                 const ImVec2 pos = ImGui::GetCursorScreenPos();
                 const ImVec2 size = ImVec2(m_ThumbnailSize + m_Padding, m_ThumbnailSize + m_Padding + 20.0f);
-                ImGui::GetWindowDrawList()->AddRectFilled(pos, ImVec2(pos.x + size.x, pos.y + size.y), IM_COL32(70, 130, 180, 80), 4.0f);
+                ImDrawList* drawList = ImGui::GetWindowDrawList();
+                drawList->AddRectFilled(pos, ImVec2(pos.x + size.x, pos.y + size.y),
+                    IM_COL32(59, 184, 204, 34), 6.0f);
+                drawList->AddRect(pos, ImVec2(pos.x + size.x, pos.y + size.y),
+                    IM_COL32(59, 184, 204, 210), 6.0f, 0, 1.5f);
             }
 
             ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0, 0, 0, 0));
-            ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(1, 1, 1, 0.08f));
-            ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4(1, 1, 1, 0.12f));
+            ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(0.23f, 0.72f, 0.80f, 0.12f));
+            ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4(0.23f, 0.72f, 0.80f, 0.20f));
             ImGui::ImageButton(
                 "##AssetIcon",
                 static_cast<ImTextureID>(static_cast<uintptr_t>(icon->GetRendererID())),
@@ -391,38 +467,12 @@ namespace Wheatear {
                 m_SelectedPath = path;
 
             if (ImGui::IsItemHovered() && ImGui::IsMouseDoubleClicked(ImGuiMouseButton_Left))
-            {
-                if (entry.is_directory())
-                {
-                    NavigateTo(path);
-                }
-                else
-                {
-                    // Open designer-authored text assets in their structured
-                    // editors instead of forcing a raw text edit.
-                    const std::string ext = path.extension().string();
-                    const std::string relative = AssetPath::ToProjectRelative(path).generic_string();
-                    if (ext == ".vn")
-                        VisualNovelEditorRequests::RequestOpenScript(relative);
-                    else if (ext == ".wts")
-                        EventScriptGraphRequests::RequestOpenScript(relative);
-                    else if (ext == AssetFileType::SceneExtension)
-                    {
-                        if (m_OnOpenScene) m_OnOpenScene(path);
-                    }
-                    else if (ext == AssetFileType::PrefabExtension)
-                    {
-                        if (m_OnInstantiatePrefab) m_OnInstantiatePrefab(path);
-                    }
-                    else if (ext == AssetFileType::UITemplateExtension)
-                    {
-                        if (m_OnInstantiateUITemplate) m_OnInstantiateUITemplate(path);
-                    }
-                }
-            }
+                OpenEntry(path);
 
             if (ImGui::BeginPopupContextItem())
             {
+                if (ImGui::MenuItem(EditorLocale::Text("Open", "打开")))
+                    OpenEntry(path);
                 if (ImGui::MenuItem(EditorLocale::Text("Show in Explorer", "在资源管理器中显示")))
                 {
                     EditorPlatform::OpenDirectory(entry.is_directory() ? path : path.parent_path());
@@ -431,13 +481,39 @@ namespace Wheatear {
                 {
                     ImGui::SetClipboardText(path.string().c_str());
                 }
+                ImGui::Separator();
+                if (ImGui::MenuItem(EditorLocale::Text("Rename", "重命名"), "F2"))
+                {
+                    m_RenameTarget = path;
+                    std::strncpy(m_RenameBuffer, filename.c_str(), sizeof(m_RenameBuffer) - 1);
+                }
+                if (ImGui::MenuItem(EditorLocale::Text("Delete", "删除"), "Del"))
+                    m_ConfirmDeletePath = path;
                 ImGui::EndPopup();
             }
 
             if (ImGui::IsItemHovered())
                 ImGui::SetTooltip("%s", path.string().c_str());
 
-            ImGui::TextWrapped("%s", filename.c_str());
+            // Inline rename field replaces the filename while renaming.
+            if (path == m_RenameTarget)
+            {
+                ImGui::SetNextItemWidth(m_ThumbnailSize);
+                ImGui::SetKeyboardFocusHere();
+                const bool committed = ImGui::InputText("##rename", m_RenameBuffer,
+                    sizeof(m_RenameBuffer),
+                    ImGuiInputTextFlags_EnterReturnsTrue | ImGuiInputTextFlags_AutoSelectAll);
+                const bool cancelled = ImGui::IsKeyPressed(ImGuiKey_Escape);
+                const bool deactivated = ImGui::IsItemDeactivated();
+                if (committed)
+                    CommitRename(m_RenameTarget, m_RenameBuffer);
+                if (cancelled || (deactivated && !committed))
+                    m_RenameTarget.clear();
+            }
+            else
+            {
+                ImGui::TextWrapped("%s", filename.c_str());
+            }
 
             ImGui::NextColumn();
             ImGui::PopID();
@@ -704,8 +780,45 @@ namespace Wheatear {
 
     void ContentBrowserPanel::OnImGuiRender()
     {
-        ImGui::Begin(EditorLocale::Text("Content Browser", "资源浏览器"));
+        if (m_DrawerMode)
+        {
+            // Fold the docked window to a tab bar and show the floating
+            // drawer sliding up from the bottom (UE-style content drawer).
+            ImGui::SetNextWindowCollapsed(true, ImGuiCond_Always);
+            ImGui::Begin("Content Browser");
+            ImGui::End();
 
+            const ImGuiViewport* viewport = ImGui::GetMainViewport();
+            const float drawerHeight = 320.0f;
+            ImGui::SetNextWindowPos(
+                ImVec2(viewport->WorkPos.x, viewport->WorkPos.y + viewport->WorkSize.y - drawerHeight),
+                ImGuiCond_Always);
+            ImGui::SetNextWindowSize(ImVec2(viewport->WorkSize.x, drawerHeight), ImGuiCond_Always);
+            ImGui::SetNextWindowViewport(viewport->ID);
+            ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 10.0f);
+            ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 1.0f);
+            ImGui::Begin("##ContentDrawer", nullptr,
+                ImGuiWindowFlags_NoDocking | ImGuiWindowFlags_NoCollapse
+                | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize
+                | ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoSavedSettings);
+            DrawPanelContent();
+            ImGui::End();
+            ImGui::PopStyleVar(2);
+
+            // Clicking outside the drawer dismisses it.
+            if (ImGui::IsMouseClicked(ImGuiMouseButton_Left)
+                && !ImGui::IsWindowHovered(ImGuiHoveredFlags_AnyWindow))
+                m_DrawerMode = false;
+            return;
+        }
+
+        ImGui::Begin(EditorLocale::Text("Content Browser", "资源浏览器"));
+        DrawPanelContent();
+        ImGui::End();
+    }
+
+    void ContentBrowserPanel::DrawPanelContent()
+    {
         EditorWidgets::PanelHeader("Content Browser", "Project asset workspace rooted at WheatearEditor/assets.");
         DrawToolbar();
 
@@ -732,7 +845,41 @@ namespace Wheatear {
 
         DrawStatusBar();
 
-        ImGui::End();
+        // Confirmation before deleting an asset from disk.
+        if (!m_ConfirmDeletePath.empty())
+        {
+            ImGui::OpenPopup(EditorLocale::Text("Delete Asset", "删除资源"));
+            ImGui::SetNextWindowPos(ImGui::GetMainViewport()->GetCenter(), ImGuiCond_Appearing, ImVec2(0.5f, 0.5f));
+            if (ImGui::BeginPopupModal(EditorLocale::Text("Delete Asset", "删除资源"),
+                    nullptr, ImGuiWindowFlags_AlwaysAutoResize))
+            {
+                ImGui::Text("%s", EditorLocale::Text(
+                    "Delete '%s' from disk? This cannot be undone.",
+                    "确定从磁盘删除 '%s' 吗？此操作无法撤销。"),
+                    m_ConfirmDeletePath.filename().string().c_str());
+                ImGui::Separator();
+                ImGui::Spacing();
+                if (ImGui::Button(EditorLocale::Text("Delete", "删除"), ImVec2(120.0f, 0.0f)))
+                {
+                    std::error_code error;
+                    if (std::filesystem::is_directory(m_ConfirmDeletePath))
+                        std::filesystem::remove_all(m_ConfirmDeletePath, error);
+                    else
+                        std::filesystem::remove(m_ConfirmDeletePath, error);
+                    if (error)
+                        m_RegistryStatus = "Delete failed: " + error.message();
+                    else
+                        m_RegistryStatus = "Deleted: " + m_ConfirmDeletePath.filename().string();
+                    if (m_SelectedPath == m_ConfirmDeletePath)
+                        m_SelectedPath.clear();
+                    m_ConfirmDeletePath.clear();
+                }
+                ImGui::SameLine();
+                if (ImGui::Button(EditorLocale::Text("Cancel", "取消"), ImVec2(100.0f, 0.0f)))
+                    m_ConfirmDeletePath.clear();
+                ImGui::EndPopup();
+            }
+        }
     }
 
 } // namespace Wheatear

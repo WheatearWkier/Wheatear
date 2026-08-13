@@ -201,6 +201,7 @@ namespace Wheatear {
         bool m_UIEditorMouseOverCanvas = false;
         glm::vec2 m_UIEditorCanvasBounds[2] = {};
         bool m_ShowStats = true;
+        bool m_ContentDrawerOpen = false;
         bool m_RequestDefaultDockspaceLayout = false;
         bool m_DefaultDockspaceLayoutBuilt = false;
         Entity m_UIEditingCanvas;

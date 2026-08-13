@@ -421,6 +421,14 @@ namespace Wheatear {
             m_DefaultDockspaceLayoutBuilt = false;
         }
 
+        sameLine();
+        if (EditorWidgets::IconButton("##ToolbarContentDrawer", m_IconFolder,
+                "Content Drawer (Content Browser)", iconSize))
+        {
+            m_ContentDrawerOpen = !m_ContentDrawerOpen;
+            m_ContentBrowserPanel->SetDrawerMode(m_ContentDrawerOpen);
+        }
+
         ImGui::End();
         ImGui::PopStyleColor(2);
         ImGui::PopStyleVar(4);

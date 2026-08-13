@@ -35,6 +35,11 @@ namespace Wheatear {
         ContentBrowserPanel();
         void OnImGuiRender();
 
+        // UE-style content drawer: the panel folds into a floating bar at the
+        // bottom of the editor instead of a docked window.
+        void SetDrawerMode(bool on) { m_DrawerMode = on; }
+        bool IsDrawerMode() const { return m_DrawerMode; }
+
         // Double-click routing for scene / prefab / UI-template assets; the
         // editor layer registers these so the browser never touches the scene.
         void SetOnOpenSceneCallback(std::function<void(const std::filesystem::path&)> callback)
@@ -51,6 +56,7 @@ namespace Wheatear {
         }
 
     private:
+        void DrawPanelContent();
         void DrawToolbar();
         void DrawSidebar();
         void DrawFileGrid();
@@ -65,6 +71,8 @@ namespace Wheatear {
         Ref<Texture2D> GetIconForType(AssetType type) const;
 
         std::vector<std::filesystem::directory_entry> GetFilteredEntries() const;
+        void OpenEntry(const std::filesystem::path& path);
+        void CommitRename(const std::filesystem::path& oldPath, const char* newName);
 
     private:
         std::filesystem::path              m_CurrentDirectory;
@@ -72,6 +80,10 @@ namespace Wheatear {
         int                                m_HistoryIndex = -1;
 
         std::filesystem::path m_SelectedPath;
+        std::filesystem::path m_RenameTarget;
+        char m_RenameBuffer[256] = {};
+        std::filesystem::path m_ConfirmDeletePath;
+        bool m_DrawerMode = false;
 
         char m_SearchBuffer[256] = {};
 
