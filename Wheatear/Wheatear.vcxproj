@@ -283,6 +283,7 @@
     <ClInclude Include="src\Wheatear\Modules\VisualNovel\VisualNovelRuntime.h" />
     <ClInclude Include="src\Wheatear\Modules\VisualNovel\VisualNovelScript.h" />
     <ClInclude Include="src\Wheatear\Modules\VisualNovel\VisualNovelSystem.h" />
+    <ClInclude Include="src\Wheatear\Modules\VisualNovel\VisualNovelSystemInternal.h" />
     <ClInclude Include="src\Wheatear\Physics\ContactListener.h" />
     <ClInclude Include="src\Wheatear\Renderer\Buffer.h" />
     <ClInclude Include="src\Wheatear\Renderer\Camera.h" />
@@ -814,6 +815,7 @@
     <ClCompile Include="src\Wheatear\Modules\VisualNovel\VisualNovelRuntime.cpp" />
     <ClCompile Include="src\Wheatear\Modules\VisualNovel\VisualNovelScript.cpp" />
     <ClCompile Include="src\Wheatear\Modules\VisualNovel\VisualNovelSystem.cpp" />
+    <ClCompile Include="src\Wheatear\Modules\VisualNovel\VisualNovelSystem_SceneBindings.cpp" />
     <ClCompile Include="src\Wheatear\Physics\ContactListener.cpp" />
     <ClCompile Include="src\Wheatear\Renderer\Buffer.cpp" />
     <ClCompile Include="src\Wheatear\Renderer\EditorCamera.cpp" />

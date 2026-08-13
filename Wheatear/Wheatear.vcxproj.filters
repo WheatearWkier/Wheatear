@@ -513,6 +513,9 @@
     <ClInclude Include="src\Wheatear\Modules\VisualNovel\VisualNovelSystem.h">
       <Filter>src\Wheatear\Modules\VisualNovel</Filter>
     </ClInclude>
+    <ClInclude Include="src\Wheatear\Modules\VisualNovel\VisualNovelSystemInternal.h">
+      <Filter>src\Wheatear\Modules\VisualNovel</Filter>
+    </ClInclude>
     <ClInclude Include="src\Wheatear\Physics\ContactListener.h">
       <Filter>src\Wheatear\Physics</Filter>
     </ClInclude>
@@ -2100,6 +2103,9 @@
       <Filter>src\Wheatear\Modules\VisualNovel</Filter>
     </ClCompile>
     <ClCompile Include="src\Wheatear\Modules\VisualNovel\VisualNovelSystem.cpp">
+      <Filter>src\Wheatear\Modules\VisualNovel</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Wheatear\Modules\VisualNovel\VisualNovelSystem_SceneBindings.cpp">
       <Filter>src\Wheatear\Modules\VisualNovel</Filter>
     </ClCompile>
     <ClCompile Include="src\Wheatear\Physics\ContactListener.cpp">
