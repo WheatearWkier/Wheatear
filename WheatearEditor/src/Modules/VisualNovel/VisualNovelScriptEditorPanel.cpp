@@ -1082,7 +1082,7 @@ static void ExtractChoiceRequiredCondition(std::string& target,
                 }
                 if (ImGui::Button("+ Choice Option"))
                 {
-                    row.Choices.push_back({ "New option", "target_label", {}, {} });
+                    row.Choices.push_back({ EditorLocale::Text("New option", "新选项"), "target_label", {}, {} });
                     m_Dirty = true;
                 }
                 break;
@@ -1194,11 +1194,11 @@ static void ExtractChoiceRequiredCondition(std::string& target,
                 break;
             case RowKind::Music:
                 row.Value = m_BGMAssets.empty() ? AssetAliasRegistry::Path("vn.default.bgm") : m_BGMAssets.front();
-                row.Text = "新BGM";
+                row.Text = EditorLocale::Text("New BGM", "新BGM");
                 break;
             case RowKind::Character:
                 row.Name = "Character";
-                row.Text = "角色";
+                row.Text = EditorLocale::Text("Character", "角色");
                 row.Value = AssetAliasRegistry::Path("vn.default.portrait_pattern");
                 break;
             case RowKind::Show:
@@ -1212,11 +1212,11 @@ static void ExtractChoiceRequiredCondition(std::string& target,
                 row.Value = "neutral";
                 break;
             case RowKind::Choice:
-                row.Choices.push_back({ "Option text", "target_label", {}, {} });
+                row.Choices.push_back({ EditorLocale::Text("Option text", "选项文本"), "target_label", {}, {} });
                 break;
             case RowKind::Dialogue:
                 row.Name = "Leo";
-                row.Text = "新台词。";
+                row.Text = EditorLocale::Text("New line.", "新台词。");
                 break;
             case RowKind::Goto:
                 row.Value = labels.empty() ? "target_label" : labels.front();

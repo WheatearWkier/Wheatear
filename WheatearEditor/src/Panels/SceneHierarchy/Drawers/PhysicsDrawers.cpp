@@ -1,6 +1,7 @@
 #include "PhysicsDrawers.h"
 
 #include "../ComponentDrawers.h"
+#include "Editor/EditorLocale.h"
 
 #include <imgui/imgui.h>
 #include <glm/gtc/type_ptr.hpp>
@@ -17,7 +18,7 @@ namespace Wheatear {
                 const char* bodyTypeStrings[] = { "Static", "Dynamic", "Kinematic" };
                 const char* currentStr = bodyTypeStrings[static_cast<int>(c.Type)];
 
-                if (ImGui::BeginCombo("Body Type", currentStr))
+                if (ImGui::BeginCombo(EditorLocale::Text("Body Type", "刚体类型"), currentStr))
                 {
                     for (int i = 0; i < 3; i++)
                     {
@@ -30,8 +31,8 @@ namespace Wheatear {
                     ImGui::EndCombo();
                 }
 
-                ImGui::Checkbox("Fixed Rotation", &c.FixedRotation);
-                ImGui::DragFloat("Gravity Scale", &c.GravityScale, 0.01f, -10.0f, 10.0f);
+                ImGui::Checkbox(EditorLocale::Text("Fixed Rotation", "锁定旋转"), &c.FixedRotation);
+                ImGui::DragFloat(EditorLocale::Text("Gravity Scale", "重力缩放"), &c.GravityScale, 0.01f, -10.0f, 10.0f);
             });
     }
 
@@ -40,12 +41,12 @@ namespace Wheatear {
     {
         DrawComponent<BoxCollider2DComponent>("Box Collider 2D", entity, [](auto& c)
             {
-                ImGui::DragFloat2("Offset", glm::value_ptr(c.Offset));
-                ImGui::DragFloat2("Size", glm::value_ptr(c.Size));
-                ImGui::DragFloat("Density", &c.Density, 0.01f, 0.0f, 1.0f);
-                ImGui::DragFloat("Friction", &c.Friction, 0.01f, 0.0f, 1.0f);
-                ImGui::DragFloat("Restitution", &c.Restitution, 0.01f, 0.0f, 1.0f);
-                ImGui::DragFloat("Restitution Threshold", &c.RestitutionThreshold, 0.01f, 0.0f);
+                ImGui::DragFloat2(EditorLocale::Text("Offset", "偏移"), glm::value_ptr(c.Offset));
+                ImGui::DragFloat2(EditorLocale::Text("Size", "大小"), glm::value_ptr(c.Size));
+                ImGui::DragFloat(EditorLocale::Text("Density", "密度"), &c.Density, 0.01f, 0.0f, 1.0f);
+                ImGui::DragFloat(EditorLocale::Text("Friction", "摩擦"), &c.Friction, 0.01f, 0.0f, 1.0f);
+                ImGui::DragFloat(EditorLocale::Text("Restitution", "弹性"), &c.Restitution, 0.01f, 0.0f, 1.0f);
+                ImGui::DragFloat(EditorLocale::Text("Restitution Threshold", "弹性阈值"), &c.RestitutionThreshold, 0.01f, 0.0f);
             });
     }
 
@@ -54,12 +55,12 @@ namespace Wheatear {
     {
         DrawComponent<CircleCollider2DComponent>("Circle Collider 2D", entity, [](auto& c)
             {
-                ImGui::DragFloat2("Offset", glm::value_ptr(c.Offset));
-                ImGui::DragFloat("Radius", &c.Radius);
-                ImGui::DragFloat("Density", &c.Density, 0.01f, 0.0f, 1.0f);
-                ImGui::DragFloat("Friction", &c.Friction, 0.01f, 0.0f, 1.0f);
-                ImGui::DragFloat("Restitution", &c.Restitution, 0.01f, 0.0f, 1.0f);
-                ImGui::DragFloat("Restitution Threshold", &c.RestitutionThreshold, 0.01f, 0.0f);
+                ImGui::DragFloat2(EditorLocale::Text("Offset", "偏移"), glm::value_ptr(c.Offset));
+                ImGui::DragFloat(EditorLocale::Text("Radius", "半径"), &c.Radius);
+                ImGui::DragFloat(EditorLocale::Text("Density", "密度"), &c.Density, 0.01f, 0.0f, 1.0f);
+                ImGui::DragFloat(EditorLocale::Text("Friction", "摩擦"), &c.Friction, 0.01f, 0.0f, 1.0f);
+                ImGui::DragFloat(EditorLocale::Text("Restitution", "弹性"), &c.Restitution, 0.01f, 0.0f, 1.0f);
+                ImGui::DragFloat(EditorLocale::Text("Restitution Threshold", "弹性阈值"), &c.RestitutionThreshold, 0.01f, 0.0f);
             });
     }
 

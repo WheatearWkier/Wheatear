@@ -3,6 +3,7 @@
 
 #include "Assets/AssetRegistry.h"
 #include "Assets/UITemplateFactory.h"
+#include "Editor/EditorLocale.h"
 #include "Editor/EditorPlatform.h"
 #include "Editor/EditorWidgets.h"
 #include "Editor/EventScriptGraphPanel.h"
@@ -193,7 +194,7 @@ namespace Wheatear {
         if (ImGui::Button("< ##back") && canBack)
             NavigateBack();
         if (!canBack) ImGui::PopStyleVar();
-        if (ImGui::IsItemHovered()) ImGui::SetTooltip("Back");
+        if (ImGui::IsItemHovered()) ImGui::SetTooltip(EditorLocale::Text("Back", "后退"));
 
         ImGui::SameLine();
 
@@ -201,7 +202,7 @@ namespace Wheatear {
         if (ImGui::Button("> ##fwd") && canForward)
             NavigateForward();
         if (!canForward) ImGui::PopStyleVar();
-        if (ImGui::IsItemHovered()) ImGui::SetTooltip("Forward");
+        if (ImGui::IsItemHovered()) ImGui::SetTooltip(EditorLocale::Text("Forward", "前进"));
 
         ImGui::SameLine();
 
@@ -210,7 +211,7 @@ namespace Wheatear {
         if (ImGui::Button("^ ##up") && canUp)
             NavigateTo(m_CurrentDirectory.parent_path());
         if (!canUp) ImGui::PopStyleVar();
-        if (ImGui::IsItemHovered()) ImGui::SetTooltip("Up one level");
+        if (ImGui::IsItemHovered()) ImGui::SetTooltip(EditorLocale::Text("Up one level", "上一级"));
 
         ImGui::SameLine();
 
@@ -247,7 +248,7 @@ namespace Wheatear {
         EditorWidgets::SearchBar("##search", m_SearchBuffer, sizeof(m_SearchBuffer), "Search current folder...");
 
         ImGui::SameLine();
-        if (ImGui::Button("Rescan"))
+        if (ImGui::Button(EditorLocale::Text("Rescan", "重扫")))
         {
             AssetRegistry::Get().Scan(AssetPath::GetProjectRoot());
             AssetRegistry::Get().WriteRegistry();
@@ -255,14 +256,14 @@ namespace Wheatear {
         }
 
         ImGui::SameLine();
-        if (ImGui::Button("Write Registry"))
+        if (ImGui::Button(EditorLocale::Text("Write Registry", "写入注册表")))
         {
             const bool saved = AssetRegistry::Get().WriteRegistry();
             m_RegistryStatus = saved ? "asset_registry.yaml written." : "Failed to write asset_registry.yaml.";
         }
 
         ImGui::SameLine();
-        if (ImGui::Button("UI Templates"))
+        if (ImGui::Button(EditorLocale::Text("UI Templates", "UI 模板")))
         {
             UITemplateFactory::WriteBuiltinTemplateAssets(AssetPath::GetProjectRoot());
             AssetRegistry::Get().Scan(AssetPath::GetProjectRoot());
@@ -416,7 +417,7 @@ namespace Wheatear {
 
             if (ImGui::BeginPopupContextItem())
             {
-                if (ImGui::MenuItem("Show in Explorer"))
+                if (ImGui::MenuItem(EditorLocale::Text("Show in Explorer", "在资源管理器中显示")))
                 {
                     EditorPlatform::OpenDirectory(entry.is_directory() ? path : path.parent_path());
                 }
@@ -434,7 +435,7 @@ namespace Wheatear {
 
         if (ImGui::BeginPopupContextWindow("##DirCtx", ImGuiPopupFlags_MouseButtonRight | ImGuiPopupFlags_NoOpenOverItems))
         {
-            if (ImGui::MenuItem("New Folder"))
+            if (ImGui::MenuItem(EditorLocale::Text("New Folder", "新建文件夹")))
             {
                 std::filesystem::path candidate = m_CurrentDirectory / "New Folder";
                 for (int i = 2; std::filesystem::exists(candidate); ++i)
@@ -451,7 +452,7 @@ namespace Wheatear {
                     m_RegistryStatus = "Failed to create folder.";
                 }
             }
-            if (ImGui::MenuItem("New Event Script (.wts)"))
+            if (ImGui::MenuItem(EditorLocale::Text("New Event Script (.wts)", "新建事件脚本 (.wts)")))
             {
                 std::filesystem::path candidate = m_CurrentDirectory / "new_event.wts";
                 for (int i = 2; std::filesystem::exists(candidate); ++i)
@@ -501,11 +502,11 @@ namespace Wheatear {
             const std::string name = m_SelectedPath.filename().string();
             const std::string ext = m_SelectedPath.extension().string();
 
-            ImGui::TextDisabled("Name");
+            ImGui::TextDisabled(EditorLocale::Text("Name", "名称"));
             ImGui::TextWrapped("%s", name.c_str());
 
             ImGui::Spacing();
-            ImGui::TextDisabled("Type");
+            ImGui::TextDisabled(EditorLocale::Text("Type", "类型"));
 
             ImGui::Text("%s", AssetTypeLabel(type));
 
@@ -514,11 +515,11 @@ namespace Wheatear {
             if (metadata)
             {
                 ImGui::Spacing();
-                ImGui::TextDisabled("Asset UUID");
+                ImGui::TextDisabled(EditorLocale::Text("Asset UUID", "资源 UUID"));
                 ImGui::TextWrapped("%llu", static_cast<unsigned long long>(static_cast<uint64_t>(metadata->ID)));
 
                 ImGui::Spacing();
-                ImGui::TextDisabled("Registry Type");
+                ImGui::TextDisabled(EditorLocale::Text("Registry Type", "注册表类型"));
                 ImGui::Text("%s", AssetRegistry::KindToString(metadata->Kind).c_str());
 
                 bool changed = false;
@@ -528,16 +529,16 @@ namespace Wheatear {
                     ImGui::TextDisabled("Texture Import");
                     const char* filters[] = { "Linear", "Nearest" };
                     int filterIndex = metadata->Texture.Filter == "Nearest" ? 1 : 0;
-                    if (ImGui::Combo("Filter", &filterIndex, filters, IM_ARRAYSIZE(filters)))
+                    if (ImGui::Combo(EditorLocale::Text("Filter", "过滤"), &filterIndex, filters, IM_ARRAYSIZE(filters)))
                     {
                         metadata->Texture.Filter = filters[filterIndex];
                         changed = true;
                     }
-                    changed |= ImGui::DragFloat("PPU", &metadata->Texture.PixelsPerUnit, 1.0f, 1.0f, 1000.0f, "%.0f");
-                    changed |= ImGui::InputInt("Columns", &metadata->Texture.Columns);
-                    changed |= ImGui::InputInt("Rows", &metadata->Texture.Rows);
-                    changed |= ImGui::InputInt("Cell W", &metadata->Texture.CellWidth);
-                    changed |= ImGui::InputInt("Cell H", &metadata->Texture.CellHeight);
+                    changed |= ImGui::DragFloat(EditorLocale::Text("PPU", "PPU"), &metadata->Texture.PixelsPerUnit, 1.0f, 1.0f, 1000.0f, "%.0f");
+                    changed |= ImGui::InputInt(EditorLocale::Text("Columns", "列数"), &metadata->Texture.Columns);
+                    changed |= ImGui::InputInt(EditorLocale::Text("Rows", "行数"), &metadata->Texture.Rows);
+                    changed |= ImGui::InputInt(EditorLocale::Text("Cell W", "单元格宽"), &metadata->Texture.CellWidth);
+                    changed |= ImGui::InputInt(EditorLocale::Text("Cell H", "单元格高"), &metadata->Texture.CellHeight);
                     metadata->Texture.Columns = std::max(metadata->Texture.Columns, 1);
                     metadata->Texture.Rows = std::max(metadata->Texture.Rows, 1);
                     metadata->Texture.CellWidth = std::max(metadata->Texture.CellWidth, 0);
@@ -554,13 +555,13 @@ namespace Wheatear {
                         if (metadata->Audio.Usage == usages[i])
                             usageIndex = i;
                     }
-                    if (ImGui::Combo("Usage", &usageIndex, usages, IM_ARRAYSIZE(usages)))
+                    if (ImGui::Combo(EditorLocale::Text("Usage", "用途"), &usageIndex, usages, IM_ARRAYSIZE(usages)))
                     {
                         metadata->Audio.Usage = usages[usageIndex];
                         changed = true;
                     }
-                    changed |= ImGui::SliderFloat("Default Volume", &metadata->Audio.DefaultVolume, 0.0f, 1.0f, "%.2f");
-                    changed |= ImGui::Checkbox("Loop", &metadata->Audio.Loop);
+                    changed |= ImGui::SliderFloat(EditorLocale::Text("Default Volume", "默认音量"), &metadata->Audio.DefaultVolume, 0.0f, 1.0f, "%.2f");
+                    changed |= ImGui::Checkbox(EditorLocale::Text("Loop", "循环"), &metadata->Audio.Loop);
                 }
                 else if (metadata->Kind == EditorAssetKind::Prefab || metadata->Kind == EditorAssetKind::UITemplate)
                 {
@@ -593,7 +594,7 @@ namespace Wheatear {
                 }
 
                 ImGui::SameLine();
-                if (ImGui::Button("Copy UUID"))
+                if (ImGui::Button(EditorLocale::Text("Copy UUID", "复制 UUID")))
                     ImGui::SetClipboardText(std::to_string(static_cast<uint64_t>(metadata->ID)).c_str());
 
                 ImGui::Spacing();
@@ -633,14 +634,14 @@ namespace Wheatear {
             if (!ext.empty())
             {
                 ImGui::Spacing();
-                ImGui::TextDisabled("Extension");
+                ImGui::TextDisabled(EditorLocale::Text("Extension", "扩展名"));
                 ImGui::Text("%s", ext.c_str());
             }
 
             if (!std::filesystem::is_directory(m_SelectedPath))
             {
                 ImGui::Spacing();
-                ImGui::TextDisabled("Size");
+                ImGui::TextDisabled(EditorLocale::Text("Size", "大小"));
                 const auto bytes = std::filesystem::file_size(m_SelectedPath);
                 if (bytes < 1024)
                     ImGui::Text("%llu B", static_cast<unsigned long long>(bytes));
@@ -651,8 +652,8 @@ namespace Wheatear {
             }
 
             ImGui::Spacing();
-            ImGui::TextDisabled("Modified");
-            ImGui::TextDisabled("(see OS)");
+            ImGui::TextDisabled(EditorLocale::Text("Modified", "修改时间"));
+            ImGui::TextDisabled(EditorLocale::Text("(see OS)", "(见操作系统)"));
         }
         else
         {
@@ -691,7 +692,7 @@ namespace Wheatear {
 
     void ContentBrowserPanel::OnImGuiRender()
     {
-        ImGui::Begin("Content Browser");
+        ImGui::Begin(EditorLocale::Text("Content Browser", "资源浏览器"));
 
         EditorWidgets::PanelHeader("Content Browser", "Project asset workspace rooted at WheatearEditor/assets.");
         DrawToolbar();

@@ -659,6 +659,9 @@ namespace Wheatear {
         auto localizedToolLabel = [](const char* label) -> const char*
         {
             if (!label) return "";
+            if (std::strcmp(label, "UI Canvas Editor") == 0) return EditorLocale::Text("UI Canvas Editor", "UI 画布编辑器");
+            if (std::strcmp(label, "Animation Editor") == 0) return EditorLocale::Text("Animation Editor", "动画编辑器");
+            if (std::strcmp(label, "Sprite Sheet Picker") == 0) return EditorLocale::Text("Sprite Sheet Picker", "序列帧选择器");
             if (std::strcmp(label, "Event Script Editor") == 0) return EditorLocale::Text("Event Script Editor", "事件脚本编辑器");
             if (std::strcmp(label, "VN Script Editor") == 0) return EditorLocale::Text("VN Script Editor", "视觉小说脚本编辑器");
             if (std::strcmp(label, "Side Combat Tuning Editor") == 0) return EditorLocale::Text("Side Combat Tuning Editor", "横版战斗调参编辑器");
@@ -712,38 +715,38 @@ namespace Wheatear {
             }
         };
 
-        if (ImGui::BeginMenu("Scene"))
+        if (ImGui::BeginMenu(EditorLocale::Text("Scene", "场景")))
         {
-            if (ImGui::MenuItem("New",          "Ctrl+N"))        NewScene();
-            if (ImGui::MenuItem("Open...",      "Ctrl+O"))        OpenScene();
-            if (ImGui::MenuItem("Save",         "Ctrl+S"))        SaveScene();
-            if (ImGui::MenuItem("Save As...",   "Ctrl+Shift+S"))  SaveSceneAs();
+            if (ImGui::MenuItem(EditorLocale::Text("New", "新建"), "Ctrl+N"))        NewScene();
+            if (ImGui::MenuItem(EditorLocale::Text("Open...", "打开..."), "Ctrl+O"))  OpenScene();
+            if (ImGui::MenuItem(EditorLocale::Text("Save", "保存"), "Ctrl+S"))        SaveScene();
+            if (ImGui::MenuItem(EditorLocale::Text("Save As...", "另存为..."), "Ctrl+Shift+S"))  SaveSceneAs();
             ImGui::EndMenu();
         }
 
-        if (ImGui::BeginMenu("Edit"))
+        if (ImGui::BeginMenu(EditorLocale::Text("Edit", "编辑")))
         {
-            if (ImGui::MenuItem("Undo", "Ctrl+Z", false, CommandHistory::Get().CanUndo()))
+            if (ImGui::MenuItem(EditorLocale::Text("Undo", "撤销"), "Ctrl+Z", false, CommandHistory::Get().CanUndo()))
                 CommandHistory::Get().Undo();
-            if (ImGui::MenuItem("Redo", "Ctrl+Y / Ctrl+Shift+Z", false, CommandHistory::Get().CanRedo()))
+            if (ImGui::MenuItem(EditorLocale::Text("Redo", "重做"), "Ctrl+Y / Ctrl+Shift+Z", false, CommandHistory::Get().CanRedo()))
                 CommandHistory::Get().Redo();
             ImGui::EndMenu();
         }
 
-        if (ImGui::BeginMenu("Run"))
+        if (ImGui::BeginMenu(EditorLocale::Text("Run", "运行")))
         {
             if (m_SceneState == SceneState::Edit)
             {
-                if (ImGui::MenuItem("Play", "Ctrl+Enter"))
+                if (ImGui::MenuItem(EditorLocale::Text("Play", "播放"), "Ctrl+Enter"))
                     TransitionToPlay();
             }
             else
             {
-                if (ImGui::MenuItem("Stop", "Ctrl+Enter"))
+                if (ImGui::MenuItem(EditorLocale::Text("Stop", "停止"), "Ctrl+Enter"))
                     TransitionToStop();
             }
 
-            if (ImGui::MenuItem("Frame Selection", "F"))
+            if (ImGui::MenuItem(EditorLocale::Text("Frame Selection", "聚焦选中"), "F"))
             {
                 if (Entity selected = m_SceneHierarchyPanel->GetSelectedEntity())
                     ActivateHierarchyEntity(selected);
@@ -753,17 +756,17 @@ namespace Wheatear {
             ImGui::EndMenu();
         }
 
-        if (ImGui::BeginMenu("UI"))
+        if (ImGui::BeginMenu(EditorLocale::Text("UI", "界面")))
         {
-            ImGui::MenuItem("UI Edit Outlines", nullptr, &m_ShowUIOutlines);
-            if (ImGui::MenuItem("UI Canvas Editor", nullptr, &m_UIEditorOpen))
+            ImGui::MenuItem(EditorLocale::Text("UI Edit Outlines", "UI 编辑轮廓线"), nullptr, &m_ShowUIOutlines);
+            if (ImGui::MenuItem(EditorLocale::Text("UI Canvas Editor", "UI 画布编辑器"), nullptr, &m_UIEditorOpen))
             {
                 EditorFloatingWindow::Dock("UI Canvas Editor");
                 m_FocusCanvasEditor = true;
                 if (!m_UIEditingCanvas)
                     m_UIEditingCanvas = m_SceneHierarchyPanel->GetSelectedEntity();
             }
-            if (ImGui::MenuItem("UI Canvas Editor Floating"))
+            if (ImGui::MenuItem(EditorLocale::Text("UI Canvas Editor Floating", "UI 画布编辑器（浮动）")))
             {
                 m_UIEditorOpen = true;
                 EditorFloatingWindow::OpenFloating("UI Canvas Editor");
@@ -771,9 +774,9 @@ namespace Wheatear {
                 if (!m_UIEditingCanvas)
                     m_UIEditingCanvas = m_SceneHierarchyPanel->GetSelectedEntity();
             }
-            if (ImGui::MenuItem("Sprite Sheet Picker"))
+            if (ImGui::MenuItem(EditorLocale::Text("Sprite Sheet Picker", "序列帧选择器")))
                 m_SpriteSheetPickerPanel->OpenForEntity(m_SceneHierarchyPanel->GetSelectedEntity());
-            if (ImGui::MenuItem("Generate UI Templates"))
+            if (ImGui::MenuItem(EditorLocale::Text("Generate UI Templates", "生成内置 UI 模板")))
             {
                 UITemplateFactory::WriteBuiltinTemplateAssets(AssetPath::GetProjectRoot());
                 AssetRegistry::Get().Scan(AssetPath::GetProjectRoot());
@@ -783,15 +786,18 @@ namespace Wheatear {
             ImGui::EndMenu();
         }
 
-        if (ImGui::BeginMenu("Window"))
+        if (ImGui::BeginMenu(EditorLocale::Text("Window", "窗口")))
         {
-            drawFloatingWindowItem("UI Canvas Editor", [&]()
+            drawLocalizedFloatingWindowItem("UI Canvas Editor", [&]()
             {
                 m_UIEditorOpen = true;
                 m_FocusCanvasEditor = true;
             });
-            EditorFloatingWindow::DrawFloatingMenuItem("Animation Editor");
-            drawFloatingWindowItem("Sprite Sheet Picker", [&]()
+            drawLocalizedFloatingWindowItem("Animation Editor", [&]()
+            {
+                EditorFloatingWindow::OpenFloating("Animation Editor");
+            });
+            drawLocalizedFloatingWindowItem("Sprite Sheet Picker", [&]()
             {
                 m_SpriteSheetPickerPanel->OpenForEntity(m_SceneHierarchyPanel->GetSelectedEntity());
             });
@@ -803,7 +809,7 @@ namespace Wheatear {
             drawLocalizedFloatingWindowItem("Asset Alias / Manifest Editor", [&]() { openToolByLabel("Asset Alias / Manifest Editor"); });
             drawLocalizedFloatingWindowItem("Project Health", [&]() { openToolByLabel("Project Health"); });
             ImGui::Separator();
-            if (ImGui::MenuItem("Reset Window Layout"))
+            if (ImGui::MenuItem(EditorLocale::Text("Reset Window Layout", "重置窗口布局")))
             {
                 m_RequestDefaultDockspaceLayout = true;
                 m_DefaultDockspaceLayoutBuilt = false;
@@ -812,15 +818,15 @@ namespace Wheatear {
             ImGui::EndMenu();
         }
 
-        if (ImGui::BeginMenu("Gameplay"))
+        if (ImGui::BeginMenu(EditorLocale::Text("Gameplay", "玩法")))
         {
             drawToolsByCategory(EditorToolCategory::Gameplay);
             ImGui::EndMenu();
         }
 
-        if (ImGui::BeginMenu("Assets"))
+        if (ImGui::BeginMenu(EditorLocale::Text("Assets", "资源")))
         {
-            if (ImGui::MenuItem("Rescan Asset Registry"))
+            if (ImGui::MenuItem(EditorLocale::Text("Rescan Asset Registry", "重扫资源注册表")))
             {
                 AssetRegistry::Get().Scan(AssetPath::GetProjectRoot());
                 AssetRegistry::Get().WriteRegistry();
@@ -829,33 +835,33 @@ namespace Wheatear {
             ImGui::EndMenu();
         }
 
-        if (ImGui::BeginMenu("Build"))
+        if (ImGui::BeginMenu(EditorLocale::Text("Build", "构建")))
         {
-            if (ImGui::MenuItem("Package Player + Editor", nullptr, false, !m_PlayerBuildRunning))
+            if (ImGui::MenuItem(EditorLocale::Text("Package Player + Editor", "打包玩家 + 编辑器"), nullptr, false, !m_PlayerBuildRunning))
                 StartPlayerPackageBuild(false);
-            if (ImGui::MenuItem("Open Player Folder", nullptr, false, !m_LastPlayerBuildDirectory.empty()))
+            if (ImGui::MenuItem(EditorLocale::Text("Open Player Folder", "打开玩家目录"), nullptr, false, !m_LastPlayerBuildDirectory.empty()))
                 EditorPlatform::OpenDirectory(m_LastPlayerBuildDirectory);
-            if (ImGui::MenuItem("Open Editor Folder", nullptr, false, !m_LastEditorBuildDirectory.empty()))
+            if (ImGui::MenuItem(EditorLocale::Text("Open Editor Folder", "打开编辑器目录"), nullptr, false, !m_LastEditorBuildDirectory.empty()))
                 EditorPlatform::OpenDirectory(m_LastEditorBuildDirectory);
             ImGui::EndMenu();
         }
 
-        if (ImGui::BeginMenu("Diagnostics"))
+        if (ImGui::BeginMenu(EditorLocale::Text("Diagnostics", "诊断")))
         {
             drawToolsByCategory(EditorToolCategory::Diagnostics);
-            ImGui::MenuItem("Physics Colliders", nullptr, &m_ShowPhysicsColliders);
-            ImGui::MenuItem("Stats Window", nullptr, &m_ShowStats);
+            ImGui::MenuItem(EditorLocale::Text("Physics Colliders", "物理碰撞体"), nullptr, &m_ShowPhysicsColliders);
+            ImGui::MenuItem(EditorLocale::Text("Stats Window", "统计窗口"), nullptr, &m_ShowStats);
             ImGui::EndMenu();
         }
 
-        if (ImGui::BeginMenu("App"))
+        if (ImGui::BeginMenu(EditorLocale::Text("App", "应用")))
         {
             if (ImGui::BeginMenu(EditorLocale::Text("Language", "语言")))
             {
                 EditorLocale::DrawLanguageMenu();
                 ImGui::EndMenu();
             }
-            if (ImGui::MenuItem("Exit")) Application::Get().Close();
+            if (ImGui::MenuItem(EditorLocale::Text("Exit", "退出"))) Application::Get().Close();
             ImGui::EndMenu();
         }
 
@@ -868,14 +874,14 @@ namespace Wheatear {
         const std::string hoveredName = m_HoveredEntity && !IsEditorHidden(m_HoveredEntity)
             ? m_HoveredEntity.GetComponent<TagComponent>().Tag
             : "None";
-        ImGui::Text("Hovered Entity: %s", hoveredName.c_str());
+        ImGui::Text(EditorLocale::Text("Hovered Entity: %s", "悬停实体: %s"), hoveredName.c_str());
 
         const auto stats = Renderer2D::GetStats();
-        ImGui::Text("Renderer2D Stats:");
-        ImGui::Text("  Draw Calls: %d", stats.DrawCalls);
-        ImGui::Text("  Quads:      %d", stats.QuadCount);
-        ImGui::Text("  Vertices:   %d", stats.GetTotalVertexCount());
-        ImGui::Text("  Indices:    %d", stats.GetTotalIndexCount());
+        ImGui::Text(EditorLocale::Text("Renderer2D Stats:", "Renderer2D 统计:"));
+        ImGui::Text(EditorLocale::Text("  Draw Calls: %d", "  绘制调用: %d"), stats.DrawCalls);
+        ImGui::Text(EditorLocale::Text("  Quads:      %d", "  四边形:   %d"), stats.QuadCount);
+        ImGui::Text(EditorLocale::Text("  Vertices:   %d", "  顶点:     %d"), stats.GetTotalVertexCount());
+        ImGui::Text(EditorLocale::Text("  Indices:    %d", "  索引:     %d"), stats.GetTotalIndexCount());
 
         ImGui::End();
     }

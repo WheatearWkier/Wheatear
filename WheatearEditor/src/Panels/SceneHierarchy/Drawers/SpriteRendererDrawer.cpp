@@ -1,6 +1,7 @@
 #include "SpriteRendererDrawer.h"
 
 #include "../ComponentDrawers.h"
+#include "Editor/EditorLocale.h"
 #include "Panels/SpriteSheetPickerPanel.h"
 
 #include <imgui/imgui.h>
@@ -58,19 +59,19 @@ namespace Wheatear {
                 }
 
                 ImGui::PopID();
-                ImGui::Checkbox("Flip X", &c.FlipX);
+                ImGui::Checkbox(EditorLocale::Text("Flip X", "水平翻转"), &c.FlipX);
                 // ImGui::Checkbox("Flip Y", &c.FlipY);
-                ImGui::DragFloat("Tiling Factor", &c.TilingFactor, 0.1f, 0.0f, 100.0f);
-                ImGui::DragFloat2("Draw Offset", glm::value_ptr(c.DrawOffset), 0.01f);
-                ImGui::DragFloat2("Draw Scale", glm::value_ptr(c.DrawScale), 0.01f);
-                if (ImGui::Button("Open Sprite Sheet Picker"))
+                ImGui::DragFloat(EditorLocale::Text("Tiling Factor", "平铺系数"), &c.TilingFactor, 0.1f, 0.0f, 100.0f);
+                ImGui::DragFloat2(EditorLocale::Text("Draw Offset", "绘制偏移"), glm::value_ptr(c.DrawOffset), 0.01f);
+                ImGui::DragFloat2(EditorLocale::Text("Draw Scale", "绘制缩放"), glm::value_ptr(c.DrawScale), 0.01f);
+                if (ImGui::Button(EditorLocale::Text("Open Sprite Sheet Picker", "打开序列帧选择器")))
                     SpriteSheetPickerPanel::RequestOpen(entity);
                 if (ImGui::IsItemHovered(ImGuiHoveredFlags_DelayShort))
                     ImGui::SetTooltip("Pick a cell from an atlas or generate sprite animation frames.");
-                if (ImGui::TreeNode("Advanced UV"))
+                if (ImGui::TreeNode(EditorLocale::Text("Advanced UV", "高级 UV")))
                 {
-                    ImGui::DragFloat2("UV Min", glm::value_ptr(c.UVMin), 0.001f, 0.0f, 1.0f, "%.3f");
-                    ImGui::DragFloat2("UV Max", glm::value_ptr(c.UVMax), 0.001f, 0.0f, 1.0f, "%.3f");
+                    ImGui::DragFloat2(EditorLocale::Text("UV Min", "UV 最小"), glm::value_ptr(c.UVMin), 0.001f, 0.0f, 1.0f, "%.3f");
+                    ImGui::DragFloat2(EditorLocale::Text("UV Max", "UV 最大"), glm::value_ptr(c.UVMax), 0.001f, 0.0f, 1.0f, "%.3f");
                     ImGui::TreePop();
                 }
             });

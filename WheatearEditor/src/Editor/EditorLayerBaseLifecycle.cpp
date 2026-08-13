@@ -1,5 +1,6 @@
 #include "wtpch.h"
 #include "EditorLayerBase.h"
+#include "Editor/EditorLocale.h"
 
 #include "Wheatear/Core/Application.h"
 #include "Wheatear/Core/AssetPath.h"
@@ -92,6 +93,10 @@ namespace Wheatear {
     void EditorLayerBase::OnAttach()
     {
         WT_PROFILE_FUNCTION();
+
+        // Restore the persisted editor language (falls back to the OS language
+        // when the user has never pinned a choice).
+        EditorLocale::ApplyFromSettings();
 
         m_IconPlay = Texture2D::Create("Resources/Icons/Editor/play.png");
         m_IconStop = Texture2D::Create("Resources/Icons/Editor/stop.png");

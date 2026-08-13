@@ -1,6 +1,7 @@
 ﻿#include "wtpch.h"
 #include "SceneHierarchyPanel.h"
 #include "EditorCommands.h"
+#include "Editor/EditorLocale.h"
 
 #include "Wheatear/Core/AssetPath.h"
 #include "Wheatear/Core/EngineInfo.h"
@@ -393,7 +394,7 @@ namespace Wheatear {
                 ImGui::Separator();
             }
 
-            if (ImGui::MenuItem("Rename"))
+            if (ImGui::MenuItem(EditorLocale::Text("Rename", "重命名")))
             {
                 m_RenameRequested = true;
             }
@@ -404,7 +405,7 @@ namespace Wheatear {
                 hiddenInEditor = !hiddenInEditor;
             }
 
-            if (ImGui::MenuItem("Duplicate Entity"))
+            if (ImGui::MenuItem(EditorLocale::Text("Duplicate Entity", "复制实体")))
             {
                 auto command = std::make_unique<EntityDuplicateCommand>(m_Context.get(), entity);
                 command->Execute();
@@ -414,7 +415,7 @@ namespace Wheatear {
 
             ImGui::Separator();
 
-            if (ImGui::MenuItem("Save as Prefab"))
+            if (ImGui::MenuItem(EditorLocale::Text("Save as Prefab", "另存为 Prefab")))
             {
                 std::filesystem::path prefabDir = AssetPath::Resolve("assets/prefabs");
                 std::filesystem::create_directories(prefabDir);
@@ -437,7 +438,7 @@ namespace Wheatear {
                 WT_CORE_INFO("Saved prefab: {}", savePath.string());
             }
 
-            if (ImGui::MenuItem("Save as UI Template"))
+            if (ImGui::MenuItem(EditorLocale::Text("Save as UI Template", "另存为 UI 模板")))
             {
                 // Composite UI templates are .wtuit files embedding a Prefab v2
                 // body; designers use this to author reusable widget bundles (new
@@ -472,7 +473,7 @@ namespace Wheatear {
 
             ImGui::Separator();
 
-            if (ImGui::MenuItem("Delete Entity"))
+            if (ImGui::MenuItem(EditorLocale::Text("Delete Entity", "删除实体")))
                 entityDeleted = true;
 
             ImGui::EndPopup();

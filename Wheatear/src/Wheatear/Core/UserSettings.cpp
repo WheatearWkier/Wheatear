@@ -102,6 +102,7 @@ namespace Wheatear {
         settings.SFXVolume = 55;
         settings.Fullscreen = false;
         settings.ScreenShake = true;
+        settings.EditorLanguage = -1;
 
         AddBinding(settings, "move.left", { WT_KEY_A, WT_KEY_LEFT });
         AddBinding(settings, "move.right", { WT_KEY_D, WT_KEY_RIGHT });
@@ -176,6 +177,7 @@ namespace Wheatear {
                 else if (key == "sfxVolume") loaded.SFXVolume = std::clamp(ParseInt(value, loaded.SFXVolume), 0, 100);
                 else if (key == "fullscreen") loaded.Fullscreen = ParseBool(value, loaded.Fullscreen);
                 else if (key == "screenShake") loaded.ScreenShake = ParseBool(value, loaded.ScreenShake);
+                else if (key == "editorLanguage") loaded.EditorLanguage = ParseInt(value, loaded.EditorLanguage);
                 else if (key.rfind("key.", 0) == 0)
                 {
                     std::vector<int> keys = ParseKeyList(value);
@@ -209,6 +211,7 @@ namespace Wheatear {
         output << "sfxVolume=" << settings.SFXVolume << "\n";
         output << "fullscreen=" << (settings.Fullscreen ? 1 : 0) << "\n";
         output << "screenShake=" << (settings.ScreenShake ? 1 : 0) << "\n";
+        output << "editorLanguage=" << settings.EditorLanguage << "\n";
 
         std::vector<std::string> actionIds;
         actionIds.reserve(settings.KeyBindings.size());

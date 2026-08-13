@@ -2,6 +2,7 @@
 #include "ModuleEditorBootstrap.h"
 
 #include "Editor/EditorComponentRegistry.h"
+#include "Editor/EditorLocale.h"
 #include "Editor/EventScriptGraphPanel.h"
 #include "Editor/EditorToolRegistry.h"
 #include "Panels/EditorCommands.h"
@@ -245,80 +246,80 @@ namespace Wheatear {
         RegisterEditorTools();
 
         RegisterEditorComponent<VisualNovelComponent>(
-            "Visual Novel",
-            "Visual Novel",
+            EditorLocale::Text("Visual Novel", "视觉小说"),
+            EditorLocale::Text("Visual Novel", "视觉小说"),
             DrawVisualNovelComponent);
 
         RegisterEditorComponent<ArcadeCombatLevelComponent>(
-            "Arcade Combat",
-            "Arcade Combat Level",
+            EditorLocale::Text("Arcade Combat", "街机战斗"),
+            EditorLocale::Text("Arcade Combat Level", "街机战斗关卡"),
             DrawArcadeCombatLevelComponent);
         RegisterEditorComponent<ArcadeCombatantComponent>(
-            "Arcade Combat",
-            "Arcade Combatant",
+            EditorLocale::Text("Arcade Combat", "街机战斗"),
+            EditorLocale::Text("Arcade Combatant", "街机战斗单位"),
             DrawArcadeCombatantComponent);
         RegisterEditorComponent<ArcadePlayerControllerComponent>(
-            "Arcade Combat",
-            "Arcade Player Controller",
+            EditorLocale::Text("Arcade Combat", "街机战斗"),
+            EditorLocale::Text("Arcade Player Controller", "街机玩家控制器"),
             DrawArcadePlayerControllerComponent);
         RegisterEditorComponent<ArcadeBossComponent>(
-            "Arcade Combat",
-            "Arcade Boss",
+            EditorLocale::Text("Arcade Combat", "街机战斗"),
+            EditorLocale::Text("Arcade Boss", "街机 Boss"),
             DrawArcadeBossComponent);
         RegisterEditorComponent<ArcadeProjectileComponent>(
-            "Arcade Combat",
-            "Arcade Projectile",
+            EditorLocale::Text("Arcade Combat", "街机战斗"),
+            EditorLocale::Text("Arcade Projectile", "街机子弹"),
             DrawArcadeProjectileComponent);
         RegisterEditorComponent<ArcadeCoverComponent>(
-            "Arcade Combat",
-            "Arcade Cover",
+            EditorLocale::Text("Arcade Combat", "街机战斗"),
+            EditorLocale::Text("Arcade Cover", "街机掩体"),
             DrawArcadeCoverComponent);
         RegisterEditorComponent<ArcadeTriggerComponent>(
-            "Arcade Combat",
-            "Arcade Trigger",
+            EditorLocale::Text("Arcade Combat", "街机战斗"),
+            EditorLocale::Text("Arcade Trigger", "街机触发器"),
             DrawArcadeTriggerComponent);
 
         RegisterEditorComponent<SideCombatLevelComponent>(
-            "Side Combat",
-            "Side Combat Level",
+            EditorLocale::Text("Side Combat", "横版战斗"),
+            EditorLocale::Text("Side Combat Level", "横版战斗关卡"),
             DrawSideCombatLevelComponent);
         RegisterEditorComponent<SideCombatantComponent>(
-            "Side Combat",
-            "Side Combatant",
+            EditorLocale::Text("Side Combat", "横版战斗"),
+            EditorLocale::Text("Side Combatant", "横版战斗单位"),
             DrawSideCombatantComponent);
         RegisterEditorComponent<SidePlayerControllerComponent>(
-            "Side Combat",
-            "Side Player Controller",
+            EditorLocale::Text("Side Combat", "横版战斗"),
+            EditorLocale::Text("Side Player Controller", "横版玩家控制器"),
             DrawSidePlayerControllerComponent);
         RegisterEditorComponent<SideEnemyAIComponent>(
-            "Side Combat",
-            "Side Enemy AI",
+            EditorLocale::Text("Side Combat", "横版战斗"),
+            EditorLocale::Text("Side Enemy AI", "横版敌人 AI"),
             DrawSideEnemyAIComponent);
         RegisterEditorComponent<SideHitboxComponent>(
-            "Side Combat",
-            "Side Hitbox",
+            EditorLocale::Text("Side Combat", "横版战斗"),
+            EditorLocale::Text("Side Hitbox", "横版命中框"),
             DrawSideHitboxComponent);
         RegisterEditorComponent<SidePickupComponent>(
-            "Side Combat",
-            "Side Pickup",
+            EditorLocale::Text("Side Combat", "横版战斗"),
+            EditorLocale::Text("Side Pickup", "横版拾取物"),
             DrawSidePickupComponent);
 
         RegisterEditorComponent<TurnCombatLevelComponent>(
-            "Turn Combat",
-            "Turn Combat Level",
+            EditorLocale::Text("Turn Combat", "回合制战斗"),
+            EditorLocale::Text("Turn Combat Level", "回合制战斗关卡"),
             DrawTurnCombatLevelComponent);
         RegisterEditorComponent<TurnCombatantComponent>(
-            "Turn Combat",
-            "Turn Combatant",
+            EditorLocale::Text("Turn Combat", "回合制战斗"),
+            EditorLocale::Text("Turn Combatant", "回合制战斗单位"),
             DrawTurnCombatantComponent);
 
         RegisterEditorComponent<TacticalCombatLevelComponent>(
-            "Tactical Combat",
-            "Tactical Combat Level",
+            EditorLocale::Text("Tactical Combat", "战棋战斗"),
+            EditorLocale::Text("Tactical Combat Level", "战棋战斗关卡"),
             DrawTacticalCombatLevelComponent);
         RegisterEditorComponent<TacticalUnitComponent>(
-            "Tactical Combat",
-            "Tactical Unit",
+            EditorLocale::Text("Tactical Combat", "战棋战斗"),
+            EditorLocale::Text("Tactical Unit", "战棋单位"),
             DrawTacticalUnitComponent);
     }
 

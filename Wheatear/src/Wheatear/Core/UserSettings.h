@@ -17,6 +17,8 @@ namespace Wheatear {
         int SFXVolume = 55;
         bool Fullscreen = false;
         bool ScreenShake = true;
+        // Editor UI language: -1 = auto (follow OS), 0 = English, 1 = Chinese.
+        int EditorLanguage = -1;
         std::unordered_map<std::string, std::vector<int>> KeyBindings;
     };
 

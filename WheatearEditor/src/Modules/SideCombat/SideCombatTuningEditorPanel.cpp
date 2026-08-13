@@ -2,6 +2,7 @@
 
 #include "Editor/EditorContentPickers.h"
 #include "Editor/EditorFloatingWindow.h"
+#include "Editor/EditorLocale.h"
 #include "Editor/EditorWidgets.h"
 #include "Editor/GameplayEditorShell.h"
 #include "Wheatear/Core/AssetAliasRegistry.h"
@@ -293,7 +294,7 @@ namespace Wheatear {
             if (DrawFloat(player, "coyoteTime", "Coyote Time", 0.005f, 0.0f, 0.5f)) m_Dirty = true;
         }
 
-        if (ImGui::CollapsingHeader("冲刺", ImGuiTreeNodeFlags_DefaultOpen))
+        if (ImGui::CollapsingHeader(EditorLocale::Text("Dash", "冲刺"), ImGuiTreeNodeFlags_DefaultOpen))
         {
             if (DrawFloat(player, "dashCooldown", "Cooldown", 0.01f, 0.0f, 10.0f)) m_Dirty = true;
             if (DrawFloat(player, "dashManaCost", "Mana Cost", 0.5f, 0.0f, 100.0f)) m_Dirty = true;
@@ -326,15 +327,15 @@ namespace Wheatear {
             if (DrawFloat(airChase, "attackerAirImpulse", "Air S+J Player Lift", 0.02f, -20.0f, 30.0f)) m_Dirty = true;
         }
 
-        if (ImGui::CollapsingHeader("断限", ImGuiTreeNodeFlags_DefaultOpen))
+        if (ImGui::CollapsingHeader(EditorLocale::Text("Break Limit", "断限"), ImGuiTreeNodeFlags_DefaultOpen))
         {
             if (DrawBool(airCombo, "breakLimitEnabled", "Enable Break Limit")) m_Dirty = true;
             if (DrawInt(airCombo, "breakLimitMinCombo", "Min Combo", 0, 999)) m_Dirty = true;
             if (DrawFloat(airCombo, "breakLimitCooldown", "Cooldown", 0.02f, 0.0f, 30.0f)) m_Dirty = true;
             if (DrawFloat(airCombo, "breakLimitGaugeCost", "Gauge Cost", 0.05f, 0.0f, 10.0f)) m_Dirty = true;
-            if (DrawFloat(protection, "bossProtectionBreakLimitThreshold", "保护阈值", 0.05f, 0.0f, 100.0f)) m_Dirty = true;
-            if (DrawVec2(breakLimit, "launchVelocity", "命中位移", 0.05f)) m_Dirty = true;
-            if (DrawFloat(breakLimit, "hitStun", "破防硬直", 0.01f, 0.0f, 3.0f)) m_Dirty = true;
+            if (DrawFloat(protection, "bossProtectionBreakLimitThreshold", EditorLocale::Text("Break Limit Threshold", "保护阈值"), 0.05f, 0.0f, 100.0f)) m_Dirty = true;
+            if (DrawVec2(breakLimit, "launchVelocity", EditorLocale::Text("Hit Displacement", "命中位移"), 0.05f)) m_Dirty = true;
+            if (DrawFloat(breakLimit, "hitStun", EditorLocale::Text("Break Hit Stun", "破防硬直"), 0.01f, 0.0f, 3.0f)) m_Dirty = true;
         }
     }
 

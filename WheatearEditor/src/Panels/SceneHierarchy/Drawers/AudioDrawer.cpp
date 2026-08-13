@@ -1,5 +1,6 @@
 #include "wtpch.h"
 #include "AudioDrawer.h"
+#include "Editor/EditorLocale.h"
 #include "Editor/EditorWidgets.h"
 #include "Wheatear/Scene/Components.h"
 #include "Wheatear/Audio/AudioEngine.h"
@@ -51,15 +52,15 @@ namespace Wheatear {
             ImGui::PopID();
 
             if (asc.AudioFilePath.empty())
-                ImGui::TextDisabled("Choose or drag an audio asset.");
+                ImGui::TextDisabled(EditorLocale::Text("Choose or drag an audio asset.", "选择或拖入音频资源。"));
 
             // Volume
-            ImGui::SliderFloat("Volume", &asc.Volume, 0.0f, 1.0f);
+            ImGui::SliderFloat(EditorLocale::Text("Volume", "音量"), &asc.Volume, 0.0f, 1.0f);
 
             // Loop and PlayOnStart
-            ImGui::Checkbox("Loop", &asc.Loop);
+            ImGui::Checkbox(EditorLocale::Text("Loop", "循环"), &asc.Loop);
             ImGui::SameLine();
-            ImGui::Checkbox("Play On Start", &asc.PlayOnStart);
+            ImGui::Checkbox(EditorLocale::Text("Play On Start", "开始时播放"), &asc.PlayOnStart);
 
             ImGui::TreePop();
         }

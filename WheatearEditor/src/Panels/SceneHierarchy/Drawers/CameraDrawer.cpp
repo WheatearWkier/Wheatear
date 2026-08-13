@@ -1,6 +1,7 @@
 #include "CameraDrawer.h"
 
 #include "../ComponentDrawers.h"
+#include "Editor/EditorLocale.h"
 
 #include <imgui/imgui.h>
 #include <glm/gtc/type_ptr.hpp>
@@ -14,12 +15,12 @@ namespace Wheatear {
         DrawComponent<CameraComponent>("Camera", entity, [](auto& c)
             {
                 auto& camera = c.Camera;
-                ImGui::Checkbox("Primary", &c.Primary);
+                ImGui::Checkbox(EditorLocale::Text("Primary", "主相机"), &c.Primary);
 
                 const char* projTypeStrings[] = { "Perspective", "Orthographic" };
                 const char* currentProjStr = projTypeStrings[static_cast<int>(camera.GetProjectionType())];
 
-                if (ImGui::BeginCombo("Projection", currentProjStr))
+                if (ImGui::BeginCombo(EditorLocale::Text("Projection", "投影"), currentProjStr))
                 {
                     for (int i = 0; i < 2; i++)
                     {
@@ -35,15 +36,15 @@ namespace Wheatear {
                 if (camera.GetProjectionType() == SceneCamera::ProjectionType::Perspective)
                 {
                     float fov = glm::degrees(camera.GetPerspectiveVerticalFOV());
-                    if (ImGui::DragFloat("Vertical FOV", &fov))
+                    if (ImGui::DragFloat(EditorLocale::Text("Vertical FOV", "垂直视场角"), &fov))
                         camera.SetPerspectiveVerticalFOV(glm::radians(fov));
 
                     float nearClip = camera.GetPerspectiveNearClip();
-                    if (ImGui::DragFloat("Near Clip", &nearClip))
+                    if (ImGui::DragFloat(EditorLocale::Text("Near Clip", "近裁剪"), &nearClip))
                         camera.SetPerspectiveNearClip(nearClip);
 
                     float farClip = camera.GetPerspectiveFarClip();
-                    if (ImGui::DragFloat("Far Clip", &farClip))
+                    if (ImGui::DragFloat(EditorLocale::Text("Far Clip", "远裁剪"), &farClip))
                         camera.SetPerspectiveFarClip(farClip);
                 }
 
@@ -54,14 +55,14 @@ namespace Wheatear {
                         camera.SetOrthographicSize(size);
 
                     float nearClip = camera.GetOrthographicNearClip();
-                    if (ImGui::DragFloat("Near Clip", &nearClip))
+                    if (ImGui::DragFloat(EditorLocale::Text("Near Clip", "近裁剪"), &nearClip))
                         camera.SetOrthographicNearClip(nearClip);
 
                     float farClip = camera.GetOrthographicFarClip();
-                    if (ImGui::DragFloat("Far Clip", &farClip))
+                    if (ImGui::DragFloat(EditorLocale::Text("Far Clip", "远裁剪"), &farClip))
                         camera.SetOrthographicFarClip(farClip);
 
-                    ImGui::Checkbox("Fixed Aspect Ratio", &c.FixedAspectRatio);
+                    ImGui::Checkbox(EditorLocale::Text("Fixed Aspect Ratio", "固定宽高比"), &c.FixedAspectRatio);
                 }
             });
     }

@@ -2,6 +2,7 @@
 #include "SceneHierarchyPanel.h"
 #include "EditorCommands.h"
 #include "Assets/UITemplateFactory.h"
+#include "Editor/EditorLocale.h"
 
 #include <imgui/imgui.h>
 #include <algorithm>
@@ -221,7 +222,7 @@ namespace Wheatear {
         }
 
         if (!canCreateUIChild)
-            ImGui::TextDisabled("Select a Canvas or UI child first.");
+            ImGui::TextDisabled(EditorLocale::Text("Select a Canvas or UI child first.", "请先选择画布或 UI 子对象。"));
 
         ImGui::BeginDisabled(!canCreateUIChild);
         if (ImGui::MenuItem("Panel"))
@@ -387,7 +388,7 @@ namespace Wheatear {
             if (ImGui::SmallButton("Show All"))
                 ShowAllHiddenEditorEntities();
             if (ImGui::IsItemHovered(ImGuiHoveredFlags_AllowWhenDisabled))
-                ImGui::SetTooltip("Show all entities hidden in the editor");
+                ImGui::SetTooltip(EditorLocale::Text("Show all entities hidden in the editor", "显示所有在编辑器中隐藏的实体"));
             ImGui::EndDisabled();
             ImGui::Separator();
 
@@ -494,7 +495,7 @@ namespace Wheatear {
 
             if (ImGui::BeginPopupContextWindow("##HierarchyCtx", ImGuiPopupFlags_MouseButtonRight | ImGuiPopupFlags_NoOpenOverItems))
             {
-                if (ImGui::MenuItem("Create Empty Entity"))
+                if (ImGui::MenuItem(EditorLocale::Text("Create Empty Entity", "创建空实体")))
                     CreateEntityWithUndo("Empty Entity", [](Entity) {});
 
                 ImGui::BeginDisabled(!HasHiddenEditorEntities());
@@ -506,14 +507,14 @@ namespace Wheatear {
 
                 if (ImGui::BeginMenu("2D Object"))
                 {
-                    if (ImGui::MenuItem("Sprite"))
+                    if (ImGui::MenuItem(EditorLocale::Text("Sprite", "精灵")))
                     {
                         CreateEntityWithUndo("Sprite", [](Entity e)
                         {
                             e.AddComponent<SpriteRendererComponent>();
                         });
                     }
-                    if (ImGui::MenuItem("Circle"))
+                    if (ImGui::MenuItem(EditorLocale::Text("Circle", "圆形")))
                     {
                         CreateEntityWithUndo("Circle", [](Entity e)
                         {
@@ -523,9 +524,9 @@ namespace Wheatear {
                     ImGui::EndMenu();
                 }
 
-                if (ImGui::BeginMenu("Camera"))
+                if (ImGui::BeginMenu(EditorLocale::Text("Camera", "相机")))
                 {
-                    if (ImGui::MenuItem("Camera"))
+                    if (ImGui::MenuItem(EditorLocale::Text("Camera", "相机")))
                     {
                         CreateEntityWithUndo("Camera", [](Entity e)
                         {

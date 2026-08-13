@@ -4,6 +4,7 @@
 #include "Wheatear/Scene/Components.h"
 #include "Wheatear/Scene/Scene.h"
 #include "Editor/EditorComponentRegistry.h"
+#include "Editor/EditorLocale.h"
 
 #include <imgui/imgui.h>
 #include <cstring>
@@ -36,7 +37,7 @@ namespace Wheatear {
         ImGui::SameLine();
         ImGui::PushItemWidth(-1);
 
-        if (ImGui::Button("Add Component"))
+        if (ImGui::Button(EditorLocale::Text("Add Component", "添加组件")))
             ImGui::OpenPopup("AddComponent");
 
         if (ImGui::BeginPopup("AddComponent"))
@@ -67,7 +68,7 @@ namespace Wheatear {
         ImGui::PopItemWidth();
 
         bool hiddenInEditor = IsEntityHiddenInEditor(entity);
-        if (ImGui::Checkbox("Hidden in Editor", &hiddenInEditor))
+        if (ImGui::Checkbox(EditorLocale::Text("Hidden in Editor", "编辑器中隐藏"), &hiddenInEditor))
             SetEntityHiddenInEditor(entity, hiddenInEditor);
 
         EditorComponentRegistry::ForEach([entity](const EditorComponentDescriptor& descriptor)

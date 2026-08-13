@@ -2,6 +2,7 @@
 #include "CoreEditorComponents.h"
 
 #include "Editor/EditorComponentRegistry.h"
+#include "Editor/EditorLocale.h"
 #include "Panels/EditorCommands.h"
 #include "Panels/SceneHierarchy/ComponentDrawers.h"
 #include "Wheatear/Scene/Components.h"
@@ -147,39 +148,39 @@ namespace Wheatear {
 
         RegisterReadOnlyEditorComponent<TransformComponent>("Core", "Transform", DrawTransformComponent);
 
-        RegisterEditorComponent<CameraComponent>("Rendering", "Camera", DrawCameraComponent);
-        RegisterEditorComponent<SpriteRendererComponent>("Rendering", "Sprite Renderer", DrawSpriteRendererComponent);
-        RegisterEditorComponent<SpriteAnimatorComponent>("Rendering", "Sprite Animator", DrawSpriteAnimatorComponent);
-        RegisterEditorComponent<CircleRendererComponent>("Rendering", "Circle Renderer", DrawCircleRendererComponent);
-        RegisterEditorComponent<MeshRendererComponent>("Rendering", "Mesh Renderer", DrawMeshRendererComponent);
+        RegisterEditorComponent<CameraComponent>("Rendering", EditorLocale::Text("Camera", "相机"), DrawCameraComponent);
+        RegisterEditorComponent<SpriteRendererComponent>("Rendering", EditorLocale::Text("Sprite Renderer", "精灵渲染器"), DrawSpriteRendererComponent);
+        RegisterEditorComponent<SpriteAnimatorComponent>("Rendering", EditorLocale::Text("Sprite Animator", "精灵动画器"), DrawSpriteAnimatorComponent);
+        RegisterEditorComponent<CircleRendererComponent>("Rendering", EditorLocale::Text("Circle Renderer", "圆形渲染器"), DrawCircleRendererComponent);
+        RegisterEditorComponent<MeshRendererComponent>("Rendering", EditorLocale::Text("Mesh Renderer", "网格渲染器"), DrawMeshRendererComponent);
 
-        RegisterEditorComponent<DirectionalLightComponent>("Lighting", "Directional Light", DrawDirectionalLightComponent);
-        RegisterEditorComponent<PointLightComponent>("Lighting", "Point Light", DrawPointLightComponent);
+        RegisterEditorComponent<DirectionalLightComponent>("Lighting", EditorLocale::Text("Directional Light", "方向光"), DrawDirectionalLightComponent);
+        RegisterEditorComponent<PointLightComponent>("Lighting", EditorLocale::Text("Point Light", "点光源"), DrawPointLightComponent);
 
-        RegisterEditorComponent<Rigidbody2DComponent>("Physics", "Rigidbody 2D", DrawRigidbody2DComponent);
-        RegisterEditorComponent<BoxCollider2DComponent>("Physics", "Box Collider 2D", DrawBoxCollider2DComponent);
-        RegisterEditorComponent<CircleCollider2DComponent>("Physics", "Circle Collider 2D", DrawCircleCollider2DComponent);
+        RegisterEditorComponent<Rigidbody2DComponent>("Physics", EditorLocale::Text("Rigidbody 2D", "刚体 2D"), DrawRigidbody2DComponent);
+        RegisterEditorComponent<BoxCollider2DComponent>("Physics", EditorLocale::Text("Box Collider 2D", "盒形碰撞体 2D"), DrawBoxCollider2DComponent);
+        RegisterEditorComponent<CircleCollider2DComponent>("Physics", EditorLocale::Text("Circle Collider 2D", "圆形碰撞体 2D"), DrawCircleCollider2DComponent);
 
-        RegisterEditorComponent<ScriptComponent>("Scripting & Audio", "Script", DrawScriptComponent);
-        RegisterEditorComponent<EventScriptComponent>("Scripting & Audio", "Event Script", DrawEventScriptComponent);
-        RegisterEditorComponent<AudioSourceComponent>("Scripting & Audio", "Audio Source", DrawAudioSourceComponent);
+        RegisterEditorComponent<ScriptComponent>("Scripting & Audio", EditorLocale::Text("Script", "脚本"), DrawScriptComponent);
+        RegisterEditorComponent<EventScriptComponent>("Scripting & Audio", EditorLocale::Text("Event Script", "事件脚本"), DrawEventScriptComponent);
+        RegisterEditorComponent<AudioSourceComponent>("Scripting & Audio", EditorLocale::Text("Audio Source", "音频源"), DrawAudioSourceComponent);
 
-        RegisterEditorComponent<UICanvasComponent>("UI", "UI Canvas", DrawUICanvasComponent);
+        RegisterEditorComponent<UICanvasComponent>("UI", EditorLocale::Text("UI Canvas", "UI 画布"), DrawUICanvasComponent);
         RegisterUIWidgetComponent();
-        RegisterEditorComponent<UIAnimatorComponent>("UI", "UI Animator", DrawUIAnimatorComponent, true);
-        RegisterEditorComponent<UIImageComponent>("UI", "UI Image", DrawUIImageComponent, true);
-        RegisterEditorComponent<UIRadialCooldownComponent>("UI", "UI Radial Cooldown", DrawUIRadialCooldownComponent, true);
-        RegisterEditorComponent<UIPanelComponent>("UI", "UI Panel", DrawUIPanelComponent, true);
-        RegisterEditorComponent<UITextComponent>("UI", "UI Text", DrawUITextComponent, true);
-        RegisterEditorComponent<UIButtonComponent>("UI", "UI Button", DrawUIButtonComponent, true);
-        RegisterEditorComponent<UIProgressBarComponent>("UI", "UI Progress Bar", DrawUIProgressBarComponent, true);
-        RegisterEditorComponent<UISliderComponent>("UI", "UI Slider", DrawUISliderComponent, true);
-        RegisterEditorComponent<UIPagerComponent>("UI", "UI Pager", DrawUIPagerComponent, true);
-        RegisterEditorComponent<UIScrollViewComponent>("UI", "UI Scroll View", DrawUIScrollViewComponent, true);
-        RegisterEditorComponent<UIPathComponent>("UI", "UI Path", DrawUIPathComponent, true);
-        RegisterEditorComponent<UISkillTreeViewComponent>("UI", "UI Skill Tree View", DrawUISkillTreeViewComponent, true);
-        RegisterEditorComponent<UIPageItemComponent>("UI", "UI Page Item", DrawUIPageItemComponent, true);
-        RegisterEditorComponent<UICheckboxComponent>("UI", "UI Checkbox", DrawUICheckboxComponent, true);
+        RegisterEditorComponent<UIAnimatorComponent>("UI", EditorLocale::Text("UI Animator", "UI 动画器"), DrawUIAnimatorComponent, true);
+        RegisterEditorComponent<UIImageComponent>("UI", EditorLocale::Text("UI Image", "UI 图片"), DrawUIImageComponent, true);
+        RegisterEditorComponent<UIRadialCooldownComponent>("UI", EditorLocale::Text("UI Radial Cooldown", "UI 径向冷却"), DrawUIRadialCooldownComponent, true);
+        RegisterEditorComponent<UIPanelComponent>("UI", EditorLocale::Text("UI Panel", "UI 面板"), DrawUIPanelComponent, true);
+        RegisterEditorComponent<UITextComponent>("UI", EditorLocale::Text("UI Text", "UI 文本"), DrawUITextComponent, true);
+        RegisterEditorComponent<UIButtonComponent>("UI", EditorLocale::Text("UI Button", "UI 按钮"), DrawUIButtonComponent, true);
+        RegisterEditorComponent<UIProgressBarComponent>("UI", EditorLocale::Text("UI Progress Bar", "UI 进度条"), DrawUIProgressBarComponent, true);
+        RegisterEditorComponent<UISliderComponent>("UI", EditorLocale::Text("UI Slider", "UI 滑条"), DrawUISliderComponent, true);
+        RegisterEditorComponent<UIPagerComponent>("UI", EditorLocale::Text("UI Pager", "UI 分页器"), DrawUIPagerComponent, true);
+        RegisterEditorComponent<UIScrollViewComponent>("UI", EditorLocale::Text("UI Scroll View", "UI 滚动视图"), DrawUIScrollViewComponent, true);
+        RegisterEditorComponent<UIPathComponent>("UI", EditorLocale::Text("UI Path", "UI 路径"), DrawUIPathComponent, true);
+        RegisterEditorComponent<UISkillTreeViewComponent>("UI", EditorLocale::Text("UI Skill Tree View", "UI 技能树视图"), DrawUISkillTreeViewComponent, true);
+        RegisterEditorComponent<UIPageItemComponent>("UI", EditorLocale::Text("UI Page Item", "UI 页面项"), DrawUIPageItemComponent, true);
+        RegisterEditorComponent<UICheckboxComponent>("UI", EditorLocale::Text("UI Checkbox", "UI 复选框"), DrawUICheckboxComponent, true);
     }
 
 } // namespace Wheatear
