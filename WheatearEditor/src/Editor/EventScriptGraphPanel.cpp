@@ -352,7 +352,32 @@ namespace Wheatear {
                 if (EditorContentPickers::DrawProgressionIdField("Material", id,
                     EditorContentPickers::ProgressionIdKind::Material, 256))
                     rebuild("material " + id);
-                EditorWidgets::HelpTooltip("Runtime defaults to amount > 0. Add \">= N\" etc. via Raw for quantity comparisons.");
+
+                // Optional quantity comparison: "material <id> OP N" (runtime
+                // CompareInt on material amount; bare form means amount > 0).
+                std::string op = words.size() >= 3 ? words[2] : std::string{">"};
+                const char* ops[] = { ">", ">=", "==", "!=", "<", "<=" };
+                int opIndex = 0;
+                for (int i = 0; i < IM_ARRAYSIZE(ops); ++i)
+                    if (op == ops[i]) { opIndex = i; break; }
+                if (ImGui::Combo("Operator", &opIndex, ops, IM_ARRAYSIZE(ops)))
+                {
+                    op = ops[opIndex];
+                    changed = true;
+                }
+                int amount = 1;
+                if (words.size() >= 4)
+                {
+                    try { amount = std::stoi(words[3]); } catch (...) { amount = 1; }
+                }
+                if (ImGui::DragInt("Amount", &amount, 1.0f, 0, 9999))
+                    changed = true;
+                if (changed)
+                {
+                    std::ostringstream s; s << "material " << id << " " << op << " " << amount;
+                    rebuild(s.str());
+                }
+                EditorWidgets::HelpTooltip("Bare form means amount > 0; add an operator + amount for quantity comparisons.");
                 break;
             }
             case ConditionKind::Raw:

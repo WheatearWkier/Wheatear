@@ -302,6 +302,55 @@ static void ExtractChoiceRequiredCondition(std::string& target,
             return labels;
         }
 
+        // Returns human-readable descriptions of jump targets that do not match
+        // any @label row (goto / if targets / choice targets). Playback warns at
+        // runtime; surfacing it here lets designers catch typos before playing.
+        static std::vector<std::string> ValidateLabelTargets(
+            const std::vector<VisualNovelScriptEditorPanel::Row>& rows)
+        {
+            const std::vector<std::string> labels = CollectLabels(rows);
+            std::vector<std::string> issues;
+
+            auto isDangling = [&labels](const std::string& target)
+            {
+                if (target.empty())
+                    return false;
+                // External commands (scene:/event:/newgame:/loadgame:) are not
+                // label jumps and must not be flagged.
+                if (StartsWith(target, "scene:")
+                    || StartsWith(target, "event:")
+                    || StartsWith(target, "newgame:")
+                    || StartsWith(target, "loadgame:"))
+                    return false;
+                return std::find(labels.begin(), labels.end(), target) == labels.end();
+            };
+
+            for (const VisualNovelScriptEditorPanel::Row& row : rows)
+            {
+                switch (row.Kind)
+                {
+                case VisualNovelScriptEditorPanel::RowKind::Goto:
+                    if (isDangling(row.Value))
+                        issues.push_back("Row: @goto target '" + row.Value + "' has no matching @label.");
+                    break;
+                case VisualNovelScriptEditorPanel::RowKind::If:
+                    if (isDangling(row.Text))
+                        issues.push_back("Row: @if jump target '" + row.Text + "' has no matching @label.");
+                    break;
+                case VisualNovelScriptEditorPanel::RowKind::Choice:
+                    for (const auto& choice : row.Choices)
+                    {
+                        if (isDangling(choice.Target))
+                            issues.push_back("Row: choice '" + choice.Text + "' target '" + choice.Target + "' has no matching @label.");
+                    }
+                    break;
+                default:
+                    break;
+                }
+            }
+            return issues;
+        }
+
         static std::vector<std::string> CollectCharacterIds(const std::vector<VisualNovelScriptEditorPanel::Row>& rows)
         {
             std::vector<std::string> ids;
@@ -420,6 +469,22 @@ static void ExtractChoiceRequiredCondition(std::string& target,
             m_SourcePath,
             m_Status
         });
+
+        const std::vector<std::string> danglingTargets = ValidateLabelTargets(m_Rows);
+        if (!danglingTargets.empty())
+        {
+            ImGui::SameLine();
+            EditorWidgets::StatusBadge((std::to_string(danglingTargets.size()) + " dangling jump target(s)").c_str(),
+                EditorWidgets::StatusKind::Warning);
+            if (ImGui::IsItemHovered())
+            {
+                ImGui::BeginTooltip();
+                for (const std::string& issue : danglingTargets)
+                    ImGui::BulletText("%s", issue.c_str());
+                ImGui::EndTooltip();
+            }
+        }
+
         DrawToolbar();
 
         if (ImGui::BeginTabBar("##VNEditorTabs"))
