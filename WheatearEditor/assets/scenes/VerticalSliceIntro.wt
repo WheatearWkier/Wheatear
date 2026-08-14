@@ -382,6 +382,8 @@ Entities:
     UIImageComponent:
       Color: [1, 1, 1, 0.920000017]
       TexturePath: assets/vertical_slice/ui/atlases/vn_ui_atlas.png
+      SpriteSheet: assets/vertical_slice/ui/atlases/vn_ui_atlas.wtsheet
+      SubRect: VN_MusicNoticePanel
       UVMin: [0.224999994, 0]
       UVMax: [0.574999988, 0.121212125]
     UIPanelComponent:
@@ -1885,6 +1887,8 @@ Entities:
     UIImageComponent:
       Color: [0.0399999991, 0.0549999997, 0.075000003, 0.939999998]
       TexturePath: assets/vertical_slice/ui/atlases/vn_ui_atlas.png
+      SpriteSheet: assets/vertical_slice/ui/atlases/vn_ui_atlas.wtsheet
+      SubRect: VN_SettingsPanel
       UVMin: [0.109999999, 0.648989975]
       UVMax: [0.889688015, 0.948231995]
   - Entity: 910000026
@@ -1958,6 +1962,8 @@ Entities:
     UIImageComponent:
       Color: [0.0399999991, 0.0549999997, 0.075000003, 0.930000007]
       TexturePath: assets/vertical_slice/ui/atlases/vn_ui_atlas.png
+      SpriteSheet: assets/vertical_slice/ui/atlases/vn_ui_atlas.wtsheet
+      SubRect: VN_SettingsPanel
       UVMin: [0.109999999, 0.648989975]
       UVMax: [0.889688015, 0.948231995]
   - Entity: 910000024
@@ -2013,6 +2019,8 @@ Entities:
     UIImageComponent:
       Color: [1, 1, 1, 1]
       TexturePath: assets/vertical_slice/ui/atlases/vn_ui_atlas.png
+      SpriteSheet: assets/vertical_slice/ui/atlases/vn_ui_atlas.wtsheet
+      SubRect: VN_Command_Settings
       UVMin: [0.319999993, 0.43434301]
       UVMax: [0.400000006, 0.595960021]
     UITextComponent:
@@ -2052,6 +2060,8 @@ Entities:
     UIImageComponent:
       Color: [1, 1, 1, 1]
       TexturePath: assets/vertical_slice/ui/atlases/vn_ui_atlas.png
+      SpriteSheet: assets/vertical_slice/ui/atlases/vn_ui_atlas.wtsheet
+      SubRect: VN_Command_History
       UVMin: [0.400000006, 0.43434301]
       UVMax: [0.479999989, 0.595960021]
     UITextComponent:
@@ -2091,6 +2101,8 @@ Entities:
     UIImageComponent:
       Color: [1, 1, 1, 1]
       TexturePath: assets/vertical_slice/ui/atlases/vn_ui_atlas.png
+      SpriteSheet: assets/vertical_slice/ui/atlases/vn_ui_atlas.wtsheet
+      SubRect: VN_Command_QuickLoad
       UVMin: [0.239999995, 0.43434301]
       UVMax: [0.319999993, 0.595960021]
     UITextComponent:
@@ -2130,6 +2142,8 @@ Entities:
     UIImageComponent:
       Color: [1, 1, 1, 1]
       TexturePath: assets/vertical_slice/ui/atlases/vn_ui_atlas.png
+      SpriteSheet: assets/vertical_slice/ui/atlases/vn_ui_atlas.wtsheet
+      SubRect: VN_Command_QuickSave
       UVMin: [0.159999996, 0.43434301]
       UVMax: [0.239999995, 0.595960021]
     UITextComponent:
@@ -2169,6 +2183,8 @@ Entities:
     UIImageComponent:
       Color: [1, 1, 1, 1]
       TexturePath: assets/vertical_slice/ui/atlases/vn_ui_atlas.png
+      SpriteSheet: assets/vertical_slice/ui/atlases/vn_ui_atlas.wtsheet
+      SubRect: VN_Command_Load
       UVMin: [0.0799999982, 0.43434301]
       UVMax: [0.159999996, 0.595960021]
     UITextComponent:
@@ -2208,6 +2224,8 @@ Entities:
     UIImageComponent:
       Color: [1, 1, 1, 1]
       TexturePath: assets/vertical_slice/ui/atlases/vn_ui_atlas.png
+      SpriteSheet: assets/vertical_slice/ui/atlases/vn_ui_atlas.wtsheet
+      SubRect: VN_Command_Save
       UVMin: [0, 0.43434301]
       UVMax: [0.0799999982, 0.595960021]
     UITextComponent:
@@ -2247,6 +2265,8 @@ Entities:
     UIImageComponent:
       Color: [1, 1, 1, 1]
       TexturePath: assets/vertical_slice/ui/atlases/vn_ui_atlas.png
+      SpriteSheet: assets/vertical_slice/ui/atlases/vn_ui_atlas.wtsheet
+      SubRect: VN_Command_Auto
       UVMin: [0.479999989, 0.43434301]
       UVMax: [0.560000002, 0.595960021]
     UITextComponent:
@@ -2286,6 +2306,8 @@ Entities:
     UIImageComponent:
       Color: [1, 1, 1, 1]
       TexturePath: assets/vertical_slice/ui/atlases/vn_ui_atlas.png
+      SpriteSheet: assets/vertical_slice/ui/atlases/vn_ui_atlas.wtsheet
+      SubRect: VN_Command_Skip
       UVMin: [0.560000002, 0.43434301]
       UVMax: [0.639999986, 0.595960021]
     UITextComponent:
@@ -2464,6 +2486,8 @@ Entities:
     UIImageComponent:
       Color: [1, 1, 1, 0.949999988]
       TexturePath: assets/vertical_slice/ui/atlases/vn_ui_atlas.png
+      SpriteSheet: assets/vertical_slice/ui/atlases/vn_ui_atlas.wtsheet
+      SubRect: VN_Choice_3
       UVMin: [0.0834370032, 0.136995003]
       UVMax: [0.479063004, 0.256944001]
     UITextComponent:
@@ -2503,6 +2527,8 @@ Entities:
     UIImageComponent:
       Color: [1, 1, 1, 0.949999988]
       TexturePath: assets/vertical_slice/ui/atlases/vn_ui_atlas.png
+      SpriteSheet: assets/vertical_slice/ui/atlases/vn_ui_atlas.wtsheet
+      SubRect: VN_Choice_3
       UVMin: [0.0834370032, 0.136995003]
       UVMax: [0.479063004, 0.256944001]
     UITextComponent:
@@ -2542,6 +2568,8 @@ Entities:
     UIImageComponent:
       Color: [1, 1, 1, 0.949999988]
       TexturePath: assets/vertical_slice/ui/atlases/vn_ui_atlas.png
+      SpriteSheet: assets/vertical_slice/ui/atlases/vn_ui_atlas.wtsheet
+      SubRect: VN_Choice_3
       UVMin: [0.0834370032, 0.136995003]
       UVMax: [0.479063004, 0.256944001]
     UITextComponent:
@@ -2719,6 +2747,8 @@ Entities:
     UIImageComponent:
       Color: [0.0599999987, 0.0700000003, 0.0900000036, 0.879999995]
       TexturePath: assets/vertical_slice/ui/atlases/vn_ui_atlas.png
+      SpriteSheet: assets/vertical_slice/ui/atlases/vn_ui_atlas.wtsheet
+      SubRect: VN_SettingsPanel
       UVMin: [0.109999999, 0.648989975]
       UVMax: [0.889688015, 0.948231995]
   - Entity: 910000006
