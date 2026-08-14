@@ -21,6 +21,7 @@ namespace Wheatear {
     class ContentBrowserPanel;
     class EditorHelpPanel;
     class Framebuffer;
+    class InputBindingsPanel;
     class KeyPressedEvent;
     class MouseButtonPressedEvent;
     class MouseButtonReleasedEvent;
@@ -247,6 +248,7 @@ namespace Wheatear {
         std::unique_ptr<AnimationEditorPanel> m_AnimationEditorPanel;
         std::unique_ptr<SpriteSheetPickerPanel> m_SpriteSheetPickerPanel;
         std::unique_ptr<EditorHelpPanel> m_HelpPanel;
+        std::unique_ptr<InputBindingsPanel> m_InputBindingsPanel;
         Timestep m_LastTimestep;
 
         std::future<PlayerPackageResult> m_PlayerBuildFuture;

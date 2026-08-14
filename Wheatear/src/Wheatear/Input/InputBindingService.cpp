@@ -107,7 +107,7 @@ namespace Wheatear {
 
     void InputBindingService::SetKeys(const std::string& actionId, const std::vector<int>& keys)
     {
-        if (actionId.empty() || keys.empty())
+        if (actionId.empty())
             return;
 
         UserSettings::Get().KeyBindings[actionId] = keys;

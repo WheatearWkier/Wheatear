@@ -194,6 +194,7 @@
     <ClInclude Include="src\Panels\EditorHelpPanel.h" />
     <ClInclude Include="src\Panels\EventScriptGraphPanel.h" />
     <ClInclude Include="src\Panels\EventScriptGraphPanelInternal.h" />
+    <ClInclude Include="src\Panels\InputBindingsPanel.h" />
     <ClInclude Include="src\Panels\ProjectHealthPanel.h" />
     <ClInclude Include="src\Panels\ProjectHealthPanelInternal.h" />
     <ClInclude Include="src\Panels\SceneHierarchy\ComponentDrawers.h" />
@@ -256,6 +257,7 @@
     <ClCompile Include="src\Panels\EditorHelpPanel.cpp" />
     <ClCompile Include="src\Panels\EventScriptGraphPanel.cpp" />
     <ClCompile Include="src\Panels\EventScriptGraphPanel_Graph.cpp" />
+    <ClCompile Include="src\Panels\InputBindingsPanel.cpp" />
     <ClCompile Include="src\Panels\ProjectHealthPanel.cpp" />
     <ClCompile Include="src\Panels\ProjectHealthPanel_Hygiene.cpp" />
     <ClCompile Include="src\Panels\SceneHierarchy\Drawers\AudioDrawer.cpp" />

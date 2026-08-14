@@ -6,6 +6,7 @@
 #include "Panels/ContentBrowserPanel.h"
 #include "Panels/SceneHierarchy/SceneHierarchyPanel.h"
 #include "Panels/EditorHelpPanel.h"
+#include "Panels/InputBindingsPanel.h"
 #include "Panels/SpriteSheetPickerPanel.h"
 
 #include <ImGuizmo.h>
@@ -22,6 +23,7 @@ namespace Wheatear {
         , m_AnimationEditorPanel(std::make_unique<AnimationEditorPanel>())
         , m_SpriteSheetPickerPanel(std::make_unique<SpriteSheetPickerPanel>())
         , m_HelpPanel(std::make_unique<EditorHelpPanel>())
+        , m_InputBindingsPanel(std::make_unique<InputBindingsPanel>())
         , m_GizmoType(ImGuizmo::OPERATION::TRANSLATE)
     {
         m_SceneHierarchyPanel->SetEntityActivatedCallback(

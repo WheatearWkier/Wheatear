@@ -34,6 +34,7 @@
 #include "Panels/AnimationEditorPanel.h"
 #include "Panels/ContentBrowserPanel.h"
 #include "Panels/EditorHelpPanel.h"
+#include "Panels/InputBindingsPanel.h"
 #include "Editor/EditorCommands.h"
 #include "Panels/SceneHierarchy/SceneHierarchyPanel.h"
 #include "Panels/SpriteSheetPickerPanel.h"
@@ -286,6 +287,7 @@ namespace Wheatear {
         DrawUnsavedChangesModal();
 
         m_HelpPanel->OnImGuiRender();
+        m_InputBindingsPanel->OnImGuiRender();
 
         ImGui::End();
     }
@@ -672,6 +674,10 @@ namespace Wheatear {
             drawMenuIcon(m_IconInfo);
             if (ImGui::MenuItem(EditorLocale::Text("Editor Help", "编辑器帮助"), "F1"))
                 m_HelpPanel->SetOpen(true);
+            ImGui::Separator();
+            drawMenuIcon(m_IconSettings);
+            if (ImGui::MenuItem(EditorLocale::Text("Input Bindings", "输入绑定")))
+                m_InputBindingsPanel->SetOpen(true);
             ImGui::EndMenu();
         }
 
