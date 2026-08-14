@@ -1,4 +1,4 @@
-Scene: VerticalSliceChapter3Preview
+﻿Scene: VerticalSliceChapter3Preview
 Entities:
   - Entity: 990000010
     TagComponent:

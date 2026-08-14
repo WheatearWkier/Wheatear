@@ -1,4 +1,4 @@
-Prefab: Bullet
+﻿Prefab: Bullet
 Version: 2
 RootEntity: 5332659702471258422
 Entities:
@@ -24,5 +24,3 @@ Entities:
       Friction: 0.5
       Restitution: 0
       RestitutionThreshold: 0.5
-    ScriptComponent:
-      ClassName: WheatearSandbox.Bullet

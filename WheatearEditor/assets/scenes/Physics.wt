@@ -1,4 +1,4 @@
-Scene: Untitled
+﻿Scene: Untitled
 Entities:
   - Entity: 13976215309801431112
     TagComponent:
@@ -77,8 +77,6 @@ Entities:
       Friction: 0.5
       Restitution: 0
       RestitutionThreshold: 0.5
-    ScriptComponent:
-      ClassName: WheatearSandbox.Player
   - Entity: 2233826224799755753
     TagComponent:
       Tag: Square3

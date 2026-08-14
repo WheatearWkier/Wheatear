@@ -1,4 +1,4 @@
-Scene: VerticalSliceResult
+﻿Scene: VerticalSliceResult
 Entities:
   - Entity: 960000192
     TagComponent:

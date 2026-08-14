@@ -1,4 +1,4 @@
-Scene: Untitled
+﻿Scene: Untitled
 Entities:
   - Entity: 15687307925216717625
     TagComponent:
@@ -135,8 +135,6 @@ Entities:
       Friction: 0.5
       Restitution: 0
       RestitutionThreshold: 0.5
-    ScriptComponent:
-      ClassName: WheatearSandbox.Player
     AudioSourceComponent:
       AudioFilePath: audios\battle.wav
       Volume: 0.101999998
@@ -214,8 +212,6 @@ Entities:
       Friction: 0.5
       Restitution: 0
       RestitutionThreshold: 0.5
-    ScriptComponent:
-      ClassName: WheatearSandbox.Enemy
   - Entity: 17867312845864350248
     TagComponent:
       Tag: BackGround

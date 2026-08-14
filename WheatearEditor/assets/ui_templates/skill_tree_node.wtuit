@@ -1,4 +1,4 @@
-UITemplate:
+﻿UITemplate:
   Version: 1
   Kind: "SkillTreeNode"
   DisplayName: "Skill Tree Node"

@@ -1,4 +1,4 @@
-Scene: VerticalSliceEquipment
+﻿Scene: VerticalSliceEquipment
 Entities:
   - Entity: 980000210
     TagComponent:

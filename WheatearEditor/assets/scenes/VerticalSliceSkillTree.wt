@@ -1,4 +1,4 @@
-Scene: VerticalSliceSkillTree
+﻿Scene: VerticalSliceSkillTree
 Entities:
   - Entity: 970000001
     TagComponent:

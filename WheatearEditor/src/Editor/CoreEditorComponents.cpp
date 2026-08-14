@@ -161,7 +161,6 @@ namespace Wheatear {
         RegisterEditorComponent<BoxCollider2DComponent>("Physics", EditorLocale::Text("Box Collider 2D", "盒形碰撞体 2D"), DrawBoxCollider2DComponent);
         RegisterEditorComponent<CircleCollider2DComponent>("Physics", EditorLocale::Text("Circle Collider 2D", "圆形碰撞体 2D"), DrawCircleCollider2DComponent);
 
-        RegisterEditorComponent<ScriptComponent>("Scripting & Audio", EditorLocale::Text("Script", "脚本"), DrawScriptComponent);
         RegisterEditorComponent<EventScriptComponent>("Scripting & Audio", EditorLocale::Text("Event Script", "事件脚本"), DrawEventScriptComponent);
         RegisterEditorComponent<AudioSourceComponent>("Scripting & Audio", EditorLocale::Text("Audio Source", "音频源"), DrawAudioSourceComponent);
 

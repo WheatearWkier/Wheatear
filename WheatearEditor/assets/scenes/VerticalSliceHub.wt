@@ -1,4 +1,4 @@
-Scene: VerticalSliceHub
+﻿Scene: VerticalSliceHub
 Entities:
   - Entity: 950000129
     TagComponent:
