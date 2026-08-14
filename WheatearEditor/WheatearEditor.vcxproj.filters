@@ -159,6 +159,9 @@
     <ClInclude Include="src\Panels\ContentBrowserPanel.h">
       <Filter>Panels</Filter>
     </ClInclude>
+    <ClInclude Include="src\Panels\EditorHelpPanel.h">
+      <Filter>Panels</Filter>
+    </ClInclude>
     <ClInclude Include="src\Panels\EventScriptGraphPanel.h">
       <Filter>Panels</Filter>
     </ClInclude>
@@ -334,6 +337,9 @@
       <Filter>Panels</Filter>
     </ClCompile>
     <ClCompile Include="src\Panels\ContentBrowserPanel.cpp">
+      <Filter>Panels</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Panels\EditorHelpPanel.cpp">
       <Filter>Panels</Filter>
     </ClCompile>
     <ClCompile Include="src\Panels\EventScriptGraphPanel.cpp">

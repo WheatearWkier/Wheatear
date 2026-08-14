@@ -137,6 +137,7 @@ namespace Wheatear {
         m_IconSearch = Texture2D::Create("Resources/Icons/Editor/search.png");
         m_IconClose = Texture2D::Create("Resources/Icons/Editor/close.png");
         m_IconPlus = Texture2D::Create("Resources/Icons/Editor/plus.png");
+        m_IconInfo = Texture2D::Create("Resources/Icons/Editor/info.png");
 
         EditorCanvasTools::Configure({
             [this](Entity canvasEntity)

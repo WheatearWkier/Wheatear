@@ -191,6 +191,7 @@
     <ClInclude Include="src\Panels\AnimationEditorPanel.h" />
     <ClInclude Include="src\Panels\AssetAliasManifestEditorPanel.h" />
     <ClInclude Include="src\Panels\ContentBrowserPanel.h" />
+    <ClInclude Include="src\Panels\EditorHelpPanel.h" />
     <ClInclude Include="src\Panels\EventScriptGraphPanel.h" />
     <ClInclude Include="src\Panels\EventScriptGraphPanelInternal.h" />
     <ClInclude Include="src\Panels\ProjectHealthPanel.h" />
@@ -252,6 +253,7 @@
     <ClCompile Include="src\Panels\AnimationEditorPanel_Timeline.cpp" />
     <ClCompile Include="src\Panels\AssetAliasManifestEditorPanel.cpp" />
     <ClCompile Include="src\Panels\ContentBrowserPanel.cpp" />
+    <ClCompile Include="src\Panels\EditorHelpPanel.cpp" />
     <ClCompile Include="src\Panels\EventScriptGraphPanel.cpp" />
     <ClCompile Include="src\Panels\EventScriptGraphPanel_Graph.cpp" />
     <ClCompile Include="src\Panels\ProjectHealthPanel.cpp" />

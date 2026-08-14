@@ -19,6 +19,7 @@ namespace Wheatear {
 
     class AnimationEditorPanel;
     class ContentBrowserPanel;
+    class EditorHelpPanel;
     class Framebuffer;
     class KeyPressedEvent;
     class MouseButtonPressedEvent;
@@ -243,11 +244,13 @@ namespace Wheatear {
         Ref<Texture2D> m_IconSearch;
         Ref<Texture2D> m_IconClose;
         Ref<Texture2D> m_IconPlus;
+        Ref<Texture2D> m_IconInfo;
 
         std::unique_ptr<SceneHierarchyPanel> m_SceneHierarchyPanel;
         std::unique_ptr<ContentBrowserPanel> m_ContentBrowserPanel;
         std::unique_ptr<AnimationEditorPanel> m_AnimationEditorPanel;
         std::unique_ptr<SpriteSheetPickerPanel> m_SpriteSheetPickerPanel;
+        std::unique_ptr<EditorHelpPanel> m_HelpPanel;
         Timestep m_LastTimestep;
 
         std::future<PlayerPackageResult> m_PlayerBuildFuture;

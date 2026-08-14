@@ -33,6 +33,7 @@
 #include "Editor/EditorToolRegistry.h"
 #include "Panels/AnimationEditorPanel.h"
 #include "Panels/ContentBrowserPanel.h"
+#include "Panels/EditorHelpPanel.h"
 #include "Editor/EditorCommands.h"
 #include "Panels/SceneHierarchy/SceneHierarchyPanel.h"
 #include "Panels/SpriteSheetPickerPanel.h"
@@ -281,6 +282,8 @@ namespace Wheatear {
         ProcessDeferredViewportAssetDrop();
 
         DrawUnsavedChangesModal();
+
+        m_HelpPanel->OnImGuiRender();
 
         ImGui::End();
     }
@@ -659,6 +662,14 @@ namespace Wheatear {
             drawMenuIcon(m_IconLogout);
             if (ImGui::MenuItem(EditorLocale::Text("Exit", "退出")))
                 RequestSceneChange(PendingSceneAction::Exit);
+            ImGui::EndMenu();
+        }
+
+        if (ImGui::BeginMenu(EditorLocale::Text("Help", "帮助")))
+        {
+            drawMenuIcon(m_IconInfo);
+            if (ImGui::MenuItem(EditorLocale::Text("Editor Help", "编辑器帮助"), "F1"))
+                m_HelpPanel->SetOpen(true);
             ImGui::EndMenu();
         }
 
