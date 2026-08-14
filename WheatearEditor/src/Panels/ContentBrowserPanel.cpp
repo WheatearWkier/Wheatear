@@ -10,6 +10,8 @@
 #include "Panels/EventScriptGraphPanel.h"
 #include "Modules/VisualNovel/VisualNovelScriptEditorPanel.h"
 #include "Wheatear/Audio/AudioEngine.h"
+#include "Wheatear/Animation/AnimationClip.h"
+#include "Wheatear/Animation/AnimationClipSerializer.h"
 #include "Wheatear/Assets/AssetPath.h"
 #include "Wheatear/Core/EngineInfo.h"
 #include "Wheatear/Renderer/Framebuffer.h"
@@ -385,6 +387,33 @@ namespace Wheatear {
                 return false;
             meshComponent.Material = Material::Create();
         }
+        else if (type == AssetType::AnimationClip)
+        {
+            // Preview the clip's first frame (sheet-linked frames resolve
+            // through the shared sheet cache).
+            Ref<AnimationClip> clip = AnimationClipSerializer::Load(path);
+            if (!clip || clip->GetFrameCount() == 0)
+                return false;
+
+            const AnimationFrame& frame = clip->GetFrames()[0];
+            Entity spriteEntity = scene->CreateEntity(
+                clip->GetName().empty() ? "ThumbAnim" : clip->GetName());
+            auto& sr = spriteEntity.AddComponent<SpriteRendererComponent>();
+            if (!frame.SpriteSheet.empty() && frame.CellIndex >= 0)
+            {
+                if (!SpriteSheetAsset::ResolveCell(frame.SpriteSheet, frame.CellIndex,
+                    sr.Texture, sr.UVMin, sr.UVMax))
+                    return false;
+            }
+            else
+            {
+                sr.Texture = frame.Texture;
+                sr.UVMin = frame.TexCoordMin;
+                sr.UVMax = frame.TexCoordMax;
+                if (!sr.Texture)
+                    return false;
+            }
+        }
         else
         {
             return false;
@@ -697,11 +726,39 @@ namespace Wheatear {
             }
         }
 
-        ImGui::Columns(columnCount, nullptr, false);
-
-        for (const auto& entry : entries)
+        // Manual grid layout (instead of ImGui::Columns) so an expanded
+        // .wtsheet item can reserve vertical space below its row for the
+        // inline cell strip. Pass 1 measures strip heights per row.
+        const int   rowCount  = static_cast<int>((entries.size() + columnCount - 1) / columnCount);
+        const float rowHeight = m_ThumbnailSize + m_Padding + 20.0f;
+        std::vector<float> rowStripHeight(rowCount, 0.0f);
+        for (int i = 0; i < static_cast<int>(entries.size()); ++i)
         {
+            const auto& entry = entries[i];
+            if (entry.is_directory() || GetAssetType(entry.path()) != AssetType::SpriteSheet)
+                continue;
+            if (entry.path().string() != m_ExpandedSheetPath)
+                continue;
+            const int row = i / columnCount;
+            rowStripHeight[row] = std::max(rowStripHeight[row],
+                static_cast<float>(ComputeSheetStripHeight(entry.path())));
+        }
+        std::vector<float> rowOffset(rowCount + 1, 0.0f);
+        for (int r = 1; r <= rowCount; ++r)
+            rowOffset[r] = rowOffset[r - 1] + rowStripHeight[r - 1];
+
+        const float gridStartX = ImGui::GetCursorScreenPos().x;
+        const float gridStartY = ImGui::GetCursorScreenPos().y;
+
+        for (int i = 0; i < static_cast<int>(entries.size()); ++i)
+        {
+            const auto& entry = entries[i];
             const auto& path = entry.path();
+            const int row = i / columnCount;
+            const int col = i % columnCount;
+            ImGui::SetCursorScreenPos(ImVec2(gridStartX + col * cellSize,
+                gridStartY + row * rowHeight + rowOffset[row]));
+
             const auto relativePath = std::filesystem::relative(path, GetEditorAssetPath());
             const std::string filename = relativePath.filename().string();
             const bool isSelected = (path == m_SelectedPath);
@@ -712,12 +769,13 @@ namespace Wheatear {
             const Ref<Texture2D>& icon = GetIconForType(type);
 
             // Real thumbnail preview: image assets load their texture directly;
-            // scenes/prefabs/UI templates/meshes are rendered offscreen through
-            // a frame-by-frame queue (see OnUpdate/RenderThumbnail).
+            // scenes/prefabs/UI templates/meshes/animations are rendered
+            // offscreen through a frame-by-frame queue (see OnUpdate/RenderThumbnail).
             Ref<Texture2D> displayIcon = icon;
             const bool needsRenderThumbnail =
                 type == AssetType::Scene || type == AssetType::Prefab
-                || type == AssetType::UITemplate || type == AssetType::Mesh;
+                || type == AssetType::UITemplate || type == AssetType::Mesh
+                || type == AssetType::AnimationClip;
             if (type == AssetType::Texture || needsRenderThumbnail)
             {
                 const std::string thumbKey = path.string();
@@ -808,6 +866,11 @@ namespace Wheatear {
             {
                 if (ImGui::MenuItem(EditorLocale::Text("Open", "打开")))
                     OpenEntry(path);
+                if (type == AssetType::SpriteSheet && m_OnOpenSpriteSheet)
+                {
+                    if (ImGui::MenuItem(EditorLocale::Text("Open in Sheet Splitter", "打开分割器")))
+                        m_OnOpenSpriteSheet(path);
+                }
                 if (ImGui::MenuItem(EditorLocale::Text("Show in Explorer", "在资源管理器中显示")))
                 {
                     EditorPlatform::OpenDirectory(entry.is_directory() ? path : path.parent_path());
@@ -864,7 +927,43 @@ namespace Wheatear {
                 ImGui::TextUnformatted(shortName.c_str());
             }
 
-            ImGui::NextColumn();
+            // Unity-style expand arrow for .wtsheet items, overlaid on the
+            // thumbnail's top-right corner. Drawn last so the thumbnail stays
+            // the "last item" for click/drag/tooltip handling above.
+            if (type == AssetType::SpriteSheet)
+            {
+                const ImVec2 thumbMin = ImGui::GetItemRectMin();
+                const ImVec2 thumbMax = ImGui::GetItemRectMax();
+                const bool expanded = (path.string() == m_ExpandedSheetPath);
+                ImGui::SetCursorScreenPos(ImVec2(thumbMax.x - 20.0f, thumbMin.y + 3.0f));
+                ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0, 0, 0, 0));
+                ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(0.23f, 0.72f, 0.80f, 0.25f));
+                if (ImGui::SmallButton(expanded ? "▾" : "▸"))
+                {
+                    if (expanded)
+                        m_ExpandedSheetPath.clear();
+                    else
+                    {
+                        m_ExpandedSheetPath = path.string();
+                        m_SelectedPath = path;
+                    }
+                }
+                ImGui::PopStyleColor(2);
+                if (ImGui::IsItemHovered())
+                    ImGui::SetTooltip(expanded
+                        ? EditorLocale::Text("Collapse sheet cells", "收起格子")
+                        : EditorLocale::Text("Expand sheet cells", "展开格子"));
+            }
+
+            // Inline cell strip below the expanded .wtsheet row (space was
+            // reserved for it in the layout pass above).
+            if (type == AssetType::SpriteSheet && path.string() == m_ExpandedSheetPath)
+            {
+                const float stripY = gridStartY + (row + 1) * rowHeight + rowOffset[row] + 6.0f;
+                ImGui::SetCursorScreenPos(ImVec2(gridStartX, stripY));
+                DrawSheetCellStrip(path);
+            }
+
             ImGui::PopID();
         }
 
@@ -910,8 +1009,98 @@ namespace Wheatear {
             ImGui::EndPopup();
         }
 
-        ImGui::Columns(1);
         ImGui::EndChild();
+    }
+
+    namespace {
+
+        // Sheet cell strip layout (inline expansion below a .wtsheet item).
+        constexpr int   kSheetCellsPerStripRow = 8;
+        constexpr float kSheetCellThumb        = 44.0f;
+        constexpr float kSheetCellRowHeight    = 72.0f; // thumb + index label + spacing
+        constexpr float kSheetStripPadding     = 10.0f;
+
+    } // namespace
+
+    int ContentBrowserPanel::ComputeSheetStripHeight(const std::filesystem::path& path)
+    {
+        const std::string key = path.string();
+        auto& cached = m_SheetCellCache[key];
+        // Refresh the definition every time so re-gridded sheets show up
+        // live; the texture itself only re-loads when missing.
+        cached.Data = SpriteSheetAsset::Load(key);
+        if (!cached.Texture && !cached.Data.TexturePath.empty())
+            cached.Texture = Texture2D::Create(cached.Data.TexturePath);
+        if (!cached.Texture || !cached.Texture->IsLoaded())
+            return 0;
+
+        const int cellCount = SpriteSheetAsset::CellCount(cached.Data);
+        const int cellRows  = (cellCount + kSheetCellsPerStripRow - 1) / kSheetCellsPerStripRow;
+        return static_cast<int>(cellRows * kSheetCellRowHeight + kSheetStripPadding);
+    }
+
+    void ContentBrowserPanel::DrawSheetCellStrip(const std::filesystem::path& path)
+    {
+        auto& cached = m_SheetCellCache[path.string()];
+        if (!cached.Texture || !cached.Texture->IsLoaded())
+        {
+            ImGui::TextDisabled(EditorLocale::Text("Failed to load sheet cells.", "无法加载格子。"));
+            return;
+        }
+
+        const int cellCount = SpriteSheetAsset::CellCount(cached.Data);
+        const int cellRows  = (cellCount + kSheetCellsPerStripRow - 1) / kSheetCellsPerStripRow;
+        const float stripWidth  = ImGui::GetContentRegionAvail().x;
+        const float stripHeight = cellRows * kSheetCellRowHeight + kSheetStripPadding;
+
+        ImGui::PushStyleColor(ImGuiCol_ChildBg, ImVec4(0.05f, 0.06f, 0.08f, 0.85f));
+        ImGui::BeginChild("##sheetcells", ImVec2(stripWidth, stripHeight), true);
+
+        const ImTextureID texId =
+            static_cast<ImTextureID>(static_cast<uintptr_t>(cached.Texture->GetRendererID()));
+
+        for (int c = 0; c < cellCount; ++c)
+        {
+            ImGui::PushID(c);
+
+            const glm::vec2 uvMin = SpriteSheetAsset::CellUVMin(cached.Data, c);
+            const glm::vec2 uvMax = SpriteSheetAsset::CellUVMax(cached.Data, c);
+            // ImGui UV origin is bottom-left while sheet UVs are top-left based.
+            const ImVec2 imgUV0(uvMin.x, 1.0f - uvMax.y);
+            const ImVec2 imgUV1(uvMax.x, 1.0f - uvMin.y);
+
+            ImGui::ImageButton("##cell", texId, ImVec2(kSheetCellThumb, kSheetCellThumb), imgUV0, imgUV1);
+
+            if (ImGui::BeginDragDropSource())
+            {
+                // Payload: project-relative sheet path + '\n' + cell index.
+                std::wstring payload = AssetPath::ToProjectRelative(path).wstring();
+                payload += L'\n' + std::to_wstring(c);
+                ImGui::SetDragDropPayload("SPRITE_SHEET_CELL", payload.c_str(),
+                    (payload.size() + 1) * sizeof(wchar_t));
+                ImGui::Image(texId, ImVec2(32, 32), imgUV0, imgUV1);
+                ImGui::SameLine();
+                ImGui::TextDisabled("Cell %d", c);
+                ImGui::EndDragDropSource();
+            }
+
+            if (ImGui::IsItemHovered())
+                ImGui::SetTooltip(EditorLocale::Text(
+                    "Cell %d — drag into the viewport to spawn a sprite",
+                    "格子 %d — 拖到视口创建精灵"), c);
+
+            const std::string label = std::to_string(c);
+            const float labelWidth = ImGui::CalcTextSize(label.c_str()).x;
+            ImGui::SetCursorPosX(ImGui::GetCursorPosX() + (kSheetCellThumb - labelWidth) * 0.5f);
+            ImGui::TextUnformatted(label.c_str());
+
+            if ((c + 1) % kSheetCellsPerStripRow != 0 && c + 1 < cellCount)
+                ImGui::SameLine();
+            ImGui::PopID();
+        }
+
+        ImGui::EndChild();
+        ImGui::PopStyleColor();
     }
 
     void ContentBrowserPanel::DrawInspector()

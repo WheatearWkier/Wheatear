@@ -30,6 +30,8 @@ namespace Wheatear {
             out << YAML::Key << "UVMin" << YAML::Value << f.TexCoordMin;
             out << YAML::Key << "UVMax" << YAML::Value << f.TexCoordMax;
             out << YAML::Key << "Duration" << YAML::Value << f.Duration;
+            out << YAML::Key << "SpriteSheet" << YAML::Value << f.SpriteSheet;
+            out << YAML::Key << "CellIndex" << YAML::Value << f.CellIndex;
             out << YAML::EndMap;
         }
         out << YAML::EndSeq;
@@ -143,6 +145,8 @@ namespace Wheatear {
                 frame.TexCoordMin = f["UVMin"].as<glm::vec2>(glm::vec2(0.0f));
                 frame.TexCoordMax = f["UVMax"].as<glm::vec2>(glm::vec2(1.0f));
                 frame.Duration = f["Duration"].as<float>(0.1f);
+                frame.SpriteSheet = f["SpriteSheet"].as<std::string>("");
+                frame.CellIndex = f["CellIndex"].as<int>(-1);
                 clip->AddFrame(frame);
             }
         }

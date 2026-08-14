@@ -213,7 +213,17 @@ namespace Wheatear {
             if (!IsCellValid(col, row))
                 break;
 
-            clip->AddFrame({ m_Texture, GetCellUVMin(col, row), GetCellUVMax(col, row), m_FrameDuration });
+            AnimationFrame frame{ m_Texture, GetCellUVMin(col, row), GetCellUVMax(col, row), m_FrameDuration };
+
+            // Link the frame to the active sheet so re-gridding the sheet
+            // updates this animation live; embedded UVs stay as fallback.
+            if (!m_SheetPath.empty())
+            {
+                frame.SpriteSheet = m_SheetPath;
+                frame.CellIndex = col + row * m_Cols;
+            }
+
+            clip->AddFrame(frame);
             ++added;
         }
 

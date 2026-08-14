@@ -1,13 +1,60 @@
 #include "wtpch.h"
 #include "SpriteSheetAsset.h"
 
+#include "Wheatear/Assets/AssetPath.h"
+
 #include <yaml-cpp/yaml.h>
 
+#include <filesystem>
 #include <fstream>
+#include <unordered_map>
 
 namespace Wheatear {
 
     namespace SpriteSheetAsset {
+
+        namespace {
+
+            struct CachedSheet
+            {
+                SpriteSheetData Data;
+                Ref<Texture2D> Texture;
+                std::filesystem::file_time_type WriteTime{};
+                bool Loaded = false;
+            };
+
+            std::unordered_map<std::string, CachedSheet>& SheetCache()
+            {
+                static std::unordered_map<std::string, CachedSheet> cache;
+                return cache;
+            }
+
+            const CachedSheet* GetCachedSheet(const std::string& sheetPath)
+            {
+                if (sheetPath.empty())
+                    return nullptr;
+
+                // Runtime data resolution handles both loose editor files and
+                // the packaged content.wtpack (same convention as .vn/.wts).
+                const std::filesystem::path resolved = AssetPath::ResolveRuntimeData(sheetPath);
+                std::error_code error;
+                const auto writeTime = std::filesystem::exists(resolved, error)
+                    ? std::filesystem::last_write_time(resolved, error)
+                    : std::filesystem::file_time_type{};
+
+                CachedSheet& cached = SheetCache()[sheetPath];
+                if (cached.Loaded && cached.WriteTime == writeTime)
+                    return &cached;
+
+                cached.Data = Load(resolved.generic_string());
+                cached.Texture = cached.Data.TexturePath.empty()
+                    ? nullptr : Texture2D::Create(cached.Data.TexturePath);
+                cached.WriteTime = writeTime;
+                cached.Loaded = true;
+                return &cached;
+            }
+
+        } // namespace
 
         SpriteSheetData Load(const std::string& path)
         {
@@ -70,6 +117,22 @@ namespace Wheatear {
             const int row = cellIndex / columns;
             return { static_cast<float>(col + 1) / columns,
                      static_cast<float>(row + 1) / rows };
+        }
+
+        bool ResolveCell(const std::string& sheetPath, int cellIndex,
+            Ref<Texture2D>& outTexture, glm::vec2& outUVMin, glm::vec2& outUVMax)
+        {
+            const CachedSheet* sheet = GetCachedSheet(sheetPath);
+            if (!sheet || !sheet->Texture || !sheet->Loaded)
+                return false;
+
+            if (!IsValidCell(sheet->Data, cellIndex))
+                return false;
+
+            outTexture = sheet->Texture;
+            outUVMin = CellUVMin(sheet->Data, cellIndex);
+            outUVMax = CellUVMax(sheet->Data, cellIndex);
+            return true;
         }
 
     } // namespace SpriteSheetAsset

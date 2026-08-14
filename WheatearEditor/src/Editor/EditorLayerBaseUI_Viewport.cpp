@@ -242,6 +242,19 @@ namespace Wheatear {
                         m_DeferredUITemplateInstantiatePath = fullPath;
                 }
             }
+
+            // A sprite-sheet cell dragged from the content browser: spawn a
+            // sprite entity bound to (sheet, cell) once the viewport is idle.
+            if (const ImGuiPayload* cellPayload = ImGui::AcceptDragDropPayload("SPRITE_SHEET_CELL"))
+            {
+                std::wstring text(static_cast<const wchar_t*>(cellPayload->Data));
+                const size_t sep = text.find(L'\n');
+                if (sep != std::wstring::npos)
+                {
+                    m_DeferredSheetCellPath = std::filesystem::path(text.substr(0, sep)).string();
+                    m_DeferredSheetCellIndex = std::stoi(text.substr(sep + 1));
+                }
+            }
             ImGui::EndDragDropTarget();
         }
 

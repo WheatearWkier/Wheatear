@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Wheatear/Core/Core.h"
+#include "Wheatear/Renderer/Texture.h"
 
 #include <string>
 
@@ -32,6 +33,13 @@ namespace Wheatear {
         // Cell index order is row-major (left-to-right, top-to-bottom).
         glm::vec2 CellUVMin(const SpriteSheetData& data, int cellIndex);
         glm::vec2 CellUVMax(const SpriteSheetData& data, int cellIndex);
+
+        // Cached, hot-reloading cell resolution shared by every consumer
+        // (SpriteSheetSystem components and animation frames). The sheet file
+        // is re-read when its write time changes, so editing a grid updates
+        // all entities and animations referencing it live.
+        bool ResolveCell(const std::string& sheetPath, int cellIndex,
+            Ref<Texture2D>& outTexture, glm::vec2& outUVMin, glm::vec2& outUVMax);
 
     } // namespace SpriteSheetAsset
 

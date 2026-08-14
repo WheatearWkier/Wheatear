@@ -263,6 +263,8 @@ namespace Wheatear {
         std::filesystem::path m_DeferredSceneOpenPath;
         std::filesystem::path m_DeferredPrefabInstantiatePath;
         std::filesystem::path m_DeferredUITemplateInstantiatePath;
+        std::string m_DeferredSheetCellPath;
+        int m_DeferredSheetCellIndex = -1;
         int m_PendingVisualNovelLoadSlot = 0;
     };
 

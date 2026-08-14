@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Wheatear/Core/Core.h"
+#include "Wheatear/Assets/SpriteSheetAsset.h"
 #include "Wheatear/Renderer/Texture.h"
 
 #include <filesystem>
@@ -87,6 +88,10 @@ namespace Wheatear {
         void CommitRename(const std::filesystem::path& oldPath, const char* newName);
         bool RenderThumbnail(const std::string& key, AssetType type);
 
+        // Unity-style inline cell strip shown below an expanded .wtsheet item.
+        int  ComputeSheetStripHeight(const std::filesystem::path& path);
+        void DrawSheetCellStrip(const std::filesystem::path& path);
+
     private:
         std::filesystem::path              m_CurrentDirectory;
         std::vector<std::filesystem::path> m_History;
@@ -119,6 +124,15 @@ namespace Wheatear {
         std::unordered_set<std::string> m_ThumbnailQueued;
         std::unordered_map<std::string, AssetType> m_ThumbnailQueueTypes;
         Ref<Framebuffer> m_ThumbnailFramebuffer;
+
+        // Currently expanded .wtsheet (full path); cells render inline below it.
+        std::string m_ExpandedSheetPath;
+        struct SheetCellCacheEntry
+        {
+            SpriteSheetData Data;
+            Ref<Texture2D> Texture;
+        };
+        std::unordered_map<std::string, SheetCellCacheEntry> m_SheetCellCache;
 
         std::function<void(const std::filesystem::path&)> m_OnOpenScene;
         std::function<void(const std::filesystem::path&)> m_OnInstantiatePrefab;

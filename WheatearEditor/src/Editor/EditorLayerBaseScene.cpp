@@ -4,6 +4,7 @@
 
 #include "Wheatear/Core/Application.h"
 #include "Wheatear/Assets/AssetPath.h"
+#include "Wheatear/Assets/SpriteSheetAsset.h"
 #include "Wheatear/Core/EngineInfo.h"
 #include "Wheatear/Input/Input.h"
 #include "Wheatear/Input/KeyCodes.h"
@@ -301,7 +302,8 @@ namespace Wheatear {
     {
         if (m_DeferredSceneOpenPath.empty() &&
             m_DeferredPrefabInstantiatePath.empty() &&
-            m_DeferredUITemplateInstantiatePath.empty())
+            m_DeferredUITemplateInstantiatePath.empty() &&
+            m_DeferredSheetCellPath.empty())
         {
             return;
         }
@@ -309,9 +311,13 @@ namespace Wheatear {
         const std::filesystem::path scenePath = m_DeferredSceneOpenPath;
         const std::filesystem::path prefabPath = m_DeferredPrefabInstantiatePath;
         const std::filesystem::path uiTemplatePath = m_DeferredUITemplateInstantiatePath;
+        const std::string sheetCellPath = m_DeferredSheetCellPath;
+        const int sheetCellIndex = m_DeferredSheetCellIndex;
         m_DeferredSceneOpenPath.clear();
         m_DeferredPrefabInstantiatePath.clear();
         m_DeferredUITemplateInstantiatePath.clear();
+        m_DeferredSheetCellPath.clear();
+        m_DeferredSheetCellIndex = -1;
 
         if (m_SceneState != SceneState::Edit)
             return;
@@ -330,7 +336,23 @@ namespace Wheatear {
         }
 
         if (!uiTemplatePath.empty())
+        {
             InstantiateUITemplate(uiTemplatePath);
+            return;
+        }
+
+        // Spawn a sprite bound to the dropped sheet cell; the sheet reference
+        // keeps it live-linked (re-gridding the sheet updates the sprite).
+        if (!sheetCellPath.empty() && m_EditorScene)
+        {
+            Entity e = m_EditorScene->CreateEntity("SheetSprite");
+            auto& sr = e.AddComponent<SpriteRendererComponent>();
+            sr.SpriteSheet = sheetCellPath;
+            sr.CellIndex = sheetCellIndex;
+            SpriteSheetAsset::ResolveCell(sheetCellPath, sheetCellIndex,
+                sr.Texture, sr.UVMin, sr.UVMax);
+            m_SceneHierarchyPanel->SetSelectedEntity(e);
+        }
     }
 
     void EditorLayerBase::CommitPendingGizmoEdit()

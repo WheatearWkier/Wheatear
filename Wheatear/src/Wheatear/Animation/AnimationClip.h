@@ -18,6 +18,13 @@ namespace Wheatear {
         glm::vec2      TexCoordMax = { 1.0f, 1.0f };
         float          Duration = 0.1f;
 
+        // Optional sprite-sheet linkage: when both are set the frame is
+        // resolved from a .wtsheet cell at playback time (hot-reloaded), so
+        // re-gridding a sheet updates every animation using it. The embedded
+        // Texture/UV above remain as a baked fallback for older consumers.
+        std::string SpriteSheet;
+        int         CellIndex = -1;
+
         AnimationFrame() = default;
 
         AnimationFrame(const Ref<Texture2D>& texture, float duration = 0.1f)
