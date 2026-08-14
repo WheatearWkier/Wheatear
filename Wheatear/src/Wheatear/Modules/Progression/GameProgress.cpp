@@ -42,7 +42,11 @@ namespace Wheatear::GameProgress {
         static std::filesystem::path SavePathForSlot(int slot)
         {
             const int safeSlot = ClampSaveSlot(slot);
-            return AssetPath::Resolve("assets/saves/progression_slot" + std::to_string(safeSlot) + ".wtsave");
+            // Saves are runtime-generated data: write under the writable root
+            // (project in the editor, next to the executable when packaged)
+            // so they survive cache re-extraction and repacks.
+            return AssetPath::GetWritableRoot() / "assets" / "saves"
+                / ("progression_slot" + std::to_string(safeSlot) + ".wtsave");
         }
 
         static std::string DefaultLoadScenePath()
@@ -59,6 +63,9 @@ namespace Wheatear::GameProgress {
         {
             const int safeSlot = ClampSaveSlot(slot);
             const std::string directory = saveDirectory.empty() ? "assets/saves" : saveDirectory;
+            if (saveDirectory.empty())
+                return AssetPath::GetWritableRoot() / "assets" / "saves"
+                    / ("slot" + std::to_string(safeSlot) + ".vnstate");
             return AssetPath::Resolve(directory) / ("slot" + std::to_string(safeSlot) + ".vnstate");
         }
 

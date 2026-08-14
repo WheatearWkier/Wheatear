@@ -230,7 +230,8 @@ namespace Wheatear
         {
             for (int i = 1; i < args.Count; ++i)
             {
-                if ((args[i] == "--configuration" || args[i] == "--config")
+                const std::string argument = args[i];
+                if ((argument == "--configuration" || argument == "--config")
                     && i + 1 < args.Count
                     && !IsCommandOption(args[i + 1]))
                 {

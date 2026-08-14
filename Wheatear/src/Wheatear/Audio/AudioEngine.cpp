@@ -34,6 +34,10 @@ namespace Wheatear {
         struct CachedSfx
         {
             std::array<std::unique_ptr<ma_audio_buffer>, 2> Buffers;
+            // Decoded PCM owned by the cache. ma_audio_buffer only references
+            // caller memory (no copy flag in this miniaudio version), so the
+            // PCM must outlive every buffer that plays it.
+            std::array<std::vector<float>, 2> OwnedPcm;
             int Next = 0;
         };
 
@@ -58,16 +62,26 @@ namespace Wheatear {
             if (ma_decoder_init_file(resolvedPath.c_str(), nullptr, &decoder) != MA_SUCCESS)
                 return nullptr;
 
+            // Snapshot the format before decoding; the decoder is uninitialized
+            // below and its fields must not be read afterwards.
+            const ma_uint32 outputSampleRate = decoder.outputSampleRate;
+            const ma_uint32 outputChannels = decoder.outputChannels;
+            if (outputSampleRate == 0 || outputChannels == 0)
+            {
+                ma_decoder_uninit(&decoder);
+                return nullptr;
+            }
+
             // Decode the whole file to f32 PCM in memory (one-time cost).
             std::vector<float> pcm;
-            pcm.reserve(decoder.outputSampleRate * decoder.outputChannels);
+            pcm.reserve(static_cast<size_t>(outputSampleRate) * outputChannels);
             std::array<float, 8192> chunk{};
             for (;;)
             {
                 ma_uint64 framesRead = 0;
                 const ma_result readResult = ma_decoder_read_pcm_frames(
-                    &decoder, chunk.data(), chunk.size() / decoder.outputChannels, &framesRead);
-                pcm.insert(pcm.end(), chunk.begin(), chunk.begin() + static_cast<ptrdiff_t>(framesRead * decoder.outputChannels));
+                    &decoder, chunk.data(), chunk.size() / outputChannels, &framesRead);
+                pcm.insert(pcm.end(), chunk.begin(), chunk.begin() + static_cast<ptrdiff_t>(framesRead * outputChannels));
                 if (readResult != MA_SUCCESS || framesRead == 0)
                     break;
             }
@@ -75,16 +89,23 @@ namespace Wheatear {
             if (pcm.empty())
                 return nullptr;
 
+            // Keep the decoded PCM alive inside the cache entry: ma_audio_buffer
+            // references the caller's memory and would dangle once the local
+            // vector goes out of scope.
+            std::vector<float>& ownedPcm = cached.OwnedPcm[cached.Next];
+            ownedPcm = std::move(pcm);
+
             cached.Buffers[cached.Next] = std::make_unique<ma_audio_buffer>();
             const ma_audio_buffer_config config = ma_audio_buffer_config_init(
                 ma_format_f32,
-                decoder.outputChannels,
-                static_cast<ma_uint64>(pcm.size() / decoder.outputChannels),
-                pcm.data(),
+                outputChannels,
+                static_cast<ma_uint64>(ownedPcm.size() / outputChannels),
+                ownedPcm.data(),
                 nullptr);
             if (ma_audio_buffer_init(&config, cached.Buffers[cached.Next].get()) != MA_SUCCESS)
             {
                 cached.Buffers[cached.Next].reset();
+                cached.OwnedPcm[cached.Next].clear();
                 return nullptr;
             }
             return cached.Buffers[cached.Next].get();

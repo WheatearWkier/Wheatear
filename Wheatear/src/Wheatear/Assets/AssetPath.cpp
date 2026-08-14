@@ -17,6 +17,7 @@ namespace Wheatear {
         {
             std::filesystem::path ProjectRoot;
             std::filesystem::path EngineRoot;
+            std::filesystem::path WritableRoot;
             std::filesystem::path AssetDirectoryName = "assets";
             bool Initialized = false;
         };
@@ -146,6 +147,22 @@ namespace Wheatear {
         if (s_State.ProjectRoot.empty())
             s_State.ProjectRoot = s_State.EngineRoot;
         s_State.Initialized = true;
+    }
+
+    void AssetPath::SetWritableRoot(const std::filesystem::path& writableRoot)
+    {
+        s_State.WritableRoot = writableRoot.empty()
+            ? s_State.ProjectRoot
+            : FileSystem::Normalize(writableRoot);
+        s_State.Initialized = true;
+    }
+
+    const std::filesystem::path& AssetPath::GetWritableRoot()
+    {
+        EnsureInitialized();
+        if (s_State.WritableRoot.empty())
+            s_State.WritableRoot = s_State.ProjectRoot;
+        return s_State.WritableRoot;
     }
 
     const std::filesystem::path& AssetPath::GetEngineRoot()

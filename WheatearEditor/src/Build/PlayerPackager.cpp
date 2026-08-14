@@ -167,19 +167,20 @@ namespace Wheatear {
 #endif
 
         // Removes a package directory while keeping the runtime extract cache
-        // (.wheatear_cache) so repacks do not force a full re-extraction on
-        // the next launch (the fingerprint check still refreshes it when the
-        // pack actually changed).
+        // (.wheatear_cache) and player saves so repacks do not force a full
+        // re-extraction or wipe player progress.
         static bool CleanPackageDirectory(const std::filesystem::path& directory, std::string* errorMessage)
         {
             constexpr const char* kRuntimeCacheDirectory = ".wheatear_cache";
+            constexpr const char* kPlayerSaveDirectory = "saves";
 
             std::error_code error;
             for (const auto& entry : std::filesystem::directory_iterator(directory, error))
             {
                 if (error)
                     break;
-                if (entry.path().filename() == kRuntimeCacheDirectory)
+                const std::string name = entry.path().filename().generic_string();
+                if (name == kRuntimeCacheDirectory || name == kPlayerSaveDirectory)
                     continue;
                 std::filesystem::remove_all(entry.path(), error);
                 if (error)

@@ -21,6 +21,12 @@ namespace Wheatear {
         static void SetEngineRoot(const std::filesystem::path& engineRoot);
         static const std::filesystem::path& GetEngineRoot();
 
+        // Writable data root for runtime-generated files (saves, settings).
+        // Defaults to the project root; packaged games point it next to the
+        // executable so saves survive cache re-extraction and repacks.
+        static void SetWritableRoot(const std::filesystem::path& writableRoot);
+        static const std::filesystem::path& GetWritableRoot();
+
         static const std::filesystem::path& GetProjectRoot();
         static std::filesystem::path GetAssetRoot();
         static std::filesystem::path GetResourceRoot();

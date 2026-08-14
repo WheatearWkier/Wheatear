@@ -371,7 +371,8 @@ static std::filesystem::path ReadProjectArgument(const Wheatear::ApplicationComm
 {
 	for (int i = 1; i < args.Count; ++i)
 	{
-		if (args[i] == "--project" && i + 1 < args.Count
+		const std::string argument = args[i];
+		if (argument == "--project" && i + 1 < args.Count
 			&& (args[i + 1][0] != '-' || args[i + 1][1] != '-'))
 		{
 			return std::filesystem::path(args[i + 1]);
@@ -414,6 +415,9 @@ static Wheatear::ApplicationSpecification CreateWheatearSandboxSpecification(
 	if (!packagedAssetRoot.empty())
 	{
 		specification.ProjectRoot = packagedAssetRoot;
+		// Packaged games write saves/settings next to the executable (the
+		// extracted cache is regenerated and must stay disposable).
+		Wheatear::AssetPath::SetWritableRoot(GetExecutableDirectory());
 		return specification;
 	}
 
