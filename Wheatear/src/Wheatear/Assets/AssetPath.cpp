@@ -16,6 +16,7 @@ namespace Wheatear {
         struct AssetPathState
         {
             std::filesystem::path ProjectRoot;
+            std::filesystem::path EngineRoot;
             std::filesystem::path AssetDirectoryName = "assets";
             bool Initialized = false;
         };
@@ -91,6 +92,8 @@ namespace Wheatear {
                 return;
 
             s_State.ProjectRoot = AssetPath::DiscoverProjectRoot();
+            if (s_State.EngineRoot.empty())
+                s_State.EngineRoot = s_State.ProjectRoot;
             s_State.Initialized = true;
         }
 
@@ -128,7 +131,23 @@ namespace Wheatear {
     void AssetPath::SetProjectRoot(const std::filesystem::path& projectRoot)
     {
         s_State.ProjectRoot = FileSystem::Normalize(projectRoot);
+        if (s_State.EngineRoot.empty())
+            s_State.EngineRoot = s_State.ProjectRoot;
         s_State.Initialized = true;
+    }
+
+    void AssetPath::SetEngineRoot(const std::filesystem::path& engineRoot)
+    {
+        s_State.EngineRoot = engineRoot.empty()
+            ? s_State.ProjectRoot
+            : FileSystem::Normalize(engineRoot);
+        s_State.Initialized = true;
+    }
+
+    const std::filesystem::path& AssetPath::GetEngineRoot()
+    {
+        EnsureInitialized();
+        return s_State.EngineRoot;
     }
 
     void AssetPath::SetAssetDirectoryName(const std::filesystem::path& directoryName)
@@ -176,6 +195,10 @@ namespace Wheatear {
 
         candidates.push_back(projectRoot / path);
         candidates.push_back(std::filesystem::current_path() / path);
+
+        // Engine built-ins (shaders / fonts / editor Resources) fall back to
+        // the engine root last, so projects without a local copy still work.
+        candidates.push_back(GetEngineRoot() / path);
 
         return FirstExistingOrFallback(candidates);
     }

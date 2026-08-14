@@ -211,9 +211,14 @@ powershell -NoProfile -ExecutionPolicy Bypass -File scripts\Build-WheatearEditor
 
 常用入口：
 
-- `WheatearEditor.exe`
-- `WheatearSandbox.exe`
+- `WheatearEditor.exe`：启动器（选择 2D/3D 模式 + 项目目录 / 新建项目）
+- `WheatearEditor.exe --project <目录>`：直接打开指定项目
+- `WheatearSandbox.exe`：独立运行器（打包目录双击运行）
+- `WheatearSandbox.exe --project <目录>`：从引擎仓库直接跑任意项目（loose 资产）
 - `WheatearSandbox.exe --scripts`：启用可选脚本运行时
+
+项目 = 一个含 `assets/` 的目录（启动器里可新建，自动生成模板场景）；
+引擎内置资源（shaders/字体）按引擎根解析，项目无需复制。
 
 ## 代码结构
 

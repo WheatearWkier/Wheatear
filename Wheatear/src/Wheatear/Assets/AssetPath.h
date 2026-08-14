@@ -14,6 +14,13 @@ namespace Wheatear {
         static void SetProjectRoot(const std::filesystem::path& projectRoot);
         static void SetAssetDirectoryName(const std::filesystem::path& directoryName);
 
+        // Engine built-in resource root (shaders / fonts / editor Resources).
+        // Defaults to the project root; multi-project setups point it at the
+        // engine repository so built-ins resolve even when the project has no
+        // copy of them (Resolve falls back to it last).
+        static void SetEngineRoot(const std::filesystem::path& engineRoot);
+        static const std::filesystem::path& GetEngineRoot();
+
         static const std::filesystem::path& GetProjectRoot();
         static std::filesystem::path GetAssetRoot();
         static std::filesystem::path GetResourceRoot();

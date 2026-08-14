@@ -1,15 +1,56 @@
 #include "wepch.h"
 #include "ModeSelectLayer.h"
 
+#include "Assets/AssetRegistry.h"
 #include "Wheatear/Core/Application.h"
 #include "Wheatear/Core/EngineInfo.h"
+#include "Wheatear/Assets/AssetPath.h"
 
 #include "EditorLayer2D.h"
 #include "EditorLayer3D.h"
 
 #include <imgui/imgui.h>
 
+#include <filesystem>
+#include <fstream>
+
 namespace Wheatear {
+
+    namespace {
+
+        constexpr const char* kProjectsDirectoryName = "Projects";
+
+        // Minimal scene template for newly created projects: an orthogonal
+        // camera entity, ready for 2D content.
+        const char* kNewProjectSceneTemplate =
+            "Scene: Start\n"
+            "Entities:\n"
+            "  - Entity: 1000000001\n"
+            "    TagComponent:\n"
+            "      Tag: Main Camera\n"
+            "    TransformComponent:\n"
+            "      Translation: [0, 0, 10]\n"
+            "      Rotation: [0, 0, 0]\n"
+            "      Scale: [1, 1, 1]\n"
+            "    CameraComponent:\n"
+            "      Camera:\n"
+            "        ProjectionType: 1\n"
+            "        OrthographicSize: 5\n"
+            "        OrthographicNear: -1\n"
+            "        OrthographicFar: 100\n"
+            "      Primary: true\n"
+            "      FixedAspectRatio: false\n";
+
+        bool WriteFileText(const std::filesystem::path& path, const std::string& text)
+        {
+            std::ofstream output(path, std::ios::binary | std::ios::trunc);
+            if (!output.is_open())
+                return false;
+            output << text;
+            return output.good();
+        }
+
+    } // namespace
 
     ModeSelectLayer::ModeSelectLayer()
         : Layer("ModeSelectLayer")
@@ -223,6 +264,10 @@ namespace Wheatear {
 
         // =====================================================================
 
+        DrawProjectSection();
+
+        // =====================================================================
+
         ImGui::End();
 
         ImGui::PopStyleColor();
@@ -242,7 +287,6 @@ namespace Wheatear {
         Application::Get().PushLayer(std::make_unique<EditorLayer2D>());
         Application::Get().PopLayer(this);
     }
-
     void ModeSelectLayer::LaunchEditor3D()
     {
         if (m_Decided)
@@ -252,6 +296,120 @@ namespace Wheatear {
 
         Application::Get().PushLayer(std::make_unique<EditorLayer3D>());
         Application::Get().PopLayer(this);
+    }
+
+    bool ModeSelectLayer::ApplyProject(const std::filesystem::path& projectRoot)
+    {
+        std::error_code error;
+        const std::filesystem::path assetsDirectory = projectRoot / "assets";
+        if (!std::filesystem::is_directory(assetsDirectory, error))
+        {
+            m_ProjectMessage = "Not a project: '" + projectRoot.string() + "' (missing assets/).";
+            return false;
+        }
+
+        // Switch the engine's project root (all asset path resolution follows)
+        // and refresh the editor asset registry for the new project.
+        AssetPath::SetProjectRoot(projectRoot);
+        AssetRegistry::Get().Scan(projectRoot);
+        AssetRegistry::Get().WriteRegistry();
+
+        m_ProjectMessage = "Active project: " + AssetPath::GetProjectRoot().string();
+        m_ProjectListDirty = true;
+        return true;
+    }
+
+    void ModeSelectLayer::DrawProjectSection()
+    {
+        ImGui::Separator();
+        ImGui::Dummy(ImVec2(0.0f, 12.0f));
+        ImGui::Text("项目");
+        ImGui::TextDisabled("当前: %s", AssetPath::GetProjectRoot().string().c_str());
+        ImGui::Dummy(ImVec2(0.0f, 8.0f));
+
+        // Projects discovered under <engine>/Projects (next to the active
+        // project's parent directory).
+        if (m_ProjectListDirty)
+        {
+            m_ProjectList.clear();
+            const std::filesystem::path projectsRoot =
+                AssetPath::GetProjectRoot().parent_path() / kProjectsDirectoryName;
+            std::error_code error;
+            if (std::filesystem::is_directory(projectsRoot, error))
+            {
+                for (const auto& entry : std::filesystem::directory_iterator(projectsRoot, error))
+                {
+                    if (!error && entry.is_directory() &&
+                        std::filesystem::is_directory(entry.path() / "assets"))
+                    {
+                        m_ProjectList.push_back(entry.path());
+                    }
+                }
+            }
+            m_ProjectListDirty = false;
+        }
+
+        if (!m_ProjectList.empty())
+        {
+            for (const auto& project : m_ProjectList)
+            {
+                ImGui::PushID(project.string().c_str());
+                if (ImGui::Button(project.filename().string().c_str(), ImVec2(240.0f, 0.0f)))
+                    ApplyProject(project);
+                ImGui::PopID();
+            }
+            ImGui::Dummy(ImVec2(0.0f, 8.0f));
+        }
+
+        ImGui::Text("新建项目");
+        ImGui::SetNextItemWidth(240.0f);
+        ImGui::InputText("##NewProjectName", m_NewProjectName, sizeof(m_NewProjectName));
+        ImGui::SameLine();
+        if (ImGui::Button("创建", ImVec2(80.0f, 0.0f)))
+        {
+            std::string name = m_NewProjectName;
+            name.erase(0, name.find_first_not_of(" \t\r\n"));
+            name.erase(name.find_last_not_of(" \t\r\n") + 1);
+            if (name.empty())
+            {
+                m_ProjectMessage = "Project name must not be empty.";
+            }
+            else
+            {
+                const std::filesystem::path projectRoot =
+                    AssetPath::GetProjectRoot().parent_path() / kProjectsDirectoryName / name;
+                std::error_code error;
+                if (std::filesystem::exists(projectRoot, error))
+                {
+                    m_ProjectMessage = "Project already exists: " + projectRoot.string();
+                }
+                else
+                {
+                    const std::filesystem::path scenePath =
+                        projectRoot / "assets" / "scenes" / "Start.wt";
+                    const bool created =
+                        std::filesystem::create_directories(scenePath.parent_path(), error)
+                        && WriteFileText(scenePath, kNewProjectSceneTemplate);
+                    if (created)
+                    {
+                        if (ApplyProject(projectRoot))
+                            m_ProjectMessage += " (created)";
+                    }
+                    else
+                    {
+                        m_ProjectMessage = "Failed to create project: " + projectRoot.string();
+                    }
+                }
+            }
+        }
+        ImGui::SameLine();
+        ImGui::TextDisabled("assets/scenes/Start.wt");
+
+        if (!m_ProjectMessage.empty())
+        {
+            ImGui::Dummy(ImVec2(0.0f, 6.0f));
+            ImGui::TextColored(ImVec4(0.42f, 0.88f, 0.72f, 1.0f), "%s", m_ProjectMessage.c_str());
+        }
     }
 
 } // namespace Wheatear

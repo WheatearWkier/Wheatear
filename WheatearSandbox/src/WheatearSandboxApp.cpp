@@ -367,6 +367,19 @@ static bool ShouldEnableScripting(const Wheatear::ApplicationCommandLineArgs& ar
 	return Wheatear::LoadRuntimePlayerConfig().EnableScripts;
 }
 
+static std::filesystem::path ReadProjectArgument(const Wheatear::ApplicationCommandLineArgs& args)
+{
+	for (int i = 1; i < args.Count; ++i)
+	{
+		if (args[i] == "--project" && i + 1 < args.Count
+			&& (args[i + 1][0] != '-' || args[i + 1][1] != '-'))
+		{
+			return std::filesystem::path(args[i + 1]);
+		}
+	}
+	return {};
+}
+
 static Wheatear::ApplicationSpecification CreateWheatearSandboxSpecification(
 	const Wheatear::ApplicationCommandLineArgs& args)
 {
@@ -374,6 +387,18 @@ static Wheatear::ApplicationSpecification CreateWheatearSandboxSpecification(
 	specification.Name = "Wheatear Sandbox";
 	specification.CommandLineArgs = args;
 	specification.EnableScripting = ShouldEnableScripting(args);
+
+	// --project <dir> runs any project's loose assets straight from the
+	// engine repository (developer mode); otherwise the packaged wtpack
+	// extraction path applies (packaged games, engine root = extracted root).
+	const std::filesystem::path explicitProject = ReadProjectArgument(args);
+	if (!explicitProject.empty())
+	{
+		specification.ProjectRoot = std::filesystem::absolute(explicitProject);
+		Wheatear::AssetPath::SetEngineRoot(Wheatear::AssetPath::DiscoverProjectRoot());
+		return specification;
+	}
+
 	const std::filesystem::path packagedAssetRoot = PreparePackagedAssetRoot();
 	specification.ProjectRoot = packagedAssetRoot.empty()
 		? Wheatear::AssetPath::DiscoverProjectRoot()

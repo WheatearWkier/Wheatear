@@ -30,7 +30,27 @@ namespace Wheatear
             ApplicationSpecification specification;
             specification.Name = EngineInfo::EditorName;
             specification.CommandLineArgs = args;
-            specification.ProjectRoot = AssetPath::DiscoverProjectRoot();
+
+            // Project root precedence: --project <dir> > WHEATEAR_PROJECT env >
+            // automatic discovery (nearest directory with an assets/ folder).
+            std::filesystem::path projectRoot;
+            for (int i = 1; i < args.Count; ++i)
+            {
+                const std::string argument = args[i];
+                if (argument == "--project" && i + 1 < args.Count && !IsCommandOption(args[i + 1]))
+                {
+                    projectRoot = std::filesystem::path(args[i + 1]);
+                    break;
+                }
+            }
+            if (projectRoot.empty())
+            {
+                if (const char* env = std::getenv("WHEATEAR_PROJECT"); env && *env)
+                    projectRoot = std::filesystem::path(env);
+            }
+            specification.ProjectRoot = projectRoot.empty()
+                ? AssetPath::DiscoverProjectRoot()
+                : std::filesystem::absolute(projectRoot);
             return specification;
         }
 
@@ -240,6 +260,10 @@ namespace Wheatear
             std::exit(RunPackagePlayer(args));
         if (IsProjectHealthCommand(args))
             std::exit(RunProjectHealth(args));
+
+        // Engine built-ins (shaders / fonts / editor Resources) resolve from
+        // the engine repository even when --project points elsewhere.
+        AssetPath::SetEngineRoot(AssetPath::DiscoverProjectRoot());
 
         return new WheatearEditor(args);
     }
