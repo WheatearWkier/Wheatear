@@ -46,9 +46,11 @@ Dist/
 __pycache__/
 *.py[cod]
 
-# Runtime / editor generated files (any project under Projects/)
+# Runtime / editor generated files (engine root + any project under Projects/)
 WheatearProfile-*.json
 WheatearEditor/imgui.ini
+WheatearEditor/assets/cache/
+WheatearEditor/assets/saves/
 Projects/**/assets/cache/
 Projects/**/assets/saves/
 Projects/**/assets/**/*.wtmeta
