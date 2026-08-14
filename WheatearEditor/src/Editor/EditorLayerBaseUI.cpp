@@ -220,7 +220,9 @@ namespace Wheatear {
 
         static bool dockspaceOpen   = true;
         static bool opt_fullscreen  = true;
-        static ImGuiDockNodeFlags dockspace_flags = ImGuiDockNodeFlags_None;
+        // Central node is pass-through: dragging a panel into the viewport
+        // centre docks it as a floating tab instead of squeezing the view.
+        static ImGuiDockNodeFlags dockspace_flags = ImGuiDockNodeFlags_PassthruCentralNode;
 
         ImGuiWindowFlags window_flags = ImGuiWindowFlags_MenuBar | ImGuiWindowFlags_NoDocking;
         if (opt_fullscreen)
@@ -247,7 +249,7 @@ namespace Wheatear {
         ImGuiIO&    io    = ImGui::GetIO();
         ImGuiStyle& style = ImGui::GetStyle();
         const float prevMinX = style.WindowMinSize.x;
-        style.WindowMinSize.x = 480.0f;
+        style.WindowMinSize.x = 320.0f;
         if (io.ConfigFlags & ImGuiConfigFlags_DockingEnable)
         {
             ImGuiID id = ImGui::GetID("MyDockSpace");

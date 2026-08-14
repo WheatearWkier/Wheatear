@@ -355,6 +355,7 @@ namespace Wheatear {
         const bool canForward = m_HistoryIndex < static_cast<int>(m_History.size()) - 1;
         const auto entries = GetFilteredEntries();
 
+        // --- Row 1: navigation + breadcrumbs + sidebar toggle ----------------
         if (!canBack) ImGui::PushStyleVar(ImGuiStyleVar_Alpha, 0.4f);
         if (ImGui::Button("< ##back") && canBack)
             NavigateBack();
@@ -378,72 +379,123 @@ namespace Wheatear {
         if (!canUp) ImGui::PopStyleVar();
         if (ImGui::IsItemHovered()) ImGui::SetTooltip(EditorLocale::Text("Up one level", "上一级"));
 
-        ImGui::SameLine();
+        ImGui::SameLine(0, 8.0f);
 
+        // Breadcrumbs: elide leading segments when the path is too wide so
+        // long paths never push the rest of the toolbar off-screen.
         auto relative = std::filesystem::relative(m_CurrentDirectory, GetEditorAssetPath().parent_path());
+        struct Crumb { std::string Label; std::filesystem::path Path; float Width; };
+        std::vector<Crumb> crumbs;
         std::filesystem::path accumulated;
-        bool first = true;
         for (const auto& part : relative)
         {
             accumulated /= part;
-            if (!first)
-                ImGui::SameLine(0, 2);
-            first = false;
-
-            const std::string breadcrumbLabel = EditorWidgets::LabelWithId(
-                part.string(),
-                "breadcrumb:" + accumulated.generic_string());
-            if (ImGui::SmallButton(breadcrumbLabel.c_str()))
-                NavigateTo(GetEditorAssetPath().parent_path() / accumulated);
-
-            ImGui::SameLine(0, 2);
-            ImGui::TextDisabled("/");
+            crumbs.push_back({ part.string(), accumulated,
+                ImGui::CalcTextSize(part.string().c_str()).x + 16.0f });
         }
 
+        const float row1Avail = ImGui::GetContentRegionAvail().x;
+        constexpr float kElideWidth = 30.0f;
+        float totalWidth = 0.0f;
+        for (const auto& crumb : crumbs)
+            totalWidth += crumb.Width;
+
+        int firstShown = 0;
+        if (totalWidth > row1Avail)
+        {
+            // Keep the tail that fits, elide the head with a "..." button.
+            float tailWidth = 0.0f;
+            int keep = 0;
+            for (int i = static_cast<int>(crumbs.size()) - 1; i >= 0; --i)
+            {
+                if (tailWidth + crumbs[i].Width > row1Avail - kElideWidth)
+                    break;
+                tailWidth += crumbs[i].Width;
+                ++keep;
+            }
+            firstShown = std::max(0, static_cast<int>(crumbs.size()) - keep);
+        }
+
+        bool firstCrumb = true;
+        if (firstShown > 0)
+        {
+            if (ImGui::SmallButton("...##elide"))
+                NavigateTo(GetEditorAssetPath().parent_path() / crumbs[firstShown].Path);
+            if (ImGui::IsItemHovered())
+                ImGui::SetTooltip("%s", crumbs[firstShown].Path.generic_string().c_str());
+            firstCrumb = false;
+        }
+        for (int i = firstShown; i < static_cast<int>(crumbs.size()); ++i)
+        {
+            if (!firstCrumb)
+            {
+                ImGui::SameLine(0, 2);
+                ImGui::TextDisabled("/");
+            }
+            firstCrumb = false;
+            ImGui::SameLine(0, 2);
+            const std::string label = EditorWidgets::LabelWithId(
+                crumbs[i].Label, "breadcrumb:" + crumbs[i].Path.generic_string());
+            if (ImGui::SmallButton(label.c_str()))
+                NavigateTo(GetEditorAssetPath().parent_path() / crumbs[i].Path);
+        }
+
+        ImGui::SameLine(0, 10.0f);
+        if (ImGui::Button(m_ShowSidebar ? "<<" : ">>"))
+            m_ShowSidebar = !m_ShowSidebar;
+        if (ImGui::IsItemHovered())
+            ImGui::SetTooltip(EditorLocale::Text("Toggle Folder Tree", "切换文件夹树"));
+
+        // --- Row 2: search + item count + management menu --------------------
         ImGui::Spacing();
-        EditorWidgets::StatusBadge((std::to_string(entries.size()) + " visible item(s)").c_str(), EditorWidgets::StatusKind::Info);
+
+        ImGui::SetNextItemWidth(260.0f);
+        EditorWidgets::SearchBar("##search", m_SearchBuffer, sizeof(m_SearchBuffer),
+            EditorLocale::Text("Search current folder...", "搜索当前文件夹..."));
+        ImGui::SameLine();
+        const std::string countLabel = std::to_string(entries.size())
+            + EditorLocale::Text(" visible item(s)", " 项可见");
+        EditorWidgets::StatusBadge(countLabel.c_str(), EditorWidgets::StatusKind::Info);
         if (m_SearchBuffer[0] != '\0')
         {
             ImGui::SameLine();
-            EditorWidgets::StatusBadge("Filtered", EditorWidgets::StatusKind::Warning);
+            EditorWidgets::StatusBadge(EditorLocale::Text("Filtered", "已过滤"), EditorWidgets::StatusKind::Warning);
         }
 
-        ImGui::SameLine();
-        ImGui::SetNextItemWidth(220.0f);
-        EditorWidgets::SearchBar("##search", m_SearchBuffer, sizeof(m_SearchBuffer), "Search current folder...");
-
-        ImGui::SameLine();
-        if (ImGui::Button(EditorLocale::Text("Rescan", "重扫")))
+        ImGui::SameLine(0, 12.0f);
+        if (ImGui::Button(EditorLocale::Text("Tools...", "工具...")))
+            ImGui::OpenPopup("##browser_tools");
+        if (ImGui::IsItemHovered())
+            ImGui::SetTooltip(EditorLocale::Text("Asset management actions", "资产管理操作"));
+        if (ImGui::BeginPopup("##browser_tools"))
         {
-            AssetRegistry::Get().Scan(AssetPath::GetProjectRoot());
-            AssetRegistry::Get().WriteRegistry();
-            m_RegistryStatus = "Asset registry rescanned and written.";
+            if (ImGui::MenuItem(EditorLocale::Text("Rescan Asset Registry", "重扫资源注册表")))
+            {
+                AssetRegistry::Get().Scan(AssetPath::GetProjectRoot());
+                AssetRegistry::Get().WriteRegistry();
+                m_RegistryStatus = "Asset registry rescanned and written.";
+            }
+            if (ImGui::MenuItem(EditorLocale::Text("Write Registry", "写入注册表")))
+            {
+                const bool saved = AssetRegistry::Get().WriteRegistry();
+                m_RegistryStatus = saved ? "asset_registry.yaml written." : "Failed to write asset_registry.yaml.";
+            }
+            if (ImGui::MenuItem(EditorLocale::Text("Generate UI Templates", "生成内置 UI 模板")))
+            {
+                UITemplateFactory::WriteBuiltinTemplateAssets(AssetPath::GetProjectRoot());
+                AssetRegistry::Get().Scan(AssetPath::GetProjectRoot());
+                AssetRegistry::Get().WriteRegistry();
+                m_RegistryStatus = "Builtin .wtuit UI template assets generated.";
+            }
+            ImGui::EndPopup();
         }
-
-        ImGui::SameLine();
-        if (ImGui::Button(EditorLocale::Text("Write Registry", "写入注册表")))
-        {
-            const bool saved = AssetRegistry::Get().WriteRegistry();
-            m_RegistryStatus = saved ? "asset_registry.yaml written." : "Failed to write asset_registry.yaml.";
-        }
-
-        ImGui::SameLine();
-        if (ImGui::Button(EditorLocale::Text("UI Templates", "UI 模板")))
-        {
-            UITemplateFactory::WriteBuiltinTemplateAssets(AssetPath::GetProjectRoot());
-            AssetRegistry::Get().Scan(AssetPath::GetProjectRoot());
-            AssetRegistry::Get().WriteRegistry();
-            m_RegistryStatus = "Builtin .wtuit UI template assets generated.";
-        }
-
-        ImGui::SameLine();
-        if (ImGui::Button(m_ShowSidebar ? "<<" : ">>"))
-            m_ShowSidebar = !m_ShowSidebar;
-        if (ImGui::IsItemHovered()) ImGui::SetTooltip("Toggle Folder Tree");
 
         if (!m_RegistryStatus.empty())
+        {
+            ImGui::SameLine();
             EditorWidgets::InlineStatus(m_RegistryStatus,
                 m_RegistryStatus.find("Failed") != std::string::npos ? EditorWidgets::StatusKind::Error : EditorWidgets::StatusKind::Info);
+        }
 
         ImGui::Separator();
     }
@@ -453,7 +505,7 @@ namespace Wheatear {
         if (!m_ShowSidebar)
             return;
 
-        ImGui::BeginChild("##sidebar", ImVec2(150, 0), true);
+        ImGui::BeginChild("##sidebar", ImVec2(m_SidebarWidth, 0), true);
 
         std::function<void(const std::filesystem::path&, int)> drawTree;
         drawTree = [&](const std::filesystem::path& dir, int depth)
@@ -1009,15 +1061,33 @@ namespace Wheatear {
         {
             DrawSidebar();
             ImGui::SameLine();
+            // Draggable splitter between the folder tree and the grid.
+            ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0, 0, 0, 0));
+            ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(0.23f, 0.72f, 0.80f, 0.25f));
+            ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4(0.23f, 0.72f, 0.80f, 0.35f));
+            ImGui::InvisibleButton("##sidebar_split", ImVec2(5.0f, -1.0f));
+            ImGui::PopStyleColor(3);
+            if (ImGui::IsItemActive())
+                m_SidebarWidth = std::clamp(m_SidebarWidth + ImGui::GetIO().MouseDelta.x, 90.0f, 420.0f);
+            ImGui::SameLine();
         }
 
         if (m_ShowInspector)
         {
-            const float inspectorWidth = 190.0f;
-            ImGui::BeginChild("##gridwrap", ImVec2(ImGui::GetContentRegionAvail().x - inspectorWidth, 0), false);
+            const float gridWidth = std::max(120.0f, ImGui::GetContentRegionAvail().x - m_InspectorWidth);
+            ImGui::BeginChild("##gridwrap", ImVec2(gridWidth, 0), false);
             DrawFileGrid();
             ImGui::EndChild();
 
+            ImGui::SameLine();
+            // Draggable splitter between the grid and the inspector.
+            ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0, 0, 0, 0));
+            ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(0.23f, 0.72f, 0.80f, 0.25f));
+            ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4(0.23f, 0.72f, 0.80f, 0.35f));
+            ImGui::InvisibleButton("##inspector_split", ImVec2(5.0f, -1.0f));
+            ImGui::PopStyleColor(3);
+            if (ImGui::IsItemActive())
+                m_InspectorWidth = std::clamp(m_InspectorWidth - ImGui::GetIO().MouseDelta.x, 140.0f, 420.0f);
             ImGui::SameLine();
             DrawInspector();
         }

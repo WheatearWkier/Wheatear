@@ -98,6 +98,8 @@ namespace Wheatear {
 
         float m_ThumbnailSize = 72.0f;
         float m_Padding = 8.0f;
+        float m_SidebarWidth = 150.0f;
+        float m_InspectorWidth = 190.0f;
         bool  m_ShowSidebar = true;
         bool  m_ShowInspector = true;
         std::string m_RegistryStatus;

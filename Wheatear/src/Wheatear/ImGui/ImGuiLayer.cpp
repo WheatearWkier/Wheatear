@@ -97,6 +97,9 @@ namespace Wheatear {
 		io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;      // Enable Docking
 		io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;    // Enable Multi-Viewport/ Platform windows
 		io.ConfigViewportsNoDecoration = false;
+		// Drag a docked window as a transparent ghost that follows the cursor
+		// instead of an opaque window — docking feels much more responsive.
+		io.ConfigDockingTransparentPayload = true;
 		//io.ConfigFlags |= ImGuiConfigFlags_ViewportsNoTaskBarIcons;
 		//io.ConfigFlags |= ImGuiConfigFlags_ViewportsNoMerge,
 		
@@ -222,7 +225,7 @@ namespace Wheatear {
 		style.ScrollbarRounding = 7.0f;
 		style.GrabRounding = 6.0f;
 		style.TabRounding = 6.0f;
-		style.DockingSeparatorSize = 2.0f;   // Thicker dock splitter for easier grabbing
+		style.DockingSeparatorSize = 4.0f;   // Thicker dock splitter for easier grabbing
 		style.TabBarOverlineSize = 2.0f;     // Selected-tab top highlight bar (TabSelectedOverline)
 
 		auto& colors = style.Colors;
@@ -288,7 +291,7 @@ namespace Wheatear {
 		colors[ImGuiCol_ScrollbarGrabHovered] = bg4;
 		colors[ImGuiCol_ScrollbarGrabActive] = teal;
 
-		colors[ImGuiCol_DockingPreview] = ImVec4{ teal.x, teal.y, teal.z, 0.35f };
+		colors[ImGuiCol_DockingPreview] = ImVec4{ teal.x, teal.y, teal.z, 0.55f };
 		colors[ImGuiCol_DockingEmptyBg] = bg1;
 		colors[ImGuiCol_TableHeaderBg] = bg2;
 		colors[ImGuiCol_TableBorderStrong] = border;
