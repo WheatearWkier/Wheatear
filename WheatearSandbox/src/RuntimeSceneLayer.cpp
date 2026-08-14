@@ -77,6 +77,9 @@ void RuntimeSceneLayer::OnUpdate(Wheatear::Timestep ts)
     Wheatear::RenderCommand::SetClearColor({ 0.08f, 0.09f, 0.10f, 1.0f });
     Wheatear::RenderCommand::Clear();
 
+    // Hot-reload WAO action recipes while the game is running.
+    Wheatear::UpdateActionHotReload();
+
     m_ActiveScene->OnUpdateRuntime(ts);
     ConsumeRuntimeSceneCommands();
 }

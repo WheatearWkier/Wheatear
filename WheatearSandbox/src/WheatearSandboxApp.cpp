@@ -307,7 +307,7 @@ public:
 		: Wheatear::Application(CreateWheatearSandboxSpecification(args))
 	{
 		Wheatear::RegisterDefaultGameplayModules();
-		PushLayer(new RuntimeSceneLayer());
+		PushLayer(std::make_unique<RuntimeSceneLayer>());
 	}
 
 	~WheatearSandbox()

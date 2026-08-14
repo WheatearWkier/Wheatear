@@ -93,6 +93,9 @@ namespace Wheatear {
         std::filesystem::path m_ConfirmDeletePath;
         bool m_DrawerMode = false;
 
+        uint32_t m_AudioPreviewHandle = 0;
+        std::string m_AudioPreviewPath;
+
         char m_SearchBuffer[256] = {};
 
         float m_ThumbnailSize = 72.0f;

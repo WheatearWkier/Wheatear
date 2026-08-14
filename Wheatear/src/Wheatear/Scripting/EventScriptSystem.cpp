@@ -84,6 +84,8 @@ namespace Wheatear {
                 cache.Script = EventScript::FromFile(resolved);
                 cache.LastWriteTime = writeTime;
                 cache.Loaded = true;
+                WT_CORE_INFO("EventScriptSystem: reloaded '{}' ({} events)",
+                    scriptPath, cache.Script.GetEvents().size());
             }
 
             return &cache.Script;
@@ -303,7 +305,9 @@ namespace Wheatear {
         const EventScriptBlock* block = script ? script->FindEvent(component.RuntimeEventName) : nullptr;
         if (!block)
         {
+            WT_CORE_WARN("EventScriptSystem: running event '{}' no longer exists in '{}' after reload; stopped.", component.RuntimeEventName, component.ScriptPath);
             component.RuntimeActive = false;
+            component.RuntimeEventName.clear();
             return;
         }
 

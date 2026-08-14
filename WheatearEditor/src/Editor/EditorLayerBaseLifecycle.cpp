@@ -19,6 +19,7 @@
 #include "Wheatear/Scene/Components.h"
 #include "Wheatear/Scene/Scene.h"
 #include "Wheatear/Scene/SceneSerializer.h"
+#include "Wheatear/Modules/GameplayModuleRuntime.h"
 #include "Wheatear/Utils/PlatformUtils.h"
 #include "Wheatear/UI/UIInputSystem.h"
 #include "Wheatear/UI/UIWidgetLayout.h"
@@ -225,6 +226,11 @@ namespace Wheatear {
         // Render one queued asset thumbnail per frame (scenes/prefabs/UI
         // templates/meshes) so browsing the content browser never stalls.
         m_ContentBrowserPanel->OnUpdate();
+
+        // Hot-reload WAO action recipes while playing (editor tuning applies
+        // without restarting play).
+        if (m_SceneState == SceneState::Play)
+            UpdateActionHotReload();
 
         {
             const auto& spec = m_Framebuffer->GetSpecification();
@@ -457,7 +463,17 @@ namespace Wheatear {
             break;
         case WT_KEY_ENTER:
         case WT_KEY_KP_ENTER:
-            if (ctrl)
+            if (ctrl && shift)
+            {
+                // Restart play: stop and immediately re-enter play with the
+                // latest scene state (scene edits apply without an extra click).
+                if (m_SceneState == SceneState::Play)
+                {
+                    TransitionToStop();
+                    TransitionToPlay();
+                }
+            }
+            else if (ctrl)
             {
                 if (m_SceneState == SceneState::Edit)
                     TransitionToPlay();

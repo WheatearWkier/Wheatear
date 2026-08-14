@@ -9,6 +9,7 @@
 #include "Editor/EditorWidgets.h"
 #include "Panels/EventScriptGraphPanel.h"
 #include "Modules/VisualNovel/VisualNovelScriptEditorPanel.h"
+#include "Wheatear/Audio/AudioEngine.h"
 #include "Wheatear/Assets/AssetPath.h"
 #include "Wheatear/Core/EngineInfo.h"
 #include "Wheatear/Renderer/Framebuffer.h"
@@ -51,6 +52,111 @@ namespace Wheatear {
                 case AssetType::Mesh:          return "Mesh";
                 default:                    return "Unknown";
             }
+        }
+
+    } // namespace
+
+    namespace {
+
+        // Lightweight WAV peak extractor for the audio preview waveform
+        // (uncompressed PCM WAV only; other formats show no waveform).
+        struct WavPreview
+        {
+            float DurationSeconds = 0.0f;
+            std::vector<float> Peaks;   // 64 bars in 0..1
+        };
+
+        static bool ParseWavPreview(const std::string& path, WavPreview& out)
+        {
+            std::ifstream input(path, std::ios::binary);
+            if (!input.is_open())
+                return false;
+
+            char riff[4];
+            input.read(riff, 4);
+            if (std::memcmp(riff, "RIFF", 4) != 0)
+                return false;
+
+            uint32_t sampleRate = 0;
+            uint16_t channels = 0;
+            uint16_t bitsPerSample = 0;
+            uint32_t dataSize = 0;
+
+            input.seekg(4, std::ios::cur); // chunk size
+            char wave[4];
+            input.read(wave, 4);
+            if (std::memcmp(wave, "WAVE", 4) != 0)
+                return false;
+
+            while (input.good())
+            {
+                char chunkId[4];
+                uint32_t chunkSize = 0;
+                input.read(chunkId, 4);
+                input.read(reinterpret_cast<char*>(&chunkSize), 4);
+                if (std::memcmp(chunkId, "fmt ", 4) == 0)
+                {
+                    uint16_t audioFormat = 0;
+                    input.read(reinterpret_cast<char*>(&audioFormat), 2);
+                    input.read(reinterpret_cast<char*>(&channels), 2);
+                    input.read(reinterpret_cast<char*>(&sampleRate), 4);
+                    input.seekg(6, std::ios::cur); // byte rate + block align
+                    input.read(reinterpret_cast<char*>(&bitsPerSample), 2);
+                    input.seekg(chunkSize - 16, std::ios::cur);
+                }
+                else if (std::memcmp(chunkId, "data", 4) == 0)
+                {
+                    dataSize = chunkSize;
+                    break;
+                }
+                else
+                {
+                    input.seekg(chunkSize, std::ios::cur);
+                    if (chunkSize % 2 != 0)
+                        input.seekg(1, std::ios::cur);
+                }
+            }
+
+            if (channels == 0 || sampleRate == 0 || bitsPerSample == 0 || dataSize == 0)
+                return false;
+
+            constexpr size_t kBarCount = 64;
+            const size_t sampleCount = dataSize / (channels * bitsPerSample / 8);
+            out.DurationSeconds = static_cast<float>(sampleCount) / sampleRate;
+            out.Peaks.assign(kBarCount, 0.0f);
+
+            if (bitsPerSample == 16)
+            {
+                const size_t samplesPerBar = std::max<size_t>(1, sampleCount / kBarCount);
+                std::vector<int16_t> buffer(samplesPerBar * channels);
+                for (size_t bar = 0; bar < kBarCount && input.good(); ++bar)
+                {
+                    input.read(reinterpret_cast<char*>(buffer.data()),
+                        static_cast<std::streamsize>(buffer.size() * sizeof(int16_t)));
+                    const size_t read = static_cast<size_t>(input.gcount()) / sizeof(int16_t);
+                    float peak = 0.0f;
+                    for (size_t i = 0; i < read; ++i)
+                        peak = std::max(peak, std::abs(buffer[i]) / 32768.0f);
+                    out.Peaks[bar] = peak;
+                }
+            }
+            else if (bitsPerSample == 8)
+            {
+                const size_t samplesPerBar = std::max<size_t>(1, sampleCount / kBarCount);
+                std::vector<uint8_t> buffer(samplesPerBar * channels);
+                for (size_t bar = 0; bar < kBarCount && input.good(); ++bar)
+                {
+                    input.read(reinterpret_cast<char*>(buffer.data()),
+                        static_cast<std::streamsize>(buffer.size()));
+                    const size_t read = static_cast<size_t>(input.gcount());
+                    float peak = 0.0f;
+                    for (size_t i = 0; i < read; ++i)
+                        peak = std::max(peak, std::abs(static_cast<int>(buffer[i]) - 128) / 128.0f);
+                    out.Peaks[bar] = peak;
+                }
+            }
+
+            return true;
         }
 
     } // namespace
@@ -883,6 +989,50 @@ namespace Wheatear {
                     }
                     changed |= ImGui::SliderFloat(EditorLocale::Text("Default Volume", "默认音量"), &metadata->Audio.DefaultVolume, 0.0f, 1.0f, "%.2f");
                     changed |= ImGui::Checkbox(EditorLocale::Text("Loop", "循环"), &metadata->Audio.Loop);
+
+                    // Audio preview: waveform + duration + play/stop.
+                    ImGui::Spacing();
+                    const bool isPlaying = (m_AudioPreviewHandle != 0 && m_AudioPreviewPath == m_SelectedPath.string());
+                    if (isPlaying)
+                    {
+                        if (ImGui::Button(EditorLocale::Text("Stop", "停止")))
+                        {
+                            AudioEngine::StopSound(m_AudioPreviewHandle);
+                            m_AudioPreviewHandle = 0;
+                            m_AudioPreviewPath.clear();
+                        }
+                    }
+                    else
+                    {
+                        if (ImGui::Button(EditorLocale::Text("Play", "播放")))
+                        {
+                            m_AudioPreviewHandle = AudioEngine::PlaySoundWithHandle(m_SelectedPath.string(), 0.8f);
+                            m_AudioPreviewPath = m_SelectedPath.string();
+                        }
+                    }
+
+                    WavPreview wav;
+                    if (ParseWavPreview(m_SelectedPath.string(), wav) && !wav.Peaks.empty())
+                    {
+                        ImGui::SameLine();
+                        ImGui::TextDisabled("%.1f s", wav.DurationSeconds);
+
+                        const ImVec2 cursor = ImGui::GetCursorScreenPos();
+                        const ImVec2 area(ImGui::GetContentRegionAvail().x, 36.0f);
+                        ImGui::Dummy(area);
+                        ImDrawList* drawList = ImGui::GetWindowDrawList();
+                        const float barWidth = area.x / static_cast<float>(wav.Peaks.size());
+                        const ImU32 barColor = ImGui::ColorConvertFloat4ToU32(
+                            ImGui::GetStyleColorVec4(ImGuiCol_CheckMark));
+                        for (size_t i = 0; i < wav.Peaks.size(); ++i)
+                        {
+                            const float barHeight = std::max(2.0f, wav.Peaks[i] * area.y);
+                            const float x = cursor.x + static_cast<float>(i) * barWidth;
+                            const float y = cursor.y + (area.y - barHeight) * 0.5f;
+                            drawList->AddRectFilled(ImVec2(x + 1.0f, y),
+                                ImVec2(x + barWidth - 1.0f, y + barHeight), barColor);
+                        }
+                    }
                 }
                 else if (metadata->Kind == EditorAssetKind::Prefab || metadata->Kind == EditorAssetKind::UITemplate)
                 {

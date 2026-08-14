@@ -8,6 +8,8 @@
 #include "Editor/EditorLocale.h"
 #include "Editor/EditorWidgets.h"
 #include "Panels/EventScriptGraphPanel.h"
+#include "Wheatear/Assets/AssetPath.h"
+#include "Wheatear/Scripting/EventScript.h"
 #include "Wheatear/Scene/Components.h"
 #include "Wheatear/Scripting/ScriptEngine.h"
 
@@ -54,6 +56,41 @@ namespace Wheatear {
             ImGui::TextDisabled(EditorLocale::Text("Instruction: %zu / Wait: %.2fs", "指令: %zu / 等待: %.2fs"),
                 component.RuntimeInstructionIndex,
                 component.RuntimeWaitRemaining);
+
+            // Live "current instruction" preview: what the event script is
+            // executing right now while playing.
+            if (component.RuntimeActive && !component.ScriptPath.empty())
+            {
+                EventScript script = EventScript::FromFile(AssetPath::ResolveRuntimeData(component.ScriptPath));
+                if (const EventScriptBlock* block = script.FindEvent(component.RuntimeEventName))
+                {
+                    if (component.RuntimeInstructionIndex < block->Instructions.size())
+                    {
+                        const auto& instruction = block->Instructions[component.RuntimeInstructionIndex];
+                        std::string preview;
+                        switch (instruction.Type)
+                        {
+                        case EventScriptInstructionType::Command:
+                            preview = instruction.Text;
+                            break;
+                        case EventScriptInstructionType::Wait:
+                            preview = "wait " + std::to_string(instruction.Seconds) + "s";
+                            break;
+                        case EventScriptInstructionType::If:
+                            preview = "if " + instruction.Text;
+                            break;
+                        case EventScriptInstructionType::EndIf:
+                            preview = "endif";
+                            break;
+                        }
+                        if (!preview.empty())
+                        {
+                            ImGui::TextColored(ImGui::GetStyleColorVec4(ImGuiCol_CheckMark),
+                                "%s %s", EditorLocale::Text("Now:", "正在执行:"), preview.c_str());
+                        }
+                    }
+                }
+            }
 
             ImGui::PopID();
         });
