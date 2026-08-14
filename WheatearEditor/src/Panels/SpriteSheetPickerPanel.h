@@ -29,6 +29,10 @@ namespace Wheatear {
         void OpenForEntity(Entity entity);
         void Open();
 
+        // Opens the picker bound to a reusable .wtsheet asset (no entity
+        // needed; Apply actions stay disabled until an entity is selected).
+        void OpenSheet(const std::string& sheetPath);
+
         static void RequestOpen(Entity entity);
 
     private:
@@ -38,6 +42,7 @@ namespace Wheatear {
 
         void DrawTextureDropZone();
         void DrawTargetSummary();
+        void DrawSheetTools();
         void DrawGridControls();
         void DrawPreview();
         void DrawSelectedSpritePreview();
@@ -75,6 +80,7 @@ namespace Wheatear {
         float m_Zoom = 1.0f;
 
         std::string m_LastAction;
+        std::string m_SheetPath;   // reusable .wtsheet asset (empty = not saved yet)
     };
 
 } // namespace Wheatear

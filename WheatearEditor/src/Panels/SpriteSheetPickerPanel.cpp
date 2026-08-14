@@ -4,8 +4,10 @@
 #include "ContentBrowserPanel.h"
 #include "Editor/EditorFloatingWindow.h"
 #include "Editor/EditorLocale.h"
+#include "Editor/EditorWidgets.h"
 #include "Wheatear/Animation/AnimationClip.h"
 #include "Wheatear/Assets/AssetPath.h"
+#include "Wheatear/Assets/SpriteSheetAsset.h"
 #include "Wheatear/Renderer/Texture.h"
 #include "Wheatear/Scene/Components.h"
 
@@ -99,6 +101,22 @@ namespace Wheatear {
         SyncTextureFromEntity();
     }
 
+    void SpriteSheetPickerPanel::OpenSheet(const std::string& sheetPath)
+    {
+        m_Open = true;
+        m_SheetPath = sheetPath;
+
+        const SpriteSheetData data = SpriteSheetAsset::Load(sheetPath);
+        if (!data.TexturePath.empty())
+        {
+            m_Cols = std::max(1, data.Columns);
+            m_Rows = std::max(1, data.Rows);
+            m_SelectedCol = std::clamp(m_SelectedCol, 0, m_Cols - 1);
+            m_SelectedRow = std::clamp(m_SelectedRow, 0, m_Rows - 1);
+            SetTexture(Texture2D::Create(data.TexturePath), data.TexturePath);
+        }
+    }
+
     void SpriteSheetPickerPanel::ConsumeOpenRequest()
     {
         if (!s_HasOpenRequest)
@@ -125,6 +143,8 @@ namespace Wheatear {
         EditorFloatingWindow::DrawToggleButton("Sprite Sheet Picker");
         ImGui::Separator();
         DrawTargetSummary();
+        ImGui::Separator();
+        DrawSheetTools();
         ImGui::Separator();
 
         ImGui::Columns(2, "##sprite_sheet_picker_columns", true);
@@ -319,6 +339,71 @@ namespace Wheatear {
         {
             ImGui::TextDisabled(EditorLocale::Text("Drag a texture from Content Browser, then click a cell or generate a frame sequence.", "从资源浏览器拖入纹理，然后点击单元格或生成帧序列。"));
         }
+    }
+
+    void SpriteSheetPickerPanel::DrawSheetTools()
+    {
+        ImGui::TextUnformatted(EditorLocale::Text("Reusable Sheet (.wtsheet)", "可复用图集 (.wtsheet)"));
+
+        // Default path: same directory as the texture, swapped extension.
+        if (m_SheetPath.empty() && !m_TexturePath.empty())
+        {
+            std::filesystem::path relative = AssetPath::ToProjectRelative(m_TexturePath);
+            m_SheetPath = relative.replace_extension(".wtsheet").generic_string();
+        }
+
+        EditorWidgets::InputString(EditorLocale::Text("Sheet Path", "图集路径"), m_SheetPath, 512);
+
+        if (ImGui::Button(EditorLocale::Text("Load Sheet", "加载图集")) && !m_SheetPath.empty())
+        {
+            const SpriteSheetData data = SpriteSheetAsset::Load(m_SheetPath);
+            if (!data.TexturePath.empty())
+            {
+                m_Cols = std::max(1, data.Columns);
+                m_Rows = std::max(1, data.Rows);
+                m_SelectedCol = std::clamp(m_SelectedCol, 0, m_Cols - 1);
+                m_SelectedRow = std::clamp(m_SelectedRow, 0, m_Rows - 1);
+                SetTexture(Texture2D::Create(data.TexturePath), data.TexturePath);
+                m_LastAction = "Loaded sheet: " + m_SheetPath;
+            }
+            else
+            {
+                m_LastAction = "Failed to load sheet: " + m_SheetPath;
+            }
+        }
+
+        ImGui::SameLine();
+        if (ImGui::Button(EditorLocale::Text("Save As Sheet", "另存为图集")) && !m_SheetPath.empty() && m_Texture)
+        {
+            SpriteSheetData data;
+            data.TexturePath = m_TexturePath.empty()
+                ? m_Texture->GetPath() : m_TexturePath;
+            data.Columns = m_Cols;
+            data.Rows = m_Rows;
+            SpriteSheetAsset::Save(m_SheetPath, data);
+
+            // Bind the saved sheet to the selected entity so it reuses the
+            // grid definition instead of a baked UV pair.
+            const int cellIndex = m_SelectedRow * m_Cols + m_SelectedCol;
+            if (m_Entity && m_Entity.HasComponent<SpriteRendererComponent>())
+            {
+                auto& sprite = m_Entity.GetComponent<SpriteRendererComponent>();
+                sprite.SpriteSheet = m_SheetPath;
+                sprite.CellIndex = cellIndex;
+            }
+            else if (m_Entity && m_Entity.HasComponent<UIImageComponent>())
+            {
+                auto& image = m_Entity.GetComponent<UIImageComponent>();
+                image.SpriteSheet = m_SheetPath;
+                image.CellIndex = cellIndex;
+            }
+            m_LastAction = "Saved sheet: " + m_SheetPath;
+        }
+
+        ImGui::SameLine();
+        HelpMarker(EditorLocale::Text(
+            "Saves the current grid as a reusable .wtsheet asset. Entities that reference the sheet stay in sync when the texture or grid changes; the runtime still samples the full sheet texture.",
+            "将当前网格保存为可复用的 .wtsheet 资产。引用该图集的实体会在纹理或网格变化时保持同步；运行时仍使用整张图集纹理。"));
     }
 
     void SpriteSheetPickerPanel::DrawGridControls()

@@ -91,6 +91,11 @@ namespace Wheatear {
         glm::vec2      UVMin = { 0.0f, 0.0f };
         glm::vec2      UVMax = { 1.0f, 1.0f };
 
+        // Optional reusable sprite-sheet reference (.wtsheet), resolved by the
+        // SpriteSheetSystem like SpriteRendererComponent.
+        std::string    SpriteSheet;
+        int            CellIndex = -1;
+
         UIImageComponent() = default;
         UIImageComponent(const UIImageComponent&) = default;
     };

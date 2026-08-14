@@ -31,6 +31,7 @@ namespace Wheatear {
         Metadata,
         AnimationClip,
         Mesh,
+        SpriteSheet,
     };
 
     class ContentBrowserPanel
@@ -60,6 +61,10 @@ namespace Wheatear {
         void SetOnInstantiateUITemplateCallback(std::function<void(const std::filesystem::path&)> callback)
         {
             m_OnInstantiateUITemplate = std::move(callback);
+        }
+        void SetOnOpenSpriteSheetCallback(std::function<void(const std::filesystem::path&)> callback)
+        {
+            m_OnOpenSpriteSheet = std::move(callback);
         }
 
     private:
@@ -118,6 +123,7 @@ namespace Wheatear {
         std::function<void(const std::filesystem::path&)> m_OnOpenScene;
         std::function<void(const std::filesystem::path&)> m_OnInstantiatePrefab;
         std::function<void(const std::filesystem::path&)> m_OnInstantiateUITemplate;
+        std::function<void(const std::filesystem::path&)> m_OnOpenSpriteSheet;
     };
 
 } // namespace Wheatear

@@ -168,6 +168,7 @@
     <ClInclude Include="src\Wheatear\Assets\AssetAliasRegistry.h" />
     <ClInclude Include="src\Wheatear\Assets\AssetPath.h" />
     <ClInclude Include="src\Wheatear\Assets\FileSystem.h" />
+    <ClInclude Include="src\Wheatear\Assets\SpriteSheetAsset.h" />
     <ClInclude Include="src\Wheatear\Audio\AudioEngine.h" />
     <ClInclude Include="src\Wheatear\Config\PlayerConfig.h" />
     <ClInclude Include="src\Wheatear\Config\UserSettings.h" />
@@ -340,6 +341,7 @@
     <ClInclude Include="src\Wheatear\Systems\PhysicsSystem.h" />
     <ClInclude Include="src\Wheatear\Systems\RenderSystem.h" />
     <ClInclude Include="src\Wheatear\Systems\ScriptSystem.h" />
+    <ClInclude Include="src\Wheatear\Systems\SpriteSheetSystem.h" />
     <ClInclude Include="src\Wheatear\Systems\UISystem.h" />
     <ClInclude Include="src\Wheatear\UI\UIInputSystem.h" />
     <ClInclude Include="src\Wheatear\UI\UIRenderer.h" />
@@ -730,6 +732,7 @@
     <ClCompile Include="src\Wheatear\Assets\AssetAliasRegistry.cpp" />
     <ClCompile Include="src\Wheatear\Assets\AssetPath.cpp" />
     <ClCompile Include="src\Wheatear\Assets\FileSystem.cpp" />
+    <ClCompile Include="src\Wheatear\Assets\SpriteSheetAsset.cpp" />
     <ClCompile Include="src\Wheatear\Audio\AudioEngine.cpp" />
     <ClCompile Include="src\Wheatear\Config\PlayerConfig.cpp" />
     <ClCompile Include="src\Wheatear\Config\UserSettings.cpp" />
@@ -870,6 +873,7 @@
     <ClCompile Include="src\Wheatear\Systems\PhysicsSystem.cpp" />
     <ClCompile Include="src\Wheatear\Systems\RenderSystem.cpp" />
     <ClCompile Include="src\Wheatear\Systems\ScriptSystem.cpp" />
+    <ClCompile Include="src\Wheatear\Systems\SpriteSheetSystem.cpp" />
     <ClCompile Include="src\Wheatear\Systems\UISystem.cpp" />
     <ClCompile Include="src\Wheatear\UI\UIInputSystem.cpp" />
     <ClCompile Include="src\Wheatear\UI\UIRenderer.cpp" />

@@ -183,6 +183,9 @@
     <ClInclude Include="src\Wheatear\Assets\FileSystem.h">
       <Filter>src\Wheatear\Assets</Filter>
     </ClInclude>
+    <ClInclude Include="src\Wheatear\Assets\SpriteSheetAsset.h">
+      <Filter>src\Wheatear\Assets</Filter>
+    </ClInclude>
     <ClInclude Include="src\Wheatear\Audio\AudioEngine.h">
       <Filter>src\Wheatear\Audio</Filter>
     </ClInclude>
@@ -697,6 +700,9 @@
       <Filter>src\Wheatear\Systems</Filter>
     </ClInclude>
     <ClInclude Include="src\Wheatear\Systems\ScriptSystem.h">
+      <Filter>src\Wheatear\Systems</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Wheatear\Systems\SpriteSheetSystem.h">
       <Filter>src\Wheatear\Systems</Filter>
     </ClInclude>
     <ClInclude Include="src\Wheatear\Systems\UISystem.h">
@@ -1865,6 +1871,9 @@
     <ClCompile Include="src\Wheatear\Assets\FileSystem.cpp">
       <Filter>src\Wheatear\Assets</Filter>
     </ClCompile>
+    <ClCompile Include="src\Wheatear\Assets\SpriteSheetAsset.cpp">
+      <Filter>src\Wheatear\Assets</Filter>
+    </ClCompile>
     <ClCompile Include="src\Wheatear\Audio\AudioEngine.cpp">
       <Filter>src\Wheatear\Audio</Filter>
     </ClCompile>
@@ -2283,6 +2292,9 @@
       <Filter>src\Wheatear\Systems</Filter>
     </ClCompile>
     <ClCompile Include="src\Wheatear\Systems\ScriptSystem.cpp">
+      <Filter>src\Wheatear\Systems</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Wheatear\Systems\SpriteSheetSystem.cpp">
       <Filter>src\Wheatear\Systems</Filter>
     </ClCompile>
     <ClCompile Include="src\Wheatear\Systems\UISystem.cpp">

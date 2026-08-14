@@ -11,6 +11,7 @@
 #include "Wheatear/Systems/PhysicsSystem.h"
 #include "Wheatear/Systems/ScriptSystem.h"
 #include "Wheatear/Systems/AnimationSystem.h"
+#include "Wheatear/Systems/SpriteSheetSystem.h"
 #include "Wheatear/Systems/AudioSystem.h"
 #include "Wheatear/Systems/UISystem.h"
 #include "Wheatear/Systems/RenderSystem.h"
@@ -134,6 +135,7 @@ namespace Wheatear {
         RegisterSystem<ScriptSystem>();
         RegisterSystem<AnimationSystem>();
         RegisterSystem<AudioSystem>();
+        RegisterSystem<SpriteSheetSystem>();
         RegisterSystem<UISystem>();
 
         SceneSystemRegistry::ForEachRuntimeSystem(
@@ -148,6 +150,7 @@ namespace Wheatear {
     void Scene::ConfigureEditorSystems()
     {
         RegisterSystem<AnimationSystem>();
+        RegisterSystem<SpriteSheetSystem>();
         RegisterSystem<UISystem>();
         RegisterSystem<RenderSystem>();
     }

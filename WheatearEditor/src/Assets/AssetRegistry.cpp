@@ -541,6 +541,7 @@ namespace Wheatear {
         if (extension == AssetFileType::MaterialExtension) return EditorAssetKind::Material;
         if (extension == AssetFileType::MetadataExtension) return EditorAssetKind::Metadata;
         if (extension == AssetFileType::AnimationClipExtension) return EditorAssetKind::AnimationClip;
+        if (extension == AssetFileType::SheetExtension) return EditorAssetKind::SpriteSheet;
         if (extension == ".png" || extension == ".jpg" || extension == ".jpeg" || extension == ".tga" || extension == ".webp")
             return EditorAssetKind::Texture;
         if (extension == ".glsl" || extension == ".hlsl") return EditorAssetKind::Shader;

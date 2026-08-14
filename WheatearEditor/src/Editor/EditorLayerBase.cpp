@@ -1,5 +1,6 @@
 #include "wepch.h"
 #include "EditorLayerBase.h"
+#include "Wheatear/Assets/AssetPath.h"
 
 #include "Wheatear/Scene/Components.h"
 #include "Panels/AnimationEditorPanel.h"
@@ -35,6 +36,12 @@ namespace Wheatear {
             [this](const std::filesystem::path& path) { InstantiatePrefab(path); });
         m_ContentBrowserPanel->SetOnInstantiateUITemplateCallback(
             [this](const std::filesystem::path& path) { InstantiateUITemplate(path); });
+        m_ContentBrowserPanel->SetOnOpenSpriteSheetCallback(
+            [this](const std::filesystem::path& path)
+            {
+                m_SpriteSheetPickerPanel->OpenSheet(
+                    AssetPath::ToProjectRelative(path).generic_string());
+            });
     }
 
     EditorLayerBase::~EditorLayerBase() = default;

@@ -26,6 +26,12 @@ namespace Wheatear {
         glm::vec2      DrawOffset = { 0.0f, 0.0f };
         glm::vec2      DrawScale = { 1.0f, 1.0f };
 
+        // Optional reusable sprite-sheet reference (.wtsheet). When set with a
+        // valid CellIndex, the SpriteSheetSystem resolves Texture/UVMin/UVMax
+        // from the sheet definition each frame (grid changes hot-update).
+        std::string    SpriteSheet;
+        int            CellIndex = -1;
+
         SpriteRendererComponent() = default;
         SpriteRendererComponent(const SpriteRendererComponent&) = default;
         SpriteRendererComponent(const glm::vec4& color) : Color(color) {}

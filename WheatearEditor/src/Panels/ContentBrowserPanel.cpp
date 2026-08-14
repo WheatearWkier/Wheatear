@@ -50,6 +50,7 @@ namespace Wheatear {
                 case AssetType::Metadata:   return "Metadata";
                 case AssetType::AnimationClip: return "Animation Clip";
                 case AssetType::Mesh:          return "Mesh";
+                case AssetType::SpriteSheet:   return "Sprite Sheet";
                 default:                    return "Unknown";
             }
         }
@@ -184,6 +185,7 @@ namespace Wheatear {
         m_Icons[AssetType::Metadata]  = m_Icons[AssetType::Unknown];
         m_Icons[AssetType::AnimationClip] = Texture2D::Create("Resources/Icons/Editor/film.png");
         m_Icons[AssetType::Mesh] = Texture2D::Create("Resources/Icons/Editor/box.png");
+        m_Icons[AssetType::SpriteSheet] = Texture2D::Create("Resources/Icons/Editor/sprite_sheet.png");
 
         AssetRegistry::Get().LoadCache(AssetPath::GetProjectRoot());
         m_RegistryStatus = "Loaded asset registry cache. Use Rescan Assets after adding or replacing resources.";
@@ -218,6 +220,8 @@ namespace Wheatear {
             return AssetType::Material;
         if (ext == AssetFileType::AnimationClipExtension)
             return AssetType::AnimationClip;
+        if (ext == AssetFileType::SheetExtension)
+            return AssetType::SpriteSheet;
         if (ext == ".yaml" || ext == ".yml" || ext == ".json" || ext == ".txt")
             return AssetType::Data;
 
@@ -290,6 +294,10 @@ namespace Wheatear {
         else if (ext == AssetFileType::UITemplateExtension)
         {
             if (m_OnInstantiateUITemplate) m_OnInstantiateUITemplate(path);
+        }
+        else if (ext == AssetFileType::SheetExtension)
+        {
+            if (m_OnOpenSpriteSheet) m_OnOpenSpriteSheet(path);
         }
     }
 

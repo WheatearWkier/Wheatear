@@ -79,12 +79,16 @@ namespace Wheatear {
             o << YAML::Key << "TexturePath" << YAML::Value << (c.Texture ? c.Texture->GetPath() : "");
             o << YAML::Key << "UVMin" << YAML::Value << c.UVMin;
             o << YAML::Key << "UVMax" << YAML::Value << c.UVMax;
+            o << YAML::Key << "SpriteSheet" << YAML::Value << c.SpriteSheet;
+            o << YAML::Key << "CellIndex" << YAML::Value << c.CellIndex;
             o << YAML::EndMap;
         }
         static void Deserialize(const YAML::Node& n, UIImageComponent& c) {
             c.Color = n["Color"].as<glm::vec4>();
             c.UVMin = n["UVMin"].as<glm::vec2>(c.UVMin);
             c.UVMax = n["UVMax"].as<glm::vec2>(c.UVMax);
+            c.SpriteSheet = n["SpriteSheet"].as<std::string>("");
+            c.CellIndex = n["CellIndex"].as<int>(-1);
             if (auto p = n["TexturePath"].as<std::string>(""); !p.empty())
                 c.Texture = Texture2D::Create(p);
         }
