@@ -4,6 +4,7 @@
 #include "Wheatear/Audio/AudioEngine.h"
 #include "Wheatear/Assets/AssetPath.h"
 #include "Wheatear/Config/UserSettings.h"
+#include "Wheatear/Input/Input.h"
 #include "Wheatear/Input/InputBindingService.h"
 #include "Wheatear/Events/ApplicationEvent.h"
 #include "Wheatear/ImGui/ImGuiLayer.h"
@@ -138,8 +139,10 @@ namespace Wheatear {
 			FlushEventQueue();
 
 			// Advance the action-layer edge state machine so IsActionPressed /
-			// IsActionReleased report consistent per-frame results.
+			// IsActionReleased report consistent per-frame results, and the
+			// mouse delta baseline for GetMouseDeltaX/Y.
 			InputBindingService::EndFrame();
+			Input::EndFrame();
 
 			if (!m_Running)
 				break;

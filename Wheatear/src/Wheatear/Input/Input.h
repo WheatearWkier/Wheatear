@@ -20,6 +20,13 @@ namespace Wheatear {
 		static float GetMouseX();
 		static float GetMouseY();
 
+		// Mouse movement since the previous EndFrame (frame-consistent with
+		// InputBindingService edge queries). Call EndFrame() once per frame
+		// from the application loop.
+		static float GetMouseDeltaX();
+		static float GetMouseDeltaY();
+		static void EndFrame();
+
 		static void SetMouseInputBounds(float minX, float minY, float maxX, float maxY);
 		static void ClearMouseInputBounds();
 		static bool IsMouseWithinInputBounds();

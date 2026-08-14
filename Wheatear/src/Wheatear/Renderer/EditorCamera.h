@@ -86,8 +86,6 @@ namespace Wheatear {
 
         Mode m_Mode = Mode::Orbit;
 
-        glm::vec2 m_InitialMousePosition = { 0.0f, 0.0f };
-
         float m_ViewportWidth = 1920.0f;
         float m_ViewportHeight = 1080.0f;
     };

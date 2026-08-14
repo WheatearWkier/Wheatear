@@ -93,7 +93,6 @@ namespace Wheatear {
         {
             m_Mode = Mode::Fly;
             m_FocalPoint = m_Position + GetForwardDirection() * m_Distance;
-            m_InitialMousePosition = { Input::GetMouseX(), Input::GetMouseY() };
         }
         else if (!rightMouseHeld && m_Mode == Mode::Fly)
         {
@@ -103,13 +102,12 @@ namespace Wheatear {
 
         if (m_Mode == Mode::Fly)
         {
-            const glm::vec2 mouse = { Input::GetMouseX(), Input::GetMouseY() };
-            const glm::vec2 delta = (mouse - m_InitialMousePosition) * 0.003f;
-            m_InitialMousePosition = mouse;
+            const glm::vec2 delta = { Input::GetMouseDeltaX(), Input::GetMouseDeltaY() };
+            const glm::vec2 scaledDelta = delta * 0.003f;
 
             const float yawSign = (GetUpDirection().y < 0.0f) ? -1.0f : 1.0f;
-            m_Yaw += yawSign * delta.x * RotationSpeed();
-            m_Pitch += delta.y * RotationSpeed();
+            m_Yaw += yawSign * scaledDelta.x * RotationSpeed();
+            m_Pitch += scaledDelta.y * RotationSpeed();
 
             const float pitchLimit = glm::radians(89.0f);
             m_Pitch = glm::clamp(m_Pitch, -pitchLimit, pitchLimit);
@@ -129,13 +127,12 @@ namespace Wheatear {
 
         if (m_Mode == Mode::Orbit && Input::IsKeyPressed(WT_KEY_LEFT_ALT))
         {
-            const glm::vec2 mouse = { Input::GetMouseX(), Input::GetMouseY() };
-            const glm::vec2 delta = (mouse - m_InitialMousePosition) * 0.003f;
-            m_InitialMousePosition = mouse;
+            const glm::vec2 delta = { Input::GetMouseDeltaX(), Input::GetMouseDeltaY() };
+            const glm::vec2 scaledDelta = delta * 0.003f;
 
-            if (Input::IsMouseButtonPressed(WT_MOUSE_BUTTON_MIDDLE)) MousePan(delta);
-            else if (Input::IsMouseButtonPressed(WT_MOUSE_BUTTON_LEFT))   MouseRotate(delta);
-            else if (Input::IsMouseButtonPressed(WT_MOUSE_BUTTON_RIGHT))  MouseZoom(delta.y);
+            if (Input::IsMouseButtonPressed(WT_MOUSE_BUTTON_MIDDLE)) MousePan(scaledDelta);
+            else if (Input::IsMouseButtonPressed(WT_MOUSE_BUTTON_LEFT))   MouseRotate(scaledDelta);
+            else if (Input::IsMouseButtonPressed(WT_MOUSE_BUTTON_RIGHT))  MouseZoom(scaledDelta.y);
         }
 
         UpdateView();

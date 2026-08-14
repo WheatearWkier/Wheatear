@@ -19,6 +19,7 @@ namespace Wheatear {
 		};
 
 		static MouseInputBounds s_MouseInputBounds;
+		static std::pair<float, float> s_LastMousePosition = { 0.0f, 0.0f };
 
 		static GLFWwindow* GetNativeWindow()
 		{
@@ -77,6 +78,23 @@ namespace Wheatear {
 	{
 		auto [xpos, ypos] = GetMousePosition();
 		return ypos;
+	}
+
+	float Input::GetMouseDeltaX()
+	{
+		const auto [xpos, ypos] = GetMousePosition();
+		return xpos - s_LastMousePosition.first;
+	}
+
+	float Input::GetMouseDeltaY()
+	{
+		const auto [xpos, ypos] = GetMousePosition();
+		return ypos - s_LastMousePosition.second;
+	}
+
+	void Input::EndFrame()
+	{
+		s_LastMousePosition = GetMousePosition();
 	}
 
 	void Input::SetCursorMode(CursorMode mode)
