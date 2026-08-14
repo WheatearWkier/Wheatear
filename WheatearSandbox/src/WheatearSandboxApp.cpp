@@ -52,11 +52,44 @@ namespace {
 		return true;
 	}
 
-	template<typename T>
-	static bool ReadValue(std::istream& input, T* value)
+	// The asset pack format is little-endian by design; read explicitly so
+	// the reader is independent of host byte order.
+	static bool ReadU16(std::istream& input, uint16_t* value)
 	{
-		input.read(reinterpret_cast<char*>(value), sizeof(T));
-		return input.good();
+		char bytes[2] = {};
+		input.read(bytes, sizeof(bytes));
+		if (!input.good())
+			return false;
+		*value = static_cast<uint16_t>(
+			static_cast<uint8_t>(bytes[0]) |
+			(static_cast<uint16_t>(static_cast<uint8_t>(bytes[1])) << 8));
+		return true;
+	}
+
+	static bool ReadU32(std::istream& input, uint32_t* value)
+	{
+		char bytes[4] = {};
+		input.read(bytes, sizeof(bytes));
+		if (!input.good())
+			return false;
+		*value = static_cast<uint32_t>(static_cast<uint8_t>(bytes[0]))
+			| (static_cast<uint32_t>(static_cast<uint8_t>(bytes[1])) << 8)
+			| (static_cast<uint32_t>(static_cast<uint8_t>(bytes[2])) << 16)
+			| (static_cast<uint32_t>(static_cast<uint8_t>(bytes[3])) << 24);
+		return true;
+	}
+
+	static bool ReadU64(std::istream& input, uint64_t* value)
+	{
+		char bytes[8] = {};
+		input.read(bytes, sizeof(bytes));
+		if (!input.good())
+			return false;
+		uint64_t result = 0;
+		for (int i = 7; i >= 0; --i)
+			result = (result << 8) | static_cast<uint8_t>(bytes[i]);
+		*value = result;
+		return true;
 	}
 
 	static bool ReadBytes(std::istream& input, void* data, size_t size)
@@ -93,8 +126,29 @@ namespace {
 		return output.str();
 	}
 
+	static std::filesystem::path GetExecutableDirectory()
+	{
+#ifdef WT_PLATFORM_WINDOWS
+		wchar_t buffer[MAX_PATH] = {};
+		const DWORD length = GetModuleFileNameW(nullptr, buffer, MAX_PATH);
+		if (length > 0 && length < MAX_PATH)
+			return std::filesystem::path(buffer).parent_path();
+#endif
+		return std::filesystem::current_path();
+	}
+
 	static std::filesystem::path GetRuntimeCacheRoot()
 	{
+		// Prefer a cache directory next to the executable so packaged games do
+		// not consume the system drive; fall back to the user profile when the
+		// install directory is not writable (e.g. Program Files).
+		const std::filesystem::path exeCache = GetExecutableDirectory() / ".wheatear_cache";
+		{
+			std::error_code error;
+			if (std::filesystem::create_directories(exeCache, error) || !error)
+				return exeCache;
+		}
+
 #ifdef WT_PLATFORM_WINDOWS
 		if (const char* localAppData = std::getenv("LOCALAPPDATA"))
 			return std::filesystem::path(localAppData) / "Wheatear" / "PackageCache";
@@ -161,7 +215,7 @@ namespace {
 
 		uint32_t version = 0;
 		uint32_t entryCount = 0;
-		if (!ReadValue(input, &version) || !ReadValue(input, &entryCount) ||
+		if (!ReadU32(input, &version) || !ReadU32(input, &entryCount) ||
 			version != kAssetPackVersion)
 		{
 			WT_CORE_ERROR("Runtime asset pack version is not supported: {}", packPath.string());
@@ -180,10 +234,10 @@ namespace {
 			uint32_t method = 0;
 			uint64_t originalSize = 0;
 			uint64_t storedSize = 0;
-			if (!ReadValue(input, &pathLength) ||
-				!ReadValue(input, &method) ||
-				!ReadValue(input, &originalSize) ||
-				!ReadValue(input, &storedSize))
+			if (!ReadU16(input, &pathLength) ||
+				!ReadU32(input, &method) ||
+				!ReadU64(input, &originalSize) ||
+				!ReadU64(input, &storedSize))
 			{
 				return false;
 			}
@@ -242,7 +296,7 @@ namespace {
 		}
 
 		std::ofstream marker(cacheRoot / ".complete", std::ios::binary | std::ios::trunc);
-		marker << packPath.generic_string();
+		marker << BuildPackFingerprint(packPath) << ':' << entryCount;
 		return marker.good();
 	}
 
@@ -252,18 +306,45 @@ namespace {
 		if (packPath.empty())
 			return {};
 
-		const std::filesystem::path cacheRoot = GetRuntimeCacheRoot() / BuildPackFingerprint(packPath);
+		const std::string fingerprint = BuildPackFingerprint(packPath);
+		const std::filesystem::path cacheRoot = GetRuntimeCacheRoot() / fingerprint;
 		const std::filesystem::path marker = cacheRoot / ".complete";
 		if (std::filesystem::exists(marker) &&
 			std::filesystem::exists(cacheRoot / "assets" / "shaders" / "Renderer2D_Quad.glsl"))
 		{
-			return cacheRoot;
+			// Trust the cache only when the marker names this exact pack
+			// (fingerprint) and carries a sane entry count; a partially
+			// deleted or stale cache re-extracts.
+			std::ifstream markerInput(marker);
+			std::string markerText;
+			std::getline(markerInput, markerText);
+			const size_t colon = markerText.find(':');
+			const std::string markerFingerprint =
+				colon == std::string::npos ? markerText : markerText.substr(0, colon);
+			const bool saneCount = colon != std::string::npos
+				&& markerText.size() > colon + 1
+				&& std::all_of(markerText.begin() + static_cast<std::ptrdiff_t>(colon + 1),
+					markerText.end(),
+					[](unsigned char c) { return c >= '0' && c <= '9'; });
+			if (markerFingerprint == fingerprint && saneCount)
+				return cacheRoot;
 		}
 
 		if (!ExtractAssetPack(packPath, cacheRoot))
 		{
 			WT_CORE_ERROR("Failed to extract runtime asset pack: {}", packPath.string());
 			return {};
+		}
+
+		// Prune stale fingerprint directories from previous packs so the
+		// cache cannot grow unbounded across repacks.
+		std::error_code error;
+		for (const auto& entry : std::filesystem::directory_iterator(GetRuntimeCacheRoot(), error))
+		{
+			if (error)
+				break;
+			if (entry.is_directory() && entry.path().filename() != cacheRoot.filename())
+				std::filesystem::remove_all(entry.path(), error);
 		}
 
 		WT_CORE_INFO("Runtime asset pack extracted to '{}'", cacheRoot.string());

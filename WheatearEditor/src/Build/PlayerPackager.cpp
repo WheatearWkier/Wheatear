@@ -122,7 +122,8 @@ namespace Wheatear {
 
         static int RunProcess(const std::filesystem::path& executable,
             const std::wstring& arguments,
-            const std::filesystem::path& workingDirectory)
+            const std::filesystem::path& workingDirectory,
+            DWORD timeoutMs = 10 * 60 * 1000)
         {
             std::wstring commandLine = QuoteWide(executable) + L" " + arguments;
             STARTUPINFOW startup{};
@@ -145,7 +146,17 @@ namespace Wheatear {
             if (!created)
                 return -static_cast<int>(GetLastError());
 
-            WaitForSingleObject(process.hProcess, INFINITE);
+            const DWORD waitResult = WaitForSingleObject(process.hProcess, timeoutMs);
+            if (waitResult == WAIT_TIMEOUT)
+            {
+                // A hung build must not hang the packager forever: kill the
+                // process tree and report failure.
+                TerminateProcess(process.hProcess, 1);
+                WaitForSingleObject(process.hProcess, 5000);
+                CloseHandle(process.hThread);
+                CloseHandle(process.hProcess);
+                return -static_cast<int>(ERROR_TIMEOUT);
+            }
 
             DWORD exitCode = 1;
             GetExitCodeProcess(process.hProcess, &exitCode);
@@ -154,6 +165,34 @@ namespace Wheatear {
             return static_cast<int>(exitCode);
         }
 #endif
+
+        // Removes a package directory while keeping the runtime extract cache
+        // (.wheatear_cache) so repacks do not force a full re-extraction on
+        // the next launch (the fingerprint check still refreshes it when the
+        // pack actually changed).
+        static bool CleanPackageDirectory(const std::filesystem::path& directory, std::string* errorMessage)
+        {
+            constexpr const char* kRuntimeCacheDirectory = ".wheatear_cache";
+
+            std::error_code error;
+            for (const auto& entry : std::filesystem::directory_iterator(directory, error))
+            {
+                if (error)
+                    break;
+                if (entry.path().filename() == kRuntimeCacheDirectory)
+                    continue;
+                std::filesystem::remove_all(entry.path(), error);
+                if (error)
+                    break;
+            }
+            if (error)
+            {
+                if (errorMessage)
+                    *errorMessage = "Failed to clean package directory: " + error.message();
+                return false;
+            }
+            return true;
+        }
 
         static std::string ToOutputDirectoryName(const std::string& configuration)
         {
@@ -338,19 +377,42 @@ namespace Wheatear {
             return true;
         }
 
+        // The asset pack format is little-endian by design (Windows x86_64
+        // target). Write explicitly so the format stays stable regardless of
+        // host byte order.
         static void WriteU16(std::ostream& output, uint16_t value)
         {
-            output.write(reinterpret_cast<const char*>(&value), sizeof(value));
+            const char bytes[2] = {
+                static_cast<char>(value & 0xFF),
+                static_cast<char>((value >> 8) & 0xFF)
+            };
+            output.write(bytes, sizeof(bytes));
         }
 
         static void WriteU32(std::ostream& output, uint32_t value)
         {
-            output.write(reinterpret_cast<const char*>(&value), sizeof(value));
+            const char bytes[4] = {
+                static_cast<char>(value & 0xFF),
+                static_cast<char>((value >> 8) & 0xFF),
+                static_cast<char>((value >> 16) & 0xFF),
+                static_cast<char>((value >> 24) & 0xFF)
+            };
+            output.write(bytes, sizeof(bytes));
         }
 
         static void WriteU64(std::ostream& output, uint64_t value)
         {
-            output.write(reinterpret_cast<const char*>(&value), sizeof(value));
+            const char bytes[8] = {
+                static_cast<char>(value & 0xFF),
+                static_cast<char>((value >> 8) & 0xFF),
+                static_cast<char>((value >> 16) & 0xFF),
+                static_cast<char>((value >> 24) & 0xFF),
+                static_cast<char>((value >> 32) & 0xFF),
+                static_cast<char>((value >> 40) & 0xFF),
+                static_cast<char>((value >> 48) & 0xFF),
+                static_cast<char>((value >> 56) & 0xFF)
+            };
+            output.write(bytes, sizeof(bytes));
         }
 
         static bool ReadBinaryFile(const std::filesystem::path& path, std::vector<unsigned char>* bytes)
@@ -633,9 +695,9 @@ namespace Wheatear {
             return Fail("WheatearEditor.exe was not generated; package aborted.", outputDirectory);
 
         std::error_code error;
-        std::filesystem::remove_all(outputDirectory, error);
-        if (error)
-            return Fail("Failed to clean previous package directory: " + error.message(), outputDirectory);
+        std::string cleanError;
+        if (!CleanPackageDirectory(outputDirectory, &cleanError))
+            return Fail("Failed to clean previous package directory: " + cleanError, outputDirectory);
         error.clear();
         std::filesystem::remove_all(editorOutputDirectory, error);
         if (error)

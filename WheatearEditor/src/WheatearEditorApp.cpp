@@ -162,11 +162,29 @@ namespace Wheatear
             return 1;
         }
 
+        static std::string ReadPackageConfiguration(ApplicationCommandLineArgs args)
+        {
+            for (int i = 1; i < args.Count; ++i)
+            {
+                if ((args[i] == "--configuration" || args[i] == "--config")
+                    && i + 1 < args.Count
+                    && !IsCommandOption(args[i + 1]))
+                {
+                    const std::string value = args[i + 1];
+                    if (value == "Debug" || value == "Release")
+                        return value;
+                    WT_CORE_WARN("Unknown package configuration '{}'; falling back to Debug.", value);
+                    return "Debug";
+                }
+            }
+            return "Debug";
+        }
+
         static int RunPackagePlayer(ApplicationCommandLineArgs args)
         {
             PlayerPackageOptions options;
             options.StartupScene = ReadPackageStartupScene(args);
-            options.Configuration = "Debug";
+            options.Configuration = ReadPackageConfiguration(args);
             options.IncludeDebugSymbols = false;
 
             const PlayerPackageResult result = PlayerPackager::PackagePlayer(options);
