@@ -1055,7 +1055,8 @@ namespace Wheatear {
 
         const int cellCount = SpriteSheetAsset::CellCount(cached.Data);
         const int cellRows  = (cellCount + kSheetCellsPerStripRow - 1) / kSheetCellsPerStripRow;
-        return static_cast<int>(cellRows * kSheetCellRowHeight + kSheetStripPadding);
+        const int rectRows  = (static_cast<int>(cached.Data.Rects.size()) + kSheetCellsPerStripRow - 1) / kSheetCellsPerStripRow;
+        return static_cast<int>((cellRows + rectRows) * kSheetCellRowHeight + kSheetStripPadding);
     }
 
     void ContentBrowserPanel::DrawSheetCellStrip(const std::filesystem::path& path)
@@ -1069,15 +1070,65 @@ namespace Wheatear {
         }
 
         const int cellCount = SpriteSheetAsset::CellCount(cached.Data);
+        const int rectCount = static_cast<int>(cached.Data.Rects.size());
         const int cellRows  = (cellCount + kSheetCellsPerStripRow - 1) / kSheetCellsPerStripRow;
+        const int rectRows  = (rectCount + kSheetCellsPerStripRow - 1) / kSheetCellsPerStripRow;
         const float stripWidth  = ImGui::GetContentRegionAvail().x;
-        const float stripHeight = cellRows * kSheetCellRowHeight + kSheetStripPadding;
+        const float stripHeight = (cellRows + rectRows) * kSheetCellRowHeight + kSheetStripPadding;
 
         ImGui::PushStyleColor(ImGuiCol_ChildBg, ImVec4(0.05f, 0.06f, 0.08f, 0.85f));
         ImGui::BeginChild("##sheetcells", ImVec2(stripWidth, stripHeight), true);
 
         const ImTextureID texId =
             static_cast<ImTextureID>(static_cast<uintptr_t>(cached.Texture->GetRendererID()));
+
+        // Named sub-rects (irregular atlases) render first; each shows its
+        // name and is draggable into the viewport.
+        for (int r = 0; r < rectCount; ++r)
+        {
+            ImGui::PushID(r);
+            const auto& rect = cached.Data.Rects[r];
+
+            glm::vec2 uvMin{ 0.0f }, uvMax{ 1.0f };
+            SpriteSheetAsset::ResolvedCell resolved;
+            if (SpriteSheetAsset::ResolveCell(key, rect.Name, resolved))
+            {
+                uvMin = resolved.UVMin;
+                uvMax = resolved.UVMax;
+            }
+            // Sheet UVs follow the renderer convention (v=0 bottom), which
+            // matches ImGui's texture orientation {0,1}..{1,0}.
+            const ImVec2 imgUV0(uvMin.x, uvMax.y);
+            const ImVec2 imgUV1(uvMax.x, uvMin.y);
+
+            ImGui::ImageButton("##rect", texId, ImVec2(kSheetCellThumb, kSheetCellThumb), imgUV0, imgUV1);
+
+            if (ImGui::BeginDragDropSource())
+            {
+                // Payload: project-relative sheet path + '\n' + rect:<name>.
+                std::wstring payload = AssetPath::ToProjectRelative(path).wstring();
+                payload += L"\nrect:" + std::wstring(rect.Name.begin(), rect.Name.end());
+                ImGui::SetDragDropPayload("SPRITE_SHEET_CELL", payload.c_str(),
+                    (payload.size() + 1) * sizeof(wchar_t));
+                ImGui::Image(texId, ImVec2(32, 32), imgUV0, imgUV1);
+                ImGui::SameLine();
+                ImGui::TextDisabled("%s", rect.Name.c_str());
+                ImGui::EndDragDropSource();
+            }
+
+            if (ImGui::IsItemHovered())
+                ImGui::SetTooltip("%s", EditorLocale::Text(
+                    "Rect '%s' — drag into the viewport to spawn a sprite",
+                    "子图 '%s' — 拖到视口创建精灵"), rect.Name.c_str());
+
+            ImGui::TextUnformatted(rect.Name.c_str());
+            if ((r + 1) % kSheetCellsPerStripRow != 0 && r + 1 < rectCount)
+                ImGui::SameLine();
+            ImGui::PopID();
+        }
+
+        if (rectCount > 0 && cellCount > 0)
+            ImGui::Spacing();
 
         for (int c = 0; c < cellCount; ++c)
         {
@@ -1106,9 +1157,9 @@ namespace Wheatear {
 
             if (ImGui::BeginDragDropSource())
             {
-                // Payload: project-relative sheet path + '\n' + cell index.
+                // Payload: project-relative sheet path + '\n' + cell:<index>.
                 std::wstring payload = AssetPath::ToProjectRelative(path).wstring();
-                payload += L'\n' + std::to_wstring(c);
+                payload += L"\ncell:" + std::to_wstring(c);
                 ImGui::SetDragDropPayload("SPRITE_SHEET_CELL", payload.c_str(),
                     (payload.size() + 1) * sizeof(wchar_t));
                 ImGui::Image(texId, ImVec2(32, 32), imgUV0, imgUV1);

@@ -78,6 +78,7 @@ namespace Wheatear {
             o << YAML::Key << "PixelsPerUnit" << YAML::Value << c.PixelsPerUnit;
             o << YAML::Key << "SpriteSheet" << YAML::Value << c.SpriteSheet;
             o << YAML::Key << "CellIndex" << YAML::Value << c.CellIndex;
+            o << YAML::Key << "SubRect" << YAML::Value << c.SubRect;
             o << YAML::EndMap;
         }
         static void Deserialize(const YAML::Node& n, SpriteRendererComponent& c) {
@@ -90,6 +91,8 @@ namespace Wheatear {
             c.DrawScale = n["DrawScale"].as<glm::vec2>(c.DrawScale);
             c.PixelsPerUnit = n["PixelsPerUnit"].as<float>(0.0f);
             c.SpriteSheet = n["SpriteSheet"].as<std::string>("");
+            c.CellIndex = n["CellIndex"].as<int>(-1);
+            c.SubRect = n["SubRect"].as<std::string>("");
             c.CellIndex = n["CellIndex"].as<int>(-1);
             if (auto p = n["Texture"].as<std::string>(""); !p.empty())
                 c.Texture = Texture2D::Create(p);

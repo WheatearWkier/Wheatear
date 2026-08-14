@@ -243,8 +243,9 @@ namespace Wheatear {
                 }
             }
 
-            // A sprite-sheet cell dragged from the content browser: spawn a
-            // sprite entity bound to (sheet, cell) once the viewport is idle.
+            // A sprite-sheet cell/rect dragged from the content browser: spawn
+            // a sprite entity bound to (sheet, cell-or-rect) once the viewport
+            // is idle. Payload: <path>\ncell:<index> | <path>\nrect:<name>.
             if (const ImGuiPayload* cellPayload = ImGui::AcceptDragDropPayload("SPRITE_SHEET_CELL"))
             {
                 std::wstring text(static_cast<const wchar_t*>(cellPayload->Data));
@@ -252,7 +253,18 @@ namespace Wheatear {
                 if (sep != std::wstring::npos)
                 {
                     m_DeferredSheetCellPath = std::filesystem::path(text.substr(0, sep)).string();
-                    m_DeferredSheetCellIndex = std::stoi(text.substr(sep + 1));
+                    const std::wstring ref = text.substr(sep + 1);
+                    if (ref.rfind(L"rect:", 0) == 0)
+                    {
+                        m_DeferredSheetCellSubRect = std::filesystem::path(ref.substr(5)).string();
+                        m_DeferredSheetCellIndex = -1;
+                    }
+                    else
+                    {
+                        const std::wstring indexText = ref.rfind(L"cell:", 0) == 0 ? ref.substr(5) : ref;
+                        m_DeferredSheetCellIndex = std::stoi(indexText);
+                        m_DeferredSheetCellSubRect.clear();
+                    }
                 }
             }
             ImGui::EndDragDropTarget();

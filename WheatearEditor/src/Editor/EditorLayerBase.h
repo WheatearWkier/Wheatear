@@ -265,6 +265,7 @@ namespace Wheatear {
         std::filesystem::path m_DeferredUITemplateInstantiatePath;
         std::string m_DeferredSheetCellPath;
         int m_DeferredSheetCellIndex = -1;
+        std::string m_DeferredSheetCellSubRect;
         int m_PendingVisualNovelLoadSlot = 0;
     };
 

@@ -15,12 +15,17 @@ namespace Wheatear {
             for (auto entity : registry.view<T>())
             {
                 T& component = registry.get<T>(entity);
-                if (component.SpriteSheet.empty() || component.CellIndex < 0)
+                if (component.SpriteSheet.empty())
                     continue;
 
                 // Shared cached resolution (hot-reloads on sheet file change).
+                // A named sub-rect takes priority over a grid cell index.
                 SpriteSheetAsset::ResolvedCell resolved;
-                if (!SpriteSheetAsset::ResolveCell(component.SpriteSheet, component.CellIndex, resolved))
+                const bool ok = !component.SubRect.empty()
+                    ? SpriteSheetAsset::ResolveCell(component.SpriteSheet, component.SubRect, resolved)
+                    : (component.CellIndex >= 0
+                        && SpriteSheetAsset::ResolveCell(component.SpriteSheet, component.CellIndex, resolved));
+                if (!ok)
                     continue;
 
                 component.Texture = resolved.Texture;

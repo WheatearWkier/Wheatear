@@ -313,11 +313,13 @@ namespace Wheatear {
         const std::filesystem::path uiTemplatePath = m_DeferredUITemplateInstantiatePath;
         const std::string sheetCellPath = m_DeferredSheetCellPath;
         const int sheetCellIndex = m_DeferredSheetCellIndex;
+        const std::string sheetCellSubRect = m_DeferredSheetCellSubRect;
         m_DeferredSceneOpenPath.clear();
         m_DeferredPrefabInstantiatePath.clear();
         m_DeferredUITemplateInstantiatePath.clear();
         m_DeferredSheetCellPath.clear();
         m_DeferredSheetCellIndex = -1;
+        m_DeferredSheetCellSubRect.clear();
 
         if (m_SceneState != SceneState::Edit)
             return;
@@ -341,16 +343,20 @@ namespace Wheatear {
             return;
         }
 
-        // Spawn a sprite bound to the dropped sheet cell; the sheet reference
-        // keeps it live-linked (re-gridding the sheet updates the sprite).
+        // Spawn a sprite bound to the dropped sheet cell/rect; the sheet
+        // reference keeps it live-linked (re-gridding updates the sprite).
         if (!sheetCellPath.empty() && m_EditorScene)
         {
             Entity e = m_EditorScene->CreateEntity("SheetSprite");
             auto& sr = e.AddComponent<SpriteRendererComponent>();
             sr.SpriteSheet = sheetCellPath;
             sr.CellIndex = sheetCellIndex;
+            sr.SubRect = sheetCellSubRect;
             SpriteSheetAsset::ResolvedCell resolved;
-            if (SpriteSheetAsset::ResolveCell(sheetCellPath, sheetCellIndex, resolved))
+            const bool ok = !sheetCellSubRect.empty()
+                ? SpriteSheetAsset::ResolveCell(sheetCellPath, sheetCellSubRect, resolved)
+                : SpriteSheetAsset::ResolveCell(sheetCellPath, sheetCellIndex, resolved);
+            if (ok)
             {
                 sr.Texture = resolved.Texture;
                 sr.UVMin = resolved.UVMin;

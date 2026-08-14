@@ -37,6 +37,26 @@ namespace Wheatear {
             int ColliderHeight = 0;
         };
         std::vector<CellTrim> Trims;
+
+        // Optional irregular sub-rects (Unity-style named sprites in an
+        // atlas). Unlike the regular grid, each rect is an arbitrary pixel
+        // rectangle with a name; components/animations can reference either a
+        // grid cell (CellIndex) or a named rect (SubRect).
+        struct NamedRect
+        {
+            std::string Name;
+            int Left = 0;    // px from the texture's left edge
+            int Top = 0;     // px from the texture's top edge
+            int Width = 0;
+            int Height = 0;
+
+            bool HasCollider = false;
+            int ColliderLeft = 0;   // px from the texture's left edge
+            int ColliderTop = 0;    // px from the texture's top edge
+            int ColliderWidth = 0;
+            int ColliderHeight = 0;
+        };
+        std::vector<NamedRect> Rects;
     };
 
     namespace SpriteSheetAsset {
@@ -84,6 +104,8 @@ namespace Wheatear {
             int ColliderHeight = 0;
         };
         bool ResolveCell(const std::string& sheetPath, int cellIndex, ResolvedCell& out);
+        // Named-rect variant for irregular atlases (see SpriteSheetData::Rects).
+        bool ResolveCell(const std::string& sheetPath, const std::string& rectName, ResolvedCell& out);
 
     } // namespace SpriteSheetAsset
 

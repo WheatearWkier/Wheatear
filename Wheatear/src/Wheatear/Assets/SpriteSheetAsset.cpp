@@ -105,6 +105,28 @@ namespace Wheatear {
                         data.Trims.push_back(trim);
                     }
                 }
+
+                if (auto rects = node["rects"])
+                {
+                    for (auto r : rects)
+                    {
+                        SpriteSheetData::NamedRect rect;
+                        rect.Name = r["name"].as<std::string>("");
+                        rect.Left = r["left"].as<int>(0);
+                        rect.Top = r["top"].as<int>(0);
+                        rect.Width = r["width"].as<int>(0);
+                        rect.Height = r["height"].as<int>(0);
+                        if (auto c = r["collider"])
+                        {
+                            rect.HasCollider = true;
+                            rect.ColliderLeft = c["left"].as<int>(0);
+                            rect.ColliderTop = c["top"].as<int>(0);
+                            rect.ColliderWidth = c["width"].as<int>(0);
+                            rect.ColliderHeight = c["height"].as<int>(0);
+                        }
+                        data.Rects.push_back(rect);
+                    }
+                }
             }
             catch (...)
             {
@@ -139,6 +161,30 @@ namespace Wheatear {
                         out << YAML::Key << "top" << YAML::Value << t.ColliderTop;
                         out << YAML::Key << "width" << YAML::Value << t.ColliderWidth;
                         out << YAML::Key << "height" << YAML::Value << t.ColliderHeight;
+                        out << YAML::EndMap;
+                    }
+                    out << YAML::EndMap;
+                }
+                out << YAML::EndSeq;
+            }
+            if (!data.Rects.empty())
+            {
+                out << YAML::Key << "rects" << YAML::Value << YAML::BeginSeq;
+                for (const auto& r : data.Rects)
+                {
+                    out << YAML::BeginMap;
+                    out << YAML::Key << "name" << YAML::Value << r.Name;
+                    out << YAML::Key << "left" << YAML::Value << r.Left;
+                    out << YAML::Key << "top" << YAML::Value << r.Top;
+                    out << YAML::Key << "width" << YAML::Value << r.Width;
+                    out << YAML::Key << "height" << YAML::Value << r.Height;
+                    if (r.HasCollider)
+                    {
+                        out << YAML::Key << "collider" << YAML::Value << YAML::BeginMap;
+                        out << YAML::Key << "left" << YAML::Value << r.ColliderLeft;
+                        out << YAML::Key << "top" << YAML::Value << r.ColliderTop;
+                        out << YAML::Key << "width" << YAML::Value << r.ColliderWidth;
+                        out << YAML::Key << "height" << YAML::Value << r.ColliderHeight;
                         out << YAML::EndMap;
                     }
                     out << YAML::EndMap;
@@ -184,6 +230,38 @@ namespace Wheatear {
                      1.0f - static_cast<float>(row) / rows };
         }
 
+        // Shared fill for both resolution paths: maps a content rect (plus an
+        // optional collider rect, both in texture pixels) into a ResolvedCell
+        // using the renderer UV convention (v=0 = texture bottom).
+        static void FillResolved(const Ref<Texture2D>& texture,
+            int left, int top, int width, int height,
+            bool hasCollider, int colliderLeft, int colliderTop,
+            int colliderWidth, int colliderHeight,
+            ResolvedCell& out)
+        {
+            const int texWidth = texture->GetWidth();
+            const int texHeight = texture->GetHeight();
+
+            out.Texture = texture;
+            out.UVMin = { static_cast<float>(left) / texWidth,
+                          1.0f - static_cast<float>(top + height) / texHeight };
+            out.UVMax = { static_cast<float>(left + width) / texWidth,
+                          1.0f - static_cast<float>(top) / texHeight };
+            out.ContentX = left;
+            out.ContentY = top;
+            out.ContentWidth = width;
+            out.ContentHeight = height;
+
+            if (hasCollider && colliderWidth > 0 && colliderHeight > 0)
+            {
+                out.HasCollider = true;
+                out.ColliderLeft = std::clamp(colliderLeft, left, left + width - 1);
+                out.ColliderTop = std::clamp(colliderTop, top, top + height - 1);
+                out.ColliderWidth = std::clamp(colliderWidth, 1, left + width - out.ColliderLeft);
+                out.ColliderHeight = std::clamp(colliderHeight, 1, top + height - out.ColliderTop);
+            }
+        }
+
         bool ResolveCell(const std::string& sheetPath, int cellIndex, ResolvedCell& out)
         {
             const CachedSheet* sheet = GetCachedSheet(sheetPath);
@@ -225,27 +303,49 @@ namespace Wheatear {
                 height = std::clamp(trim->Height, 1, row * cellHeight + cellHeight - top);
             }
 
-            out.Texture = sheet->Texture;
-            // Renderer UV convention (v=0 = texture bottom): the top-left
-            // content rect maps to uvMin = (left, 1 - bottom), uvMax = (right, 1 - top).
-            out.UVMin = { static_cast<float>(left) / texWidth,
-                          1.0f - static_cast<float>(top + height) / texHeight };
-            out.UVMax = { static_cast<float>(left + width) / texWidth,
-                          1.0f - static_cast<float>(top) / texHeight };
-            out.ContentX = left;
-            out.ContentY = top;
-            out.ContentWidth = width;
-            out.ContentHeight = height;
+            FillResolved(sheet->Texture, left, top, width, height,
+                trim && trim->HasCollider,
+                trim ? left + trim->ColliderLeft : 0,
+                trim ? top + trim->ColliderTop : 0,
+                trim ? trim->ColliderWidth : 0,
+                trim ? trim->ColliderHeight : 0,
+                out);
+            return true;
+        }
 
-            if (trim && trim->HasCollider && trim->ColliderWidth > 0 && trim->ColliderHeight > 0)
+        bool ResolveCell(const std::string& sheetPath, const std::string& rectName, ResolvedCell& out)
+        {
+            const CachedSheet* sheet = GetCachedSheet(sheetPath);
+            if (!sheet || !sheet->Texture || !sheet->Loaded)
+                return false;
+
+            const SpriteSheetData& data = sheet->Data;
+            const SpriteSheetData::NamedRect* rect = nullptr;
+            for (const auto& r : data.Rects)
             {
-                out.HasCollider = true;
-                out.ColliderLeft = std::clamp(left + trim->ColliderLeft, left, left + width - 1);
-                out.ColliderTop = std::clamp(top + trim->ColliderTop, top, top + height - 1);
-                out.ColliderWidth = std::clamp(trim->ColliderWidth, 1, left + width - out.ColliderLeft);
-                out.ColliderHeight = std::clamp(trim->ColliderHeight, 1, top + height - out.ColliderTop);
+                if (r.Name == rectName && r.Width > 0 && r.Height > 0)
+                {
+                    rect = &r;
+                    break;
+                }
             }
+            if (!rect)
+                return false;
 
+            const int texWidth = sheet->Texture->GetWidth();
+            const int texHeight = sheet->Texture->GetHeight();
+            const int left = std::clamp(rect->Left, 0, std::max(0, texWidth - 1));
+            const int top = std::clamp(rect->Top, 0, std::max(0, texHeight - 1));
+            const int width = std::clamp(rect->Width, 1, texWidth - left);
+            const int height = std::clamp(rect->Height, 1, texHeight - top);
+
+            FillResolved(sheet->Texture, left, top, width, height,
+                rect->HasCollider,
+                rect->ColliderLeft,
+                rect->ColliderTop,
+                rect->ColliderWidth,
+                rect->ColliderHeight,
+                out);
             return true;
         }
 

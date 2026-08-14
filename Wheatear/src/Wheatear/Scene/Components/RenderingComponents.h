@@ -35,8 +35,11 @@ namespace Wheatear {
         // Optional reusable sprite-sheet reference (.wtsheet). When set with a
         // valid CellIndex, the SpriteSheetSystem resolves Texture/UVMin/UVMax
         // from the sheet definition each frame (grid changes hot-update).
+        // SubRect (non-empty) references a named irregular rect instead of a
+        // grid cell and takes priority when both are set.
         std::string    SpriteSheet;
         int            CellIndex = -1;
+        std::string    SubRect;
 
         SpriteRendererComponent() = default;
         SpriteRendererComponent(const SpriteRendererComponent&) = default;

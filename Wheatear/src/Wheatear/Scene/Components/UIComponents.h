@@ -92,9 +92,11 @@ namespace Wheatear {
         glm::vec2      UVMax = { 1.0f, 1.0f };
 
         // Optional reusable sprite-sheet reference (.wtsheet), resolved by the
-        // SpriteSheetSystem like SpriteRendererComponent.
+        // SpriteSheetSystem like SpriteRendererComponent. SubRect (non-empty)
+        // references a named irregular rect and takes priority over CellIndex.
         std::string    SpriteSheet;
         int            CellIndex = -1;
+        std::string    SubRect;
 
         UIImageComponent() = default;
         UIImageComponent(const UIImageComponent&) = default;

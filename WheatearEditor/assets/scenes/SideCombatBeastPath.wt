@@ -686,6 +686,8 @@ Entities:
     UIImageComponent:
       Color: [1, 1, 1, 1]
       TexturePath: assets/vertical_slice/side_combat/ui/sidecombat_ui_sheet.png
+      SpriteSheet: assets/vertical_slice/side_combat/ui/sidecombat_ui_sheet.wtsheet
+      SubRect: SC_TopPanel
       UVMin: [0.100391001, 0.734027982]
       UVMax: [0.429297, 0.977778018]
   - Entity: 940000009
@@ -716,6 +718,8 @@ Entities:
     UIImageComponent:
       Color: [1, 1, 1, 1]
       TexturePath: assets/vertical_slice/side_combat/ui/sidecombat_ui_sheet.png
+      SpriteSheet: assets/vertical_slice/side_combat/ui/sidecombat_ui_sheet.wtsheet
+      SubRect: SC_ComboPanel
       UVMin: [0.443749994, 0.758333027]
       UVMax: [0.908984005, 0.944444001]
   - Entity: 940000010
@@ -737,6 +741,8 @@ Entities:
     UIImageComponent:
       Color: [1, 1, 1, 1]
       TexturePath: assets/vertical_slice/side_combat/ui/sidecombat_ui_sheet.png
+      SpriteSheet: assets/vertical_slice/side_combat/ui/sidecombat_ui_sheet.wtsheet
+      SubRect: SC_PlayerHealth
       UVMin: [0.642578006, 0.487500012]
       UVMax: [0.88320303, 0.520138979]
     UIProgressBarComponent:
@@ -792,6 +798,8 @@ Entities:
     UIImageComponent:
       Color: [1, 1, 1, 1]
       TexturePath: assets/vertical_slice/side_combat/ui/sidecombat_ui_sheet.png
+      SpriteSheet: assets/vertical_slice/side_combat/ui/sidecombat_ui_sheet.wtsheet
+      SubRect: SC_PlayerMana
       UVMin: [0.642578006, 0.425000012]
       UVMax: [0.88320303, 0.456943989]
   - Entity: 946201101
@@ -813,6 +821,8 @@ Entities:
     UIImageComponent:
       Color: [1, 1, 1, 0.920000017]
       TexturePath: assets/vertical_slice/side_combat/ui/sidecombat_ui_sheet.png
+      SpriteSheet: assets/vertical_slice/side_combat/ui/sidecombat_ui_sheet.wtsheet
+      SubRect: SC_PlayerUltimateMask
       UVMin: [0.170702994, 0.622916996]
       UVMax: [0.419140995, 0.703472018]
   - Entity: 940000012
@@ -834,6 +844,8 @@ Entities:
     UIImageComponent:
       Color: [1, 1, 1, 1]
       TexturePath: assets/vertical_slice/side_combat/ui/sidecombat_ui_sheet.png
+      SpriteSheet: assets/vertical_slice/side_combat/ui/sidecombat_ui_sheet.wtsheet
+      SubRect: SC_BossHealth
       UVMin: [0.642578006, 0.359721988]
       UVMax: [0.88320303, 0.392360985]
     UIProgressBarComponent:
@@ -889,6 +901,8 @@ Entities:
     UIImageComponent:
       Color: [1, 1, 1, 1]
       TexturePath: assets/vertical_slice/side_combat/ui/sidecombat_ui_sheet.png
+      SpriteSheet: assets/vertical_slice/side_combat/ui/sidecombat_ui_sheet.wtsheet
+      SubRect: SC_BossProtection
       UVMin: [0.642578006, 0.295139015]
       UVMax: [0.882812977, 0.327778012]
   - Entity: 946201400
@@ -910,6 +924,8 @@ Entities:
     UIImageComponent:
       Color: [1, 1, 1, 1]
       TexturePath: assets/vertical_slice/side_combat/ui/sidecombat_ui_sheet.png
+      SpriteSheet: assets/vertical_slice/side_combat/ui/sidecombat_ui_sheet.wtsheet
+      SubRect: SC_PlayerStatus_Buff_0
       UVMin: [0.615234017, 0.0222219992]
       UVMax: [0.683983982, 0.143749997]
   - Entity: 946201401
@@ -931,6 +947,8 @@ Entities:
     UIImageComponent:
       Color: [1, 1, 1, 1]
       TexturePath: assets/vertical_slice/side_combat/ui/sidecombat_ui_sheet.png
+      SpriteSheet: assets/vertical_slice/side_combat/ui/sidecombat_ui_sheet.wtsheet
+      SubRect: SC_PlayerStatus_Buff_1
       UVMin: [0.690234005, 0.0229170006]
       UVMax: [0.747265995, 0.145833001]
   - Entity: 946201402
@@ -952,6 +970,8 @@ Entities:
     UIImageComponent:
       Color: [1, 1, 1, 1]
       TexturePath: assets/vertical_slice/side_combat/ui/sidecombat_ui_sheet.png
+      SpriteSheet: assets/vertical_slice/side_combat/ui/sidecombat_ui_sheet.wtsheet
+      SubRect: SC_PlayerStatus_Debuff_0
       UVMin: [0.754297018, 0.021528]
       UVMax: [0.824218988, 0.145833001]
   - Entity: 946201403
@@ -973,6 +993,8 @@ Entities:
     UIImageComponent:
       Color: [1, 1, 1, 1]
       TexturePath: assets/vertical_slice/side_combat/ui/sidecombat_ui_sheet.png
+      SpriteSheet: assets/vertical_slice/side_combat/ui/sidecombat_ui_sheet.wtsheet
+      SubRect: SC_PlayerStatus_Debuff_1
       UVMin: [0.830078006, 0.0222219992]
       UVMax: [0.89804697, 0.144444004]
   - Entity: 946201404
@@ -994,6 +1016,8 @@ Entities:
     UIImageComponent:
       Color: [1, 1, 1, 1]
       TexturePath: assets/vertical_slice/side_combat/ui/sidecombat_ui_sheet.png
+      SpriteSheet: assets/vertical_slice/side_combat/ui/sidecombat_ui_sheet.wtsheet
+      SubRect: SC_PlayerStatus_Buff_0
       UVMin: [0.615234017, 0.0222219992]
       UVMax: [0.683983982, 0.143749997]
   - Entity: 946201405
@@ -1015,6 +1039,8 @@ Entities:
     UIImageComponent:
       Color: [1, 1, 1, 1]
       TexturePath: assets/vertical_slice/side_combat/ui/sidecombat_ui_sheet.png
+      SpriteSheet: assets/vertical_slice/side_combat/ui/sidecombat_ui_sheet.wtsheet
+      SubRect: SC_PlayerStatus_Buff_1
       UVMin: [0.690234005, 0.0229170006]
       UVMax: [0.747265995, 0.145833001]
   - Entity: 946201406
@@ -1036,6 +1062,8 @@ Entities:
     UIImageComponent:
       Color: [1, 1, 1, 1]
       TexturePath: assets/vertical_slice/side_combat/ui/sidecombat_ui_sheet.png
+      SpriteSheet: assets/vertical_slice/side_combat/ui/sidecombat_ui_sheet.wtsheet
+      SubRect: SC_PlayerStatus_Debuff_0
       UVMin: [0.754297018, 0.021528]
       UVMax: [0.824218988, 0.145833001]
   - Entity: 946201407
@@ -1057,6 +1085,8 @@ Entities:
     UIImageComponent:
       Color: [1, 1, 1, 1]
       TexturePath: assets/vertical_slice/side_combat/ui/sidecombat_ui_sheet.png
+      SpriteSheet: assets/vertical_slice/side_combat/ui/sidecombat_ui_sheet.wtsheet
+      SubRect: SC_PlayerStatus_Debuff_1
       UVMin: [0.830078006, 0.0222219992]
       UVMax: [0.89804697, 0.144444004]
   - Entity: 940000014
@@ -1154,6 +1184,8 @@ Entities:
     UIImageComponent:
       Color: [1, 1, 1, 0.939999998]
       TexturePath: assets/vertical_slice/side_combat/ui/sidecombat_ui_sheet.png
+      SpriteSheet: assets/vertical_slice/side_combat/ui/sidecombat_ui_sheet.wtsheet
+      SubRect: SC_ComboFrame
       UVMin: [0.496093988, 0.574306011]
       UVMax: [0.905469, 0.747916996]
   - Entity: 946201310
@@ -1486,6 +1518,8 @@ Entities:
     UIImageComponent:
       Color: [1, 1, 1, 1]
       TexturePath: assets/vertical_slice/side_combat/ui/sidecombat_ui_sheet.png
+      SpriteSheet: assets/vertical_slice/side_combat/ui/sidecombat_ui_sheet.wtsheet
+      SubRect: SC_SkillIcon_J
       UVMin: [0.112891003, 0.170833007]
       UVMax: [0.186719, 0.298610985]
     UIButtonComponent:
@@ -1513,6 +1547,8 @@ Entities:
     UIImageComponent:
       Color: [0, 0, 0, 0.540000021]
       TexturePath: assets/vertical_slice/side_combat/ui/sidecombat_ui_sheet.png
+      SpriteSheet: assets/vertical_slice/side_combat/ui/sidecombat_ui_sheet.wtsheet
+      SubRect: SC_SkillIcon_J
       UVMin: [0.112891003, 0.170833007]
       UVMax: [0.186719, 0.298610985]
     UIRadialCooldownComponent:
@@ -1622,6 +1658,8 @@ Entities:
     UIImageComponent:
       Color: [1, 1, 1, 1]
       TexturePath: assets/vertical_slice/side_combat/ui/sidecombat_ui_sheet.png
+      SpriteSheet: assets/vertical_slice/side_combat/ui/sidecombat_ui_sheet.wtsheet
+      SubRect: SC_SkillIcon_SJ
       UVMin: [0.198827997, 0.170833007]
       UVMax: [0.271874994, 0.297917008]
     UIButtonComponent:
@@ -1649,6 +1687,8 @@ Entities:
     UIImageComponent:
       Color: [0, 0, 0, 0.540000021]
       TexturePath: assets/vertical_slice/side_combat/ui/sidecombat_ui_sheet.png
+      SpriteSheet: assets/vertical_slice/side_combat/ui/sidecombat_ui_sheet.wtsheet
+      SubRect: SC_SkillIcon_SJ
       UVMin: [0.198827997, 0.170833007]
       UVMax: [0.271874994, 0.297917008]
     UIRadialCooldownComponent:
@@ -1761,6 +1801,8 @@ Entities:
     UIImageComponent:
       Color: [1, 1, 1, 1]
       TexturePath: assets/vertical_slice/side_combat/ui/sidecombat_ui_sheet.png
+      SpriteSheet: assets/vertical_slice/side_combat/ui/sidecombat_ui_sheet.wtsheet
+      SubRect: SC_SkillIcon_S2
       UVMin: [0.446483999, 0.170139]
       UVMax: [0.517578006, 0.295832992]
     UIButtonComponent:
@@ -1788,6 +1830,8 @@ Entities:
     UIImageComponent:
       Color: [0, 0, 0, 0.540000021]
       TexturePath: assets/vertical_slice/side_combat/ui/sidecombat_ui_sheet.png
+      SpriteSheet: assets/vertical_slice/side_combat/ui/sidecombat_ui_sheet.wtsheet
+      SubRect: SC_SkillIcon_S2
       UVMin: [0.446483999, 0.170139]
       UVMax: [0.517578006, 0.295832992]
     UIRadialCooldownComponent:
@@ -1895,6 +1939,8 @@ Entities:
     UIImageComponent:
       Color: [1, 1, 1, 1]
       TexturePath: assets/vertical_slice/side_combat/ui/sidecombat_ui_sheet.png
+      SpriteSheet: assets/vertical_slice/side_combat/ui/sidecombat_ui_sheet.wtsheet
+      SubRect: SC_SkillIcon_S3
       UVMin: [0.364843994, 0.170833007]
       UVMax: [0.436327994, 0.297221988]
     UIButtonComponent:
@@ -1922,6 +1968,8 @@ Entities:
     UIImageComponent:
       Color: [0, 0, 0, 0.540000021]
       TexturePath: assets/vertical_slice/side_combat/ui/sidecombat_ui_sheet.png
+      SpriteSheet: assets/vertical_slice/side_combat/ui/sidecombat_ui_sheet.wtsheet
+      SubRect: SC_SkillIcon_S3
       UVMin: [0.364843994, 0.170833007]
       UVMax: [0.436327994, 0.297221988]
     UIRadialCooldownComponent:
@@ -2031,6 +2079,8 @@ Entities:
     UIImageComponent:
       Color: [1, 1, 1, 1]
       TexturePath: assets/vertical_slice/side_combat/ui/sidecombat_ui_sheet.png
+      SpriteSheet: assets/vertical_slice/side_combat/ui/sidecombat_ui_sheet.wtsheet
+      SubRect: SC_SkillIcon_U
       UVMin: [0.283594012, 0.171527997]
       UVMax: [0.354297012, 0.295832992]
     UIButtonComponent:
@@ -2058,6 +2108,8 @@ Entities:
     UIImageComponent:
       Color: [0, 0, 0, 0.540000021]
       TexturePath: assets/vertical_slice/side_combat/ui/sidecombat_ui_sheet.png
+      SpriteSheet: assets/vertical_slice/side_combat/ui/sidecombat_ui_sheet.wtsheet
+      SubRect: SC_SkillIcon_U
       UVMin: [0.283594012, 0.171527997]
       UVMax: [0.354297012, 0.295832992]
     UIRadialCooldownComponent:
@@ -2172,6 +2224,8 @@ Entities:
     UIImageComponent:
       Color: [1, 1, 1, 1]
       TexturePath: assets/vertical_slice/side_combat/ui/sidecombat_ui_sheet.png
+      SpriteSheet: assets/vertical_slice/side_combat/ui/sidecombat_ui_sheet.wtsheet
+      SubRect: SC_SkillIcon_I
       UVMin: [0.528905988, 0.170139]
       UVMax: [0.600781024, 0.295832992]
     UIButtonComponent:
@@ -2199,6 +2253,8 @@ Entities:
     UIImageComponent:
       Color: [0, 0, 0, 0.540000021]
       TexturePath: assets/vertical_slice/side_combat/ui/sidecombat_ui_sheet.png
+      SpriteSheet: assets/vertical_slice/side_combat/ui/sidecombat_ui_sheet.wtsheet
+      SubRect: SC_SkillIcon_I
       UVMin: [0.528905988, 0.170139]
       UVMax: [0.600781024, 0.295832992]
     UIRadialCooldownComponent:
@@ -2483,6 +2539,8 @@ Entities:
     UIImageComponent:
       Color: [1, 1, 1, 1]
       TexturePath: assets/vertical_slice/side_combat/ui/sidecombat_ui_sheet.png
+      SpriteSheet: assets/vertical_slice/side_combat/ui/sidecombat_ui_sheet.wtsheet
+      SubRect: SC_ItemSlot_1_Frame
       UVMin: [0.116406001, 0.320138991]
       UVMax: [0.183594003, 0.439583004]
     UIPanelComponent:
@@ -2512,6 +2570,8 @@ Entities:
     UIImageComponent:
       Color: [1, 1, 1, 1]
       TexturePath: assets/vertical_slice/side_combat/ui/sidecombat_ui_sheet.png
+      SpriteSheet: assets/vertical_slice/side_combat/ui/sidecombat_ui_sheet.wtsheet
+      SubRect: SC_ItemSlot_1_Icon
       UVMin: [0.116016001, 0.0333329998]
       UVMax: [0.167577997, 0.139583007]
   - Entity: 946200702
@@ -2555,6 +2615,8 @@ Entities:
     UIImageComponent:
       Color: [0, 0, 0, 0]
       TexturePath: assets/vertical_slice/side_combat/ui/sidecombat_ui_sheet.png
+      SpriteSheet: assets/vertical_slice/side_combat/ui/sidecombat_ui_sheet.wtsheet
+      SubRect: SC_ItemSlot_1_Icon
       UVMin: [0.116016001, 0.0333329998]
       UVMax: [0.167577997, 0.139583007]
     UIRadialCooldownComponent:
@@ -2640,6 +2702,8 @@ Entities:
     UIImageComponent:
       Color: [1, 1, 1, 1]
       TexturePath: assets/vertical_slice/side_combat/ui/sidecombat_ui_sheet.png
+      SpriteSheet: assets/vertical_slice/side_combat/ui/sidecombat_ui_sheet.wtsheet
+      SubRect: SC_ItemSlot_1_Frame
       UVMin: [0.116406001, 0.320138991]
       UVMax: [0.183594003, 0.439583004]
     UIPanelComponent:
@@ -2669,6 +2733,8 @@ Entities:
     UIImageComponent:
       Color: [1, 1, 1, 1]
       TexturePath: assets/vertical_slice/side_combat/ui/sidecombat_ui_sheet.png
+      SpriteSheet: assets/vertical_slice/side_combat/ui/sidecombat_ui_sheet.wtsheet
+      SubRect: SC_ItemSlot_2_Icon
       UVMin: [0.180078, 0.0340280011]
       UVMax: [0.219141006, 0.150693998]
   - Entity: 946200712
@@ -2712,6 +2778,8 @@ Entities:
     UIImageComponent:
       Color: [0, 0, 0, 0]
       TexturePath: assets/vertical_slice/side_combat/ui/sidecombat_ui_sheet.png
+      SpriteSheet: assets/vertical_slice/side_combat/ui/sidecombat_ui_sheet.wtsheet
+      SubRect: SC_ItemSlot_2_Icon
       UVMin: [0.180078, 0.0340280011]
       UVMax: [0.219141006, 0.150693998]
     UIRadialCooldownComponent:
@@ -2797,6 +2865,8 @@ Entities:
     UIImageComponent:
       Color: [1, 1, 1, 1]
       TexturePath: assets/vertical_slice/side_combat/ui/sidecombat_ui_sheet.png
+      SpriteSheet: assets/vertical_slice/side_combat/ui/sidecombat_ui_sheet.wtsheet
+      SubRect: SC_ItemSlot_1_Frame
       UVMin: [0.116406001, 0.320138991]
       UVMax: [0.183594003, 0.439583004]
     UIPanelComponent:
@@ -2826,6 +2896,8 @@ Entities:
     UIImageComponent:
       Color: [1, 1, 1, 1]
       TexturePath: assets/vertical_slice/side_combat/ui/sidecombat_ui_sheet.png
+      SpriteSheet: assets/vertical_slice/side_combat/ui/sidecombat_ui_sheet.wtsheet
+      SubRect: SC_ItemSlot_3_Icon
       UVMin: [0.234375, 0.0326390006]
       UVMax: [0.288280994, 0.143749997]
   - Entity: 946200722
@@ -2869,6 +2941,8 @@ Entities:
     UIImageComponent:
       Color: [0, 0, 0, 0]
       TexturePath: assets/vertical_slice/side_combat/ui/sidecombat_ui_sheet.png
+      SpriteSheet: assets/vertical_slice/side_combat/ui/sidecombat_ui_sheet.wtsheet
+      SubRect: SC_ItemSlot_3_Icon
       UVMin: [0.234375, 0.0326390006]
       UVMax: [0.288280994, 0.143749997]
     UIRadialCooldownComponent:
@@ -2954,6 +3028,8 @@ Entities:
     UIImageComponent:
       Color: [1, 1, 1, 0.860000014]
       TexturePath: assets/vertical_slice/side_combat/ui/sidecombat_ui_sheet.png
+      SpriteSheet: assets/vertical_slice/side_combat/ui/sidecombat_ui_sheet.wtsheet
+      SubRect: SC_JoystickBase
       UVMin: [0.192187995, 0.308333009]
       UVMax: [0.273828, 0.453471988]
   - Entity: 946201301
@@ -2975,5 +3051,7 @@ Entities:
     UIImageComponent:
       Color: [0.660000026, 0.800000012, 0.839999974, 0.519999981]
       TexturePath: assets/vertical_slice/side_combat/ui/sidecombat_ui_sheet.png
+      SpriteSheet: assets/vertical_slice/side_combat/ui/sidecombat_ui_sheet.wtsheet
+      SubRect: SC_JoystickBase
       UVMin: [0.192187995, 0.308333009]
       UVMax: [0.273828, 0.453471988]
