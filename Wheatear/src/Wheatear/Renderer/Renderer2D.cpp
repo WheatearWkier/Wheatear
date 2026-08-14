@@ -340,6 +340,20 @@ namespace Wheatear {
             drawTransform *= glm::scale(glm::mat4(1.0f), { src.DrawScale.x, src.DrawScale.y, 1.0f });
         }
 
+        // PPU mode: size the quad to the texture content actually covered by
+        // the UV span, so sprites keep their true aspect ratio (and trimmed
+        // sheet cells render at their content size). 0 = legacy 1x1 quad.
+        if (src.PixelsPerUnit > 0.0f && src.Texture)
+        {
+            const float contentW = (src.UVMax.x - src.UVMin.x) * static_cast<float>(src.Texture->GetWidth());
+            const float contentH = (src.UVMax.y - src.UVMin.y) * static_cast<float>(src.Texture->GetHeight());
+            if (contentW > 0.0f && contentH > 0.0f)
+            {
+                drawTransform *= glm::scale(glm::mat4(1.0f),
+                    { contentW / src.PixelsPerUnit, contentH / src.PixelsPerUnit, 1.0f });
+            }
+        }
+
         if (src.Texture)
             DrawAnimationFrame(drawTransform, src.Texture,
                 src.UVMin, src.UVMax, src.FlipX,

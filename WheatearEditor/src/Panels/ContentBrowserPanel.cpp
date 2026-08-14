@@ -401,9 +401,12 @@ namespace Wheatear {
             auto& sr = spriteEntity.AddComponent<SpriteRendererComponent>();
             if (!frame.SpriteSheet.empty() && frame.CellIndex >= 0)
             {
-                if (!SpriteSheetAsset::ResolveCell(frame.SpriteSheet, frame.CellIndex,
-                    sr.Texture, sr.UVMin, sr.UVMax))
+                SpriteSheetAsset::ResolvedCell resolved;
+                if (!SpriteSheetAsset::ResolveCell(frame.SpriteSheet, frame.CellIndex, resolved))
                     return false;
+                sr.Texture = resolved.Texture;
+                sr.UVMin = resolved.UVMin;
+                sr.UVMax = resolved.UVMax;
             }
             else
             {
@@ -1041,7 +1044,8 @@ namespace Wheatear {
 
     void ContentBrowserPanel::DrawSheetCellStrip(const std::filesystem::path& path)
     {
-        auto& cached = m_SheetCellCache[path.string()];
+        const std::string key = path.string();
+        auto& cached = m_SheetCellCache[key];
         if (!cached.Texture || !cached.Texture->IsLoaded())
         {
             ImGui::TextDisabled(EditorLocale::Text("Failed to load sheet cells.", "无法加载格子。"));
@@ -1063,11 +1067,24 @@ namespace Wheatear {
         {
             ImGui::PushID(c);
 
-            const glm::vec2 uvMin = SpriteSheetAsset::CellUVMin(cached.Data, c);
-            const glm::vec2 uvMax = SpriteSheetAsset::CellUVMax(cached.Data, c);
-            // ImGui UV origin is bottom-left while sheet UVs are top-left based.
-            const ImVec2 imgUV0(uvMin.x, 1.0f - uvMax.y);
-            const ImVec2 imgUV1(uvMax.x, 1.0f - uvMin.y);
+            // Resolve through the shared cache so trimmed cells preview their
+            // actual content; full-cell UVs fall back when resolution fails.
+            glm::vec2 uvMin, uvMax;
+            SpriteSheetAsset::ResolvedCell resolved;
+            if (SpriteSheetAsset::ResolveCell(key, c, resolved))
+            {
+                uvMin = resolved.UVMin;
+                uvMax = resolved.UVMax;
+            }
+            else
+            {
+                uvMin = SpriteSheetAsset::CellUVMin(cached.Data, c);
+                uvMax = SpriteSheetAsset::CellUVMax(cached.Data, c);
+            }
+            // Sheet UVs follow the renderer convention (v=0 bottom), which
+            // matches ImGui's texture orientation {0,1}..{1,0}.
+            const ImVec2 imgUV0(uvMin.x, uvMax.y);
+            const ImVec2 imgUV1(uvMax.x, uvMin.y);
 
             ImGui::ImageButton("##cell", texId, ImVec2(kSheetCellThumb, kSheetCellThumb), imgUV0, imgUV1);
 

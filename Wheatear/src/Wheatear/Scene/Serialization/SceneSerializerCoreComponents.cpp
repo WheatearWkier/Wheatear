@@ -75,6 +75,7 @@ namespace Wheatear {
             o << YAML::Key << "FlipX" << YAML::Value << c.FlipX;
             o << YAML::Key << "DrawOffset" << YAML::Value << c.DrawOffset;
             o << YAML::Key << "DrawScale" << YAML::Value << c.DrawScale;
+            o << YAML::Key << "PixelsPerUnit" << YAML::Value << c.PixelsPerUnit;
             o << YAML::Key << "SpriteSheet" << YAML::Value << c.SpriteSheet;
             o << YAML::Key << "CellIndex" << YAML::Value << c.CellIndex;
             o << YAML::EndMap;
@@ -87,6 +88,7 @@ namespace Wheatear {
             c.FlipX = n["FlipX"].as<bool>(c.FlipX);
             c.DrawOffset = n["DrawOffset"].as<glm::vec2>(c.DrawOffset);
             c.DrawScale = n["DrawScale"].as<glm::vec2>(c.DrawScale);
+            c.PixelsPerUnit = n["PixelsPerUnit"].as<float>(0.0f);
             c.SpriteSheet = n["SpriteSheet"].as<std::string>("");
             c.CellIndex = n["CellIndex"].as<int>(-1);
             if (auto p = n["Texture"].as<std::string>(""); !p.empty())
@@ -136,6 +138,7 @@ namespace Wheatear {
             o << YAML::Key << "Friction" << YAML::Value << c.Friction;
             o << YAML::Key << "Restitution" << YAML::Value << c.Restitution;
             o << YAML::Key << "RestitutionThreshold" << YAML::Value << c.RestitutionThreshold;
+            o << YAML::Key << "FollowAnimation" << YAML::Value << c.FollowAnimation;
             o << YAML::EndMap;
         }
         static void Deserialize(const YAML::Node& n, BoxCollider2DComponent& c) {
@@ -145,6 +148,7 @@ namespace Wheatear {
             c.Friction = n["Friction"].as<float>();
             c.Restitution = n["Restitution"].as<float>();
             c.RestitutionThreshold = n["RestitutionThreshold"].as<float>();
+            c.FollowAnimation = n["FollowAnimation"].as<bool>(false);
         }
     };
 

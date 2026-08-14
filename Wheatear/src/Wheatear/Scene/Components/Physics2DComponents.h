@@ -32,6 +32,12 @@ namespace Wheatear {
         float     RestitutionThreshold = 0.5f;
         void* RuntimeFixture = nullptr;
 
+        // When true and the entity's sprite is driven by a .wtsheet cell with
+        // a per-cell collision box (sprite animations included), the box
+        // follows the cell's box every frame. Requires PixelsPerUnit > 0 on
+        // the SpriteRendererComponent for pixel->world conversion.
+        bool FollowAnimation = false;
+
         BoxCollider2DComponent() = default;
         BoxCollider2DComponent(const BoxCollider2DComponent&) = default;
     };

@@ -27,6 +27,8 @@ namespace Wheatear {
         b2World* GetPhysicsWorld() const { return m_PhysicsWorld.get(); }
 
     private:
+        void SyncAnimationDrivenColliders(Scene* scene);
+
         // RAII ownership: world and listener are created per play session and
         // released automatically on stop (b2World is non-copyable/non-movable).
         std::unique_ptr<b2World> m_PhysicsWorld;

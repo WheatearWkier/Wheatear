@@ -349,8 +349,13 @@ namespace Wheatear {
             auto& sr = e.AddComponent<SpriteRendererComponent>();
             sr.SpriteSheet = sheetCellPath;
             sr.CellIndex = sheetCellIndex;
-            SpriteSheetAsset::ResolveCell(sheetCellPath, sheetCellIndex,
-                sr.Texture, sr.UVMin, sr.UVMax);
+            SpriteSheetAsset::ResolvedCell resolved;
+            if (SpriteSheetAsset::ResolveCell(sheetCellPath, sheetCellIndex, resolved))
+            {
+                sr.Texture = resolved.Texture;
+                sr.UVMin = resolved.UVMin;
+                sr.UVMax = resolved.UVMax;
+            }
             m_SceneHierarchyPanel->SetSelectedEntity(e);
         }
     }

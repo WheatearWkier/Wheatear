@@ -11,6 +11,8 @@
 #include "Wheatear/Renderer/Texture.h"
 #include "Wheatear/Scene/Components.h"
 
+#include "stb_image/stb_image.h"
+
 #include <imgui/imgui.h>
 #include <glm/gtc/type_ptr.hpp>
 
@@ -113,6 +115,8 @@ namespace Wheatear {
             m_Rows = std::max(1, data.Rows);
             m_SelectedCol = std::clamp(m_SelectedCol, 0, m_Cols - 1);
             m_SelectedRow = std::clamp(m_SelectedRow, 0, m_Rows - 1);
+            m_Trims = data.Trims;
+            m_Trims.resize(SpriteSheetAsset::CellCount(data));
             SetTexture(Texture2D::Create(data.TexturePath), data.TexturePath);
         }
     }
@@ -154,6 +158,8 @@ namespace Wheatear {
 
         ImGui::NextColumn();
         DrawGridControls();
+        ImGui::Spacing();
+        DrawTrimTools();
         ImGui::Spacing();
         DrawSelectedSpritePreview();
         ImGui::Spacing();
@@ -213,7 +219,7 @@ namespace Wheatear {
             if (!IsCellValid(col, row))
                 break;
 
-            AnimationFrame frame{ m_Texture, GetCellUVMin(col, row), GetCellUVMax(col, row), m_FrameDuration };
+            AnimationFrame frame{ m_Texture, GetTrimmedUVMin(col, row), GetTrimmedUVMax(col, row), m_FrameDuration };
 
             // Link the frame to the active sheet so re-gridding the sheet
             // updates this animation live; embedded UVs stay as fallback.
@@ -373,6 +379,8 @@ namespace Wheatear {
                 m_Rows = std::max(1, data.Rows);
                 m_SelectedCol = std::clamp(m_SelectedCol, 0, m_Cols - 1);
                 m_SelectedRow = std::clamp(m_SelectedRow, 0, m_Rows - 1);
+                m_Trims = data.Trims;
+                m_Trims.resize(SpriteSheetAsset::CellCount(data));
                 SetTexture(Texture2D::Create(data.TexturePath), data.TexturePath);
                 m_LastAction = "Loaded sheet: " + m_SheetPath;
             }
@@ -390,6 +398,7 @@ namespace Wheatear {
                 ? m_Texture->GetPath() : m_TexturePath;
             data.Columns = m_Cols;
             data.Rows = m_Rows;
+            data.Trims = m_Trims;
             SpriteSheetAsset::Save(m_SheetPath, data);
 
             // Bind the saved sheet to the selected entity so it reuses the
@@ -465,6 +474,97 @@ namespace Wheatear {
         ImGui::Checkbox(EditorLocale::Text("Append frames", "追加帧"), &m_AppendFrames);
     }
 
+    void SpriteSheetPickerPanel::DrawTrimTools()
+    {
+        ImGui::TextUnformatted(EditorLocale::Text("Content Trim (per-cell)", "内容裁切 (逐格)"));
+
+        if (ImGui::Button(EditorLocale::Text("Detect Content Bounds", "检测内容边界"))
+            && m_Texture)
+        {
+            DetectContentBounds();
+        }
+        ImGui::SameLine();
+        HelpMarker(EditorLocale::Text(
+            "Computes each cell's opaque bounding box and stores it as the cell trim. Playback then crops to the visible content, aligning un-anchored frames (e.g. jump animations) and removing padding.",
+            "计算每格不透明内容包围盒并保存为格子裁切。播放时按可见内容裁剪，对齐未锚定的帧（如跳跃动画）并去除留白。"));
+
+        if (!m_Texture)
+        {
+            ImGui::TextDisabled(EditorLocale::Text("(drop a texture first)", "(先拖入纹理)"));
+            return;
+        }
+
+        if (ImGui::Button(EditorLocale::Text("Clear All Trims", "清除全部裁切")))
+        {
+            m_Trims.clear();
+            m_Trims.resize(std::max(1, m_Cols) * std::max(1, m_Rows));
+            m_LastAction = "Cleared all trims.";
+        }
+
+        ImGui::Separator();
+        ImGui::TextUnformatted(EditorLocale::Text("Selected Cell", "选中格子"));
+        const int cellIndex = m_SelectedRow * std::max(1, m_Cols) + m_SelectedCol;
+        if (cellIndex >= static_cast<int>(m_Trims.size()))
+            m_Trims.resize(cellIndex + 1);
+
+        SpriteSheetData::CellTrim& trim = m_Trims[cellIndex];
+        const int texWidth = static_cast<int>(m_Texture->GetWidth());
+        const int texHeight = static_cast<int>(m_Texture->GetHeight());
+        const int cellWidth = texWidth / std::max(1, m_Cols);
+        const int cellHeight = texHeight / std::max(1, m_Rows);
+
+        const bool hasTrim = trim.Width > 0 && trim.Height > 0;
+        if (hasTrim)
+        {
+            ImGui::TextDisabled("Content: %d x %d px", trim.Width, trim.Height);
+            ImGui::SetNextItemWidth(90.0f);
+            ImGui::DragInt("Left", &trim.Left, 1, 0, std::max(0, cellWidth - 1));
+            ImGui::SetNextItemWidth(90.0f);
+            ImGui::DragInt("Top", &trim.Top, 1, 0, std::max(0, cellHeight - 1));
+            ImGui::SetNextItemWidth(90.0f);
+            ImGui::DragInt("Width", &trim.Width, 1, 1, cellWidth);
+            ImGui::SetNextItemWidth(90.0f);
+            ImGui::DragInt("Height", &trim.Height, 1, 1, cellHeight);
+            if (ImGui::SmallButton(EditorLocale::Text("Reset Trim", "重置裁切")))
+                trim = SpriteSheetData::CellTrim{};
+        }
+        else
+        {
+            ImGui::TextDisabled(EditorLocale::Text("Full cell (no trim).", "整格（无裁切）。"));
+            if (ImGui::SmallButton(EditorLocale::Text("Crop To Selected", "裁切到选中区域")))
+            {
+                trim.Left = 0;
+                trim.Top = 0;
+                trim.Width = cellWidth;
+                trim.Height = cellHeight;
+            }
+        }
+
+        ImGui::Separator();
+        ImGui::Checkbox(EditorLocale::Text("Collision Box", "碰撞框"), &trim.HasCollider);
+        if (ImGui::IsItemHovered(ImGuiHoveredFlags_DelayShort))
+            ImGui::SetTooltip("Optional per-cell collision box. Entities with 'Follow Animation' enabled on their Box Collider 2D follow this box every frame (requires Pixels Per Unit > 0).");
+        if (trim.HasCollider)
+        {
+            // Default to the trimmed content when enabling.
+            if (trim.ColliderWidth <= 0 || trim.ColliderHeight <= 0)
+            {
+                trim.ColliderLeft = 0;
+                trim.ColliderTop = 0;
+                trim.ColliderWidth = hasTrim ? trim.Width : cellWidth;
+                trim.ColliderHeight = hasTrim ? trim.Height : cellHeight;
+            }
+            ImGui::SetNextItemWidth(90.0f);
+            ImGui::DragInt("C. Left", &trim.ColliderLeft, 1, 0, std::max(0, cellWidth - 1));
+            ImGui::SetNextItemWidth(90.0f);
+            ImGui::DragInt("C. Top", &trim.ColliderTop, 1, 0, std::max(0, cellHeight - 1));
+            ImGui::SetNextItemWidth(90.0f);
+            ImGui::DragInt("C. Width", &trim.ColliderWidth, 1, 1, cellWidth);
+            ImGui::SetNextItemWidth(90.0f);
+            ImGui::DragInt("C. Height", &trim.ColliderHeight, 1, 1, cellHeight);
+        }
+    }
+
     bool SpriteSheetPickerPanel::IsCellValid(int col, int row) const
     {
         return col >= 0 && row >= 0 && col < m_Cols && row < m_Rows;
@@ -490,6 +590,132 @@ namespace Wheatear {
             ? 1.0f - static_cast<float>(row) * vStep
             : static_cast<float>(row + 1) * vStep;
         return { uMax, vMax };
+    }
+
+    const SpriteSheetData::CellTrim* SpriteSheetPickerPanel::GetTrim(int cellIndex) const
+    {
+        if (cellIndex < 0 || cellIndex >= static_cast<int>(m_Trims.size()))
+            return nullptr;
+        const auto& t = m_Trims[cellIndex];
+        return (t.Width > 0 && t.Height > 0) ? &t : nullptr;
+    }
+
+    glm::vec2 SpriteSheetPickerPanel::GetTrimmedUVMin(int col, int row) const
+    {
+        const int texWidth = m_Texture ? static_cast<int>(m_Texture->GetWidth()) : 1;
+        const int texHeight = m_Texture ? static_cast<int>(m_Texture->GetHeight()) : 1;
+        const int cellWidth = texWidth / std::max(1, m_Cols);
+        const int cellHeight = texHeight / std::max(1, m_Rows);
+        const int index = row * m_Cols + col;
+
+        int left = col * cellWidth;
+        int top = row * cellHeight;
+        int width = cellWidth;
+        int height = cellHeight;
+        if (const SpriteSheetData::CellTrim* t = GetTrim(index))
+        {
+            left = std::clamp(left + t->Left, col * cellWidth, col * cellWidth + cellWidth - 1);
+            top = std::clamp(top + t->Top, row * cellHeight, row * cellHeight + cellHeight - 1);
+            width = std::clamp(t->Width, 1, col * cellWidth + cellWidth - left);
+            height = std::clamp(t->Height, 1, row * cellHeight + cellHeight - top);
+        }
+        // Renderer UV convention (v=0 = texture bottom), matching the runtime.
+        return { static_cast<float>(left) / texWidth,
+                 1.0f - static_cast<float>(top + height) / texHeight };
+    }
+
+    glm::vec2 SpriteSheetPickerPanel::GetTrimmedUVMax(int col, int row) const
+    {
+        const int texWidth = m_Texture ? static_cast<int>(m_Texture->GetWidth()) : 1;
+        const int texHeight = m_Texture ? static_cast<int>(m_Texture->GetHeight()) : 1;
+        const int cellWidth = texWidth / std::max(1, m_Cols);
+        const int cellHeight = texHeight / std::max(1, m_Rows);
+        const int index = row * m_Cols + col;
+
+        int left = col * cellWidth;
+        int top = row * cellHeight;
+        int width = cellWidth;
+        int height = cellHeight;
+        if (const SpriteSheetData::CellTrim* t = GetTrim(index))
+        {
+            left = std::clamp(left + t->Left, col * cellWidth, col * cellWidth + cellWidth - 1);
+            top = std::clamp(top + t->Top, row * cellHeight, row * cellHeight + cellHeight - 1);
+            width = std::clamp(t->Width, 1, col * cellWidth + cellWidth - left);
+            height = std::clamp(t->Height, 1, row * cellHeight + cellHeight - top);
+        }
+        return { static_cast<float>(left + width) / texWidth,
+                 1.0f - static_cast<float>(top) / texHeight };
+    }
+
+    void SpriteSheetPickerPanel::DetectContentBounds()
+    {
+        if (!m_Texture)
+        {
+            m_LastAction = "Drop a texture first.";
+            return;
+        }
+
+        int width = 0, height = 0, channels = 0;
+        // Decode without vertical flip so row 0 is the image top, matching
+        // the trim coordinate convention. The engine's texture loader always
+        // sets flip=1, so restore that state afterwards (the flip flag is
+        // per-TU static inside stb; only the public setter is reliable).
+        stbi_set_flip_vertically_on_load(0);
+        stbi_uc* pixels = stbi_load(
+            AssetPath::Resolve(m_Texture->GetPath()).string().c_str(),
+            &width, &height, &channels, 4);
+        stbi_set_flip_vertically_on_load(1);
+        if (!pixels || width <= 0 || height <= 0)
+        {
+            m_LastAction = "Failed to decode texture for content detection.";
+            return;
+        }
+
+        const int cols = std::max(1, m_Cols);
+        const int rows = std::max(1, m_Rows);
+        const int cellWidth = width / cols;
+        const int cellHeight = height / rows;
+        m_Trims.assign(cols * rows, SpriteSheetData::CellTrim{});
+
+        int detected = 0;
+        for (int row = 0; row < rows; ++row)
+        {
+            for (int col = 0; col < cols; ++col)
+            {
+                int minX = cellWidth, minY = cellHeight, maxX = -1, maxY = -1;
+                for (int y = 0; y < cellHeight; ++y)
+                {
+                    const int texY = row * cellHeight + y;
+                    for (int x = 0; x < cellWidth; ++x)
+                    {
+                        const int texX = col * cellWidth + x;
+                        if (pixels[(texY * width + texX) * 4 + 3] <= 8)
+                            continue;
+                        minX = std::min(minX, x);
+                        minY = std::min(minY, y);
+                        maxX = std::max(maxX, x);
+                        maxY = std::max(maxY, y);
+                    }
+                }
+
+                if (maxX >= 0)
+                {
+                    auto& trim = m_Trims[row * cols + col];
+                    trim.Left = minX;
+                    trim.Top = minY;
+                    trim.Width = maxX - minX + 1;
+                    trim.Height = maxY - minY + 1;
+                    ++detected;
+                }
+            }
+        }
+
+        stbi_image_free(pixels);
+
+        char buffer[128];
+        std::snprintf(buffer, sizeof(buffer), "Detected content bounds for %d / %d cells.",
+            detected, cols * rows);
+        m_LastAction = buffer;
     }
 
     std::pair<int, int> SpriteSheetPickerPanel::GetSequenceCell(int frameIndex) const
@@ -539,6 +765,8 @@ namespace Wheatear {
         const ImU32 gridColor = IM_COL32(110, 180, 190, 120);
         const ImU32 selectedColor = IM_COL32(255, 220, 95, 255);
         const ImU32 sequenceColor = IM_COL32(75, 220, 255, 210);
+        const ImU32 trimColor = IM_COL32(205, 125, 255, 210);
+        const ImU32 colliderColor = IM_COL32(120, 235, 120, 230);
         const float cellWidth = imageSize.x / static_cast<float>(std::max(1, m_Cols));
         const float cellHeight = imageSize.y / static_cast<float>(std::max(1, m_Rows));
 
@@ -551,6 +779,35 @@ namespace Wheatear {
         {
             const float y = imageMin.y + cellHeight * static_cast<float>(row);
             drawList->AddLine(ImVec2(imageMin.x, y), ImVec2(imageMax.x, y), gridColor);
+        }
+
+        // Trim boxes (magenta) and collision boxes (green) overlay. The
+        // preview draws the texture upright, so pixel offsets map 1:1 to
+        // screen pixels scaled by zoom.
+        const float pxScale = m_Zoom;
+        for (int row = 0; row < m_Rows; ++row)
+        {
+            for (int col = 0; col < m_Cols; ++col)
+            {
+                const int index = row * m_Cols + col;
+                if (index >= static_cast<int>(m_Trims.size()))
+                    continue;
+                const SpriteSheetData::CellTrim& t = m_Trims[index];
+                const float cellMinX = imageMin.x + col * cellWidth;
+                const float cellMinY = imageMin.y + row * cellHeight;
+                if (t.Width > 0 && t.Height > 0)
+                {
+                    const ImVec2 min(cellMinX + t.Left * pxScale, cellMinY + t.Top * pxScale);
+                    const ImVec2 max(min.x + t.Width * pxScale, min.y + t.Height * pxScale);
+                    drawList->AddRect(min, max, trimColor, 0.0f, 0, 1.5f);
+                }
+                if (t.HasCollider && t.ColliderWidth > 0 && t.ColliderHeight > 0)
+                {
+                    const ImVec2 min(cellMinX + t.ColliderLeft * pxScale, cellMinY + t.ColliderTop * pxScale);
+                    const ImVec2 max(min.x + t.ColliderWidth * pxScale, min.y + t.ColliderHeight * pxScale);
+                    drawList->AddRect(min, max, colliderColor, 0.0f, 0, 2.0f);
+                }
+            }
         }
 
         for (int i = 0; i < m_FrameCount; ++i)
@@ -603,8 +860,8 @@ namespace Wheatear {
             return;
         }
 
-        const glm::vec2 uvMin = GetCellUVMin(m_SelectedCol, m_SelectedRow);
-        const glm::vec2 uvMax = GetCellUVMax(m_SelectedCol, m_SelectedRow);
+        const glm::vec2 uvMin = GetTrimmedUVMin(m_SelectedCol, m_SelectedRow);
+        const glm::vec2 uvMax = GetTrimmedUVMax(m_SelectedCol, m_SelectedRow);
         const ImVec2 previewSize(96.0f, 96.0f);
         ImGui::Image(ToImGuiTextureID(m_Texture), previewSize,
             ImVec2(uvMin.x, uvMax.y),
@@ -659,21 +916,21 @@ namespace Wheatear {
         {
             auto& sprite = m_Entity.GetComponent<SpriteRendererComponent>();
             sprite.Texture = m_Texture;
-            sprite.UVMin = GetCellUVMin(m_SelectedCol, m_SelectedRow);
-            sprite.UVMax = GetCellUVMax(m_SelectedCol, m_SelectedRow);
+            sprite.UVMin = GetTrimmedUVMin(m_SelectedCol, m_SelectedRow);
+            sprite.UVMax = GetTrimmedUVMax(m_SelectedCol, m_SelectedRow);
             m_LastAction = "Applied selected cell to SpriteRenderer.";
         }
-        HelpMarker("Writes texture + UV to the selected SpriteRenderer component.");
+        HelpMarker("Writes texture + trimmed UV to the selected SpriteRenderer component.");
 
         if (ButtonDisabled(EditorLocale::Text("Apply To UI Image", "应用到 UI 图片"), !canUIImage, wideButton))
         {
             auto& image = m_Entity.GetComponent<UIImageComponent>();
             image.Texture = m_Texture;
-            image.UVMin = GetCellUVMin(m_SelectedCol, m_SelectedRow);
-            image.UVMax = GetCellUVMax(m_SelectedCol, m_SelectedRow);
+            image.UVMin = GetTrimmedUVMin(m_SelectedCol, m_SelectedRow);
+            image.UVMax = GetTrimmedUVMax(m_SelectedCol, m_SelectedRow);
             m_LastAction = "Applied selected cell to UI Image.";
         }
-        HelpMarker("Writes texture + UV to the selected UIImage component. Good for icon atlases.");
+        HelpMarker("Writes texture + trimmed UV to the selected UIImage component. Good for icon atlases.");
 
         if (ButtonDisabled(m_AppendFrames ? "Append Sequence To Clip" : "Replace Clip With Sequence", !canAnimator, wideButton))
         {

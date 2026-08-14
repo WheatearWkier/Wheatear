@@ -26,6 +26,12 @@ namespace Wheatear {
         glm::vec2      DrawOffset = { 0.0f, 0.0f };
         glm::vec2      DrawScale = { 1.0f, 1.0f };
 
+        // Pixels-per-world-unit. 0 = legacy behavior (quad is 1x1 x scale);
+        // >0 renders the quad at (UV span in pixels) / PPU so sprites keep
+        // their true aspect ratio — trimmed sheet cells included. Also the
+        // basis for cell-driven collider sizes.
+        float          PixelsPerUnit = 0.0f;
+
         // Optional reusable sprite-sheet reference (.wtsheet). When set with a
         // valid CellIndex, the SpriteSheetSystem resolves Texture/UVMin/UVMax
         // from the sheet definition each frame (grid changes hot-update).

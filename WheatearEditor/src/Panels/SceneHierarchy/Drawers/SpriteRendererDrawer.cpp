@@ -63,6 +63,9 @@ namespace Wheatear {
                 ImGui::Checkbox(EditorLocale::Text("Flip X", "水平翻转"), &c.FlipX);
                 // ImGui::Checkbox("Flip Y", &c.FlipY);
                 ImGui::DragFloat(EditorLocale::Text("Tiling Factor", "平铺系数"), &c.TilingFactor, 0.1f, 0.0f, 100.0f);
+                ImGui::DragFloat(EditorLocale::Text("Pixels Per Unit", "像素/单位"), &c.PixelsPerUnit, 1.0f, 0.0f, 1000.0f, "%.1f");
+                if (ImGui::IsItemHovered(ImGuiHoveredFlags_DelayShort))
+                    ImGui::SetTooltip("0 = quad is 1x1 x scale (legacy). >0 renders at true content size (content pixels / PPU), keeps aspect ratio and sizes colliders driven by sheet cells.");
                 ImGui::DragFloat2(EditorLocale::Text("Draw Offset", "绘制偏移"), glm::value_ptr(c.DrawOffset), 0.01f);
                 ImGui::DragFloat2(EditorLocale::Text("Draw Scale", "绘制缩放"), glm::value_ptr(c.DrawScale), 0.01f);
                 if (ImGui::Button(EditorLocale::Text("Open Sprite Sheet Picker", "打开序列帧选择器")))

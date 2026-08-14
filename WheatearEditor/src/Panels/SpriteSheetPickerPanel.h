@@ -1,12 +1,14 @@
 #pragma once
 
 #include "Wheatear/Core/Core.h"
+#include "Wheatear/Assets/SpriteSheetAsset.h"
 #include "Wheatear/Scene/Entity.h"
 
 #include <glm/glm.hpp>
 
 #include <string>
 #include <utility>
+#include <vector>
 
 namespace Wheatear {
 
@@ -44,6 +46,7 @@ namespace Wheatear {
         void DrawTargetSummary();
         void DrawSheetTools();
         void DrawGridControls();
+        void DrawTrimTools();
         void DrawPreview();
         void DrawSelectedSpritePreview();
         void DrawApplyActions();
@@ -51,10 +54,20 @@ namespace Wheatear {
         bool AcceptTextureDrop();
         glm::vec2 GetCellUVMin(int col, int row) const;
         glm::vec2 GetCellUVMax(int col, int row) const;
+        // Pixel-accurate UVs for the trimmed content of a cell (falls back
+        // to the full cell when no trim is set). Matches the runtime
+        // SpriteSheetAsset::ResolveCell convention.
+        glm::vec2 GetTrimmedUVMin(int col, int row) const;
+        glm::vec2 GetTrimmedUVMax(int col, int row) const;
+        const SpriteSheetData::CellTrim* GetTrim(int cellIndex) const;
         std::pair<int, int> GetSequenceCell(int frameIndex) const;
         bool IsCellValid(int col, int row) const;
         Ref<AnimationClip> GetOrCreateTargetClip();
         void ApplySequenceToClip(const Ref<AnimationClip>& clip);
+
+        // Decodes the current texture (CPU) and computes each cell's opaque
+        // content bounding box into m_Trims.
+        void DetectContentBounds();
 
     private:
         Entity m_Entity;
@@ -81,6 +94,10 @@ namespace Wheatear {
 
         std::string m_LastAction;
         std::string m_SheetPath;   // reusable .wtsheet asset (empty = not saved yet)
+
+        // Per-cell content trims/colliders (index = cell, row-major, top row
+        // first), persisted into the .wtsheet. Saved with Save As Sheet.
+        std::vector<SpriteSheetData::CellTrim> m_Trims;
     };
 
 } // namespace Wheatear

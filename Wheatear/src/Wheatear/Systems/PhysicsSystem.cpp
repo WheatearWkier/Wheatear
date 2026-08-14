@@ -71,6 +71,54 @@ namespace Wheatear {
             tc.Translation.y = pos.y;
             tc.Rotation.z = body->GetAngle();
         }
+
+        SyncAnimationDrivenColliders(scene);
+    }
+
+    void PhysicsSystem::SyncAnimationDrivenColliders(Scene* scene)
+    {
+        // Box colliders flagged FollowAnimation are re-shaped every frame by
+        // the sprite system / animation system. Box2D fixtures copy their
+        // shape at creation time, so rebuild when the component data moved.
+        auto& registry = scene->GetRegistry();
+        auto view = registry.view<Rigidbody2DComponent, BoxCollider2DComponent, TransformComponent>();
+        for (auto e : view)
+        {
+            auto& rb2d = view.get<Rigidbody2DComponent>(e);
+            auto& bc = view.get<BoxCollider2DComponent>(e);
+            if (!bc.FollowAnimation)
+                continue;
+
+            b2Body* body = static_cast<b2Body*>(rb2d.RuntimeBody);
+            if (!body)
+                continue;
+
+            const auto& tc = view.get<TransformComponent>(e);
+            const b2Vec2 desiredHalf(bc.Size.x * tc.Scale.x, bc.Size.y * tc.Scale.y);
+            const b2Vec2 desiredCenter(bc.Offset.x, bc.Offset.y);
+
+            b2Fixture* fixture = static_cast<b2Fixture*>(bc.RuntimeFixture);
+            if (fixture && fixture->GetType() == b2Shape::e_polygon)
+            {
+                const b2PolygonShape* shape = static_cast<const b2PolygonShape*>(fixture->GetShape());
+                const bool unchanged = shape->m_centroid == desiredCenter
+                    && shape->m_vertices[0]
+                        == b2Vec2(desiredCenter.x - desiredHalf.x, desiredCenter.y - desiredHalf.y);
+                if (unchanged)
+                    continue;
+                body->DestroyFixture(fixture);
+            }
+
+            b2PolygonShape shape;
+            shape.SetAsBox(desiredHalf.x, desiredHalf.y, desiredCenter, 0.0f);
+            b2FixtureDef fd;
+            fd.shape = &shape;
+            fd.density = bc.Density;
+            fd.friction = bc.Friction;
+            fd.restitution = bc.Restitution;
+            fd.restitutionThreshold = bc.RestitutionThreshold;
+            bc.RuntimeFixture = body->CreateFixture(&fd);
+        }
     }
 
     void PhysicsSystem::InitEntityPhysics(Scene* scene, Entity entity)
@@ -101,7 +149,7 @@ namespace Wheatear {
                 fd.friction = friction;
                 fd.restitution = restitution;
                 fd.restitutionThreshold = restitutionThreshold;
-                body->CreateFixture(&fd);
+                return body->CreateFixture(&fd);
             };
 
         if (entity.HasComponent<BoxCollider2DComponent>())
@@ -110,7 +158,7 @@ namespace Wheatear {
             b2PolygonShape shape;
             shape.SetAsBox(bc.Size.x * tc.Scale.x, bc.Size.y * tc.Scale.y,
                 { bc.Offset.x, bc.Offset.y }, 0.0f);
-            makeFixture(shape, bc.Density, bc.Friction,
+            bc.RuntimeFixture = makeFixture(shape, bc.Density, bc.Friction,
                 bc.Restitution, bc.RestitutionThreshold);
         }
 
@@ -120,7 +168,7 @@ namespace Wheatear {
             b2CircleShape shape;
             shape.m_p = { cc.Offset.x, cc.Offset.y };
             shape.m_radius = cc.Radius * tc.Scale.x;
-            makeFixture(shape, cc.Density, cc.Friction,
+            cc.RuntimeFixture = makeFixture(shape, cc.Density, cc.Friction,
                 cc.Restitution, cc.RestitutionThreshold);
         }
     }

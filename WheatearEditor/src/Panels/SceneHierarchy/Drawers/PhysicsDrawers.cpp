@@ -48,6 +48,9 @@ namespace Wheatear {
                 ImGui::DragFloat(EditorLocale::Text("Friction", "摩擦"), &c.Friction, 0.01f, 0.0f, 1.0f);
                 ImGui::DragFloat(EditorLocale::Text("Restitution", "弹性"), &c.Restitution, 0.01f, 0.0f, 1.0f);
                 ImGui::DragFloat(EditorLocale::Text("Restitution Threshold", "弹性阈值"), &c.RestitutionThreshold, 0.01f, 0.0f);
+                ImGui::Checkbox(EditorLocale::Text("Follow Animation", "跟随动画"), &c.FollowAnimation);
+                if (ImGui::IsItemHovered(ImGuiHoveredFlags_DelayShort))
+                    ImGui::SetTooltip("When the entity's sprite is a sheet cell (static or animated), the box follows the cell's collision box every frame. Requires Pixels Per Unit > 0 on the Sprite Renderer.");
             });
     }
 

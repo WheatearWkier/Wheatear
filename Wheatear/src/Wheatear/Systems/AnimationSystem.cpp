@@ -8,6 +8,7 @@
 #include "Wheatear/Animation/AnimationClipSerializer.h"
 #include "Wheatear/Assets/AssetPath.h"
 #include "Wheatear/Assets/SpriteSheetAsset.h"
+#include "Wheatear/Systems/SpriteSheetSystem.h"
 #include "Wheatear/Runtime/CommandBus.h"
 
 #include <glm/glm.hpp>
@@ -47,15 +48,22 @@ namespace Wheatear {
 
         // Applies a frame to a sprite component. Frames linked to a .wtsheet
         // cell resolve through the shared sheet cache (hot-reloading with the
-        // sheet file); embedded texture/UV are the fallback for older assets.
-        static void ApplyFrameToSprite(const AnimationFrame& frame,
+        // sheet file) and drive a FollowAnimation collider; embedded
+        // texture/UV are the fallback for older assets.
+        static void ApplyFrameToSprite(Scene* scene, Entity entity, const AnimationFrame& frame,
             Ref<Texture2D>& texture, glm::vec2& uvMin, glm::vec2& uvMax)
         {
             if (!frame.SpriteSheet.empty() && frame.CellIndex >= 0)
             {
-                if (SpriteSheetAsset::ResolveCell(frame.SpriteSheet, frame.CellIndex,
-                    texture, uvMin, uvMax))
+                SpriteSheetAsset::ResolvedCell resolved;
+                if (SpriteSheetAsset::ResolveCell(frame.SpriteSheet, frame.CellIndex, resolved))
+                {
+                    texture = resolved.Texture;
+                    uvMin = resolved.UVMin;
+                    uvMax = resolved.UVMax;
+                    SpriteSheetSystem::ApplyColliderToEntity(entity, resolved);
                     return;
+                }
             }
 
             texture = frame.Texture;
@@ -209,7 +217,7 @@ namespace Wheatear {
             const auto& frames = it->second->GetFrames();
             if (frames.empty()) continue;
 
-            ApplyFrameToSprite(frames[0], sr.Texture, sr.UVMin, sr.UVMax);
+            ApplyFrameToSprite(scene, Entity{ e, scene }, frames[0], sr.Texture, sr.UVMin, sr.UVMax);
         }
     }
 
@@ -261,7 +269,7 @@ namespace Wheatear {
                 animator.CurrentFrameIndex = frameIdx;
 
                 const auto& frame = frames[frameIdx];
-                ApplyFrameToSprite(frame, sprite.Texture, sprite.UVMin, sprite.UVMax);
+                ApplyFrameToSprite(scene, Entity{ e, scene }, frame, sprite.Texture, sprite.UVMin, sprite.UVMax);
             }
 
             TransformComponent* tc = registry.try_get<TransformComponent>(e);
