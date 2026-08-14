@@ -4,6 +4,7 @@
 #include "Wheatear/Audio/AudioEngine.h"
 #include "Wheatear/Assets/AssetPath.h"
 #include "Wheatear/Config/UserSettings.h"
+#include "Wheatear/Input/InputBindingService.h"
 #include "Wheatear/Events/ApplicationEvent.h"
 #include "Wheatear/ImGui/ImGuiLayer.h"
 #include "Wheatear/Renderer/Renderer.h"
@@ -135,6 +136,10 @@ namespace Wheatear {
 
 			glfwPollEvents();
 			FlushEventQueue();
+
+			// Advance the action-layer edge state machine so IsActionPressed /
+			// IsActionReleased report consistent per-frame results.
+			InputBindingService::EndFrame();
 
 			if (!m_Running)
 				break;

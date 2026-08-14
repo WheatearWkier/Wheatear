@@ -32,29 +32,15 @@ namespace Wheatear {
             if (InputBindingService::IsActionDown("move.down"))
                 input.Movement.y -= 1.0f;
 
-            input.AttackHeld =
-                Input::IsMouseButtonPressed(WT_MOUSE_BUTTON_LEFT) ||
-                InputBindingService::IsActionDown("arcade.attack");
-            input.Weapon1Pressed = InputBindingService::IsActionDown("arcade.weapon1");
-            input.Weapon2Pressed = InputBindingService::IsActionDown("arcade.weapon2");
-            input.Weapon3Pressed = InputBindingService::IsActionDown("arcade.weapon3");
+            input.AttackHeld = InputBindingService::IsActionDown("arcade.attack");
             return input;
         }
 
     } // namespace
 
-    void ArcadeCombatSystem::ResetInputState()
-    {
-        m_PreviousPausePressed = false;
-        m_PreviousWeapon1Pressed = false;
-        m_PreviousWeapon2Pressed = false;
-        m_PreviousWeapon3Pressed = false;
-        m_PreviousAttackPressed = false;
-    }
 
     void ArcadeCombatSystem::OnRuntimeStart(Scene* scene)
     {
-        ResetInputState();
         if (!scene)
             return;
 
@@ -82,16 +68,7 @@ namespace Wheatear {
             return;
 
         const float dt = ts.GetSeconds();
-        const bool pausePressed = InputBindingService::IsActionDown("game.pause");
         const auto input = SamplePlayerInput();
-        const ArcadeCombatPlayerService::PlayerInputState previousInput{
-            {},
-            m_PreviousAttackPressed,
-            m_PreviousWeapon1Pressed,
-            m_PreviousWeapon2Pressed,
-            m_PreviousWeapon3Pressed
-        };
-
         auto& registry = scene->GetRegistry();
         for (auto levelEntity : registry.view<ArcadeCombatLevelComponent>())
         {
@@ -106,10 +83,10 @@ namespace Wheatear {
             Entity player = SceneQueries::FindEntityByName(scene, level.PlayerEntityName);
             Entity boss = SceneQueries::FindEntityByName(scene, level.BossEntityName);
 
-            if (pausePressed && !m_PreviousPausePressed && !level.RuntimeVictory && !level.RuntimeDefeat)
+            if (InputBindingService::IsActionPressed("game.pause") && !level.RuntimeVictory && !level.RuntimeDefeat)
                 level.RuntimePaused = !level.RuntimePaused;
 
-            ArcadeCombatPlayerService::UpdateWeaponSelection(player, input, previousInput);
+            ArcadeCombatPlayerService::UpdateWeaponSelection(player, input);
 
             if (!level.RuntimePaused)
             {
@@ -133,12 +110,6 @@ namespace Wheatear {
 
             ArcadeCombatHudService::UpdateHUD(scene, level, player, boss);
         }
-
-        m_PreviousPausePressed = pausePressed;
-        m_PreviousWeapon1Pressed = input.Weapon1Pressed;
-        m_PreviousWeapon2Pressed = input.Weapon2Pressed;
-        m_PreviousWeapon3Pressed = input.Weapon3Pressed;
-        m_PreviousAttackPressed = input.AttackHeld;
     }
 
 } // namespace Wheatear

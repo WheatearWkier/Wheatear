@@ -111,7 +111,7 @@ namespace Wheatear {
         AddBinding(settings, "game.confirm", { WT_KEY_SPACE, WT_KEY_ENTER, WT_KEY_RIGHT });
 
         AddBinding(settings, "side.jump", { WT_KEY_K, WT_KEY_SPACE });
-        AddBinding(settings, "side.basic", { WT_KEY_J });
+        AddBinding(settings, "side.basic", { WT_KEY_J, -1 });   // -1 = mouse left
         AddBinding(settings, "side.magic", { WT_KEY_U });
         AddBinding(settings, "side.support", { WT_KEY_H });
         AddBinding(settings, "side.dash", { WT_KEY_I });
@@ -120,7 +120,7 @@ namespace Wheatear {
         AddBinding(settings, "side.item2", { WT_KEY_2 });
         AddBinding(settings, "side.item3", { WT_KEY_3 });
 
-        AddBinding(settings, "arcade.attack", { WT_KEY_J, WT_KEY_SPACE });
+        AddBinding(settings, "arcade.attack", { WT_KEY_J, WT_KEY_SPACE, -1 });   // -1 = mouse left
         AddBinding(settings, "arcade.weapon1", { WT_KEY_1 });
         AddBinding(settings, "arcade.weapon2", { WT_KEY_2 });
         AddBinding(settings, "arcade.weapon3", { WT_KEY_3 });

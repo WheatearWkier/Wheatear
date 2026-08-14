@@ -4,6 +4,7 @@
 #include "ArcadeCombatMath.h"
 #include "ArcadeCombatProjectileService.h"
 #include "ArcadeCombatSignalHandlers.h"
+#include "Wheatear/Input/InputBindingService.h"
 #include "Wheatear/Gameplay/Action/ActionRecipeQueries.h"
 #include "Wheatear/Gameplay/Action/ActionResolver.h"
 #include "Wheatear/Scene/Components.h"
@@ -35,18 +36,17 @@ namespace Wheatear::ArcadeCombatPlayerService {
     } // namespace
 
     void UpdateWeaponSelection(Entity player,
-        const PlayerInputState& input,
-        const PlayerInputState& previousInput)
+        const PlayerInputState& input)
     {
         if (!player || !player.HasComponent<ArcadePlayerControllerComponent>())
             return;
 
         auto& controller = player.GetComponent<ArcadePlayerControllerComponent>();
-        if (input.Weapon1Pressed && !previousInput.Weapon1Pressed)
+        if (InputBindingService::IsActionPressed("arcade.weapon1"))
             controller.CurrentWeapon = ArcadeWeaponType::Gun;
-        if (input.Weapon2Pressed && !previousInput.Weapon2Pressed)
+        if (InputBindingService::IsActionPressed("arcade.weapon2"))
             controller.CurrentWeapon = ArcadeWeaponType::Cannon;
-        if (input.Weapon3Pressed && !previousInput.Weapon3Pressed)
+        if (InputBindingService::IsActionPressed("arcade.weapon3"))
             controller.CurrentWeapon = ArcadeWeaponType::Katana;
     }
 

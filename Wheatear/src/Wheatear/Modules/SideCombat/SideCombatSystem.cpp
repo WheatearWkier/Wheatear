@@ -49,24 +49,9 @@ namespace Wheatear {
 
     } // namespace
 
-    void SideCombatSystem::ResetInputState()
-    {
-        m_PreviousPausePressed = false;
-        m_PreviousJumpPressed = false;
-        m_PreviousBasicPressed = false;
-        m_PreviousLauncherPressed = false;
-        m_PreviousMagicPressed = false;
-        m_PreviousSupportPressed = false;
-        m_PreviousDashPressed = false;
-        m_PreviousBreakLimitPressed = false;
-        m_PreviousItem1Pressed = false;
-        m_PreviousItem2Pressed = false;
-        m_PreviousItem3Pressed = false;
-    }
 
     void SideCombatSystem::OnRuntimeStart(Scene* scene)
     {
-        ResetInputState();
         if (!scene)
             return;
 
@@ -91,39 +76,30 @@ namespace Wheatear {
         const float dt = std::min(0.05f, ts.GetSeconds());
         auto& registry = scene->GetRegistry();
 
-        const bool pausePressed = InputBindingService::IsActionDown("game.pause");
-        const bool downHeld = InputBindingService::IsActionDown("move.down");
-        const bool jumpPressed = InputBindingService::IsActionDown("side.jump");
-        bool basicPressed = Input::IsMouseButtonPressed(WT_MOUSE_BUTTON_LEFT) || InputBindingService::IsActionDown("side.basic");
-        bool launcherPressed = downHeld && basicPressed;
-        bool magicPressed = InputBindingService::IsActionDown("side.magic");
-        bool supportPressed = InputBindingService::IsActionDown("side.support");
-        bool dashPressed = InputBindingService::IsActionDown("side.dash");
-        bool breakLimitPressed = InputBindingService::IsActionDown("side.break_limit");
-        bool item1Pressed = InputBindingService::IsActionDown("side.item1") || Input::IsKeyPressed(WT_KEY_1);
-        bool item2Pressed = InputBindingService::IsActionDown("side.item2") || Input::IsKeyPressed(WT_KEY_2);
-        bool item3Pressed = InputBindingService::IsActionDown("side.item3") || Input::IsKeyPressed(WT_KEY_3);
+        // Route gameplay commands through the action layer so commands and
+        // physical input share the same edge-detection path.
         for (const std::string& command : CommandBus::DrainGameplayCommands("side:"))
         {
             if (command == "side:item:1")
-                item1Pressed = true;
+                InputBindingService::InjectActionPress("side.item1");
             else if (command == "side:item:2")
-                item2Pressed = true;
+                InputBindingService::InjectActionPress("side.item2");
             else if (command == "side:item:3")
-                item3Pressed = true;
+                InputBindingService::InjectActionPress("side.item3");
             else if (command == "side:basic")
-                basicPressed = true;
+                InputBindingService::InjectActionPress("side.basic");
             else if (command == "side:launcher")
-                launcherPressed = true;
+                InputBindingService::InjectActionPress("side.launcher");
             else if (command == "side:magic")
-                magicPressed = true;
+                InputBindingService::InjectActionPress("side.magic");
             else if (command == "side:support")
-                supportPressed = true;
+                InputBindingService::InjectActionPress("side.support");
             else if (command == "side:dash")
-                dashPressed = true;
+                InputBindingService::InjectActionPress("side.dash");
             else if (command == "side:break_limit")
-                breakLimitPressed = true;
+                InputBindingService::InjectActionPress("side.break_limit");
         }
+
         float horizontal = 0.0f;
         if (InputBindingService::IsActionDown("move.left"))
             horizontal -= 1.0f;
@@ -137,32 +113,8 @@ namespace Wheatear {
             lane += 1.0f;
 
         const SideCombatPlayerService::PlayerInputState input{
-            jumpPressed,
-            basicPressed,
-            launcherPressed,
-            magicPressed,
-            supportPressed,
-            dashPressed,
-            breakLimitPressed,
-            item1Pressed,
-            item2Pressed,
-            item3Pressed,
             horizontal,
             lane
-        };
-        const SideCombatPlayerService::PlayerInputState previousInput{
-            m_PreviousJumpPressed,
-            m_PreviousBasicPressed,
-            m_PreviousLauncherPressed,
-            m_PreviousMagicPressed,
-            m_PreviousSupportPressed,
-            m_PreviousDashPressed,
-            m_PreviousBreakLimitPressed,
-            m_PreviousItem1Pressed,
-            m_PreviousItem2Pressed,
-            m_PreviousItem3Pressed,
-            0.0f,
-            0.0f
         };
 
         for (auto levelEntity : registry.view<SideCombatLevelComponent>())
@@ -175,7 +127,7 @@ namespace Wheatear {
             SideCombatFeedbackService::UpdateStartFade(scene, level, dt);
             SideCombatFeedbackService::UpdateCameraFeedback(scene, level, dt);
 
-            if (pausePressed && !m_PreviousPausePressed)
+            if (InputBindingService::IsActionPressed("game.pause"))
                 level.RuntimePaused = !level.RuntimePaused;
 
             Entity player = SideCombatEntityReferenceService::ResolvePlayer(scene, level);
@@ -202,7 +154,7 @@ namespace Wheatear {
                 simulationDt = dt * simulationTimeScale;
 
                 SideCombatComboService::UpdateCombo(level, simulationDt);
-                SideCombatPlayerService::UpdatePlayer(scene, level, player, simulationDt, input, previousInput);
+                SideCombatPlayerService::UpdatePlayer(scene, level, player, simulationDt, input);
                 SideCombatEnemyAIService::UpdateEnemies(scene, level, player, simulationDt);
                 SideCombatHitboxService::UpdateHitboxes(scene, level, simulationDt);
                 SideCombatPhysicsService::UpdateCombatants(scene, level, simulationDt);
@@ -213,18 +165,6 @@ namespace Wheatear {
 
             SideCombatHudService::UpdateUI(scene, level, player, boss);
         }
-
-        m_PreviousPausePressed = pausePressed;
-        m_PreviousJumpPressed = jumpPressed;
-        m_PreviousBasicPressed = basicPressed;
-        m_PreviousLauncherPressed = launcherPressed;
-        m_PreviousMagicPressed = magicPressed;
-        m_PreviousSupportPressed = supportPressed;
-        m_PreviousDashPressed = dashPressed;
-        m_PreviousBreakLimitPressed = breakLimitPressed;
-        m_PreviousItem1Pressed = item1Pressed;
-        m_PreviousItem2Pressed = item2Pressed;
-        m_PreviousItem3Pressed = item3Pressed;
     }
 
 } // namespace Wheatear

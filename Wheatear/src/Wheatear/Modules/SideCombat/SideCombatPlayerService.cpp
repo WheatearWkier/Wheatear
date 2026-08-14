@@ -7,6 +7,7 @@
 #include "SideCombatHitResolutionService.h"
 #include "SideCombatMath.h"
 #include "SideCombatTargetService.h"
+#include "Wheatear/Input/InputBindingService.h"
 #include "SideCombatTuningService.h"
 #include "Wheatear/Gameplay/Action/ActionRecipeQueries.h"
 #include "Wheatear/Scene/Components.h"
@@ -482,8 +483,7 @@ namespace Wheatear::SideCombatPlayerService {
         SideCombatLevelComponent& level,
         Entity player,
         float dt,
-        const PlayerInputState& input,
-        const PlayerInputState& previousInput)
+        const PlayerInputState& input)
     {
         if (!player || !player.HasComponent<TransformComponent>() ||
             !player.HasComponent<SideCombatantComponent>() ||
@@ -530,17 +530,17 @@ namespace Wheatear::SideCombatPlayerService {
 
         const bool inputLockedByCinematic = level.RuntimeCinematicTimer > 0.0f;
 
-        if (!inputLockedByCinematic && input.JumpPressed && !previousInput.JumpPressed)
+        if (!inputLockedByCinematic && InputBindingService::IsActionPressed("side.jump"))
             controller.RuntimeJumpBufferTimer = std::max(0.0f, controller.JumpBufferTime);
 
         if (combatant.ControlsLocked || level.RuntimeVictory || level.RuntimeDefeat)
             return;
 
-        if (!inputLockedByCinematic && input.Item1Pressed && !previousInput.Item1Pressed)
+        if (!inputLockedByCinematic && InputBindingService::IsActionPressed("side.item1"))
             UseCombatItem(tuning, 1, combatant, controller);
-        if (!inputLockedByCinematic && input.Item2Pressed && !previousInput.Item2Pressed)
+        if (!inputLockedByCinematic && InputBindingService::IsActionPressed("side.item2"))
             UseCombatItem(tuning, 2, combatant, controller);
-        if (!inputLockedByCinematic && input.Item3Pressed && !previousInput.Item3Pressed)
+        if (!inputLockedByCinematic && InputBindingService::IsActionPressed("side.item3"))
             UseCombatItem(tuning, 3, combatant, controller);
 
         if (combatant.RuntimeHitStun > 0.0f ||
@@ -621,17 +621,20 @@ namespace Wheatear::SideCombatPlayerService {
             SideCombatFeedbackService::PlaySfx(tuning.Feedback.JumpSound, tuning.Feedback.JumpSoundVolume);
         }
 
-        if (input.BreakLimitPressed && !previousInput.BreakLimitPressed && canStartAction)
+        if (InputBindingService::IsActionPressed("side.break_limit") && canStartAction)
             CreateBreakLimit(scene, level, player, combatant, controller);
-        else if (input.DashPressed && !previousInput.DashPressed && controller.RuntimeDashCooldown <= 0.0f && canStartAction)
+        else if (InputBindingService::IsActionPressed("side.dash") && controller.RuntimeDashCooldown <= 0.0f && canStartAction)
             CreatePlayerDash(scene, level, player, combatant, controller);
-        else if (input.SupportPressed && !previousInput.SupportPressed && controller.RuntimeAllySupportCooldown <= 0.0f && canStartAction)
+        else if (InputBindingService::IsActionPressed("side.support") && controller.RuntimeAllySupportCooldown <= 0.0f && canStartAction)
             CreateAllySupport(scene, level, player, combatant, controller);
-        else if (input.MagicPressed && !previousInput.MagicPressed && controller.RuntimeMagicBoltCooldown <= 0.0f && canStartAction)
+        else if (InputBindingService::IsActionPressed("side.magic") && controller.RuntimeMagicBoltCooldown <= 0.0f && canStartAction)
             CreatePlayerMagicBolt(scene, level, player, combatant, controller);
-        else if (input.LauncherPressed && !previousInput.LauncherPressed && controller.RuntimeLauncherCooldown <= 0.0f && canStartAction)
+        else if (InputBindingService::IsActionPressed("side.launcher")
+            || (InputBindingService::IsActionDown("move.down") && InputBindingService::IsActionPressed("side.basic")))
+        {
             CreatePlayerLauncher(scene, level, player, combatant, controller);
-        else if (!input.LauncherPressed && input.BasicPressed && !previousInput.BasicPressed && controller.RuntimeBasicCooldown <= 0.0f && canStartAction)
+        }
+        else if (!InputBindingService::IsActionDown("move.down") && InputBindingService::IsActionPressed("side.basic") && controller.RuntimeBasicCooldown <= 0.0f && canStartAction)
             CreatePlayerBasic(scene, level, player, combatant, controller);
 
         if (player.HasComponent<SpriteRendererComponent>())

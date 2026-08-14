@@ -12,18 +12,11 @@ namespace Wheatear {
 
 namespace Wheatear::SideCombatPlayerService {
 
+    // Per-frame player input. Edge (pressed-this-frame) semantics come from
+    // InputBindingService::IsActionPressed; this struct only carries the
+    // analog movement axes.
     struct PlayerInputState
     {
-        bool JumpPressed = false;
-        bool BasicPressed = false;
-        bool LauncherPressed = false;
-        bool MagicPressed = false;
-        bool SupportPressed = false;
-        bool DashPressed = false;
-        bool BreakLimitPressed = false;
-        bool Item1Pressed = false;
-        bool Item2Pressed = false;
-        bool Item3Pressed = false;
         float Horizontal = 0.0f;
         float Lane = 0.0f;
     };
@@ -32,7 +25,6 @@ namespace Wheatear::SideCombatPlayerService {
         SideCombatLevelComponent& level,
         Entity player,
         float dt,
-        const PlayerInputState& input,
-        const PlayerInputState& previousInput);
+        const PlayerInputState& input);
 
 } // namespace Wheatear::SideCombatPlayerService

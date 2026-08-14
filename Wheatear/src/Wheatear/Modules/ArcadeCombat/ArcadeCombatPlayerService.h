@@ -16,14 +16,10 @@ namespace Wheatear::ArcadeCombatPlayerService {
     {
         glm::vec2 Movement = { 0.0f, 0.0f };
         bool AttackHeld = false;
-        bool Weapon1Pressed = false;
-        bool Weapon2Pressed = false;
-        bool Weapon3Pressed = false;
     };
 
     WHEATEAR_API void UpdateWeaponSelection(Entity player,
-        const PlayerInputState& input,
-        const PlayerInputState& previousInput);
+        const PlayerInputState& input);
     WHEATEAR_API void UpdatePlayer(Scene* scene,
         ArcadeCombatLevelComponent& level,
         Entity player,
