@@ -82,13 +82,11 @@ namespace Wheatear {
         void Scan(const std::filesystem::path& projectRoot = {});
         bool WriteRegistry() const;
         const std::vector<EditorAssetMetadata>& GetAssets() const { return m_Assets; }
-        const EditorAssetMetadata* FindByPath(const std::filesystem::path& relativePath) const;
         EditorAssetMetadata* FindMutableByPath(const std::filesystem::path& relativePath);
         const EditorAssetMetadata* FindByUUID(UUID id) const;
 
         size_t GetAssetCount() const { return m_Assets.size(); }
         size_t GetReferenceCount() const;
-        bool HasScanned() const { return m_HasScanned; }
 
         static std::string KindToString(EditorAssetKind kind);
         static EditorAssetKind KindFromString(const std::string& value);

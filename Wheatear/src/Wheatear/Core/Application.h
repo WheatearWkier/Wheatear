@@ -37,7 +37,7 @@ namespace Wheatear {
 		std::filesystem::path WorkingDirectory;
 		std::filesystem::path ProjectRoot;
 		std::filesystem::path AssetDirectoryName = "assets";
-		bool EnableScripting = true;
+		bool EnableScripting = false;
 		ApplicationCommandLineArgs CommandLineArgs;
 	};
 
@@ -45,10 +45,7 @@ namespace Wheatear {
 	{
 	public:
 		explicit Application(const ApplicationSpecification& specification = ApplicationSpecification());
-		Application(const std::string& name = "Wheatear App",
-			ApplicationCommandLineArgs args = ApplicationCommandLineArgs(),
-			bool enableScripting = true);
-		virtual ~Application();
+				virtual ~Application();
 
 		void Run();
 

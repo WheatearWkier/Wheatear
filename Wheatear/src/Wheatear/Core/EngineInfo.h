@@ -6,8 +6,6 @@ namespace Wheatear {
     {
         inline constexpr const char* Name = "Wheatear";
         inline constexpr const char* EditorName = "Wheatear Editor";
-        inline constexpr const char* ScriptCoreAssemblyName = "Wheatear-ScriptCore";
-        inline constexpr const char* ScriptCoreAssemblyPath = "assets/scripts/Wheatear-ScriptCore.dll";
         inline constexpr const char* DefaultStartupScene = "assets/scenes/VisualNovelMainMenu.wt";
     }
 

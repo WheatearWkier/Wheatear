@@ -634,7 +634,7 @@ namespace Wheatear {
         {
             drawMenuIcon(m_IconPackage);
             if (ImGui::MenuItem(EditorLocale::Text("Package Player + Editor", "打包玩家 + 编辑器"), nullptr, false, !m_PlayerBuildRunning))
-                StartPlayerPackageBuild(false);
+                StartPlayerPackageBuild();
             drawMenuIcon(nullptr);
             if (ImGui::MenuItem(EditorLocale::Text("Open Player Folder", "打开玩家目录"), nullptr, false, !m_LastPlayerBuildDirectory.empty()))
                 EditorPlatform::OpenDirectory(m_LastPlayerBuildDirectory);
@@ -735,7 +735,7 @@ namespace Wheatear {
             {
                 m_PackageScenePath = m_PackageSceneInput;
                 m_PackageScenePickerOpen = false;
-                ExecutePlayerPackageBuild(m_PackageEnableScripts);
+                ExecutePlayerPackageBuild();
             }
             ImGui::SameLine();
             if (ImGui::Button("Cancel"))

@@ -15,7 +15,6 @@ namespace Wheatear {
     public:
         void OnImGuiRender();
         void SetOpen(bool open) { m_Open = open; }
-        bool IsOpen() const { return m_Open; }
 
     private:
         struct HelpTopic

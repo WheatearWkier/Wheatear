@@ -288,45 +288,6 @@ namespace Wheatear {
             texIndex, tilingFactor, entityID);
     }
 
-    void Renderer2D::DrawQuad(const glm::vec2& pos, const glm::vec2& size,
-        const glm::vec4& color)
-    {
-        DrawQuad(glm::vec3(pos, 0.0f), size, color);
-    }
-
-    void Renderer2D::DrawQuad(const glm::vec3& pos, const glm::vec2& size,
-        const glm::vec4& color)
-    {
-        DrawQuad(
-            glm::scale(glm::translate(glm::mat4(1.0f), pos),
-                { size.x, size.y, 1.0f }),
-            color);
-    }
-
-    void Renderer2D::DrawQuad(const glm::vec3& pos, const glm::vec2& size,
-        const Ref<Texture2D>& texture,
-        float tilingFactor, const glm::vec4& tintColor)
-    {
-        DrawQuad(
-            glm::scale(glm::translate(glm::mat4(1.0f), pos),
-                { size.x, size.y, 1.0f }),
-            texture, tilingFactor, tintColor);
-    }
-
-    void Renderer2D::DrawQuad(const glm::vec3& pos, const glm::vec2& size,
-        const Ref<SubTexture2D>& subTexture,
-        float tilingFactor, const glm::vec4& tintColor)
-    {
-        const glm::mat4 transform =
-            glm::scale(glm::translate(glm::mat4(1.0f), pos),
-                { size.x, size.y, 1.0f });
-        const float texIndex = GetOrAllocTextureSlot(subTexture->GetTexture());
-        SubmitQuadVertices(transform, tintColor,
-            subTexture->GetTexCoords(), texIndex, tilingFactor, -1);
-    }
-
-    //  DrawCircle
-
     void Renderer2D::DrawCircle(const glm::mat4& transform,
         const glm::vec4& color,
         float thickness, float fade, int entityID)

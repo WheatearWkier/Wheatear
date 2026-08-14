@@ -80,7 +80,6 @@ namespace Wheatear {
         bool ConsumePlayModeRuntimeCommands();
 
         // Play-mode pause / single-frame stepping (designer iteration aid).
-        bool IsPlayPaused() const { return m_PlayPaused; }
         void TogglePlayPause();
         void StepPlayFrame();
 
@@ -97,14 +96,11 @@ namespace Wheatear {
         // Unsaved-changes protection: any command executed through the editor
         // command history marks the scene dirty; New/Open/Exit ask first.
         void MarkSceneDirty() { m_SceneDirty = true; }
-        bool IsSceneDirty() const { return m_SceneDirty; }
 
         SceneState GetSceneState() const { return m_SceneState; }
         Ref<Scene> GetActiveScene() const { return m_ActiveScene; }
         const EditorCamera& GetEditorCamera() const { return m_EditorCamera; }
         EditorCamera& GetEditorCamera() { return m_EditorCamera; }
-        const glm::vec2& GetViewportSize() const { return m_ViewportSize; }
-        bool IsViewportHovered() const { return m_ViewportHovered; }
 
         SceneHierarchyPanel& GetHierarchyPanel();
         ContentBrowserPanel& GetContentBrowserPanel();
@@ -142,8 +138,8 @@ namespace Wheatear {
         void CommitPendingGizmoEdit();
         void CommitPendingUIEdit();
         void UpdateUITextFontDuringUIResize(Entity entity);
-        void StartPlayerPackageBuild(bool enableScripts = false);
-        void ExecutePlayerPackageBuild(bool enableScripts);
+        void StartPlayerPackageBuild();
+        void ExecutePlayerPackageBuild();
         void PollPlayerPackageBuild();
         void ProcessDeferredViewportAssetDrop();
         void SelectEditorEntity(Entity entity, bool preferMoveGizmo);
@@ -259,7 +255,6 @@ namespace Wheatear {
         bool m_PackageScenePickerOpen = false;
         std::string m_PackageScenePath;
         std::string m_PackageSceneInput;
-        bool m_PackageEnableScripts = false;
         std::string m_PackageConfiguration = "Debug";
         std::filesystem::path m_LastPlayerBuildDirectory;
         std::filesystem::path m_LastEditorBuildDirectory;

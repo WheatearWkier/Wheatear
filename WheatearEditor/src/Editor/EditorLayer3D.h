@@ -17,7 +17,6 @@ namespace Wheatear {
 
     protected:
 
-        void OnAttach3D();
 
         void OnBeginRender() override;
 

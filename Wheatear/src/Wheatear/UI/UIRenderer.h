@@ -98,7 +98,6 @@ namespace Wheatear {
     private:
         static uint32_t s_ViewportWidth;
         static uint32_t s_ViewportHeight;
-        static glm::mat4 s_SavedViewProjection;
 
     };
 

@@ -471,7 +471,6 @@ namespace Wheatear {
             output << "================================\n\n";
             output << "Startup Scene: " << options.StartupScene.generic_string() << "\n";
             output << "Configuration: " << options.Configuration << "\n";
-            output << "C# Scripts: " << (options.EnableScripts ? "enabled" : "disabled") << "\n";
             output << "Runtime Executable: WheatearSandbox.exe\n";
             output << "Editor Package: " << editorOutputDirectory.generic_string() << "\n";
             output << "Loose Runtime Data: text configs, scenes, scripts and shaders\n";
@@ -665,23 +664,11 @@ namespace Wheatear {
             return Fail("Failed to copy editor resources: " + errorMessage, editorOutputDirectory);
         }
 
-        const std::filesystem::path monoSource = AssetPath::GetProjectRoot() / "mono";
-        if (options.EnableScripts && !std::filesystem::exists(monoSource))
-            return Fail("Scripts are enabled, but the mono runtime directory was not found.", outputDirectory);
-
-        if (options.EnableScripts &&
-            std::filesystem::exists(monoSource) &&
-            !FileSystem::CopyDirectoryRecursive(monoSource, outputDirectory / "mono", {}, &errorMessage))
-        {
-            return Fail("Failed to copy mono runtime: " + errorMessage, outputDirectory);
-        }
-
         const std::filesystem::path startupScene = ResolvePackagedStartupScene(options, outputDirectory);
         const auto dependencyScanStarted = std::chrono::steady_clock::now();
         AssetDependencyScanOptions scanOptions;
         scanOptions.ProjectRoot = AssetPath::GetProjectRoot();
         scanOptions.StartupAsset = startupScene;
-        scanOptions.EnableScripts = options.EnableScripts;
         scanOptions.IncludeBuiltinAssets = true;
         scanOptions.IncludeUnusedAssets = false;
         const AssetDependencyReport dependencyReport = AssetDependencyScanner::BuildReport(scanOptions);
@@ -725,7 +712,6 @@ namespace Wheatear {
 
         RuntimePlayerConfig playerConfig;
         playerConfig.StartupScene = startupScene;
-        playerConfig.EnableScripts = options.EnableScripts;
         const auto configStarted = std::chrono::steady_clock::now();
         if (!SaveRuntimePlayerConfig(outputDirectory / "assets" / "game" / "player.config",
             playerConfig,
@@ -747,8 +733,7 @@ namespace Wheatear {
         result.Message = "Package completed: Player=" + outputDirectory.string() +
                 ", Editor=" + editorOutputDirectory.string() +
                 " (Sandbox uses " + kAssetPackFilename +
-                ", Editor uses WheatearEditor/assets, C# scripts " +
-                (options.EnableScripts ? "enabled" : "disabled") + ")";
+                ", Editor uses WheatearEditor/assets)";
         result.PackageDirectory = outputDirectory;
         result.EditorPackageDirectory = editorOutputDirectory;
         result.ExecutablePath = executablePath;

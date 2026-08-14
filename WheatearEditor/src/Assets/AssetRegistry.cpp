@@ -472,13 +472,6 @@ namespace Wheatear {
         return true;
     }
 
-    const EditorAssetMetadata* AssetRegistry::FindByPath(const std::filesystem::path& relativePath) const
-    {
-        const std::string normalized = NormalizePath(relativePath);
-        auto it = m_PathToIndex.find(normalized);
-        return it == m_PathToIndex.end() ? nullptr : &m_Assets[it->second];
-    }
-
     EditorAssetMetadata* AssetRegistry::FindMutableByPath(const std::filesystem::path& relativePath)
     {
         const std::string normalized = NormalizePath(relativePath);

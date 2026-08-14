@@ -20,7 +20,6 @@
 
 #include "Wheatear/Scene/Scene.h"
 #include "Wheatear/Scene/Entity.h"
-#include "Wheatear/Scene/ScriptableEntity.h"
 #include "Wheatear/Scene/Components.h"
 
 #include "Wheatear/ImGui/ImGuiLayer.h"
@@ -37,7 +36,6 @@
 #include "Wheatear/Renderer/Buffer.h"
 #include "Wheatear/Renderer/Framebuffer.h"
 #include "Wheatear/Renderer/Texture.h"
-#include "Wheatear/Renderer/SubTexture2D.h"
 #include "Wheatear/Renderer/VertexArray.h"
 #include "Wheatear/Renderer/Font.h"
 #include "Wheatear/Renderer/TextRenderer.h"

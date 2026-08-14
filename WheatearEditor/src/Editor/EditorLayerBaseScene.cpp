@@ -611,7 +611,7 @@ namespace Wheatear {
     // =========================================================================
     // =========================================================================
 
-    void EditorLayerBase::StartPlayerPackageBuild(bool enableScripts)
+    void EditorLayerBase::StartPlayerPackageBuild()
     {
         if (m_PlayerBuildRunning)
             return;
@@ -638,11 +638,10 @@ namespace Wheatear {
 
         m_PackageScenePath = m_EditorScenePath.generic_string();
         m_PackageSceneInput = m_PackageScenePath;
-        m_PackageEnableScripts = enableScripts;
         m_PackageScenePickerOpen = true;
     }
 
-    void EditorLayerBase::ExecutePlayerPackageBuild(bool enableScripts)
+    void EditorLayerBase::ExecutePlayerPackageBuild()
     {
         if (m_PlayerBuildRunning)
             return;
@@ -650,12 +649,10 @@ namespace Wheatear {
         PlayerPackageOptions options;
         options.StartupScene = m_PackageScenePath.empty() ? m_EditorScenePath : std::filesystem::path(m_PackageScenePath);
         options.Configuration = m_PackageConfiguration;
-        options.EnableScripts = enableScripts;
         options.IncludeDebugSymbols = false;
-
-        m_PlayerBuildStatus = enableScripts
-            ? "Packaging player and editor with C# scripts..."
-            : "Packaging player and editor without C# scripts...";
+        m_PlayerBuildStatus = "Packaging player and editor...";
+            
+            
         m_PlayerBuildRunning = true;
         m_PlayerBuildFuture = std::async(std::launch::async, [options]() mutable
         {

@@ -20,7 +20,6 @@ group ""
 
 group "Core"
     include "Wheatear"
-    include "Wheatear-ScriptCore"
 group ""
 
 group "Tools"

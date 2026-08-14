@@ -19,7 +19,6 @@ namespace Wheatear {
 
     uint32_t  UIRenderer::s_ViewportWidth = 1920;
     uint32_t  UIRenderer::s_ViewportHeight = 1080;
-    glm::mat4 UIRenderer::s_SavedViewProjection = glm::mat4(1.0f);
 
     static std::unordered_map<std::string, Ref<Font>> s_FontCache;
     static std::unordered_map<std::string, Ref<Texture2D>> s_UITextureCache;

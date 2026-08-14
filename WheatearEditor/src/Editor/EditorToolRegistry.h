@@ -51,10 +51,6 @@ namespace Wheatear {
             tools.push_back(std::move(descriptor));
         }
 
-        static void Clear()
-        {
-            Tools().clear();
-        }
 
         static void ForEach(const Visitor& visitor)
         {

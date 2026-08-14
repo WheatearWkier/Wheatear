@@ -99,20 +99,6 @@ namespace Wheatear
             return EngineInfo::DefaultStartupScene;
         }
 
-        static bool ReadPackageEnableScripts(ApplicationCommandLineArgs args)
-        {
-            for (int i = 1; i < args.Count; ++i)
-            {
-                const std::string argument = args[i];
-                if (argument == "--scripts" || argument == "--enable-scripts")
-                    return true;
-                if (argument == "--no-scripts" || argument == "--disable-scripts")
-                    return false;
-            }
-
-            return false;
-        }
-
         static bool ReadIncludeUnusedAssets(ApplicationCommandLineArgs args)
         {
             for (int i = 1; i < args.Count; ++i)
@@ -132,7 +118,6 @@ namespace Wheatear
             AssetDependencyScanOptions options;
             options.ProjectRoot = AssetPath::GetProjectRoot();
             options.StartupAsset = ReadStartupScene(args);
-            options.EnableScripts = ReadPackageEnableScripts(args);
             options.IncludeBuiltinAssets = true;
             options.IncludeUnusedAssets = ReadIncludeUnusedAssets(args);
 
@@ -182,7 +167,6 @@ namespace Wheatear
             PlayerPackageOptions options;
             options.StartupScene = ReadPackageStartupScene(args);
             options.Configuration = "Debug";
-            options.EnableScripts = ReadPackageEnableScripts(args);
             options.IncludeDebugSymbols = false;
 
             const PlayerPackageResult result = PlayerPackager::PackagePlayer(options);

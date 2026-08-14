@@ -46,7 +46,6 @@ namespace Wheatear {
         // UE-style content drawer: the panel folds into a floating bar at the
         // bottom of the editor instead of a docked window.
         void SetDrawerMode(bool on) { m_DrawerMode = on; }
-        bool IsDrawerMode() const { return m_DrawerMode; }
 
         // Double-click routing for scene / prefab / UI-template assets; the
         // editor layer registers these so the browser never touches the scene.

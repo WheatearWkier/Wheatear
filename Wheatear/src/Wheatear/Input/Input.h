@@ -9,8 +9,6 @@ namespace Wheatear {
 	enum class CursorMode
 	{
 		Normal = 0,
-		Hidden,
-		Locked
 	};
 
 	class Input

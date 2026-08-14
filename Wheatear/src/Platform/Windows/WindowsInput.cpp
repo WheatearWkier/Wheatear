@@ -88,14 +88,6 @@ namespace Wheatear {
 		case CursorMode::Normal:
 			glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
 			break;
-
-		case CursorMode::Hidden:
-			glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_HIDDEN);
-			break;
-
-		case CursorMode::Locked:
-			glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
-			break;
 		}
 	}
 

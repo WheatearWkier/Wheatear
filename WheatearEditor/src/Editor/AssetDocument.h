@@ -59,10 +59,6 @@ namespace Wheatear::EditorDocuments {
             m_Status = "Modified.";
         }
 
-        void ClearDirty()
-        {
-            m_Dirty = false;
-        }
 
         bool Load(size_t maxBytes = 2 * 1024 * 1024)
         {

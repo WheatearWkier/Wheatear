@@ -136,9 +136,5 @@ namespace Wheatear::EditorGameplayShell {
             ImGuiInputTextFlags_ReadOnly | ImGuiInputTextFlags_AllowTabInput);
     }
 
-    inline bool AdvancedModeToggle(bool& enabled, const char* label = "Advanced")
-    {
-        return ImGui::Checkbox(label ? label : "Advanced", &enabled);
-    }
 
 } // namespace Wheatear::EditorGameplayShell

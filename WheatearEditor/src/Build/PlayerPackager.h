@@ -11,7 +11,6 @@ namespace Wheatear {
         std::filesystem::path OutputDirectory;
         std::filesystem::path EditorOutputDirectory;
         std::string Configuration = "Debug";
-        bool EnableScripts = false;
         bool IncludeDebugSymbols = false;
     };
 

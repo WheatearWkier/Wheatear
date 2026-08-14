@@ -303,7 +303,6 @@
     <ClInclude Include="src\Wheatear\Renderer\RendererAPI.h" />
     <ClInclude Include="src\Wheatear\Renderer\SceneCamera.h" />
     <ClInclude Include="src\Wheatear\Renderer\Shader.h" />
-    <ClInclude Include="src\Wheatear\Renderer\SubTexture2D.h" />
     <ClInclude Include="src\Wheatear\Renderer\TextRenderer.h" />
     <ClInclude Include="src\Wheatear\Renderer\Texture.h" />
     <ClInclude Include="src\Wheatear\Renderer\UniformBuffer.h" />
@@ -329,7 +328,6 @@
     <ClInclude Include="src\Wheatear\Scene\SceneQueries.h" />
     <ClInclude Include="src\Wheatear\Scene\SceneSerializer.h" />
     <ClInclude Include="src\Wheatear\Scene\SceneSystemRegistry.h" />
-    <ClInclude Include="src\Wheatear\Scene\ScriptableEntity.h" />
     <ClInclude Include="src\Wheatear\Scene\Serialization\SceneSerializerComponentGroups.h" />
     <ClInclude Include="src\Wheatear\Scene\Serialization\SceneSerializerComponentSupport.h" />
     <ClInclude Include="src\Wheatear\Scripting\EventScript.h" />
@@ -840,7 +838,6 @@
     <ClCompile Include="src\Wheatear\Renderer\RendererAPI.cpp" />
     <ClCompile Include="src\Wheatear\Renderer\SceneCamera.cpp" />
     <ClCompile Include="src\Wheatear\Renderer\Shader.cpp" />
-    <ClCompile Include="src\Wheatear\Renderer\SubTexture2D.cpp" />
     <ClCompile Include="src\Wheatear\Renderer\TextRenderer.cpp" />
     <ClCompile Include="src\Wheatear\Renderer\Texture.cpp" />
     <ClCompile Include="src\Wheatear\Renderer\UniformBuffer.cpp" />

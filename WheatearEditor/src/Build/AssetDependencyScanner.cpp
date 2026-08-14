@@ -186,7 +186,6 @@ namespace Wheatear {
         }
 
         static void AddBuiltinAssets(const std::filesystem::path& projectRoot,
-            bool enableScripts,
             std::set<std::string>* assets,
             std::queue<std::string>* parseQueue,
             std::vector<AssetReferenceRecord>* missingReferences)
@@ -201,13 +200,6 @@ namespace Wheatear {
             TryAddAsset(projectRoot, "assets/fonts/licenses/WenQuanYiMicroHei/README.txt", {}, assets, nullptr, nullptr);
             TryAddAsset(projectRoot, "assets/fonts/licenses/WenQuanYiMicroHei/AUTHORS.txt", {}, assets, nullptr, nullptr);
             TryAddAsset(projectRoot, AssetAliasRegistry::Path("font.ui_fallback_sc", "assets/fonts/NotoSansSC-VF.ttf"), {}, assets, nullptr, nullptr);
-            TryAddAsset(projectRoot, AssetAliasRegistry::Path("font.latin", "assets/fonts/Open-Sans-2.ttf"), {}, assets, nullptr, nullptr);
-
-            if (enableScripts)
-            {
-                TryAddAsset(projectRoot, EngineInfo::ScriptCoreAssemblyPath, {}, assets, nullptr, nullptr);
-                TryAddAsset(projectRoot, "assets/scripts/Wheatear-ScriptCore.deps.json", {}, assets, nullptr, nullptr);
-            }
         }
 
         static void SortAndUnique(std::vector<std::filesystem::path>* paths)
@@ -284,7 +276,7 @@ namespace Wheatear {
         }
 
         if (options.IncludeBuiltinAssets)
-            AddBuiltinAssets(projectRoot, options.EnableScripts, &assets, &parseQueue, &report.MissingReferences);
+            AddBuiltinAssets(projectRoot, &assets, &parseQueue, &report.MissingReferences);
 
         while (!parseQueue.empty())
         {

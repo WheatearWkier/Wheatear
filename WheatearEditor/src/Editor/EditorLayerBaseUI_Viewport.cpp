@@ -413,7 +413,7 @@ namespace Wheatear {
             openToolByLabel("Project Health");
         sameLine();
         if (EditorWidgets::IconButton("##ToolbarPackage", m_IconPackage, "Package Player + Editor", iconSize, !m_PlayerBuildRunning))
-            StartPlayerPackageBuild(false);
+            StartPlayerPackageBuild();
         sameLine();
         if (EditorWidgets::IconButton("##ToolbarResetLayout", m_IconResetLayout, "Reset Window Layout", iconSize))
         {

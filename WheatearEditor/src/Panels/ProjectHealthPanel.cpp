@@ -66,7 +66,6 @@ namespace Wheatear {
         AssetDependencyScanOptions options;
         options.ProjectRoot = AssetPath::GetProjectRoot();
         options.StartupAsset = m_StartupScene;
-        options.EnableScripts = m_EnableScripts;
         options.IncludeBuiltinAssets = true;
         options.IncludeUnusedAssets = m_IncludeUnusedAssets;
 
@@ -123,7 +122,6 @@ namespace Wheatear {
 
         EditorWidgets::SectionHeader(EditorLocale::Text("Scan Scope", "扫描范围"), "The startup scene defines the package dependency closure.");
         EditorWidgets::InputString(EditorLocale::Text("Startup Scene", "启动场景"), m_StartupScene, 384);
-        ImGui::Checkbox(EditorLocale::Text("Enable C# Script Assets", "启用 C# 脚本资源"), &m_EnableScripts);
         ImGui::SameLine();
         ImGui::Checkbox(EditorLocale::Text("Scan Unused Assets", "扫描未使用资源"), &m_IncludeUnusedAssets);
 

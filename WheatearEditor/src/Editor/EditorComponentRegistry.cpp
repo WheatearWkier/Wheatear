@@ -36,11 +36,6 @@ namespace Wheatear {
         descriptors.push_back(std::move(descriptor));
     }
 
-    void EditorComponentRegistry::Clear()
-    {
-        Descriptors().clear();
-    }
-
     void EditorComponentRegistry::ForEach(const Visitor& visitor)
     {
         if (!visitor)

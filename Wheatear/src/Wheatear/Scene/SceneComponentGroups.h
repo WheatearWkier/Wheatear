@@ -15,7 +15,6 @@ namespace Wheatear {
         DirectionalLightComponent,
         PointLightComponent,
         CameraComponent,
-        NativeScriptComponent,
         Rigidbody2DComponent,
         BoxCollider2DComponent,
         CircleCollider2DComponent

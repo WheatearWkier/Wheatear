@@ -16,7 +16,6 @@ namespace Wheatear {
     private:
         void Load();
         void Save();
-        void DrawAliasList();
         void DrawAliasDetails();
         void DrawReferenceTools(const std::string& alias, const std::string& target);
         void ApplyReferenceReplacement(const std::string& searchText, const std::string& replacementText, bool dryRun);

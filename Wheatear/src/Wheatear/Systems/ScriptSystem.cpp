@@ -4,7 +4,6 @@
 #include "Wheatear/Scene/Scene.h"
 #include "Wheatear/Scene/Entity.h"
 #include "Wheatear/Scene/Components.h"
-#include "Wheatear/Scene/ScriptableEntity.h"
 #include "Wheatear/Scripting/ScriptEngine.h"
 
 namespace Wheatear {

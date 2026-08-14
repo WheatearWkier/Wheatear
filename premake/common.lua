@@ -1,9 +1,5 @@
 outputdir = "%{cfg.buildcfg}-%{cfg.system}-%{cfg.architecture}"
 
-newoption {
-    trigger = "csharp-scripting",
-    description = "Enable optional Mono/C# scripting support"
-}
 
 local vulkan_sdk = os.getenv("VULKAN_SDK")
 if not vulkan_sdk then
@@ -24,7 +20,6 @@ IncludeDir = {
     yaml_cpp      = "%{wks.location}/Wheatear/vendor/yaml-cpp/include",
     ImGuizmo      = "%{wks.location}/Wheatear/vendor/ImGuizmo",
     Box2D         = "%{wks.location}/Wheatear/vendor/Box2D/include",
-    mono          = "%{wks.location}/Wheatear/vendor/mono/include",
     miniaudio     = "%{wks.location}/Wheatear/vendor/miniaudio",
     VulkanSDK     = path.join(vulkan_sdk, "Include"),
 }
@@ -38,8 +33,6 @@ Library = {
     SPIRV_Cross_Release      = path.join(vulkan_sdk, "Lib/spirv-cross-core.lib"),
     SPIRV_Cross_GLSL_Release = path.join(vulkan_sdk, "Lib/spirv-cross-glsl.lib"),
 
-    mono_Debug   = "%{wks.location}/Wheatear/vendor/mono/lib/Debug/libmono-static-sgen.lib",
-    mono_Release = "%{wks.location}/Wheatear/vendor/mono/lib/Release/libmono-static-sgen.lib",
 }
 
 function wt_cpp_defaults()

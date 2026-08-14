@@ -588,9 +588,6 @@
     <ClInclude Include="src\Wheatear\Renderer\Shader.h">
       <Filter>src\Wheatear\Renderer</Filter>
     </ClInclude>
-    <ClInclude Include="src\Wheatear\Renderer\SubTexture2D.h">
-      <Filter>src\Wheatear\Renderer</Filter>
-    </ClInclude>
     <ClInclude Include="src\Wheatear\Renderer\TextRenderer.h">
       <Filter>src\Wheatear\Renderer</Filter>
     </ClInclude>
@@ -664,9 +661,6 @@
       <Filter>src\Wheatear\Scene</Filter>
     </ClInclude>
     <ClInclude Include="src\Wheatear\Scene\SceneSystemRegistry.h">
-      <Filter>src\Wheatear\Scene</Filter>
-    </ClInclude>
-    <ClInclude Include="src\Wheatear\Scene\ScriptableEntity.h">
       <Filter>src\Wheatear\Scene</Filter>
     </ClInclude>
     <ClInclude Include="src\Wheatear\Scene\Serialization\SceneSerializerComponentGroups.h">
@@ -2193,9 +2187,6 @@
       <Filter>src\Wheatear\Renderer</Filter>
     </ClCompile>
     <ClCompile Include="src\Wheatear\Renderer\Shader.cpp">
-      <Filter>src\Wheatear\Renderer</Filter>
-    </ClCompile>
-    <ClCompile Include="src\Wheatear\Renderer\SubTexture2D.cpp">
       <Filter>src\Wheatear\Renderer</Filter>
     </ClCompile>
     <ClCompile Include="src\Wheatear\Renderer\TextRenderer.cpp">

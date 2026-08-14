@@ -422,21 +422,12 @@ namespace Wheatear {
 
     } // namespace
 
-    void CommandBus::RegisterNativeCommandPrefix(const std::string& prefix)
-    {
-        RegisterCommandPrefix(NativeCommandPrefixes(), prefix);
-    }
 
     void CommandBus::RegisterGameplayCommandPrefix(const std::string& prefix)
     {
         RegisterCommandPrefix(GameplayCommandPrefixes(), prefix);
     }
 
-    void CommandBus::ClearRegisteredCommandPrefixes()
-    {
-        NativeCommandPrefixes().clear();
-        GameplayCommandPrefixes().clear();
-    }
 
     bool CommandBus::IsNativeCommand(const std::string& command)
     {

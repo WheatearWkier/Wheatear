@@ -6,30 +6,6 @@
 
 namespace Wheatear {
 
-    class ScriptableEntity;
-
-    struct NativeScriptComponent
-    {
-        ScriptableEntity* Instance = nullptr;
-
-        ScriptableEntity* (*InstantiateScript)() = nullptr;
-        void              (*DestroyScript)(NativeScriptComponent*) = nullptr;
-
-        template<typename T>
-        void Bind()
-        {
-            InstantiateScript = []() -> ScriptableEntity*
-                {
-                    return static_cast<ScriptableEntity*>(new T());
-                };
-            DestroyScript = [](NativeScriptComponent* nsc)
-                {
-                    delete nsc->Instance;
-                    nsc->Instance = nullptr;
-                };
-        }
-    };
-
     struct ScriptComponent
     {
         std::string ClassName;

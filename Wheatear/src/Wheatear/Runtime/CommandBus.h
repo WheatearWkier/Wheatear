@@ -27,9 +27,7 @@ namespace Wheatear {
     class WHEATEAR_API CommandBus
     {
     public:
-        static void RegisterNativeCommandPrefix(const std::string& prefix);
         static void RegisterGameplayCommandPrefix(const std::string& prefix);
-        static void ClearRegisteredCommandPrefixes();
 
         static bool IsNativeCommand(const std::string& command);
         static CommandResult Execute(Scene* scene, const std::string& command);

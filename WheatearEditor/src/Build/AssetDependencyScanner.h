@@ -17,7 +17,6 @@ namespace Wheatear {
     {
         std::filesystem::path ProjectRoot;
         std::filesystem::path StartupAsset;
-        bool EnableScripts = false;
         bool IncludeBuiltinAssets = true;
         bool IncludeUnusedAssets = true;
     };

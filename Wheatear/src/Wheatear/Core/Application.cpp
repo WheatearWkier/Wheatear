@@ -20,25 +20,7 @@ namespace Wheatear {
 
 	Application* Application::s_Instance = nullptr;
 
-	namespace {
 
-		static ApplicationSpecification CreateSpecification(const std::string& name,
-			ApplicationCommandLineArgs args,
-			bool enableScripting)
-		{
-			ApplicationSpecification specification;
-			specification.Name = name;
-			specification.CommandLineArgs = args;
-			specification.EnableScripting = enableScripting;
-			return specification;
-		}
-
-	} // namespace
-
-	Application::Application(const std::string& name, ApplicationCommandLineArgs args, bool enableScripting)
-		: Application(CreateSpecification(name, args, enableScripting))
-	{
-	}
 
 	Application::Application(const ApplicationSpecification& specification)
 		: m_Specification(specification)
