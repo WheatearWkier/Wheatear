@@ -70,7 +70,8 @@ namespace Wheatear {
             const std::string& sourceAsset,
             std::set<std::string>* assets,
             std::queue<std::string>* parseQueue,
-            std::vector<AssetReferenceRecord>* missingReferences)
+            std::vector<AssetReferenceRecord>* missingReferences,
+            const std::filesystem::path& builtinRoot = {})
         {
             if (!assets)
                 return false;
@@ -80,7 +81,13 @@ namespace Wheatear {
             if (!AssetDependencyScanner::IsPackableAsset(normalizedPath))
                 return false;
 
-            const std::filesystem::path sourcePath = projectRoot / normalizedPath;
+            // Engine built-ins (shaders/fonts/gameplay recipes) live under the
+            // builtin root; resolve project-first, builtin-root fallback.
+            const std::filesystem::path sourceRoot =
+                (!builtinRoot.empty() && !std::filesystem::exists(projectRoot / normalizedPath))
+                ? builtinRoot
+                : projectRoot;
+            const std::filesystem::path sourcePath = sourceRoot / normalizedPath;
             if (std::filesystem::is_directory(sourcePath))
             {
                 bool addedAny = false;
@@ -90,9 +97,9 @@ namespace Wheatear {
                     if (error || !entry.is_regular_file())
                         continue;
 
-                    const std::filesystem::path childPath = std::filesystem::relative(entry.path(), projectRoot, error);
+                    const std::filesystem::path childPath = std::filesystem::relative(entry.path(), sourceRoot, error);
                     if (!error)
-                        addedAny = TryAddAsset(projectRoot, childPath, sourceAsset, assets, parseQueue, missingReferences) || addedAny;
+                        addedAny = TryAddAsset(projectRoot, childPath, sourceAsset, assets, parseQueue, missingReferences, builtinRoot) || addedAny;
                 }
                 return addedAny;
             }
@@ -119,7 +126,8 @@ namespace Wheatear {
                 std::filesystem::path sheetPath = normalizedPath;
                 sheetPath.replace_extension(AssetFileType::SheetExtension);
                 if (AssetDependencyScanner::IsPackableAsset(sheetPath)
-                    && std::filesystem::is_regular_file(projectRoot / sheetPath))
+                    && (std::filesystem::is_regular_file(projectRoot / sheetPath)
+                        || (!builtinRoot.empty() && std::filesystem::is_regular_file(builtinRoot / sheetPath))))
                 {
                     assets->insert(
                         AssetDependencyScanner::NormalizeAssetReference(sheetPath.generic_string()));
@@ -133,19 +141,23 @@ namespace Wheatear {
             const std::string& sourceAsset,
             std::set<std::string>* assets,
             std::queue<std::string>* parseQueue,
-            std::vector<AssetReferenceRecord>* missingReferences)
+            std::vector<AssetReferenceRecord>* missingReferences,
+            const std::filesystem::path& builtinRoot = {})
         {
             const std::string normalized = AssetDependencyScanner::NormalizeAssetReference(reference);
             const size_t placeholder = normalized.find('{');
             if (placeholder == std::string::npos)
             {
-                TryAddAsset(projectRoot, normalized, sourceAsset, assets, parseQueue, missingReferences);
+                TryAddAsset(projectRoot, normalized, sourceAsset, assets, parseQueue, missingReferences, builtinRoot);
                 return;
             }
 
             const std::filesystem::path templatePath(normalized);
             const std::filesystem::path relativeDirectory = templatePath.parent_path();
-            const std::filesystem::path sourceDirectory = projectRoot / relativeDirectory;
+            const std::filesystem::path projectDirectory = projectRoot / relativeDirectory;
+            const std::filesystem::path sourceDirectory = builtinRoot.empty()
+                ? projectDirectory
+                : (std::filesystem::is_directory(projectDirectory) ? projectDirectory : builtinRoot / relativeDirectory);
             if (!std::filesystem::is_directory(sourceDirectory))
             {
                 if (missingReferences)
@@ -174,7 +186,7 @@ namespace Wheatear {
                     continue;
 
                 matchedAny = true;
-                TryAddAsset(projectRoot, relativeDirectory / filename, sourceAsset, assets, parseQueue, missingReferences);
+                TryAddAsset(projectRoot, relativeDirectory / filename, sourceAsset, assets, parseQueue, missingReferences, builtinRoot);
             }
 
             if (!matchedAny && missingReferences)
@@ -294,7 +306,12 @@ namespace Wheatear {
         }
 
         if (options.IncludeBuiltinAssets)
-            AddBuiltinAssets(projectRoot, &assets, &parseQueue, &report.MissingReferences);
+        {
+            const std::filesystem::path builtinRoot = options.BuiltinRoot.empty()
+                ? projectRoot
+                : options.BuiltinRoot;
+            AddBuiltinAssets(builtinRoot, &assets, &parseQueue, &report.MissingReferences);
+        }
 
         while (!parseQueue.empty())
         {
@@ -302,7 +319,15 @@ namespace Wheatear {
             parseQueue.pop();
 
             std::string text;
-            if (!ReadTextFile(projectRoot / current, &text))
+            // Engine built-ins (gameplay recipes etc.) live under the builtin
+            // root; read project-first, builtin-root fallback.
+            const std::filesystem::path builtinRoot = options.BuiltinRoot.empty()
+                ? projectRoot
+                : options.BuiltinRoot;
+            const std::filesystem::path projectSource = projectRoot / current;
+            const std::filesystem::path sourcePath =
+                std::filesystem::exists(projectSource) ? projectSource : builtinRoot / current;
+            if (!ReadTextFile(sourcePath, &text))
             {
                 report.Warnings.push_back("Could not parse dependency text asset: " + current);
                 continue;
@@ -313,7 +338,7 @@ namespace Wheatear {
             std::vector<std::string> references;
             ExtractAssetReferences(text, &references);
             for (const std::string& reference : references)
-                ExpandTemplateReference(projectRoot, reference, current, &assets, &parseQueue, &report.MissingReferences);
+                ExpandTemplateReference(projectRoot, reference, current, &assets, &parseQueue, &report.MissingReferences, builtinRoot);
 
             std::vector<std::string> sceneTransitions;
             ExtractSceneTransitionReferences(text, &sceneTransitions);

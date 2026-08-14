@@ -14,6 +14,7 @@
 
 #include <filesystem>
 #include <cstdlib>
+#include <fstream>
 #include <string>
 
 namespace Wheatear
@@ -25,6 +26,45 @@ namespace Wheatear
             return argument.rfind("--", 0) == 0;
         }
 
+        static std::filesystem::path GetEditorConfigDirectory()
+        {
+            if (const char* localAppData = std::getenv("LOCALAPPDATA"))
+                return std::filesystem::path(localAppData) / "Wheatear";
+            return std::filesystem::temp_directory_path() / "Wheatear";
+        }
+
+        static std::filesystem::path ReadLastProject()
+        {
+            std::ifstream input(GetEditorConfigDirectory() / "last_project.txt");
+            std::string line;
+            std::getline(input, line);
+            if (line.empty() || line[0] == '\0')
+                return {};
+            return std::filesystem::path(line);
+        }
+
+        static void WriteLastProject(const std::filesystem::path& projectRoot)
+        {
+            std::error_code error;
+            const std::filesystem::path configDirectory = GetEditorConfigDirectory();
+            std::filesystem::create_directories(configDirectory, error);
+            if (error)
+                return;
+            std::ofstream output(configDirectory / "last_project.txt", std::ios::trunc);
+            output << projectRoot.generic_string();
+        }
+
+        // Default project when nothing is specified: the repository's
+        // Projects/ directory, falling back to automatic discovery.
+        static std::filesystem::path DefaultProjectRoot()
+        {
+            const std::filesystem::path repositoryRoot = AssetPath::GetEngineRoot().parent_path();
+            const std::filesystem::path demoProject = repositoryRoot / "Projects" / "WheatearDemo";
+            if (std::filesystem::is_directory(demoProject / "assets"))
+                return demoProject;
+            return {};
+        }
+
         static ApplicationSpecification CreateEditorSpecification(ApplicationCommandLineArgs args)
         {
             ApplicationSpecification specification;
@@ -32,7 +72,7 @@ namespace Wheatear
             specification.CommandLineArgs = args;
 
             // Project root precedence: --project <dir> > WHEATEAR_PROJECT env >
-            // automatic discovery (nearest directory with an assets/ folder).
+            // last opened project > Projects/WheatearDemo > auto discovery.
             std::filesystem::path projectRoot;
             for (int i = 1; i < args.Count; ++i)
             {
@@ -48,6 +88,10 @@ namespace Wheatear
                 if (const char* env = std::getenv("WHEATEAR_PROJECT"); env && *env)
                     projectRoot = std::filesystem::path(env);
             }
+            if (projectRoot.empty())
+                projectRoot = ReadLastProject();
+            if (projectRoot.empty())
+                projectRoot = DefaultProjectRoot();
             specification.ProjectRoot = projectRoot.empty()
                 ? AssetPath::DiscoverProjectRoot()
                 : std::filesystem::absolute(projectRoot);
@@ -202,6 +246,27 @@ namespace Wheatear
 
         static int RunPackagePlayer(ApplicationCommandLineArgs args)
         {
+            // --project selects which project to package; otherwise the
+            // default project (Projects/WheatearDemo) or the engine root.
+            bool projectSet = false;
+            for (int i = 1; i < args.Count; ++i)
+            {
+                const std::string argument = args[i];
+                if (argument == "--project" && i + 1 < args.Count && !IsCommandOption(args[i + 1]))
+                {
+                    AssetPath::SetProjectRoot(std::filesystem::absolute(args[i + 1]));
+                    projectSet = true;
+                    break;
+                }
+            }
+            if (!projectSet)
+            {
+                const std::filesystem::path defaultProject = DefaultProjectRoot();
+                AssetPath::SetProjectRoot(defaultProject.empty()
+                    ? AssetPath::GetEngineRoot()
+                    : defaultProject);
+            }
+
             PlayerPackageOptions options;
             options.StartupScene = ReadPackageStartupScene(args);
             options.Configuration = ReadPackageConfiguration(args);

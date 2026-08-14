@@ -141,6 +141,10 @@ namespace Wheatear {
         s_State.EngineRoot = engineRoot.empty()
             ? s_State.ProjectRoot
             : FileSystem::Normalize(engineRoot);
+        // Defensive: a bare engine root still leaves a usable project root
+        // (callers that switch projects set the project root explicitly).
+        if (s_State.ProjectRoot.empty())
+            s_State.ProjectRoot = s_State.EngineRoot;
         s_State.Initialized = true;
     }
 

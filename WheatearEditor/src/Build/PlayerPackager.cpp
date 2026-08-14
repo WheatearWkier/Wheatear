@@ -343,7 +343,21 @@ namespace Wheatear {
                 && extension != ".woff2";
         }
 
+        // Engine built-ins (shaders/fonts/gameplay) live under the engine root
+        // while project assets live under the project root; resolve source
+        // files project-first, engine-root fallback.
+        static std::filesystem::path ResolveSourcePath(const std::filesystem::path& projectRoot,
+            const std::filesystem::path& builtinRoot,
+            const std::filesystem::path& relativePath)
+        {
+            const std::filesystem::path projectSource = projectRoot / relativePath;
+            if (std::filesystem::exists(projectSource))
+                return projectSource;
+            return builtinRoot / relativePath;
+        }
+
         static bool CopyLooseRuntimeDataAssets(const std::filesystem::path& projectRoot,
+            const std::filesystem::path& builtinRoot,
             const std::vector<std::filesystem::path>& packageAssets,
             const std::filesystem::path& outputDirectory,
             std::string* errorMessage)
@@ -354,7 +368,8 @@ namespace Wheatear {
                 if (!IsLooseRuntimeDataAsset(relativePath))
                     continue;
 
-                const std::filesystem::path sourcePath = projectRoot / relativePath;
+                const std::filesystem::path sourcePath =
+                    ResolveSourcePath(projectRoot, builtinRoot, relativePath);
                 const std::filesystem::path targetPath = outputDirectory / relativePath;
                 std::filesystem::create_directories(targetPath.parent_path(), error);
                 if (error)
@@ -431,6 +446,7 @@ namespace Wheatear {
         }
 
         static bool WriteAssetPack(const std::filesystem::path& projectRoot,
+            const std::filesystem::path& builtinRoot,
             const std::vector<std::filesystem::path>& assets,
             const std::filesystem::path& packPath,
             std::string* errorMessage)
@@ -458,7 +474,7 @@ namespace Wheatear {
                 }
 
                 std::vector<unsigned char> sourceBytes;
-                if (!ReadBinaryFile(projectRoot / entryPath, &sourceBytes))
+                if (!ReadBinaryFile(ResolveSourcePath(projectRoot, builtinRoot, entryPath), &sourceBytes))
                 {
                     if (errorMessage)
                         *errorMessage = "Could not read asset for pack: " + entryPath;
@@ -727,9 +743,11 @@ namespace Wheatear {
         }
 
         const std::filesystem::path startupScene = ResolvePackagedStartupScene(options, outputDirectory);
+        const std::filesystem::path engineRoot = AssetPath::GetEngineRoot();
         const auto dependencyScanStarted = std::chrono::steady_clock::now();
         AssetDependencyScanOptions scanOptions;
         scanOptions.ProjectRoot = AssetPath::GetProjectRoot();
+        scanOptions.BuiltinRoot = engineRoot;
         scanOptions.StartupAsset = startupScene;
         scanOptions.IncludeBuiltinAssets = true;
         scanOptions.IncludeUnusedAssets = false;
@@ -757,12 +775,12 @@ namespace Wheatear {
 
         const std::filesystem::path assetPackPath = outputDirectory / kAssetPackFilename;
         const auto writePackStarted = std::chrono::steady_clock::now();
-        if (!WriteAssetPack(AssetPath::GetProjectRoot(), packageAssets, assetPackPath, &errorMessage))
+        if (!WriteAssetPack(AssetPath::GetProjectRoot(), engineRoot, packageAssets, assetPackPath, &errorMessage))
             return Fail("Failed to write asset pack: " + errorMessage, outputDirectory);
         LogTimedStep("Asset pack write", writePackStarted);
 
         const auto copyLooseStarted = std::chrono::steady_clock::now();
-        if (!CopyLooseRuntimeDataAssets(AssetPath::GetProjectRoot(), packageAssets, outputDirectory, &errorMessage))
+        if (!CopyLooseRuntimeDataAssets(AssetPath::GetProjectRoot(), engineRoot, packageAssets, outputDirectory, &errorMessage))
             return Fail("Failed to copy loose runtime data assets: " + errorMessage, outputDirectory);
         LogTimedStep("Loose runtime data copy", copyLooseStarted);
 

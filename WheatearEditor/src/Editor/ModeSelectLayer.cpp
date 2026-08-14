@@ -12,6 +12,7 @@
 #include <imgui/imgui.h>
 
 #include <filesystem>
+#include <cstdlib>
 #include <fstream>
 
 namespace Wheatear {
@@ -19,6 +20,28 @@ namespace Wheatear {
     namespace {
 
         constexpr const char* kProjectsDirectoryName = "Projects";
+
+        // Projects live next to the engine repository (engine root's parent),
+        // not inside the active project.
+        std::filesystem::path ProjectsRoot()
+        {
+            return AssetPath::GetEngineRoot().parent_path() / kProjectsDirectoryName;
+        }
+
+        void WriteLastProject(const std::filesystem::path& projectRoot)
+        {
+            std::error_code error;
+            std::filesystem::path configDirectory;
+            if (const char* localAppData = std::getenv("LOCALAPPDATA"))
+                configDirectory = std::filesystem::path(localAppData) / "Wheatear";
+            else
+                configDirectory = std::filesystem::temp_directory_path() / "Wheatear";
+            std::filesystem::create_directories(configDirectory, error);
+            if (error)
+                return;
+            std::ofstream output(configDirectory / "last_project.txt", std::ios::trunc);
+            output << projectRoot.generic_string();
+        }
 
         // Minimal scene template for newly created projects: an orthogonal
         // camera entity, ready for 2D content.
@@ -313,6 +336,7 @@ namespace Wheatear {
         AssetPath::SetProjectRoot(projectRoot);
         AssetRegistry::Get().Scan(projectRoot);
         AssetRegistry::Get().WriteRegistry();
+        WriteLastProject(projectRoot);
 
         m_ProjectMessage = "Active project: " + AssetPath::GetProjectRoot().string();
         m_ProjectListDirty = true;
@@ -327,13 +351,12 @@ namespace Wheatear {
         ImGui::TextDisabled("当前: %s", AssetPath::GetProjectRoot().string().c_str());
         ImGui::Dummy(ImVec2(0.0f, 8.0f));
 
-        // Projects discovered under <engine>/Projects (next to the active
-        // project's parent directory).
+        // Projects discovered under <engine>/Projects (next to the engine
+        // repository, independent of the active project).
         if (m_ProjectListDirty)
         {
             m_ProjectList.clear();
-            const std::filesystem::path projectsRoot =
-                AssetPath::GetProjectRoot().parent_path() / kProjectsDirectoryName;
+            const std::filesystem::path projectsRoot = ProjectsRoot();
             std::error_code error;
             if (std::filesystem::is_directory(projectsRoot, error))
             {
@@ -377,7 +400,7 @@ namespace Wheatear {
             else
             {
                 const std::filesystem::path projectRoot =
-                    AssetPath::GetProjectRoot().parent_path() / kProjectsDirectoryName / name;
+                    ProjectsRoot() / name;
                 std::error_code error;
                 if (std::filesystem::exists(projectRoot, error))
                 {

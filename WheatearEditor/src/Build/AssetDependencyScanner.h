@@ -16,6 +16,10 @@ namespace Wheatear {
     struct AssetDependencyScanOptions
     {
         std::filesystem::path ProjectRoot;
+        // Root that provides engine built-ins (shaders / fonts / gameplay
+        // recipes). Defaults to ProjectRoot; multi-project setups pass the
+        // engine root here.
+        std::filesystem::path BuiltinRoot;
         std::filesystem::path StartupAsset;
         bool IncludeBuiltinAssets = true;
         bool IncludeUnusedAssets = true;

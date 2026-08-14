@@ -222,7 +222,9 @@ powershell -NoProfile -ExecutionPolicy Bypass -File scripts\Build-WheatearEditor
 
 ## 代码结构
 
-- `Wheatear/`：运行时引擎
-- `WheatearEditor/`：编辑器和内容生产工具
+- `Wheatear/`：运行时引擎（渲染/ECS/资产/动画/输入/物理/玩法模块）
+- `WheatearEditor/`：编辑器和内容生产工具（含引擎内置资源 assets/shaders、fonts、gameplay）
 - `WheatearSandbox/`：独立运行器
+- `Projects/`：用户项目目录（`WheatearDemo/` 是 Sandbox 演示项目，含场景/图集/数据表）
 - `docs/`：设计文档、系统说明和竖切记录
+- `Builds/Windows/Player/`：打包产物（exe + content.wtpack + 解包缓存）

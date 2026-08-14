@@ -380,6 +380,17 @@ static std::filesystem::path ReadProjectArgument(const Wheatear::ApplicationComm
 	return {};
 }
 
+// Default project when running loose from the engine repository (no wtpack,
+// no --project): Projects/WheatearDemo, falling back to discovery.
+static std::filesystem::path DefaultProjectRoot()
+{
+	const std::filesystem::path repositoryRoot = Wheatear::AssetPath::GetEngineRoot().parent_path();
+	const std::filesystem::path demoProject = repositoryRoot / "Projects" / "WheatearDemo";
+	if (std::filesystem::is_directory(demoProject / "assets"))
+		return demoProject;
+	return {};
+}
+
 static Wheatear::ApplicationSpecification CreateWheatearSandboxSpecification(
 	const Wheatear::ApplicationCommandLineArgs& args)
 {
@@ -400,9 +411,16 @@ static Wheatear::ApplicationSpecification CreateWheatearSandboxSpecification(
 	}
 
 	const std::filesystem::path packagedAssetRoot = PreparePackagedAssetRoot();
-	specification.ProjectRoot = packagedAssetRoot.empty()
-		? Wheatear::AssetPath::DiscoverProjectRoot()
-		: packagedAssetRoot;
+	if (!packagedAssetRoot.empty())
+	{
+		specification.ProjectRoot = packagedAssetRoot;
+		return specification;
+	}
+
+	const std::filesystem::path defaultProject = DefaultProjectRoot();
+	specification.ProjectRoot = !defaultProject.empty()
+		? defaultProject
+		: Wheatear::AssetPath::DiscoverProjectRoot();
 	return specification;
 }
 
