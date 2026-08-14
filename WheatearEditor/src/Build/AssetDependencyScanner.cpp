@@ -107,6 +107,24 @@ namespace Wheatear {
             const bool inserted = assets->insert(normalized).second;
             if (inserted && parseQueue && AssetDependencyScanner::ShouldParseDependencies(normalizedPath))
                 parseQueue->push(normalized);
+
+            // Runtime sheet convention: a .wtsheet next to an atlas texture is
+            // probed at runtime (e.g. SideCombatVisualService swaps the sheet
+            // extension for tuning-driven clips), even when no scene text
+            // references it statically. Pack it alongside the texture so
+            // packaged players keep the full sheet pipeline.
+            const std::string extension = normalizedPath.extension().generic_string();
+            if (extension == ".png" || extension == ".jpg" || extension == ".jpeg")
+            {
+                std::filesystem::path sheetPath = normalizedPath;
+                sheetPath.replace_extension(AssetFileType::SheetExtension);
+                if (AssetDependencyScanner::IsPackableAsset(sheetPath)
+                    && std::filesystem::is_regular_file(projectRoot / sheetPath))
+                {
+                    assets->insert(
+                        AssetDependencyScanner::NormalizeAssetReference(sheetPath.generic_string()));
+                }
+            }
             return inserted;
         }
 
@@ -420,6 +438,7 @@ namespace Wheatear {
             || extension == AssetFileType::PrefabExtension
             || extension == AssetFileType::MaterialExtension
             || extension == AssetFileType::AnimationClipExtension
+            || extension == AssetFileType::SheetExtension
             || extension == ".vn"
             || extension == ".wts"
             || extension == ".yaml"
