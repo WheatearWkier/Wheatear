@@ -2,6 +2,10 @@
 #include "SpriteAnimatorDrawer.h"
 #include "../ComponentDrawers.h"
 #include "Editor/EditorLocale.h"
+#include "Editor/EditorWidgets.h"
+#include "Wheatear/Animation/AnimationClip.h"
+#include "Wheatear/Animation/AnimationClipSerializer.h"
+#include "Wheatear/Assets/AssetPath.h"
 #include <imgui/imgui.h>
 #include "Wheatear/Scene/Components.h"
 
@@ -46,6 +50,35 @@ namespace Wheatear {
                     for (const auto& [name, path] : c.ExternalClipAssets)
                         ImGui::BulletText("%s -> %s", name.c_str(), path.c_str());
                 }
+
+                // Quick-bind a .wtanim asset to this entity without opening
+                // the Animation Editor: picking a file loads it into Clips
+                // and records the (name -> asset) binding.
+                ImGui::Separator();
+                static std::string quickClipPath;
+                if (EditorWidgets::DrawAssetReferenceField(
+                        EditorLocale::Text("Load .wtanim", "加载 .wtanim"),
+                        quickClipPath, EditorWidgets::AssetReferenceKind::AnimationClip, 512))
+                {
+                    Ref<AnimationClip> loaded =
+                        AnimationClipSerializer::Load(AssetPath::Resolve(quickClipPath));
+                    if (loaded)
+                    {
+                        c.AddClip(loaded);
+                        c.BindExternalClipAsset(loaded->GetName(), quickClipPath);
+                        if (c.DefaultClipName.empty())
+                            c.DefaultClipName = loaded->GetName();
+                        c.Play(loaded->GetName());
+                        WT_CORE_INFO("Loaded animation clip asset: {}", quickClipPath);
+                    }
+                    else
+                    {
+                        WT_CORE_ERROR("Failed to load animation clip asset: {}", quickClipPath);
+                    }
+                }
+                EditorWidgets::HelpTooltip(EditorLocale::Text(
+                    "Loads a .wtanim clip and binds it to this entity. The same asset can drive any number of entities.",
+                    "加载 .wtanim 片段并绑定到当前实体。同一资产可驱动任意多个实体。"));
             });
     }
 
