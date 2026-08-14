@@ -65,7 +65,9 @@ namespace Wheatear {
                 ImGui::DragFloat(EditorLocale::Text("Tiling Factor", "平铺系数"), &c.TilingFactor, 0.1f, 0.0f, 100.0f);
                 ImGui::DragFloat(EditorLocale::Text("Pixels Per Unit", "像素/单位"), &c.PixelsPerUnit, 1.0f, 0.0f, 1000.0f, "%.1f");
                 if (ImGui::IsItemHovered(ImGuiHoveredFlags_DelayShort))
-                    ImGui::SetTooltip("0 = quad is 1x1 x scale (legacy). >0 renders at true content size (content pixels / PPU), keeps aspect ratio and sizes colliders driven by sheet cells.");
+                    ImGui::SetTooltip("%s", EditorLocale::Text(
+                        "0 = quad is 1x1 x scale (legacy). >0 renders at true content size (content pixels / PPU), keeps aspect ratio and sizes colliders driven by sheet cells.",
+                        "0 = 旧行为（quad 为 1×1×缩放）。>0 时按真实内容尺寸渲染（内容像素 ÷ PPU），保持宽高比，也是格子碰撞框的换算基准。"));
                 ImGui::DragFloat2(EditorLocale::Text("Draw Offset", "绘制偏移"), glm::value_ptr(c.DrawOffset), 0.01f);
                 ImGui::DragFloat2(EditorLocale::Text("Draw Scale", "绘制缩放"), glm::value_ptr(c.DrawScale), 0.01f);
                 if (ImGui::Button(EditorLocale::Text("Open Sprite Sheet Picker", "打开序列帧选择器")))

@@ -50,7 +50,9 @@ namespace Wheatear {
                 ImGui::DragFloat(EditorLocale::Text("Restitution Threshold", "弹性阈值"), &c.RestitutionThreshold, 0.01f, 0.0f);
                 ImGui::Checkbox(EditorLocale::Text("Follow Animation", "跟随动画"), &c.FollowAnimation);
                 if (ImGui::IsItemHovered(ImGuiHoveredFlags_DelayShort))
-                    ImGui::SetTooltip("When the entity's sprite is a sheet cell (static or animated), the box follows the cell's collision box every frame. Requires Pixels Per Unit > 0 on the Sprite Renderer.");
+                    ImGui::SetTooltip("%s", EditorLocale::Text(
+                        "When the entity's sprite is a sheet cell (static or animated), the box follows the cell's collision box every frame. Requires Pixels Per Unit > 0 on the Sprite Renderer.",
+                        "当实体精灵是图集格子（静态或动画）时，碰撞框每帧跟随格子的碰撞框变化。需要精灵渲染器上设置像素/单位 > 0。"));
             });
     }
 

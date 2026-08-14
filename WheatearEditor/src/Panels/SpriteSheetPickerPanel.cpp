@@ -498,7 +498,7 @@ namespace Wheatear {
         {
             m_Trims.clear();
             m_Trims.resize(std::max(1, m_Cols) * std::max(1, m_Rows));
-            m_LastAction = "Cleared all trims.";
+            m_LastAction = EditorLocale::Text("Cleared all trims.", "已清除全部裁切。");
         }
 
         ImGui::Separator();
@@ -516,15 +516,15 @@ namespace Wheatear {
         const bool hasTrim = trim.Width > 0 && trim.Height > 0;
         if (hasTrim)
         {
-            ImGui::TextDisabled("Content: %d x %d px", trim.Width, trim.Height);
+            ImGui::TextDisabled(EditorLocale::Text("Content: %d x %d px", "内容: %d x %d 像素"), trim.Width, trim.Height);
             ImGui::SetNextItemWidth(90.0f);
-            ImGui::DragInt("Left", &trim.Left, 1, 0, std::max(0, cellWidth - 1));
+            ImGui::DragInt(EditorLocale::Text("Left", "左"), &trim.Left, 1, 0, std::max(0, cellWidth - 1));
             ImGui::SetNextItemWidth(90.0f);
-            ImGui::DragInt("Top", &trim.Top, 1, 0, std::max(0, cellHeight - 1));
+            ImGui::DragInt(EditorLocale::Text("Top", "上"), &trim.Top, 1, 0, std::max(0, cellHeight - 1));
             ImGui::SetNextItemWidth(90.0f);
-            ImGui::DragInt("Width", &trim.Width, 1, 1, cellWidth);
+            ImGui::DragInt(EditorLocale::Text("Width", "宽"), &trim.Width, 1, 1, cellWidth);
             ImGui::SetNextItemWidth(90.0f);
-            ImGui::DragInt("Height", &trim.Height, 1, 1, cellHeight);
+            ImGui::DragInt(EditorLocale::Text("Height", "高"), &trim.Height, 1, 1, cellHeight);
             if (ImGui::SmallButton(EditorLocale::Text("Reset Trim", "重置裁切")))
                 trim = SpriteSheetData::CellTrim{};
         }
@@ -543,7 +543,9 @@ namespace Wheatear {
         ImGui::Separator();
         ImGui::Checkbox(EditorLocale::Text("Collision Box", "碰撞框"), &trim.HasCollider);
         if (ImGui::IsItemHovered(ImGuiHoveredFlags_DelayShort))
-            ImGui::SetTooltip("Optional per-cell collision box. Entities with 'Follow Animation' enabled on their Box Collider 2D follow this box every frame (requires Pixels Per Unit > 0).");
+            ImGui::SetTooltip("%s", EditorLocale::Text(
+                "Optional per-cell collision box. Entities with 'Follow Animation' enabled on their Box Collider 2D follow this box every frame (requires Pixels Per Unit > 0).",
+                "每格可选的碰撞框。实体上勾选了『跟随动画』的 Box Collider 2D 每帧跟随此框（需要精灵渲染器上设置像素/单位 > 0）。"));
         if (trim.HasCollider)
         {
             // Default to the trimmed content when enabling.
@@ -555,13 +557,13 @@ namespace Wheatear {
                 trim.ColliderHeight = hasTrim ? trim.Height : cellHeight;
             }
             ImGui::SetNextItemWidth(90.0f);
-            ImGui::DragInt("C. Left", &trim.ColliderLeft, 1, 0, std::max(0, cellWidth - 1));
+            ImGui::DragInt(EditorLocale::Text("C. Left", "碰撞左"), &trim.ColliderLeft, 1, 0, std::max(0, cellWidth - 1));
             ImGui::SetNextItemWidth(90.0f);
-            ImGui::DragInt("C. Top", &trim.ColliderTop, 1, 0, std::max(0, cellHeight - 1));
+            ImGui::DragInt(EditorLocale::Text("C. Top", "碰撞上"), &trim.ColliderTop, 1, 0, std::max(0, cellHeight - 1));
             ImGui::SetNextItemWidth(90.0f);
-            ImGui::DragInt("C. Width", &trim.ColliderWidth, 1, 1, cellWidth);
+            ImGui::DragInt(EditorLocale::Text("C. Width", "碰撞宽"), &trim.ColliderWidth, 1, 1, cellWidth);
             ImGui::SetNextItemWidth(90.0f);
-            ImGui::DragInt("C. Height", &trim.ColliderHeight, 1, 1, cellHeight);
+            ImGui::DragInt(EditorLocale::Text("C. Height", "碰撞高"), &trim.ColliderHeight, 1, 1, cellHeight);
         }
     }
 
