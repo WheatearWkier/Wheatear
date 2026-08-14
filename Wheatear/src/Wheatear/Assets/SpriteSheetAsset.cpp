@@ -5,6 +5,7 @@
 
 #include <yaml-cpp/yaml.h>
 
+#include <chrono>
 #include <filesystem>
 #include <fstream>
 #include <unordered_map>
@@ -29,10 +30,29 @@ namespace Wheatear {
                 return cache;
             }
 
+            // File-system probes (exists + last_write_time) are the hot path
+            // of per-frame sheet resolution. Throttle them so scenes with many
+            // sheet entities do not issue dozens of syscalls per frame; a
+            // sub-second delay on sheet edits is imperceptible in the editor.
+            constexpr auto kSheetProbeInterval = std::chrono::milliseconds(250);
+            std::chrono::steady_clock::time_point& SheetProbeClock()
+            {
+                static std::chrono::steady_clock::time_point last;
+                return last;
+            }
+
             const CachedSheet* GetCachedSheet(const std::string& sheetPath)
             {
                 if (sheetPath.empty())
                     return nullptr;
+
+                const auto now = std::chrono::steady_clock::now();
+                const bool probeFiles = (now - SheetProbeClock()) >= kSheetProbeInterval;
+                CachedSheet& cached = SheetCache()[sheetPath];
+                if (probeFiles)
+                    SheetProbeClock() = now;
+                else if (cached.Loaded)
+                    return &cached;
 
                 // Runtime data resolution handles both loose editor files and
                 // the packaged content.wtpack (same convention as .vn/.wts).
@@ -42,7 +62,6 @@ namespace Wheatear {
                     ? std::filesystem::last_write_time(resolved, error)
                     : std::filesystem::file_time_type{};
 
-                CachedSheet& cached = SheetCache()[sheetPath];
                 if (cached.Loaded && cached.WriteTime == writeTime)
                     return &cached;
 

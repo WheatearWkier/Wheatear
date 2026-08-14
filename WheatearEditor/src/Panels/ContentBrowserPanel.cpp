@@ -243,6 +243,18 @@ namespace Wheatear {
         std::vector<std::filesystem::directory_entry> result;
         const std::string filter = StringUtils::ToLower(m_SearchBuffer);
 
+        // Cache the scan per (directory, filter) so the grid does not hit the
+        // file system on every frame for large folders; a quarter-second
+        // staleness is imperceptible for asset browsing.
+        constexpr auto kEntryScanInterval = std::chrono::milliseconds(250);
+        const auto now = std::chrono::steady_clock::now();
+        if (m_EntryCacheDir == m_CurrentDirectory
+            && m_EntryCacheFilter == filter
+            && (now - m_LastEntryScan) < kEntryScanInterval)
+        {
+            return m_EntryCache;
+        }
+
         if (!std::filesystem::exists(m_CurrentDirectory))
             return result;
 
@@ -268,7 +280,11 @@ namespace Wheatear {
                     < StringUtils::ToLower(b.path().filename().string());
             });
 
-        return result;
+        m_EntryCache = result;
+        m_EntryCacheDir = m_CurrentDirectory;
+        m_EntryCacheFilter = filter;
+        m_LastEntryScan = std::chrono::steady_clock::now();
+        return m_EntryCache;
     }
 
     void ContentBrowserPanel::OpenEntry(const std::filesystem::path& path)

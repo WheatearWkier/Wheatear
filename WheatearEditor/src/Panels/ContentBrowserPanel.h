@@ -4,6 +4,7 @@
 #include "Wheatear/Assets/SpriteSheetAsset.h"
 #include "Wheatear/Renderer/Texture.h"
 
+#include <chrono>
 #include <filesystem>
 #include <string>
 #include <unordered_map>
@@ -133,6 +134,13 @@ namespace Wheatear {
             Ref<Texture2D> Texture;
         };
         std::unordered_map<std::string, SheetCellCacheEntry> m_SheetCellCache;
+
+        // Scanned-entry cache (dir + search filter keyed) so the grid does not
+        // hit the file system every frame on large folders.
+        mutable std::vector<std::filesystem::directory_entry> m_EntryCache;
+        mutable std::filesystem::path m_EntryCacheDir;
+        mutable std::string m_EntryCacheFilter;
+        mutable std::chrono::steady_clock::time_point m_LastEntryScan;
 
         std::function<void(const std::filesystem::path&)> m_OnOpenScene;
         std::function<void(const std::filesystem::path&)> m_OnInstantiatePrefab;
