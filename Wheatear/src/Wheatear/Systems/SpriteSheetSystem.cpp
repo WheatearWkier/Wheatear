@@ -40,16 +40,23 @@ namespace Wheatear {
 
     void SpriteSheetSystem::ApplyColliderToEntity(Entity entity, const SpriteSheetAsset::ResolvedCell& resolved)
     {
-        if (!entity || !resolved.HasCollider)
+        if (Scene* scene = entity.GetScene())
+            ApplyColliderToEntity(scene->GetRegistry(), entity, resolved);
+    }
+
+    void SpriteSheetSystem::ApplyColliderToEntity(entt::registry& registry, entt::entity entity,
+        const SpriteSheetAsset::ResolvedCell& resolved)
+    {
+        if (entity == entt::null || !resolved.HasCollider)
             return;
-        if (!entity.HasComponent<BoxCollider2DComponent>())
+        if (!registry.all_of<BoxCollider2DComponent>(entity))
             return;
-        auto& box = entity.GetComponent<BoxCollider2DComponent>();
+        auto& box = registry.get<BoxCollider2DComponent>(entity);
         if (!box.FollowAnimation)
             return;
-        if (!entity.HasComponent<SpriteRendererComponent>())
+        if (!registry.all_of<SpriteRendererComponent>(entity))
             return;
-        const float ppu = entity.GetComponent<SpriteRendererComponent>().PixelsPerUnit;
+        const float ppu = registry.get<SpriteRendererComponent>(entity).PixelsPerUnit;
         if (ppu <= 0.0f)
             return;
 

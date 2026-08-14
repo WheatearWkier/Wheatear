@@ -2,16 +2,20 @@
 #include "SideCombatVisualService.h"
 
 #include "Wheatear/Animation/AnimationClip.h"
+#include "Wheatear/Assets/AssetPath.h"
+#include "Wheatear/Assets/SpriteSheetAsset.h"
 #include "Wheatear/Gameplay/Services/GameplayTextService.h"
 #include "Wheatear/Gameplay/Services/GameplayVisualService.h"
 #include "Wheatear/Renderer/Texture.h"
 #include "Wheatear/Scene/Components.h"
 #include "Wheatear/Scene/Scene.h"
 #include "Wheatear/Scene/SceneQueries.h"
+#include "Wheatear/Systems/SpriteSheetSystem.h"
 
 #include <algorithm>
 #include <cmath>
 #include <cstdint>
+#include <filesystem>
 
 namespace Wheatear::SideCombatVisualService {
 
@@ -79,6 +83,20 @@ namespace Wheatear::SideCombatVisualService {
             auto animationClip = AnimationClip::Create(key, clipTuning.Loop);
             const float duration = 1.0f / std::max(1.0f, clipTuning.FrameRate);
             const int frameCount = std::max(1, clipTuning.FrameCount);
+
+            // Prefer the reusable .wtsheet asset when one exists next to the
+            // atlas texture: frames then carry (sheet, cell) references, so
+            // the grid / trims / PPU / collider-follow pipeline drives the
+            // demo. Baked UVs stay embedded as the fallback.
+            std::string sheetAsset;
+            if (clipTuning.Atlas.IsValid())
+            {
+                const std::filesystem::path sheetPath =
+                    std::filesystem::path(clipTuning.Atlas.SheetPath).replace_extension(".wtsheet");
+                if (std::filesystem::exists(AssetPath::Resolve(sheetPath.generic_string())))
+                    sheetAsset = sheetPath.generic_string();
+            }
+
             if (clipTuning.Atlas.IsValid())
             {
                 for (int frame = 1; frame <= frameCount; ++frame)
@@ -87,7 +105,15 @@ namespace Wheatear::SideCombatVisualService {
                     glm::vec2 uvMin{ 0.0f };
                     glm::vec2 uvMax{ 1.0f };
                     if (GameplayVisualService::ResolveAtlasFrame(clipTuning.Atlas, frame, &texture, &uvMin, &uvMax))
-                        animationClip->AddFrame({ texture, uvMin, uvMax, duration });
+                    {
+                        AnimationFrame animationFrame{ texture, uvMin, uvMax, duration };
+                        if (!sheetAsset.empty())
+                        {
+                            animationFrame.SpriteSheet = sheetAsset;
+                            animationFrame.CellIndex = std::max(0, clipTuning.Atlas.StartFrame) + frame - 1;
+                        }
+                        animationClip->AddFrame(animationFrame);
+                    }
                 }
             }
 
@@ -112,10 +138,31 @@ namespace Wheatear::SideCombatVisualService {
         }
 
         static void ApplyAnimatorCurrentFrame(SpriteRendererComponent& sprite,
+            entt::registry& registry,
+            entt::entity entity,
             const SpriteAnimatorComponent& animator)
         {
             const AnimationFrame* frame = animator.GetCurrentFrame();
-            if (!frame || !frame->Texture)
+            if (!frame)
+                return;
+
+            // Sheet-linked frames resolve through the shared sheet cache so
+            // the demo's runtime-generated clips behave exactly like clips
+            // authored in the editor (grid/trim hot-reload, collider follow).
+            if (!frame->SpriteSheet.empty() && frame->CellIndex >= 0)
+            {
+                SpriteSheetAsset::ResolvedCell resolved;
+                if (SpriteSheetAsset::ResolveCell(frame->SpriteSheet, frame->CellIndex, resolved))
+                {
+                    sprite.Texture = resolved.Texture;
+                    sprite.UVMin = resolved.UVMin;
+                    sprite.UVMax = resolved.UVMax;
+                    SpriteSheetSystem::ApplyColliderToEntity(registry, entity, resolved);
+                    return;
+                }
+            }
+
+            if (!frame->Texture)
                 return;
 
             sprite.Texture = frame->Texture;
@@ -261,7 +308,7 @@ namespace Wheatear::SideCombatVisualService {
                 {
                     animator->CurrentClipName.clear();
                     animator->Play(clipKey);
-                    ApplyAnimatorCurrentFrame(sprite, *animator);
+                    ApplyAnimatorCurrentFrame(sprite, registry, entity, *animator);
                 }
             }
             else
@@ -271,7 +318,7 @@ namespace Wheatear::SideCombatVisualService {
                 {
                     animator->CurrentClipName.clear();
                     animator->Play(clipKey);
-                    ApplyAnimatorCurrentFrame(sprite, *animator);
+                    ApplyAnimatorCurrentFrame(sprite, registry, entity, *animator);
                 }
             }
 

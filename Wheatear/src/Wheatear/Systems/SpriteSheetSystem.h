@@ -20,8 +20,11 @@ namespace Wheatear {
 
         // Drives a FollowAnimation BoxCollider2D from a resolved sheet cell
         // (world units derived via the sprite's PPU). Shared by component
-        // resolution and animation frame application.
+        // resolution and animation frame application. The registry overload
+        // serves module code that holds raw entt handles without a Scene*.
         static void ApplyColliderToEntity(Entity entity, const SpriteSheetAsset::ResolvedCell& resolved);
+        static void ApplyColliderToEntity(entt::registry& registry, entt::entity entity,
+            const SpriteSheetAsset::ResolvedCell& resolved);
 
     private:
         static void ResolveSheets(Scene* scene);

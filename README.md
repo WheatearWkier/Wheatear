@@ -21,6 +21,44 @@ https://github.com/user-attachments/assets/594114a5-ba8b-4847-9f34-6be1f15181f7
 - 重点能力包括 `Gameplay`、`.wts` 事件脚本、WAO 动作系统、2D 渲染和编辑器工作流。
 - 3D 渲染保留了基础能力展示，但不是当前项目的主线。
 
+## 引擎架构
+
+```
+┌──────────────────────────── 引擎运行时 Wheatear/ ────────────────────────────┐
+│                                                                              │
+│  Renderer(2D批渲染/3D)   Physics(Box2D)   Input(动作层)   Audio(miniaudio)   │
+│  Scene+ECS(entt)         Animation        Assets(资产/热重载)  Serialization  │
+│  Gameplay模块: SideCombat / TurnCombat / Tactical / VN / WAO动作编排          │
+└──────────────────────────────────┬───────────────────────────────────────────┘
+                                   │ 静态库 + 数据资产
+┌──────────────────────────────────┴───────────────────────────────────────────┐
+│  编辑器 WheatearEditor/：ImGui 面板体系（场景/层级/资源/动画/事件/WAO/打包）   │
+│  Sandbox：独立运行器（编辑器产出的数据资产直接驱动）                            │
+└──────────────────────────────────────────────────────────────────────────────┘
+```
+
+| 模块 | 一句话说明 |
+| --- | --- |
+| Scene + ECS | entt 驱动的组件系统，主题化组件头文件 + 模板序列化器（YAML） |
+| Renderer | 2D 合批渲染（quad/circle/line/text/UI），3D 基础管线（阴影/IBL/SSAO） |
+| Physics | Box2D 2D 物理，fixture 与组件数据解耦，支持动画驱动的碰撞盒 |
+| Input | 底层事件 + 动作绑定层（可重映射、边沿检测、命令注入） |
+| Animation | AnimationClip 资产 + 时间线编辑器 + 动画事件 + 属性轨道 |
+| SpriteSheet | `.wtsheet` 可复用图集资产：网格/逐格裁切/碰撞框，全链路热更新 |
+| Assets | 资产注册表、`.wtsheet/.wtanim/.wtpack` 打包、运行时 loose/pack 双路径 |
+| Gameplay | 数据表驱动的战斗/成长/剧情模块，运行时服务 + 编辑器调参面板 |
+| WAO | 动作编排系统：`ActionIntent -> ActionRecipe -> RuleResolver -> EffectBundle` |
+| Scripting | `.wts` 事件脚本 + 事件图编辑器；Mono C# 为可选能力 |
+
+### Sprite Sheet 工作流（2D 资产核心）
+
+图集从「图片」变成「可复用资产」：`.wtsheet` 只存引用（纹理路径 + 网格 + 可选逐格裁切/碰撞框），实体和动画帧也存引用（sheet + 格子号），运行时统一解析——**改网格、改裁切，所有实体和动画下一帧自动更新**。
+
+- 分割器自动检测每格内容边界（alpha 包围盒），动画帧自动对齐，无留白不跳动
+- `Pixels Per Unit` 按真实内容尺寸渲染，动画每帧尺寸跟随（站姿/躺姿自动适配）
+- 格子碰撞框 + `Follow Animation` 开关：物理碰撞盒跟随动画帧
+- 资源浏览器 ▸ 展开格子直接拖到视口创建精灵
+
 ## 玩法展示
 
 ### 剧情和分支
@@ -104,7 +142,7 @@ ActionIntent -> ActionRecipe -> RuleResolver -> EffectBundle -> EffectLedger -> 
 2D 是项目的主力。当前渲染主要围绕这些内容展开：
 
 - 批量绘制 Quad、Circle、Line 和 Text
-- Sprite、spritesheet、atlas 和 UV 子图
+- Sprite、spritesheet、atlas 和 UV 子图（含逐格裁切、PPU 真实尺寸）
 - UI Canvas、按钮、分页、进度条和路径绘制
 - SDF 文本、技能图标和战斗 HUD
 - 序列帧动画和动画事件
@@ -140,11 +178,13 @@ Sprite、UI 和特效共用同一套图集与动画工作流，角色动作、�
 编辑器围绕内容生产效率设计，当前重点工具包括：
 
 - VN Script Editor：编辑剧情、选项、角色、背景和音乐
-- Event Script：查看和组织 `.wts` 流程
+- Event Script：查看和组织 `.wts` 流程（事件图编辑器）
 - Side Combat Tuning：编辑横板战斗参数
 - WAO Action Debugger：查看动作配方、效果和运行记录
-- Animation Editor / Sprite Sheet Picker：制作序列帧、图集和 UI 图标
-- Content Browser：浏览资源、场景、Prefab 和 UI 模板
+- Animation Editor / Sprite Sheet Picker：序列帧、图集、逐格裁切、碰撞框
+- Content Browser：浏览资源、场景、Prefab 和 UI 模板（缩略图、格子条带拖放）
+- Input Bindings：输入动作重映射
+- 内置 Help 手册：编辑器操作文档，含完整 sheet 工作流示例
 
 ## 素材说明
 
@@ -155,10 +195,10 @@ Sprite、UI 和特效共用同一套图集与动画工作流，角色动作、�
 
 ## 技术栈
 
-- C++17
-- OpenGL
-- GLFW / ImGui / ImGuizmo
-- entt / glm / yaml-cpp / Box2D / spdlog
+- C++17，静态库 + 三个可执行工程（Editor / Sandbox / ScriptCore）
+- OpenGL / GLFW / ImGui / ImGuizmo
+- entt / glm / yaml-cpp / Box2D / spdlog / miniaudio
+- 预编译头（glm/entt/imgui）增量编译单文件约 3 秒
 - Mono 为可选脚本能力，默认构建不强依赖
 - Git LFS 管理图片、视频和其他二进制资源
 
