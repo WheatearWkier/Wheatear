@@ -228,7 +228,7 @@ void RuntimeSceneLayer::ExecuteSceneTransitionRequest(const Wheatear::SceneTrans
         LoadScene(request.ScenePath);
         break;
     case Wheatear::SceneTransitionMode::LoadGame:
-        if (m_ActiveScene && !m_ActiveScene->GetSavePolicy().CanLoad)
+        if (m_ActiveScene && !m_ActiveScene->GetEffectiveSavePolicy().CanLoad)
         {
             Wheatear::GameProgress::GetState().LastResultMessage = "当前场景禁止读取。";
             return;

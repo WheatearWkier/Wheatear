@@ -40,7 +40,7 @@ namespace Wheatear {
         static const SavePolicy& GetSceneSavePolicy(Scene* scene)
         {
             static const SavePolicy s_DefaultPolicy{};
-            return scene ? scene->GetSavePolicy() : s_DefaultPolicy;
+            return scene ? scene->GetEffectiveSavePolicy() : s_DefaultPolicy;
         }
 
         static bool CanSceneSave(Scene* scene)

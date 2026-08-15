@@ -1162,7 +1162,7 @@ namespace Wheatear::VisualNovelSystemInternal {
         inline const SavePolicy& ResolveSceneSavePolicy(Scene* scene)
         {
             static const SavePolicy s_DefaultPolicy{};
-            return scene ? scene->GetSavePolicy() : s_DefaultPolicy;
+            return scene ? scene->GetEffectiveSavePolicy() : s_DefaultPolicy;
         }
 
         inline std::filesystem::path BuildSavePath(Scene* scene, int slot)

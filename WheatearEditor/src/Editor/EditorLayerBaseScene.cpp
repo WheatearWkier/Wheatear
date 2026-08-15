@@ -267,7 +267,7 @@ namespace Wheatear {
             LoadPlayScene(request.ScenePath);
             break;
         case SceneTransitionMode::LoadGame:
-            if (m_ActiveScene && !m_ActiveScene->GetSavePolicy().CanLoad)
+            if (m_ActiveScene && !m_ActiveScene->GetEffectiveSavePolicy().CanLoad)
             {
                 GameProgress::GetState().LastResultMessage = "当前场景禁止读取。";
                 return;

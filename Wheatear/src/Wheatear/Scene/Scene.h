@@ -8,6 +8,7 @@
 #include "Wheatear/Renderer/EditorCamera.h"
 #include "Wheatear/Systems/ISystem.h"
 
+#include <cstddef>
 #include <cstdint>
 #include <filesystem>
 #include <memory>
@@ -79,6 +80,21 @@ namespace Wheatear {
         const SavePolicy& GetSavePolicy() const { return m_SavePolicy; }
         SavePolicy& GetSavePolicy() { return m_SavePolicy; }
         void SetSavePolicy(const SavePolicy& policy) { m_SavePolicy = policy; }
+        const SavePolicy& GetEffectiveSavePolicy() const
+        {
+            return m_SavePolicyOverrides.empty() ? m_SavePolicy : m_SavePolicyOverrides.back();
+        }
+        void PushSavePolicyOverride(const SavePolicy& policy) { m_SavePolicyOverrides.push_back(policy); }
+        bool PopSavePolicyOverride()
+        {
+            if (m_SavePolicyOverrides.empty())
+                return false;
+            m_SavePolicyOverrides.pop_back();
+            return true;
+        }
+        void ClearSavePolicyOverrides() { m_SavePolicyOverrides.clear(); }
+        bool HasSavePolicyOverride() const { return !m_SavePolicyOverrides.empty(); }
+        std::size_t GetSavePolicyOverrideDepth() const { return m_SavePolicyOverrides.size(); }
 
         Entity GetPrimaryCameraEntity();
         Entity FindEntityByUUID(UUID uuid);
@@ -146,6 +162,7 @@ namespace Wheatear {
         uint32_t m_ViewportHeight = 0;
         glm::vec2 m_ViewportOffset = { 0.0f, 0.0f };
         SavePolicy m_SavePolicy;
+        std::vector<SavePolicy> m_SavePolicyOverrides;
         SceneExecutionMode m_ExecutionMode = SceneExecutionMode::None;
 
         std::vector<Scope<ISystem>> m_Systems;

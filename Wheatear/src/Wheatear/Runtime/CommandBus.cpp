@@ -352,7 +352,7 @@ namespace Wheatear {
             }
             else if (StartsWith(command, "loadgame:"))
             {
-                if (scene && !scene->GetSavePolicy().CanLoad)
+                if (scene && !scene->GetEffectiveSavePolicy().CanLoad)
                 {
                     result.Handled = true;
                     result.Message = "当前场景禁止读取。";

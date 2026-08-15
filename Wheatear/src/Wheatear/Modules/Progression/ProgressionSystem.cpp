@@ -21,6 +21,7 @@
 #include <cctype>
 #include <optional>
 #include <string>
+#include <utility>
 
 namespace Wheatear {
 
@@ -30,6 +31,7 @@ namespace Wheatear {
         using UIRuntimeTools::SetProgress;
         using UIRuntimeTools::SetText;
         using Wheatear::StringUtils::ToLower;
+        using Wheatear::StringUtils::Trim;
 
         static constexpr const char* kSaveLoadSceneAlias = "progression.scene.save_load";
         static constexpr const char* kFallbackSaveLoadScenePath = "assets/scenes/VerticalSliceSaveLoad.wt";
@@ -37,7 +39,9 @@ namespace Wheatear {
         static bool s_SaveLoadSaveMode = true;
         static int s_PendingOverwriteSlot = 0;
         static std::optional<bool> s_PendingSaveLoadMode;
+        static SavePolicy s_ActiveSavePolicy;
         static std::string s_ActiveSaveDirectory = "assets/saves";
+        static std::optional<SavePolicy> s_PendingSavePolicy;
         static std::optional<std::string> s_PendingSaveDirectory;
 
         static bool HasEntity(Scene* scene, const std::string& name)
@@ -85,13 +89,32 @@ namespace Wheatear {
             return std::clamp(std::stoi(payload), 1, GameProgress::GetMaxSaveSlots());
         }
 
+        static std::string NormalizeSaveDirectory(const std::string& directory)
+        {
+            return directory.empty() ? "assets/saves" : directory;
+        }
+
+        static SavePolicy NormalizeSavePolicy(SavePolicy policy)
+        {
+            policy.SaveDirectory = NormalizeSaveDirectory(policy.SaveDirectory);
+            return policy;
+        }
+
+        static void SetActiveSavePolicy(SavePolicy policy)
+        {
+            s_ActiveSavePolicy = NormalizeSavePolicy(std::move(policy));
+            s_ActiveSaveDirectory = s_ActiveSavePolicy.SaveDirectory;
+        }
+
+        static const SavePolicy& ResolveCommandSavePolicy(Scene* scene)
+        {
+            static const SavePolicy s_DefaultPolicy{};
+            return scene ? scene->GetEffectiveSavePolicy() : s_DefaultPolicy;
+        }
+
         static std::string ResolveCommandSaveDirectory(Scene* scene)
         {
-            if (HasEntity(scene, "SaveLoad_SlotScroll"))
-                return s_ActiveSaveDirectory.empty() ? "assets/saves" : s_ActiveSaveDirectory;
-            return scene && !scene->GetSavePolicy().SaveDirectory.empty()
-                ? scene->GetSavePolicy().SaveDirectory
-                : "assets/saves";
+            return NormalizeSaveDirectory(ResolveCommandSavePolicy(scene).SaveDirectory);
         }
 
         static void SetPolicyDeniedMessage(bool saving)
@@ -112,18 +135,190 @@ namespace Wheatear {
             return GameProgress::SaveSlot(slot);
         }
 
+        static bool TryParsePolicyBool(const std::string& value, bool& result)
+        {
+            const std::string normalized = ToLower(Trim(value));
+            if (normalized == "1" || normalized == "true" || normalized == "yes"
+                || normalized == "on" || normalized == "allow" || normalized == "enabled"
+                || normalized == "enable")
+            {
+                result = true;
+                return true;
+            }
+            if (normalized == "0" || normalized == "false" || normalized == "no"
+                || normalized == "off" || normalized == "deny" || normalized == "disabled"
+                || normalized == "disable")
+            {
+                result = false;
+                return true;
+            }
+            return false;
+        }
+
+        static bool ApplySavePolicyToken(SavePolicy& policy, const std::string& rawToken)
+        {
+            const std::string token = Trim(rawToken);
+            if (token.empty())
+                return false;
+
+            const std::string lowerToken = ToLower(token);
+            if (lowerToken == "allow_all" || lowerToken == "all")
+            {
+                policy.CanSave = true;
+                policy.CanLoad = true;
+                return true;
+            }
+            if (lowerToken == "block_all" || lowerToken == "deny_all" || lowerToken == "none")
+            {
+                policy.CanSave = false;
+                policy.CanLoad = false;
+                return true;
+            }
+            if (lowerToken == "save" || lowerToken == "can_save")
+            {
+                policy.CanSave = true;
+                return true;
+            }
+            if (lowerToken == "nosave" || lowerToken == "no_save" || lowerToken == "deny_save")
+            {
+                policy.CanSave = false;
+                return true;
+            }
+            if (lowerToken == "load" || lowerToken == "can_load")
+            {
+                policy.CanLoad = true;
+                return true;
+            }
+            if (lowerToken == "noload" || lowerToken == "no_load" || lowerToken == "deny_load")
+            {
+                policy.CanLoad = false;
+                return true;
+            }
+
+            const size_t separator = token.find('=');
+            if (separator == std::string::npos)
+                return false;
+
+            const std::string key = ToLower(Trim(token.substr(0, separator)));
+            const std::string value = Trim(token.substr(separator + 1));
+            bool boolValue = false;
+            if (key == "save" || key == "can_save" || key == "cansave")
+            {
+                if (!TryParsePolicyBool(value, boolValue))
+                    return false;
+                policy.CanSave = boolValue;
+                return true;
+            }
+            if (key == "load" || key == "can_load" || key == "canload")
+            {
+                if (!TryParsePolicyBool(value, boolValue))
+                    return false;
+                policy.CanLoad = boolValue;
+                return true;
+            }
+            if (key == "dir" || key == "directory" || key == "save_directory" || key == "savedirectory")
+            {
+                policy.SaveDirectory = NormalizeSaveDirectory(value);
+                return true;
+            }
+            if (key == "auto" || key == "autoload" || key == "auto_load" || key == "autoloadslot")
+            {
+                try
+                {
+                    policy.AutoLoadSlot = std::max(0, std::stoi(value));
+                    return true;
+                }
+                catch (...)
+                {
+                    return false;
+                }
+            }
+
+            return false;
+        }
+
+        static void SyncActivePolicyIfSaveLoadPage(Scene* scene)
+        {
+            if (HasEntity(scene, "SaveLoad_SlotScroll"))
+                SetActiveSavePolicy(scene ? scene->GetEffectiveSavePolicy() : SavePolicy{});
+        }
+
+        static bool HandleSavePolicyCommand(Scene* scene, const std::string& action)
+        {
+            const std::string rawAction = Trim(action);
+            const std::string lowerAction = ToLower(rawAction);
+            if (lowerAction.empty())
+                return false;
+
+            SavePolicy policy = ResolveCommandSavePolicy(scene);
+            if (lowerAction == "push_policy:allow_all")
+            {
+                policy.CanSave = true;
+                policy.CanLoad = true;
+            }
+            else if (lowerAction == "push_policy:block_all")
+            {
+                policy.CanSave = false;
+                policy.CanLoad = false;
+            }
+            else if (lowerAction.rfind("push_policy", 0) == 0)
+            {
+                size_t tokenStart = rawAction.find(':');
+                while (tokenStart != std::string::npos)
+                {
+                    const size_t next = rawAction.find(':', tokenStart + 1);
+                    const std::string token = rawAction.substr(
+                        tokenStart + 1,
+                        next == std::string::npos ? std::string::npos : next - tokenStart - 1);
+                    ApplySavePolicyToken(policy, token);
+                    tokenStart = next;
+                }
+            }
+            else if (lowerAction == "pop_policy")
+            {
+                const bool popped = scene && scene->PopSavePolicyOverride();
+                SyncActivePolicyIfSaveLoadPage(scene);
+                GameProgress::GetState().LastResultMessage = popped
+                    ? "已恢复上一层存档策略。"
+                    : "没有临时存档策略需要恢复。";
+                return true;
+            }
+            else if (lowerAction == "clear_policy")
+            {
+                if (scene)
+                    scene->ClearSavePolicyOverrides();
+                SyncActivePolicyIfSaveLoadPage(scene);
+                GameProgress::GetState().LastResultMessage = "已清空临时存档策略。";
+                return true;
+            }
+            else
+            {
+                return false;
+            }
+
+            if (scene)
+                scene->PushSavePolicyOverride(NormalizeSavePolicy(policy));
+            SyncActivePolicyIfSaveLoadPage(scene);
+            GameProgress::GetState().LastResultMessage = "已应用临时存档策略。";
+            return true;
+        }
+
         static void UpdateGameSaveCommands(Scene* scene)
         {
             if (!scene)
                 return;
 
             VisualNovelSystem* visualNovelSystem = scene->GetSystem<VisualNovelSystem>();
-            const SavePolicy& policy = scene->GetSavePolicy();
-            const std::string commandSaveDirectory = ResolveCommandSaveDirectory(scene);
             for (const std::string& command : CommandBus::DrainGameplayCommands("gamesave:"))
             {
-                const std::string action = ToLower(command.substr(9));
-                if (action == "open_save_menu" || action == "open_save_load" || action == "open_menu")
+                const std::string rawAction = command.substr(9);
+                const std::string action = ToLower(rawAction);
+                if (HandleSavePolicyCommand(scene, rawAction))
+                    continue;
+
+                const SavePolicy& policy = ResolveCommandSavePolicy(scene);
+                const std::string commandSaveDirectory = ResolveCommandSaveDirectory(scene);
+                if (action == "open_save_menu")
                 {
                     if (!policy.CanSave)
                     {
@@ -133,6 +328,7 @@ namespace Wheatear {
 
                     s_SaveLoadSaveMode = true;
                     s_PendingSaveLoadMode = true;
+                    s_PendingSavePolicy = policy;
                     s_PendingSaveDirectory = policy.SaveDirectory;
                     s_PendingOverwriteSlot = 0;
                     SceneTransitionService::RequestLoadScene(GetSaveLoadScenePath(), command);
@@ -149,6 +345,7 @@ namespace Wheatear {
 
                     s_SaveLoadSaveMode = false;
                     s_PendingSaveLoadMode = false;
+                    s_PendingSavePolicy = policy;
                     s_PendingSaveDirectory = policy.SaveDirectory;
                     s_PendingOverwriteSlot = 0;
                     SceneTransitionService::RequestLoadScene(GetSaveLoadScenePath(), command);
@@ -370,6 +567,16 @@ namespace Wheatear {
 
     void ProgressionSystem::OnRuntimeStart(Scene* scene)
     {
+        if (s_PendingSavePolicy)
+        {
+            SetActiveSavePolicy(*s_PendingSavePolicy);
+            s_PendingSavePolicy.reset();
+        }
+        else
+        {
+            SetActiveSavePolicy(scene ? scene->GetEffectiveSavePolicy() : SavePolicy{});
+        }
+
         if (s_PendingSaveLoadMode)
         {
             s_SaveLoadSaveMode = *s_PendingSaveLoadMode;
@@ -389,9 +596,14 @@ namespace Wheatear {
         }
         else
         {
-            s_ActiveSaveDirectory = scene && !scene->GetSavePolicy().SaveDirectory.empty()
-                ? scene->GetSavePolicy().SaveDirectory
-                : "assets/saves";
+            s_ActiveSaveDirectory = s_ActiveSavePolicy.SaveDirectory;
+        }
+        s_ActiveSavePolicy.SaveDirectory = NormalizeSaveDirectory(s_ActiveSaveDirectory);
+
+        if (HasEntity(scene, "SaveLoad_SlotScroll"))
+        {
+            scene->ClearSavePolicyOverrides();
+            scene->PushSavePolicyOverride(s_ActiveSavePolicy);
         }
 
         s_PendingOverwriteSlot = 0;

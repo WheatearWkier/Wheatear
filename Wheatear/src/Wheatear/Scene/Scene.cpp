@@ -191,6 +191,7 @@ namespace Wheatear {
     void Scene::OnRuntimeStart()
     {
         StopSystems();
+        ClearSavePolicyOverrides();
         ConfigureRuntimeSystems();
         StartSystems(SceneExecutionMode::Runtime);
     }
@@ -198,6 +199,7 @@ namespace Wheatear {
     void Scene::OnRuntimeStop()
     {
         StopSystems();
+        ClearSavePolicyOverrides();
         m_DestroyQueue.clear();
     }
 

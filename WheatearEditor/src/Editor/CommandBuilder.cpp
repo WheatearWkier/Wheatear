@@ -29,6 +29,10 @@ namespace Wheatear::EditorCommandBuilder {
         case CommandKind::GameSaveClose: return EditorLocale::Text("Close Save UI", "关闭存档界面");
         case CommandKind::GameSaveConfirmOverwrite: return EditorLocale::Text("Confirm Overwrite", "确认覆盖");
         case CommandKind::GameSaveCancelOverwrite: return EditorLocale::Text("Cancel Overwrite", "取消覆盖");
+        case CommandKind::GameSavePushAllowAll: return EditorLocale::Text("Push Allow Save/Load", "临时允许存读");
+        case CommandKind::GameSavePushBlockAll: return EditorLocale::Text("Push Block Save/Load", "临时禁止存读");
+        case CommandKind::GameSavePopPolicy: return EditorLocale::Text("Restore Save Policy", "恢复存档策略");
+        case CommandKind::GameSaveClearPolicy: return EditorLocale::Text("Clear Save Policy", "清空临时存档策略");
         case CommandKind::ProgressionSetFlag: return EditorLocale::Text("Set Story Flag", "设置剧情标记");
         case CommandKind::ProgressionClearFlag: return EditorLocale::Text("Clear Story Flag", "清除剧情标记");
         case CommandKind::ProgressionSetActiveDungeon: return EditorLocale::Text("Set Active Dungeon", "设置当前地牢");
@@ -135,6 +139,10 @@ namespace Wheatear::EditorCommandBuilder {
         case CommandKind::GameSaveClose: return "gamesave:close";
         case CommandKind::GameSaveConfirmOverwrite: return "gamesave:confirm_overwrite";
         case CommandKind::GameSaveCancelOverwrite: return "gamesave:cancel_overwrite";
+        case CommandKind::GameSavePushAllowAll: return "gamesave:push_policy:save=1:load=1";
+        case CommandKind::GameSavePushBlockAll: return "gamesave:push_policy:save=0:load=0";
+        case CommandKind::GameSavePopPolicy: return "gamesave:pop_policy";
+        case CommandKind::GameSaveClearPolicy: return "gamesave:clear_policy";
         case CommandKind::ProgressionSetFlag: return "progression:set_flag:" + spec.Primary;
         case CommandKind::ProgressionClearFlag: return "progression:clear_flag:" + spec.Primary;
         case CommandKind::ProgressionSetActiveDungeon: return "progression:set_active_dungeon:" + spec.Primary;
@@ -343,6 +351,30 @@ namespace Wheatear::EditorCommandBuilder {
         if (command == "gamesave:cancel_overwrite")
         {
             spec.Kind = CommandKind::GameSaveCancelOverwrite;
+            return spec;
+        }
+
+        if (command == "gamesave:push_policy:save=1:load=1")
+        {
+            spec.Kind = CommandKind::GameSavePushAllowAll;
+            return spec;
+        }
+
+        if (command == "gamesave:push_policy:save=0:load=0")
+        {
+            spec.Kind = CommandKind::GameSavePushBlockAll;
+            return spec;
+        }
+
+        if (command == "gamesave:pop_policy")
+        {
+            spec.Kind = CommandKind::GameSavePopPolicy;
+            return spec;
+        }
+
+        if (command == "gamesave:clear_policy")
+        {
+            spec.Kind = CommandKind::GameSaveClearPolicy;
             return spec;
         }
 
@@ -711,6 +743,10 @@ namespace Wheatear::EditorCommandBuilder {
             CommandKind::GameSaveClose,
             CommandKind::GameSaveConfirmOverwrite,
             CommandKind::GameSaveCancelOverwrite,
+            CommandKind::GameSavePushAllowAll,
+            CommandKind::GameSavePushBlockAll,
+            CommandKind::GameSavePopPolicy,
+            CommandKind::GameSaveClearPolicy,
             CommandKind::ProgressionSetFlag,
             CommandKind::ProgressionClearFlag,
             CommandKind::ProgressionSetActiveDungeon,

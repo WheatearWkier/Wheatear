@@ -327,7 +327,7 @@ namespace Wheatear {
         ImGui::SameLine();
         if (ImGui::SmallButton("Save"))
         {
-            AddInstruction(EventScriptInstructionType::Command, "gamesave:open");
+            AddInstruction(EventScriptInstructionType::Command, "gamesave:open_save_menu");
             ImGui::EndChild();
             return;
         }
