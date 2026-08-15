@@ -175,6 +175,24 @@ namespace Wheatear {
             constexpr const char* kPlayerSaveDirectory = "saves";
 
             std::error_code error;
+            if (!std::filesystem::exists(directory, error))
+            {
+                if (error)
+                {
+                    if (errorMessage)
+                        *errorMessage = directory.string() + ": " + error.message();
+                    return false;
+                }
+                return true;
+            }
+
+            if (!std::filesystem::is_directory(directory, error))
+            {
+                if (errorMessage)
+                    *errorMessage = "Package path is not a directory: " + directory.string();
+                return false;
+            }
+
             for (const auto& entry : std::filesystem::directory_iterator(directory, error))
             {
                 if (error)
@@ -198,6 +216,102 @@ namespace Wheatear {
         static std::string ToOutputDirectoryName(const std::string& configuration)
         {
             return configuration + "-windows-x86_64";
+        }
+
+        static std::string SanitizePathComponent(std::string value)
+        {
+            for (char& ch : value)
+            {
+                switch (ch)
+                {
+                case '<':
+                case '>':
+                case ':':
+                case '"':
+                case '/':
+                case '\\':
+                case '|':
+                case '?':
+                case '*':
+                    ch = '_';
+                    break;
+                default:
+                    break;
+                }
+            }
+
+            while (!value.empty() && (value.back() == ' ' || value.back() == '.'))
+                value.pop_back();
+
+            return value.empty() ? std::string("Project") : value;
+        }
+
+        static uint64_t Hash64(const std::string& text)
+        {
+            uint64_t hash = 1469598103934665603ull;
+            for (unsigned char c : text)
+            {
+                hash ^= static_cast<uint64_t>(c);
+                hash *= 1099511628211ull;
+            }
+            return hash;
+        }
+
+        static std::string ToHex8(uint64_t value)
+        {
+            static constexpr char digits[] = "0123456789abcdef";
+            char buffer[9] = {};
+            for (int i = 7; i >= 0; --i)
+            {
+                buffer[i] = digits[value & 0x0F];
+                value >>= 4;
+            }
+            return std::string(buffer, 8);
+        }
+
+        static std::filesystem::path BuildProjectPackageKey(const std::filesystem::path& repositoryRoot,
+            const std::filesystem::path& projectRoot)
+        {
+            const std::filesystem::path normalizedRepositoryRoot = FileSystem::Normalize(repositoryRoot);
+            const std::filesystem::path normalizedProjectRoot = FileSystem::Normalize(projectRoot);
+
+            std::error_code error;
+            if (FileSystem::IsSubPath(normalizedProjectRoot, normalizedRepositoryRoot))
+            {
+                const std::filesystem::path relative =
+                    std::filesystem::relative(normalizedProjectRoot, normalizedRepositoryRoot, error);
+                if (!error && !relative.empty() && relative != ".")
+                {
+                    std::filesystem::path key;
+                    for (const auto& part : relative)
+                    {
+                        const std::string segment = SanitizePathComponent(part.generic_string());
+                        if (segment == "." || segment == "..")
+                            continue;
+                        key /= segment;
+                    }
+
+                    if (!key.empty())
+                        return key;
+                }
+            }
+
+            std::string basename = SanitizePathComponent(normalizedProjectRoot.filename().generic_string());
+            const std::string fingerprint = ToHex8(Hash64(normalizedProjectRoot.generic_string()));
+            return std::filesystem::path(basename + "-" + fingerprint);
+        }
+
+        static std::filesystem::path DefaultPackageDirectory(const std::filesystem::path& repositoryRoot,
+            const std::filesystem::path& projectRoot,
+            const std::string& configuration,
+            const char* packageKind)
+        {
+            return repositoryRoot
+                / "Builds"
+                / "Windows"
+                / packageKind
+                / BuildProjectPackageKey(repositoryRoot, projectRoot)
+                / SanitizePathComponent(configuration);
         }
 
         static constexpr const char* kAssetPackFilename = "content.wtpack";
@@ -627,11 +741,12 @@ namespace Wheatear {
         if (options.StartupScene.empty() || !std::filesystem::exists(AssetPath::Resolve(options.StartupScene)))
             return Fail("Startup scene is not saved or does not exist.");
 
+        const std::filesystem::path projectRoot = AssetPath::GetProjectRoot();
         const std::filesystem::path outputDirectory = options.OutputDirectory.empty()
-            ? repositoryRoot / "Builds" / "Windows" / "Player"
+            ? DefaultPackageDirectory(repositoryRoot, projectRoot, options.Configuration, "Player")
             : options.OutputDirectory;
         const std::filesystem::path editorOutputDirectory = options.EditorOutputDirectory.empty()
-            ? outputDirectory.parent_path() / "Editor"
+            ? DefaultPackageDirectory(repositoryRoot, projectRoot, options.Configuration, "Editor")
             : options.EditorOutputDirectory;
         const std::filesystem::path buildsRoot = repositoryRoot / "Builds";
 
