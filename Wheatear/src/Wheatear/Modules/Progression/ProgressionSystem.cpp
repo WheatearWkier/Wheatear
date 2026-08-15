@@ -126,13 +126,16 @@ namespace Wheatear {
 
         static bool SaveProgressionOnlySlot(int slot, const std::string& saveDirectory)
         {
-            if (!GameProgress::ClearGameRuntimeSaveSlot(slot, saveDirectory))
+            if (!GameProgress::SaveSlot(slot))
             {
-                GameProgress::GetState().LastResultMessage = "存档失败：无法清理旧剧情状态。";
                 return false;
             }
 
-            return GameProgress::SaveSlot(slot);
+            if (!GameProgress::ClearGameRuntimeSaveSlot(slot, saveDirectory))
+            {
+                GameProgress::GetState().LastResultMessage = "已保存进度，但旧剧情状态清理失败。";
+            }
+            return true;
         }
 
         static bool TryParsePolicyBool(const std::string& value, bool& result)

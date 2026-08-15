@@ -134,6 +134,7 @@ void RuntimeSceneLayer::LoadScene(const std::filesystem::path& requestedPath)
     if (!serializer.DeserializeYaml(m_ScenePath))
     {
         WT_CORE_ERROR("RuntimeSceneLayer: failed to load scene '{}'", m_ScenePath.string());
+        m_PendingSceneAutoLoadSlot = 0;
         m_ActiveScene = nullptr;
         return;
     }

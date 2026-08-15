@@ -325,8 +325,8 @@ namespace Wheatear {
         }
 
         const std::filesystem::path savePath = BuildSavePath(scene, safeSlot);
-        const bool vnSaved = state.Runtime.SaveState(savePath);
         const bool progressSaved = GameProgress::SaveSlot(safeSlot);
+        const bool vnSaved = state.Runtime.SaveState(savePath);
         state.PendingOverwriteSlot = 0;
 
         if (vnSaved && progressSaved)
@@ -334,9 +334,13 @@ namespace Wheatear {
             state.ShowSaveLoad = false;
             PushSystemMessage(state, "已保存到 " + std::to_string(safeSlot) + " 号槽。");
         }
+        else if (progressSaved)
+        {
+            PushSystemMessage(state, "已保存进度，但剧情状态写入失败。");
+        }
         else if (vnSaved)
         {
-            PushSystemMessage(state, "已保存到 " + std::to_string(safeSlot) + " 号槽。");
+            PushSystemMessage(state, "已保存剧情状态，但全局进度写入失败。");
         }
         else
         {
