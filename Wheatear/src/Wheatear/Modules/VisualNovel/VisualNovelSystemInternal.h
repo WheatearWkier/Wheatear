@@ -1159,9 +1159,15 @@ namespace Wheatear::VisualNovelSystemInternal {
                 SetTextVisible(scene, component.CommandTooltipEntityName, "", false);
         }
 
-        inline std::filesystem::path BuildSavePath(const VisualNovelComponent& component, int slot)
+        inline const SavePolicy& ResolveSceneSavePolicy(Scene* scene)
         {
-            return GameProgress::GetGameRuntimeSavePath(slot, component.SaveDirectory);
+            static const SavePolicy s_DefaultPolicy{};
+            return scene ? scene->GetSavePolicy() : s_DefaultPolicy;
+        }
+
+        inline std::filesystem::path BuildSavePath(Scene* scene, int slot)
+        {
+            return GameProgress::GetGameRuntimeSavePath(slot, ResolveSceneSavePolicy(scene).SaveDirectory);
         }
 
         inline int ParseVNSaveSlot(const std::string& value, int fallback = 1)
@@ -1169,22 +1175,23 @@ namespace Wheatear::VisualNovelSystemInternal {
             return std::clamp(ParseInt(value, fallback), 1, GameProgress::GetMaxSaveSlots());
         }
 
-        inline bool HasVNSaveSlot(const VisualNovelComponent& component, int slot)
+        inline bool HasVNSaveSlot(Scene* scene, int slot)
         {
-            return std::filesystem::exists(BuildSavePath(component, slot));
+            return std::filesystem::exists(BuildSavePath(scene, slot));
         }
 
-        inline bool HasAnySaveSlotData(const VisualNovelComponent& component, int slot)
+        inline bool HasAnySaveSlotData(Scene* scene, int slot)
         {
-            return HasVNSaveSlot(component, slot) || GameProgress::IsGameSaveSlotOccupied(slot, component.SaveDirectory);
+            return HasVNSaveSlot(scene, slot)
+                || GameProgress::IsGameSaveSlotOccupied(slot, ResolveSceneSavePolicy(scene).SaveDirectory);
         }
 
-        inline std::string BuildVNSaveSlotText(const VisualNovelComponent& component,
+        inline std::string BuildVNSaveSlotText(Scene* scene,
             int slot,
             bool saveMode)
         {
             const int safeSlot = std::clamp(slot, 1, GameProgress::GetMaxSaveSlots());
-            return GameProgress::BuildGameSaveSlotButtonText(safeSlot, saveMode, component.SaveDirectory);
+            return GameProgress::BuildGameSaveSlotButtonText(safeSlot, saveMode, ResolveSceneSavePolicy(scene).SaveDirectory);
         }
         inline void EnsureVNSaveLoadLayout(Scene* scene,
             const VisualNovelComponent& component,
@@ -1197,6 +1204,14 @@ namespace Wheatear::VisualNovelSystemInternal {
                 return;
 
             (void)runtime;
+
+            const SavePolicy& policy = ResolveSceneSavePolicy(scene);
+            if ((saveMode && !policy.CanSave) || (!saveMode && !policy.CanLoad))
+            {
+                SetWidgetsWithPrefixVisible(scene, "VN_SaveLoad", false);
+                SetWidgetVisible(scene, component.SaveLoadPanelEntityName, false);
+                return;
+            }
 
             const bool useSlotScroll = static_cast<bool>(FindEntityByName(scene, "VN_SaveLoadSlotScroll"));
             SetWidgetVisible(scene, "VN_SaveLoad_SaveSlot1", visible && !useSlotScroll && saveMode);
@@ -1237,7 +1252,7 @@ namespace Wheatear::VisualNovelSystemInternal {
                         { 0.025f, 0.025f + static_cast<float>(slot - 1) * slotStep },
                         { 0.940f, 0.180f },
                         120 + slot,
-                        BuildVNSaveSlotText(component, slot, saveMode),
+                        BuildVNSaveSlotText(scene, slot, saveMode),
                         saveMode
                             ? "gamesave:slot_save_" + std::to_string(slot)
                             : "gamesave:load_" + std::to_string(slot),

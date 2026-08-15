@@ -42,8 +42,6 @@ namespace Wheatear {
             o << YAML::Key << "SystemMessageEntityName" << YAML::Value << c.SystemMessageEntityName;
             o << YAML::Key << "MusicNoticePanelEntityName" << YAML::Value << c.MusicNoticePanelEntityName;
             o << YAML::Key << "MusicNoticeTextEntityName" << YAML::Value << c.MusicNoticeTextEntityName;
-            o << YAML::Key << "SaveDirectory" << YAML::Value << c.SaveDirectory;
-            o << YAML::Key << "AutoLoadSlot" << YAML::Value << c.AutoLoadSlot;
             o << YAML::EndMap;
         }
         static void Deserialize(const YAML::Node& n, VisualNovelComponent& c) {
@@ -76,8 +74,6 @@ namespace Wheatear {
             c.SystemMessageEntityName = n["SystemMessageEntityName"].as<std::string>(c.SystemMessageEntityName);
             c.MusicNoticePanelEntityName = n["MusicNoticePanelEntityName"].as<std::string>(c.MusicNoticePanelEntityName);
             c.MusicNoticeTextEntityName = n["MusicNoticeTextEntityName"].as<std::string>(c.MusicNoticeTextEntityName);
-            c.SaveDirectory = n["SaveDirectory"].as<std::string>(c.SaveDirectory);
-            c.AutoLoadSlot = n["AutoLoadSlot"].as<int>(c.AutoLoadSlot);
         }
     };
 

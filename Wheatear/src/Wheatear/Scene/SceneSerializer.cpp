@@ -16,6 +16,31 @@
 
 namespace Wheatear {
 
+    namespace {
+
+        static void SerializeSavePolicy(YAML::Emitter& out, const SavePolicy& policy)
+        {
+            out << YAML::Key << "SavePolicy" << YAML::Value << YAML::BeginMap;
+            out << YAML::Key << "CanSave" << YAML::Value << policy.CanSave;
+            out << YAML::Key << "CanLoad" << YAML::Value << policy.CanLoad;
+            out << YAML::Key << "SaveDirectory" << YAML::Value << policy.SaveDirectory;
+            out << YAML::Key << "AutoLoadSlot" << YAML::Value << policy.AutoLoadSlot;
+            out << YAML::EndMap;
+        }
+
+        static void DeserializeSavePolicy(const YAML::Node& node, SavePolicy& policy)
+        {
+            if (!node)
+                return;
+
+            policy.CanSave = node["CanSave"].as<bool>(policy.CanSave);
+            policy.CanLoad = node["CanLoad"].as<bool>(policy.CanLoad);
+            policy.SaveDirectory = node["SaveDirectory"].as<std::string>(policy.SaveDirectory);
+            policy.AutoLoadSlot = node["AutoLoadSlot"].as<int>(policy.AutoLoadSlot);
+        }
+
+    } // namespace
+
     static void SerializeEntity(YAML::Emitter& out, Entity entity)
     {
         WT_CORE_ASSERT(entity.HasComponent<IDComponent>(), "Entity missing IDComponent");
@@ -187,6 +212,7 @@ namespace Wheatear {
         YAML::Emitter out;
         out << YAML::BeginMap;
         out << YAML::Key << "Scene" << YAML::Value << "Untitled";
+        SerializeSavePolicy(out, m_Scene->GetSavePolicy());
         out << YAML::Key << "Entities" << YAML::Value << YAML::BeginSeq;
         for (auto id : m_Scene->m_Registry.view<IDComponent>())
             SerializeEntity(out, { id, m_Scene.get() });
@@ -218,6 +244,13 @@ namespace Wheatear {
 
         if (!data["Scene"])
             return false;
+
+        if (auto savePolicy = data["SavePolicy"])
+        {
+            SavePolicy policy = m_Scene->GetSavePolicy();
+            DeserializeSavePolicy(savePolicy, policy);
+            m_Scene->SetSavePolicy(policy);
+        }
 
         if (auto entities = data["Entities"])
         {

@@ -140,7 +140,7 @@ void RuntimeSceneLayer::LoadScene(const std::filesystem::path& requestedPath)
 
     Wheatear::GameProgress::SetSceneTransitionContext(previousScenePath, sceneRequest);
 
-    ApplyPendingVisualNovelLoad();
+    ApplyPendingSceneAutoLoadSlot();
 
     WT_CORE_INFO("RuntimeSceneLayer: loaded scene '{}'", m_ScenePath.string());
 
@@ -153,13 +153,13 @@ void RuntimeSceneLayer::LoadScene(const std::filesystem::path& requestedPath)
     m_RuntimeStarted = true;
 }
 
-void RuntimeSceneLayer::ApplyPendingVisualNovelLoad()
+void RuntimeSceneLayer::ApplyPendingSceneAutoLoadSlot()
 {
-    if (!m_ActiveScene || m_PendingVisualNovelLoadSlot <= 0)
+    if (!m_ActiveScene || m_PendingSceneAutoLoadSlot <= 0)
         return;
 
-    Wheatear::ApplyVisualNovelAutoLoadSlot(m_ActiveScene.get(), m_PendingVisualNovelLoadSlot);
-    m_PendingVisualNovelLoadSlot = 0;
+    m_ActiveScene->GetSavePolicy().AutoLoadSlot = m_PendingSceneAutoLoadSlot;
+    m_PendingSceneAutoLoadSlot = 0;
 }
 
 void RuntimeSceneLayer::UpdateViewport()
@@ -224,11 +224,17 @@ void RuntimeSceneLayer::ExecuteSceneTransitionRequest(const Wheatear::SceneTrans
         break;
     case Wheatear::SceneTransitionMode::NewGame:
         Wheatear::GameProgress::ResetForNewGame();
-        m_PendingVisualNovelLoadSlot = 0;
+        m_PendingSceneAutoLoadSlot = 0;
         LoadScene(request.ScenePath);
         break;
     case Wheatear::SceneTransitionMode::LoadGame:
-        m_PendingVisualNovelLoadSlot = request.Slot;
+        if (m_ActiveScene && !m_ActiveScene->GetSavePolicy().CanLoad)
+        {
+            Wheatear::GameProgress::GetState().LastResultMessage = "当前场景禁止读取。";
+            return;
+        }
+
+        m_PendingSceneAutoLoadSlot = request.Slot;
         Wheatear::GameProgress::LoadSlot(request.Slot);
         LoadScene(request.ScenePath);
         break;

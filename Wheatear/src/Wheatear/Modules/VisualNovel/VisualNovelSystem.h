@@ -48,6 +48,7 @@ namespace Wheatear {
             float SystemMessageTimer = 0.0f;
             std::string SystemMessage;
             int LoadedAutoLoadSlot = 0;
+            std::string LoadedSaveDirectory;
             uint32_t BGMHandle = 0;
             std::string CurrentBGMPath;
             std::string CurrentBGMTitle;
@@ -56,13 +57,13 @@ namespace Wheatear {
         };
 
         RuntimeState& GetState(UUID id);
-        bool LoadRuntime(RuntimeState& state, const VisualNovelComponent& component);
+        bool LoadRuntime(Scene* scene, RuntimeState& state, const VisualNovelComponent& component);
         void UpdateInput(Scene* scene, VisualNovelComponent& component, RuntimeState& state);
         bool ExecuteCommand(Scene* scene, VisualNovelComponent& component, RuntimeState& state, const std::string& command);
-        bool ExecuteGameSaveCommand(Scene* scene, VisualNovelComponent& component, RuntimeState& state, const std::string& command);
+        bool ExecuteGameSaveCommand(Scene* scene, RuntimeState& state, const std::string& command);
         void PushSystemMessage(RuntimeState& state, const std::string& message);
-        void SaveToSlot(Scene* scene, VisualNovelComponent& component, RuntimeState& state, int slot, bool allowOverwrite);
-        void LoadFromSlot(Scene* scene, VisualNovelComponent& component, RuntimeState& state, int slot);
+        void SaveToSlot(Scene* scene, RuntimeState& state, int slot, bool allowOverwrite);
+        void LoadFromSlot(Scene* scene, RuntimeState& state, int slot);
         void UpdateSceneBindings(Scene* scene, const VisualNovelComponent& component, RuntimeState& state);
         void StopSkip(RuntimeState& state);
         void UpdateSkip(RuntimeState& state, float deltaSeconds);

@@ -33,6 +33,14 @@ namespace Wheatear {
         Runtime
     };
 
+    struct SavePolicy
+    {
+        bool CanSave = true;
+        bool CanLoad = true;
+        std::string SaveDirectory = "assets/saves";
+        int AutoLoadSlot = 0;
+    };
+
     class Scene
     {
     public:
@@ -68,6 +76,9 @@ namespace Wheatear {
         uint32_t GetViewportHeight() const { return m_ViewportHeight; }
         const glm::vec2& GetViewportOffset() const { return m_ViewportOffset; }
         SceneExecutionMode GetExecutionMode() const { return m_ExecutionMode; }
+        const SavePolicy& GetSavePolicy() const { return m_SavePolicy; }
+        SavePolicy& GetSavePolicy() { return m_SavePolicy; }
+        void SetSavePolicy(const SavePolicy& policy) { m_SavePolicy = policy; }
 
         Entity GetPrimaryCameraEntity();
         Entity FindEntityByUUID(UUID uuid);
@@ -134,6 +145,7 @@ namespace Wheatear {
         uint32_t m_ViewportWidth = 0;
         uint32_t m_ViewportHeight = 0;
         glm::vec2 m_ViewportOffset = { 0.0f, 0.0f };
+        SavePolicy m_SavePolicy;
         SceneExecutionMode m_ExecutionMode = SceneExecutionMode::None;
 
         std::vector<Scope<ISystem>> m_Systems;

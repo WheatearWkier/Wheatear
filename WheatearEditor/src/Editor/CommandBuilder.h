@@ -51,8 +51,7 @@ namespace Wheatear::EditorCommandBuilder {
 
         // vn: family (VisualNovelSystem) — no args unless noted
         VnAuto, VnHistory, VnSettings, VnClose, VnHide,
-        VnSaveMenu, VnLoadMenu, VnQuickSave, VnQuickLoad,
-        VnSaveSlot, VnLoadSlot, VnConfirmOverwrite, VnCancelOverwrite,
+        VnSaveMenu, VnLoadMenu, VnConfirmOverwrite, VnCancelOverwrite,
         VnTextSpeedUp, VnTextSpeedDown, VnAutoDelayUp, VnAutoDelayDown,
         VnAdvance, VnSkip,
 

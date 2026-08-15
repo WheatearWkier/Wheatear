@@ -32,7 +32,7 @@ public:
 private:
     std::filesystem::path ResolveScenePath(const std::filesystem::path& requestedPath) const;
     void LoadScene(const std::filesystem::path& requestedPath = {});
-    void ApplyPendingVisualNovelLoad();
+    void ApplyPendingSceneAutoLoadSlot();
     void UpdateViewport();
     bool ConsumeRuntimeSceneCommands();
     bool ConsumeSceneTransitionRequests();
@@ -50,5 +50,5 @@ private:
     uint32_t m_ViewportWidth = 0;
     uint32_t m_ViewportHeight = 0;
     bool m_RuntimeStarted = false;
-    int m_PendingVisualNovelLoadSlot = 0;
+    int m_PendingSceneAutoLoadSlot = 0;
 };

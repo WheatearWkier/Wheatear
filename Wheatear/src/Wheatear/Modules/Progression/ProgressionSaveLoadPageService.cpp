@@ -45,11 +45,12 @@ namespace Wheatear::ProgressionSaveLoadPageService {
 
     } // namespace
 
-    void EnsureLayout(Scene* scene, bool saveMode, int pendingOverwriteSlot)
+    void EnsureLayout(Scene* scene, bool saveMode, int pendingOverwriteSlot, const std::string& saveDirectory)
     {
         if (!HasEntity(scene, "SaveLoad_SlotScroll"))
             return;
 
+        const std::string resolvedSaveDirectory = saveDirectory.empty() ? "assets/saves" : saveDirectory;
         SetWidgetVisible(scene, "SaveLoad_MainPanel", true);
         SetWidgetVisible(scene, "SaveLoad_Icon", true);
         SetWidgetVisible(scene, "SaveLoad_Title", true);
@@ -69,7 +70,7 @@ namespace Wheatear::ProgressionSaveLoadPageService {
                 continue;
 
             SetWidgetVisible(scene, entityName, true);
-            SetText(scene, entityName, GameProgress::BuildGameSaveSlotButtonText(slot, saveMode));
+            SetText(scene, entityName, GameProgress::BuildGameSaveSlotButtonText(slot, saveMode, resolvedSaveDirectory));
             SetButtonCommand(scene, entityName,
                 saveMode
                     ? "gamesave:slot_save_" + std::to_string(slot)

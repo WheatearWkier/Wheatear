@@ -65,12 +65,8 @@ namespace Wheatear
             return {};
         }
 
-        static ApplicationSpecification CreateEditorSpecification(ApplicationCommandLineArgs args)
+        static std::filesystem::path ResolveEditorProjectRoot(ApplicationCommandLineArgs args)
         {
-            ApplicationSpecification specification;
-            specification.Name = EngineInfo::EditorName;
-            specification.CommandLineArgs = args;
-
             // Project root precedence: --project <dir> > WHEATEAR_PROJECT env >
             // last opened project > Projects/WheatearDemo > auto discovery.
             std::filesystem::path projectRoot;
@@ -92,9 +88,17 @@ namespace Wheatear
                 projectRoot = ReadLastProject();
             if (projectRoot.empty())
                 projectRoot = DefaultProjectRoot();
-            specification.ProjectRoot = projectRoot.empty()
+            return projectRoot.empty()
                 ? AssetPath::DiscoverProjectRoot()
                 : std::filesystem::absolute(projectRoot);
+        }
+
+        static ApplicationSpecification CreateEditorSpecification(ApplicationCommandLineArgs args)
+        {
+            ApplicationSpecification specification;
+            specification.Name = EngineInfo::EditorName;
+            specification.CommandLineArgs = args;
+            specification.ProjectRoot = ResolveEditorProjectRoot(args);
             return specification;
         }
 
@@ -179,8 +183,16 @@ namespace Wheatear
 
         static int RunProjectHealth(ApplicationCommandLineArgs args)
         {
+            const std::filesystem::path projectRoot = ResolveEditorProjectRoot(args);
+            AssetPath::SetProjectRoot(projectRoot);
+            // Health runs before the editor Application exists; set the engine
+            // fallback explicitly so project assets and editor built-ins resolve
+            // the same way as they do in the GUI.
+            AssetPath::SetEngineRoot(AssetPath::DiscoverProjectRoot());
+
             AssetDependencyScanOptions options;
             options.ProjectRoot = AssetPath::GetProjectRoot();
+            options.BuiltinRoot = AssetPath::GetEngineRoot();
             options.StartupAsset = ReadStartupScene(args);
             options.IncludeBuiltinAssets = true;
             options.IncludeUnusedAssets = ReadIncludeUnusedAssets(args);

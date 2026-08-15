@@ -99,7 +99,7 @@ namespace Wheatear {
         WT_CORE_ASSERT(m_SceneState == SceneState::Edit, "TransitionToPlay called from non-Edit state");
 
         ClearEntitySelection();
-        m_PendingVisualNovelLoadSlot = 0;
+        m_PendingSceneAutoLoadSlot = 0;
         WAO::ActionDebugHistory::Clear();
         UIInputSystem::Reset();
         Input::ClearMouseInputBounds();
@@ -121,7 +121,7 @@ namespace Wheatear {
     {
         WT_CORE_ASSERT(m_SceneState == SceneState::Play, "TransitionToStop called from non-Play state");
 
-        m_PendingVisualNovelLoadSlot = 0;
+        m_PendingSceneAutoLoadSlot = 0;
         UIInputSystem::Reset();
         Input::ClearMouseInputBounds();
         m_PlayModeViewportMouseDown = false;
@@ -188,7 +188,7 @@ namespace Wheatear {
         m_ActiveScene = newScene;
         m_PlayScenePath = scenePath;
         GameProgress::SetSceneTransitionContext(previousPlayScenePath, m_PlayScenePath);
-        ApplyPendingVisualNovelLoad();
+        ApplyPendingSceneAutoLoadSlot();
 
         if (m_ViewportSize.x > 0.0f && m_ViewportSize.y > 0.0f)
         {
@@ -201,13 +201,13 @@ namespace Wheatear {
         SyncPanels();
     }
 
-    void EditorLayerBase::ApplyPendingVisualNovelLoad()
+    void EditorLayerBase::ApplyPendingSceneAutoLoadSlot()
     {
-        if (!m_ActiveScene || m_PendingVisualNovelLoadSlot <= 0)
+        if (!m_ActiveScene || m_PendingSceneAutoLoadSlot <= 0)
             return;
 
-        ApplyVisualNovelAutoLoadSlot(m_ActiveScene.get(), m_PendingVisualNovelLoadSlot);
-        m_PendingVisualNovelLoadSlot = 0;
+        m_ActiveScene->GetSavePolicy().AutoLoadSlot = m_PendingSceneAutoLoadSlot;
+        m_PendingSceneAutoLoadSlot = 0;
     }
 
     bool EditorLayerBase::ConsumePlayModeRuntimeCommands()
@@ -263,11 +263,17 @@ namespace Wheatear {
             break;
         case SceneTransitionMode::NewGame:
             GameProgress::ResetForNewGame();
-            m_PendingVisualNovelLoadSlot = 0;
+            m_PendingSceneAutoLoadSlot = 0;
             LoadPlayScene(request.ScenePath);
             break;
         case SceneTransitionMode::LoadGame:
-            m_PendingVisualNovelLoadSlot = request.Slot;
+            if (m_ActiveScene && !m_ActiveScene->GetSavePolicy().CanLoad)
+            {
+                GameProgress::GetState().LastResultMessage = "当前场景禁止读取。";
+                return;
+            }
+
+            m_PendingSceneAutoLoadSlot = request.Slot;
             GameProgress::LoadSlot(request.Slot);
             LoadPlayScene(request.ScenePath);
             break;

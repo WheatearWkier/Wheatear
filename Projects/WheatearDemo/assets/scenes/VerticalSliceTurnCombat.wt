@@ -1,4 +1,9 @@
 ﻿Scene: VerticalSliceTurnCombat
+SavePolicy:
+  CanSave: false
+  CanLoad: false
+  SaveDirectory: assets/saves
+  AutoLoadSlot: 0
 Entities:
   - Entity: 940100001
     TagComponent:

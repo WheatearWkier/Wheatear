@@ -1,4 +1,9 @@
-﻿Scene: Untitled
+Scene: Untitled
+SavePolicy:
+  CanSave: true
+  CanLoad: true
+  SaveDirectory: assets/saves
+  AutoLoadSlot: 0
 Entities:
   - Entity: 990000010
     TagComponent:
@@ -671,7 +676,7 @@ Entities:
       NormalColor: [0.119999997, 0.180000007, 0.180000007, 0.779999971]
       HoverColor: [0.219999999, 0.379999995, 0.340000004, 0.920000017]
       PressedColor: [0.0799999982, 0.109999999, 0.119999997, 0.959999979]
-      OnClickFunction: "vn:saveslot:20"
+      OnClickFunction: "gamesave:slot_save_20"
       TooltipText: ""
   - Entity: 930023422
     TagComponent:
@@ -714,7 +719,7 @@ Entities:
       NormalColor: [0.119999997, 0.180000007, 0.180000007, 0.779999971]
       HoverColor: [0.219999999, 0.379999995, 0.340000004, 0.920000017]
       PressedColor: [0.0799999982, 0.109999999, 0.119999997, 0.959999979]
-      OnClickFunction: "vn:saveslot:19"
+      OnClickFunction: "gamesave:slot_save_19"
       TooltipText: ""
   - Entity: 930023421
     TagComponent:
@@ -757,7 +762,7 @@ Entities:
       NormalColor: [0.119999997, 0.180000007, 0.180000007, 0.779999971]
       HoverColor: [0.219999999, 0.379999995, 0.340000004, 0.920000017]
       PressedColor: [0.0799999982, 0.109999999, 0.119999997, 0.959999979]
-      OnClickFunction: "vn:saveslot:18"
+      OnClickFunction: "gamesave:slot_save_18"
       TooltipText: ""
   - Entity: 930023420
     TagComponent:
@@ -800,7 +805,7 @@ Entities:
       NormalColor: [0.119999997, 0.180000007, 0.180000007, 0.779999971]
       HoverColor: [0.219999999, 0.379999995, 0.340000004, 0.920000017]
       PressedColor: [0.0799999982, 0.109999999, 0.119999997, 0.959999979]
-      OnClickFunction: "vn:saveslot:17"
+      OnClickFunction: "gamesave:slot_save_17"
       TooltipText: ""
   - Entity: 930023419
     TagComponent:
@@ -843,7 +848,7 @@ Entities:
       NormalColor: [0.119999997, 0.180000007, 0.180000007, 0.779999971]
       HoverColor: [0.219999999, 0.379999995, 0.340000004, 0.920000017]
       PressedColor: [0.0799999982, 0.109999999, 0.119999997, 0.959999979]
-      OnClickFunction: "vn:saveslot:16"
+      OnClickFunction: "gamesave:slot_save_16"
       TooltipText: ""
   - Entity: 930023418
     TagComponent:
@@ -886,7 +891,7 @@ Entities:
       NormalColor: [0.119999997, 0.180000007, 0.180000007, 0.779999971]
       HoverColor: [0.219999999, 0.379999995, 0.340000004, 0.920000017]
       PressedColor: [0.0799999982, 0.109999999, 0.119999997, 0.959999979]
-      OnClickFunction: "vn:saveslot:15"
+      OnClickFunction: "gamesave:slot_save_15"
       TooltipText: ""
   - Entity: 930023417
     TagComponent:
@@ -929,7 +934,7 @@ Entities:
       NormalColor: [0.119999997, 0.180000007, 0.180000007, 0.779999971]
       HoverColor: [0.219999999, 0.379999995, 0.340000004, 0.920000017]
       PressedColor: [0.0799999982, 0.109999999, 0.119999997, 0.959999979]
-      OnClickFunction: "vn:saveslot:14"
+      OnClickFunction: "gamesave:slot_save_14"
       TooltipText: ""
   - Entity: 930023416
     TagComponent:
@@ -972,7 +977,7 @@ Entities:
       NormalColor: [0.119999997, 0.180000007, 0.180000007, 0.779999971]
       HoverColor: [0.219999999, 0.379999995, 0.340000004, 0.920000017]
       PressedColor: [0.0799999982, 0.109999999, 0.119999997, 0.959999979]
-      OnClickFunction: "vn:saveslot:13"
+      OnClickFunction: "gamesave:slot_save_13"
       TooltipText: ""
   - Entity: 930023415
     TagComponent:
@@ -1015,7 +1020,7 @@ Entities:
       NormalColor: [0.119999997, 0.180000007, 0.180000007, 0.779999971]
       HoverColor: [0.219999999, 0.379999995, 0.340000004, 0.920000017]
       PressedColor: [0.0799999982, 0.109999999, 0.119999997, 0.959999979]
-      OnClickFunction: "vn:saveslot:12"
+      OnClickFunction: "gamesave:slot_save_12"
       TooltipText: ""
   - Entity: 930023414
     TagComponent:
@@ -1058,7 +1063,7 @@ Entities:
       NormalColor: [0.119999997, 0.180000007, 0.180000007, 0.779999971]
       HoverColor: [0.219999999, 0.379999995, 0.340000004, 0.920000017]
       PressedColor: [0.0799999982, 0.109999999, 0.119999997, 0.959999979]
-      OnClickFunction: "vn:saveslot:11"
+      OnClickFunction: "gamesave:slot_save_11"
       TooltipText: ""
   - Entity: 930023413
     TagComponent:
@@ -1101,7 +1106,7 @@ Entities:
       NormalColor: [0.119999997, 0.180000007, 0.180000007, 0.779999971]
       HoverColor: [0.219999999, 0.379999995, 0.340000004, 0.920000017]
       PressedColor: [0.0799999982, 0.109999999, 0.119999997, 0.959999979]
-      OnClickFunction: "vn:saveslot:10"
+      OnClickFunction: "gamesave:slot_save_10"
       TooltipText: ""
   - Entity: 930023412
     TagComponent:
@@ -1144,7 +1149,7 @@ Entities:
       NormalColor: [0.119999997, 0.180000007, 0.180000007, 0.779999971]
       HoverColor: [0.219999999, 0.379999995, 0.340000004, 0.920000017]
       PressedColor: [0.0799999982, 0.109999999, 0.119999997, 0.959999979]
-      OnClickFunction: "vn:saveslot:9"
+      OnClickFunction: "gamesave:slot_save_9"
       TooltipText: ""
   - Entity: 930023411
     TagComponent:
@@ -1187,7 +1192,7 @@ Entities:
       NormalColor: [0.119999997, 0.180000007, 0.180000007, 0.779999971]
       HoverColor: [0.219999999, 0.379999995, 0.340000004, 0.920000017]
       PressedColor: [0.0799999982, 0.109999999, 0.119999997, 0.959999979]
-      OnClickFunction: "vn:saveslot:8"
+      OnClickFunction: "gamesave:slot_save_8"
       TooltipText: ""
   - Entity: 930023410
     TagComponent:
@@ -1230,7 +1235,7 @@ Entities:
       NormalColor: [0.119999997, 0.180000007, 0.180000007, 0.779999971]
       HoverColor: [0.219999999, 0.379999995, 0.340000004, 0.920000017]
       PressedColor: [0.0799999982, 0.109999999, 0.119999997, 0.959999979]
-      OnClickFunction: "vn:saveslot:7"
+      OnClickFunction: "gamesave:slot_save_7"
       TooltipText: ""
   - Entity: 930023409
     TagComponent:
@@ -1273,7 +1278,7 @@ Entities:
       NormalColor: [0.119999997, 0.180000007, 0.180000007, 0.779999971]
       HoverColor: [0.219999999, 0.379999995, 0.340000004, 0.920000017]
       PressedColor: [0.0799999982, 0.109999999, 0.119999997, 0.959999979]
-      OnClickFunction: "vn:saveslot:6"
+      OnClickFunction: "gamesave:slot_save_6"
       TooltipText: ""
   - Entity: 930023408
     TagComponent:
@@ -1316,7 +1321,7 @@ Entities:
       NormalColor: [0.119999997, 0.180000007, 0.180000007, 0.779999971]
       HoverColor: [0.219999999, 0.379999995, 0.340000004, 0.920000017]
       PressedColor: [0.0799999982, 0.109999999, 0.119999997, 0.959999979]
-      OnClickFunction: "vn:saveslot:5"
+      OnClickFunction: "gamesave:slot_save_5"
       TooltipText: ""
   - Entity: 930023407
     TagComponent:
@@ -1359,7 +1364,7 @@ Entities:
       NormalColor: [0.119999997, 0.180000007, 0.180000007, 0.779999971]
       HoverColor: [0.219999999, 0.379999995, 0.340000004, 0.920000017]
       PressedColor: [0.0799999982, 0.109999999, 0.119999997, 0.959999979]
-      OnClickFunction: "vn:saveslot:4"
+      OnClickFunction: "gamesave:slot_save_4"
       TooltipText: ""
   - Entity: 930023406
     TagComponent:
@@ -1402,7 +1407,7 @@ Entities:
       NormalColor: [0.119999997, 0.180000007, 0.180000007, 0.779999971]
       HoverColor: [0.219999999, 0.379999995, 0.340000004, 0.920000017]
       PressedColor: [0.0799999982, 0.109999999, 0.119999997, 0.959999979]
-      OnClickFunction: "vn:saveslot:3"
+      OnClickFunction: "gamesave:slot_save_3"
       TooltipText: ""
   - Entity: 930023405
     TagComponent:
@@ -1445,7 +1450,7 @@ Entities:
       NormalColor: [0.119999997, 0.180000007, 0.180000007, 0.779999971]
       HoverColor: [0.219999999, 0.379999995, 0.340000004, 0.920000017]
       PressedColor: [0.0799999982, 0.109999999, 0.119999997, 0.959999979]
-      OnClickFunction: "vn:saveslot:2"
+      OnClickFunction: "gamesave:slot_save_2"
       TooltipText: ""
   - Entity: 930023404
     TagComponent:
@@ -1488,7 +1493,7 @@ Entities:
       NormalColor: [0.119999997, 0.180000007, 0.180000007, 0.779999971]
       HoverColor: [0.219999999, 0.379999995, 0.340000004, 0.920000017]
       PressedColor: [0.0799999982, 0.109999999, 0.119999997, 0.959999979]
-      OnClickFunction: "vn:saveslot:1"
+      OnClickFunction: "gamesave:slot_save_1"
       TooltipText: ""
   - Entity: 930023403
     TagComponent:
@@ -2121,7 +2126,7 @@ Entities:
       NormalColor: [1, 1, 1, 0]
       HoverColor: [1, 1, 1, 0]
       PressedColor: [1, 1, 1, 0]
-      OnClickFunction: "vn:quickload"
+      OnClickFunction: "gamesave:load_1"
       TooltipText: "快速读取"
   - Entity: 910000080
     TagComponent:
@@ -2162,7 +2167,7 @@ Entities:
       NormalColor: [1, 1, 1, 0]
       HoverColor: [1, 1, 1, 0]
       PressedColor: [1, 1, 1, 0]
-      OnClickFunction: "vn:quicksave"
+      OnClickFunction: "gamesave:slot_save_1"
       TooltipText: "快速保存"
   - Entity: 910000021
     TagComponent:
@@ -2627,8 +2632,6 @@ Entities:
       SystemMessageEntityName: VN_SystemMessage
       MusicNoticePanelEntityName: VN_MusicNoticePanel
       MusicNoticeTextEntityName: VN_MusicNoticePanel
-      SaveDirectory: assets/saves
-      AutoLoadSlot: 0
   - Entity: 930023400
     TagComponent:
       Tag: VN_SaveLoad_Close

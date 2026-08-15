@@ -61,6 +61,7 @@ namespace Wheatear {
         void ReparentUIWithUndo(Entity child,
             Entity parent,
             const UIChildMap& childMap);
+        void DrawSceneSettings();
         Entity CreateEntityWithUndo(const std::string& name,
             const std::function<void(Entity)>& configure);
         Entity CreateUITemplateWithUndo(UITemplateKind kind, UUID parentID);
@@ -81,6 +82,11 @@ namespace Wheatear {
         char m_SearchBuffer[128] = {};
         char m_AddComponentSearch[128] = {};
         bool m_ShowOnlyUI = false;
+        bool m_SceneSettingsEditing = false;
+        bool m_SceneSettingsEditStartCanSave = true;
+        bool m_SceneSettingsEditStartCanLoad = true;
+        std::string m_SceneSettingsEditStartSaveDirectory;
+        int m_SceneSettingsEditStartAutoLoadSlot = 0;
     };
 
 } // namespace Wheatear

@@ -1,4 +1,9 @@
 ﻿Scene: VerticalSliceTacticalCombat
+SavePolicy:
+  CanSave: false
+  CanLoad: false
+  SaveDirectory: assets/saves
+  AutoLoadSlot: 0
 Entities:
   - Entity: 950200001
     TagComponent:

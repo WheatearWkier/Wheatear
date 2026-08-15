@@ -371,6 +371,11 @@ namespace Wheatear {
         m_Context = context;
         m_SelectionContext = {};
         m_ScrollToSelection = false;
+        m_SceneSettingsEditing = false;
+        m_SceneSettingsEditStartCanSave = true;
+        m_SceneSettingsEditStartCanLoad = true;
+        m_SceneSettingsEditStartSaveDirectory.clear();
+        m_SceneSettingsEditStartAutoLoadSlot = 0;
     }
 
     void SceneHierarchyPanel::OnImGuiRender()
@@ -540,6 +545,8 @@ namespace Wheatear {
         ImGui::End();
 
         ImGui::Begin("Properties");
+        if (m_Context)
+            DrawSceneSettings();
         if (m_SelectionContext)
             DrawComponents(m_SelectionContext);
         ImGui::End();

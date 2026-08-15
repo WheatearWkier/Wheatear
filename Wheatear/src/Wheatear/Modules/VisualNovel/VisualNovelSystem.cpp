@@ -35,6 +35,31 @@ namespace Wheatear {
 
     using namespace VisualNovelSystemInternal;
 
+    namespace {
+
+        static const SavePolicy& GetSceneSavePolicy(Scene* scene)
+        {
+            static const SavePolicy s_DefaultPolicy{};
+            return scene ? scene->GetSavePolicy() : s_DefaultPolicy;
+        }
+
+        static bool CanSceneSave(Scene* scene)
+        {
+            return GetSceneSavePolicy(scene).CanSave;
+        }
+
+        static bool CanSceneLoad(Scene* scene)
+        {
+            return GetSceneSavePolicy(scene).CanLoad;
+        }
+
+        static std::string GetSceneSaveDirectory(Scene* scene)
+        {
+            return GetSceneSavePolicy(scene).SaveDirectory;
+        }
+
+    } // namespace
+
 
     void VisualNovelSystem::OnRuntimeStart(Scene* scene)
     {
@@ -44,7 +69,7 @@ namespace Wheatear {
             auto& component = entity.GetComponent<VisualNovelComponent>();
             RuntimeState& state = GetState(entity.GetUUID());
             if (component.PlayOnStart)
-                LoadRuntime(state, component);
+                LoadRuntime(scene, state, component);
         }
     }
 
@@ -71,11 +96,13 @@ namespace Wheatear {
             RuntimeState& state = GetState(entity.GetUUID());
 
             const std::filesystem::path resolvedPath = AssetPath::ResolveRuntimeData(component.ScriptPath);
+            const SavePolicy& policy = GetSceneSavePolicy(scene);
             if (!state.Loaded
                 || state.LoadedPath != resolvedPath
-                || state.LoadedAutoLoadSlot != component.AutoLoadSlot)
+                || state.LoadedAutoLoadSlot != policy.AutoLoadSlot
+                || state.LoadedSaveDirectory != policy.SaveDirectory)
             {
-                LoadRuntime(state, component);
+                LoadRuntime(scene, state, component);
             }
             else
             {
@@ -213,14 +240,16 @@ namespace Wheatear {
 
 
 
-    bool VisualNovelSystem::LoadRuntime(RuntimeState& state, const VisualNovelComponent& component)
+    bool VisualNovelSystem::LoadRuntime(Scene* scene, RuntimeState& state, const VisualNovelComponent& component)
     {
+        const SavePolicy& policy = GetSceneSavePolicy(scene);
         StopBGM(state);
         state.LoadedPath = AssetPath::ResolveRuntimeData(component.ScriptPath);
         state.Runtime.SetCharactersPerSecond(component.CharactersPerSecond);
         state.Runtime.SetAutoPlayDelay(component.AutoPlayDelay);
         state.Loaded = state.Runtime.LoadScript(state.LoadedPath);
-        state.LoadedAutoLoadSlot = component.AutoLoadSlot;
+        state.LoadedAutoLoadSlot = policy.AutoLoadSlot;
+        state.LoadedSaveDirectory = policy.SaveDirectory;
         state.ShowHistory = false;
         state.ShowSettings = false;
         state.ShowSaveLoad = false;
@@ -243,12 +272,12 @@ namespace Wheatear {
             ? std::filesystem::last_write_time(state.LoadedPath, error)
             : std::filesystem::file_time_type{};
 
-        if (component.AutoLoadSlot > 0)
+        if (policy.CanLoad && policy.AutoLoadSlot > 0)
         {
-            const std::filesystem::path savePath = BuildSavePath(component, component.AutoLoadSlot);
+            const std::filesystem::path savePath = BuildSavePath(scene, policy.AutoLoadSlot);
             const bool runtimeLoaded = state.Runtime.LoadState(savePath);
-            if (runtimeLoaded || GameProgress::IsGameSaveSlotOccupied(component.AutoLoadSlot, component.SaveDirectory))
-                GameProgress::LoadSlot(component.AutoLoadSlot);
+            if (runtimeLoaded || GameProgress::IsGameSaveSlotOccupied(policy.AutoLoadSlot, policy.SaveDirectory))
+                GameProgress::LoadSlot(policy.AutoLoadSlot);
         }
 
         return true;
@@ -263,9 +292,8 @@ namespace Wheatear {
         for (auto e : scene->GetRegistry().view<VisualNovelComponent>())
         {
             Entity entity{ e, scene };
-            auto& component = entity.GetComponent<VisualNovelComponent>();
             RuntimeState& state = GetState(entity.GetUUID());
-            handled = ExecuteGameSaveCommand(scene, component, state, command) || handled;
+            handled = ExecuteGameSaveCommand(scene, state, command) || handled;
         }
         return handled;
     }
@@ -276,22 +304,27 @@ namespace Wheatear {
         state.SystemMessageTimer = 2.0f;
     }
 
-    void VisualNovelSystem::SaveToSlot(Scene*,
-        VisualNovelComponent& component,
+    void VisualNovelSystem::SaveToSlot(Scene* scene,
         RuntimeState& state,
         int slot,
         bool allowOverwrite)
     {
         StopSkip(state);
+        if (!CanSceneSave(scene))
+        {
+            PushSystemMessage(state, "当前场景禁止保存。");
+            return;
+        }
+
         const int safeSlot = std::clamp(slot, 1, GameProgress::GetMaxSaveSlots());
-        if (!allowOverwrite && HasAnySaveSlotData(component, safeSlot))
+        if (!allowOverwrite && HasAnySaveSlotData(scene, safeSlot))
         {
             state.PendingOverwriteSlot = safeSlot;
             PushSystemMessage(state, "该槽位已有存档，是否覆盖 " + std::to_string(safeSlot) + " 号槽？");
             return;
         }
 
-        const std::filesystem::path savePath = BuildSavePath(component, safeSlot);
+        const std::filesystem::path savePath = BuildSavePath(scene, safeSlot);
         const bool vnSaved = state.Runtime.SaveState(savePath);
         const bool progressSaved = GameProgress::SaveSlot(safeSlot);
         state.PendingOverwriteSlot = 0;
@@ -312,13 +345,18 @@ namespace Wheatear {
     }
 
     void VisualNovelSystem::LoadFromSlot(Scene* scene,
-        VisualNovelComponent& component,
         RuntimeState& state,
         int slot)
     {
         StopSkip(state);
+        if (!CanSceneLoad(scene))
+        {
+            PushSystemMessage(state, "当前场景禁止读取。");
+            return;
+        }
+
         const int safeSlot = std::clamp(slot, 1, GameProgress::GetMaxSaveSlots());
-        if (!GameProgress::IsGameSaveSlotOccupied(safeSlot, component.SaveDirectory))
+        if (!GameProgress::IsGameSaveSlotOccupied(safeSlot, GetSceneSaveDirectory(scene)))
         {
             PushSystemMessage(state, "槽位 " + std::to_string(safeSlot) + " 没有存档。");
             return;
@@ -326,12 +364,14 @@ namespace Wheatear {
 
         state.ShowSaveLoad = false;
         state.PendingOverwriteSlot = 0;
-        CommandBus::Execute(scene, GameProgress::BuildLoadGameCommand(safeSlot));
-        PushSystemMessage(state, "正在读取 " + std::to_string(safeSlot) + " 号槽。");
+        const CommandResult result = CommandBus::Execute(scene, GameProgress::BuildLoadGameCommand(safeSlot));
+        if (result.Success)
+            PushSystemMessage(state, "正在读取 " + std::to_string(safeSlot) + " 号槽。");
+        else
+            PushSystemMessage(state, result.Message.empty() ? "读取失败。" : result.Message);
     }
 
     bool VisualNovelSystem::ExecuteGameSaveCommand(Scene* scene,
-        VisualNovelComponent& component,
         RuntimeState& state,
         const std::string& command)
     {
@@ -342,13 +382,7 @@ namespace Wheatear {
         if (action.rfind("slot_save_", 0) == 0)
         {
             state.SaveLoadSaveMode = true;
-            SaveToSlot(scene, component, state, ParseVNSaveSlot(action.substr(10)), false);
-            return true;
-        }
-
-        if (action.rfind("save_", 0) == 0)
-        {
-            SaveToSlot(scene, component, state, ParseVNSaveSlot(action.substr(5)), true);
+            SaveToSlot(scene, state, ParseVNSaveSlot(action.substr(10)), false);
             return true;
         }
 
@@ -356,22 +390,7 @@ namespace Wheatear {
         {
             state.SaveLoadSaveMode = false;
             state.PendingOverwriteSlot = 0;
-            LoadFromSlot(scene, component, state, ParseVNSaveSlot(action.substr(5)));
-            return true;
-        }
-
-        if (action.rfind("saveslot:", 0) == 0)
-        {
-            state.SaveLoadSaveMode = true;
-            SaveToSlot(scene, component, state, ParseVNSaveSlot(action.substr(9)), false);
-            return true;
-        }
-
-        if (action.rfind("loadslot:", 0) == 0)
-        {
-            state.SaveLoadSaveMode = false;
-            state.PendingOverwriteSlot = 0;
-            LoadFromSlot(scene, component, state, ParseVNSaveSlot(action.substr(9)));
+            LoadFromSlot(scene, state, ParseVNSaveSlot(action.substr(5)));
             return true;
         }
 
@@ -447,8 +466,24 @@ namespace Wheatear {
         if (action == "savemenu" || action == "loadmenu")
         {
             StopSkip(state);
+            const bool saveMode = action == "savemenu";
+            if (saveMode && !CanSceneSave(scene))
+            {
+                state.ShowSaveLoad = false;
+                state.PendingOverwriteSlot = 0;
+                PushSystemMessage(state, "当前场景禁止保存。");
+                return true;
+            }
+            if (!saveMode && !CanSceneLoad(scene))
+            {
+                state.ShowSaveLoad = false;
+                state.PendingOverwriteSlot = 0;
+                PushSystemMessage(state, "当前场景禁止读取。");
+                return true;
+            }
+
             state.ShowSaveLoad = true;
-            state.SaveLoadSaveMode = action == "savemenu";
+            state.SaveLoadSaveMode = saveMode;
             state.PendingOverwriteSlot = 0;
             state.ShowHistory = false;
             state.ShowSettings = false;
@@ -456,37 +491,10 @@ namespace Wheatear {
             return true;
         }
 
-        if (action == "save" || action == "quicksave")
-        {
-            SaveToSlot(scene, component, state, 1, true);
-            return true;
-        }
-
-        if (action == "load" || action == "quickload")
-        {
-            LoadFromSlot(scene, component, state, 1);
-            return true;
-        }
-
-        if (action.rfind("saveslot:", 0) == 0)
-        {
-            state.SaveLoadSaveMode = true;
-            SaveToSlot(scene, component, state, ParseVNSaveSlot(action.substr(9)), false);
-            return true;
-        }
-
-        if (action.rfind("loadslot:", 0) == 0)
-        {
-            state.SaveLoadSaveMode = false;
-            state.PendingOverwriteSlot = 0;
-            LoadFromSlot(scene, component, state, ParseVNSaveSlot(action.substr(9)));
-            return true;
-        }
-
         if (action == "confirm_overwrite")
         {
             if (state.PendingOverwriteSlot > 0)
-                SaveToSlot(scene, component, state, state.PendingOverwriteSlot, true);
+                SaveToSlot(scene, state, state.PendingOverwriteSlot, true);
             return true;
         }
 
@@ -494,7 +502,7 @@ namespace Wheatear {
         {
             StopSkip(state);
             state.PendingOverwriteSlot = 0;
-            PushSystemMessage(state, "Overwrite canceled.");
+            PushSystemMessage(state, "已取消覆盖。");
             return true;
         }
 

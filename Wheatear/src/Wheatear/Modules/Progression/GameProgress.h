@@ -183,13 +183,7 @@ namespace Wheatear::GameProgress {
     WHEATEAR_API std::string BuildRelationshipStatus();
     WHEATEAR_API std::string BuildSupportStatus();
     WHEATEAR_API std::string BuildSettingsStatus();
-    WHEATEAR_API std::string BuildSaveLoadStatus();
-    WHEATEAR_API std::string BuildSaveSlotSummary(int slot);
-    WHEATEAR_API std::string BuildSaveSlotDetails(int slot);
     WHEATEAR_API std::string BuildGameSaveSlotButtonText(int slot, bool saveMode, const std::string& saveDirectory = "assets/saves");
-    WHEATEAR_API std::string BuildGameSaveSlotDetails(int slot, const std::string& saveDirectory = "assets/saves");
     WHEATEAR_API std::string BuildLoadGameCommand(int slot, const std::string& scenePath = "");
-    WHEATEAR_API std::string GetSaveButtonText(int slot);
-    WHEATEAR_API std::string GetLoadButtonText(int slot);
 
 } // namespace Wheatear::GameProgress

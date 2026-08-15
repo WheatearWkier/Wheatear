@@ -37,6 +37,8 @@ namespace Wheatear {
         static bool s_SaveLoadSaveMode = true;
         static int s_PendingOverwriteSlot = 0;
         static std::optional<bool> s_PendingSaveLoadMode;
+        static std::string s_ActiveSaveDirectory = "assets/saves";
+        static std::optional<std::string> s_PendingSaveDirectory;
 
         static bool HasEntity(Scene* scene, const std::string& name)
         {
@@ -83,9 +85,25 @@ namespace Wheatear {
             return std::clamp(std::stoi(payload), 1, GameProgress::GetMaxSaveSlots());
         }
 
-        static bool SaveProgressionOnlySlot(int slot)
+        static std::string ResolveCommandSaveDirectory(Scene* scene)
         {
-            if (!GameProgress::ClearGameRuntimeSaveSlot(slot))
+            if (HasEntity(scene, "SaveLoad_SlotScroll"))
+                return s_ActiveSaveDirectory.empty() ? "assets/saves" : s_ActiveSaveDirectory;
+            return scene && !scene->GetSavePolicy().SaveDirectory.empty()
+                ? scene->GetSavePolicy().SaveDirectory
+                : "assets/saves";
+        }
+
+        static void SetPolicyDeniedMessage(bool saving)
+        {
+            GameProgress::GetState().LastResultMessage = saving
+                ? "当前场景禁止保存。"
+                : "当前场景禁止读取。";
+        }
+
+        static bool SaveProgressionOnlySlot(int slot, const std::string& saveDirectory)
+        {
+            if (!GameProgress::ClearGameRuntimeSaveSlot(slot, saveDirectory))
             {
                 GameProgress::GetState().LastResultMessage = "存档失败：无法清理旧剧情状态。";
                 return false;
@@ -100,13 +118,22 @@ namespace Wheatear {
                 return;
 
             VisualNovelSystem* visualNovelSystem = scene->GetSystem<VisualNovelSystem>();
+            const SavePolicy& policy = scene->GetSavePolicy();
+            const std::string commandSaveDirectory = ResolveCommandSaveDirectory(scene);
             for (const std::string& command : CommandBus::DrainGameplayCommands("gamesave:"))
             {
                 const std::string action = ToLower(command.substr(9));
                 if (action == "open_save_menu" || action == "open_save_load" || action == "open_menu")
                 {
+                    if (!policy.CanSave)
+                    {
+                        SetPolicyDeniedMessage(true);
+                        continue;
+                    }
+
                     s_SaveLoadSaveMode = true;
                     s_PendingSaveLoadMode = true;
+                    s_PendingSaveDirectory = policy.SaveDirectory;
                     s_PendingOverwriteSlot = 0;
                     SceneTransitionService::RequestLoadScene(GetSaveLoadScenePath(), command);
                     continue;
@@ -114,8 +141,15 @@ namespace Wheatear {
 
                 if (action == "open_load_menu")
                 {
+                    if (!policy.CanLoad)
+                    {
+                        SetPolicyDeniedMessage(false);
+                        continue;
+                    }
+
                     s_SaveLoadSaveMode = false;
                     s_PendingSaveLoadMode = false;
+                    s_PendingSaveDirectory = policy.SaveDirectory;
                     s_PendingOverwriteSlot = 0;
                     SceneTransitionService::RequestLoadScene(GetSaveLoadScenePath(), command);
                     continue;
@@ -131,8 +165,15 @@ namespace Wheatear {
 
                 if (action == "confirm_overwrite")
                 {
+                    if (!policy.CanSave)
+                    {
+                        s_PendingOverwriteSlot = 0;
+                        SetPolicyDeniedMessage(true);
+                        continue;
+                    }
+
                     if (s_PendingOverwriteSlot > 0)
-                        SaveProgressionOnlySlot(s_PendingOverwriteSlot);
+                        SaveProgressionOnlySlot(s_PendingOverwriteSlot, commandSaveDirectory);
                     s_PendingOverwriteSlot = 0;
                     continue;
                 }
@@ -149,8 +190,14 @@ namespace Wheatear {
 
                 if (const auto slot = ParseTrailingSlot(action, "slot_save_"))
                 {
+                    if (!policy.CanSave)
+                    {
+                        SetPolicyDeniedMessage(true);
+                        continue;
+                    }
+
                     s_SaveLoadSaveMode = true;
-                    if (GameProgress::IsGameSaveSlotOccupied(*slot))
+                    if (GameProgress::IsGameSaveSlotOccupied(*slot, commandSaveDirectory))
                     {
                         s_PendingOverwriteSlot = *slot;
                         GameProgress::GetState().LastResultMessage =
@@ -159,20 +206,27 @@ namespace Wheatear {
                     else
                     {
                         s_PendingOverwriteSlot = 0;
-                        SaveProgressionOnlySlot(*slot);
+                        SaveProgressionOnlySlot(*slot, commandSaveDirectory);
                     }
                     continue;
                 }
 
                 if (const auto slot = ParseTrailingSlot(action, "load_"))
                 {
+                    if (!policy.CanLoad)
+                    {
+                        SetPolicyDeniedMessage(false);
+                        continue;
+                    }
+
                     s_SaveLoadSaveMode = false;
                     s_PendingOverwriteSlot = 0;
-                    if (GameProgress::IsGameSaveSlotOccupied(*slot))
+                    if (GameProgress::IsGameSaveSlotOccupied(*slot, commandSaveDirectory))
                     {
-                        GameProgress::GetState().LastResultMessage =
-                            "已读取 " + std::to_string(*slot) + " 号槽。";
-                        CommandBus::Execute(scene, GameProgress::BuildLoadGameCommand(*slot));
+                        const CommandResult result = CommandBus::Execute(scene, GameProgress::BuildLoadGameCommand(*slot));
+                        GameProgress::GetState().LastResultMessage = result.Success
+                            ? "已读取 " + std::to_string(*slot) + " 号槽。"
+                            : (result.Message.empty() ? "读取失败。" : result.Message);
                     }
                     else
                     {
@@ -292,7 +346,11 @@ namespace Wheatear {
             if (!HasEntity(scene, "SaveLoad_SlotScroll"))
                 return;
 
-            ProgressionSaveLoadPageService::EnsureLayout(scene, s_SaveLoadSaveMode, s_PendingOverwriteSlot);
+            ProgressionSaveLoadPageService::EnsureLayout(
+                scene,
+                s_SaveLoadSaveMode,
+                s_PendingOverwriteSlot,
+                s_ActiveSaveDirectory);
         }
 
         static void UpdateProgressionPages(Scene* scene)
@@ -320,6 +378,20 @@ namespace Wheatear {
         else
         {
             s_SaveLoadSaveMode = true;
+        }
+
+        if (s_PendingSaveDirectory)
+        {
+            s_ActiveSaveDirectory = s_PendingSaveDirectory->empty()
+                ? "assets/saves"
+                : *s_PendingSaveDirectory;
+            s_PendingSaveDirectory.reset();
+        }
+        else
+        {
+            s_ActiveSaveDirectory = scene && !scene->GetSavePolicy().SaveDirectory.empty()
+                ? scene->GetSavePolicy().SaveDirectory
+                : "assets/saves";
         }
 
         s_PendingOverwriteSlot = 0;

@@ -43,10 +43,6 @@ namespace Wheatear::EditorCommandBuilder {
         case CommandKind::VnHide: return EditorLocale::Text("VN: Hide Dialogue", "VN: 隐藏对白");
         case CommandKind::VnSaveMenu: return EditorLocale::Text("VN: Open Save Menu", "VN: 打开存档菜单");
         case CommandKind::VnLoadMenu: return EditorLocale::Text("VN: Open Load Menu", "VN: 打开读档菜单");
-        case CommandKind::VnQuickSave: return EditorLocale::Text("VN: Quick Save", "VN: 快速存档");
-        case CommandKind::VnQuickLoad: return EditorLocale::Text("VN: Quick Load", "VN: 快速读档");
-        case CommandKind::VnSaveSlot: return EditorLocale::Text("VN: Save Slot", "VN: 保存到槽位");
-        case CommandKind::VnLoadSlot: return EditorLocale::Text("VN: Load Slot", "VN: 从槽位读取");
         case CommandKind::VnConfirmOverwrite: return EditorLocale::Text("VN: Confirm Overwrite", "VN: 确认覆盖");
         case CommandKind::VnCancelOverwrite: return EditorLocale::Text("VN: Cancel Overwrite", "VN: 取消覆盖");
         case CommandKind::VnTextSpeedUp: return EditorLocale::Text("VN: Text Speed +", "VN: 文字速度 +");
@@ -175,10 +171,6 @@ namespace Wheatear::EditorCommandBuilder {
         case CommandKind::VnHide: return "vn:hide";
         case CommandKind::VnSaveMenu: return "vn:savemenu";
         case CommandKind::VnLoadMenu: return "vn:loadmenu";
-        case CommandKind::VnQuickSave: return "vn:quicksave";
-        case CommandKind::VnQuickLoad: return "vn:quickload";
-        case CommandKind::VnSaveSlot: return "vn:saveslot:" + std::to_string(std::max(1, spec.Number));
-        case CommandKind::VnLoadSlot: return "vn:loadslot:" + std::to_string(std::max(1, spec.Number));
         case CommandKind::VnConfirmOverwrite: return "vn:confirm_overwrite";
         case CommandKind::VnCancelOverwrite: return "vn:cancel_overwrite";
         case CommandKind::VnTextSpeedUp: return "vn:textspeed+";
@@ -445,18 +437,6 @@ namespace Wheatear::EditorCommandBuilder {
             else if (action == "hide") spec.Kind = CommandKind::VnHide;
             else if (action == "savemenu") spec.Kind = CommandKind::VnSaveMenu;
             else if (action == "loadmenu") spec.Kind = CommandKind::VnLoadMenu;
-            else if (action == "save" || action == "quicksave") spec.Kind = CommandKind::VnQuickSave;
-            else if (action == "load" || action == "quickload") spec.Kind = CommandKind::VnQuickLoad;
-            else if (StartsWith(action, "saveslot:"))
-            {
-                spec.Kind = CommandKind::VnSaveSlot;
-                TryParsePositiveInt(action.substr(9), spec.Number);
-            }
-            else if (StartsWith(action, "loadslot:"))
-            {
-                spec.Kind = CommandKind::VnLoadSlot;
-                TryParsePositiveInt(action.substr(9), spec.Number);
-            }
             else if (action == "confirm_overwrite") spec.Kind = CommandKind::VnConfirmOverwrite;
             else if (action == "cancel_overwrite") spec.Kind = CommandKind::VnCancelOverwrite;
             else if (action == "textspeed+" || action == "speed+") spec.Kind = CommandKind::VnTextSpeedUp;
@@ -638,9 +618,7 @@ namespace Wheatear::EditorCommandBuilder {
         else
         {
             // Defaults for commands that carry arguments.
-            if (kind == CommandKind::VnSaveSlot || kind == CommandKind::VnLoadSlot)
-                spec.Number = std::max(1, spec.Number);
-            else if (kind == CommandKind::TurnMenu)
+            if (kind == CommandKind::TurnMenu)
             {
                 if (spec.Primary.empty()) spec.Primary = "root";
             }
@@ -743,8 +721,6 @@ namespace Wheatear::EditorCommandBuilder {
             CommandKind::VnAuto, CommandKind::VnHistory, CommandKind::VnSettings,
             CommandKind::VnClose, CommandKind::VnHide,
             CommandKind::VnSaveMenu, CommandKind::VnLoadMenu,
-            CommandKind::VnQuickSave, CommandKind::VnQuickLoad,
-            CommandKind::VnSaveSlot, CommandKind::VnLoadSlot,
             CommandKind::VnConfirmOverwrite, CommandKind::VnCancelOverwrite,
             CommandKind::VnTextSpeedUp, CommandKind::VnTextSpeedDown,
             CommandKind::VnAutoDelayUp, CommandKind::VnAutoDelayDown,
@@ -955,18 +931,6 @@ namespace Wheatear::EditorCommandBuilder {
                     command = BuildCommand(spec);
                     changed = true;
                 }
-            }
-            break;
-        }
-        case CommandKind::VnSaveSlot:
-        case CommandKind::VnLoadSlot:
-        {
-            int slot = std::max(1, spec.Number);
-            if (ImGui::DragInt("Save Slot", &slot, 1.0f, 1, 20))
-            {
-                spec.Number = std::max(1, slot);
-                command = BuildCommand(spec);
-                changed = true;
             }
             break;
         }

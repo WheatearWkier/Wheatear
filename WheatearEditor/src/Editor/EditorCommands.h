@@ -49,6 +49,32 @@ namespace Wheatear {
         std::vector<std::unique_ptr<ICommand>> m_Commands;
     };
 
+    class SceneSavePolicyCommand : public ICommand
+    {
+    public:
+        SceneSavePolicyCommand(Scene* scene, const SavePolicy& before, const SavePolicy& after)
+            : m_Scene(scene), m_Before(before), m_After(after)
+        {
+        }
+
+        void Execute() override
+        {
+            if (m_Scene)
+                m_Scene->SetSavePolicy(m_After);
+        }
+
+        void Undo() override
+        {
+            if (m_Scene)
+                m_Scene->SetSavePolicy(m_Before);
+        }
+
+    private:
+        Scene* m_Scene = nullptr;
+        SavePolicy m_Before;
+        SavePolicy m_After;
+    };
+
     class CommandHistory
     {
     public:

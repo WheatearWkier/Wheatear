@@ -155,7 +155,7 @@ namespace Wheatear {
         void FrameEditorCameraOnEntity(Entity entity);
         void FrameEditorCameraOnScene();
         void LoadPlayScene(const std::filesystem::path& scenePath);
-        void ApplyPendingVisualNovelLoad();
+        void ApplyPendingSceneAutoLoadSlot();
         bool ConsumePlayModeSceneTransitionRequests();
         void ExecutePlayModeSceneTransitionRequest(const SceneTransitionRequest& request);
 
@@ -266,7 +266,7 @@ namespace Wheatear {
         std::string m_DeferredSheetCellPath;
         int m_DeferredSheetCellIndex = -1;
         std::string m_DeferredSheetCellSubRect;
-        int m_PendingVisualNovelLoadSlot = 0;
+        int m_PendingSceneAutoLoadSlot = 0;
     };
 
 } // namespace Wheatear

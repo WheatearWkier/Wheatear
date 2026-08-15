@@ -327,7 +327,7 @@ namespace Wheatear {
             return result;
         }
 
-        static CommandResult ExecuteRuntimeQueuedCommand(const std::string& command)
+        static CommandResult ExecuteRuntimeQueuedCommand(Scene* scene, const std::string& command)
         {
             CommandResult result;
             if (command == "quit")
@@ -352,6 +352,14 @@ namespace Wheatear {
             }
             else if (StartsWith(command, "loadgame:"))
             {
+                if (scene && !scene->GetSavePolicy().CanLoad)
+                {
+                    result.Handled = true;
+                    result.Message = "当前场景禁止读取。";
+                    GameProgress::GetState().LastResultMessage = result.Message;
+                    return result;
+                }
+
                 std::string payload = PayloadAfter(command, "loadgame:");
                 int slot = 1;
 
@@ -464,7 +472,7 @@ namespace Wheatear {
         if (CommandResult result = ExecuteGameplayCommand(command); result.Handled)
             return result;
 
-        if (CommandResult result = ExecuteRuntimeQueuedCommand(command); result.Handled)
+        if (CommandResult result = ExecuteRuntimeQueuedCommand(scene, command); result.Handled)
             return result;
 
         return {};

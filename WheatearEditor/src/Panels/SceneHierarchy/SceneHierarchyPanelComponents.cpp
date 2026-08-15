@@ -3,15 +3,88 @@
 
 #include "Wheatear/Scene/Components.h"
 #include "Wheatear/Scene/Scene.h"
+#include "Wheatear/Modules/Progression/GameProgress.h"
 #include "Wheatear/Utils/StringUtils.h"
 #include "Editor/EditorComponentRegistry.h"
+#include "Editor/EditorCommands.h"
 #include "Editor/EditorLocale.h"
+#include "Editor/EditorWidgets.h"
 
 #include <imgui/imgui.h>
+#include <algorithm>
 #include <cstring>
+#include <memory>
 #include <string>
 
 namespace Wheatear {
+    namespace {
+
+        static bool SavePolicyEquals(const SavePolicy& a, const SavePolicy& b)
+        {
+            return a.CanSave == b.CanSave
+                && a.CanLoad == b.CanLoad
+                && a.SaveDirectory == b.SaveDirectory
+                && a.AutoLoadSlot == b.AutoLoadSlot;
+        }
+
+    } // namespace
+
+    void SceneHierarchyPanel::DrawSceneSettings()
+    {
+        if (!m_Context)
+            return;
+
+        Scene* scene = m_Context.get();
+        SavePolicy& policy = scene->GetSavePolicy();
+        const SavePolicy beforeFrame = policy;
+
+        EditorWidgets::SectionHeader(EditorLocale::Text("Save Policy", "存档策略"));
+        ImGui::PushID("SceneSavePolicy");
+
+        ImGui::Checkbox(EditorLocale::Text("Can Save", "允许保存"), &policy.CanSave);
+        ImGui::SameLine();
+        ImGui::Checkbox(EditorLocale::Text("Can Load", "允许读取"), &policy.CanLoad);
+        EditorWidgets::InputString(EditorLocale::Text("Save Directory", "存档目录"), policy.SaveDirectory);
+
+        int autoLoadSlot = policy.AutoLoadSlot;
+        if (ImGui::DragInt(EditorLocale::Text("Auto Load Slot", "自动读取槽位"),
+            &autoLoadSlot,
+            1.0f,
+            0,
+            GameProgress::GetMaxSaveSlots()))
+        {
+            policy.AutoLoadSlot = std::clamp(autoLoadSlot, 0, GameProgress::GetMaxSaveSlots());
+        }
+
+        const bool anyItemActive = ImGui::IsAnyItemActive();
+        if (anyItemActive && !m_SceneSettingsEditing)
+        {
+            m_SceneSettingsEditStartCanSave = beforeFrame.CanSave;
+            m_SceneSettingsEditStartCanLoad = beforeFrame.CanLoad;
+            m_SceneSettingsEditStartSaveDirectory = beforeFrame.SaveDirectory;
+            m_SceneSettingsEditStartAutoLoadSlot = beforeFrame.AutoLoadSlot;
+            m_SceneSettingsEditing = true;
+        }
+        else if (!anyItemActive && m_SceneSettingsEditing)
+        {
+            SavePolicy before;
+            before.CanSave = m_SceneSettingsEditStartCanSave;
+            before.CanLoad = m_SceneSettingsEditStartCanLoad;
+            before.SaveDirectory = m_SceneSettingsEditStartSaveDirectory;
+            before.AutoLoadSlot = m_SceneSettingsEditStartAutoLoadSlot;
+
+            const SavePolicy after = scene->GetSavePolicy();
+            if (!SavePolicyEquals(before, after))
+                CommandHistory::Get().Push(std::make_unique<SceneSavePolicyCommand>(scene, before, after));
+
+            m_SceneSettingsEditing = false;
+            m_SceneSettingsEditStartSaveDirectory.clear();
+        }
+
+        ImGui::PopID();
+        ImGui::Spacing();
+    }
+
     void SceneHierarchyPanel::DrawComponents(Entity entity)
     {
         if (entity.HasComponent<TagComponent>())

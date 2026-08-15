@@ -1,4 +1,9 @@
 ﻿Scene: Untitled
+SavePolicy:
+  CanSave: false
+  CanLoad: true
+  SaveDirectory: assets/saves
+  AutoLoadSlot: 0
 Entities:
   - Entity: 920000013
     TagComponent:

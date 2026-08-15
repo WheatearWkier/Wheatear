@@ -41,6 +41,7 @@ namespace Wheatear {
         newScene->m_ViewportWidth = other->m_ViewportWidth;
         newScene->m_ViewportHeight = other->m_ViewportHeight;
         newScene->m_ViewportOffset = other->m_ViewportOffset;
+        newScene->m_SavePolicy = other->m_SavePolicy;
 
         auto& src = other->m_Registry;
         auto& dst = newScene->m_Registry;

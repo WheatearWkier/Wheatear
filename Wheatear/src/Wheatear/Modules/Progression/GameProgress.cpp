@@ -1825,19 +1825,7 @@ namespace Wheatear::GameProgress {
         return ProgressionSettingsCommandService::BuildStatusText();
     }
 
-    std::string BuildSaveLoadStatus()
-    {
-        const State& state = GetState();
-        std::ostringstream stream;
-        stream << "游戏公共存档\n";
-        stream << "保存和读取在整个 Sandbox 内共用同一套槽位。VN 槽位会记录剧情位置，其他场景会记录当前场景和成长进度。\n";
-        stream << "当前：第 " << state.CurrentChapter << " 章 / 主角 Lv" << state.PlayerLevel
-               << " / 魔剑 Lv" << state.MagicSwordLevel << "\n";
-        stream << (state.LastResultMessage.empty() ? "请选择槽位继续。" : state.LastResultMessage);
-        return stream.str();
-    }
-
-    std::string BuildSaveSlotSummary(int slot)
+    static std::string BuildSaveSlotSummaryText(int slot)
     {
         const SaveSlotInfo info = GetSaveSlotInfo(slot);
         const int safeSlot = ClampSaveSlot(slot);
@@ -1850,17 +1838,6 @@ namespace Wheatear::GameProgress {
                << "  Lv" << info.PlayerLevel
                << "  金币 " << info.Gold;
         return stream.str();
-    }
-
-    std::string BuildSaveSlotDetails(int slot)
-    {
-        const SaveSlotInfo info = GetSaveSlotInfo(slot);
-        if (!info.Exists)
-            return "点击即可保存当前进度。";
-
-        if (!info.Objective.empty())
-            return info.Objective;
-        return "已有游戏进度，可读取或覆盖。";
     }
 
     std::string BuildGameSaveSlotButtonText(int slot, bool saveMode, const std::string& saveDirectory)
@@ -1879,47 +1856,16 @@ namespace Wheatear::GameProgress {
         else if (saveMode)
             stream << "点击后确认是否覆盖";
         else if (hasProgress)
-            stream << BuildSaveSlotSummary(safeSlot);
+            stream << BuildSaveSlotSummaryText(safeSlot);
         else
             stream << "已有剧情位置存档";
 
         return stream.str();
     }
 
-    std::string BuildGameSaveSlotDetails(int slot, const std::string& saveDirectory)
-    {
-        const int safeSlot = ClampSaveSlot(slot);
-        const bool hasRuntimeState = IsGameRuntimeSaveSlotOccupied(safeSlot, saveDirectory);
-        const bool hasProgress = IsSaveSlotOccupied(safeSlot);
-        if (!hasRuntimeState && !hasProgress)
-            return "空槽。";
-
-        const SaveSlotInfo info = GetSaveSlotInfo(safeSlot);
-        if (info.Exists && !info.Objective.empty())
-            return info.Objective;
-        if (hasRuntimeState && !hasProgress)
-            return "已有剧情位置状态，可从同槽读取。";
-        if (hasRuntimeState)
-            return "已有完整存档，可读取或覆盖。";
-        return "已有成长进度存档，可读取或覆盖。";
-    }
-
     std::string BuildLoadGameCommand(int slot, const std::string& scenePath)
     {
         const std::string targetScene = ResolveLoadScenePathForSlot(slot, scenePath);
         return "loadgame:" + targetScene + ":" + std::to_string(ClampSaveSlot(slot));
-    }
-
-    std::string GetSaveButtonText(int slot)
-    {
-        return "保存到 " + std::to_string(ClampSaveSlot(slot)) + " 号槽";
-    }
-
-    std::string GetLoadButtonText(int slot)
-    {
-        const int safeSlot = ClampSaveSlot(slot);
-        return IsGameSaveSlotOccupied(safeSlot)
-            ? "读取 " + std::to_string(safeSlot) + " 号槽"
-            : std::to_string(safeSlot) + " 号槽为空";
     }
 } // namespace Wheatear::GameProgress

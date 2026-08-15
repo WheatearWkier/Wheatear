@@ -96,8 +96,6 @@ namespace Wheatear {
                 EditorContentPickers::DrawSceneEntityField("System Message", entity, component.SystemMessageEntityName);
                 EditorContentPickers::DrawSceneEntityField("Music Notice Panel", entity, component.MusicNoticePanelEntityName);
                 EditorContentPickers::DrawSceneEntityField("Music Notice Text", entity, component.MusicNoticeTextEntityName);
-                EditorWidgets::InputString("Save Directory", component.SaveDirectory);
-                ImGui::DragInt("Auto Load Slot", &component.AutoLoadSlot, 1.0f, 0, 9);
 
                 ImGui::Separator();
                 ImGui::TextDisabled("Editor UI Preview");

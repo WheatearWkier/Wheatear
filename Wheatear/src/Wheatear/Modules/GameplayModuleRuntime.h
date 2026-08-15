@@ -60,16 +60,6 @@ namespace Wheatear {
         return commands;
     }
 
-    inline void ApplyVisualNovelAutoLoadSlot(Scene* scene, int slot)
-    {
-        if (!scene || slot <= 0)
-            return;
-
-        auto& registry = scene->GetRegistry();
-        for (auto entity : registry.view<VisualNovelComponent>())
-            registry.get<VisualNovelComponent>(entity).AutoLoadSlot = slot;
-    }
-
     // Hot-reloads WAO action recipes while a scene is playing: polls the
     // action_sets manifest (500ms throttle) and reloads on change, so tuning
     // recipes in the editor takes effect without restarting play. Call once
