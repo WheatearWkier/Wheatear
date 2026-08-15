@@ -11,6 +11,7 @@
 #include <cmath>
 #include <filesystem>
 #include <memory>
+#include <system_error>
 #include <vector>
 
 namespace Wheatear {
@@ -47,16 +48,28 @@ namespace Wheatear {
             return cache;
         }
 
+        bool IsReadableAudioFile(const std::string& resolvedPath)
+        {
+            std::error_code error;
+            return !resolvedPath.empty()
+                && std::filesystem::is_regular_file(std::filesystem::path(resolvedPath), error);
+        }
+
         ma_audio_buffer* GetOrLoadSfxBuffer(const std::string& resolvedPath)
         {
             CachedSfx& cached = SfxBufferCache()[resolvedPath];
-            ma_audio_buffer* buffer = cached.Buffers[cached.Next].get();
+            const int slot = cached.Next;
 
             // Round-robin between the two buffer slots so consecutive plays of
             // the same SFX do not start from a half-consumed data source.
-            cached.Next = (cached.Next + 1) % 2;
+            cached.Next = (cached.Next + 1) % static_cast<int>(cached.Buffers.size());
+
+            ma_audio_buffer* buffer = cached.Buffers[slot].get();
             if (buffer)
+            {
+                ma_audio_buffer_seek_to_pcm_frame(buffer, 0);
                 return buffer;
+            }
 
             ma_decoder decoder;
             if (ma_decoder_init_file(resolvedPath.c_str(), nullptr, &decoder) != MA_SUCCESS)
@@ -92,23 +105,23 @@ namespace Wheatear {
             // Keep the decoded PCM alive inside the cache entry: ma_audio_buffer
             // references the caller's memory and would dangle once the local
             // vector goes out of scope.
-            std::vector<float>& ownedPcm = cached.OwnedPcm[cached.Next];
+            std::vector<float>& ownedPcm = cached.OwnedPcm[slot];
             ownedPcm = std::move(pcm);
 
-            cached.Buffers[cached.Next] = std::make_unique<ma_audio_buffer>();
+            cached.Buffers[slot] = std::make_unique<ma_audio_buffer>();
             const ma_audio_buffer_config config = ma_audio_buffer_config_init(
                 ma_format_f32,
                 outputChannels,
                 static_cast<ma_uint64>(ownedPcm.size() / outputChannels),
                 ownedPcm.data(),
                 nullptr);
-            if (ma_audio_buffer_init(&config, cached.Buffers[cached.Next].get()) != MA_SUCCESS)
+            if (ma_audio_buffer_init(&config, cached.Buffers[slot].get()) != MA_SUCCESS)
             {
-                cached.Buffers[cached.Next].reset();
-                cached.OwnedPcm[cached.Next].clear();
+                cached.Buffers[slot].reset();
+                cached.OwnedPcm[slot].clear();
                 return nullptr;
             }
-            return cached.Buffers[cached.Next].get();
+            return cached.Buffers[slot].get();
         }
 
     } // namespace
@@ -175,30 +188,56 @@ namespace Wheatear {
         CollectFinishedSounds();
 
         const std::string resolvedPath = ResolvePath(filepath);
-
-        ma_sound* sound = new ma_sound();
-        ma_audio_buffer* buffer = GetOrLoadSfxBuffer(resolvedPath);
-        if (!buffer)
+        if (!IsReadableAudioFile(resolvedPath))
         {
-            WT_CORE_WARN("AudioEngine: failed to load [{0}]", filepath);
-            delete sound;
+            WT_CORE_WARN("AudioEngine: file [{0}] resolved to [{1}] but does not exist", filepath, resolvedPath);
             return 0;
         }
 
-        // Play from the in-memory buffer; the data source is owned by the cache
-        // and outlives the sound, so no per-play disk I/O or decode.
-        const ma_result result = ma_sound_init_from_data_source(
-            s_Engine, buffer, 0, nullptr, sound);
+        ma_sound* sound = new ma_sound();
+        ma_result result = MA_SUCCESS;
+        if (loop)
+        {
+            // Long-running music should stream from the resolved file. Sharing
+            // the short-SFX buffer cache for looped BGM can leave playback tied
+            // to reused data-source cursors.
+            result = ma_sound_init_from_file(
+                s_Engine, resolvedPath.c_str(), MA_SOUND_FLAG_STREAM, nullptr, nullptr, sound);
+        }
+        else
+        {
+            ma_audio_buffer* buffer = GetOrLoadSfxBuffer(resolvedPath);
+            if (!buffer)
+            {
+                WT_CORE_WARN("AudioEngine: failed to load [{0}] resolved to [{1}]", filepath, resolvedPath);
+                delete sound;
+                return 0;
+            }
+
+            // Play from the in-memory buffer; the data source is owned by the cache
+            // and outlives the sound, so no per-play disk I/O or decode.
+            result = ma_sound_init_from_data_source(
+                s_Engine, buffer, 0, nullptr, sound);
+        }
         if (result != MA_SUCCESS)
         {
-            WT_CORE_WARN("AudioEngine: failed to init sound from buffer [{0}], error code = {1}", filepath, (int)result);
+            WT_CORE_WARN("AudioEngine: failed to init sound [{0}] resolved to [{1}], error code = {2}",
+                filepath, resolvedPath, (int)result);
             delete sound;
             return 0;
         }
 
         ma_sound_set_volume(sound, std::clamp(volume, 0.0f, 2.0f));
         ma_sound_set_looping(sound, loop ? MA_TRUE : MA_FALSE);
-        ma_sound_start(sound);
+        const ma_result startResult = ma_sound_start(sound);
+        if (startResult != MA_SUCCESS)
+        {
+            WT_CORE_WARN("AudioEngine: failed to start sound [{0}] resolved to [{1}], error code = {2}",
+                filepath, resolvedPath, (int)startResult);
+            ma_sound_uninit(sound);
+            delete sound;
+            return 0;
+        }
 
         uint32_t handle = s_NextHandle++;
         s_Sounds[handle] = sound;
