@@ -57,6 +57,9 @@ namespace Wheatear {
 
     void VisualNovelSystem::OnUpdateRuntime(Scene* scene, Timestep ts)
     {
+        if (!scene || scene->GetRegistry().view<VisualNovelComponent>().empty())
+            return;
+
         // Drain gameplay commands ONCE per frame (not per entity) so multiple VN
         // components in one scene do not steal each other's commands; every
         // entity sees the same batch.
