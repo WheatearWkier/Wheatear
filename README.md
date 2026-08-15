@@ -48,7 +48,7 @@ https://github.com/user-attachments/assets/594114a5-ba8b-4847-9f34-6be1f15181f7
 | Assets | 资产注册表、`.wtsheet/.wtanim/.wtpack` 打包、运行时 loose/pack 双路径 |
 | Gameplay | 数据表驱动的战斗/成长/剧情模块，运行时服务 + 编辑器调参面板 |
 | WAO | 动作编排系统：`ActionIntent -> ActionRecipe -> RuleResolver -> EffectBundle` |
-| Scripting | `.wts` 事件脚本 + 事件图编辑器；Mono C# 为可选能力 |
+| Scripting | `.wts` 事件脚本 + 事件图编辑器；旧 Mono C# 默认隐藏，仅宏打开时作为 legacy 可选能力 |
 
 ### Sprite Sheet 工作流（2D 资产核心）
 
@@ -195,11 +195,11 @@ Sprite、UI 和特效共用同一套图集与动画工作流，角色动作、�
 
 ## 技术栈
 
-- C++17，静态库 + 三个可执行工程（Editor / Sandbox / ScriptCore）
+- C++17，静态库 + 两个主可执行工程（Editor / Sandbox）
 - OpenGL / GLFW / ImGui / ImGuizmo
 - entt / glm / yaml-cpp / Box2D / spdlog / miniaudio
 - 预编译头（glm/entt/imgui）增量编译单文件约 3 秒
-- Mono 为可选脚本能力，默认构建不强依赖
+- Mono/C# 为 legacy 可选脚本能力，默认构建隐藏且不启用
 - Git LFS 管理图片、视频和其他二进制资源
 
 ## 构建与运行
@@ -215,7 +215,7 @@ powershell -NoProfile -ExecutionPolicy Bypass -File scripts\Build-WheatearEditor
 - `WheatearEditor.exe --project <目录>`：直接打开指定项目
 - `WheatearSandbox.exe`：独立运行器（打包目录双击运行）
 - `WheatearSandbox.exe --project <目录>`：从引擎仓库直接跑任意项目（loose 资产）
-- `WheatearSandbox.exe --scripts`：启用可选脚本运行时
+- `WheatearSandbox.exe --scripts`：仅在定义 `WT_ENABLE_CSHARP_SCRIPTING` 的 legacy 构建中启用 C# 脚本运行时
 
 项目 = 一个含 `assets/` 的目录（启动器里可新建，自动生成模板场景）；
 引擎内置资源（shaders/字体）按引擎根解析，项目无需复制。

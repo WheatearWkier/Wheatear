@@ -3,6 +3,7 @@
 #include <cstdint>
 #include <filesystem>
 #include <string>
+#include <unordered_map>
 #include <vector>
 
 namespace Wheatear {
@@ -21,6 +22,10 @@ namespace Wheatear {
         // engine root here.
         std::filesystem::path BuiltinRoot;
         std::filesystem::path StartupAsset;
+        // Optional absolute source file for StartupAsset when the package key
+        // differs from the source path (for example an external startup scene
+        // copied to assets/scenes/PackagedStartup.wt).
+        std::filesystem::path StartupSourceAsset;
         bool IncludeBuiltinAssets = true;
         bool IncludeUnusedAssets = true;
     };
@@ -34,6 +39,7 @@ namespace Wheatear {
         std::vector<std::filesystem::path> UnusedAssets;
         std::vector<std::filesystem::path> ParsedTextAssets;
         std::vector<std::string> Warnings;
+        std::unordered_map<std::string, std::filesystem::path> AssetSources;
         uintmax_t IncludedBytes = 0;
         uintmax_t PackableBytes = 0;
         size_t PackableAssetCount = 0;

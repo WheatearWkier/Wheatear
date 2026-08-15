@@ -471,7 +471,7 @@ namespace Wheatear {
         scene->OnEditorStop();
 
         Ref<Texture2D> thumbnail = Texture2D::Create(thumbSize, thumbSize);
-        thumbnail->SetData(pixels.data(), pixels.size());
+        thumbnail->SetData(pixels.data(), static_cast<uint32_t>(pixels.size()));
         m_ThumbnailCache[key] = thumbnail;
         return true;
     }

@@ -58,6 +58,7 @@ project "GLFW"
 	filter "configurations:Debug"
 		runtime "Debug"
 		symbols "on"
+		editandcontinue "Off"
 
 	filter "configurations:Release"
 		runtime "Release"

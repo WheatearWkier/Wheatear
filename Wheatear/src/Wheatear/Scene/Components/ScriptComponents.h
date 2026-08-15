@@ -1,6 +1,7 @@
 #pragma once
 
-// Native, C#/Mono, and event-script components.
+// Legacy C#/Mono and native event-script components. C#/Mono is hidden in the
+// default build; EventScriptComponent remains the active runtime scripting path.
 
 #include <string>
 

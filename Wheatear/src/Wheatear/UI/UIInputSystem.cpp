@@ -20,7 +20,16 @@ namespace Wheatear {
         static entt::entity s_DraggingPanel = entt::null;
         static entt::entity s_DraggingScrollView = entt::null;
         static entt::entity s_DraggingSkillTreeView = entt::null;
+        static entt::entity s_DraggingSlider = entt::null;
         static bool s_DragStartResolved = false;
+
+        enum class PointerTargetKind
+        {
+            None,
+            Button,
+            Checkbox,
+            Slider
+        };
 
     } // namespace
 
@@ -124,6 +133,7 @@ namespace Wheatear {
         s_DraggingPanel = entt::null;
         s_DraggingScrollView = entt::null;
         s_DraggingSkillTreeView = entt::null;
+        s_DraggingSlider = entt::null;
         s_DragStartResolved = false;
     }
 
@@ -311,7 +321,7 @@ namespace Wheatear {
         uint32_t viewportWidth,
         uint32_t viewportHeight)
     {
-        if (viewportWidth == 0 || viewportHeight == 0) return;
+        if (!scene || viewportWidth == 0 || viewportHeight == 0) return;
 
         const float normX = mouseX / static_cast<float>(viewportWidth);
         const float normY = mouseY / static_cast<float>(viewportHeight);
@@ -555,6 +565,8 @@ namespace Wheatear {
         }
 
         auto buttonView = scene->GetRegistry().view<UIWidgetComponent, UIButtonComponent>();
+        entt::entity topHoveredButton = entt::null;
+        int topHoveredButtonSortOrder = std::numeric_limits<int>::min();
         for (auto e : buttonView)
         {
             auto& button = buttonView.get<UIButtonComponent>(e);
@@ -572,11 +584,22 @@ namespace Wheatear {
                 && !skillTreeIsDragging
                 && !PointBlockedByParentClip(layout, e, normX, normY)
                 && HitTest(resolvedWidget, normX, normY);
-            button.IsHovered = hit;
-            button.IsPressed = hit && s_MouseWasPressed;
+            button.IsHovered = false;
+            button.IsPressed = false;
+            if (hit)
+            {
+                const int sortOrder = resolvedWidget.SortOrder;
+                if (topHoveredButton == entt::null || sortOrder >= topHoveredButtonSortOrder)
+                {
+                    topHoveredButton = e;
+                    topHoveredButtonSortOrder = sortOrder;
+                }
+            }
         }
 
         auto checkboxView = scene->GetRegistry().view<UIWidgetComponent, UICheckboxComponent>();
+        entt::entity topHoveredCheckbox = entt::null;
+        int topHoveredCheckboxSortOrder = std::numeric_limits<int>::min();
         for (auto e : checkboxView)
         {
             auto& checkbox = checkboxView.get<UICheckboxComponent>(e);
@@ -594,18 +617,30 @@ namespace Wheatear {
                 && !skillTreeIsDragging
                 && !PointBlockedByParentClip(layout, e, normX, normY)
                 && HitTest(resolvedWidget, normX, normY);
-            checkbox.IsHovered = hit;
-            checkbox.IsPressed = hit && s_MouseWasPressed;
+            checkbox.IsHovered = false;
+            checkbox.IsPressed = false;
+            if (hit)
+            {
+                const int sortOrder = resolvedWidget.SortOrder;
+                if (topHoveredCheckbox == entt::null || sortOrder >= topHoveredCheckboxSortOrder)
+                {
+                    topHoveredCheckbox = e;
+                    topHoveredCheckboxSortOrder = sortOrder;
+                }
+            }
         }
 
         auto sliderView = scene->GetRegistry().view<UIWidgetComponent, UISliderComponent>();
+        entt::entity topHoveredSlider = entt::null;
+        int topHoveredSliderSortOrder = std::numeric_limits<int>::min();
         for (auto e : sliderView)
         {
             auto& slider = sliderView.get<UISliderComponent>(e);
             if (!WidgetCanReceivePointer(layout, e))
             {
                 slider.IsHovered = false;
-                slider.IsDragging = false;
+                if (e != s_DraggingSlider)
+                    slider.IsDragging = false;
                 continue;
             }
 
@@ -617,19 +652,80 @@ namespace Wheatear {
                 && !skillTreeIsDragging
                 && !PointBlockedByParentClip(layout, e, normX, normY)
                 && PointInRect(rect, normX, normY);
-            slider.IsHovered = hit;
-
-            if (s_MouseWasPressed && (hit || slider.IsDragging))
+            slider.IsHovered = false;
+            if (hit)
             {
-                const float width = rect.Right - rect.Left;
-                if (width > 0.0f)
-                    slider.SetNormalized((normX - rect.Left) / width);
-                slider.IsDragging = true;
+                const int sortOrder = resolvedWidget.SortOrder;
+                if (topHoveredSlider == entt::null || sortOrder >= topHoveredSliderSortOrder)
+                {
+                    topHoveredSlider = e;
+                    topHoveredSliderSortOrder = sortOrder;
+                }
             }
-            else if (!s_MouseWasPressed)
+        }
+
+        PointerTargetKind pointerTargetKind = PointerTargetKind::None;
+        entt::entity pointerTarget = entt::null;
+        int pointerTargetSortOrder = std::numeric_limits<int>::min();
+        auto selectPointerTarget = [&](PointerTargetKind kind, entt::entity entity, int sortOrder)
+        {
+            if (entity == entt::null)
+                return;
+            if (pointerTarget == entt::null || sortOrder >= pointerTargetSortOrder)
+            {
+                pointerTargetKind = kind;
+                pointerTarget = entity;
+                pointerTargetSortOrder = sortOrder;
+            }
+        };
+        selectPointerTarget(PointerTargetKind::Button, topHoveredButton, topHoveredButtonSortOrder);
+        selectPointerTarget(PointerTargetKind::Checkbox, topHoveredCheckbox, topHoveredCheckboxSortOrder);
+        selectPointerTarget(PointerTargetKind::Slider, topHoveredSlider, topHoveredSliderSortOrder);
+
+        if (topHoveredButton != entt::null)
+        {
+            auto& button = buttonView.get<UIButtonComponent>(topHoveredButton);
+            button.IsHovered = pointerTargetKind == PointerTargetKind::Button;
+            button.IsPressed = button.IsHovered && s_MouseWasPressed;
+        }
+        if (topHoveredCheckbox != entt::null)
+        {
+            auto& checkbox = checkboxView.get<UICheckboxComponent>(topHoveredCheckbox);
+            checkbox.IsHovered = pointerTargetKind == PointerTargetKind::Checkbox;
+            checkbox.IsPressed = checkbox.IsHovered && s_MouseWasPressed;
+        }
+        if (topHoveredSlider != entt::null)
+            sliderView.get<UISliderComponent>(topHoveredSlider).IsHovered =
+                pointerTargetKind == PointerTargetKind::Slider;
+
+        if (s_MouseWasPressed
+            && s_DraggingSlider == entt::null
+            && pointerTargetKind == PointerTargetKind::Slider
+            && topHoveredSlider != entt::null)
+        {
+            s_DraggingSlider = topHoveredSlider;
+        }
+
+        const bool sliderIsDragging = s_DraggingSlider != entt::null
+            && scene->GetRegistry().valid(s_DraggingSlider)
+            && scene->GetRegistry().all_of<UIWidgetComponent>(s_DraggingSlider)
+            && scene->GetRegistry().all_of<UISliderComponent>(s_DraggingSlider);
+
+        for (auto e : sliderView)
+        {
+            auto& slider = sliderView.get<UISliderComponent>(e);
+            if (!s_MouseWasPressed || !sliderIsDragging || e != s_DraggingSlider)
             {
                 slider.IsDragging = false;
+                continue;
             }
+
+            const UIWidgetComponent resolvedWidget = UIWidgetLayout::ResolveWidget(layout, e);
+            const UINormalizedRect rect = WidgetToNormalizedRect(resolvedWidget);
+            const float width = rect.Right - rect.Left;
+            if (width > 0.0f)
+                slider.SetNormalized((normX - rect.Left) / width);
+            slider.IsDragging = true;
         }
     }
 
@@ -644,6 +740,14 @@ namespace Wheatear {
         if (!s_MouseWasPressed) return;
         s_MouseWasPressed = false;
         s_DragStartResolved = false;
+        if (!scene)
+        {
+            s_DraggingPanel = entt::null;
+            s_DraggingScrollView = entt::null;
+            s_DraggingSkillTreeView = entt::null;
+            s_DraggingSlider = entt::null;
+            return;
+        }
         UIWidgetLayout::Context layout(scene);
 
         if (s_DraggingPanel != entt::null && scene->GetRegistry().valid(s_DraggingPanel)
@@ -701,28 +805,41 @@ namespace Wheatear {
             FireOnClick(scene, clickedButton);
 
         auto checkboxView = scene->GetRegistry().view<UIWidgetComponent, UICheckboxComponent>();
+        entt::entity clickedCheckbox = entt::null;
+        int clickedCheckboxSortOrder = std::numeric_limits<int>::min();
         for (auto e : checkboxView)
         {
             auto& checkbox = checkboxView.get<UICheckboxComponent>(e);
-            if (WidgetCanReceivePointer(layout, e) && checkbox.IsHovered)
+            if (!releaseConsumedBySkillTree && WidgetCanReceivePointer(layout, e) && checkbox.IsHovered)
             {
-                checkbox.Checked = !checkbox.Checked;
-                FireScriptCallback(scene, e, checkbox.OnValueChangedFunction);
+                const UIWidgetComponent resolvedWidget = UIWidgetLayout::ResolveWidget(layout, e);
+                if (clickedCheckbox == entt::null || resolvedWidget.SortOrder >= clickedCheckboxSortOrder)
+                {
+                    clickedCheckbox = e;
+                    clickedCheckboxSortOrder = resolvedWidget.SortOrder;
+                }
             }
             checkbox.IsPressed = false;
+        }
+        if (clickedCheckbox != entt::null)
+        {
+            auto& checkbox = scene->GetRegistry().get<UICheckboxComponent>(clickedCheckbox);
+            checkbox.Checked = !checkbox.Checked;
+            FireScriptCallback(scene, clickedCheckbox, checkbox.OnValueChangedFunction);
         }
 
         auto sliderView = scene->GetRegistry().view<UIWidgetComponent, UISliderComponent>();
         for (auto e : sliderView)
         {
             auto& slider = sliderView.get<UISliderComponent>(e);
-            if (slider.IsDragging)
+            if (e == s_DraggingSlider && slider.IsDragging)
             {
                 if (!ExecuteSliderNativeCommand(scene, slider.OnValueChangedFunction, slider.Value))
                     FireScriptCallback(scene, e, slider.OnValueChangedFunction);
             }
             slider.IsDragging = false;
         }
+        s_DraggingSlider = entt::null;
     }
 
     bool UIInputSystem::OnMouseScrolled(Scene* scene,

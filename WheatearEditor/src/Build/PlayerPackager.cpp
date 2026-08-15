@@ -17,6 +17,7 @@
 #include <fstream>
 #include <limits>
 #include <system_error>
+#include <unordered_map>
 #include <vector>
 
 #define STB_IMAGE_WRITE_STATIC
@@ -407,9 +408,12 @@ namespace Wheatear {
         }
 
         static std::filesystem::path ResolvePackagedStartupScene(const PlayerPackageOptions& options,
-            const std::filesystem::path& packageDirectory)
+            const std::filesystem::path& packageDirectory,
+            std::filesystem::path* sourceStartupScene)
         {
             const std::filesystem::path resolvedScene = AssetPath::Resolve(options.StartupScene);
+            if (sourceStartupScene)
+                *sourceStartupScene = resolvedScene;
             const std::filesystem::path relativeScene = AssetPath::ToProjectRelative(resolvedScene);
 
             if (!relativeScene.empty() && *relativeScene.begin() == "assets")
@@ -463,17 +467,32 @@ namespace Wheatear {
         // files project-first, engine-root fallback.
         static std::filesystem::path ResolveSourcePath(const std::filesystem::path& projectRoot,
             const std::filesystem::path& builtinRoot,
-            const std::filesystem::path& relativePath)
+            const std::filesystem::path& relativePath,
+            const std::unordered_map<std::string, std::filesystem::path>* assetSources)
         {
-            const std::filesystem::path projectSource = projectRoot / relativePath;
+            const std::string entryPath = AssetDependencyScanner::NormalizeAssetReference(relativePath.generic_string());
+            if (assetSources)
+            {
+                auto it = assetSources->find(entryPath);
+                if (it != assetSources->end())
+                    return it->second;
+            }
+
+            const std::filesystem::path projectSource = projectRoot / entryPath;
             if (std::filesystem::exists(projectSource))
                 return projectSource;
-            return builtinRoot / relativePath;
+
+            const std::filesystem::path builtinSource = builtinRoot / entryPath;
+            if (std::filesystem::exists(builtinSource))
+                return builtinSource;
+
+            return projectSource;
         }
 
         static bool CopyLooseRuntimeDataAssets(const std::filesystem::path& projectRoot,
             const std::filesystem::path& builtinRoot,
             const std::vector<std::filesystem::path>& packageAssets,
+            const std::unordered_map<std::string, std::filesystem::path>* assetSources,
             const std::filesystem::path& outputDirectory,
             std::string* errorMessage)
         {
@@ -484,7 +503,7 @@ namespace Wheatear {
                     continue;
 
                 const std::filesystem::path sourcePath =
-                    ResolveSourcePath(projectRoot, builtinRoot, relativePath);
+                    ResolveSourcePath(projectRoot, builtinRoot, relativePath, assetSources);
                 const std::filesystem::path targetPath = outputDirectory / relativePath;
                 std::filesystem::create_directories(targetPath.parent_path(), error);
                 if (error)
@@ -563,6 +582,7 @@ namespace Wheatear {
         static bool WriteAssetPack(const std::filesystem::path& projectRoot,
             const std::filesystem::path& builtinRoot,
             const std::vector<std::filesystem::path>& assets,
+            const std::unordered_map<std::string, std::filesystem::path>* assetSources,
             const std::filesystem::path& packPath,
             std::string* errorMessage)
         {
@@ -589,7 +609,7 @@ namespace Wheatear {
                 }
 
                 std::vector<unsigned char> sourceBytes;
-                if (!ReadBinaryFile(ResolveSourcePath(projectRoot, builtinRoot, entryPath), &sourceBytes))
+                if (!ReadBinaryFile(ResolveSourcePath(projectRoot, builtinRoot, entryPath, assetSources), &sourceBytes))
                 {
                     if (errorMessage)
                         *errorMessage = "Could not read asset for pack: " + entryPath;
@@ -858,13 +878,15 @@ namespace Wheatear {
             return Fail("Failed to copy editor resources: " + errorMessage, editorOutputDirectory);
         }
 
-        const std::filesystem::path startupScene = ResolvePackagedStartupScene(options, outputDirectory);
+        std::filesystem::path startupSceneSource;
+        const std::filesystem::path startupScene = ResolvePackagedStartupScene(options, outputDirectory, &startupSceneSource);
         const std::filesystem::path engineRoot = AssetPath::GetEngineRoot();
         const auto dependencyScanStarted = std::chrono::steady_clock::now();
         AssetDependencyScanOptions scanOptions;
         scanOptions.ProjectRoot = AssetPath::GetProjectRoot();
         scanOptions.BuiltinRoot = engineRoot;
         scanOptions.StartupAsset = startupScene;
+        scanOptions.StartupSourceAsset = startupSceneSource;
         scanOptions.IncludeBuiltinAssets = true;
         scanOptions.IncludeUnusedAssets = false;
         const AssetDependencyReport dependencyReport = AssetDependencyScanner::BuildReport(scanOptions);
@@ -891,12 +913,12 @@ namespace Wheatear {
 
         const std::filesystem::path assetPackPath = outputDirectory / kAssetPackFilename;
         const auto writePackStarted = std::chrono::steady_clock::now();
-        if (!WriteAssetPack(AssetPath::GetProjectRoot(), engineRoot, packageAssets, assetPackPath, &errorMessage))
+        if (!WriteAssetPack(AssetPath::GetProjectRoot(), engineRoot, packageAssets, &dependencyReport.AssetSources, assetPackPath, &errorMessage))
             return Fail("Failed to write asset pack: " + errorMessage, outputDirectory);
         LogTimedStep("Asset pack write", writePackStarted);
 
         const auto copyLooseStarted = std::chrono::steady_clock::now();
-        if (!CopyLooseRuntimeDataAssets(AssetPath::GetProjectRoot(), engineRoot, packageAssets, outputDirectory, &errorMessage))
+        if (!CopyLooseRuntimeDataAssets(AssetPath::GetProjectRoot(), engineRoot, packageAssets, &dependencyReport.AssetSources, outputDirectory, &errorMessage))
             return Fail("Failed to copy loose runtime data assets: " + errorMessage, outputDirectory);
         LogTimedStep("Loose runtime data copy", copyLooseStarted);
 

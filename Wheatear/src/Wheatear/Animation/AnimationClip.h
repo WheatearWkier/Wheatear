@@ -3,9 +3,10 @@
 #include "Wheatear/Renderer/Texture.h"
 #include <glm/glm.hpp>
 #include <algorithm>
+#include <cmath>
 #include <string>
 #include <vector>
-#include <functional>
+#include <variant>
 
 namespace Wheatear {
 
@@ -138,6 +139,8 @@ namespace Wheatear {
         Vec4
     };
 
+    using TrackSampleValue = std::variant<float, glm::vec2, glm::vec3, glm::vec4>;
+
     // =========================================================
     // =========================================================
     struct PropertyTrackBase
@@ -145,14 +148,13 @@ namespace Wheatear {
         AnimatedProperty Property = AnimatedProperty::SpriteColorA;
 
         virtual ~PropertyTrackBase() = default;
-        virtual void  Sample(float time, bool looping, float totalDuration) = 0;
+        virtual bool  SampleValue(float time, bool looping, float totalDuration, TrackSampleValue& outValue) const = 0;
         virtual float GetDuration()      const = 0;
         virtual int   GetKeyframeCount() const = 0;
 
         virtual TrackDataType GetDataType() const = 0;
 
-        // Deep copy for undo snapshots; Writer is a runtime-only delegate and is
-        // intentionally not copied.
+        // Deep copy for undo snapshots.
         virtual Ref<PropertyTrackBase> Clone() const = 0;
     };
 
@@ -162,7 +164,6 @@ namespace Wheatear {
     struct PropertyTrack : public PropertyTrackBase
     {
         std::vector<Keyframe<T>>  Keyframes;
-        std::function<void(const T&)> Writer;
 
         TrackDataType GetDataType() const override;
 
@@ -201,16 +202,17 @@ namespace Wheatear {
             return copy;
         }
 
-        void Sample(float time, bool looping, float totalDuration) override
+        bool SampleValue(float time, bool looping, float totalDuration, TrackSampleValue& outValue) const override
         {
-            if (Keyframes.empty() || !Writer) return;
+            if (Keyframes.empty())
+                return false;
 
             if (looping && totalDuration > 0.0f)
                 time = std::fmod(time, totalDuration);
 
-            if (Keyframes.size() == 1) { Writer(Keyframes[0].Value); return; }
-            if (time <= Keyframes.front().Time) { Writer(Keyframes.front().Value); return; }
-            if (time >= Keyframes.back().Time) { Writer(Keyframes.back().Value); return; }
+            if (Keyframes.size() == 1) { outValue = Keyframes[0].Value; return true; }
+            if (time <= Keyframes.front().Time) { outValue = Keyframes.front().Value; return true; }
+            if (time >= Keyframes.back().Time) { outValue = Keyframes.back().Value; return true; }
 
             int nextIdx = 1;
             while (nextIdx < (int)Keyframes.size() && Keyframes[nextIdx].Time < time)
@@ -222,7 +224,8 @@ namespace Wheatear {
             float t = (span > 0.0f) ? (time - prev.Time) / span : 0.0f;
 
             t = ApplyCurve(t, prev.Mode);
-            Writer(Lerp(prev.Value, next.Value, t));
+            outValue = Lerp(prev.Value, next.Value, t);
+            return true;
         }
 
     private:

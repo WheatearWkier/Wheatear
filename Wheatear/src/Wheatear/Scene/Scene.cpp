@@ -134,8 +134,8 @@ namespace Wheatear {
         RegisterSystem<PhysicsSystem>();
         RegisterSystem<ScriptSystem>();
         RegisterSystem<AnimationSystem>();
-        RegisterSystem<AudioSystem>();
         RegisterSystem<SpriteSheetSystem>();
+        RegisterSystem<AudioSystem>();
         RegisterSystem<UISystem>();
 
         SceneSystemRegistry::ForEachRuntimeSystem(
@@ -207,8 +207,28 @@ namespace Wheatear {
     {
         FlushDestroyQueue();
 
+        // Physics starts early so scripts see initialized bodies in OnCreate,
+        // but steps after animation/spritesheet so FollowAnimation fixtures are current.
+        PhysicsSystem* deferredPhysics = nullptr;
         for (auto& system : m_Systems)
+        {
+            if (auto* physics = dynamic_cast<PhysicsSystem*>(system.get()))
+            {
+                deferredPhysics = physics;
+                continue;
+            }
+
             system->OnUpdateRuntime(this, ts);
+
+            if (dynamic_cast<SpriteSheetSystem*>(system.get()) && deferredPhysics)
+            {
+                deferredPhysics->OnUpdateRuntime(this, ts);
+                deferredPhysics = nullptr;
+            }
+        }
+
+        if (deferredPhysics)
+            deferredPhysics->OnUpdateRuntime(this, ts);
     }
 
     void Scene::OnEditorStart()

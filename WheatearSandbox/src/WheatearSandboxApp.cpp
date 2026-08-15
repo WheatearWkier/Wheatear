@@ -355,6 +355,11 @@ namespace {
 
 static bool ShouldEnableScripting(const Wheatear::ApplicationCommandLineArgs& args)
 {
+#if !defined(WT_ENABLE_CSHARP_SCRIPTING)
+    (void)args;
+    // Legacy Mono/C# scripting stays dormant in the default build.
+    return false;
+#else
 	for (int i = 1; i < args.Count; ++i)
 	{
 		const std::string argument = args[i];
@@ -365,6 +370,7 @@ static bool ShouldEnableScripting(const Wheatear::ApplicationCommandLineArgs& ar
 	}
 
 	return Wheatear::LoadRuntimePlayerConfig().EnableScripts;
+#endif
 }
 
 static std::filesystem::path ReadProjectArgument(const Wheatear::ApplicationCommandLineArgs& args)

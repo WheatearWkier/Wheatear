@@ -29,6 +29,7 @@ project "Box2D"
 	filter "configurations:Debug"
 		runtime "Debug"
 		symbols "on"
+		editandcontinue "Off"
 
 	filter "configurations:Release"
 		runtime "Release"

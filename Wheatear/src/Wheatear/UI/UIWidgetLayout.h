@@ -21,7 +21,6 @@ namespace Wheatear::UIWidgetLayout {
     struct Context
     {
         Scene* ScenePtr = nullptr;
-        std::unordered_map<UUID, entt::entity> Entities;
         mutable std::unordered_map<uint32_t, Rect> RectCache;
         mutable std::unordered_map<uint32_t, bool> VisibilityCache;
         // Reusable recursion guard for the Resolve* entry points; the recursion
@@ -32,25 +31,15 @@ namespace Wheatear::UIWidgetLayout {
         explicit Context(Scene* scene)
             : ScenePtr(scene)
         {
-            if (!scene)
-                return;
-
-            auto& registry = scene->GetRegistry();
-            for (auto entity : registry.view<IDComponent>())
-            {
-                const UUID id = registry.get<IDComponent>(entity).ID;
-                if (static_cast<uint64_t>(id) != 0)
-                    Entities[id] = entity;
-            }
         }
 
         entt::entity FindByUUID(UUID uuid) const
         {
-            if (static_cast<uint64_t>(uuid) == 0)
+            if (!ScenePtr || static_cast<uint64_t>(uuid) == 0)
                 return entt::null;
 
-            auto it = Entities.find(uuid);
-            return it != Entities.end() ? it->second : entt::null;
+            Entity entity = ScenePtr->FindEntityByUUID(uuid);
+            return entity ? static_cast<entt::entity>(entity) : entt::null;
         }
 
         entt::entity ResolveReference(UUID uuid) const

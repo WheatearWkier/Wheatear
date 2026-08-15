@@ -17,11 +17,10 @@ namespace Wheatear {
     // Binding encoding: positive = keyboard key code (WT_KEY_*), negative =
     // mouse button (-1 = left, -2 = right, -3 = middle, ...).
     //
-    // Edge queries (IsActionPressed / IsActionReleased) are frame-based:
-    // call EndFrame() once per frame from the application loop, then any
-    // action queried within the frame reports a consistent "pressed this
-    // frame" answer. This removes the hand-rolled previous-frame flags that
-    // used to live in each gameplay system.
+    // Edge queries (IsActionPressed / IsActionReleased) are frame-based.
+    // The application calls EndFrame() after layer updates so the next frame
+    // compares against a complete snapshot, including actions that were not
+    // queried this frame.
     class WHEATEAR_API InputBindingService
     {
     public:

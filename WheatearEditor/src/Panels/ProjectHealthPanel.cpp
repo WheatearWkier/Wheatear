@@ -65,6 +65,7 @@ namespace Wheatear {
     {
         AssetDependencyScanOptions options;
         options.ProjectRoot = AssetPath::GetProjectRoot();
+        options.BuiltinRoot = AssetPath::GetEngineRoot();
         options.StartupAsset = m_StartupScene;
         options.IncludeBuiltinAssets = true;
         options.IncludeUnusedAssets = m_IncludeUnusedAssets;

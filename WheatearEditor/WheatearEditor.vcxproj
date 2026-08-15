@@ -82,7 +82,7 @@
       <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;WT_PLATFORM_WINDOWS;WT_DEBUG;WT_ENABLE_ASSERTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalIncludeDirectories>..\Wheatear\vendor\spdlog\include;..\Wheatear\src;..\Wheatear\vendor;..\Wheatear\vendor\glm;..\Wheatear\vendor\entt\include;src;..\Wheatear\vendor\GLAD\include;..\Wheatear\vendor\ImGuizmo;..\Wheatear\vendor\miniaudio;..\Wheatear\vendor\yaml-cpp\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <ForcedIncludeFiles>wepch.h</ForcedIncludeFiles>
-      <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <Optimization>Disabled</Optimization>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
       <AdditionalOptions>/utf-8 /wd4828 /MP /bigobj %(AdditionalOptions)</AdditionalOptions>

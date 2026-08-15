@@ -158,6 +158,55 @@ namespace Wheatear {
                 true);
         }
 
+        static void ApplyFloatProperty(AnimatedProperty property,
+            float value,
+            SpriteRendererComponent& sprite,
+            TransformComponent* transform)
+        {
+            switch (property)
+            {
+            case AnimatedProperty::SpriteColorA: sprite.Color.a = value; break;
+            case AnimatedProperty::SpriteColorR: sprite.Color.r = value; break;
+            case AnimatedProperty::SpriteColorG: sprite.Color.g = value; break;
+            case AnimatedProperty::SpriteColorB: sprite.Color.b = value; break;
+            case AnimatedProperty::PositionX: if (transform) transform->Translation.x = value; break;
+            case AnimatedProperty::PositionY: if (transform) transform->Translation.y = value; break;
+            case AnimatedProperty::PositionZ: if (transform) transform->Translation.z = value; break;
+            case AnimatedProperty::RotationZ: if (transform) transform->Rotation.z = value; break;
+            case AnimatedProperty::ScaleX: if (transform) transform->Scale.x = value; break;
+            case AnimatedProperty::ScaleY: if (transform) transform->Scale.y = value; break;
+            case AnimatedProperty::ScaleUniform:
+                if (transform)
+                    transform->Scale.x = transform->Scale.y = value;
+                break;
+            case AnimatedProperty::SpriteColor:
+                break;
+            }
+        }
+
+        static void ApplyVec4Property(AnimatedProperty property,
+            const glm::vec4& value,
+            SpriteRendererComponent& sprite)
+        {
+            if (property == AnimatedProperty::SpriteColor)
+                sprite.Color = value;
+        }
+
+        static void ApplyPropertyTrackSample(const PropertyTrackBase& track,
+            const TrackSampleValue& value,
+            SpriteRendererComponent& sprite,
+            TransformComponent* transform)
+        {
+            if (const float* floatValue = std::get_if<float>(&value))
+            {
+                ApplyFloatProperty(track.Property, *floatValue, sprite, transform);
+                return;
+            }
+
+            if (const glm::vec4* vec4Value = std::get_if<glm::vec4>(&value))
+                ApplyVec4Property(track.Property, *vec4Value, sprite);
+        }
+
     } // namespace
 
     void AnimationSystem::OnRuntimeStart(Scene* scene)
@@ -274,65 +323,13 @@ namespace Wheatear {
 
             TransformComponent* tc = registry.try_get<TransformComponent>(e);
 
-            // Bind property-track writers only when the playing clip changes
-            // (clips are shared assets, so writers are per-entity bindings into
-            // this entity's components); steady-state playback rebinds nothing.
-            const AnimationClip* clipKey = clip.get();
-            if (m_BoundClipForEntity[e] != clipKey)
-            {
-                for (auto& trackBase : clip->GetPropertyTracks())
-                {
-                    switch (trackBase->Property)
-                    {
-                    case AnimatedProperty::SpriteColorA:
-                        std::static_pointer_cast<PropertyTrack<float>>(trackBase)->Writer =
-                            [&sprite](const float& v) { sprite.Color.a = v; }; break;
-                    case AnimatedProperty::SpriteColorR:
-                        std::static_pointer_cast<PropertyTrack<float>>(trackBase)->Writer =
-                            [&sprite](const float& v) { sprite.Color.r = v; }; break;
-                    case AnimatedProperty::SpriteColorG:
-                        std::static_pointer_cast<PropertyTrack<float>>(trackBase)->Writer =
-                            [&sprite](const float& v) { sprite.Color.g = v; }; break;
-                    case AnimatedProperty::SpriteColorB:
-                        std::static_pointer_cast<PropertyTrack<float>>(trackBase)->Writer =
-                            [&sprite](const float& v) { sprite.Color.b = v; }; break;
-                    case AnimatedProperty::SpriteColor:
-                        std::static_pointer_cast<PropertyTrack<glm::vec4>>(trackBase)->Writer =
-                            [&sprite](const glm::vec4& v) { sprite.Color = v; }; break;
-                    case AnimatedProperty::PositionX:
-                        if (tc) std::static_pointer_cast<PropertyTrack<float>>(trackBase)->Writer =
-                            [tc](const float& v) { tc->Translation.x = v; }; break;
-                    case AnimatedProperty::PositionY:
-                        if (tc) std::static_pointer_cast<PropertyTrack<float>>(trackBase)->Writer =
-                            [tc](const float& v) { tc->Translation.y = v; }; break;
-                    case AnimatedProperty::PositionZ:
-                        if (tc) std::static_pointer_cast<PropertyTrack<float>>(trackBase)->Writer =
-                            [tc](const float& v) { tc->Translation.z = v; }; break;
-                    case AnimatedProperty::RotationZ:
-                        if (tc) std::static_pointer_cast<PropertyTrack<float>>(trackBase)->Writer =
-                            [tc](const float& v) { tc->Rotation.z = v; }; break;
-                    case AnimatedProperty::ScaleX:
-                        if (tc) std::static_pointer_cast<PropertyTrack<float>>(trackBase)->Writer =
-                            [tc](const float& v) { tc->Scale.x = v; }; break;
-                    case AnimatedProperty::ScaleY:
-                        if (tc) std::static_pointer_cast<PropertyTrack<float>>(trackBase)->Writer =
-                            [tc](const float& v) { tc->Scale.y = v; }; break;
-                    case AnimatedProperty::ScaleUniform:
-                        if (tc) std::static_pointer_cast<PropertyTrack<float>>(trackBase)->Writer =
-                            [tc](const float& v) { tc->Scale.x = tc->Scale.y = v; }; break;
-                    }
-                }
-                m_BoundClipForEntity[e] = clipKey;
-            }
-
             for (auto& trackBase : clip->GetPropertyTracks())
-                trackBase->Sample(animator.ElapsedTime, clip->IsLooping(), totalDur);
+            {
+                TrackSampleValue value;
+                if (trackBase->SampleValue(animator.ElapsedTime, clip->IsLooping(), totalDur, value))
+                    ApplyPropertyTrackSample(*trackBase, value, sprite, tc);
+            }
         }
-    }
-
-    void AnimationSystem::OnEntityDestroy(Scene* scene, Entity& entity)
-    {
-        m_BoundClipForEntity.erase(static_cast<entt::entity>(static_cast<uint32_t>(entity)));
     }
 
 } // namespace Wheatear

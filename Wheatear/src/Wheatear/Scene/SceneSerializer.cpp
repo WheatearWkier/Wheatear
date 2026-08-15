@@ -7,9 +7,12 @@
 #include "Wheatear/Assets/AssetPath.h"
 
 #include <yaml-cpp/yaml.h>
+#include <charconv>
+#include <cctype>
 #include <filesystem>
 #include <fstream>
 #include <algorithm>
+#include <system_error>
 #include <unordered_map>
 #include <unordered_set>
 #include <vector>
@@ -87,7 +90,41 @@ namespace Wheatear {
         return static_cast<uint32_t>(static_cast<entt::entity>(entity));
     }
 
+    using UIChildrenByParent = std::unordered_map<uint64_t, std::vector<Entity>>;
+
+    static UIChildrenByParent BuildUIChildrenIndex(Scene* scene)
+    {
+        UIChildrenByParent childrenByParent;
+        if (!scene)
+            return childrenByParent;
+
+        auto& registry = scene->GetRegistry();
+        for (auto entityID : registry.view<IDComponent, UIWidgetComponent>())
+        {
+            Entity child{ entityID, scene };
+            const auto& widget = child.GetComponent<UIWidgetComponent>();
+            const uint64_t parentID = static_cast<uint64_t>(widget.ParentEntity);
+            if (parentID != 0)
+                childrenByParent[parentID].push_back(child);
+        }
+
+        for (auto& [parentID, children] : childrenByParent)
+        {
+            std::sort(children.begin(), children.end(), [](Entity a, Entity b)
+            {
+                const auto& aw = a.GetComponent<UIWidgetComponent>();
+                const auto& bw = b.GetComponent<UIWidgetComponent>();
+                if (aw.SortOrder != bw.SortOrder)
+                    return aw.SortOrder < bw.SortOrder;
+                return a.GetName() < b.GetName();
+            });
+        }
+
+        return childrenByParent;
+    }
+
     static void CollectUIPrefabEntitiesRecursive(Entity root,
+        const UIChildrenByParent& childrenByParent,
         std::vector<Entity>& entities,
         std::unordered_set<uint32_t>& visited)
     {
@@ -104,41 +141,20 @@ namespace Wheatear {
             return;
 
         const UUID rootID = root.GetUUID();
-        Scene* scene = root.GetScene();
-        if (!scene)
+        auto childrenIt = childrenByParent.find(static_cast<uint64_t>(rootID));
+        if (childrenIt == childrenByParent.end())
             return;
 
-        auto& registry = scene->GetRegistry();
-        std::vector<Entity> children;
-        for (auto entityID : registry.view<IDComponent, UIWidgetComponent>())
-        {
-            Entity candidate{ entityID, scene };
-            if (candidate == root)
-                continue;
-
-            const auto& widget = candidate.GetComponent<UIWidgetComponent>();
-            if (widget.ParentEntity == rootID)
-                children.push_back(candidate);
-        }
-
-        std::sort(children.begin(), children.end(), [](Entity a, Entity b)
-        {
-            const auto& aw = a.GetComponent<UIWidgetComponent>();
-            const auto& bw = b.GetComponent<UIWidgetComponent>();
-            if (aw.SortOrder != bw.SortOrder)
-                return aw.SortOrder < bw.SortOrder;
-            return a.GetName() < b.GetName();
-        });
-
-        for (Entity child : children)
-            CollectUIPrefabEntitiesRecursive(child, entities, visited);
+        for (Entity child : childrenIt->second)
+            CollectUIPrefabEntitiesRecursive(child, childrenByParent, entities, visited);
     }
 
     static std::vector<Entity> CollectPrefabEntities(Entity root)
     {
         std::vector<Entity> entities;
         std::unordered_set<uint32_t> visited;
-        CollectUIPrefabEntitiesRecursive(root, entities, visited);
+        const UIChildrenByParent childrenByParent = BuildUIChildrenIndex(root ? root.GetScene() : nullptr);
+        CollectUIPrefabEntitiesRecursive(root, childrenByParent, entities, visited);
 
         if (entities.empty() && root)
             entities.push_back(root);
@@ -156,17 +172,88 @@ namespace Wheatear {
         return it == idRemap.end() ? UUID(0) : it->second;
     }
 
-    static void ReplaceAll(std::string& text, const std::string& from, const std::string& to)
+    static bool IsSelectorPrefixBoundary(const std::string& text, size_t position)
     {
-        if (from.empty())
+        if (position == 0)
+            return true;
+
+        const unsigned char previous = static_cast<unsigned char>(text[position - 1]);
+        return !std::isalnum(previous) && previous != '_';
+    }
+
+    static bool TryReadU64(const std::string& text, size_t begin, size_t end, uint64_t& value)
+    {
+        if (begin >= end)
+            return false;
+
+        const char* first = text.data() + begin;
+        const char* last = text.data() + end;
+        const auto result = std::from_chars(first, last, value);
+        return result.ec == std::errc{} && result.ptr == last;
+    }
+
+    static void RemapUUIDSelectorsInText(std::string& text,
+        const std::unordered_map<uint64_t, UUID>& idRemap)
+    {
+        if (text.empty() || idRemap.empty())
             return;
 
+        std::string remapped;
+        remapped.reserve(text.size());
+
         size_t cursor = 0;
-        while ((cursor = text.find(from, cursor)) != std::string::npos)
+        while (cursor < text.size())
         {
-            text.replace(cursor, from.size(), to);
-            cursor += to.size();
+            size_t prefixLength = 0;
+            if (text[cursor] == '@')
+            {
+                prefixLength = 1;
+            }
+            else if (IsSelectorPrefixBoundary(text, cursor)
+                && text.compare(cursor, 5, "uuid:") == 0)
+            {
+                prefixLength = 5;
+            }
+            else if (IsSelectorPrefixBoundary(text, cursor)
+                && text.compare(cursor, 3, "id:") == 0)
+            {
+                prefixLength = 3;
+            }
+
+            if (prefixLength == 0 ||
+                cursor + prefixLength >= text.size() ||
+                !std::isdigit(static_cast<unsigned char>(text[cursor + prefixLength])))
+            {
+                remapped.push_back(text[cursor++]);
+                continue;
+            }
+
+            const size_t digitsBegin = cursor + prefixLength;
+            size_t digitsEnd = digitsBegin;
+            while (digitsEnd < text.size() &&
+                std::isdigit(static_cast<unsigned char>(text[digitsEnd])))
+            {
+                ++digitsEnd;
+            }
+
+            uint64_t oldID = 0;
+            if (TryReadU64(text, digitsBegin, digitsEnd, oldID))
+            {
+                auto it = idRemap.find(oldID);
+                if (it != idRemap.end())
+                {
+                    remapped.append(text, cursor, prefixLength);
+                    remapped += std::to_string(static_cast<uint64_t>(it->second));
+                    cursor = digitsEnd;
+                    continue;
+                }
+            }
+
+            remapped.append(text, cursor, digitsEnd - cursor);
+            cursor = digitsEnd;
         }
+
+        text = std::move(remapped);
     }
 
     static void RemapPrefabEntityReferences(const std::vector<Entity>& entities,
@@ -192,12 +279,7 @@ namespace Wheatear {
             if (entity.HasComponent<UIButtonComponent>())
             {
                 auto& button = entity.GetComponent<UIButtonComponent>();
-                for (const auto& [oldID, newID] : idRemap)
-                {
-                    const std::string oldSelector = "@" + std::to_string(oldID);
-                    const std::string newSelector = "@" + std::to_string(static_cast<uint64_t>(newID));
-                    ReplaceAll(button.OnClickFunction, oldSelector, newSelector);
-                }
+                RemapUUIDSelectorsInText(button.OnClickFunction, idRemap);
             }
         }
     }

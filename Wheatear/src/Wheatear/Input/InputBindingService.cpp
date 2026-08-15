@@ -25,6 +25,7 @@ namespace Wheatear {
             bool Down = false;    // level this frame (queried lazily)
             bool Prev = false;    // level at the previous EndFrame
             bool Queried = false; // queried at least once this frame
+            bool InjectedPress = false;
         };
 
         std::unordered_map<std::string, ActionEdgeState>& EdgeStates()
@@ -33,19 +34,27 @@ namespace Wheatear {
             return states;
         }
 
+        bool IsActionPhysicallyDown(const std::string& actionId)
+        {
+            for (int binding : InputBindingService::GetKeys(actionId))
+            {
+                const bool down = binding >= 0
+                    ? Input::IsKeyPressed(binding)
+                    : Input::IsMouseButtonPressed(InputBindingService::MouseBindingToButton(binding));
+                if (down)
+                    return true;
+            }
+            return false;
+        }
+
     } // namespace
 
     bool InputBindingService::IsActionDown(const std::string& actionId)
     {
-        for (int binding : GetKeys(actionId))
-        {
-            const bool down = binding >= 0
-                ? Input::IsKeyPressed(binding)
-                : Input::IsMouseButtonPressed(MouseBindingToButton(binding));
-            if (down)
-                return true;
-        }
-        return false;
+        auto& states = EdgeStates();
+        auto it = states.find(actionId);
+        return (it != states.end() && it->second.InjectedPress)
+            || IsActionPhysicallyDown(actionId);
     }
 
     bool InputBindingService::IsActionPressed(const std::string& actionId)
@@ -75,17 +84,17 @@ namespace Wheatear {
         ActionEdgeState& state = EdgeStates()[actionId];
         state.Down = true;
         state.Queried = true;
+        state.InjectedPress = true;
     }
 
     void InputBindingService::EndFrame()
     {
         for (auto& [actionId, state] : EdgeStates())
         {
-            if (state.Queried)
-            {
-                state.Prev = state.Down;
-                state.Queried = false;
-            }
+            state.Prev = IsActionPhysicallyDown(actionId);
+            state.Down = state.Prev;
+            state.Queried = false;
+            state.InjectedPress = false;
         }
     }
 

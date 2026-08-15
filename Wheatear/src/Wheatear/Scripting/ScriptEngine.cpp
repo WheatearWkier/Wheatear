@@ -132,6 +132,7 @@ namespace Wheatear {
         if (!s_Data)
             return;
 
+        s_Data->EntityInstances.clear();
         ShutdownMono();
         delete s_Data;
         s_Data = nullptr;
@@ -538,8 +539,10 @@ namespace Wheatear {
         if (exception)
         {
             MonoString* msg = mono_object_to_string(exception, nullptr);
+            char* cStr = msg ? mono_string_to_utf8(msg) : nullptr;
             WT_CORE_ERROR("C# Exception in {}.{}: {}",
-                m_ClassNamespace, m_ClassName, mono_string_to_utf8(msg));
+                m_ClassNamespace, m_ClassName, cStr ? cStr : "<exception>");
+            mono_free(cStr);
         }
         return result;
     }
@@ -549,6 +552,9 @@ namespace Wheatear {
         : m_ScriptClass(scriptClass)
     {
         m_Instance = scriptClass->Instantiate();
+        WT_CORE_ASSERT(m_Instance, "Failed to instantiate C# script object '{}.{}'",
+            scriptClass->GetNamespace(), scriptClass->GetName());
+        m_GCHandle = mono_gchandle_new(m_Instance, false);
 
         m_OnCreateMethod = scriptClass->GetMethod("OnCreate", 0);
         m_OnUpdateMethod = scriptClass->GetMethod("OnUpdate", 1);
@@ -566,7 +572,7 @@ namespace Wheatear {
         if (scriptConstructor)
         {
             MonoObject* exception = nullptr;
-            mono_runtime_invoke(scriptConstructor, m_Instance, nullptr, &exception);
+            mono_runtime_invoke(scriptConstructor, GetMonoObject(), nullptr, &exception);
             if (exception)
                 WT_CORE_ERROR("ScriptInstance: exception while constructing '{}'", scriptClass->GetName());
         }
@@ -577,13 +583,27 @@ namespace Wheatear {
 
         uint64_t entityID = static_cast<uint64_t>(entity.GetUUID());
         void* idParam = &entityID;
-        mono_runtime_invoke(setRuntimeIDMethod, m_Instance, &idParam, nullptr);
+        mono_runtime_invoke(setRuntimeIDMethod, GetMonoObject(), &idParam, nullptr);
+    }
+
+    ScriptInstance::~ScriptInstance()
+    {
+        if (m_GCHandle)
+        {
+            mono_gchandle_free(m_GCHandle);
+            m_GCHandle = 0;
+        }
+    }
+
+    MonoObject* ScriptInstance::GetMonoObject() const
+    {
+        return m_GCHandle ? mono_gchandle_get_target(m_GCHandle) : m_Instance;
     }
 
     void ScriptInstance::InvokeOnCreate()
     {
         if (m_OnCreateMethod)
-            m_ScriptClass->InvokeMethod(m_Instance, m_OnCreateMethod);
+            m_ScriptClass->InvokeMethod(GetMonoObject(), m_OnCreateMethod);
     }
 
     void ScriptInstance::InvokeOnUpdate(float ts)
@@ -591,7 +611,7 @@ namespace Wheatear {
         if (m_OnUpdateMethod)
         {
             void* param = &ts;
-            m_ScriptClass->InvokeMethod(m_Instance, m_OnUpdateMethod, &param);
+            m_ScriptClass->InvokeMethod(GetMonoObject(), m_OnUpdateMethod, &param);
         }
     }
 
@@ -600,7 +620,7 @@ namespace Wheatear {
         if (!m_OnCollisionEnterMethod) return;
         UUID  otherID = other.GetUUID();
         void* param = &otherID;
-        m_ScriptClass->InvokeMethod(m_Instance, m_OnCollisionEnterMethod, &param);
+        m_ScriptClass->InvokeMethod(GetMonoObject(), m_OnCollisionEnterMethod, &param);
     }
 
     void ScriptInstance::InvokeOnCollisionExit(Entity other)
@@ -608,7 +628,7 @@ namespace Wheatear {
         if (!m_OnCollisionExitMethod) return;
         UUID  otherID = other.GetUUID();
         void* param = &otherID;
-        m_ScriptClass->InvokeMethod(m_Instance, m_OnCollisionExitMethod, &param);
+        m_ScriptClass->InvokeMethod(GetMonoObject(), m_OnCollisionExitMethod, &param);
     }
 
     std::string ScriptInstance::GetStringFieldValue(const std::string& name)
@@ -619,7 +639,7 @@ namespace Wheatear {
             return {};
 
         MonoString* monoValue = nullptr;
-        mono_field_get_value(m_Instance, it->second.ClassField, &monoValue);
+        mono_field_get_value(GetMonoObject(), it->second.ClassField, &monoValue);
         if (!monoValue)
             return {};
 
@@ -637,7 +657,7 @@ namespace Wheatear {
             return;
 
         MonoString* monoValue = mono_string_new(s_Data->AppDomain, value.c_str());
-        mono_field_set_value(m_Instance, it->second.ClassField, &monoValue);
+        mono_field_set_value(GetMonoObject(), it->second.ClassField, &monoValue);
     }
 
     bool ScriptInstance::GetFieldValueInternal(const std::string& name, void* outBuffer)
@@ -646,7 +666,7 @@ namespace Wheatear {
         auto it = fields.find(name);
         if (it == fields.end())
             return false;
-        mono_field_get_value(m_Instance, it->second.ClassField, outBuffer);
+        mono_field_get_value(GetMonoObject(), it->second.ClassField, outBuffer);
         return true;
     }
 
@@ -656,7 +676,7 @@ namespace Wheatear {
         auto it = fields.find(name);
         if (it == fields.end())
             return false;
-        mono_field_set_value(m_Instance, it->second.ClassField, const_cast<void*>(value));
+        mono_field_set_value(GetMonoObject(), it->second.ClassField, const_cast<void*>(value));
         return true;
     }
 
@@ -703,6 +723,13 @@ namespace Wheatear {
     ScriptInstance::ScriptInstance(Ref<ScriptClass> scriptClass, Entity)
         : m_ScriptClass(std::move(scriptClass))
     {
+    }
+
+    ScriptInstance::~ScriptInstance() {}
+
+    MonoObject* ScriptInstance::GetMonoObject() const
+    {
+        return nullptr;
     }
 
     void ScriptInstance::InvokeOnCreate() {}

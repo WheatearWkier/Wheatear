@@ -78,7 +78,7 @@
       <WarningLevel>Level3</WarningLevel>
       <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;WT_PLATFORM_WINDOWS;WT_BUILD_DLL;GLFW_INCLUDE_NONE;WT_DEBUG;WT_ENABLE_ASSERTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalIncludeDirectories>src;vendor\spdlog\include;vendor\GLFW\include;vendor\GLAD\include;vendor\imgui;vendor\glm;vendor\stb_image;vendor\entt\include;vendor\tinyobjloader\include;vendor\yaml-cpp\include;vendor\ImGuizmo;D:\softwares\VulkanSDK\1.4.341.1\Include;vendor\Box2D\include;vendor\miniaudio;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <Optimization>Disabled</Optimization>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
       <AdditionalOptions>/utf-8 /wd4828 /MP %(AdditionalOptions)</AdditionalOptions>

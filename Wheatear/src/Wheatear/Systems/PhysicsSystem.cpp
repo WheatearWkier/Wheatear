@@ -12,6 +12,8 @@
 #include <box2d/b2_polygon_shape.h>
 #include <box2d/b2_circle_shape.h>
 
+#include <cmath>
+
 namespace Wheatear {
 
 
@@ -27,6 +29,11 @@ namespace Wheatear {
             }
             WT_CORE_ASSERT(false, "Unknown Rigidbody2D BodyType");
             return b2_staticBody;
+        }
+
+        static float PositiveHalfExtent(float value)
+        {
+            return std::max(std::abs(value), 0.0001f);
         }
 
     } // anonymous namespace
@@ -54,6 +61,8 @@ namespace Wheatear {
     {
         constexpr int32_t velocityIterations = 6;
         constexpr int32_t positionIterations = 2;
+
+        SyncAnimationDrivenColliders(scene);
         m_PhysicsWorld->Step(ts, velocityIterations, positionIterations);
 
         auto& registry = scene->GetRegistry();
@@ -71,8 +80,6 @@ namespace Wheatear {
             tc.Translation.y = pos.y;
             tc.Rotation.z = body->GetAngle();
         }
-
-        SyncAnimationDrivenColliders(scene);
     }
 
     void PhysicsSystem::SyncAnimationDrivenColliders(Scene* scene)
@@ -94,7 +101,9 @@ namespace Wheatear {
                 continue;
 
             const auto& tc = view.get<TransformComponent>(e);
-            const b2Vec2 desiredHalf(bc.Size.x * tc.Scale.x, bc.Size.y * tc.Scale.y);
+            const b2Vec2 desiredHalf(
+                PositiveHalfExtent(bc.Size.x * tc.Scale.x),
+                PositiveHalfExtent(bc.Size.y * tc.Scale.y));
             const b2Vec2 desiredCenter(bc.Offset.x, bc.Offset.y);
 
             b2Fixture* fixture = static_cast<b2Fixture*>(bc.RuntimeFixture);
@@ -156,7 +165,8 @@ namespace Wheatear {
         {
             auto& bc = entity.GetComponent<BoxCollider2DComponent>();
             b2PolygonShape shape;
-            shape.SetAsBox(bc.Size.x * tc.Scale.x, bc.Size.y * tc.Scale.y,
+            shape.SetAsBox(PositiveHalfExtent(bc.Size.x * tc.Scale.x),
+                PositiveHalfExtent(bc.Size.y * tc.Scale.y),
                 { bc.Offset.x, bc.Offset.y }, 0.0f);
             bc.RuntimeFixture = makeFixture(shape, bc.Density, bc.Friction,
                 bc.Restitution, bc.RestitutionThreshold);
@@ -167,7 +177,7 @@ namespace Wheatear {
             auto& cc = entity.GetComponent<CircleCollider2DComponent>();
             b2CircleShape shape;
             shape.m_p = { cc.Offset.x, cc.Offset.y };
-            shape.m_radius = cc.Radius * tc.Scale.x;
+            shape.m_radius = PositiveHalfExtent(cc.Radius * tc.Scale.x);
             cc.RuntimeFixture = makeFixture(shape, cc.Density, cc.Friction,
                 cc.Restitution, cc.RestitutionThreshold);
         }

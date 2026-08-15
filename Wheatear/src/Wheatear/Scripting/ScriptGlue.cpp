@@ -57,16 +57,26 @@ namespace Wheatear {
         mono_free(cStr);
         return result;
     }
+
+    static Entity GetEntityByID(uint64_t entityID)
+    {
+        Scene* scene = ScriptEngine::GetSceneContext();
+        return scene ? scene->FindEntityByUUID(entityID) : Entity{};
+    }
+
+    static MonoString* EmptyMonoString()
+    {
+        return mono_string_new(mono_domain_get(), "");
+    }
     // =========================================================
     //  Entity
     // =========================================================
 
     static MonoString* Entity_GetTag(uint64_t entityID)
     {
-        Scene* scene = ScriptEngine::GetSceneContext();
-        Entity entity = scene->GetEntityByUUID(entityID);
+        Entity entity = GetEntityByID(entityID);
         if (!entity)
-            return mono_string_new(mono_domain_get(), "");
+            return EmptyMonoString();
         return mono_string_new(mono_domain_get(),
             entity.GetComponent<TagComponent>().Tag.c_str());
     }
@@ -74,16 +84,15 @@ namespace Wheatear {
     static void Entity_Destroy(uint64_t entityID)
     {
         Scene* scene = ScriptEngine::GetSceneContext();
-        Entity entity = scene->GetEntityByUUID(entityID);
+        Entity entity = GetEntityByID(entityID);
         if (!entity) return;
         scene->DestroyEntity(entity);
     }
 
     static bool Entity_HasComponent(uint64_t entityID, MonoReflectionType* componentType)
     {
-        Scene* scene = ScriptEngine::GetSceneContext();
-        Entity entity = scene->GetEntityByUUID(entityID);
-        if (!entity) return false;
+        Entity entity = GetEntityByID(entityID);
+        if (!entity || !componentType) return false;
 
         MonoType* monoType = mono_reflection_type_get_type(componentType);
         auto it = s_HasComponentFns.find(monoType);
@@ -97,9 +106,8 @@ namespace Wheatear {
 
     static void Entity_AddComponent(uint64_t entityID, MonoReflectionType* componentType)
     {
-        Scene* scene = ScriptEngine::GetSceneContext();
-        Entity entity = scene->GetEntityByUUID(entityID);
-        if (!entity) return;
+        Entity entity = GetEntityByID(entityID);
+        if (!entity || !componentType) return;
 
         MonoType* monoType = mono_reflection_type_get_type(componentType);
         auto it = s_AddComponentFns.find(monoType);
@@ -115,10 +123,11 @@ namespace Wheatear {
 
     static uint64_t Scene_FindEntityByName(MonoString* name)
     {
-        char* cStr = mono_string_to_utf8(name);
         Scene* scene = ScriptEngine::GetSceneContext();
+        if (!scene)
+            return 0;
+        const std::string cStr = MonoStringToString(name);
         Entity entity = scene->GetEntityByName(cStr);
-        mono_free(cStr);
         if (!entity) return 0;
         return (uint64_t)entity.GetUUID();
     }
@@ -129,43 +138,61 @@ namespace Wheatear {
 
     static void TransformComponent_GetTranslation(uint64_t entityID, glm::vec3* outTranslation)
     {
-        Entity entity = ScriptEngine::GetSceneContext()->GetEntityByUUID(entityID);
-        WT_CORE_ASSERT(entity, "Entity not found!");
+        Entity entity = GetEntityByID(entityID);
+        if (!outTranslation)
+            return;
+        if (!entity)
+        {
+            *outTranslation = {};
+            return;
+        }
         *outTranslation = entity.GetComponent<TransformComponent>().Translation;
     }
 
     static void TransformComponent_SetTranslation(uint64_t entityID, glm::vec3* translation)
     {
-        Entity entity = ScriptEngine::GetSceneContext()->GetEntityByUUID(entityID);
-        if (!entity) return;
+        Entity entity = GetEntityByID(entityID);
+        if (!entity || !translation) return;
         entity.GetComponent<TransformComponent>().Translation = *translation;
     }
 
     static void TransformComponent_GetRotation(uint64_t entityID, glm::vec3* outRotation)
     {
-        Entity entity = ScriptEngine::GetSceneContext()->GetEntityByUUID(entityID);
-        if (!entity) return;
+        Entity entity = GetEntityByID(entityID);
+        if (!outRotation)
+            return;
+        if (!entity)
+        {
+            *outRotation = {};
+            return;
+        }
         *outRotation = entity.GetComponent<TransformComponent>().Rotation;
     }
 
     static void TransformComponent_SetRotation(uint64_t entityID, glm::vec3* rotation)
     {
-        Entity entity = ScriptEngine::GetSceneContext()->GetEntityByUUID(entityID);
-        if (!entity) return;
+        Entity entity = GetEntityByID(entityID);
+        if (!entity || !rotation) return;
         entity.GetComponent<TransformComponent>().Rotation = *rotation;
     }
 
     static void TransformComponent_GetScale(uint64_t entityID, glm::vec3* outScale)
     {
-        Entity entity = ScriptEngine::GetSceneContext()->GetEntityByUUID(entityID);
-        if (!entity) return;
+        Entity entity = GetEntityByID(entityID);
+        if (!outScale)
+            return;
+        if (!entity)
+        {
+            *outScale = {};
+            return;
+        }
         *outScale = entity.GetComponent<TransformComponent>().Scale;
     }
 
     static void TransformComponent_SetScale(uint64_t entityID, glm::vec3* scale)
     {
-        Entity entity = ScriptEngine::GetSceneContext()->GetEntityByUUID(entityID);
-        if (!entity) return;
+        Entity entity = GetEntityByID(entityID);
+        if (!entity || !scale) return;
         entity.GetComponent<TransformComponent>().Scale = *scale;
     }
 
@@ -176,8 +203,8 @@ namespace Wheatear {
     static void Rigidbody2DComponent_ApplyLinearImpulse(
         uint64_t entityID, glm::vec2* impulse, glm::vec2* point, bool wake)
     {
-        Entity entity = ScriptEngine::GetSceneContext()->GetEntityByUUID(entityID);
-        if (!entity || !entity.HasComponent<Rigidbody2DComponent>()) return;
+        Entity entity = GetEntityByID(entityID);
+        if (!entity || !impulse || !point || !entity.HasComponent<Rigidbody2DComponent>()) return;
 
         b2Body* body = static_cast<b2Body*>(
             entity.GetComponent<Rigidbody2DComponent>().RuntimeBody);
@@ -188,7 +215,9 @@ namespace Wheatear {
 
     static void Rigidbody2DComponent_GetLinearVelocity(uint64_t entityID, glm::vec2* outVelocity)
     {
-        Entity entity = ScriptEngine::GetSceneContext()->GetEntityByUUID(entityID);
+        Entity entity = GetEntityByID(entityID);
+        if (!outVelocity)
+            return;
         if (!entity || !entity.HasComponent<Rigidbody2DComponent>())
         {
             *outVelocity = {}; return;
@@ -204,8 +233,8 @@ namespace Wheatear {
 
     static void Rigidbody2DComponent_SetLinearVelocity(uint64_t entityID, glm::vec2* velocity)
     {
-        Entity entity = ScriptEngine::GetSceneContext()->GetEntityByUUID(entityID);
-        if (!entity || !entity.HasComponent<Rigidbody2DComponent>()) return;
+        Entity entity = GetEntityByID(entityID);
+        if (!entity || !velocity || !entity.HasComponent<Rigidbody2DComponent>()) return;
 
         b2Body* body = static_cast<b2Body*>(
             entity.GetComponent<Rigidbody2DComponent>().RuntimeBody);
@@ -215,7 +244,7 @@ namespace Wheatear {
 
     static float Rigidbody2DComponent_GetGravityScale(uint64_t entityID)
     {
-        Entity entity = ScriptEngine::GetSceneContext()->GetEntityByUUID(entityID);
+        Entity entity = GetEntityByID(entityID);
         if (!entity || !entity.HasComponent<Rigidbody2DComponent>()) return 1.0f;
 
         b2Body* body = static_cast<b2Body*>(
@@ -226,7 +255,7 @@ namespace Wheatear {
 
     static void Rigidbody2DComponent_SetGravityScale(uint64_t entityID, float scale)
     {
-        Entity entity = ScriptEngine::GetSceneContext()->GetEntityByUUID(entityID);
+        Entity entity = GetEntityByID(entityID);
         if (!entity || !entity.HasComponent<Rigidbody2DComponent>()) return;
 
         auto& rb2d = entity.GetComponent<Rigidbody2DComponent>();
@@ -238,14 +267,14 @@ namespace Wheatear {
 
     static bool Rigidbody2DComponent_GetFixedRotation(uint64_t entityID)
     {
-        Entity entity = ScriptEngine::GetSceneContext()->GetEntityByUUID(entityID);
+        Entity entity = GetEntityByID(entityID);
         if (!entity || !entity.HasComponent<Rigidbody2DComponent>()) return false;
         return entity.GetComponent<Rigidbody2DComponent>().FixedRotation;
     }
 
     static void Rigidbody2DComponent_SetFixedRotation(uint64_t entityID, bool fixed)
     {
-        Entity entity = ScriptEngine::GetSceneContext()->GetEntityByUUID(entityID);
+        Entity entity = GetEntityByID(entityID);
         if (!entity || !entity.HasComponent<Rigidbody2DComponent>()) return;
 
         auto& rb2d = entity.GetComponent<Rigidbody2DComponent>();
@@ -258,14 +287,14 @@ namespace Wheatear {
     // BodyType
     static int Rigidbody2DComponent_GetBodyType(uint64_t entityID)
     {
-        Entity entity = ScriptEngine::GetSceneContext()->GetEntityByUUID(entityID);
+        Entity entity = GetEntityByID(entityID);
         if (!entity || !entity.HasComponent<Rigidbody2DComponent>()) return 0;
         return static_cast<int>(entity.GetComponent<Rigidbody2DComponent>().Type);
     }
 
     static void Rigidbody2DComponent_SetBodyType(uint64_t entityID, int type)
     {
-        Entity entity = ScriptEngine::GetSceneContext()->GetEntityByUUID(entityID);
+        Entity entity = GetEntityByID(entityID);
         if (!entity || !entity.HasComponent<Rigidbody2DComponent>()) return;
 
         auto& rb2d = entity.GetComponent<Rigidbody2DComponent>();
@@ -349,48 +378,44 @@ namespace Wheatear {
     // =========================================================
     static void SpriteRendererComponent_GetColor(uint64_t entityID, glm::vec4* outColor)
     {
-        Scene* scene = ScriptEngine::GetSceneContext();
-        Entity entity = scene->GetEntityByUUID(entityID);
+        Entity entity = GetEntityByID(entityID);
+        if (!outColor)
+            return;
         if (!entity || !entity.HasComponent<SpriteRendererComponent>()) { *outColor = glm::vec4(1.0f); return; }
         *outColor = entity.GetComponent<SpriteRendererComponent>().Color;
     }
 
     static void SpriteRendererComponent_SetColor(uint64_t entityID, glm::vec4* color)
     {
-        Scene* scene = ScriptEngine::GetSceneContext();
-        Entity entity = scene->GetEntityByUUID(entityID);
-        if (!entity || !entity.HasComponent<SpriteRendererComponent>()) return;
+        Entity entity = GetEntityByID(entityID);
+        if (!entity || !color || !entity.HasComponent<SpriteRendererComponent>()) return;
         entity.GetComponent<SpriteRendererComponent>().Color = *color;
     }
 
     static float SpriteRendererComponent_GetTilingFactor(uint64_t entityID)
     {
-        Scene* scene = ScriptEngine::GetSceneContext();
-        Entity entity = scene->GetEntityByUUID(entityID);
+        Entity entity = GetEntityByID(entityID);
         if (!entity || !entity.HasComponent<SpriteRendererComponent>()) return 1.0f;
         return entity.GetComponent<SpriteRendererComponent>().TilingFactor;
     }
 
     static void SpriteRendererComponent_SetTilingFactor(uint64_t entityID, float tilingFactor)
     {
-        Scene* scene = ScriptEngine::GetSceneContext();
-        Entity entity = scene->GetEntityByUUID(entityID);
+        Entity entity = GetEntityByID(entityID);
         if (!entity || !entity.HasComponent<SpriteRendererComponent>()) return;
         entity.GetComponent<SpriteRendererComponent>().TilingFactor = tilingFactor;
     }
 
     static bool SpriteRendererComponent_GetFlipX(UUID entityID)
     {
-        Scene* scene = ScriptEngine::GetSceneContext();
-        Entity entity = scene->GetEntityByUUID(entityID);
+        Entity entity = GetEntityByID(entityID);
         if (!entity || !entity.HasComponent<SpriteRendererComponent>()) return false;
         return entity.GetComponent<SpriteRendererComponent>().FlipX;
     }
 
     static void SpriteRendererComponent_SetFlipX(UUID entityID, bool flipX)
     {
-        Scene* scene = ScriptEngine::GetSceneContext();
-        Entity entity = scene->GetEntityByUUID(entityID);
+        Entity entity = GetEntityByID(entityID);
         if (!entity || !entity.HasComponent<SpriteRendererComponent>()) return;
         entity.GetComponent<SpriteRendererComponent>().FlipX = flipX;
     }
@@ -401,39 +426,37 @@ namespace Wheatear {
 
     static void SpriteAnimatorComponent_Play(uint64_t entityID, MonoString* clipName)
     {
-        Entity entity = ScriptEngine::GetSceneContext()->GetEntityByUUID(entityID);
+        Entity entity = GetEntityByID(entityID);
         if (!entity || !entity.HasComponent<SpriteAnimatorComponent>()) return;
-        char* cStr = mono_string_to_utf8(clipName);
-        entity.GetComponent<SpriteAnimatorComponent>().Play(cStr);
-        mono_free(cStr);
+        entity.GetComponent<SpriteAnimatorComponent>().Play(MonoStringToString(clipName));
     }
 
     static void SpriteAnimatorComponent_Stop(uint64_t entityID)
     {
-        Entity entity = ScriptEngine::GetSceneContext()->GetEntityByUUID(entityID);
+        Entity entity = GetEntityByID(entityID);
         if (!entity || !entity.HasComponent<SpriteAnimatorComponent>()) return;
         entity.GetComponent<SpriteAnimatorComponent>().IsPlaying = false;
     }
 
     static void SpriteAnimatorComponent_Resume(uint64_t entityID)
     {
-        Entity entity = ScriptEngine::GetSceneContext()->GetEntityByUUID(entityID);
+        Entity entity = GetEntityByID(entityID);
         if (!entity || !entity.HasComponent<SpriteAnimatorComponent>()) return;
         entity.GetComponent<SpriteAnimatorComponent>().IsPlaying = true;
     }
 
     static MonoString* SpriteAnimatorComponent_GetCurrentClip(uint64_t entityID)
     {
-        Entity entity = ScriptEngine::GetSceneContext()->GetEntityByUUID(entityID);
+        Entity entity = GetEntityByID(entityID);
         if (!entity || !entity.HasComponent<SpriteAnimatorComponent>())
-            return mono_string_new(mono_domain_get(), "");
+            return EmptyMonoString();
         const auto& name = entity.GetComponent<SpriteAnimatorComponent>().CurrentClipName;
         return mono_string_new(mono_domain_get(), name.c_str());
     }
 
     static bool SpriteAnimatorComponent_IsFinished(uint64_t entityID)
     {
-        Entity entity = ScriptEngine::GetSceneContext()->GetEntityByUUID(entityID);
+        Entity entity = GetEntityByID(entityID);
         if (!entity || !entity.HasComponent<SpriteAnimatorComponent>()) return false;
         return entity.GetComponent<SpriteAnimatorComponent>().IsFinished;
     }
@@ -444,19 +467,18 @@ namespace Wheatear {
 
     static void Audio_PlaySound(MonoString* filepath, float volume)
     {
-        char* path = mono_string_to_utf8(filepath);
-        AudioEngine::PlaySound(std::string(path), volume);
-        mono_free(path);
+        const std::string path = MonoStringToString(filepath);
+        if (!path.empty())
+            AudioEngine::PlaySound(path, volume);
     }
 
     static uint32_t Audio_PlaySoundWithHandle(MonoString* filepath,
         float volume, bool loop)
     {
-        char* path = mono_string_to_utf8(filepath);
-        uint32_t handle = AudioEngine::PlaySoundWithHandle(
-            std::string(path), volume, loop);
-        mono_free(path);
-        return handle;
+        const std::string path = MonoStringToString(filepath);
+        if (path.empty())
+            return 0;
+        return AudioEngine::PlaySoundWithHandle(path, volume, loop);
     }
 
     static void Audio_StopSound(uint32_t handle)
@@ -486,8 +508,7 @@ namespace Wheatear {
 
     static void AudioSourceComponent_Play(UUID entityID)
     {
-        Scene* scene = ScriptEngine::GetSceneContext();
-        Entity entity = scene->GetEntityByUUID(entityID);
+        Entity entity = GetEntityByID(entityID);
         if (!entity || !entity.HasComponent<AudioSourceComponent>()) return;
 
         auto& asc = entity.GetComponent<AudioSourceComponent>();
@@ -502,8 +523,7 @@ namespace Wheatear {
 
     static void AudioSourceComponent_Stop(UUID entityID)
     {
-        Scene* scene = ScriptEngine::GetSceneContext();
-        Entity entity = scene->GetEntityByUUID(entityID);
+        Entity entity = GetEntityByID(entityID);
         if (!entity || !entity.HasComponent<AudioSourceComponent>()) return;
 
         auto& asc = entity.GetComponent<AudioSourceComponent>();
@@ -516,8 +536,7 @@ namespace Wheatear {
 
     static bool AudioSourceComponent_IsPlaying(UUID entityID)
     {
-        Scene* scene = ScriptEngine::GetSceneContext();
-        Entity entity = scene->GetEntityByUUID(entityID);
+        Entity entity = GetEntityByID(entityID);
         if (!entity || !entity.HasComponent<AudioSourceComponent>()) return false;
 
         auto& asc = entity.GetComponent<AudioSourceComponent>();
@@ -526,16 +545,14 @@ namespace Wheatear {
 
     static float AudioSourceComponent_GetVolume(UUID entityID)
     {
-        Scene* scene = ScriptEngine::GetSceneContext();
-        Entity entity = scene->GetEntityByUUID(entityID);
+        Entity entity = GetEntityByID(entityID);
         if (!entity || !entity.HasComponent<AudioSourceComponent>()) return 1.0f;
         return entity.GetComponent<AudioSourceComponent>().Volume;
     }
 
     static void AudioSourceComponent_SetVolume(UUID entityID, float volume)
     {
-        Scene* scene = ScriptEngine::GetSceneContext();
-        Entity entity = scene->GetEntityByUUID(entityID);
+        Entity entity = GetEntityByID(entityID);
         if (!entity || !entity.HasComponent<AudioSourceComponent>()) return;
 
         auto& asc = entity.GetComponent<AudioSourceComponent>();
@@ -550,129 +567,153 @@ namespace Wheatear {
 
     static bool UICanvasComponent_GetVisible(uint64_t entityID)
     {
-        Entity entity = ScriptEngine::GetSceneContext()->GetEntityByUUID(entityID);
+        Entity entity = GetEntityByID(entityID);
         if (!entity || !entity.HasComponent<UICanvasComponent>()) return false;
         return entity.GetComponent<UICanvasComponent>().Visible;
     }
 
     static void UICanvasComponent_SetVisible(uint64_t entityID, bool visible)
     {
-        Entity entity = ScriptEngine::GetSceneContext()->GetEntityByUUID(entityID);
+        Entity entity = GetEntityByID(entityID);
         if (!entity || !entity.HasComponent<UICanvasComponent>()) return;
         entity.GetComponent<UICanvasComponent>().Visible = visible;
     }
 
     static bool UIWidgetComponent_GetVisible(uint64_t entityID)
     {
-        Entity entity = ScriptEngine::GetSceneContext()->GetEntityByUUID(entityID);
+        Entity entity = GetEntityByID(entityID);
         if (!entity || !entity.HasComponent<UIWidgetComponent>()) return false;
         return entity.GetComponent<UIWidgetComponent>().Visible;
     }
 
     static void UIWidgetComponent_SetVisible(uint64_t entityID, bool visible)
     {
-        Entity entity = ScriptEngine::GetSceneContext()->GetEntityByUUID(entityID);
+        Entity entity = GetEntityByID(entityID);
         if (!entity || !entity.HasComponent<UIWidgetComponent>()) return;
         entity.GetComponent<UIWidgetComponent>().Visible = visible;
     }
 
     static void UIWidgetComponent_GetPosition(uint64_t entityID, glm::vec2* outPos)
     {
-        Entity entity = ScriptEngine::GetSceneContext()->GetEntityByUUID(entityID);
-        if (!entity || !entity.HasComponent<UIWidgetComponent>()) return;
+        Entity entity = GetEntityByID(entityID);
+        if (!outPos)
+            return;
+        if (!entity || !entity.HasComponent<UIWidgetComponent>())
+        {
+            *outPos = {};
+            return;
+        }
         *outPos = entity.GetComponent<UIWidgetComponent>().Position;
     }
 
     static void UIWidgetComponent_SetPosition(uint64_t entityID, glm::vec2* pos)
     {
-        Entity entity = ScriptEngine::GetSceneContext()->GetEntityByUUID(entityID);
-        if (!entity || !entity.HasComponent<UIWidgetComponent>()) return;
+        Entity entity = GetEntityByID(entityID);
+        if (!entity || !pos || !entity.HasComponent<UIWidgetComponent>()) return;
         entity.GetComponent<UIWidgetComponent>().Position = *pos;
     }
 
     static void UIWidgetComponent_GetSize(uint64_t entityID, glm::vec2* outSize)
     {
-        Entity entity = ScriptEngine::GetSceneContext()->GetEntityByUUID(entityID);
-        if (!entity || !entity.HasComponent<UIWidgetComponent>()) return;
+        Entity entity = GetEntityByID(entityID);
+        if (!outSize)
+            return;
+        if (!entity || !entity.HasComponent<UIWidgetComponent>())
+        {
+            *outSize = {};
+            return;
+        }
         *outSize = entity.GetComponent<UIWidgetComponent>().Size;
     }
 
     static void UIWidgetComponent_SetSize(uint64_t entityID, glm::vec2* size)
     {
-        Entity entity = ScriptEngine::GetSceneContext()->GetEntityByUUID(entityID);
-        if (!entity || !entity.HasComponent<UIWidgetComponent>()) return;
+        Entity entity = GetEntityByID(entityID);
+        if (!entity || !size || !entity.HasComponent<UIWidgetComponent>()) return;
         entity.GetComponent<UIWidgetComponent>().Size = *size;
     }
 
 
     static void UIImageComponent_GetColor(uint64_t entityID, glm::vec4* outColor)
     {
-        Entity entity = ScriptEngine::GetSceneContext()->GetEntityByUUID(entityID);
-        if (!entity || !entity.HasComponent<UIImageComponent>()) return;
+        Entity entity = GetEntityByID(entityID);
+        if (!outColor)
+            return;
+        if (!entity || !entity.HasComponent<UIImageComponent>())
+        {
+            *outColor = { 1.0f, 1.0f, 1.0f, 1.0f };
+            return;
+        }
         *outColor = entity.GetComponent<UIImageComponent>().Color;
     }
 
     static void UIImageComponent_SetColor(uint64_t entityID, glm::vec4* color)
     {
-        Entity entity = ScriptEngine::GetSceneContext()->GetEntityByUUID(entityID);
-        if (!entity || !entity.HasComponent<UIImageComponent>()) return;
+        Entity entity = GetEntityByID(entityID);
+        if (!entity || !color || !entity.HasComponent<UIImageComponent>()) return;
         entity.GetComponent<UIImageComponent>().Color = *color;
     }
 
 
     static float UIProgressBarComponent_GetValue(uint64_t entityID)
     {
-        Entity entity = ScriptEngine::GetSceneContext()->GetEntityByUUID(entityID);
+        Entity entity = GetEntityByID(entityID);
         if (!entity || !entity.HasComponent<UIProgressBarComponent>()) return 0.0f;
         return entity.GetComponent<UIProgressBarComponent>().Value;
     }
 
     static void UIProgressBarComponent_SetValue(uint64_t entityID, float value)
     {
-        Entity entity = ScriptEngine::GetSceneContext()->GetEntityByUUID(entityID);
+        Entity entity = GetEntityByID(entityID);
         if (!entity || !entity.HasComponent<UIProgressBarComponent>()) return;
         entity.GetComponent<UIProgressBarComponent>().Value = value;
     }
 
     static float UIProgressBarComponent_GetMaxValue(uint64_t entityID)
     {
-        Entity entity = ScriptEngine::GetSceneContext()->GetEntityByUUID(entityID);
+        Entity entity = GetEntityByID(entityID);
         if (!entity || !entity.HasComponent<UIProgressBarComponent>()) return 1.0f;
         return entity.GetComponent<UIProgressBarComponent>().MaxValue;
     }
 
     static void UIProgressBarComponent_SetMaxValue(uint64_t entityID, float maxValue)
     {
-        Entity entity = ScriptEngine::GetSceneContext()->GetEntityByUUID(entityID);
+        Entity entity = GetEntityByID(entityID);
         if (!entity || !entity.HasComponent<UIProgressBarComponent>()) return;
         entity.GetComponent<UIProgressBarComponent>().MaxValue = maxValue;
     }
 
     static void UIProgressBarComponent_GetForegroundColor(uint64_t entityID, glm::vec4* outColor)
     {
-        Entity entity = ScriptEngine::GetSceneContext()->GetEntityByUUID(entityID);
-        if (!entity || !entity.HasComponent<UIProgressBarComponent>()) return;
+        Entity entity = GetEntityByID(entityID);
+        if (!outColor)
+            return;
+        if (!entity || !entity.HasComponent<UIProgressBarComponent>())
+        {
+            *outColor = { 1.0f, 1.0f, 1.0f, 1.0f };
+            return;
+        }
         *outColor = entity.GetComponent<UIProgressBarComponent>().ForegroundColor;
     }
 
     static void UIProgressBarComponent_SetForegroundColor(uint64_t entityID, glm::vec4* color)
     {
-        Entity entity = ScriptEngine::GetSceneContext()->GetEntityByUUID(entityID);
-        if (!entity || !entity.HasComponent<UIProgressBarComponent>()) return;
+        Entity entity = GetEntityByID(entityID);
+        if (!entity || !color || !entity.HasComponent<UIProgressBarComponent>()) return;
         entity.GetComponent<UIProgressBarComponent>().ForegroundColor = *color;
     }
 
 
     static bool UIButtonComponent_GetIsHovered(uint64_t entityID)
     {
-        Entity entity = ScriptEngine::GetSceneContext()->GetEntityByUUID(entityID);
+        Entity entity = GetEntityByID(entityID);
         if (!entity || !entity.HasComponent<UIButtonComponent>()) return false;
         return entity.GetComponent<UIButtonComponent>().IsHovered;
     }
 
     static bool UIButtonComponent_GetIsPressed(uint64_t entityID)
     {
-        Entity entity = ScriptEngine::GetSceneContext()->GetEntityByUUID(entityID);
+        Entity entity = GetEntityByID(entityID);
         if (!entity || !entity.HasComponent<UIButtonComponent>()) return false;
         return entity.GetComponent<UIButtonComponent>().IsPressed;
     }
@@ -680,17 +721,15 @@ namespace Wheatear {
 
     static void UIButtonComponent_SetOnClickFunction(uint64_t entityID, MonoString* funcName)
     {
-        Entity entity = ScriptEngine::GetSceneContext()->GetEntityByUUID(entityID);
+        Entity entity = GetEntityByID(entityID);
         if (!entity || !entity.HasComponent<UIButtonComponent>()) return;
-        char* cStr = mono_string_to_utf8(funcName);
-        entity.GetComponent<UIButtonComponent>().OnClickFunction = cStr;
-        mono_free(cStr);
+        entity.GetComponent<UIButtonComponent>().OnClickFunction = MonoStringToString(funcName);
     }
 
     static MonoString* UIButtonComponent_GetOnClickFunction(uint64_t entityID)
     {
-        Entity entity = ScriptEngine::GetSceneContext()->GetEntityByUUID(entityID);
-        if (!entity || !entity.HasComponent<UIButtonComponent>()) return nullptr;
+        Entity entity = GetEntityByID(entityID);
+        if (!entity || !entity.HasComponent<UIButtonComponent>()) return EmptyMonoString();
         auto& func = entity.GetComponent<UIButtonComponent>().OnClickFunction;
         return mono_string_new(mono_domain_get(), func.c_str());
     }
@@ -698,64 +737,66 @@ namespace Wheatear {
 
     static MonoString* UITextComponent_GetText(uint64_t entityID)
     {
-        Entity entity = ScriptEngine::GetSceneContext()->GetEntityByUUID(entityID);
-        if (!entity || !entity.HasComponent<UITextComponent>()) return nullptr;
+        Entity entity = GetEntityByID(entityID);
+        if (!entity || !entity.HasComponent<UITextComponent>()) return EmptyMonoString();
         auto& text = entity.GetComponent<UITextComponent>().Text;
         return mono_string_new(mono_domain_get(), text.c_str());
     }
 
     static void UITextComponent_SetText(uint64_t entityID, MonoString* text)
     {
-        Entity entity = ScriptEngine::GetSceneContext()->GetEntityByUUID(entityID);
+        Entity entity = GetEntityByID(entityID);
         if (!entity || !entity.HasComponent<UITextComponent>()) return;
-        char* cStr = mono_string_to_utf8(text);
-        entity.GetComponent<UITextComponent>().Text = cStr;
-        mono_free(cStr);
+        entity.GetComponent<UITextComponent>().Text = MonoStringToString(text);
     }
 
     static void UITextComponent_GetColor(uint64_t entityID, glm::vec4* outColor)
     {
-        Entity entity = ScriptEngine::GetSceneContext()->GetEntityByUUID(entityID);
-        if (!entity || !entity.HasComponent<UITextComponent>()) return;
+        Entity entity = GetEntityByID(entityID);
+        if (!outColor)
+            return;
+        if (!entity || !entity.HasComponent<UITextComponent>())
+        {
+            *outColor = { 1.0f, 1.0f, 1.0f, 1.0f };
+            return;
+        }
         *outColor = entity.GetComponent<UITextComponent>().Color;
     }
 
     static void UITextComponent_SetColor(uint64_t entityID, glm::vec4* color)
     {
-        Entity entity = ScriptEngine::GetSceneContext()->GetEntityByUUID(entityID);
-        if (!entity || !entity.HasComponent<UITextComponent>()) return;
+        Entity entity = GetEntityByID(entityID);
+        if (!entity || !color || !entity.HasComponent<UITextComponent>()) return;
         entity.GetComponent<UITextComponent>().Color = *color;
     }
 
     static float UITextComponent_GetFontSize(uint64_t entityID)
     {
-        Entity entity = ScriptEngine::GetSceneContext()->GetEntityByUUID(entityID);
+        Entity entity = GetEntityByID(entityID);
         if (!entity || !entity.HasComponent<UITextComponent>()) return 0.0f;
         return entity.GetComponent<UITextComponent>().FontSize;
     }
 
     static void UITextComponent_SetFontSize(uint64_t entityID, float fontSize)
     {
-        Entity entity = ScriptEngine::GetSceneContext()->GetEntityByUUID(entityID);
+        Entity entity = GetEntityByID(entityID);
         if (!entity || !entity.HasComponent<UITextComponent>()) return;
         entity.GetComponent<UITextComponent>().FontSize = std::max(1.0f, fontSize);
     }
 
     static MonoString* UITextComponent_GetFontPath(uint64_t entityID)
     {
-        Entity entity = ScriptEngine::GetSceneContext()->GetEntityByUUID(entityID);
-        if (!entity || !entity.HasComponent<UITextComponent>()) return nullptr;
+        Entity entity = GetEntityByID(entityID);
+        if (!entity || !entity.HasComponent<UITextComponent>()) return EmptyMonoString();
         auto& fontPath = entity.GetComponent<UITextComponent>().FontPath;
         return mono_string_new(mono_domain_get(), fontPath.c_str());
     }
 
     static void UITextComponent_SetFontPath(uint64_t entityID, MonoString* fontPath)
     {
-        Entity entity = ScriptEngine::GetSceneContext()->GetEntityByUUID(entityID);
+        Entity entity = GetEntityByID(entityID);
         if (!entity || !entity.HasComponent<UITextComponent>()) return;
-        char* cStr = mono_string_to_utf8(fontPath);
-        entity.GetComponent<UITextComponent>().FontPath = cStr;
-        mono_free(cStr);
+        entity.GetComponent<UITextComponent>().FontPath = MonoStringToString(fontPath);
     }
 
     // =========================================================
@@ -764,47 +805,45 @@ namespace Wheatear {
 
     static bool ArcadeCombatLevelComponent_GetPaused(uint64_t entityID)
     {
-        Entity entity = ScriptEngine::GetSceneContext()->GetEntityByUUID(entityID);
+        Entity entity = GetEntityByID(entityID);
         if (!entity || !entity.HasComponent<ArcadeCombatLevelComponent>()) return false;
         return entity.GetComponent<ArcadeCombatLevelComponent>().RuntimePaused;
     }
 
     static bool ArcadeCombatLevelComponent_GetBossIntroStarted(uint64_t entityID)
     {
-        Entity entity = ScriptEngine::GetSceneContext()->GetEntityByUUID(entityID);
+        Entity entity = GetEntityByID(entityID);
         if (!entity || !entity.HasComponent<ArcadeCombatLevelComponent>()) return false;
         return entity.GetComponent<ArcadeCombatLevelComponent>().RuntimeBossIntroStarted;
     }
 
     static bool ArcadeCombatLevelComponent_GetBossIntroFinished(uint64_t entityID)
     {
-        Entity entity = ScriptEngine::GetSceneContext()->GetEntityByUUID(entityID);
+        Entity entity = GetEntityByID(entityID);
         if (!entity || !entity.HasComponent<ArcadeCombatLevelComponent>()) return false;
         return entity.GetComponent<ArcadeCombatLevelComponent>().RuntimeBossIntroFinished;
     }
 
     static bool ArcadeCombatLevelComponent_GetVictory(uint64_t entityID)
     {
-        Entity entity = ScriptEngine::GetSceneContext()->GetEntityByUUID(entityID);
+        Entity entity = GetEntityByID(entityID);
         if (!entity || !entity.HasComponent<ArcadeCombatLevelComponent>()) return false;
         return entity.GetComponent<ArcadeCombatLevelComponent>().RuntimeVictory;
     }
 
     static bool ArcadeCombatLevelComponent_GetDefeat(uint64_t entityID)
     {
-        Entity entity = ScriptEngine::GetSceneContext()->GetEntityByUUID(entityID);
+        Entity entity = GetEntityByID(entityID);
         if (!entity || !entity.HasComponent<ArcadeCombatLevelComponent>()) return false;
         return entity.GetComponent<ArcadeCombatLevelComponent>().RuntimeDefeat;
     }
 
     static void ArcadeCombatLevelComponent_RequestSceneCommand(uint64_t entityID, MonoString* command)
     {
-        Entity entity = ScriptEngine::GetSceneContext()->GetEntityByUUID(entityID);
+        Entity entity = GetEntityByID(entityID);
         if (!entity || !entity.HasComponent<ArcadeCombatLevelComponent>()) return;
 
-        char* cStr = mono_string_to_utf8(command);
-        entity.GetComponent<ArcadeCombatLevelComponent>().RuntimeRequestedCommand = cStr;
-        mono_free(cStr);
+        entity.GetComponent<ArcadeCombatLevelComponent>().RuntimeRequestedCommand = MonoStringToString(command);
     }
     // =========================================================
     //  Scene
@@ -812,11 +851,17 @@ namespace Wheatear {
 
     static uint64_t Scene_InstantiateFromPrefab(MonoString* prefabPath, glm::vec3* position)
     {
-        char* cStr = mono_string_to_utf8(prefabPath);
+        if (!position)
+            return 0;
+
+        const std::string cStr = MonoStringToString(prefabPath);
+        if (cStr.empty())
+            return 0;
         std::filesystem::path path(cStr);
-        mono_free(cStr);
 
         Scene* scene = ScriptEngine::GetSceneContext();
+        if (!scene)
+            return 0;
         Entity entity = scene->InstantiateFromPrefab(path, *position);
         if (!entity) return 0;
         return (uint64_t)entity.GetUUID();

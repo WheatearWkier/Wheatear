@@ -101,6 +101,7 @@ namespace Wheatear {
     {
     public:
         ScriptInstance(Ref<ScriptClass> scriptClass, Entity entity);
+        ~ScriptInstance();
 
         void InvokeOnCreate();
         void InvokeOnUpdate(float ts);
@@ -126,7 +127,7 @@ namespace Wheatear {
         void SetStringFieldValue(const std::string& name, const std::string& value);
 
         Ref<ScriptClass> GetScriptClass() const { return m_ScriptClass; }
-        MonoObject* GetMonoObject() const { return m_Instance; }
+        MonoObject* GetMonoObject() const;
         MonoClass* GetMonoClass() const { return m_ScriptClass->GetMonoClass(); }
 
     private:
@@ -136,6 +137,7 @@ namespace Wheatear {
     private:
         Ref<ScriptClass> m_ScriptClass;
         MonoObject* m_Instance = nullptr;
+        uint32_t m_GCHandle = 0;
 
         MonoMethod* m_OnCreateMethod = nullptr;
         MonoMethod* m_OnUpdateMethod = nullptr;

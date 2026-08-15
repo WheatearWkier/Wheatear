@@ -26,7 +26,14 @@ namespace Wheatear
         {
             Type type = typeof(T);
             if (_componentCache.TryGetValue(type, out Component cached))
+            {
+                if (!InternalCalls.Entity_HasComponent(ID, type))
+                {
+                    _componentCache.Remove(type);
+                    return null;
+                }
                 return (T)cached;
+            }
 
             if (!InternalCalls.Entity_HasComponent(ID, type))
                 return null;
@@ -52,7 +59,12 @@ namespace Wheatear
         {
             Type type = typeof(T);
             if (_componentCache.TryGetValue(type, out Component cached))
-                return (T)cached;
+            {
+                if (InternalCalls.Entity_HasComponent(ID, type))
+                    return (T)cached;
+
+                _componentCache.Remove(type);
+            }
 
             if (HasComponent<T>())
                 return GetComponent<T>()!;

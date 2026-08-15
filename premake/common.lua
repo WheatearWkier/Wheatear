@@ -66,6 +66,7 @@ function wt_configurations(debug_links, release_links)
         defines { "WT_DEBUG", "WT_ENABLE_ASSERTS" }
         runtime "Debug"
         symbols "on"
+        editandcontinue "Off"
         links(debug_links)
 
     filter "configurations:Release"

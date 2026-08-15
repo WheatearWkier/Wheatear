@@ -322,9 +322,11 @@ namespace Wheatear {
                 ++component.RuntimeInstructionIndex;
                 break;
             case EventScriptInstructionType::Wait:
-                component.RuntimeWaitRemaining = instruction.Seconds;
                 ++component.RuntimeInstructionIndex;
-                return;
+                component.RuntimeWaitRemaining = std::max(0.0f, instruction.Seconds);
+                if (component.RuntimeWaitRemaining > 0.0f)
+                    return;
+                break;
             case EventScriptInstructionType::If:
                 if (EvaluateCondition(instruction.Text))
                     ++component.RuntimeInstructionIndex;

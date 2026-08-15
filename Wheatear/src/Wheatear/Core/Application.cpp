@@ -138,12 +138,6 @@ namespace Wheatear {
 			glfwPollEvents();
 			FlushEventQueue();
 
-			// Advance the action-layer edge state machine so IsActionPressed /
-			// IsActionReleased report consistent per-frame results, and the
-			// mouse delta baseline for GetMouseDeltaX/Y.
-			InputBindingService::EndFrame();
-			Input::EndFrame();
-
 			if (!m_Running)
 				break;
 
@@ -172,6 +166,12 @@ namespace Wheatear {
 				}
 				m_ImGuiLayer->End();
 			}
+
+			// Commit input state after every layer has had a chance to query it.
+			// This keeps edge queries stable even for actions skipped by the
+			// active gameplay mode this frame.
+			InputBindingService::EndFrame();
+			Input::EndFrame();
 
 			m_Window->OnUpdate();
 			PostUpdateLayers();

@@ -65,6 +65,7 @@ vertical_slice.tmp
 # Generated script binaries
 WheatearEditor/assets/scripts/*.dll
 WheatearEditor/assets/scripts/*.pdb
+WheatearEditor/assets/scripts/*.deps.json
 
 # Heavy optional sample assets not needed by the vertical slice
 cloc.exe
