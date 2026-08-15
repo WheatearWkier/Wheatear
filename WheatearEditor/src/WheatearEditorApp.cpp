@@ -268,6 +268,10 @@ namespace Wheatear
                     : defaultProject);
             }
 
+            // Packaging needs the editor/engine built-ins as its fallback
+            // asset root, not the project being packaged.
+            AssetPath::SetEngineRoot(AssetPath::DiscoverProjectRoot());
+
             PlayerPackageOptions options;
             options.StartupScene = ReadPackageStartupScene(args);
             options.Configuration = ReadPackageConfiguration(args);

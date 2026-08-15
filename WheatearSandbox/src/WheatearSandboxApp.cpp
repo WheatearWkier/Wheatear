@@ -372,10 +372,12 @@ static std::filesystem::path ReadProjectArgument(const Wheatear::ApplicationComm
 	for (int i = 1; i < args.Count; ++i)
 	{
 		const std::string argument = args[i];
+		const char* projectArgument = i + 1 < args.Count ? args[i + 1] : nullptr;
 		if (argument == "--project" && i + 1 < args.Count
-			&& (args[i + 1][0] != '-' || args[i + 1][1] != '-'))
+			&& projectArgument && projectArgument[0] != '\0'
+			&& projectArgument[0] != '-')
 		{
-			return std::filesystem::path(args[i + 1]);
+			return std::filesystem::path(projectArgument);
 		}
 	}
 	return {};

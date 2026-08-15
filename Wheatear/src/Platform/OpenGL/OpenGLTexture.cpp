@@ -8,6 +8,30 @@
 
 namespace Wheatear {
 
+	namespace {
+
+		class ScopedUnpackAlignment
+		{
+		public:
+			explicit ScopedUnpackAlignment(GLint alignment)
+			{
+				glGetIntegerv(GL_UNPACK_ALIGNMENT, &m_Previous);
+				if (m_Previous != alignment)
+					glPixelStorei(GL_UNPACK_ALIGNMENT, alignment);
+			}
+
+			~ScopedUnpackAlignment()
+			{
+				if (m_Previous != 1)
+					glPixelStorei(GL_UNPACK_ALIGNMENT, m_Previous);
+			}
+
+		private:
+			GLint m_Previous = 4;
+		};
+
+	}
+
 	OpenGLTexture2D::OpenGLTexture2D(uint32_t width, uint32_t height)
 		: m_Width(width), m_Height(height)
 	{
@@ -56,6 +80,7 @@ namespace Wheatear {
 			glTextureParameteri(m_RendererID, GL_TEXTURE_WRAP_T, GL_REPEAT);
 
 			const uint32_t fallbackPixel = 0xffff00ff;
+			ScopedUnpackAlignment unpackAlignment(1);
 			glTextureSubImage2D(m_RendererID, 0, 0, 0, m_Width, m_Height,
 				m_DataFormat, GL_UNSIGNED_BYTE, &fallbackPixel);
 			m_IsLoaded = false;
@@ -87,6 +112,7 @@ namespace Wheatear {
 		glTextureParameteri(m_RendererID, GL_TEXTURE_WRAP_S, GL_REPEAT);
 		glTextureParameteri(m_RendererID, GL_TEXTURE_WRAP_T, GL_REPEAT);
 
+		ScopedUnpackAlignment unpackAlignment(1);
 		glTextureSubImage2D(m_RendererID, 0, 0, 0, m_Width, m_Height, dataFormat, GL_UNSIGNED_BYTE, data);
 
 		stbi_image_free(data);
@@ -108,6 +134,7 @@ namespace Wheatear {
 		const uint32_t bpp = (m_DataFormat == GL_RGBA ? 4 : 3);
 		const uint32_t expectedSize = m_Width * m_Height * bpp;
 		WT_CORE_ASSERT(size == expectedSize, "Data must be entire texture!");
+		ScopedUnpackAlignment unpackAlignment(1);
 		glTextureSubImage2D(m_RendererID, 0, 0, 0, m_Width, m_Height, m_DataFormat, GL_UNSIGNED_BYTE, data);
 	}
 
@@ -117,6 +144,7 @@ namespace Wheatear {
 
 		if (width == 0 || height == 0 || !data)
 			return;
+		ScopedUnpackAlignment unpackAlignment(1);
 		glTextureSubImage2D(m_RendererID, 0,
 			static_cast<GLint>(x), static_cast<GLint>(y),
 			static_cast<GLsizei>(width), static_cast<GLsizei>(height),

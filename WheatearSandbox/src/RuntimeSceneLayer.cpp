@@ -1,4 +1,4 @@
-﻿#include "RuntimeSceneLayer.h"
+#include "RuntimeSceneLayer.h"
 
 #include "Wheatear/Core/Application.h"
 #include "Wheatear/Assets/AssetPath.h"
@@ -21,6 +21,7 @@
 
 #include <algorithm>
 #include <vector>
+
 
 namespace {
 
@@ -48,6 +49,15 @@ void RuntimeSceneLayer::OnAttach()
     for (int i = 1; i < args.Count; ++i)
     {
         const std::string argument = args[i];
+        if (argument == "--project")
+        {
+            // The project path belongs to the application bootstrapper, not
+            // to the scene selector below.
+            if (i + 1 < args.Count)
+                ++i;
+            continue;
+        }
+
         if (!argument.empty() && argument.front() == '-')
             continue;
 

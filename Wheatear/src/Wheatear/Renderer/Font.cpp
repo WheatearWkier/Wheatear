@@ -308,8 +308,23 @@ namespace Wheatear {
             const uint32_t y1 = std::min(m_AtlasHeight, m_DirtyMaxY + 1u);
             if (x1 > x0 && y1 > y0)
             {
-                m_AtlasTexture->SetSubData(x0, y0, x1 - x0, y1 - y0,
-                    &m_AtlasPixels[static_cast<size_t>(y0) * m_AtlasWidth + x0]);
+                const uint32_t regionWidth = x1 - x0;
+                const uint32_t regionHeight = y1 - y0;
+                std::vector<uint32_t> region(
+                    static_cast<size_t>(regionWidth) * regionHeight);
+
+                // m_AtlasPixels is a full-atlas buffer, but texture uploads
+                // require tightly packed rows for the requested sub-region.
+                for (uint32_t row = 0; row < regionHeight; ++row)
+                {
+                    const uint32_t* source =
+                        &m_AtlasPixels[static_cast<size_t>(y0 + row) * m_AtlasWidth + x0];
+                    uint32_t* destination =
+                        &region[static_cast<size_t>(row) * regionWidth];
+                    std::copy_n(source, regionWidth, destination);
+                }
+
+                m_AtlasTexture->SetSubData(x0, y0, regionWidth, regionHeight, region.data());
             }
         }
 
