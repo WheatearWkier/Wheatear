@@ -20,6 +20,7 @@ namespace Wheatear {
         void OnRuntimeStart(Scene* scene) override;
         void OnRuntimeStop(Scene* scene) override;
         void OnUpdateRuntime(Scene* scene, Timestep ts) override;
+        bool HandleGameSaveCommand(Scene* scene, const std::string& command);
 
     private:
         struct RuntimeState
@@ -58,6 +59,10 @@ namespace Wheatear {
         bool LoadRuntime(RuntimeState& state, const VisualNovelComponent& component);
         void UpdateInput(Scene* scene, VisualNovelComponent& component, RuntimeState& state);
         bool ExecuteCommand(Scene* scene, VisualNovelComponent& component, RuntimeState& state, const std::string& command);
+        bool ExecuteGameSaveCommand(Scene* scene, VisualNovelComponent& component, RuntimeState& state, const std::string& command);
+        void PushSystemMessage(RuntimeState& state, const std::string& message);
+        void SaveToSlot(Scene* scene, VisualNovelComponent& component, RuntimeState& state, int slot, bool allowOverwrite);
+        void LoadFromSlot(Scene* scene, VisualNovelComponent& component, RuntimeState& state, int slot);
         void UpdateSceneBindings(Scene* scene, const VisualNovelComponent& component, RuntimeState& state);
         void StopSkip(RuntimeState& state);
         void UpdateSkip(RuntimeState& state, float deltaSeconds);

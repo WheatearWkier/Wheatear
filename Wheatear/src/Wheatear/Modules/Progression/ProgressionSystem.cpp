@@ -8,7 +8,7 @@
 #include "ProgressionSkillTreePageService.h"
 #include "ProgressionSettingsPageService.h"
 #include "Wheatear/Assets/AssetAliasRegistry.h"
-#include "Wheatear/Modules/VisualNovel/VisualNovelComponents.h"
+#include "Wheatear/Modules/VisualNovel/VisualNovelSystem.h"
 #include "Wheatear/Runtime/CommandBus.h"
 #include "Wheatear/Runtime/SceneTransitionService.h"
 #include "Wheatear/Scene/Entity.h"
@@ -41,11 +41,6 @@ namespace Wheatear {
         static bool HasEntity(Scene* scene, const std::string& name)
         {
             return static_cast<bool>(FindEntityByName(scene, name));
-        }
-
-        static bool HasVisualNovelComponent(Scene* scene)
-        {
-            return scene && !scene->GetRegistry().view<VisualNovelComponent>().empty();
         }
 
         static bool IsSaveLoadScenePath(const std::string& scenePath)
@@ -101,9 +96,10 @@ namespace Wheatear {
 
         static void UpdateGameSaveCommands(Scene* scene)
         {
-            if (!scene || HasVisualNovelComponent(scene))
+            if (!scene)
                 return;
 
+            VisualNovelSystem* visualNovelSystem = scene->GetSystem<VisualNovelSystem>();
             for (const std::string& command : CommandBus::DrainGameplayCommands("gamesave:"))
             {
                 const std::string action = ToLower(command.substr(9));
@@ -147,6 +143,9 @@ namespace Wheatear {
                     GameProgress::GetState().LastResultMessage = "已取消覆盖。";
                     continue;
                 }
+
+                if (visualNovelSystem && visualNovelSystem->HandleGameSaveCommand(scene, command))
+                    continue;
 
                 if (const auto slot = ParseTrailingSlot(action, "slot_save_"))
                 {
