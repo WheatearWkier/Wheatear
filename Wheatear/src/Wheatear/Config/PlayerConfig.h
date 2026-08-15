@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 #include "Wheatear/Core/Core.h"
 #include "Wheatear/Core/EngineInfo.h"
@@ -10,7 +10,6 @@ namespace Wheatear {
     struct RuntimePlayerConfig
     {
         std::filesystem::path StartupScene = EngineInfo::DefaultStartupScene;
-        bool EnableScripts = false;
     };
 
     WHEATEAR_API std::filesystem::path FindRuntimePlayerConfigPath(const std::filesystem::path& start = {});

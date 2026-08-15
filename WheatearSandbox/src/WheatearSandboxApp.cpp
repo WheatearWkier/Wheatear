@@ -1,4 +1,4 @@
-#include <Wheatear.h>
+﻿#include <Wheatear.h>
 #include <Wheatear/Core/EntryPoint.h>
 
 #include "RuntimeSceneLayer.h"
@@ -353,26 +353,6 @@ namespace {
 
 } // namespace
 
-static bool ShouldEnableScripting(const Wheatear::ApplicationCommandLineArgs& args)
-{
-#if !defined(WT_ENABLE_CSHARP_SCRIPTING)
-    (void)args;
-    // Legacy Mono/C# scripting stays dormant in the default build.
-    return false;
-#else
-	for (int i = 1; i < args.Count; ++i)
-	{
-		const std::string argument = args[i];
-		if (argument == "--no-scripts" || argument == "--disable-scripts")
-			return false;
-		if (argument == "--scripts" || argument == "--enable-scripts")
-			return true;
-	}
-
-	return Wheatear::LoadRuntimePlayerConfig().EnableScripts;
-#endif
-}
-
 static std::filesystem::path ReadProjectArgument(const Wheatear::ApplicationCommandLineArgs& args)
 {
 	for (int i = 1; i < args.Count; ++i)
@@ -406,7 +386,6 @@ static Wheatear::ApplicationSpecification CreateWheatearSandboxSpecification(
 	Wheatear::ApplicationSpecification specification;
 	specification.Name = "Wheatear Sandbox";
 	specification.CommandLineArgs = args;
-	specification.EnableScripting = ShouldEnableScripting(args);
 
 	// --project <dir> runs any project's loose assets straight from the
 	// engine repository (developer mode); otherwise the packaged wtpack

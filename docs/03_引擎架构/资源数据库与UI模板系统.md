@@ -9,8 +9,11 @@
 Wheatear 采用中央资源数据库作为唯一真相源：
 
 ```text
-WheatearEditor/assets/.wheatear/asset_registry.yaml
+<项目根>/assets/.wheatear/asset_registry.yaml
 ```
+
+（默认项目即 `Projects/WheatearDemo/assets/.wheatear/asset_registry.yaml`。
+注意它不是引擎目录 `WheatearEditor/assets` 下的文件。）
 
 它记录：
 
@@ -84,11 +87,9 @@ UI 模板由两层组成：
 - `.wtuit`：编辑器可见的模板描述资产。
 - `UITemplateFactory`：真正创建实体、组件和父子关系的工厂。
 
-内置模板位于：
-
-```text
-WheatearEditor/assets/ui_templates
-```
+内置模板由 `UITemplateFactory` 在刷新/打包时写入**项目根**的
+`assets/ui_templates`（默认项目即 `Projects/WheatearDemo/assets/ui_templates`，
+`WheatearEditor/assets` 本身只放引擎内置的 shader/字体/action 数据）。
 
 当前模板包括：
 

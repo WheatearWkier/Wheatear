@@ -1,4 +1,4 @@
-* text=auto
+﻿* text=auto
 
 # Keep Windows project files friendly to Visual Studio.
 *.sln text eol=crlf
@@ -17,7 +17,6 @@
 *.hh text eol=lf
 *.hpp text eol=lf
 *.hxx text eol=lf
-*.cs text eol=lf
 *.lua text eol=lf
 *.py text eol=lf
 *.md text eol=lf

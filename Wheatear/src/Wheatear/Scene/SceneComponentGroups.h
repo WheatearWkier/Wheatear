@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 #include "ComponentGroup.h"
 #include "Components.h"
@@ -27,7 +27,6 @@ namespace Wheatear {
 
     using ScriptingCopyableSceneComponents = ComponentGroup
     <
-        ScriptComponent,
         EventScriptComponent,
         AudioSourceComponent
     >;

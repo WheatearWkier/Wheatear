@@ -1,14 +1,22 @@
 #pragma once
 
-// Native event-script component (.wts). The former C#/Mono ScriptComponent
-// was removed from the engine; EventScriptComponent is the active runtime
-// scripting path.
+// Legacy C#/Mono and native event-script components. C#/Mono is hidden in the
+// default build; EventScriptComponent remains the active runtime scripting path.
 
 #include <string>
 
 namespace Wheatear {
 
-    // Wheatear event script (.wts). This is a lightweight native event sequencer.
+    struct ScriptComponent
+    {
+        std::string ClassName;
+
+        ScriptComponent() = default;
+        ScriptComponent(const ScriptComponent&) = default;
+    };
+
+    // Wheatear event script (.wts). This is a lightweight native event sequencer,
+    // separate from optional C#/Mono scripting.
     struct EventScriptComponent
     {
         std::string ScriptPath = "";

@@ -678,12 +678,6 @@
     <ClInclude Include="src\Wheatear\Scripting\EventScriptSystem.h">
       <Filter>src\Wheatear\Scripting</Filter>
     </ClInclude>
-    <ClInclude Include="src\Wheatear\Scripting\ScriptEngine.h">
-      <Filter>src\Wheatear\Scripting</Filter>
-    </ClInclude>
-    <ClInclude Include="src\Wheatear\Scripting\ScriptGlue.h">
-      <Filter>src\Wheatear\Scripting</Filter>
-    </ClInclude>
     <ClInclude Include="src\Wheatear\Systems\AnimationSystem.h">
       <Filter>src\Wheatear\Systems</Filter>
     </ClInclude>
@@ -697,9 +691,6 @@
       <Filter>src\Wheatear\Systems</Filter>
     </ClInclude>
     <ClInclude Include="src\Wheatear\Systems\RenderSystem.h">
-      <Filter>src\Wheatear\Systems</Filter>
-    </ClInclude>
-    <ClInclude Include="src\Wheatear\Systems\ScriptSystem.h">
       <Filter>src\Wheatear\Systems</Filter>
     </ClInclude>
     <ClInclude Include="src\Wheatear\Systems\SpriteSheetSystem.h">
@@ -2273,12 +2264,6 @@
     <ClCompile Include="src\Wheatear\Scripting\EventScriptSystem.cpp">
       <Filter>src\Wheatear\Scripting</Filter>
     </ClCompile>
-    <ClCompile Include="src\Wheatear\Scripting\ScriptEngine.cpp">
-      <Filter>src\Wheatear\Scripting</Filter>
-    </ClCompile>
-    <ClCompile Include="src\Wheatear\Scripting\ScriptGlue.cpp">
-      <Filter>src\Wheatear\Scripting</Filter>
-    </ClCompile>
     <ClCompile Include="src\Wheatear\Systems\AnimationSystem.cpp">
       <Filter>src\Wheatear\Systems</Filter>
     </ClCompile>
@@ -2289,9 +2274,6 @@
       <Filter>src\Wheatear\Systems</Filter>
     </ClCompile>
     <ClCompile Include="src\Wheatear\Systems\RenderSystem.cpp">
-      <Filter>src\Wheatear\Systems</Filter>
-    </ClCompile>
-    <ClCompile Include="src\Wheatear\Systems\ScriptSystem.cpp">
       <Filter>src\Wheatear\Systems</Filter>
     </ClCompile>
     <ClCompile Include="src\Wheatear\Systems\SpriteSheetSystem.cpp">

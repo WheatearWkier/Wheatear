@@ -4,7 +4,6 @@
 #include "Wheatear/Scene/Entity.h"
 #include "Wheatear/Scene/Components.h"
 #include "Wheatear/Animation/AnimationClip.h"
-#include "Wheatear/Scripting/ScriptEngine.h"
 
 #include <yaml-cpp/yaml.h>
 #include <algorithm>

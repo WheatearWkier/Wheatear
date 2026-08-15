@@ -10,19 +10,36 @@
 不是硬编码：
 
 ```yaml
-# 角色动画 clip（Part 6 的运行时生成帧就来自这里）
-protagonist:
-  idle: { atlas: { sheet: ".../protag_idle_sheet.png", cellWidth: 512,
-                   cellHeight: 512, columns: 8, startFrame: 0 },
-          frameCount: 8, frameRate: 8.0, loop: true }
-  basic1: { atlas: { sheet: ".../protag_basic1_sheet.png", cellWidth: 512,
-                     cellHeight: 512, columns: 4, startFrame: 0 },
-            frameCount: 4, frameRate: 14.0, loop: false }
+# 玩家手感（移动/跳跃/连段窗口）
+player:
+  moveSpeed: 5.55
+  maxJumps: 1
+  jumpImpulse: 8.8
+  gravity: 23.0
+  basicChainWindow: 0.76
+  launcherChainWindow: 0.86
   # ...
-# 数值与手感
-combatantDefaults: { maxHealth: 420, moveSpeed: 5.4, gravity: 20, ... }
-# 敌人 AI 参数
-enemyClaw: { idleRange: 4.0, attackRange: 1.8, chaseSpeed: 3.2, ... }
+combat:                    # 通用战斗规则
+  comboDropDelay: 1.20
+  hitInvulnerableTime: 0.035
+  defenseBase: 100.0
+# 敌人 AI（Boss 是 bearBoss 节点）
+enemy:
+  bearBoss: { moveSpeed: 3.75, aggroRange: 14.0, attackRange: 1.72,
+              attackInterval: 0.82, chargeDistance: 2.15, ... }
+# 角色动画 clip（Part 6 的运行时生成帧就来自这里）
+visuals:
+  playerAnimations:
+    idle: { atlas: { sheet: ".../protag_idle_sheet.png", cellWidth: 512,
+                     cellHeight: 512, columns: 8, startFrame: 0 },
+            frameCount: 8, frameRate: 8.0, loop: true }
+    basic1: { atlas: { sheet: ".../protag_basic1_sheet.png", cellWidth: 512,
+                       cellHeight: 512, columns: 4, startFrame: 0 },
+              frameCount: 4, frameRate: 14.0, loop: false }
+    # ...
+skills:                    # 技能显示/输入/招式绑定/解锁章节
+  basic_attack: { displayName: "三段斩", input: "J",
+                  attackIds: [basic1, basic2, basic3], unlockChapter: 2 }
 ```
 
 `SideCombatTuningService` 加载这些表（500ms 热重载，Part 4 降频表），
@@ -36,16 +53,22 @@ enemyClaw: { idleRange: 4.0, attackRange: 1.8, chaseSpeed: 3.2, ... }
 
 | 服务 | 职责 |
 | --- | --- |
-| `SideCombatLifecycleService` | 战斗开始/结束、实体重置 |
-| `SideCombatPlayerService` | 玩家移动/跳跃/输入解析 |
-| `SideCombatActionService` | 动作请求（连招/冷却/消耗） |
-| `SideCombatComboService` | 连招窗口与链式 |
-| `SideCombatEnemyAIService` | 敌人行为状态机 |
-| `SideCombatHitboxService` | 攻击判定盒生成 |
-| `SideCombatHitResolutionService` | 命中结算（伤害/击退/无敌帧） |
-| `SideCombatVisualService` | 动画/特效/音效播放 |
-| `SideCombatFeedbackService` | 镜头反馈/受击闪白/hit pause |
-| `SideCombatHudService` | HUD 状态同步（血条/技能图标） |
+| `SideCombatLifecycleService` | 战斗开始/结束、实体重置、玩家属性与 Boss 参数应用 |
+| `SideCombatPlayerService` | 玩家移动/跳跃/输入解析/技能起手/空中动作 |
+| `SideCombatActionService` | 动作请求（读 WAO recipe：时长/命中帧/取消窗/音效） |
+| `SideCombatComboService` | 连击窗口与链式、空中命中奖励、魔剑槽增长 |
+| `SideCombatEnemyAIService` | 敌人行为状态机（接近/走位/Boss 阶段） |
+| `SideCombatHitboxService` | 攻击判定盒生成/帧贴图/空间重叠检测 |
+| `SideCombatHitResolutionService` | 命中结算（伤害/击退/无敌帧/保护条） |
+| `SideCombatPhysicsService` | 横板纵深移动/空中高度/重力/落地 |
+| `SideCombatPickupService` | 掉落物创建/吸附/拾取入库 |
+| `SideCombatOutcomeService` | 死亡处理/胜利判定/结算与场景流转 |
+| `SideCombatVisualService` | 动画/特效/音效播放、受击颜色反馈 |
+| `SideCombatFeedbackService` | 镜头反馈/受击闪白/hit pause/震屏 |
+| `SideCombatHudService` | HUD 状态同步（血条/技能图标/连击/奖励文字） |
+| `SideCombatTargetService` | 玩法内目标选择（最近存活敌人） |
+| `SideCombatTuningService` | 调参 YAML 加载/默认值/500ms 热重载/章节 profile |
+| `SideCombatResultService` | 结算评级/经验/结果摘要 |
 
 **为什么拆服务**：系统保持"每帧调度"的薄壳，每个服务是
 可独立测试/独立调参的纯逻辑单元。这也是"引擎 vs 玩法"的
@@ -167,7 +190,7 @@ Part 7（动作层/注入）、Part 8（判定与物理）。
 ## 10.8 当前状态
 
 - ✅ 数据表驱动（tuning YAML，500ms 热重载）
-- ✅ 系统薄 + 服务厚（14 个服务）
+- ✅ 系统薄 + 服务厚（16 个服务）
 - ✅ 输入统一（键盘/HUD 按钮/AI → 同一动作入口）
 - ✅ WAO 动作编排（Intent/Recipe/Resolver/Effect/Ledger/Signal）
 - ✅ AI 状态机、VFX 信号路由、HUD 数据驱动

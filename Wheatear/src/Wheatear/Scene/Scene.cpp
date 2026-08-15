@@ -1,4 +1,4 @@
-#include "wtpch.h"
+﻿#include "wtpch.h"
 #include "Scene.h"
 #include "Components.h"
 #include "ComponentLifecycleRegistry.h"
@@ -9,7 +9,6 @@
 
 #include "Wheatear/Scene/SceneSystemRegistry.h"
 #include "Wheatear/Systems/PhysicsSystem.h"
-#include "Wheatear/Systems/ScriptSystem.h"
 #include "Wheatear/Systems/AnimationSystem.h"
 #include "Wheatear/Systems/SpriteSheetSystem.h"
 #include "Wheatear/Systems/AudioSystem.h"
@@ -132,7 +131,6 @@ namespace Wheatear {
     void Scene::ConfigureRuntimeSystems()
     {
         RegisterSystem<PhysicsSystem>();
-        RegisterSystem<ScriptSystem>();
         RegisterSystem<AnimationSystem>();
         RegisterSystem<SpriteSheetSystem>();
         RegisterSystem<AudioSystem>();

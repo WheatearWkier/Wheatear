@@ -642,7 +642,7 @@ WAO 统一：
 WAO 应当有独立编辑器面板：
 
 ```text
-Window / Gameplay / WAO Action Editor
+View -> WAO Action Editor
 ```
 
 面板结构：
@@ -906,10 +906,9 @@ ActionResolver     由玩法模块把 recipe 转成真实规则
 
 推荐新增玩法时按这个顺序接入：
 
-1. 在玩法模块里建立 `*ActionCatalog`，把内置技能或武器映射成 `WAO::ActionRecipe`。
-2. 把可配置的显示名、图标、音效、VFX、标签、效果预览、资源消耗写入 `assets/gameplay/actions/*.yaml`。
-3. 如果该玩法需要把 recipe 转成运行时对象，例如投射物、格子技能、浮空 hitbox，就建立 `*ActionResolver` 并注册 action id 前缀。
-4. 如果该玩法的真实结算已经由专属 `ActionService` 掌握，也可以先只把结果写入 `EffectLedger`，不要为了统一而破坏玩法规则。
+1. 在 `assets/gameplay/actions/*.yaml` 里登记该玩法的动作配方（id、显示名、图标、音效、VFX、标签、效果预览、资源消耗）。
+2. 需要把 recipe 转成运行时对象的玩法（投射物、格子技能、浮空 hitbox），建立 `*ActionResolver` 并注册 action id 前缀。
+3. 如果该玩法的真实结算已经由专属 `ActionService` 掌握，也可以先只把结果写入 `EffectLedger`，不要为了统一而破坏玩法规则。
 
 #### YAML Action 格式
 
@@ -989,7 +988,7 @@ WAO（Wheatear Action Orchestration）目前作为 Wheatear 的统一动作语�
 
 #### 弹幕假玩法
 
-弹幕玩法已新增 `ArcadeCombatActionCatalog`。
+弹幕玩法通过 `00_arcade_actions.yaml` 资产提供 WAO 配方。
 
 已纳入 WAO 的动作：
 
@@ -1005,7 +1004,7 @@ Boss 发弹也拥有 WAO recipe，伤害从 recipe 读取；AI 发弹节奏仍�
 
 #### 横板格斗
 
-横板格斗已新增 `SideCombatActionCatalog`。
+横板格斗的 WAO 配方由 `10_side_combat_actions.yaml` 资产提供。
 
 已纳入 WAO 的动作：
 

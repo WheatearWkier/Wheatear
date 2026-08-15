@@ -189,13 +189,13 @@
     <ClInclude Include="src\Panels\SceneHierarchy\Drawers\CircleRendererDrawer.h">
       <Filter>Panels\SceneHierarchy\Drawers</Filter>
     </ClInclude>
+    <ClInclude Include="src\Panels\SceneHierarchy\Drawers\EventScriptDrawer.h">
+      <Filter>Panels\SceneHierarchy\Drawers</Filter>
+    </ClInclude>
     <ClInclude Include="src\Panels\SceneHierarchy\Drawers\Mesh3DDrawers.h">
       <Filter>Panels\SceneHierarchy\Drawers</Filter>
     </ClInclude>
     <ClInclude Include="src\Panels\SceneHierarchy\Drawers\PhysicsDrawers.h">
-      <Filter>Panels\SceneHierarchy\Drawers</Filter>
-    </ClInclude>
-    <ClInclude Include="src\Panels\SceneHierarchy\Drawers\ScriptDrawer.h">
       <Filter>Panels\SceneHierarchy\Drawers</Filter>
     </ClInclude>
     <ClInclude Include="src\Panels\SceneHierarchy\Drawers\SpriteAnimatorDrawer.h">
@@ -369,13 +369,13 @@
     <ClCompile Include="src\Panels\SceneHierarchy\Drawers\CircleRendererDrawer.cpp">
       <Filter>Panels\SceneHierarchy\Drawers</Filter>
     </ClCompile>
+    <ClCompile Include="src\Panels\SceneHierarchy\Drawers\EventScriptDrawer.cpp">
+      <Filter>Panels\SceneHierarchy\Drawers</Filter>
+    </ClCompile>
     <ClCompile Include="src\Panels\SceneHierarchy\Drawers\Mesh3DDrawers.cpp">
       <Filter>Panels\SceneHierarchy\Drawers</Filter>
     </ClCompile>
     <ClCompile Include="src\Panels\SceneHierarchy\Drawers\PhysicsDrawers.cpp">
-      <Filter>Panels\SceneHierarchy\Drawers</Filter>
-    </ClCompile>
-    <ClCompile Include="src\Panels\SceneHierarchy\Drawers\ScriptDrawer.cpp">
       <Filter>Panels\SceneHierarchy\Drawers</Filter>
     </ClCompile>
     <ClCompile Include="src\Panels\SceneHierarchy\Drawers\SpriteAnimatorDrawer.cpp">

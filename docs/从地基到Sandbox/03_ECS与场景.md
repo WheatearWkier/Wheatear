@@ -1,4 +1,4 @@
-# Part 3 · ECS 与场景：实体、组件、序列化与双系统集
+﻿# Part 3 · ECS 与场景：实体、组件、序列化与双系统集
 
 > 目标：理解实体组件系统（ECS）的组织方式、YAML 场景序列化机制，
 > 以及"编辑器与运行时共用一份场景数据、两套系统行为"的核心设计。
@@ -202,26 +202,39 @@ class ISystem
 ```cpp
 void Scene::ConfigureRuntimeSystems()
 {
+    RegisterSystem<PhysicsSystem>();     // 物理（Box2D 会话）
     RegisterSystem<AnimationSystem>();
     RegisterSystem<SpriteSheetSystem>();
-    RegisterSystem<PhysicsSystem>();
-    RegisterSystem<VisualNovelSystem>();
-    RegisterSystem<SideCombatSystem>();
-    // ...
+    RegisterSystem<AudioSystem>();
+    RegisterSystem<UISystem>();
+    // ...SceneSystemRegistry 外部注册的系统插在这里...
+    RegisterSystem<RenderSystem>();      // 最后：渲染
 }
 
 void Scene::ConfigureEditorSystems()
 {
-    RegisterSystem<AnimationSystem>();     // 编辑态也有它
+    RegisterSystem<AnimationSystem>();     // 编辑态也有它（预览帧）
     RegisterSystem<SpriteSheetSystem>();
+    RegisterSystem<UISystem>();
+    RegisterSystem<RenderSystem>();
     // 没有 PhysicsSystem（Box2D 世界只在运行时创建）
     // 没有玩法系统（VN/战斗不在编辑器里跑）
 }
 ```
 
-`Scene::OnUpdateRuntime` 遍历 `m_Systems` 调 `OnUpdateRuntime`；
-`OnUpdateEditor` 同理。`SceneExecutionMode`（Edit/Runtime）由
-`Scene::StartSystems` 记录，`SceneState` 切换时调 `OnEditorStop/OnRuntimeStart`。
+注意：**玩法系统（VisualNovel / SideCombat / TurnCombat / TacticalCombat /
+ArcadeCombat / Progression / EventScript）不是硬编码在 `Scene.cpp` 里的**，
+而是由 `ModuleBootstrap::RegisterDefaultGameplayModules()` 通过
+`SceneSystemRegistry` 在外部注册（插在 AudioSystem/UISystem 之后、
+RenderSystem 之前）。这样引擎核心不依赖具体玩法，新玩法模块只需要
+注册自己，Scene 本身零改动（详见 Part 11）。
+
+`Scene::OnUpdateRuntime` 遍历 `m_Systems` 调 `OnUpdateRuntime`（物理步进被
+推迟到 SpriteSheetSystem 之后，保证动画驱动碰撞先写组件再步进）；
+`OnUpdateEditor` 同理。`SceneExecutionMode`（None/Edit/Runtime）由
+`Scene::StartSystems` 记录；宿主切换模式时调用 `OnRuntimeStart /
+OnRuntimeStop`（内部会 StopSystems → 重新 Configure → StartSystems），
+`OnEditorStart/OnEditorStop` 同理——两套系统集互不残留。
 
 **同一个系统可以同时出现在两套系统集里，行为自己区分**——看
 `AnimationSystem` 是怎么做的（Part 6 详讲）：

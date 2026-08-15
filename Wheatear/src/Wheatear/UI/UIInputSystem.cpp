@@ -3,7 +3,6 @@
 #include "Wheatear/Scene/Components.h"
 #include "Wheatear/Modules/Progression/GameProgress.h"
 #include "Wheatear/Runtime/CommandBus.h"
-#include "Wheatear/Scripting/ScriptEngine.h"
 #include "Wheatear/UI/UIWidgetLayout.h"
 #include "Wheatear/Utils/StringUtils.h"
 
@@ -283,16 +282,13 @@ namespace Wheatear {
 
     static void FireScriptCallback(Scene* scene, entt::entity e, const std::string& function)
     {
+        // C#/Mono scripting was removed from the engine; UI callbacks are
+        // native CommandBus commands only. Buttons already try CommandBus in
+        // FireOnClick, so non-command callback names here are ignored.
+        (void)scene;
+        (void)e;
         if (function.empty()) return;
         if (IsNativeButtonCommand(function)) return;
-        if (!ScriptEngine::IsInitialized()) return;
-
-        std::string methodName = function;
-        if (StartsWith(methodName, "script:"))
-            methodName = methodName.substr(7);
-        if (methodName.empty()) return;
-
-        ScriptEngine::InvokeMethod(Entity{ e, scene }, methodName);
     }
 
     bool UIInputSystem::HitTest(const UIWidgetComponent& widget,

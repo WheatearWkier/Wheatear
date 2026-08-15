@@ -1,4 +1,4 @@
-# IDE / local metadata
+﻿# IDE / local metadata
 .vs/
 .idea/
 .agents/
@@ -26,11 +26,6 @@ x64/
 Debug/
 Release/
 Dist/
-!Wheatear/vendor/mono/lib/
-!Wheatear/vendor/mono/lib/Debug/
-!Wheatear/vendor/mono/lib/Debug/*.lib
-!Wheatear/vendor/mono/lib/Release/
-!Wheatear/vendor/mono/lib/Release/*.lib
 *.log
 *.ilk
 *.idb

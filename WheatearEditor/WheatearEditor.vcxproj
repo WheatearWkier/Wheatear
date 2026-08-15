@@ -201,9 +201,9 @@
     <ClInclude Include="src\Panels\SceneHierarchy\Drawers\AudioDrawer.h" />
     <ClInclude Include="src\Panels\SceneHierarchy\Drawers\CameraDrawer.h" />
     <ClInclude Include="src\Panels\SceneHierarchy\Drawers\CircleRendererDrawer.h" />
+    <ClInclude Include="src\Panels\SceneHierarchy\Drawers\EventScriptDrawer.h" />
     <ClInclude Include="src\Panels\SceneHierarchy\Drawers\Mesh3DDrawers.h" />
     <ClInclude Include="src\Panels\SceneHierarchy\Drawers\PhysicsDrawers.h" />
-    <ClInclude Include="src\Panels\SceneHierarchy\Drawers\ScriptDrawer.h" />
     <ClInclude Include="src\Panels\SceneHierarchy\Drawers\SpriteAnimatorDrawer.h" />
     <ClInclude Include="src\Panels\SceneHierarchy\Drawers\SpriteRendererDrawer.h" />
     <ClInclude Include="src\Panels\SceneHierarchy\Drawers\TransformDrawer.h" />
@@ -263,9 +263,9 @@
     <ClCompile Include="src\Panels\SceneHierarchy\Drawers\AudioDrawer.cpp" />
     <ClCompile Include="src\Panels\SceneHierarchy\Drawers\CameraDrawer.cpp" />
     <ClCompile Include="src\Panels\SceneHierarchy\Drawers\CircleRendererDrawer.cpp" />
+    <ClCompile Include="src\Panels\SceneHierarchy\Drawers\EventScriptDrawer.cpp" />
     <ClCompile Include="src\Panels\SceneHierarchy\Drawers\Mesh3DDrawers.cpp" />
     <ClCompile Include="src\Panels\SceneHierarchy\Drawers\PhysicsDrawers.cpp" />
-    <ClCompile Include="src\Panels\SceneHierarchy\Drawers\ScriptDrawer.cpp" />
     <ClCompile Include="src\Panels\SceneHierarchy\Drawers\SpriteAnimatorDrawer.cpp" />
     <ClCompile Include="src\Panels\SceneHierarchy\Drawers\SpriteRendererDrawer.cpp" />
     <ClCompile Include="src\Panels\SceneHierarchy\Drawers\TransformDrawer.cpp" />

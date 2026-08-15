@@ -6,7 +6,6 @@
 
 #include "Wheatear/Scene/Scene.h"
 #include "Wheatear/Scene/Entity.h"
-#include "Wheatear/Scripting/ScriptEngine.h"
 
 namespace Wheatear {
 
@@ -32,31 +31,18 @@ namespace Wheatear {
         return m_Scene->GetEntityByUUID(uuid);
     }
 
+    // Box2D reports raw contact pairs here. The former C#/Mono collision
+    // callbacks were removed with the scripting runtime; gameplay rules
+    // (e.g. SideCombat hitboxes) do their own overlap detection, so these
+    // hooks are intentionally empty until a native consumer is wired up.
     void ContactListener::BeginContact(b2Contact* contact)
     {
-        Entity entityA = GetEntityFromFixture(contact->GetFixtureA());
-        Entity entityB = GetEntityFromFixture(contact->GetFixtureB());
-
-        if (!entityA || !entityB)
-        {
-            WT_CORE_WARN("Collision but entity invalid!");
-            return;
-        }
-
-        ScriptEngine::OnCollisionBegin(entityA, entityB);
-        ScriptEngine::OnCollisionBegin(entityB, entityA);
+        (void)contact;
     }
 
     void ContactListener::EndContact(b2Contact* contact)
     {
-        Entity entityA = GetEntityFromFixture(contact->GetFixtureA());
-        Entity entityB = GetEntityFromFixture(contact->GetFixtureB());
-
-        if (!entityA || !entityB)
-            return;
-
-        ScriptEngine::OnCollisionEnd(entityA, entityB);
-        ScriptEngine::OnCollisionEnd(entityB, entityA);
+        (void)contact;
     }
 
 }

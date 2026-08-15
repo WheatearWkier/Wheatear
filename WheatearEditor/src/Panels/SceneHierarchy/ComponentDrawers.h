@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 #include <imgui/imgui.h>
 #include <imgui/imgui_internal.h>
 #include <string>
@@ -105,7 +105,7 @@ namespace Wheatear {
 #include "Drawers/SpriteAnimatorDrawer.h"
 #include "Drawers/CircleRendererDrawer.h"
 #include "Drawers/PhysicsDrawers.h"
-#include "Drawers/ScriptDrawer.h"
+#include "Drawers/EventScriptDrawer.h"
 #include "Drawers/UIDrawers.h"
 #include "Drawers/AudioDrawer.h"
 #include "Drawers/Mesh3DDrawers.h"

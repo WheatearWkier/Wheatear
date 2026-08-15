@@ -9,7 +9,6 @@
 #include "Wheatear/Events/ApplicationEvent.h"
 #include "Wheatear/ImGui/ImGuiLayer.h"
 #include "Wheatear/Renderer/Renderer.h"
-#include "Wheatear/Scripting/ScriptEngine.h"
 #include "Window.h"
 #include "Log.h"
 
@@ -53,8 +52,6 @@ namespace Wheatear {
 		InstallApplicationEventHandlers();
 
 		Renderer::Init();
-		if (m_Specification.EnableScripting)
-			ScriptEngine::Init();
 		AudioEngine::Init();
 
 		m_ImGuiLayer = new ImGuiLayer();
@@ -73,8 +70,6 @@ namespace Wheatear {
 		m_EventBus.Clear();
 
 		Renderer::Shutdown();
-		if (m_Specification.EnableScripting)
-			ScriptEngine::Shutdown();
 		AudioEngine::Shutdown();
 		s_Instance = nullptr;
 	}

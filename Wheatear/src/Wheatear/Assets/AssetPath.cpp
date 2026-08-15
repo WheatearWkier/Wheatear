@@ -1,4 +1,4 @@
-#include "wtpch.h"
+﻿#include "wtpch.h"
 #include "AssetPath.h"
 
 #include "Wheatear/Assets/FileSystem.h"
@@ -205,13 +205,12 @@ namespace Wheatear {
         const std::filesystem::path projectRoot = GetProjectRoot();
         const bool startsWithAssets = FirstPartEquals(path, "assets");
         const bool startsWithResources = FirstPartEquals(path, "resources");
-        const bool startsWithMono = FirstPartEquals(path, "mono");
 
         std::vector<std::filesystem::path> candidates;
-        if (startsWithAssets || startsWithResources || startsWithMono)
+        if (startsWithAssets || startsWithResources)
             candidates.push_back(projectRoot / path);
 
-        if (!startsWithAssets && !startsWithResources && !startsWithMono)
+        if (!startsWithAssets && !startsWithResources)
             candidates.push_back(GetAssetRoot() / path);
 
         candidates.push_back(projectRoot / path);
@@ -283,8 +282,7 @@ namespace Wheatear {
         if (!path.is_absolute())
         {
             if (FirstPartEquals(path, "assets")
-                || FirstPartEquals(path, "resources")
-                || FirstPartEquals(path, "mono"))
+                || FirstPartEquals(path, "resources"))
             {
                 return path.lexically_normal();
             }

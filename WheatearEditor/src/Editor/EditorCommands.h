@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 #include <functional>
 #include <memory>
 #include <optional>
@@ -209,7 +209,6 @@ namespace Wheatear {
         Rigidbody2DComponent,
         BoxCollider2DComponent,
         CircleCollider2DComponent,
-        ScriptComponent,
         EventScriptComponent,
         UICanvasComponent,
         UIWidgetComponent,

@@ -37,7 +37,6 @@ namespace Wheatear {
 		std::filesystem::path WorkingDirectory;
 		std::filesystem::path ProjectRoot;
 		std::filesystem::path AssetDirectoryName = "assets";
-		bool EnableScripting = false;
 		ApplicationCommandLineArgs CommandLineArgs;
 	};
 
@@ -73,7 +72,6 @@ namespace Wheatear {
 
 		const ApplicationSpecification& GetSpecification() const { return m_Specification; }
 		ApplicationCommandLineArgs GetCommandLineArgs() const { return m_Specification.CommandLineArgs; }
-		bool IsScriptingEnabled() const { return m_Specification.EnableScripting; }
 
 	private:
 		bool OnWindowClose(WindowCloseEvent& e);
