@@ -987,14 +987,47 @@ namespace Wheatear::SideCombatHudService {
             const bool breakDebuff = visible && combatant &&
                 combatant->RuntimeState == SideCombatState::Broken;
 
-            EnsureSheetImage(scene, prefix + "_Buff_0", 70, BuffAttackUV(),
-                glm::vec4(1.0f), false, magicBuff);
-            EnsureSheetImage(scene, prefix + "_Buff_1", 70, BuffShieldUV(),
-                glm::vec4(1.0f), false, shieldBuff);
-            EnsureSheetImage(scene, prefix + "_Debuff_0", 70, DebuffStateUV(),
-                glm::vec4(1.0f), false, stateDebuff);
-            EnsureSheetImage(scene, prefix + "_Debuff_1", 70, DebuffBreakUV(),
-                glm::vec4(1.0f), false, breakDebuff);
+            // Queue-style rows: active icons pack tightly from the start
+            // position; inactive icons are hidden and take no space, so the
+            // row never pre-occupies slots for states that are not present.
+            struct IconSpec
+            {
+                const char* Suffix;
+                SheetUVRect UV;
+                bool Active;
+            };
+            auto placeRow = [&](const glm::vec2& start,
+                std::initializer_list<IconSpec> specs)
+            {
+                float x = start.x;
+                for (const IconSpec& spec : specs)
+                {
+                    Entity icon = EnsureSheetImage(scene, prefix + spec.Suffix,
+                        70, spec.UV, glm::vec4(1.0f), false, spec.Active);
+                    if (!icon || !icon.HasComponent<UIWidgetComponent>())
+                        continue;
+                    auto& widget = icon.GetComponent<UIWidgetComponent>();
+                    if (spec.Active)
+                    {
+                        widget.Position = { x, start.y };
+                        widget.Size = layout.Size;
+                        widget.Visible = true;
+                        x += layout.Size.x + layout.Gap;
+                    }
+                    else
+                    {
+                        widget.Visible = false;
+                    }
+                }
+            };
+            placeRow(buffStart, {
+                { "_Buff_0", BuffAttackUV(), magicBuff },
+                { "_Buff_1", BuffShieldUV(), shieldBuff }
+            });
+            placeRow(debuffStart, {
+                { "_Debuff_0", DebuffStateUV(), stateDebuff },
+                { "_Debuff_1", DebuffBreakUV(), breakDebuff }
+            });
         }
 
         // On-screen joystick drag state (module-wide so the input sampler can

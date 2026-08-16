@@ -805,16 +805,16 @@ Entities:
     JoystickBaseLayout:
       Position:
       - 0.04
-      - 0.75
+      - 0.692
       Size:
-      - 0.12
-      - 0.21
+      - 0.147
+      - 0.258
     JoystickThumbSize:
-    - 0.05
-    - 0.088
+    - 0.061
+    - 0.108
     JoystickThumbTravel:
-    - 0.033
-    - 0.058
+    - 0.04
+    - 0.071
     PlayerStatusLayout:
       BuffStart:
       - 0.388
@@ -4905,8 +4905,8 @@ Entities:
     Visible: true
     EditorVisible: true
     Position:
-    - 0.0439999998
-    - 0.66900003
+    - 0.044
+    - 0.607
     Size:
     - 0.0399999991
     - 0.0780000016
@@ -4949,8 +4949,8 @@ Entities:
     Visible: true
     EditorVisible: true
     Position:
-    - 0.0379999988
-    - 0.662
+    - 0.038
+    - 0.6
     Size:
     - 0.0520000011
     - 0.0920000002
@@ -4996,8 +4996,8 @@ Entities:
     Visible: false
     EditorVisible: true
     Position:
-    - 0.0439999998
-    - 0.66900003
+    - 0.044
+    - 0.607
     Size:
     - 0.0399999991
     - 0.0780000016
@@ -5050,8 +5050,8 @@ Entities:
     Visible: false
     EditorVisible: true
     Position:
-    - 0.0469999984
-    - 0.694999993
+    - 0.047
+    - 0.655
     Size:
     - 0.0340000018
     - 0.0199999996
@@ -5110,8 +5110,8 @@ Entities:
     Visible: true
     EditorVisible: true
     Position:
-    - 0.0430000015
-    - 0.666000009
+    - 0.066
+    - 0.667
     Size:
     - 0.0179999992
     - 0.0179999992
@@ -5230,8 +5230,8 @@ Entities:
     Visible: true
     EditorVisible: true
     Position:
-    - 0.101999998
-    - 0.66900003
+    - 0.102
+    - 0.607
     Size:
     - 0.0399999991
     - 0.0780000016
@@ -5274,8 +5274,8 @@ Entities:
     Visible: true
     EditorVisible: true
     Position:
-    - 0.0960000008
-    - 0.662
+    - 0.096
+    - 0.6
     Size:
     - 0.0520000011
     - 0.0920000002
@@ -5321,8 +5321,8 @@ Entities:
     Visible: false
     EditorVisible: true
     Position:
-    - 0.101999998
-    - 0.66900003
+    - 0.102
+    - 0.607
     Size:
     - 0.0399999991
     - 0.0780000016
@@ -5375,8 +5375,8 @@ Entities:
     Visible: false
     EditorVisible: true
     Position:
-    - 0.104999997
-    - 0.694999993
+    - 0.105
+    - 0.655
     Size:
     - 0.0340000018
     - 0.0199999996
@@ -5435,8 +5435,8 @@ Entities:
     Visible: true
     EditorVisible: true
     Position:
-    - 0.101000004
-    - 0.666000009
+    - 0.124
+    - 0.667
     Size:
     - 0.0179999992
     - 0.0179999992
@@ -5555,8 +5555,8 @@ Entities:
     Visible: true
     EditorVisible: true
     Position:
-    - 0.159999996
-    - 0.66900003
+    - 0.16
+    - 0.607
     Size:
     - 0.0399999991
     - 0.0780000016
@@ -5599,8 +5599,8 @@ Entities:
     Visible: true
     EditorVisible: true
     Position:
-    - 0.153999999
-    - 0.662
+    - 0.154
+    - 0.6
     Size:
     - 0.0520000011
     - 0.0920000002
@@ -5646,8 +5646,8 @@ Entities:
     Visible: false
     EditorVisible: true
     Position:
-    - 0.159999996
-    - 0.66900003
+    - 0.16
+    - 0.607
     Size:
     - 0.0399999991
     - 0.0780000016
@@ -5700,8 +5700,8 @@ Entities:
     Visible: false
     EditorVisible: true
     Position:
-    - 0.163000003
-    - 0.694999993
+    - 0.163
+    - 0.655
     Size:
     - 0.0340000018
     - 0.0199999996
@@ -5760,8 +5760,8 @@ Entities:
     Visible: true
     EditorVisible: true
     Position:
-    - 0.158999994
-    - 0.666000009
+    - 0.182
+    - 0.667
     Size:
     - 0.0179999992
     - 0.0179999992
@@ -5821,10 +5821,10 @@ Entities:
     EditorVisible: true
     Position:
     - 0.04
-    - 0.75
+    - 0.692
     Size:
-    - 0.12
-    - 0.21
+    - 0.147
+    - 0.258
     Rotation: 0
     Anchor: 0
     SortOrder: 58
@@ -5864,11 +5864,11 @@ Entities:
     Visible: true
     EditorVisible: true
     Position:
-    - 0.0705000013
-    - 0.831499994
+    - 0.08299999999999999
+    - 0.7669999999999999
     Size:
-    - 0.05
-    - 0.088
+    - 0.061
+    - 0.108
     Rotation: 0
     Anchor: 0
     SortOrder: 59
