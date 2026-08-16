@@ -105,7 +105,7 @@ namespace Wheatear {
         rect.Size = node["Size"].as<glm::vec2>(rect.Size);
     }
 
-    static void SerializeSideStatusBadgeLayout(YAML::Emitter& o, const char* key, const SideCombatLevelComponent::StatusBadgeLayout& layout)
+    static void SerializeSideStatusIconLayout(YAML::Emitter& o, const char* key, const SideCombatLevelComponent::StatusIconLayout& layout)
     {
         o << YAML::Key << key << YAML::Value << YAML::BeginMap;
         o << YAML::Key << "BuffStart" << YAML::Value << layout.BuffStart;
@@ -115,7 +115,7 @@ namespace Wheatear {
         o << YAML::EndMap;
     }
 
-    static void DeserializeSideStatusBadgeLayout(const YAML::Node& node, SideCombatLevelComponent::StatusBadgeLayout& layout)
+    static void DeserializeSideStatusIconLayout(const YAML::Node& node, SideCombatLevelComponent::StatusIconLayout& layout)
     {
         if (!node)
             return;
@@ -283,8 +283,8 @@ namespace Wheatear {
             SerializeSideHudRect(o, "JoystickBaseLayout", c.JoystickBaseLayout);
             o << YAML::Key << "JoystickThumbSize" << YAML::Value << c.JoystickThumbSize;
             o << YAML::Key << "JoystickThumbTravel" << YAML::Value << c.JoystickThumbTravel;
-            SerializeSideStatusBadgeLayout(o, "PlayerStatusLayout", c.PlayerStatusLayout);
-            SerializeSideStatusBadgeLayout(o, "EnemyStatusLayout", c.EnemyStatusLayout);
+            SerializeSideStatusIconLayout(o, "PlayerStatusLayout", c.PlayerStatusLayout);
+            SerializeSideStatusIconLayout(o, "EnemyStatusLayout", c.EnemyStatusLayout);
             SerializeSideSkillHudSlots(o, c.SkillHudSlots);
             SerializeSideCombatItemHudSlots(o, c.CombatItemHudSlots);
             o << YAML::Key << "HudLockedText" << YAML::Value << YAML::DoubleQuoted << c.HudLockedText;
@@ -394,8 +394,8 @@ namespace Wheatear {
             DeserializeSideHudRect(n["JoystickBaseLayout"], c.JoystickBaseLayout);
             c.JoystickThumbSize = n["JoystickThumbSize"].as<glm::vec2>(c.JoystickThumbSize);
             c.JoystickThumbTravel = n["JoystickThumbTravel"].as<glm::vec2>(c.JoystickThumbTravel);
-            DeserializeSideStatusBadgeLayout(n["PlayerStatusLayout"], c.PlayerStatusLayout);
-            DeserializeSideStatusBadgeLayout(n["EnemyStatusLayout"], c.EnemyStatusLayout);
+            DeserializeSideStatusIconLayout(n["PlayerStatusLayout"], c.PlayerStatusLayout);
+            DeserializeSideStatusIconLayout(n["EnemyStatusLayout"], c.EnemyStatusLayout);
             DeserializeSideSkillHudSlots(n["SkillHudSlots"], c.SkillHudSlots);
             DeserializeSideCombatItemHudSlots(n["CombatItemHudSlots"], c.CombatItemHudSlots);
             c.HudLockedText = n["HudLockedText"].as<std::string>(c.HudLockedText);

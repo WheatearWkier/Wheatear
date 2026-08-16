@@ -122,7 +122,7 @@ namespace Wheatear {
             ImGui::PopID();
         }
 
-        static void DrawStatusBadgeLayout(const char* label, SideCombatLevelComponent::StatusBadgeLayout& layout)
+        static void DrawStatusIconLayout(const char* label, SideCombatLevelComponent::StatusIconLayout& layout)
         {
             ImGui::PushID(label);
             if (ImGui::TreeNodeEx(label, ImGuiTreeNodeFlags_DefaultOpen))
@@ -332,8 +332,8 @@ namespace Wheatear {
                 DrawHudRect("Joystick Base", level.JoystickBaseLayout);
                 ImGui::DragFloat2("Joystick Thumb Size", glm::value_ptr(level.JoystickThumbSize), 0.001f, 0.0f, 1.0f, "%.3f");
                 ImGui::DragFloat2("Joystick Thumb Travel", glm::value_ptr(level.JoystickThumbTravel), 0.001f, 0.0f, 1.0f, "%.3f");
-                DrawStatusBadgeLayout("Player Status", level.PlayerStatusLayout);
-                DrawStatusBadgeLayout("Enemy Status", level.EnemyStatusLayout);
+                DrawStatusIconLayout("Player Status", level.PlayerStatusLayout);
+                DrawStatusIconLayout("Enemy Status", level.EnemyStatusLayout);
             }
 
             if (ImGui::CollapsingHeader("Skill HUD Slots"))

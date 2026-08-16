@@ -960,11 +960,11 @@ namespace Wheatear::SideCombatHudService {
             }
         }
 
-        static void UpdateStatusBadges(Scene* scene,
+        static void UpdateStatusIcons(Scene* scene,
             const std::string& prefix,
             glm::vec2 buffStart,
             glm::vec2 debuffStart,
-            const SideCombatLevelComponent::StatusBadgeLayout& layout,
+            const SideCombatLevelComponent::StatusIconLayout& layout,
             const SideCombatantComponent* combatant,
             const SidePlayerControllerComponent* controller,
             bool playerSide,
@@ -1357,10 +1357,10 @@ namespace Wheatear::SideCombatHudService {
             SetWidgetVisible(scene, level.ComboPanelEntityName, bossVisible);
 
             UpdateJoystickVisual(scene, level);
-            UpdateStatusBadges(scene, level.PlayerStatusPrefix, level.PlayerStatusLayout.BuffStart, level.PlayerStatusLayout.DebuffStart,
+            UpdateStatusIcons(scene, level.PlayerStatusPrefix, level.PlayerStatusLayout.BuffStart, level.PlayerStatusLayout.DebuffStart,
                 level.PlayerStatusLayout,
                 playerCombatant, controller, true, playerCombatant != nullptr);
-            UpdateStatusBadges(scene, level.EnemyStatusPrefix, level.EnemyStatusLayout.BuffStart, level.EnemyStatusLayout.DebuffStart,
+            UpdateStatusIcons(scene, level.EnemyStatusPrefix, level.EnemyStatusLayout.BuffStart, level.EnemyStatusLayout.DebuffStart,
                 level.EnemyStatusLayout,
                 bossCombatant, nullptr, false, bossVisible);
         }
@@ -1407,7 +1407,7 @@ namespace Wheatear::SideCombatHudService {
                 entity.GetComponent<SpriteRendererComponent>().Color.a = 0.0f;
         }
 
-        static Entity EnsureWorldBadge(Scene* scene,
+        static Entity EnsureWorldStatusIcon(Scene* scene,
             const std::string& name,
             const SheetUVRect& uv,
             bool visible)
@@ -1499,35 +1499,35 @@ namespace Wheatear::SideCombatHudService {
                     transform.Scale = { fillWidth, 0.052f, 1.0f };
                 }
 
-                // Status badges follow the health bar: a row above it, sized
-                // to the bar (each badge ~ bar height x 1.15), only taking
+                // Status icons follow the health bar: a row above it, sized
+                // to the bar (each icon ~ bar height x 1.15), only taking
                 // space while active.
-                const bool shieldBadge = combatant.RuntimeInvulnerableTimer > 0.0f
+                const bool shieldIcon = combatant.RuntimeInvulnerableTimer > 0.0f
                     || combatant.Invulnerable
                     || combatant.RuntimeState == SideCombatState::SuperArmor;
-                const bool stateBadge = IsNegativeCombatState(combatant.RuntimeState);
-                const bool breakBadge = combatant.RuntimeState == SideCombatState::Broken;
-                const float badgeSize = 0.105f;
-                const float badgeGap = 0.11f;
-                const float badgeY = baseY + 0.15f;
-                float badgeX = baseX - fullWidth * 0.5f;
-                auto placeBadge = [&](const std::string& suffix,
+                const bool stateIcon = IsNegativeCombatState(combatant.RuntimeState);
+                const bool breakIcon = combatant.RuntimeState == SideCombatState::Broken;
+                const float iconSize = 0.105f;
+                const float iconGap = 0.11f;
+                const float iconY = baseY + 0.15f;
+                float iconX = baseX - fullWidth * 0.5f;
+                auto placeIcon = [&](const std::string& suffix,
                     const SheetUVRect& uv,
                     bool on)
                 {
-                    Entity badge = EnsureWorldBadge(scene, tag + suffix, uv, on);
-                    if (!badge || !badge.HasComponent<TransformComponent>())
+                    Entity icon = EnsureWorldStatusIcon(scene, tag + suffix, uv, on);
+                    if (!icon || !icon.HasComponent<TransformComponent>())
                         return;
-                    auto& transform = badge.GetComponent<TransformComponent>();
-                    transform.Translation = { badgeX + badgeSize * 0.5f, badgeY, z + 0.15f };
-                    transform.Scale = { badgeSize, badgeSize * 1.1f, 1.0f };
+                    auto& transform = icon.GetComponent<TransformComponent>();
+                    transform.Translation = { iconX + iconSize * 0.5f, iconY, z + 0.15f };
+                    transform.Scale = { iconSize, iconSize * 1.1f, 1.0f };
                     if (on)
-                        badgeX += badgeGap;
+                        iconX += iconGap;
                 };
-                placeBadge("_Buff_0", BuffAttackUV(), false);
-                placeBadge("_Buff_1", BuffShieldUV(), shieldBadge);
-                placeBadge("_Debuff_0", DebuffStateUV(), stateBadge);
-                placeBadge("_Debuff_1", DebuffBreakUV(), breakBadge);
+                placeIcon("_Buff_0", BuffAttackUV(), false);
+                placeIcon("_Buff_1", BuffShieldUV(), shieldIcon);
+                placeIcon("_Debuff_0", DebuffStateUV(), stateIcon);
+                placeIcon("_Debuff_1", DebuffBreakUV(), breakIcon);
             }
         }
 

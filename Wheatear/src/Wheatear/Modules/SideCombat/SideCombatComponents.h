@@ -100,7 +100,7 @@ namespace Wheatear {
             glm::vec2 Size = { 0.0f, 0.0f };
         };
 
-        struct StatusBadgeLayout
+        struct StatusIconLayout
         {
             glm::vec2 BuffStart = { 0.0f, 0.0f };
             glm::vec2 DebuffStart = { 0.0f, 0.0f };
@@ -157,8 +157,8 @@ namespace Wheatear {
         HudRect JoystickBaseLayout;
         glm::vec2 JoystickThumbSize = { 0.0f, 0.0f };
         glm::vec2 JoystickThumbTravel = { 0.0f, 0.0f };
-        StatusBadgeLayout PlayerStatusLayout;
-        StatusBadgeLayout EnemyStatusLayout;
+        StatusIconLayout PlayerStatusLayout;
+        StatusIconLayout EnemyStatusLayout;
 
         std::vector<SkillHudSlot> SkillHudSlots;
         std::vector<CombatItemHudSlot> CombatItemHudSlots;
