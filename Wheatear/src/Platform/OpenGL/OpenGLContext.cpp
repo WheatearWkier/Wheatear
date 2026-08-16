@@ -1,6 +1,8 @@
 #include "wtpch.h"
 #include "OpenGLContext.h"
 
+#include <stdexcept>
+
 namespace Wheatear {
 
 	Wheatear::OpenGLContext::OpenGLContext(GLFWwindow* windowHandle)
@@ -15,7 +17,13 @@ namespace Wheatear {
 
 		glfwMakeContextCurrent(m_WindowHandle);
 		int status = gladLoadGLLoader((GLADloadproc)glfwGetProcAddress);
-		WT_CORE_ASSERT(status, "Failed to initialize Glad!");
+		if (!status)
+		{
+			// Release builds compile the assert away, so a failed loader would
+			// otherwise call null function pointers below. Fail loudly instead.
+			WT_CORE_ERROR("OpenGLContext: failed to initialize GLAD (no GL driver?)");
+			throw std::runtime_error("Failed to initialize GLAD (no GL driver?)");
+		}
 
 		WT_CORE_INFO("OpenGL Info:");
 		WT_CORE_INFO("  Vendor: {0}", (const char*)glGetString(GL_VENDOR));

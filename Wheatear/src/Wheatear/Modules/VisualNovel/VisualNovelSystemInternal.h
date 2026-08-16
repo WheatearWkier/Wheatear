@@ -28,6 +28,9 @@
 #include <yaml-cpp/yaml.h>
 
 #include <algorithm>
+#include <chrono>
+#include <cmath>
+#include <system_error>
 #include <array>
 #include <cctype>
 #include <filesystem>
@@ -204,44 +207,67 @@ namespace Wheatear::VisualNovelSystemInternal {
 
         inline const std::unordered_map<std::string, VNUiAtlasRegion>& VNUiAtlasRegions()
         {
-            static const std::unordered_map<std::string, VNUiAtlasRegion> regions = []
+            // Write-time probed cache (same pattern as SpriteSheetAsset): the
+            // file is re-read when its write time changes, so editing
+            // ui_atlas_params.yaml (in the Data File Editor) updates the VN UI
+            // skin live instead of requiring a restart.
+            static std::unordered_map<std::string, VNUiAtlasRegion> loadedRegions;
+            static std::filesystem::file_time_type cachedWriteTime{};
+            static bool loaded = false;
+            static std::chrono::steady_clock::time_point lastProbe{};
+            constexpr auto kProbeInterval = std::chrono::milliseconds(500);
+
+            const std::string paramsPath = VNUiAsset("atlas_params",
+                "assets/vertical_slice/ui/atlases/ui_atlas_params.yaml");
+            const std::filesystem::path resolvedPath = AssetPath::ResolveRuntimeData(paramsPath);
+
+            std::error_code error;
+            const auto writeTime = std::filesystem::is_regular_file(resolvedPath, error)
+                ? std::filesystem::last_write_time(resolvedPath, error)
+                : std::filesystem::file_time_type{};
+
+            const auto now = std::chrono::steady_clock::now();
+            if (loaded && now - lastProbe < kProbeInterval)
+                return loadedRegions;
+            lastProbe = now;
+
+            if (loaded && cachedWriteTime == writeTime)
+                return loadedRegions;
+
+            loadedRegions.clear();
+            loaded = true;
+            cachedWriteTime = writeTime;
+
+            if (!std::filesystem::is_regular_file(resolvedPath))
+                return loadedRegions;
+
+            try
             {
-                std::unordered_map<std::string, VNUiAtlasRegion> loadedRegions;
-                const std::string paramsPath = VNUiAsset("atlas_params",
-                    "assets/vertical_slice/ui/atlases/ui_atlas_params.yaml");
-                const std::filesystem::path resolvedPath = AssetPath::ResolveRuntimeData(paramsPath);
-                if (!std::filesystem::is_regular_file(resolvedPath))
+                const YAML::Node root = YAML::LoadFile(resolvedPath.string());
+                const YAML::Node atlas = root["vn_ui_atlas"] ? root["vn_ui_atlas"] : root;
+                const float atlasWidth = atlas["width"].as<float>(kVNUiAtlasWidth);
+                const float atlasHeight = atlas["height"].as<float>(kVNUiAtlasHeight);
+                const YAML::Node regionsNode = atlas["regions"];
+                if (!regionsNode || !regionsNode.IsMap())
                     return loadedRegions;
 
-                try
+                for (const auto& entry : regionsNode)
                 {
-                    const YAML::Node root = YAML::LoadFile(resolvedPath.string());
-                    const YAML::Node atlas = root["vn_ui_atlas"] ? root["vn_ui_atlas"] : root;
-                    const float atlasWidth = atlas["width"].as<float>(kVNUiAtlasWidth);
-                    const float atlasHeight = atlas["height"].as<float>(kVNUiAtlasHeight);
-                    const YAML::Node regionsNode = atlas["regions"];
-                    if (!regionsNode || !regionsNode.IsMap())
-                        return loadedRegions;
+                    if (!entry.first.IsScalar())
+                        continue;
 
-                    for (const auto& entry : regionsNode)
-                    {
-                        if (!entry.first.IsScalar())
-                            continue;
-
-                        VNUiAtlasRegion region;
-                        if (TryReadVNUiAtlasRegion(entry.second, atlasWidth, atlasHeight, &region))
-                            loadedRegions[entry.first.as<std::string>()] = region;
-                    }
+                    VNUiAtlasRegion region;
+                    if (TryReadVNUiAtlasRegion(entry.second, atlasWidth, atlasHeight, &region))
+                        loadedRegions[entry.first.as<std::string>()] = region;
                 }
-                catch (const YAML::Exception& exception)
-                {
-                    WT_CORE_WARN("VisualNovelSystem: failed to load VN UI atlas params '{}': {}",
-                        resolvedPath.string(),
-                        exception.what());
-                }
-                return loadedRegions;
-            }();
-            return regions;
+            }
+            catch (const YAML::Exception& exception)
+            {
+                WT_CORE_WARN("VisualNovelSystem: failed to load VN UI atlas params '{}': {}",
+                    resolvedPath.string(),
+                    exception.what());
+            }
+            return loadedRegions;
         }
 
         inline VNUiAtlasRegion VNUiAtlasRegionFor(const std::string& key)

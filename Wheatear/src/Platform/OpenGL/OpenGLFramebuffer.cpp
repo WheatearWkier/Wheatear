@@ -182,16 +182,31 @@ namespace Wheatear {
 					break;*/
 				case FramebufferTextureFormat::DEPTH32F:
 				{
-					glTexStorage2D(GL_TEXTURE_2D, 1, GL_DEPTH_COMPONENT32F,
-						m_Specification.Width, m_Specification.Height);
-					glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-					glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-					glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
-					glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
-					float border[] = { 1,1,1,1 };
-					glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, border);
-					glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT,
-						GL_TEXTURE_2D, m_DepthAttachment, 0);
+					if (multisample)
+					{
+						// A multisample depth texture must be allocated and
+						// attached with the MSAA target; the GL_TEXTURE_2D
+						// calls below would otherwise leave the framebuffer
+						// incomplete (GL errors, black shadow maps).
+						glTexImage2DMultisample(GL_TEXTURE_2D_MULTISAMPLE,
+							m_Specification.Samples, GL_DEPTH_COMPONENT32F,
+							m_Specification.Width, m_Specification.Height, GL_FALSE);
+						glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT,
+							GL_TEXTURE_2D_MULTISAMPLE, m_DepthAttachment, 0);
+					}
+					else
+					{
+						glTexStorage2D(GL_TEXTURE_2D, 1, GL_DEPTH_COMPONENT32F,
+							m_Specification.Width, m_Specification.Height);
+						glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+						glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+						glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
+						glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
+						float border[] = { 1,1,1,1 };
+						glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, border);
+						glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT,
+							GL_TEXTURE_2D, m_DepthAttachment, 0);
+					}
 					break;
 				}
 			}

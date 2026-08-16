@@ -505,7 +505,8 @@ namespace Wheatear {
             if (EditorGameplayShell::BeginRawPreviewTab("Advanced Raw Preview"))
             {
                 EditorGameplayShell::DrawRawPreview(m_Document.GetRawPreview(),
-                    "##AliasManifestRawPreview");
+                    "##AliasManifestRawPreview",
+                    m_SourcePath.c_str());
                 ImGui::EndTabItem();
             }
             ImGui::EndTabBar();

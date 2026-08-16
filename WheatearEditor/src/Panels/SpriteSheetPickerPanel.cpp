@@ -117,6 +117,7 @@ namespace Wheatear {
             m_SelectedRow = std::clamp(m_SelectedRow, 0, m_Rows - 1);
             m_Trims = data.Trims;
             m_Trims.resize(SpriteSheetAsset::CellCount(data));
+            m_Rects = data.Rects;
             SetTexture(Texture2D::Create(data.TexturePath), data.TexturePath);
         }
     }
@@ -160,6 +161,8 @@ namespace Wheatear {
         DrawGridControls();
         ImGui::Spacing();
         DrawTrimTools();
+        ImGui::Spacing();
+        DrawNamedRects();
         ImGui::Spacing();
         DrawSelectedSpritePreview();
         ImGui::Spacing();
@@ -381,6 +384,7 @@ namespace Wheatear {
                 m_SelectedRow = std::clamp(m_SelectedRow, 0, m_Rows - 1);
                 m_Trims = data.Trims;
                 m_Trims.resize(SpriteSheetAsset::CellCount(data));
+                m_Rects = data.Rects;
                 SetTexture(Texture2D::Create(data.TexturePath), data.TexturePath);
                 m_LastAction = "Loaded sheet: " + m_SheetPath;
             }
@@ -399,6 +403,7 @@ namespace Wheatear {
             data.Columns = m_Cols;
             data.Rows = m_Rows;
             data.Trims = m_Trims;
+            data.Rects = m_Rects;
             SpriteSheetAsset::Save(m_SheetPath, data);
 
             // Bind the saved sheet to the selected entity so it reuses the
@@ -564,6 +569,102 @@ namespace Wheatear {
             ImGui::DragInt(EditorLocale::Text("C. Width", "碰撞宽"), &trim.ColliderWidth, 1, 1, cellWidth);
             ImGui::SetNextItemWidth(90.0f);
             ImGui::DragInt(EditorLocale::Text("C. Height", "碰撞高"), &trim.ColliderHeight, 1, 1, cellHeight);
+        }
+    }
+
+    void SpriteSheetPickerPanel::DrawNamedRects()
+    {
+        ImGui::Separator();
+        ImGui::TextUnformatted(EditorLocale::Text("Named Rects", "命名矩形"));
+        HelpMarker(EditorLocale::Text(
+            "Irregular atlas sub-rects (Unity-style named sprites). Components and animations reference them via SubRect instead of a grid cell.",
+            "不规则图集的命名子矩形。组件和动画可通过 SubRect 引用它们，而不使用网格格号。"));
+
+        ImGui::SetNextItemWidth(160.0f);
+        EditorWidgets::InputString(EditorLocale::Text("New Rect Name", "新矩形名"), m_NewRectName, 128);
+        ImGui::SameLine();
+        if (ImGui::Button(EditorLocale::Text("Add Rect", "添加矩形")) && !m_NewRectName.empty())
+        {
+            SpriteSheetData::NamedRect rect;
+            rect.Name = m_NewRectName;
+            rect.Width = m_Texture ? static_cast<int>(m_Texture->GetWidth()) : 1;
+            rect.Height = m_Texture ? static_cast<int>(m_Texture->GetHeight()) : 1;
+            m_Rects.push_back(std::move(rect));
+            m_SelectedRect = static_cast<int>(m_Rects.size()) - 1;
+            m_NewRectName.clear();
+        }
+
+        if (m_Rects.empty())
+        {
+            ImGui::TextDisabled(EditorLocale::Text("No named rects.", "无命名矩形。"));
+            return;
+        }
+
+        const int texW = m_Texture ? static_cast<int>(m_Texture->GetWidth()) : 1;
+        const int texH = m_Texture ? static_cast<int>(m_Texture->GetHeight()) : 1;
+
+        int deleteIndex = -1;
+        for (int i = 0; i < static_cast<int>(m_Rects.size()); ++i)
+        {
+            auto& rect = m_Rects[i];
+            const bool selected = (m_SelectedRect == i);
+
+            ImGui::PushID(i);
+            if (ImGui::Selectable(rect.Name.c_str(), selected))
+                m_SelectedRect = selected ? -1 : i;
+
+            if (m_SelectedRect == i)
+            {
+                ImGui::Indent(12.0f);
+                ImGui::SetNextItemWidth(140.0f);
+                EditorWidgets::InputString(EditorLocale::Text("Name", "名称"), rect.Name, 128);
+
+                ImGui::SetNextItemWidth(90.0f);
+                ImGui::DragInt(EditorLocale::Text("Left", "左"), &rect.Left, 1, 0, std::max(0, texW - 1));
+                ImGui::SetNextItemWidth(90.0f);
+                ImGui::DragInt(EditorLocale::Text("Top", "上"), &rect.Top, 1, 0, std::max(0, texH - 1));
+                ImGui::SetNextItemWidth(90.0f);
+                ImGui::DragInt(EditorLocale::Text("Width", "宽"), &rect.Width, 1, 1, std::max(1, texW - rect.Left));
+                ImGui::SetNextItemWidth(90.0f);
+                ImGui::DragInt(EditorLocale::Text("Height", "高"), &rect.Height, 1, 1, std::max(1, texH - rect.Top));
+
+                ImGui::Checkbox(EditorLocale::Text("Collision Box", "碰撞框"), &rect.HasCollider);
+                if (rect.HasCollider)
+                {
+                    // Default the collider to the rect content when enabling.
+                    if (rect.ColliderWidth <= 0 || rect.ColliderHeight <= 0)
+                    {
+                        rect.ColliderLeft = rect.Left;
+                        rect.ColliderTop = rect.Top;
+                        rect.ColliderWidth = rect.Width;
+                        rect.ColliderHeight = rect.Height;
+                    }
+                    ImGui::SetNextItemWidth(90.0f);
+                    ImGui::DragInt(EditorLocale::Text("C. Left", "碰撞左"), &rect.ColliderLeft, 1, 0, std::max(0, texW - 1));
+                    ImGui::SetNextItemWidth(90.0f);
+                    ImGui::DragInt(EditorLocale::Text("C. Top", "碰撞上"), &rect.ColliderTop, 1, 0, std::max(0, texH - 1));
+                    ImGui::SetNextItemWidth(90.0f);
+                    ImGui::DragInt(EditorLocale::Text("C. Width", "碰撞宽"), &rect.ColliderWidth, 1, 1, std::max(1, texW - rect.ColliderLeft));
+                    ImGui::SetNextItemWidth(90.0f);
+                    ImGui::DragInt(EditorLocale::Text("C. Height", "碰撞高"), &rect.ColliderHeight, 1, 1, std::max(1, texH - rect.ColliderTop));
+                }
+
+                if (ImGui::SmallButton(EditorLocale::Text("Delete Rect", "删除矩形")))
+                {
+                    deleteIndex = i;
+                    ImGui::Unindent(12.0f);
+                    ImGui::PopID();
+                    break;
+                }
+                ImGui::Unindent(12.0f);
+            }
+            ImGui::PopID();
+        }
+
+        if (deleteIndex >= 0)
+        {
+            m_Rects.erase(m_Rects.begin() + deleteIndex);
+            m_SelectedRect = -1;
         }
     }
 
@@ -810,6 +911,20 @@ namespace Wheatear {
                     drawList->AddRect(min, max, colliderColor, 0.0f, 0, 2.0f);
                 }
             }
+        }
+
+        // Named rects (orange): arbitrary atlas sub-rects, independent of the
+        // grid. Labels sit above each rect so artists can match the name to
+        // the box while editing.
+        const ImU32 rectColor = IM_COL32(255, 160, 60, 230);
+        for (const auto& rect : m_Rects)
+        {
+            if (rect.Width <= 0 || rect.Height <= 0)
+                continue;
+            const ImVec2 min(imageMin.x + rect.Left * pxScale, imageMin.y + rect.Top * pxScale);
+            const ImVec2 max(min.x + rect.Width * pxScale, min.y + rect.Height * pxScale);
+            drawList->AddRect(min, max, rectColor, 0.0f, 0, 1.5f);
+            drawList->AddText(ImVec2(min.x, min.y - 13.0f), rectColor, rect.Name.c_str());
         }
 
         for (int i = 0; i < m_FrameCount; ++i)

@@ -62,7 +62,11 @@ namespace Wheatear {
 
     void EditorCamera::UpdateProjection()
     {
-        m_AspectRatio = m_ViewportWidth / m_ViewportHeight;
+        // A zero viewport (minimized window, before first resize) would turn
+        // the aspect ratio into inf and poison the projection matrix with
+        // NaN; keep the last valid ratio instead.
+        if (m_ViewportWidth > 0.0f && m_ViewportHeight > 0.0f)
+            m_AspectRatio = m_ViewportWidth / m_ViewportHeight;
         m_Projection = glm::perspective(glm::radians(m_FOV),
             m_AspectRatio,
             m_NearClip, m_FarClip);

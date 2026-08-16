@@ -5,6 +5,7 @@
 #include "Wheatear/Scene/Components.h"
 #include "Panels/AnimationEditorPanel.h"
 #include "Panels/ContentBrowserPanel.h"
+#include "Panels/DataFileEditorPanel.h"
 #include "Panels/SceneHierarchy/SceneHierarchyPanel.h"
 #include "Panels/EditorHelpPanel.h"
 #include "Panels/InputBindingsPanel.h"
@@ -23,6 +24,7 @@ namespace Wheatear {
         , m_ContentBrowserPanel(std::make_unique<ContentBrowserPanel>())
         , m_AnimationEditorPanel(std::make_unique<AnimationEditorPanel>())
         , m_SpriteSheetPickerPanel(std::make_unique<SpriteSheetPickerPanel>())
+        , m_DataFileEditorPanel(std::make_unique<DataFileEditorPanel>())
         , m_HelpPanel(std::make_unique<EditorHelpPanel>())
         , m_InputBindingsPanel(std::make_unique<InputBindingsPanel>())
         , m_GizmoType(ImGuizmo::OPERATION::TRANSLATE)

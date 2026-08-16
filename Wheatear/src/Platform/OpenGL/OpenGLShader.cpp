@@ -296,17 +296,38 @@ namespace Wheatear {
             if (Utils::IsCacheFresh(shaderFilePath, cachedPath))
                 in.open(cachedPath, std::ios::in | std::ios::binary);
 
+            bool loadedFromCache = false;
             if (in.is_open())
             {
                 in.seekg(0, std::ios::end);
-                auto size = in.tellg();
+                const std::streamsize size = in.tellg();
                 in.seekg(0, std::ios::beg);
-                auto& data = shaderData[stage];
-                data.resize(static_cast<size_t>(size) / sizeof(uint32_t));
-                in.read(reinterpret_cast<char*>(data.data()),
-                    static_cast<std::streamsize>(size));
+
+                // The cache is a raw uint32 buffer. A truncated or tampered
+                // file whose size is not a multiple of 4 would overflow the
+                // vector when read back, so treat it as corrupt and recompile.
+                if (size > 0
+                    && (size % static_cast<std::streamsize>(sizeof(uint32_t))) == 0)
+                {
+                    auto& data = shaderData[stage];
+                    data.resize(static_cast<size_t>(size) / sizeof(uint32_t));
+                    in.read(reinterpret_cast<char*>(data.data()), size);
+                    loadedFromCache = in.good();
+                    if (!loadedFromCache)
+                    {
+                        WT_CORE_WARN("OpenGLShader: failed to read shader cache '{}'; recompiling",
+                            cachedPath.string());
+                        shaderData[stage].clear();
+                    }
+                }
+                else
+                {
+                    WT_CORE_WARN("OpenGLShader: ignoring corrupt shader cache '{}' ({} bytes)",
+                        cachedPath.string(), size);
+                }
             }
-            else
+
+            if (!loadedFromCache)
             {
                 shaderc::SpvCompilationResult module =
                     compiler.CompileGlslToSpv(source,

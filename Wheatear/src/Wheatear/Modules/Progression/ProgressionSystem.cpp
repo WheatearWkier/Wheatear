@@ -86,7 +86,16 @@ namespace Wheatear {
                     return std::nullopt;
             }
 
-            return std::clamp(std::stoi(payload), 1, GameProgress::GetMaxSaveSlots());
+            try
+            {
+                return std::clamp(std::stoi(payload), 1, GameProgress::GetMaxSaveSlots());
+            }
+            catch (const std::exception&)
+            {
+                // All-digit but out-of-int-range slot numbers (hand-edited
+                // scripts) must not abort the process; clamp to the maximum.
+                return GameProgress::GetMaxSaveSlots();
+            }
         }
 
         static std::string NormalizeSaveDirectory(const std::string& directory)

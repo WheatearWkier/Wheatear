@@ -152,14 +152,17 @@ namespace Wheatear {
 						layer->OnUpdate(timestep);
 				}
 
-				m_ImGuiLayer->Begin();
+				if (m_ImGuiLayer)
 				{
-					WT_PROFILE_SCOPE("LayerStack OnImGuiRender");
+					m_ImGuiLayer->Begin();
+					{
+						WT_PROFILE_SCOPE("LayerStack OnImGuiRender");
 
-					for (Layer* layer : m_LayerStack)
-						layer->OnImGuiRender();
+						for (Layer* layer : m_LayerStack)
+							layer->OnImGuiRender();
+					}
+					m_ImGuiLayer->End();
 				}
-				m_ImGuiLayer->End();
 			}
 
 			// Commit input state after every layer has had a chance to query it.
@@ -240,12 +243,16 @@ namespace Wheatear {
 		for (Layer* layer : m_PendingLayersToPop)
 		{
 			m_LayerStack.PopLayer(layer);
+			if (layer == m_ImGuiLayer)
+				m_ImGuiLayer = nullptr;
 		}
 		m_PendingLayersToPop.clear();
 
 		for (Layer* overlay : m_PendingOverlaysToPop)
 		{
 			m_LayerStack.PopOverlay(overlay);
+			if (overlay == m_ImGuiLayer)
+				m_ImGuiLayer = nullptr;
 		}
 		m_PendingOverlaysToPop.clear();
 

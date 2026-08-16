@@ -278,7 +278,8 @@ namespace Wheatear {
                 EditorWidgets::InlineStatus("Advanced structured YAML editing. Prefer the Content tab for normal authoring.", EditorWidgets::StatusKind::Warning);
                 if (!m_SelectedDocument.IsParseValid())
                     EditorWidgets::InlineStatus("YAML parse failed. Fix the source file before structured editing.", EditorWidgets::StatusKind::Error);
-                else if (DrawYamlNode(m_SelectedDocument.Root(), "asset:" + m_SelectedKey))
+                else if (YamlTreeEditor::DrawYamlNode(m_SelectedDocument.Root(), "asset:" + m_SelectedKey, 0,
+                    m_NewScalarValues, m_NewMapKeys))
                     m_SelectedDocument.MarkDirty();
                 ImGui::EndTabItem();
             }
@@ -287,7 +288,7 @@ namespace Wheatear {
             {
                 EditorWidgets::InlineStatus("Read-only raw YAML preview. This is here for verification, not normal content entry.", EditorWidgets::StatusKind::Info);
                 m_SelectedDocument.RefreshRawPreview();
-                EditorGameplayShell::DrawRawPreview(m_SelectedDocument.GetRawPreview(), "##ProgressionAssetRawPreview");
+                EditorGameplayShell::DrawRawPreview(m_SelectedDocument.GetRawPreview(), "##ProgressionAssetRawPreview", m_SelectedPath.c_str());
                 ImGui::EndTabItem();
             }
 
@@ -306,7 +307,7 @@ namespace Wheatear {
         if (!m_SelectedDocument.IsParseValid())
         {
             EditorWidgets::InlineStatus("YAML parse failed. Fix the skill tree file before graph editing.", EditorWidgets::StatusKind::Error);
-            DrawRawPreview(m_SelectedDocument.GetRawPreview(), "##SkillTreeRawPreview");
+            DrawRawPreview(m_SelectedDocument.GetRawPreview(), "##SkillTreeRawPreview", m_SelectedPath.c_str());
             return;
         }
 

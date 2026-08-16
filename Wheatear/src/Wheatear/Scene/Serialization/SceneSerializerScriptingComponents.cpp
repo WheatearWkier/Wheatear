@@ -42,10 +42,10 @@ namespace Wheatear {
             o << YAML::EndMap;
         }
         static void Deserialize(const YAML::Node& n, AudioSourceComponent& c) {
-            c.AudioFilePath = n["AudioFilePath"].as<std::string>();
-            c.Volume = n["Volume"].as<float>();
-            c.Loop = n["Loop"].as<bool>();
-            c.PlayOnStart = n["PlayOnStart"].as<bool>();
+            c.AudioFilePath = n["AudioFilePath"].as<std::string>(c.AudioFilePath);
+            c.Volume = n["Volume"].as<float>(c.Volume);
+            c.Loop = n["Loop"].as<bool>(c.Loop);
+            c.PlayOnStart = n["PlayOnStart"].as<bool>(c.PlayOnStart);
         }
     };
 

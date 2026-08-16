@@ -1,6 +1,7 @@
 #include "wepch.h"
 #include "Wheatear/Utils/StringUtils.h"
 #include "ContentBrowserPanel.h"
+#include "ContentBrowserRequests.h"
 
 #include "Assets/AssetRegistry.h"
 #include "Assets/UITemplateFactory.h"
@@ -8,6 +9,7 @@
 #include "Editor/EditorPlatform.h"
 #include "Editor/EditorWidgets.h"
 #include "Panels/EventScriptGraphPanel.h"
+#include "Panels/DataFileEditorPanel.h"
 #include "Modules/VisualNovel/VisualNovelScriptEditorPanel.h"
 #include "Wheatear/Audio/AudioEngine.h"
 #include "Wheatear/Animation/AnimationClip.h"
@@ -169,6 +171,78 @@ namespace Wheatear {
         return AssetPath::GetAssetRoot();
     }
 
+    namespace {
+
+        // UE-style drag splitter: visible grip, resize cursor, live width
+        // clamp. `dragInverts` flips the delta so the drag direction feels
+        // natural on both sides of the grid.
+        void DrawVerticalSplitter(const char* id,
+            float& size,
+            float minSize,
+            float maxSize,
+            bool dragInverts)
+        {
+            ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.10f, 0.13f, 0.16f, 1.0f));
+            ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(0.23f, 0.72f, 0.80f, 0.30f));
+            ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4(0.23f, 0.72f, 0.80f, 0.45f));
+            ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(3.0f, 2.0f));
+            ImGui::InvisibleButton(id, ImVec2(16.0f, -1.0f));
+            ImGui::PopStyleVar();
+            ImGui::PopStyleColor(3);
+
+            if (ImGui::IsItemHovered())
+                ImGui::SetMouseCursor(ImGuiMouseCursor_ResizeEW);
+
+            if (ImGui::IsItemActive())
+            {
+                const float delta = ImGui::GetIO().MouseDelta.x;
+                size = std::clamp(size + (dragInverts ? -delta : delta), minSize, maxSize);
+            }
+
+            // Grip line: always visible (dim), brightens on hover/drag so the
+            // handle is easy to find on dark themes.
+            const ImVec2 min = ImGui::GetItemRectMin();
+            const ImVec2 max = ImGui::GetItemRectMax();
+            const float x = (min.x + max.x) * 0.5f;
+            const bool hot = ImGui::IsItemHovered() || ImGui::IsItemActive();
+            ImGui::GetWindowDrawList()->AddLine(
+                ImVec2(x - 1.0f, min.y + 3.0f),
+                ImVec2(x - 1.0f, max.y - 3.0f),
+                hot ? IM_COL32(90, 210, 230, 255) : IM_COL32(120, 140, 150, 70),
+                hot ? 2.0f : 1.0f);
+            ImGui::GetWindowDrawList()->AddLine(
+                ImVec2(x + 1.0f, min.y + 3.0f),
+                ImVec2(x + 1.0f, max.y - 3.0f),
+                hot ? IM_COL32(90, 210, 230, 255) : IM_COL32(120, 140, 150, 70),
+                hot ? 2.0f : 1.0f);
+        }
+
+    } // namespace
+
+    namespace ContentBrowserRequests {
+
+        static bool s_HasPendingReveal = false;
+        static std::string s_PendingRevealPath;
+
+        void RequestReveal(const std::string& projectRelativePath)
+        {
+            s_PendingRevealPath = projectRelativePath;
+            s_HasPendingReveal = true;
+        }
+
+        bool ConsumeRevealRequest(std::string& outPath)
+        {
+            if (!s_HasPendingReveal)
+                return false;
+
+            outPath = s_PendingRevealPath;
+            s_PendingRevealPath.clear();
+            s_HasPendingReveal = false;
+            return true;
+        }
+
+    } // namespace ContentBrowserRequests
+
     ContentBrowserPanel::ContentBrowserPanel()
         : m_CurrentDirectory(GetEditorAssetPath())
     {
@@ -243,13 +317,15 @@ namespace Wheatear {
         std::vector<std::filesystem::directory_entry> result;
         const std::string filter = StringUtils::ToLower(m_SearchBuffer);
 
-        // Cache the scan per (directory, filter) so the grid does not hit the
-        // file system on every frame for large folders; a quarter-second
-        // staleness is imperceptible for asset browsing.
+        // Cache the scan per (directory, filter, type) so the grid does not
+        // hit the file system on every frame for large folders; a
+        // quarter-second staleness is imperceptible for asset browsing.
+        const std::string cacheKey = filter + "#"
+            + std::to_string(m_TypeFilterMask);
         constexpr auto kEntryScanInterval = std::chrono::milliseconds(250);
         const auto now = std::chrono::steady_clock::now();
         if (m_EntryCacheDir == m_CurrentDirectory
-            && m_EntryCacheFilter == filter
+            && m_EntryCacheFilter == cacheKey
             && (now - m_LastEntryScan) < kEntryScanInterval)
         {
             return m_EntryCache;
@@ -268,7 +344,15 @@ namespace Wheatear {
                 continue;
 
             if (filter.empty() || searchable.find(filter) != std::string::npos)
+            {
+                if (m_TypeFilterMask != 0
+                    && !entry.is_directory()
+                    && (m_TypeFilterMask & (1u << static_cast<int>(GetAssetType(entry.path())))) == 0)
+                {
+                    continue;
+                }
                 result.push_back(entry);
+            }
         }
 
         // Folders first, then case-insensitive name order.
@@ -282,7 +366,7 @@ namespace Wheatear {
 
         m_EntryCache = result;
         m_EntryCacheDir = m_CurrentDirectory;
-        m_EntryCacheFilter = filter;
+        m_EntryCacheFilter = cacheKey;
         m_LastEntryScan = std::chrono::steady_clock::now();
         return m_EntryCache;
     }
@@ -317,6 +401,14 @@ namespace Wheatear {
         {
             if (m_OnOpenSpriteSheet) m_OnOpenSpriteSheet(path);
         }
+        else if (ext == ".yaml" || ext == ".yml" || ext == ".json"
+            || ext == ".wtsettings" || ext == AssetFileType::AnimationClipExtension)
+        {
+            // Generic data files open in the Data File Editor (structured tree
+            // for YAML-ish files, validated raw text for JSON/others) so no
+            // designer ever has to hand-edit them outside the editor.
+            DataFileEditorRequests::RequestOpen(relative);
+        }
     }
 
     void ContentBrowserPanel::CommitRename(const std::filesystem::path& oldPath, const char* newName)
@@ -343,6 +435,13 @@ namespace Wheatear {
 
     void ContentBrowserPanel::OnUpdate()
     {
+        if (m_RevealHighlightTimer > 0.0f)
+        {
+            m_RevealHighlightTimer -= 1.0f / 60.0f;
+            if (m_RevealHighlightTimer <= 0.0f)
+                m_RevealHighlightPath.clear();
+        }
+
         if (m_ThumbnailRenderQueue.empty())
             return;
 
@@ -624,6 +723,69 @@ namespace Wheatear {
             EditorWidgets::StatusBadge(EditorLocale::Text("Filtered", "已过滤"), EditorWidgets::StatusKind::Warning);
         }
 
+        // UE-style type filter: one button opens a checkbox menu. Folders are
+        // never filtered; an empty mask shows everything.
+        ImGui::SameLine(0, 14.0f);
+        {
+            int activeCount = 0;
+            for (int t = 0; t < static_cast<int>(AssetType::SpriteSheet); ++t)
+            {
+                if (m_TypeFilterMask & (1u << t))
+                    ++activeCount;
+            }
+
+            char filterLabel[64];
+            if (activeCount > 0)
+                std::snprintf(filterLabel, sizeof(filterLabel), "%s (%d)",
+                    EditorLocale::Text("Filter", "筛选"), activeCount);
+            else
+                std::snprintf(filterLabel, sizeof(filterLabel), "%s",
+                    EditorLocale::Text("Filter", "筛选"));
+
+            if (ImGui::Button(filterLabel))
+                ImGui::OpenPopup("##type_filter_menu");
+            if (ImGui::IsItemHovered())
+                ImGui::SetTooltip("%s", EditorLocale::Text(
+                    "Show only the checked asset types.",
+                    "只显示勾选的资产类型。"));
+
+            if (ImGui::BeginPopup("##type_filter_menu"))
+            {
+                const struct { AssetType Type; const char* Label; } kFilterTypes[] = {
+                    { AssetType::Texture, EditorLocale::Text("Textures", "纹理") },
+                    { AssetType::Audio, EditorLocale::Text("Audio", "音频") },
+                    { AssetType::Scene, EditorLocale::Text("Scenes", "场景") },
+                    { AssetType::Script, EditorLocale::Text("Scripts", "脚本") },
+                    { AssetType::Prefab, EditorLocale::Text("Prefabs", "预制体") },
+                    { AssetType::UITemplate, EditorLocale::Text("UI Templates", "UI 模板") },
+                    { AssetType::Material, EditorLocale::Text("Materials", "材质") },
+                    { AssetType::AnimationClip, EditorLocale::Text("Animations", "动画") },
+                    { AssetType::SpriteSheet, EditorLocale::Text("Sprite Sheets", "图集") },
+                    { AssetType::Mesh, EditorLocale::Text("Meshes", "网格") },
+                    { AssetType::Data, EditorLocale::Text("Data", "数据") },
+                    { AssetType::Shader, EditorLocale::Text("Shaders", "着色器") },
+                };
+
+                const bool allShown = (m_TypeFilterMask == 0);
+                if (ImGui::MenuItem(EditorLocale::Text("All", "全部"), nullptr, allShown))
+                    m_TypeFilterMask = 0;
+                ImGui::Separator();
+
+                for (const auto& entry : kFilterTypes)
+                {
+                    const uint32_t bit = 1u << static_cast<int>(entry.Type);
+                    const bool checked = (m_TypeFilterMask & bit) != 0;
+                    if (ImGui::MenuItem(entry.Label, nullptr, checked))
+                        m_TypeFilterMask ^= bit;
+                }
+
+                ImGui::Separator();
+                if (ImGui::MenuItem(EditorLocale::Text("Clear Filter", "清除筛选")))
+                    m_TypeFilterMask = 0;
+                ImGui::EndPopup();
+            }
+        }
+
         ImGui::SameLine(0, 12.0f);
         if (ImGui::Button(EditorLocale::Text("Tools...", "工具...")))
             ImGui::OpenPopup("##browser_tools");
@@ -669,6 +831,16 @@ namespace Wheatear {
 
         ImGui::BeginChild("##sidebar", ImVec2(m_SidebarWidth, 0), true);
 
+        // UE-style Sources panel: a root entry plus the folder tree.
+        EditorWidgets::SectionHeader(EditorLocale::Text("Sources", "内容"));
+
+        const std::filesystem::path assetRoot = GetEditorAssetPath();
+        const bool rootSelected = (m_CurrentDirectory == assetRoot);
+        if (ImGui::Selectable(EditorLocale::Text("All Assets", "全部资源"), rootSelected))
+            NavigateTo(assetRoot);
+
+        ImGui::Separator();
+
         std::function<void(const std::filesystem::path&, int)> drawTree;
         drawTree = [&](const std::filesystem::path& dir, int depth)
         {
@@ -701,19 +873,33 @@ namespace Wheatear {
             }
         };
 
-        drawTree(GetEditorAssetPath(), 0);
+        drawTree(assetRoot, 0);
         ImGui::EndChild();
     }
 
     void ContentBrowserPanel::DrawFileGrid()
     {
+        // Ctrl+wheel zooms the thumbnail size (UE-style). Consume the wheel
+        // before the child window's scroll handling reads it, so zoom never
+        // also scrolls the grid.
+        ImGuiIO& io = ImGui::GetIO();
+        if (io.KeyCtrl && io.MouseWheel != 0.0f)
+        {
+            m_ThumbnailSize = std::clamp(
+                m_ThumbnailSize * (1.0f + io.MouseWheel * 0.06f), 32.0f, 160.0f);
+            io.MouseWheel = 0.0f;
+        }
+
         ImGui::BeginChild("##filegrid", ImVec2(0, 0), false);
 
         const auto entries = GetFilteredEntries();
         if (entries.empty())
         {
-            EditorWidgets::EmptyState("No assets found.",
-                m_SearchBuffer[0] == '\0' ? "This folder is empty." : "No asset matches the current search filter.");
+            EditorWidgets::EmptyState(
+                EditorLocale::Text("No assets found.", "未找到资源。"),
+                m_SearchBuffer[0] == '\0'
+                    ? EditorLocale::Text("This folder is empty.", "此文件夹为空。")
+                    : EditorLocale::Text("No asset matches the current search filter.", "没有资产匹配当前搜索条件。"));
             ImGui::EndChild();
             return;
         }
@@ -749,7 +935,7 @@ namespace Wheatear {
         // .wtsheet item can reserve vertical space below its row for the
         // inline cell strip. Pass 1 measures strip heights per row.
         const int   rowCount  = static_cast<int>((entries.size() + columnCount - 1) / columnCount);
-        const float rowHeight = m_ThumbnailSize + m_Padding + 20.0f;
+        const float rowHeight = m_ThumbnailSize + m_Padding + 24.0f;
         std::vector<float> rowStripHeight(rowCount, 0.0f);
         for (int i = 0; i < static_cast<int>(entries.size()); ++i)
         {
@@ -765,6 +951,19 @@ namespace Wheatear {
         std::vector<float> rowOffset(rowCount + 1, 0.0f);
         for (int r = 1; r <= rowCount; ++r)
             rowOffset[r] = rowOffset[r - 1] + rowStripHeight[r - 1];
+
+        // Plain wheel also zooms when the whole grid fits without scrolling
+        // (nothing to scroll anyway); with overflow the wheel keeps scrolling.
+        if (!io.KeyCtrl && io.MouseWheel != 0.0f && ImGui::IsWindowHovered())
+        {
+            const float totalHeight = rowOffset[rowCount] + rowCount * rowHeight;
+            if (totalHeight <= ImGui::GetContentRegionAvail().y + 2.0f)
+            {
+                m_ThumbnailSize = std::clamp(
+                    m_ThumbnailSize * (1.0f + io.MouseWheel * 0.06f), 32.0f, 160.0f);
+                io.MouseWheel = 0.0f;
+            }
+        }
 
         const float gridStartX = ImGui::GetCursorScreenPos().x;
         const float gridStartY = ImGui::GetCursorScreenPos().y;
@@ -820,12 +1019,26 @@ namespace Wheatear {
             if (isSelected)
             {
                 const ImVec2 pos = ImGui::GetCursorScreenPos();
-                const ImVec2 size = ImVec2(m_ThumbnailSize + m_Padding, m_ThumbnailSize + m_Padding + 20.0f);
+                const ImVec2 size = ImVec2(m_ThumbnailSize + m_Padding, m_ThumbnailSize + m_Padding + 24.0f);
                 ImDrawList* drawList = ImGui::GetWindowDrawList();
                 drawList->AddRectFilled(pos, ImVec2(pos.x + size.x, pos.y + size.y),
                     IM_COL32(59, 184, 204, 34), 6.0f);
                 drawList->AddRect(pos, ImVec2(pos.x + size.x, pos.y + size.y),
                     IM_COL32(59, 184, 204, 210), 6.0f, 0, 1.5f);
+            }
+
+            // Reveal highlight: orange flash on the asset requested by a
+            // reference field's locate button.
+            if (m_RevealHighlightTimer > 0.0f && path == m_RevealHighlightPath)
+            {
+                const float alpha = std::min(1.0f, m_RevealHighlightTimer);
+                const ImVec2 pos = ImGui::GetCursorScreenPos();
+                const ImVec2 size = ImVec2(m_ThumbnailSize + m_Padding, m_ThumbnailSize + m_Padding + 24.0f);
+                ImDrawList* drawList = ImGui::GetWindowDrawList();
+                drawList->AddRectFilled(pos, ImVec2(pos.x + size.x, pos.y + size.y),
+                    IM_COL32(255, 170, 60, static_cast<int>(55.0f * alpha)), 6.0f);
+                drawList->AddRect(pos, ImVec2(pos.x + size.x, pos.y + size.y),
+                    IM_COL32(255, 170, 60, static_cast<int>(230.0f * alpha)), 6.0f, 0, 2.5f);
             }
 
             ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0, 0, 0, 0));
@@ -909,9 +1122,6 @@ namespace Wheatear {
                 ImGui::EndPopup();
             }
 
-            if (ImGui::IsItemHovered())
-                ImGui::SetTooltip("%s", path.string().c_str());
-
             // Inline rename field replaces the filename while renaming.
             if (path == m_RenameTarget)
             {
@@ -929,21 +1139,29 @@ namespace Wheatear {
             }
             else
             {
-                // Single-line filename clipped to the cell width with an
-                // ellipsis, centered under the thumbnail.
-                const float nameMaxWidth = m_ThumbnailSize + m_Padding - 4.0f;
+                // Filename under the thumbnail, drawn directly on the draw
+                // list at a fixed position so it is always visible (never
+                // dependent on cursor state), clipped to the cell width with
+                // an ellipsis and centered.
+                const ImVec2 thumbMin = ImGui::GetItemRectMin();
+                const ImVec2 thumbMax = ImGui::GetItemRectMax();
+                const float nameMaxWidth = m_ThumbnailSize + m_Padding - 6.0f;
                 std::string shortName = filename;
-                if (ImGui::CalcTextSize(shortName.c_str()).x > nameMaxWidth)
+                while (!shortName.empty()
+                    && ImGui::CalcTextSize((shortName + "...").c_str()).x > nameMaxWidth)
                 {
-                    while (!shortName.empty()
-                        && ImGui::CalcTextSize((shortName + "...").c_str()).x > nameMaxWidth)
-                        shortName.pop_back();
-                    shortName += "...";
+                    shortName.pop_back();
                 }
-                const float nameTextWidth = ImGui::CalcTextSize(shortName.c_str()).x;
-                ImGui::SetCursorPosX(
-                    ImGui::GetCursorPosX() + std::max(0.0f, (m_ThumbnailSize + m_Padding - nameTextWidth) * 0.5f));
-                ImGui::TextUnformatted(shortName.c_str());
+                if (shortName != filename)
+                    shortName += "...";
+
+                const float nameWidth = ImGui::CalcTextSize(shortName.c_str()).x;
+                const float nameX = thumbMin.x
+                    + std::max(0.0f, (m_ThumbnailSize + m_Padding - nameWidth) * 0.5f);
+                ImGui::GetWindowDrawList()->AddText(
+                    ImVec2(nameX, thumbMax.y + 3.0f),
+                    ImGui::GetColorU32(ImGuiCol_Text),
+                    shortName.c_str());
             }
 
             // Unity-style expand arrow for .wtsheet items, overlaid on the
@@ -1023,6 +1241,60 @@ namespace Wheatear {
                 else
                 {
                     m_RegistryStatus = "Failed to create event script.";
+                }
+            }
+            if (ImGui::MenuItem(EditorLocale::Text("New VN Script (.vn)", "新建视觉小说脚本 (.vn)")))
+            {
+                std::filesystem::path candidate = m_CurrentDirectory / "new_script.vn";
+                for (int i = 2; std::filesystem::exists(candidate); ++i)
+                    candidate = m_CurrentDirectory / ("new_script_" + std::to_string(i) + ".vn");
+
+                const std::string templateText =
+                    "# Generated by Wheatear Visual Novel Editor.\n"
+                    "# 行类型：@label 标签 / @character 注册角色 / @show 立绘 /\n"
+                    "# @background 背景 / @music 音乐 / @expression 表情 / @choice 分支选项\n"
+                    "@label start\n"
+                    "角色名: 在这里写台词。\n";
+
+                if (EditorWidgets::WriteFileText(candidate, templateText))
+                {
+                    m_SelectedPath = candidate;
+                    m_RegistryStatus = "Created VN script: " + candidate.filename().string();
+                    VisualNovelEditorRequests::RequestOpenScript(
+                        AssetPath::ToProjectRelative(candidate).generic_string());
+                }
+                else
+                {
+                    m_RegistryStatus = "Failed to create VN script.";
+                }
+            }
+            if (ImGui::MenuItem(EditorLocale::Text("New Animation Clip (.wtanim)", "新建动画片段 (.wtanim)")))
+            {
+                std::filesystem::path candidate = m_CurrentDirectory / "new_clip.wtanim";
+                for (int i = 2; std::filesystem::exists(candidate); ++i)
+                    candidate = m_CurrentDirectory / ("new_clip_" + std::to_string(i) + ".wtanim");
+
+                const std::string templateText =
+                    "AnimationClip:\n"
+                    "  Name: new_clip\n"
+                    "  Looping: true\n"
+                    "  Frames: []\n"
+                    "  Events: []\n"
+                    "  PropertyTracks: []\n";
+
+                if (EditorWidgets::WriteFileText(candidate, templateText))
+                {
+                    m_SelectedPath = candidate;
+                    m_RegistryStatus = "Created animation clip: " + candidate.filename().string();
+                    // Open in the generic Data File Editor (tree/raw); the
+                    // Animation Editor can load it via a SpriteAnimator's
+                    // "Load .wtanim" binding.
+                    DataFileEditorRequests::RequestOpen(
+                        AssetPath::ToProjectRelative(candidate).generic_string());
+                }
+                else
+                {
+                    m_RegistryStatus = "Failed to create animation clip.";
                 }
             }
             ImGui::EndPopup();
@@ -1193,7 +1465,10 @@ namespace Wheatear {
             return;
 
         ImGui::BeginChild("##inspector", ImVec2(180, 0), true);
-        EditorWidgets::SectionHeader("Inspector", "Selected asset metadata and import settings.");
+        EditorWidgets::SectionHeader(
+            EditorLocale::Text("Inspector", "检查器"),
+            EditorLocale::Text("Selected asset metadata and import settings.",
+                "选中资产的元数据与导入设置。"));
 
         if (!m_SelectedPath.empty() && std::filesystem::exists(m_SelectedPath))
         {
@@ -1446,6 +1721,20 @@ namespace Wheatear {
 
     void ContentBrowserPanel::OnImGuiRender()
     {
+        // Reveal requests from asset reference fields: navigate to the
+        // asset's folder, select it, and flash a highlight.
+        std::string revealPath;
+        if (ContentBrowserRequests::ConsumeRevealRequest(revealPath))
+        {
+            const std::filesystem::path resolved = AssetPath::Resolve(revealPath);
+            const std::filesystem::path parent = resolved.parent_path();
+            if (!parent.empty() && m_CurrentDirectory != parent)
+                NavigateTo(parent);
+            m_SelectedPath = resolved;
+            m_RevealHighlightPath = resolved;
+            m_RevealHighlightTimer = 2.0f;
+        }
+
         if (m_DrawerMode)
         {
             // Fold the docked window to a tab bar and show the floating
@@ -1485,21 +1774,14 @@ namespace Wheatear {
 
     void ContentBrowserPanel::DrawPanelContent()
     {
-        EditorWidgets::PanelHeader("Content Browser", "Project asset workspace rooted at WheatearEditor/assets.");
+        EditorWidgets::PanelHeader(EditorLocale::Text("Content Browser", "资源浏览器"));
         DrawToolbar();
 
         if (m_ShowSidebar)
         {
             DrawSidebar();
             ImGui::SameLine();
-            // Draggable splitter between the folder tree and the grid.
-            ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0, 0, 0, 0));
-            ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(0.23f, 0.72f, 0.80f, 0.25f));
-            ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4(0.23f, 0.72f, 0.80f, 0.35f));
-            ImGui::InvisibleButton("##sidebar_split", ImVec2(5.0f, -1.0f));
-            ImGui::PopStyleColor(3);
-            if (ImGui::IsItemActive())
-                m_SidebarWidth = std::clamp(m_SidebarWidth + ImGui::GetIO().MouseDelta.x, 90.0f, 420.0f);
+            DrawVerticalSplitter("##sidebar_split", m_SidebarWidth, 90.0f, 420.0f, false);
             ImGui::SameLine();
         }
 
@@ -1511,14 +1793,7 @@ namespace Wheatear {
             ImGui::EndChild();
 
             ImGui::SameLine();
-            // Draggable splitter between the grid and the inspector.
-            ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0, 0, 0, 0));
-            ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(0.23f, 0.72f, 0.80f, 0.25f));
-            ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4(0.23f, 0.72f, 0.80f, 0.35f));
-            ImGui::InvisibleButton("##inspector_split", ImVec2(5.0f, -1.0f));
-            ImGui::PopStyleColor(3);
-            if (ImGui::IsItemActive())
-                m_InspectorWidth = std::clamp(m_InspectorWidth - ImGui::GetIO().MouseDelta.x, 140.0f, 420.0f);
+            DrawVerticalSplitter("##inspector_split", m_InspectorWidth, 140.0f, 420.0f, true);
             ImGui::SameLine();
             DrawInspector();
         }

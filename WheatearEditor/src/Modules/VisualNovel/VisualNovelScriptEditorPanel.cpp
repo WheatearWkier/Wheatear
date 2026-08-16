@@ -7,6 +7,7 @@
 #include "Editor/EditorWidgets.h"
 #include "VisualNovelScriptEditorPanelInternal.h"
 #include "Editor/GameplayEditorShell.h"
+#include "Panels/DataFileEditorPanel.h"
 #include "Wheatear/Assets/AssetAliasRegistry.h"
 #include "Wheatear/Assets/AssetPath.h"
 
@@ -491,6 +492,10 @@ namespace Wheatear {
             ImVec2(-1.0f, -1.0f),
             std::max<size_t>(preview.size() + 1, 4096),
             ImGuiInputTextFlags_ReadOnly | ImGuiInputTextFlags_AllowTabInput);
+
+        ImGui::Spacing();
+        if (ImGui::Button(EditorLocale::Text("Edit Source in Data File Editor", "在数据文件编辑器中编辑源文件")))
+            DataFileEditorRequests::RequestOpen(m_SourcePath);
     }
 
     void VisualNovelScriptEditorPanel::AddRow(RowKind kind)

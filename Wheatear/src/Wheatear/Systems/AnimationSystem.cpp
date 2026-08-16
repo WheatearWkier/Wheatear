@@ -85,7 +85,8 @@ namespace Wheatear {
             const AnimationClip& clip,
             float from,
             float to,
-            bool includeStart)
+            bool includeStart,
+            std::vector<std::string>& outCommands)
         {
             if (!scene || !animator.FireEvents)
                 return;
@@ -97,7 +98,7 @@ namespace Wheatear {
                 if (!IsAnimationEventInRange(event.Time, from, to, includeStart))
                     continue;
 
-                CommandBus::Execute(scene, ExpandAnimationEventCommand(entity, clip, event));
+                outCommands.push_back(ExpandAnimationEventCommand(entity, clip, event));
             }
         }
 
@@ -107,7 +108,8 @@ namespace Wheatear {
             const SpriteAnimatorComponent& animator,
             const AnimationClip& clip,
             float previousTime,
-            float currentTime)
+            float currentTime,
+            std::vector<std::string>& outCommands)
         {
             const float totalDuration = clip.GetTotalDuration();
             if (totalDuration <= 0.0f || clip.GetEvents().empty())
@@ -121,7 +123,8 @@ namespace Wheatear {
                     clip,
                     previousTime,
                     std::min(currentTime, totalDuration),
-                    previousTime <= 0.0f);
+                    previousTime <= 0.0f,
+                    outCommands);
                 return;
             }
 
@@ -138,7 +141,8 @@ namespace Wheatear {
                     clip,
                     previousLoopTime,
                     currentLoopTime,
-                    previousTime <= 0.0f);
+                    previousTime <= 0.0f,
+                    outCommands);
                 return;
             }
 
@@ -148,14 +152,16 @@ namespace Wheatear {
                 clip,
                 previousLoopTime,
                 totalDuration,
-                false);
+                false,
+                outCommands);
             FireAnimationEventsInRange(scene,
                 entity,
                 animator,
                 clip,
                 0.0f,
                 currentLoopTime,
-                true);
+                true,
+                outCommands);
         }
 
         static void ApplyFloatProperty(AnimatedProperty property,
@@ -275,6 +281,12 @@ namespace Wheatear {
         auto& registry = scene->GetRegistry();
         auto view = registry.view<SpriteAnimatorComponent, SpriteRendererComponent>();
 
+        // Animation-event commands are collected and executed only after the
+        // view loop: CommandBus::Execute runs synchronously and may destroy or
+        // modify entities, which would invalidate the view iteration and the
+        // animator/sprite references below.
+        std::vector<std::string> pendingCommands;
+
         for (auto e : view)
         {
             auto& animator = view.get<SpriteAnimatorComponent>(e);
@@ -288,7 +300,8 @@ namespace Wheatear {
             animator.ElapsedTime += ts * std::max(0.0f, animator.PlaybackSpeed);
             float totalDur = clip->GetTotalDuration();
 
-            FireAnimationEvents(scene, Entity{ e, scene }, animator, *clip, previousTime, animator.ElapsedTime);
+            FireAnimationEvents(scene, Entity{ e, scene }, animator, *clip,
+                previousTime, animator.ElapsedTime, pendingCommands);
 
             clip = animator.GetCurrentClip();
             if (!clip) continue;
@@ -330,6 +343,11 @@ namespace Wheatear {
                     ApplyPropertyTrackSample(*trackBase, value, sprite, tc);
             }
         }
+
+        // Execute collected animation-event commands now that no component
+        // references are live inside the iteration.
+        for (const std::string& command : pendingCommands)
+            CommandBus::Execute(scene, command);
     }
 
 } // namespace Wheatear

@@ -5,6 +5,7 @@
 #include "Editor/EditorCanvasTools.h"
 #include "Editor/EditorLocale.h"
 #include "Editor/EditorWidgets.h"
+#include "Panels/ContentBrowserRequests.h"
 #include "Panels/SpriteSheetPickerPanel.h"
 #include <imgui/imgui.h>
 #include <glm/gtc/type_ptr.hpp>
@@ -12,10 +13,64 @@
 #include <cmath>
 #include <filesystem>
 #include "Wheatear/Assets/AssetPath.h"
+#include "Wheatear/Assets/SpriteSheetAsset.h"
 #include "Wheatear/Scene/Components.h"
 #include "Wheatear/UI/UIWidgetLayout.h"
 
 namespace Wheatear {
+
+    void DrawSpriteSheetReference(std::string& sheetPath,
+        int& cellIndex,
+        std::string& subRect)
+    {
+        EditorWidgets::InputString(EditorLocale::Text("Sprite Sheet", "图集"), sheetPath, 512);
+        ImGui::SameLine();
+        if (ImGui::SmallButton(EditorLocale::Text("Locate", "定位")))
+        {
+            if (!sheetPath.empty())
+                ContentBrowserRequests::RequestReveal(sheetPath);
+        }
+        if (ImGui::IsItemHovered())
+            ImGui::SetTooltip("%s", EditorLocale::Text(
+                "Jump to this sheet in the Content Browser.",
+                "在资源浏览器中定位该图集。"));
+
+        ImGui::SetNextItemWidth(120.0f);
+        ImGui::DragInt(EditorLocale::Text("Cell Index", "格号"), &cellIndex, 1, -1, 4096);
+        if (ImGui::IsItemHovered(ImGuiHoveredFlags_DelayShort))
+            ImGui::SetTooltip("%s", EditorLocale::Text(
+                "-1 = no cell. Used only when Named Rect is empty.",
+                "-1 = 不使用格子。仅在命名矩形为空时生效。"));
+
+        // Named-rect dropdown (hot-reloading via the sheet cache), with a
+        // manual text field fallback for sheets without rects yet.
+        const SpriteSheetData* sheet = SpriteSheetAsset::GetCachedSheetData(sheetPath);
+        if (sheet && !sheet->Rects.empty())
+        {
+            std::vector<const char*> names;
+            names.reserve(sheet->Rects.size() + 1);
+            names.push_back(EditorLocale::Text("(none)", "(无)"));
+            int current = 0;
+            for (size_t i = 0; i < sheet->Rects.size(); ++i)
+            {
+                names.push_back(sheet->Rects[i].Name.c_str());
+                if (subRect == sheet->Rects[i].Name)
+                    current = static_cast<int>(i) + 1;
+            }
+
+            const std::string label = EditorLocale::Text("Named Rect", "命名矩形");
+            if (ImGui::Combo(label.c_str(), &current, names.data(), static_cast<int>(names.size())))
+                subRect = current == 0 ? "" : sheet->Rects[current - 1].Name;
+        }
+        else
+        {
+            EditorWidgets::InputString(EditorLocale::Text("Named Rect", "命名矩形"), subRect, 128);
+            if (ImGui::IsItemHovered(ImGuiHoveredFlags_DelayShort))
+                ImGui::SetTooltip("%s", EditorLocale::Text(
+                    "Name of a rect in the sheet's 'rects' section (see Sprite Sheet Picker).",
+                    "图集 rects 段中的命名矩形名称（见序列帧选择器）。"));
+        }
+    }
 
     namespace {
 
@@ -386,6 +441,8 @@ namespace Wheatear {
                     SpriteSheetPickerPanel::RequestOpen(entity);
                 if (ImGui::IsItemHovered(ImGuiHoveredFlags_DelayShort))
                     ImGui::SetTooltip("Pick a cell from an icon atlas for this UI image.");
+                ImGui::Separator();
+                DrawSpriteSheetReference(image.SpriteSheet, image.CellIndex, image.SubRect);
                 if (ImGui::TreeNode("Advanced UV"))
                 {
                     ImGui::DragFloat2("UV Min", glm::value_ptr(image.UVMin), 0.001f, 0.0f, 1.0f, "%.3f");

@@ -39,10 +39,21 @@ namespace Wheatear {
         static void OnSceneStop();
 
     private:
+        struct ManagedSound
+        {
+            ma_sound* Sound = nullptr;
+            // PCM-backed buffer used for one-shot SFX (ma_audio_buffer*; kept
+            // opaque here because miniaudio declares it as an anonymous-struct
+            // typedef that cannot be forward-declared). Created per play so
+            // concurrent plays never share (or seek) the same data source;
+            // freed together with the sound. Null for streamed (looped) music.
+            void* Buffer = nullptr;
+        };
+
         static void CollectFinishedSounds();
 
         static ma_engine* s_Engine;
-        static std::unordered_map<uint32_t, ma_sound*> s_Sounds;
+        static std::unordered_map<uint32_t, ManagedSound> s_Sounds;
         static uint32_t                                 s_NextHandle;
     };
 

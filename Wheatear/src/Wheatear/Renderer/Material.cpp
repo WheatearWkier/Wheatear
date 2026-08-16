@@ -23,41 +23,49 @@ namespace Wheatear {
             return CreateRef<Material>();
         }
 
-        YAML::Node root = YAML::Load(file);
-        YAML::Node node = root["Material"];
-        if (!node)
+        try
         {
-            WT_CORE_ERROR("Material::Load: 文件格式错误 {0}", resolvedPath.string());
+            YAML::Node root = YAML::Load(file);
+            YAML::Node node = root["Material"];
+            if (!node)
+            {
+                WT_CORE_ERROR("Material::Load: 文件格式错误 {0}", resolvedPath.string());
+                return CreateRef<Material>();
+            }
+
+            auto mat = CreateRef<Material>();
+            mat->m_Path = AssetPath::ToProjectRelative(resolvedPath).generic_string();
+
+            if (node["Albedo"])
+            {
+                auto a = node["Albedo"];
+                mat->Albedo = { a[0].as<float>(1.0f), a[1].as<float>(1.0f),
+                                a[2].as<float>(1.0f), a[3].as<float>(1.0f) };
+            }
+            mat->Metallic = node["Metallic"].as<float>(0.0f);
+            mat->Roughness = node["Roughness"].as<float>(0.5f);
+            mat->FlipNormals = node["FlipNormals"].as<bool>(false);
+
+            auto loadTex = [](const YAML::Node& n, const char* key) -> Ref<Texture2D>
+                {
+                    if (!n[key]) return nullptr;
+                    std::string p = n[key].as<std::string>("");
+                    if (p.empty()) return nullptr;
+                    return Texture2D::Create(p);
+                };
+
+            mat->AlbedoMap = loadTex(node, "AlbedoMap");
+            mat->NormalMap = loadTex(node, "NormalMap");
+            mat->RoughnessMap = loadTex(node, "RoughnessMap");
+            mat->MetallicMap = loadTex(node, "MetallicMap");
+
+            return mat;
+        }
+        catch (const YAML::Exception& e)
+        {
+            WT_CORE_ERROR("Material::Load: 解析失败 {0}: {1}", resolvedPath.string(), e.what());
             return CreateRef<Material>();
         }
-
-        auto mat = CreateRef<Material>();
-        mat->m_Path = AssetPath::ToProjectRelative(resolvedPath).generic_string();
-
-        if (node["Albedo"])
-        {
-            auto a = node["Albedo"];
-            mat->Albedo = { a[0].as<float>(), a[1].as<float>(),
-                            a[2].as<float>(), a[3].as<float>() };
-        }
-        mat->Metallic = node["Metallic"].as<float>(0.0f);
-        mat->Roughness = node["Roughness"].as<float>(0.5f);
-        mat->FlipNormals = node["FlipNormals"].as<bool>(false);
-
-        auto loadTex = [](const YAML::Node& n, const char* key) -> Ref<Texture2D>
-            {
-                if (!n[key]) return nullptr;
-                std::string p = n[key].as<std::string>("");
-                if (p.empty()) return nullptr;
-                return Texture2D::Create(p);
-            };
-
-        mat->AlbedoMap = loadTex(node, "AlbedoMap");
-        mat->NormalMap = loadTex(node, "NormalMap");
-        mat->RoughnessMap = loadTex(node, "RoughnessMap");
-        mat->MetallicMap = loadTex(node, "MetallicMap");
-
-        return mat;
     }
 
     void Material::Save(const std::string& path)

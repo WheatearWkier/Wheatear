@@ -158,6 +158,22 @@ namespace Wheatear {
         {
             for (const auto& idx : shape.mesh.indices)
             {
+                // Hand-edited or corrupt OBJ files can carry out-of-range or
+                // negative indices; validate before indexing the attribute
+                // arrays (tinyobj does not bounds-check for us).
+                const bool validPosition = idx.vertex_index >= 0
+                    && 3 * static_cast<size_t>(idx.vertex_index) + 2 < attrib.vertices.size();
+                const bool validNormal = idx.normal_index < 0
+                    || 3 * static_cast<size_t>(idx.normal_index) + 2 < attrib.normals.size();
+                const bool validTexCoord = idx.texcoord_index < 0
+                    || 2 * static_cast<size_t>(idx.texcoord_index) + 1 < attrib.texcoords.size();
+                if (!validPosition || !validNormal || !validTexCoord)
+                {
+                    WT_CORE_WARN("OBJ: skipping face index {0}/{1}/{2} (out of range) in '{3}'",
+                        idx.vertex_index, idx.normal_index, idx.texcoord_index, filepath);
+                    continue;
+                }
+
                 MeshVertex v{};
 
                 v.Position = {

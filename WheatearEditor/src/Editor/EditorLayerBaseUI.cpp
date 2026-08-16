@@ -33,6 +33,7 @@
 #include "Editor/EditorToolRegistry.h"
 #include "Panels/AnimationEditorPanel.h"
 #include "Panels/ContentBrowserPanel.h"
+#include "Panels/DataFileEditorPanel.h"
 #include "Panels/EditorHelpPanel.h"
 #include "Panels/InputBindingsPanel.h"
 #include "Editor/EditorCommands.h"
@@ -267,6 +268,7 @@ namespace Wheatear {
         m_AnimationEditorPanel->OnImGuiRender(m_LastTimestep);
         m_SpriteSheetPickerPanel->SetEntity(m_SceneHierarchyPanel->GetSelectedEntity());
         m_SpriteSheetPickerPanel->OnImGuiRender();
+        m_DataFileEditorPanel->OnImGuiRender();
         EditorToolRegistry::ForEach([](const EditorToolDescriptor& tool)
         {
             if (tool.Draw)

@@ -75,6 +75,12 @@ namespace Wheatear {
 
         } // namespace
 
+        const SpriteSheetData* GetCachedSheetData(const std::string& path)
+        {
+            const CachedSheet* cached = GetCachedSheet(path);
+            return cached ? &cached->Data : nullptr;
+        }
+
         SpriteSheetData Load(const std::string& path)
         {
             SpriteSheetData data;

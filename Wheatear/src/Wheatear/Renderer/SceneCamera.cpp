@@ -31,6 +31,10 @@ namespace Wheatear {
     void SceneCamera::SetViewportSize(uint32_t width, uint32_t height)
     {
         WT_CORE_ASSERT(width > 0 && height > 0, "Viewport size must be greater than zero");
+        // Guard against a zero-size viewport (minimized window, pre-resize)
+        // which would otherwise divide by zero into an inf aspect ratio.
+        if (width == 0 || height == 0)
+            return;
         m_AspectRatio = static_cast<float>(width) / static_cast<float>(height);
         RecalculateProjection();
     }

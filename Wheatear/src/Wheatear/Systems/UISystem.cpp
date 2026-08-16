@@ -57,9 +57,15 @@ namespace Wheatear {
         static bool IsEditorUIHidden(Scene* scene,
             UIWidgetLayout::Context& layout,
             entt::entity entity,
-            std::unordered_set<uint32_t>& visiting)
+            std::unordered_set<uint32_t>& visiting,
+            int depth = 0)
         {
             if (!scene || scene->GetExecutionMode() != SceneExecutionMode::Edit)
+                return false;
+
+            // A hand-edited scene can build arbitrarily deep (or cyclic)
+            // parent chains; cap the walk so it cannot blow the stack.
+            if (depth > 512)
                 return false;
 
             auto& registry = scene->GetRegistry();
@@ -79,7 +85,7 @@ namespace Wheatear {
             const auto& widget = registry.get<UIWidgetComponent>(entity);
             const entt::entity parent = layout.ResolveReference(widget.ParentEntity);
             const bool hidden = parent != entt::null && registry.valid(parent)
-                ? IsEditorUIHidden(scene, layout, parent, visiting)
+                ? IsEditorUIHidden(scene, layout, parent, visiting, depth + 1)
                 : false;
             visiting.erase(key);
             return hidden;

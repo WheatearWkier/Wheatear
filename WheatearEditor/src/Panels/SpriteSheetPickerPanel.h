@@ -47,6 +47,7 @@ namespace Wheatear {
         void DrawSheetTools();
         void DrawGridControls();
         void DrawTrimTools();
+        void DrawNamedRects();
         void DrawPreview();
         void DrawSelectedSpritePreview();
         void DrawApplyActions();
@@ -98,6 +99,13 @@ namespace Wheatear {
         // Per-cell content trims/colliders (index = cell, row-major, top row
         // first), persisted into the .wtsheet. Saved with Save As Sheet.
         std::vector<SpriteSheetData::CellTrim> m_Trims;
+
+        // Irregular-atlas named sub-rects (SpriteSheetData::Rects). Loaded and
+        // saved together with the sheet so opening a sheet in this panel can
+        // never silently drop them.
+        std::vector<SpriteSheetData::NamedRect> m_Rects;
+        int m_SelectedRect = -1;
+        std::string m_NewRectName;
     };
 
 } // namespace Wheatear

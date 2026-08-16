@@ -242,7 +242,7 @@ namespace Wheatear {
         }
     }
 
-    static void ReadCubemap(std::ifstream& f, uint32_t tex,
+    static bool ReadCubemap(std::ifstream& f, uint32_t tex,
         int baseSize, int mipLevels)
     {
         for (int mip = 0; mip < mipLevels; mip++)
@@ -255,6 +255,10 @@ namespace Wheatear {
             {
                 f.read(reinterpret_cast<char*>(buf.data()),
                     static_cast<std::streamsize>(faceBytes));
+                // A truncated cache file must not upload uninitialized memory
+                // as light data; report failure so the caller recomputes.
+                if (!f || static_cast<size_t>(f.gcount()) != faceBytes)
+                    return false;
                 glTextureSubImage3D(
                     static_cast<GLuint>(tex),
                     mip,
@@ -264,6 +268,7 @@ namespace Wheatear {
                     buf.data());
             }
         }
+        return true;
     }
 
     // =========================================================================
@@ -407,10 +412,18 @@ namespace Wheatear {
         auto result = CreateRef<IBLResult>();
 
         result->IrradianceMap = CreateCubemap(k_IrradianceSize, GL_RGB16F, false);
-        ReadCubemap(f, result->IrradianceMap, k_IrradianceSize, 1);
+        if (!ReadCubemap(f, result->IrradianceMap, k_IrradianceSize, 1))
+        {
+            WT_CORE_WARN("OpenGLIBL: truncated cache '{0}', recomputing", cachePath);
+            return nullptr;
+        }
 
         result->PrefilterMap = CreateCubemap(k_PrefilterSize, GL_RGB16F, true);
-        ReadCubemap(f, result->PrefilterMap, k_PrefilterSize, k_PrefilterMips);
+        if (!ReadCubemap(f, result->PrefilterMap, k_PrefilterSize, k_PrefilterMips))
+        {
+            WT_CORE_WARN("OpenGLIBL: truncated cache '{0}', recomputing", cachePath);
+            return nullptr;
+        }
 
         if (!s_BrdfLUT)
         {
@@ -427,6 +440,11 @@ namespace Wheatear {
             std::vector<uint8_t> lutBuf(lutBytes);
             f.read(reinterpret_cast<char*>(lutBuf.data()),
                 static_cast<std::streamsize>(lutBytes));
+            if (!f || static_cast<size_t>(f.gcount()) != lutBytes)
+            {
+                WT_CORE_WARN("OpenGLIBL: truncated cache '{0}', recomputing", cachePath);
+                return nullptr;
+            }
             glTextureSubImage2D(lut, 0, 0, 0,
                 k_BrdfLUTSize, k_BrdfLUTSize,
                 GL_RG, GL_HALF_FLOAT, lutBuf.data());

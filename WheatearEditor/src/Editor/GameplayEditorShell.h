@@ -2,6 +2,7 @@
 
 #include "Editor/EditorWidgets.h"
 #include "Editor/EditorLocale.h"
+#include "Panels/DataFileEditorPanel.h"
 
 #include <imgui/imgui.h>
 
@@ -126,7 +127,8 @@ namespace Wheatear::EditorGameplayShell {
         return ImGui::BeginTabItem(label ? label : "Advanced Raw");
     }
 
-    inline void DrawRawPreview(const std::string& text, const char* id)
+    inline void DrawRawPreview(const std::string& text, const char* id,
+        const char* sourcePath = nullptr)
     {
         std::string preview = text;
         EditorWidgets::InputMultilineString(id ? id : "##GameplayRawPreview",
@@ -134,6 +136,16 @@ namespace Wheatear::EditorGameplayShell {
             ImVec2(-1.0f, -1.0f),
             std::max<size_t>(text.size() + 1, 4096),
             ImGuiInputTextFlags_ReadOnly | ImGuiInputTextFlags_AllowTabInput);
+
+        // Designers should never need an external text editor: open the source
+        // file in the generic Data File Editor for validated raw/structured
+        // editing instead of hand-editing files outside the engine.
+        if (sourcePath && sourcePath[0] != '\0')
+        {
+            ImGui::Spacing();
+            if (ImGui::Button(EditorLocale::Text("Edit in Data File Editor", "在数据文件编辑器中编辑")))
+                DataFileEditorRequests::RequestOpen(sourcePath);
+        }
     }
 
 

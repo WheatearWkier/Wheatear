@@ -52,7 +52,18 @@ namespace Wheatear {
 
     void Scene::DestroyEntityImmediate(Entity entity)
     {
-        m_Registry.destroy(entity);
+        // Guard against stale handles (undo/redo, deleted selection): entt v4
+        // destroy() on an invalid entity dereferences out-of-range sparse
+        // storage, so this must never reach the registry unchecked.
+        if (!entity || !m_Registry.valid(static_cast<entt::entity>(entity)))
+            return;
+
+        // Mirror the deferred path so systems (physics body teardown, ...) see
+        // OnEntityDestroy even for immediate destroys.
+        for (auto& system : m_Systems)
+            system->OnEntityDestroy(this, entity);
+
+        m_Registry.destroy(static_cast<entt::entity>(entity));
         InvalidateEntityLookupCache();
     }
 
@@ -92,14 +103,19 @@ namespace Wheatear {
         if (m_DestroyQueue.empty())
             return;
 
-        // Deterministic order + dedup (handlers may enqueue during iteration).
-        std::sort(m_DestroyQueue.begin(), m_DestroyQueue.end());
-        m_DestroyQueue.erase(std::unique(m_DestroyQueue.begin(), m_DestroyQueue.end()), m_DestroyQueue.end());
+        // Swap the batch out first: OnEntityDestroy handlers may enqueue more
+        // destroys, and appending to the vector being range-iterated would
+        // invalidate the loop once it grows.
+        std::vector<entt::entity> batch;
+        batch.swap(m_DestroyQueue);
 
-        for (entt::entity e : m_DestroyQueue)
+        // Deterministic order + dedup (handlers may enqueue during iteration).
+        std::sort(batch.begin(), batch.end());
+        batch.erase(std::unique(batch.begin(), batch.end()), batch.end());
+
+        for (entt::entity e : batch)
             if (m_Registry.valid(e))
                 m_Registry.destroy(e);
-        m_DestroyQueue.clear();
         InvalidateEntityLookupCache();
     }
 
@@ -108,12 +124,19 @@ namespace Wheatear {
         if (m_DestroyQueue.empty())
             return;
 
+        // Swap the batch out first: OnEntityDestroy handlers may enqueue more
+        // destroys, and appending to the vector being range-iterated would
+        // invalidate the loop once it grows. The re-enqueued entities are
+        // flushed next frame, which is safe and repeatable.
+        std::vector<entt::entity> batch;
+        batch.swap(m_DestroyQueue);
+
         // Deterministic order + dedup (OnEntityDestroy handlers may enqueue
         // during iteration; a sorted vector makes that safe and repeatable).
-        std::sort(m_DestroyQueue.begin(), m_DestroyQueue.end());
-        m_DestroyQueue.erase(std::unique(m_DestroyQueue.begin(), m_DestroyQueue.end()), m_DestroyQueue.end());
+        std::sort(batch.begin(), batch.end());
+        batch.erase(std::unique(batch.begin(), batch.end()), batch.end());
 
-        for (entt::entity e : m_DestroyQueue)
+        for (entt::entity e : batch)
         {
             if (!m_Registry.valid(e)) continue;
             Entity entity = { e, this };
@@ -123,7 +146,6 @@ namespace Wheatear {
 
             m_Registry.destroy(e);
         }
-        m_DestroyQueue.clear();
         InvalidateEntityLookupCache();
     }
 
@@ -183,6 +205,8 @@ namespace Wheatear {
         }
 
         m_Systems.clear();
+        m_SystemCache.clear();
+        m_SystemCacheDirty = true;
         m_ExecutionMode = SceneExecutionMode::None;
     }
 

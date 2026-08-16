@@ -177,12 +177,14 @@ Sprite、UI 和特效共用同一套图集与动画工作流，角色动作、�
 
 编辑器围绕内容生产效率设计，当前重点工具包括：
 
-- VN Script Editor：编辑剧情、选项、角色、背景和音乐
-- Event Script：查看和组织 `.wts` 流程（事件图编辑器）
-- Side Combat Tuning：编辑横板战斗参数
+- VN Script Editor：编辑剧情、选项、角色、背景和音乐（行式可视化编辑 + 源文件跳转）
+- Event Script：查看和组织 `.wts` 流程（事件图编辑器，源码预览只读防手写）
+- Side Combat Tuning：编辑横板战斗参数（类型化 tab + 全字段 Advanced 树）
 - WAO Action Debugger：查看动作配方、效果和运行记录
-- Animation Editor / Sprite Sheet Picker：序列帧、图集、逐格裁切、碰撞框
-- Content Browser：浏览资源、场景、Prefab 和 UI 模板（缩略图、格子条带拖放）
+- Animation Editor / Sprite Sheet Picker：序列帧、图集、逐格裁切、碰撞框、命名矩形（rects 可视化编辑 + 画布叠加）
+- Content Browser：UE 风格资源浏览器（Sources 文件夹树、类型筛选勾选菜单、可拖拽分割条、滚轮缩放缩略图、资产定位高亮）
+- Data File Editor：通用数据文件编辑器——任何 `.yaml/.json/.wtsettings/.wtanim` 双击即可结构化树编辑 + 校验 + 原始文本兜底，`rect: [x,y,w,h]` 字段可直接在画布上拖拽
+- 资产引用定位：Inspector / 数据编辑器里的资源字段旁有 `Locate` 按钮，一键在资源浏览器中定位并高亮该资产
 - Input Bindings：输入动作重映射
 - 内置 Help 手册：编辑器操作文档，含完整 sheet 工作流示例
 

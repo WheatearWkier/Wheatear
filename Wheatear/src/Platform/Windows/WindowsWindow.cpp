@@ -12,6 +12,7 @@
 #include "stb_image.h"
 
 #include <filesystem>
+#include <stdexcept>
 
 namespace Wheatear {
 
@@ -57,7 +58,13 @@ namespace Wheatear {
         {
             WT_PROFILE_SCOPE("glfwInit");
             const int success = glfwInit();
-            WT_CORE_ASSERT(success, "Failed to initialize GLFW");
+            if (!success)
+            {
+                // Release builds compile the assert away; without this the app
+                // would keep running on an uninitialized GLFW.
+                WT_CORE_ERROR("WindowsWindow: failed to initialize GLFW");
+                throw std::runtime_error("Failed to initialize GLFW");
+            }
             glfwSetErrorCallback(GLFWErrorCallback);
         }
 
@@ -69,6 +76,12 @@ namespace Wheatear {
                 props.Title.c_str(),
                 nullptr, nullptr
             );
+            if (!m_Window)
+            {
+                WT_CORE_ERROR("WindowsWindow: failed to create window '{0}' ({1} x {2})",
+                    props.Title, props.Width, props.Height);
+                throw std::runtime_error("Failed to create GLFW window");
+            }
             s_GLFWWindowCount++;
 
             if (!props.IconPath.empty())

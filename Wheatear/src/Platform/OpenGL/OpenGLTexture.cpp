@@ -98,11 +98,40 @@ namespace Wheatear {
 			internalFormat = GL_RGB8;
 			dataFormat = GL_RGB;
 		}
+		else if (channels == 2) {
+			internalFormat = GL_RG8;
+			dataFormat = GL_RG;
+		}
+		else if (channels == 1) {
+			internalFormat = GL_R8;
+			dataFormat = GL_RED;
+		}
 
 		m_InternalFormat = internalFormat;
 		m_DataFormat = dataFormat;
 
-		WT_CORE_ASSERT(internalFormat & dataFormat, "Format not supported!");
+		if (internalFormat == 0 || dataFormat == 0)
+		{
+			WT_CORE_WARN("OpenGLTexture2D: unsupported channel count {} in '{}', using fallback texture",
+				channels, resolvedPath.string());
+			stbi_image_free(data);
+			m_Width = 1;
+			m_Height = 1;
+			m_InternalFormat = GL_RGBA8;
+			m_DataFormat = GL_RGBA;
+			glCreateTextures(GL_TEXTURE_2D, 1, &m_RendererID);
+			glTextureStorage2D(m_RendererID, 1, m_InternalFormat, m_Width, m_Height);
+			glTextureParameteri(m_RendererID, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+			glTextureParameteri(m_RendererID, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+			glTextureParameteri(m_RendererID, GL_TEXTURE_WRAP_S, GL_REPEAT);
+			glTextureParameteri(m_RendererID, GL_TEXTURE_WRAP_T, GL_REPEAT);
+			const uint32_t fallbackPixel = 0xffff00ff;
+			ScopedUnpackAlignment unpackAlignment(1);
+			glTextureSubImage2D(m_RendererID, 0, 0, 0, m_Width, m_Height,
+				m_DataFormat, GL_UNSIGNED_BYTE, &fallbackPixel);
+			m_IsLoaded = false;
+			return;
+		}
 
 		glCreateTextures(GL_TEXTURE_2D, 1, &m_RendererID);
 		glTextureStorage2D(m_RendererID, 1, internalFormat, m_Width, m_Height);

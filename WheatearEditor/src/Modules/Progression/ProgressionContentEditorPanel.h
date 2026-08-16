@@ -36,16 +36,12 @@ namespace Wheatear {
         void DrawSkillTreeTab();
         void DrawContentTab();
         void DrawValidationTab();
-        void DrawRawPreview(const std::string& text, const char* id);
+        void DrawRawPreview(const std::string& text, const char* id,
+            const char* sourcePath = nullptr);
 
         bool DrawSequenceContentEditor(const char* rootKey);
         bool DrawDefaultsEditor(YAML::Node defaults);
         bool DrawUpgradesEditor(YAML::Node upgrades);
-        bool DrawYamlNode(YAML::Node node, const std::string& path, int depth = 0);
-        bool DrawYamlMap(YAML::Node node, const std::string& path, int depth);
-        bool DrawYamlSequence(YAML::Node node, const std::string& path, int depth);
-        bool DrawYamlScalar(YAML::Node node, const std::string& path);
-        bool DrawYamlAddControls(YAML::Node node, const std::string& path, bool sequence);
 
     private:
         bool m_Open = false;

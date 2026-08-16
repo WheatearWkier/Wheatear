@@ -5,6 +5,8 @@
 #include "Wheatear/Animation/AnimationClip.h"
 #include "Wheatear/Core/Core.h"
 
+#include <algorithm>
+#include <cstddef>
 #include <string>
 #include <unordered_map>
 
@@ -64,8 +66,15 @@ namespace Wheatear {
         const AnimationFrame* GetCurrentFrame() const
         {
             auto clip = GetCurrentClip();
-            if (!clip || clip->GetFrameCount() == 0) return nullptr;
-            return &clip->GetFrames()[CurrentFrameIndex];
+            const std::size_t frameCount = clip ? clip->GetFrameCount() : 0;
+            if (frameCount == 0)
+                return nullptr;
+            // A clip can be swapped for a shorter one (hot-reloaded .wtanim,
+            // runtime replacement) while CurrentFrameIndex still points past
+            // the new clip's end; clamp instead of reading out of bounds.
+            const int clampedIndex = std::clamp(CurrentFrameIndex, 0,
+                static_cast<int>(frameCount) - 1);
+            return &clip->GetFrames()[static_cast<std::size_t>(clampedIndex)];
         }
     };
 

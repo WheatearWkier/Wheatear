@@ -72,6 +72,12 @@ namespace Wheatear {
         SpriteSheetData Load(const std::string& path);
         void Save(const std::string& path, const SpriteSheetData& data);
 
+        // Hot-reloading cached view of a sheet (re-reads when the file's write
+        // time changes, at most every ~500ms). Editor inspectors use this to
+        // show named-rect dropdowns without per-frame file I/O. Returns
+        // nullptr when the sheet cannot be loaded.
+        const SpriteSheetData* GetCachedSheetData(const std::string& path);
+
         int CellCount(const SpriteSheetData& data);
         bool IsValidCell(const SpriteSheetData& data, int cellIndex);
 

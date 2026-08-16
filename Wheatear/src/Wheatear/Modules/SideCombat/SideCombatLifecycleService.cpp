@@ -145,8 +145,12 @@ namespace Wheatear::SideCombatLifecycleService {
         level.RuntimeCameraBaseCaptured = false;
         level.RuntimeCameraProjectionCaptured = false;
         level.RuntimeWaveIndex = 0;
+        // Normalize arena bounds first: std::clamp requires lo <= hi, and a
+        // hand-edited scene may have ArenaMin.x > ArenaMax.x (UB otherwise).
+        const float arenaLo = std::min(level.ArenaMin.x, level.ArenaMax.x);
+        const float arenaHi = std::max(level.ArenaMin.x, level.ArenaMax.x);
         level.RuntimeWaveRightWall = level.WaveModeEnabled
-            ? std::clamp(GetWaveRightWall(level, 0), level.ArenaMin.x, level.ArenaMax.x)
+            ? std::clamp(GetWaveRightWall(level, 0), arenaLo, arenaHi)
             : level.ArenaMax.x;
         level.RuntimeHudLayoutConfigured = false;
 

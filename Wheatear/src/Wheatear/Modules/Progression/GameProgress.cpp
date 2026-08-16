@@ -795,7 +795,7 @@ namespace Wheatear::GameProgress {
             else if (key == "scenePath") loaded.CurrentScenePath = NormalizeAssetLikePath(value);
             else if (key == "playerLevel") loaded.PlayerLevel = ParseInt(value, loaded.PlayerLevel);
             else if (key == "experience") loaded.Experience = ParseInt(value, loaded.Experience);
-            else if (key == "experienceToNext") loaded.ExperienceToNext = ParseInt(value, loaded.ExperienceToNext);
+            else if (key == "experienceToNext") loaded.ExperienceToNext = std::max(1, ParseInt(value, loaded.ExperienceToNext));
             else if (key == "magicSwordLevel") loaded.MagicSwordLevel = ParseInt(value, loaded.MagicSwordLevel);
             else if (key == "travelerArmorLevel") loaded.TravelerArmorLevel = ParseInt(value, loaded.TravelerArmorLevel);
             else if (key == "gold") loaded.Gold = ParseInt(value, loaded.Gold);
@@ -905,8 +905,14 @@ namespace Wheatear::GameProgress {
         State& state = GetState();
         state.Experience += amount;
 
+        // Cap the loop so a hand-edited save (huge experience, tiny
+        // experienceToNext) cannot stall the game for seconds in a single
+        // call; surplus experience carries over to the next gain.
+        constexpr int kMaxLevelUpsPerGain = 100000;
         int levelUps = 0;
-        while (state.Experience >= state.ExperienceToNext)
+        while (state.Experience >= state.ExperienceToNext
+            && state.ExperienceToNext > 0
+            && levelUps < kMaxLevelUpsPerGain)
         {
             state.Experience -= state.ExperienceToNext;
             ++state.PlayerLevel;
@@ -917,6 +923,11 @@ namespace Wheatear::GameProgress {
             state.Attributes.DEF += 1;
             state.Attributes.MATK += 2;
             state.Attributes.MDEF += 1;
+        }
+        if (levelUps >= kMaxLevelUpsPerGain)
+        {
+            WT_CORE_WARN("GameProgress: level-up loop hit the safety cap; save data may be corrupted.");
+            state.Experience = std::max(0, state.ExperienceToNext - 1);
         }
 
         std::ostringstream stream;

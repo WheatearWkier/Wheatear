@@ -114,6 +114,9 @@
     <ClInclude Include="src\Editor\YamlAssetDocument.h">
       <Filter>Editor</Filter>
     </ClInclude>
+    <ClInclude Include="src\Editor\YamlTreeEditor.h">
+      <Filter>Editor</Filter>
+    </ClInclude>
     <ClInclude Include="src\Modules\ArcadeCombat\ArcadeCombatDrawer.h">
       <Filter>Modules\ArcadeCombat</Filter>
     </ClInclude>
@@ -157,6 +160,12 @@
       <Filter>Panels</Filter>
     </ClInclude>
     <ClInclude Include="src\Panels\ContentBrowserPanel.h">
+      <Filter>Panels</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Panels\ContentBrowserRequests.h">
+      <Filter>Panels</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Panels\DataFileEditorPanel.h">
       <Filter>Panels</Filter>
     </ClInclude>
     <ClInclude Include="src\Panels\EditorHelpPanel.h">
@@ -340,6 +349,9 @@
       <Filter>Panels</Filter>
     </ClCompile>
     <ClCompile Include="src\Panels\ContentBrowserPanel.cpp">
+      <Filter>Panels</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Panels\DataFileEditorPanel.cpp">
       <Filter>Panels</Filter>
     </ClCompile>
     <ClCompile Include="src\Panels\EditorHelpPanel.cpp">

@@ -104,13 +104,20 @@ namespace Wheatear {
         std::filesystem::path m_ConfirmDeletePath;
         bool m_DrawerMode = false;
 
+        // Reveal highlight: asset requested via ContentBrowserRequests gets
+        // selected and flashed in the grid for a couple of seconds.
+        std::filesystem::path m_RevealHighlightPath;
+        float m_RevealHighlightTimer = 0.0f;
+
         uint32_t m_AudioPreviewHandle = 0;
         std::string m_AudioPreviewPath;
 
         char m_SearchBuffer[256] = {};
+        // UE-style type filter: bitmask of enabled AssetType bits; 0 = all.
+        uint32_t m_TypeFilterMask = 0;
 
         float m_ThumbnailSize = 72.0f;
-        float m_Padding = 8.0f;
+        float m_Padding = 14.0f;
         float m_SidebarWidth = 150.0f;
         float m_InspectorWidth = 190.0f;
         bool  m_ShowSidebar = true;

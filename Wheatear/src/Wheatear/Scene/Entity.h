@@ -3,6 +3,7 @@
 #include "entt.hpp"
 
 #include "Wheatear/Core/UUID.h"
+#include "Scene.h"
 
 #include <cstdint>
 #include <string>
@@ -43,7 +44,16 @@ namespace Wheatear {
         Scene*             GetScene() const { return m_Scene; }
 
 
-        operator bool()          const { return m_EntityHandle != entt::null; }
+        operator bool() const
+        {
+            // Truthiness reflects registry validity, not just a non-null
+            // handle: a stale handle whose entity was destroyed (or recycled)
+            // is falsy, so `if (entity)` call sites cannot pass a dead handle
+            // into GetComponent (which is UB in release builds).
+            return m_EntityHandle != entt::null
+                && m_Scene != nullptr
+                && m_Scene->GetRegistry().valid(m_EntityHandle);
+        }
         operator entt::entity()  const { return m_EntityHandle; }
 
         explicit operator uint32_t() const

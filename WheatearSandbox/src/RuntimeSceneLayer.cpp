@@ -131,7 +131,19 @@ void RuntimeSceneLayer::LoadScene(const std::filesystem::path& requestedPath)
     m_ActiveScene = Wheatear::CreateRef<Wheatear::Scene>();
 
     Wheatear::SceneSerializer serializer(m_ActiveScene);
-    if (!serializer.DeserializeYaml(m_ScenePath))
+    bool sceneLoaded = false;
+    try
+    {
+        sceneLoaded = serializer.DeserializeYaml(m_ScenePath);
+    }
+    catch (const std::exception& e)
+    {
+        WT_CORE_ERROR("RuntimeSceneLayer: exception while loading scene '{}': {}",
+            m_ScenePath.string(), e.what());
+        sceneLoaded = false;
+    }
+
+    if (!sceneLoaded)
     {
         WT_CORE_ERROR("RuntimeSceneLayer: failed to load scene '{}'", m_ScenePath.string());
         m_PendingSceneAutoLoadSlot = 0;

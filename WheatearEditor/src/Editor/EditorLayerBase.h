@@ -19,6 +19,7 @@ namespace Wheatear {
 
     class AnimationEditorPanel;
     class ContentBrowserPanel;
+    class DataFileEditorPanel;
     class EditorHelpPanel;
     class Framebuffer;
     class InputBindingsPanel;
@@ -247,6 +248,7 @@ namespace Wheatear {
         std::unique_ptr<ContentBrowserPanel> m_ContentBrowserPanel;
         std::unique_ptr<AnimationEditorPanel> m_AnimationEditorPanel;
         std::unique_ptr<SpriteSheetPickerPanel> m_SpriteSheetPickerPanel;
+        std::unique_ptr<DataFileEditorPanel> m_DataFileEditorPanel;
         std::unique_ptr<EditorHelpPanel> m_HelpPanel;
         std::unique_ptr<InputBindingsPanel> m_InputBindingsPanel;
         Timestep m_LastTimestep;

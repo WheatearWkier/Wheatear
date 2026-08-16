@@ -28,8 +28,12 @@ namespace Wheatear::SideCombatPhysicsService {
         const auto& tuning = SideCombatTuningService::GetTuning(level);
         const float laneMinY = level.LaneMinY < level.LaneMaxY ? level.LaneMinY : tuning.LaneMinY;
         const float laneMaxY = level.LaneMinY < level.LaneMaxY ? level.LaneMaxY : tuning.LaneMaxY;
+        // Normalize arena bounds: std::clamp requires lo <= hi (hand-edited
+        // scenes may invert ArenaMin/ArenaMax, which would be UB).
+        const float arenaLo = std::min(level.ArenaMin.x, level.ArenaMax.x);
+        const float arenaHi = std::max(level.ArenaMin.x, level.ArenaMax.x);
         const float arenaMaxX = level.WaveModeEnabled
-            ? std::clamp(level.RuntimeWaveRightWall, level.ArenaMin.x, level.ArenaMax.x)
+            ? std::clamp(level.RuntimeWaveRightWall, arenaLo, arenaHi)
             : level.ArenaMax.x;
 
         auto& registry = scene->GetRegistry();

@@ -13,9 +13,9 @@ namespace Wheatear {
             o << YAML::EndMap;
         }
         static void Deserialize(const YAML::Node& n, UICanvasComponent& c) {
-            c.Visible = n["Visible"].as<bool>();
-            c.ReferenceWidth = n["ReferenceWidth"].as<float>();
-            c.ReferenceHeight = n["ReferenceHeight"].as<float>();
+            c.Visible = n["Visible"].as<bool>(c.Visible);
+            c.ReferenceWidth = n["ReferenceWidth"].as<float>(c.ReferenceWidth);
+            c.ReferenceHeight = n["ReferenceHeight"].as<float>(c.ReferenceHeight);
         }
     };
 
@@ -34,13 +34,13 @@ namespace Wheatear {
             o << YAML::EndMap;
         }
         static void Deserialize(const YAML::Node& n, UIWidgetComponent& c) {
-            c.Visible = n["Visible"].as<bool>();
+            c.Visible = n["Visible"].as<bool>(c.Visible);
             c.EditorVisible = n["EditorVisible"].as<bool>(true);
-            c.Position = n["Position"].as<glm::vec2>();
-            c.Size = n["Size"].as<glm::vec2>();
-            c.Rotation = n["Rotation"].as<float>();
-            c.Anchor = (UIAnchor)n["Anchor"].as<int>();
-            c.SortOrder = n["SortOrder"].as<int>();
+            c.Position = n["Position"].as<glm::vec2>(c.Position);
+            c.Size = n["Size"].as<glm::vec2>(c.Size);
+            c.Rotation = n["Rotation"].as<float>(c.Rotation);
+            c.Anchor = (UIAnchor)n["Anchor"].as<int>((int)c.Anchor);
+            c.SortOrder = n["SortOrder"].as<int>(c.SortOrder);
             c.ParentEntity = UUID(n["ParentEntity"].as<uint64_t>(static_cast<uint64_t>(c.ParentEntity)));
         }
     };
@@ -85,7 +85,7 @@ namespace Wheatear {
             o << YAML::EndMap;
         }
         static void Deserialize(const YAML::Node& n, UIImageComponent& c) {
-            c.Color = n["Color"].as<glm::vec4>();
+            c.Color = n["Color"].as<glm::vec4>(c.Color);
             c.UVMin = n["UVMin"].as<glm::vec2>(c.UVMin);
             c.UVMax = n["UVMax"].as<glm::vec2>(c.UVMax);
             c.SpriteSheet = n["SpriteSheet"].as<std::string>("");
@@ -205,10 +205,10 @@ namespace Wheatear {
             o << YAML::EndMap;
         }
         static void Deserialize(const YAML::Node& n, UIProgressBarComponent& c) {
-            c.Value = n["Value"].as<float>();
-            c.MaxValue = n["MaxValue"].as<float>();
-            c.ForegroundColor = n["ForegroundColor"].as<glm::vec4>();
-            c.BackgroundColor = n["BackgroundColor"].as<glm::vec4>();
+            c.Value = n["Value"].as<float>(c.Value);
+            c.MaxValue = n["MaxValue"].as<float>(c.MaxValue);
+            c.ForegroundColor = n["ForegroundColor"].as<glm::vec4>(c.ForegroundColor);
+            c.BackgroundColor = n["BackgroundColor"].as<glm::vec4>(c.BackgroundColor);
         }
     };
     template<> struct ComponentSerializer<UISliderComponent> {
@@ -306,7 +306,7 @@ namespace Wheatear {
             {
                 c.Points.clear();
                 for (auto point : points)
-                    c.Points.push_back(point.as<glm::vec2>());
+                    c.Points.push_back(point.as<glm::vec2>(glm::vec2(0.0f)));
             }
             c.Color = n["Color"].as<glm::vec4>(c.Color);
             c.GlowColor = n["GlowColor"].as<glm::vec4>(c.GlowColor);

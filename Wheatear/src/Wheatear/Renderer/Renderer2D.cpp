@@ -230,8 +230,12 @@ namespace Wheatear {
 
     static float GetOrAllocTextureSlot(const Ref<Texture2D>& texture)
     {
+        // Guard the shared choke point so a null Ref from any draw entry
+        // (DrawQuad/DrawAnimationFrame/DrawTextGlyph/...) falls back to the
+        // white texture instead of dereferencing a null slot.
+        const Ref<Texture2D>& tex = texture ? texture : s_Data.WhiteTexture;
         for (uint32_t i = 1; i < s_Data.TextureSlotIndex; i++)
-            if (*s_Data.TextureSlots[i] == *texture)
+            if (*s_Data.TextureSlots[i] == *tex)
                 return static_cast<float>(i);
 
         if (s_Data.TextureSlotIndex >= k_MaxTexSlots)
@@ -239,7 +243,7 @@ namespace Wheatear {
 
         const float index = static_cast<float>(s_Data.TextureSlotIndex);
         WT_CORE_ASSERT(s_Data.TextureSlotIndex < k_MaxTexSlots, "Texture slot overflow");
-        s_Data.TextureSlots[s_Data.TextureSlotIndex++] = texture;
+        s_Data.TextureSlots[s_Data.TextureSlotIndex++] = tex;
         return index;
     }
 

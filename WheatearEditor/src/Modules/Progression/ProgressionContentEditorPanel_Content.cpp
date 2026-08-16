@@ -20,7 +20,7 @@ namespace Wheatear {
         if (!m_SelectedDocument.IsParseValid())
         {
             EditorWidgets::InlineStatus("YAML parse failed. Fix the source file before content editing.", EditorWidgets::StatusKind::Error);
-            DrawRawPreview(m_SelectedDocument.GetRawPreview(), "##ProgressionContentRawPreview");
+            DrawRawPreview(m_SelectedDocument.GetRawPreview(), "##ProgressionContentRawPreview", m_SelectedPath.c_str());
             return;
         }
 

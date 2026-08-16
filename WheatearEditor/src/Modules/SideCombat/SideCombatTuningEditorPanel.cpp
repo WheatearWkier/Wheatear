@@ -6,6 +6,8 @@
 #include "Editor/EditorLocale.h"
 #include "Editor/EditorWidgets.h"
 #include "Editor/GameplayEditorShell.h"
+#include "Editor/YamlTreeEditor.h"
+#include "Panels/DataFileEditorPanel.h"
 #include "Wheatear/Assets/AssetAliasRegistry.h"
 #include "Wheatear/Assets/AssetPath.h"
 
@@ -24,7 +26,7 @@ namespace Wheatear {
 
         using namespace EditorWidgets;
 
-        static void DrawRawPreview(const std::string& text)
+        static void DrawRawPreview(const std::string& text, const char* sourcePath)
         {
             std::string preview = text;
             EditorWidgets::InputMultilineString("##SideCombatRawPreview",
@@ -32,6 +34,10 @@ namespace Wheatear {
                 ImVec2(-1.0f, -1.0f),
                 std::max<size_t>(text.size() + 1, 4096),
                 ImGuiInputTextFlags_ReadOnly | ImGuiInputTextFlags_AllowTabInput);
+
+            ImGui::Spacing();
+            if (ImGui::Button(EditorLocale::Text("Edit in Data File Editor", "在数据文件编辑器中编辑")))
+                DataFileEditorRequests::RequestOpen(sourcePath);
         }
 
     } // namespace
@@ -102,7 +108,7 @@ namespace Wheatear {
         {
             ImGui::Separator();
             EditorWidgets::InlineStatus("YAML parse failed. Use the raw YAML editor to fix the file first.", EditorWidgets::StatusKind::Error);
-            DrawRawPreview(m_RawPreview);
+            DrawRawPreview(m_RawPreview, m_SourcePath.c_str());
             EditorFloatingWindow::End();
             return;
         }
@@ -142,6 +148,18 @@ namespace Wheatear {
             if (ImGui::BeginTabItem("Progression"))
             {
                 DrawProgressionTab();
+                ImGui::EndTabItem();
+            }
+
+            if (ImGui::BeginTabItem("Advanced"))
+            {
+                EditorWidgets::SectionHeader("Advanced (All Fields)",
+                    "Generic tree view over every tuning key, including ones without a typed control on the other tabs.");
+                if (YamlTreeEditor::DrawYamlNode(
+                        *m_Root, "tuning", 0, m_NewScalarValues, m_NewMapKeys))
+                {
+                    m_Dirty = true;
+                }
                 ImGui::EndTabItem();
             }
 
@@ -749,7 +767,7 @@ namespace Wheatear {
     {
         EditorWidgets::SectionHeader("Raw Preview", "Generated YAML preview. Save writes this text back to disk.");
         RefreshRawPreview();
-        DrawRawPreview(m_RawPreview);
+        DrawRawPreview(m_RawPreview, m_SourcePath.c_str());
     }
 
 } // namespace Wheatear

@@ -17,7 +17,7 @@
 namespace Wheatear {
 
     ma_engine* AudioEngine::s_Engine = nullptr;
-    std::unordered_map<uint32_t, ma_sound*> AudioEngine::s_Sounds = {};
+    std::unordered_map<uint32_t, AudioEngine::ManagedSound> AudioEngine::s_Sounds = {};
     uint32_t AudioEngine::s_NextHandle = 1;
     static std::string ResolvePath(const std::string& filepath)
     {
@@ -26,25 +26,22 @@ namespace Wheatear {
 
     namespace {
 
-        // Decoded-once SFX cache. ma_sound_init_from_file(MA_SOUND_FLAG_DECODE)
+        // Decoded-once PCM cache. ma_sound_init_from_file(MA_SOUND_FLAG_DECODE)
         // re-reads and re-decodes the whole file from disk on every one-shot
         // (hits/landings/attacks at 60fps), stalling the main thread. Instead
-        // decode each path once into a pair of ma_audio_buffers (two copies so
-        // rapid overlapping plays do not fight over one data source) and create
-        // sounds from memory via ma_sound_init_from_data_source.
-        struct CachedSfx
+        // decode each path once into f32 PCM and let every play own a fresh
+        // ma_audio_buffer over that immutable memory: concurrent plays never
+        // share (or seek) a data-source cursor.
+        struct CachedSfxPcm
         {
-            std::array<std::unique_ptr<ma_audio_buffer>, 2> Buffers;
-            // Decoded PCM owned by the cache. ma_audio_buffer only references
-            // caller memory (no copy flag in this miniaudio version), so the
-            // PCM must outlive every buffer that plays it.
-            std::array<std::vector<float>, 2> OwnedPcm;
-            int Next = 0;
+            std::vector<float> Pcm;
+            ma_uint32 SampleRate = 0;
+            ma_uint32 Channels = 0;
         };
 
-        std::unordered_map<std::string, CachedSfx>& SfxBufferCache()
+        std::unordered_map<std::string, CachedSfxPcm>& SfxPcmCache()
         {
-            static std::unordered_map<std::string, CachedSfx> cache;
+            static std::unordered_map<std::string, CachedSfxPcm> cache;
             return cache;
         }
 
@@ -55,21 +52,11 @@ namespace Wheatear {
                 && std::filesystem::is_regular_file(std::filesystem::path(resolvedPath), error);
         }
 
-        ma_audio_buffer* GetOrLoadSfxBuffer(const std::string& resolvedPath)
+        const CachedSfxPcm* GetOrLoadSfxPcm(const std::string& resolvedPath)
         {
-            CachedSfx& cached = SfxBufferCache()[resolvedPath];
-            const int slot = cached.Next;
-
-            // Round-robin between the two buffer slots so consecutive plays of
-            // the same SFX do not start from a half-consumed data source.
-            cached.Next = (cached.Next + 1) % static_cast<int>(cached.Buffers.size());
-
-            ma_audio_buffer* buffer = cached.Buffers[slot].get();
-            if (buffer)
-            {
-                ma_audio_buffer_seek_to_pcm_frame(buffer, 0);
-                return buffer;
-            }
+            CachedSfxPcm& cached = SfxPcmCache()[resolvedPath];
+            if (!cached.Pcm.empty())
+                return &cached;
 
             ma_decoder decoder;
             if (ma_decoder_init_file(resolvedPath.c_str(), nullptr, &decoder) != MA_SUCCESS)
@@ -79,15 +66,21 @@ namespace Wheatear {
             // below and its fields must not be read afterwards.
             const ma_uint32 outputSampleRate = decoder.outputSampleRate;
             const ma_uint32 outputChannels = decoder.outputChannels;
-            if (outputSampleRate == 0 || outputChannels == 0)
+            if (outputSampleRate == 0 || outputChannels == 0
+                || outputSampleRate > 384000 || outputChannels > 32)
             {
+                // Reject corrupt/absurd headers so a bogus sample rate cannot
+                // drive a multi-GB allocation below.
                 ma_decoder_uninit(&decoder);
                 return nullptr;
             }
 
             // Decode the whole file to f32 PCM in memory (one-time cost).
+            // Cap the preallocation; a lying header must not trigger bad_alloc.
             std::vector<float> pcm;
-            pcm.reserve(static_cast<size_t>(outputSampleRate) * outputChannels);
+            pcm.reserve(std::min(
+                static_cast<size_t>(outputSampleRate) * outputChannels,
+                static_cast<size_t>(64 * 1024 * 1024)));
             std::array<float, 8192> chunk{};
             for (;;)
             {
@@ -102,26 +95,33 @@ namespace Wheatear {
             if (pcm.empty())
                 return nullptr;
 
-            // Keep the decoded PCM alive inside the cache entry: ma_audio_buffer
-            // references the caller's memory and would dangle once the local
-            // vector goes out of scope.
-            std::vector<float>& ownedPcm = cached.OwnedPcm[slot];
-            ownedPcm = std::move(pcm);
+            cached.Pcm = std::move(pcm);
+            cached.SampleRate = outputSampleRate;
+            cached.Channels = outputChannels;
+            return &cached;
+        }
 
-            cached.Buffers[slot] = std::make_unique<ma_audio_buffer>();
+        // Creates a fresh ma_audio_buffer over the cached PCM. The buffer is
+        // owned by the caller (the ManagedSound) and must be uninitialized and
+        // freed when the sound is torn down.
+        ma_audio_buffer* CreateSfxBuffer(const CachedSfxPcm& pcm)
+        {
+            if (pcm.Channels == 0 || pcm.Pcm.size() < pcm.Channels)
+                return nullptr;
+
+            auto* buffer = new ma_audio_buffer();
             const ma_audio_buffer_config config = ma_audio_buffer_config_init(
                 ma_format_f32,
-                outputChannels,
-                static_cast<ma_uint64>(ownedPcm.size() / outputChannels),
-                ownedPcm.data(),
+                pcm.Channels,
+                static_cast<ma_uint64>(pcm.Pcm.size() / pcm.Channels),
+                pcm.Pcm.data(),
                 nullptr);
-            if (ma_audio_buffer_init(&config, cached.Buffers[slot].get()) != MA_SUCCESS)
+            if (ma_audio_buffer_init(&config, buffer) != MA_SUCCESS)
             {
-                cached.Buffers[slot].reset();
-                cached.OwnedPcm[slot].clear();
+                delete buffer;
                 return nullptr;
             }
-            return cached.Buffers[slot].get();
+            return buffer;
         }
 
     } // namespace
@@ -150,16 +150,22 @@ namespace Wheatear {
     void AudioEngine::Shutdown()
     {
         // Stop and release all sounds first
-        for (auto& [handle, sound] : s_Sounds)
+        for (auto& [handle, managed] : s_Sounds)
         {
-            ma_sound_stop(sound);
-            ma_sound_uninit(sound);
-            delete sound;
+            ma_sound_stop(managed.Sound);
+            ma_sound_uninit(managed.Sound);
+            if (managed.Buffer)
+            {
+                auto* buffer = static_cast<ma_audio_buffer*>(managed.Buffer);
+                ma_audio_buffer_uninit(buffer);
+                delete buffer;
+            }
+            delete managed.Sound;
         }
         s_Sounds.clear();
 
-        // Release decoded SFX buffers (owned before the engine is destroyed).
-        SfxBufferCache().clear();
+        // Release decoded PCM (owned before the engine is destroyed).
+        SfxPcmCache().clear();
 
         if (s_Engine)
         {
@@ -196,6 +202,7 @@ namespace Wheatear {
 
         ma_sound* sound = new ma_sound();
         ma_result result = MA_SUCCESS;
+        ma_audio_buffer* sfxBuffer = nullptr;
         if (loop)
         {
             // Long-running music should stream from the resolved file. Sharing
@@ -206,23 +213,37 @@ namespace Wheatear {
         }
         else
         {
-            ma_audio_buffer* buffer = GetOrLoadSfxBuffer(resolvedPath);
-            if (!buffer)
+            const CachedSfxPcm* pcm = GetOrLoadSfxPcm(resolvedPath);
+            if (!pcm)
             {
                 WT_CORE_WARN("AudioEngine: failed to load [{0}] resolved to [{1}]", filepath, resolvedPath);
                 delete sound;
                 return 0;
             }
 
-            // Play from the in-memory buffer; the data source is owned by the cache
-            // and outlives the sound, so no per-play disk I/O or decode.
+            // Play from the in-memory PCM; each play gets its own buffer so
+            // concurrent plays of the same SFX never share (or seek) the same
+            // data source. The buffer is freed together with the sound.
+            sfxBuffer = CreateSfxBuffer(*pcm);
+            if (!sfxBuffer)
+            {
+                WT_CORE_WARN("AudioEngine: failed to init buffer for [{0}] resolved to [{1}]", filepath, resolvedPath);
+                delete sound;
+                return 0;
+            }
+
             result = ma_sound_init_from_data_source(
-                s_Engine, buffer, 0, nullptr, sound);
+                s_Engine, sfxBuffer, 0, nullptr, sound);
         }
         if (result != MA_SUCCESS)
         {
             WT_CORE_WARN("AudioEngine: failed to init sound [{0}] resolved to [{1}], error code = {2}",
                 filepath, resolvedPath, (int)result);
+            if (sfxBuffer)
+            {
+                ma_audio_buffer_uninit(sfxBuffer);
+                delete sfxBuffer;
+            }
             delete sound;
             return 0;
         }
@@ -235,12 +256,17 @@ namespace Wheatear {
             WT_CORE_WARN("AudioEngine: failed to start sound [{0}] resolved to [{1}], error code = {2}",
                 filepath, resolvedPath, (int)startResult);
             ma_sound_uninit(sound);
+            if (sfxBuffer)
+            {
+                ma_audio_buffer_uninit(sfxBuffer);
+                delete sfxBuffer;
+            }
             delete sound;
             return 0;
         }
 
         uint32_t handle = s_NextHandle++;
-        s_Sounds[handle] = sound;
+        s_Sounds[handle] = ManagedSound{ sound, sfxBuffer };
         return handle;
     }
 
@@ -249,9 +275,15 @@ namespace Wheatear {
         auto it = s_Sounds.find(handle);
         if (it == s_Sounds.end()) return;
 
-        ma_sound_stop(it->second);
-        ma_sound_uninit(it->second);
-        delete it->second;
+        ma_sound_stop(it->second.Sound);
+        ma_sound_uninit(it->second.Sound);
+        if (it->second.Buffer)
+        {
+            auto* buffer = static_cast<ma_audio_buffer*>(it->second.Buffer);
+            ma_audio_buffer_uninit(buffer);
+            delete buffer;
+        }
+        delete it->second.Sound;
         s_Sounds.erase(it);
     }
 
@@ -259,21 +291,21 @@ namespace Wheatear {
     {
         auto it = s_Sounds.find(handle);
         if (it != s_Sounds.end())
-            ma_sound_stop(it->second);
+            ma_sound_stop(it->second.Sound);
     }
 
     void AudioEngine::ResumeSound(uint32_t handle)
     {
         auto it = s_Sounds.find(handle);
         if (it != s_Sounds.end())
-            ma_sound_start(it->second);
+            ma_sound_start(it->second.Sound);
     }
 
     void AudioEngine::SetVolume(uint32_t handle, float volume)
     {
         auto it = s_Sounds.find(handle);
         if (it != s_Sounds.end())
-            ma_sound_set_volume(it->second, std::clamp(volume, 0.0f, 2.0f));
+            ma_sound_set_volume(it->second.Sound, std::clamp(volume, 0.0f, 2.0f));
     }
 
     bool AudioEngine::IsPlaying(uint32_t handle)
@@ -282,34 +314,48 @@ namespace Wheatear {
 
         auto it = s_Sounds.find(handle);
         if (it == s_Sounds.end()) return false;
-        return ma_sound_is_playing(it->second) == MA_TRUE;
+        return ma_sound_is_playing(it->second.Sound) == MA_TRUE;
     }
 
     void AudioEngine::OnSceneStop()
     {
-        for (auto& [handle, sound] : s_Sounds)
+        for (auto& [handle, managed] : s_Sounds)
         {
-            ma_sound_stop(sound);
-            ma_sound_uninit(sound);
-            delete sound;
+            ma_sound_stop(managed.Sound);
+            ma_sound_uninit(managed.Sound);
+            if (managed.Buffer)
+            {
+                auto* buffer = static_cast<ma_audio_buffer*>(managed.Buffer);
+                ma_audio_buffer_uninit(buffer);
+                delete buffer;
+            }
+            delete managed.Sound;
         }
         s_Sounds.clear();
         s_NextHandle = 1;
 
-        // Drop decoded buffers on scene change so BGM/SFX of the previous scene
+        // Drop decoded PCM on scene change so BGM/SFX of the previous scene
         // do not pin memory; they re-decode once on next use.
-        SfxBufferCache().clear();
+        SfxPcmCache().clear();
     }
 
     void AudioEngine::CollectFinishedSounds()
     {
         for (auto it = s_Sounds.begin(); it != s_Sounds.end(); )
         {
-            ma_sound* sound = it->second;
-            if (sound && ma_sound_at_end(sound) == MA_TRUE && ma_sound_is_playing(sound) == MA_FALSE)
+            ManagedSound& managed = it->second;
+            if (managed.Sound
+                && ma_sound_at_end(managed.Sound) == MA_TRUE
+                && ma_sound_is_playing(managed.Sound) == MA_FALSE)
             {
-                ma_sound_uninit(sound);
-                delete sound;
+                ma_sound_uninit(managed.Sound);
+                if (managed.Buffer)
+                {
+                    auto* buffer = static_cast<ma_audio_buffer*>(managed.Buffer);
+                    ma_audio_buffer_uninit(buffer);
+                    delete buffer;
+                }
+                delete managed.Sound;
                 it = s_Sounds.erase(it);
             }
             else

@@ -2,6 +2,7 @@
 #include "SpriteRendererDrawer.h"
 
 #include "../ComponentDrawers.h"
+#include "UIDrawers.h"
 #include "Editor/EditorLocale.h"
 #include "Panels/SpriteSheetPickerPanel.h"
 
@@ -74,6 +75,8 @@ namespace Wheatear {
                     SpriteSheetPickerPanel::RequestOpen(entity);
                 if (ImGui::IsItemHovered(ImGuiHoveredFlags_DelayShort))
                     ImGui::SetTooltip("Pick a cell from an atlas or generate sprite animation frames.");
+                ImGui::Separator();
+                DrawSpriteSheetReference(c.SpriteSheet, c.CellIndex, c.SubRect);
                 if (ImGui::TreeNode(EditorLocale::Text("Advanced UV", "高级 UV")))
                 {
                     ImGui::DragFloat2(EditorLocale::Text("UV Min", "UV 最小"), glm::value_ptr(c.UVMin), 0.001f, 0.0f, 1.0f, "%.3f");

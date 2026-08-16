@@ -205,6 +205,12 @@ namespace {
 		if (!input.is_open())
 			return false;
 
+		input.seekg(0, std::ios::end);
+		const std::streampos fileSize = input.tellg();
+		input.seekg(0, std::ios::beg);
+		if (fileSize < 0)
+			return false;
+
 		char magic[sizeof(kAssetPackMagic)] = {};
 		if (!ReadBytes(input, magic, sizeof(magic)) ||
 			std::memcmp(magic, kAssetPackMagic, sizeof(kAssetPackMagic)) != 0)
@@ -249,10 +255,23 @@ namespace {
 			std::replace(entryPath.begin(), entryPath.end(), '\\', '/');
 			const std::filesystem::path relativePath = std::filesystem::path(entryPath).lexically_normal();
 			if (!IsSafePackEntryPath(relativePath) ||
-				storedSize > static_cast<uint64_t>(std::numeric_limits<size_t>::max()) ||
 				originalSize > static_cast<uint64_t>(std::numeric_limits<int>::max()))
 			{
 				WT_CORE_ERROR("Runtime asset pack contains an invalid entry: {}", entryPath);
+				return false;
+			}
+
+			// A truncated or hand-tampered pack can claim an arbitrary
+			// storedSize; only allocate what the file can actually deliver,
+			// otherwise a bogus entry triggers a multi-GB allocation
+			// (std::bad_alloc -> crash) before the read below can fail.
+			const std::streampos position = input.tellg();
+			const uint64_t remaining = (position >= 0 && fileSize > position)
+				? static_cast<uint64_t>(fileSize - position) : 0;
+			if (storedSize > remaining)
+			{
+				WT_CORE_ERROR("Runtime asset pack entry '{}' claims {} bytes but only {} remain in the pack.",
+					entryPath, storedSize, remaining);
 				return false;
 			}
 

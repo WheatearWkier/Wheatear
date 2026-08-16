@@ -50,12 +50,23 @@ namespace Wheatear {
         out << YAML::Key << "PropertyTracks" << YAML::Value << YAML::BeginSeq;
         for (const auto& tb : clip->GetPropertyTracks())
         {
+            // Match the cast to the track's actual data type instead of
+            // trusting the Property enum, so a float track tagged SpriteColor
+            // (or any other mismatch) cannot be reinterpreted as a different
+            // object (UB).
+            const auto vec4Track = std::dynamic_pointer_cast<PropertyTrack<glm::vec4>>(tb);
+            const auto floatTrack = std::dynamic_pointer_cast<PropertyTrack<float>>(tb);
+            if (!vec4Track && !floatTrack)
+            {
+                WT_CORE_WARN("AnimationClipSerializer: skipping property track with unsupported data type (property {})", (int)tb->Property);
+                continue;
+            }
             out << YAML::BeginMap;
             out << YAML::Key << "Property" << YAML::Value << (int)tb->Property;
             out << YAML::Key << "Keyframes" << YAML::Value << YAML::BeginSeq;
-            if (tb->Property == AnimatedProperty::SpriteColor)
+            if (vec4Track)
             {
-                for (auto& kf : std::static_pointer_cast<PropertyTrack<glm::vec4>>(tb)->Keyframes)
+                for (auto& kf : vec4Track->Keyframes)
                 {
                     out << YAML::BeginMap << YAML::Key << "Time" << kf.Time
                         << YAML::Key << "Value" << kf.Value
@@ -65,7 +76,7 @@ namespace Wheatear {
             }
             else
             {
-                for (auto& kf : std::static_pointer_cast<PropertyTrack<float>>(tb)->Keyframes)
+                for (auto& kf : floatTrack->Keyframes)
                 {
                     out << YAML::BeginMap << YAML::Key << "Time" << kf.Time
                         << YAML::Key << "Value" << kf.Value
@@ -168,16 +179,16 @@ namespace Wheatear {
                 {
                     auto track = clip->AddVec4Track(prop);
                     for (auto kf : t["Keyframes"])
-                        track->AddKeyframe(kf["Time"].as<float>(),
-                            kf["Value"].as<glm::vec4>(),
+                        track->AddKeyframe(kf["Time"].as<float>(0.0f),
+                            kf["Value"].as<glm::vec4>(glm::vec4(1.0f)),
                             (InterpolationMode)kf["Mode"].as<int>(0));
                 }
                 else
                 {
                     auto track = clip->AddFloatTrack(prop);
                     for (auto kf : t["Keyframes"])
-                        track->AddKeyframe(kf["Time"].as<float>(),
-                            kf["Value"].as<float>(),
+                        track->AddKeyframe(kf["Time"].as<float>(0.0f),
+                            kf["Value"].as<float>(0.0f),
                             (InterpolationMode)kf["Mode"].as<int>(0));
                 }
             }

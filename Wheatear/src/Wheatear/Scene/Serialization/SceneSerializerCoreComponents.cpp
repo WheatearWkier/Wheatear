@@ -11,7 +11,7 @@ namespace Wheatear {
             o << YAML::EndMap;
         }
         static void Deserialize(const YAML::Node& n, TagComponent& c) {
-            c.Tag = n["Tag"].as<std::string>();
+            c.Tag = n["Tag"].as<std::string>("");
         }
     };
 
@@ -25,9 +25,9 @@ namespace Wheatear {
             o << YAML::EndMap;
         }
         static void Deserialize(const YAML::Node& n, TransformComponent& c) {
-            c.Translation = n["Translation"].as<glm::vec3>();
-            c.Rotation = n["Rotation"].as<glm::vec3>();
-            c.Scale = n["Scale"].as<glm::vec3>();
+            c.Translation = n["Translation"].as<glm::vec3>(c.Translation);
+            c.Rotation = n["Rotation"].as<glm::vec3>(c.Rotation);
+            c.Scale = n["Scale"].as<glm::vec3>(c.Scale);
         }
     };
 
@@ -51,15 +51,15 @@ namespace Wheatear {
         static void Deserialize(const YAML::Node& n, CameraComponent& c) {
             auto cam = n["Camera"];
             c.Camera.SetProjectionType(
-                (SceneCamera::ProjectionType)cam["ProjectionType"].as<int>());
-            c.Camera.SetPerspectiveVerticalFOV(cam["PerspectiveFOV"].as<float>());
-            c.Camera.SetPerspectiveNearClip(cam["PerspectiveNear"].as<float>());
-            c.Camera.SetPerspectiveFarClip(cam["PerspectiveFar"].as<float>());
-            c.Camera.SetOrthographicSize(cam["OrthographicSize"].as<float>());
-            c.Camera.SetOrthographicNearClip(cam["OrthographicNear"].as<float>());
-            c.Camera.SetOrthographicFarClip(cam["OrthographicFar"].as<float>());
-            c.Primary = n["Primary"].as<bool>();
-            c.FixedAspectRatio = n["FixedAspectRatio"].as<bool>();
+                (SceneCamera::ProjectionType)cam["ProjectionType"].as<int>((int)c.Camera.GetProjectionType()));
+            c.Camera.SetPerspectiveVerticalFOV(cam["PerspectiveFOV"].as<float>(c.Camera.GetPerspectiveVerticalFOV()));
+            c.Camera.SetPerspectiveNearClip(cam["PerspectiveNear"].as<float>(c.Camera.GetPerspectiveNearClip()));
+            c.Camera.SetPerspectiveFarClip(cam["PerspectiveFar"].as<float>(c.Camera.GetPerspectiveFarClip()));
+            c.Camera.SetOrthographicSize(cam["OrthographicSize"].as<float>(c.Camera.GetOrthographicSize()));
+            c.Camera.SetOrthographicNearClip(cam["OrthographicNear"].as<float>(c.Camera.GetOrthographicNearClip()));
+            c.Camera.SetOrthographicFarClip(cam["OrthographicFar"].as<float>(c.Camera.GetOrthographicFarClip()));
+            c.Primary = n["Primary"].as<bool>(c.Primary);
+            c.FixedAspectRatio = n["FixedAspectRatio"].as<bool>(c.FixedAspectRatio);
         }
     };
 
@@ -82,7 +82,7 @@ namespace Wheatear {
             o << YAML::EndMap;
         }
         static void Deserialize(const YAML::Node& n, SpriteRendererComponent& c) {
-            c.Color = n["Color"].as<glm::vec4>();
+            c.Color = n["Color"].as<glm::vec4>(c.Color);
             c.TilingFactor = n["TilingFactor"].as<float>(1.0f);
             c.UVMin = n["UVMin"].as<glm::vec2>(c.UVMin);
             c.UVMax = n["UVMax"].as<glm::vec2>(c.UVMax);
@@ -109,9 +109,9 @@ namespace Wheatear {
             o << YAML::EndMap;
         }
         static void Deserialize(const YAML::Node& n, CircleRendererComponent& c) {
-            c.Color = n["Color"].as<glm::vec4>();
-            c.Thickness = n["Thickness"].as<float>();
-            c.Fade = n["Fade"].as<float>();
+            c.Color = n["Color"].as<glm::vec4>(c.Color);
+            c.Thickness = n["Thickness"].as<float>(c.Thickness);
+            c.Fade = n["Fade"].as<float>(c.Fade);
         }
     };
 
@@ -125,8 +125,8 @@ namespace Wheatear {
             o << YAML::EndMap;
         }
         static void Deserialize(const YAML::Node& n, Rigidbody2DComponent& c) {
-            c.Type = BodyTypeFromString(n["BodyType"].as<std::string>());
-            c.FixedRotation = n["FixedRotation"].as<bool>();
+            c.Type = BodyTypeFromString(n["BodyType"].as<std::string>(""));
+            c.FixedRotation = n["FixedRotation"].as<bool>(c.FixedRotation);
             c.GravityScale = n["GravityScale"].as<float>(1.0f);
         }
     };
@@ -145,12 +145,12 @@ namespace Wheatear {
             o << YAML::EndMap;
         }
         static void Deserialize(const YAML::Node& n, BoxCollider2DComponent& c) {
-            c.Offset = n["Offset"].as<glm::vec2>();
-            c.Size = n["Size"].as<glm::vec2>();
-            c.Density = n["Density"].as<float>();
-            c.Friction = n["Friction"].as<float>();
-            c.Restitution = n["Restitution"].as<float>();
-            c.RestitutionThreshold = n["RestitutionThreshold"].as<float>();
+            c.Offset = n["Offset"].as<glm::vec2>(c.Offset);
+            c.Size = n["Size"].as<glm::vec2>(c.Size);
+            c.Density = n["Density"].as<float>(c.Density);
+            c.Friction = n["Friction"].as<float>(c.Friction);
+            c.Restitution = n["Restitution"].as<float>(c.Restitution);
+            c.RestitutionThreshold = n["RestitutionThreshold"].as<float>(c.RestitutionThreshold);
             c.FollowAnimation = n["FollowAnimation"].as<bool>(false);
         }
     };
@@ -168,12 +168,12 @@ namespace Wheatear {
             o << YAML::EndMap;
         }
         static void Deserialize(const YAML::Node& n, CircleCollider2DComponent& c) {
-            c.Offset = n["Offset"].as<glm::vec2>();
-            c.Radius = n["Radius"].as<float>();
-            c.Density = n["Density"].as<float>();
-            c.Friction = n["Friction"].as<float>();
-            c.Restitution = n["Restitution"].as<float>();
-            c.RestitutionThreshold = n["RestitutionThreshold"].as<float>();
+            c.Offset = n["Offset"].as<glm::vec2>(c.Offset);
+            c.Radius = n["Radius"].as<float>(c.Radius);
+            c.Density = n["Density"].as<float>(c.Density);
+            c.Friction = n["Friction"].as<float>(c.Friction);
+            c.Restitution = n["Restitution"].as<float>(c.Restitution);
+            c.RestitutionThreshold = n["RestitutionThreshold"].as<float>(c.RestitutionThreshold);
         }
     };
 
@@ -213,7 +213,7 @@ namespace Wheatear {
         }
         static void Deserialize(const YAML::Node& n, DirectionalLightComponent& c)
         {
-            c.Color = n["Color"].as<glm::vec3>();
+            c.Color = n["Color"].as<glm::vec3>(c.Color);
             c.Intensity = n["Intensity"].as<float>(1.0f);
         }
     };
@@ -233,7 +233,7 @@ namespace Wheatear {
         }
         static void Deserialize(const YAML::Node& n, PointLightComponent& c)
         {
-            c.Color = n["Color"].as<glm::vec3>();
+            c.Color = n["Color"].as<glm::vec3>(c.Color);
             c.Intensity = n["Intensity"].as<float>(1.0f);
             c.Constant = n["Constant"].as<float>(1.0f);
             c.Linear = n["Linear"].as<float>(0.09f);

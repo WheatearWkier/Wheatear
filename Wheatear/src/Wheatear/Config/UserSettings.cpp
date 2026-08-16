@@ -150,7 +150,12 @@ namespace Wheatear {
 
     std::filesystem::path UserSettings::SettingsPath()
     {
-        return AssetPath::Resolve("assets/saves/user_settings.wtsettings");
+        // Settings are runtime-generated data: write under the writable root
+        // (project in the editor, next to the executable when packaged) so key
+        // bindings survive cache re-extraction and repacks, matching where
+        // GameProgress writes its saves.
+        return AssetPath::GetWritableRoot() / "assets" / "saves"
+            / "user_settings.wtsettings";
     }
 
     void UserSettings::Load()

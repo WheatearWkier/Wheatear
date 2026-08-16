@@ -61,15 +61,28 @@ int main(int argc, char** argv) {
 #endif
 	Wheatear::Log::Init();
 
-	WT_PROFILE_BEGIN_SESSION("Startup", "WheatearProfile-Startup.json");
-	auto app = Wheatear::CreateApplication({ argc, argv });
-	WT_PROFILE_END_SESSION();
+	Wheatear::Application* app = nullptr;
+	try
+	{
+		WT_PROFILE_BEGIN_SESSION("Startup", "WheatearProfile-Startup.json");
+		app = Wheatear::CreateApplication({ argc, argv });
+		WT_PROFILE_END_SESSION();
 
-	WT_PROFILE_BEGIN_SESSION("Runtime", "WheatearProfile-Runtime.json");
-	app->Run();
-	WT_PROFILE_END_SESSION();
+		WT_PROFILE_BEGIN_SESSION("Runtime", "WheatearProfile-Runtime.json");
+		app->Run();
+		WT_PROFILE_END_SESSION();
+	}
+	catch (const std::exception& e)
+	{
+		Wheatear::Log::GetCoreLogger()->error("Fatal unhandled exception: {}", e.what());
+	}
+	catch (...)
+	{
+		Wheatear::Log::GetCoreLogger()->error("Fatal unhandled exception (unknown type)");
+	}
 
 	WT_PROFILE_BEGIN_SESSION("Shutdown", "WheatearProfile-Shutdown.json");
 	delete app;
 	WT_PROFILE_END_SESSION();
+	return 0;
 }

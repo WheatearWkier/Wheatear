@@ -65,24 +65,44 @@ namespace Wheatear {
         bool newUUID,
         std::unordered_map<uint64_t, UUID>* idRemap = nullptr)
     {
-        const uint64_t sourceUUID = node["Entity"].as<uint64_t>();
-        const uint64_t uuid = newUUID ? static_cast<uint64_t>(UUID()) : sourceUUID;
-        if (idRemap)
-            (*idRemap)[sourceUUID] = UUID(uuid);
+        Entity entity;
+        try
+        {
+            // Hand-edited or older files may omit fields; every as<T>() in the
+            // component deserializers carries a default, and this catch drops
+            // any entity that still fails to parse instead of terminating the
+            // whole process.
+            const uint64_t sourceUUID = node["Entity"].as<uint64_t>(0);
+            const uint64_t uuid = (newUUID || sourceUUID == 0)
+                ? static_cast<uint64_t>(UUID())
+                : sourceUUID;
+            if (idRemap && sourceUUID != 0)
+                (*idRemap)[sourceUUID] = UUID(uuid);
 
-        std::string name;
-        if (auto tagNode = node["TagComponent"])
-            name = tagNode["Tag"].as<std::string>();
+            std::string name;
+            if (auto tagNode = node["TagComponent"])
+                name = tagNode["Tag"].as<std::string>("");
 
-        Entity entity = scene->CreateEntityWithUUID(uuid, name);
+            entity = scene->CreateEntityWithUUID(uuid, name);
 
-        DeserializeCoreSceneComponents(node, entity);
-        DeserializeAnimationSceneComponents(node, entity);
-        DeserializeScriptingSceneComponents(node, entity);
-        DeserializeModuleSceneComponents(node, entity);
-        DeserializeUISceneComponents(node, entity);
+            DeserializeCoreSceneComponents(node, entity);
+            DeserializeAnimationSceneComponents(node, entity);
+            DeserializeScriptingSceneComponents(node, entity);
+            DeserializeModuleSceneComponents(node, entity);
+            DeserializeUISceneComponents(node, entity);
 
-        return entity;
+            return entity;
+        }
+        catch (const YAML::Exception& e)
+        {
+            WT_CORE_ERROR("SceneSerializer: failed to deserialize entity: {}", e.what());
+            if (entity)
+            {
+                scene->GetRegistry().destroy(static_cast<entt::entity>(entity));
+                scene->InvalidateEntityLookupCache();
+            }
+            return {};
+        }
     }
 
     static uint32_t EntityKey(Entity entity)
@@ -126,10 +146,20 @@ namespace Wheatear {
     static void CollectUIPrefabEntitiesRecursive(Entity root,
         const UIChildrenByParent& childrenByParent,
         std::vector<Entity>& entities,
-        std::unordered_set<uint32_t>& visited)
+        std::unordered_set<uint32_t>& visited,
+        int depth = 0)
     {
         if (!root || !root.HasComponent<IDComponent>())
             return;
+
+        // Guard against hand-authored arbitrarily deep parent chains: the
+        // recursion must not blow the stack.
+        if (depth > 512)
+        {
+            WT_CORE_WARN("SceneSerializer: UI hierarchy deeper than 512 levels; stopping prefab collection at '{}'",
+                root.GetName());
+            return;
+        }
 
         const uint32_t rootKey = EntityKey(root);
         if (!visited.insert(rootKey).second)
@@ -146,7 +176,7 @@ namespace Wheatear {
             return;
 
         for (Entity child : childrenIt->second)
-            CollectUIPrefabEntitiesRecursive(child, childrenByParent, entities, visited);
+            CollectUIPrefabEntitiesRecursive(child, childrenByParent, entities, visited, depth + 1);
     }
 
     static std::vector<Entity> CollectPrefabEntities(Entity root)
@@ -324,22 +354,32 @@ namespace Wheatear {
             return false;
         }
 
-        if (!data["Scene"])
+        try
+        {
+            if (!data["Scene"])
+                return false;
+
+            if (auto savePolicy = data["SavePolicy"])
+            {
+                SavePolicy policy = m_Scene->GetSavePolicy();
+                DeserializeSavePolicy(savePolicy, policy);
+                m_Scene->SetSavePolicy(policy);
+            }
+
+            if (auto entities = data["Entities"])
+            {
+                // Malformed entities are reported (and rolled back) inside
+                // DeserializeEntityFromNode; the rest of the scene still loads.
+                for (auto entityNode : entities)
+                    DeserializeEntityFromNode(entityNode, m_Scene.get(), false);
+            }
+            return true;
+        }
+        catch (const YAML::Exception& e)
+        {
+            WT_CORE_ERROR("Failed to deserialize '{}': {}", resolvedPath.string(), e.what());
             return false;
-
-        if (auto savePolicy = data["SavePolicy"])
-        {
-            SavePolicy policy = m_Scene->GetSavePolicy();
-            DeserializeSavePolicy(savePolicy, policy);
-            m_Scene->SetSavePolicy(policy);
         }
-
-        if (auto entities = data["Entities"])
-        {
-            for (auto entityNode : entities)
-                DeserializeEntityFromNode(entityNode, m_Scene.get(), false);
-        }
-        return true;
     }
 
     bool SceneSerializer::SerializePrefab(Entity entity, const std::filesystem::path& filepath)
@@ -396,8 +436,23 @@ namespace Wheatear {
         std::vector<Entity> entities;
         std::unordered_map<uint64_t, UUID> idRemap;
 
-        for (auto entityNode : data["Entities"])
-            entities.push_back(DeserializeEntityFromNode(entityNode, scene, true, &idRemap));
+        try
+        {
+            for (auto entityNode : data["Entities"])
+            {
+                Entity entity = DeserializeEntityFromNode(entityNode, scene, true, &idRemap);
+                if (entity)
+                    entities.push_back(entity);
+            }
+        }
+        catch (const YAML::Exception& e)
+        {
+            WT_CORE_ERROR("PrefabSerializer: failed to deserialize '{}': {}", resolvedPath.string(), e.what());
+            for (Entity entity : entities)
+                scene->GetRegistry().destroy(static_cast<entt::entity>(entity));
+            scene->InvalidateEntityLookupCache();
+            return {};
+        }
 
         RemapPrefabEntityReferences(entities, idRemap);
         return entities;

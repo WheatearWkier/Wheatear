@@ -3,6 +3,8 @@
 #include "EditorWidgets.h"
 
 #include "Editor/EditorPlatform.h"
+#include "Editor/EditorLocale.h"
+#include "Panels/ContentBrowserRequests.h"
 #include "Wheatear/Assets/AssetAliasRegistry.h"
 #include "Wheatear/Assets/AssetPath.h"
 #include "Wheatear/Renderer/Texture.h"
@@ -536,6 +538,16 @@ namespace Wheatear::EditorWidgets {
         ImGui::SameLine();
         if (ImGui::SmallButton("Open"))
             OpenProjectAssetFolder(reference);
+        ImGui::SameLine();
+        if (ImGui::SmallButton(EditorLocale::Text("Locate", "定位")))
+        {
+            if (!reference.empty())
+                ContentBrowserRequests::RequestReveal(reference);
+        }
+        if (ImGui::IsItemHovered())
+            ImGui::SetTooltip("%s", EditorLocale::Text(
+                "Jump to this asset in the Content Browser.",
+                "在资源浏览器中定位该资产。"));
 
         const bool exists = ProjectAssetExists(reference);
         ImGui::SameLine();

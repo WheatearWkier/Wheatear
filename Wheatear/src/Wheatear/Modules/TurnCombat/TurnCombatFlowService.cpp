@@ -82,12 +82,28 @@ namespace Wheatear::TurnCombatFlowService {
             const std::string skillId = TurnCombatSkillService::ChooseEnemySkill(
                 combatant, level.RuntimeRound);
             const auto* skill = TurnCombatSkillService::FindSkill(skillId);
-            Entity target = skill
-                ? TurnCombatTargetService::ChooseTargetForAI(scene, actor, *skill)
-                : Entity{};
+            if (!skill)
+            {
+                // Missing skill data (empty BasicSkillId with no 'claw'
+                // fallback in the action database) must not soft-lock the
+                // battle in the intro/acting phase; skip this enemy's turn.
+                WT_CORE_WARN("TurnCombat: skill '{}' not found for '{}'; skipping its turn.",
+                    skillId, combatant.DisplayName);
+                continue;
+            }
+            Entity target = TurnCombatTargetService::ChooseTargetForAI(scene, actor, *skill);
             TurnCombatActionService::BeginAction(scene, level, actor, skillId, target);
             return;
         }
+
+        // No combatant could act this pass (e.g. every enemy's skill is
+        // missing from the action database). Fall back to the command phase so
+        // the battle cannot hang permanently.
+        WT_CORE_WARN("TurnCombat: no combatant could act; falling back to the command phase.");
+        level.RuntimePhase = TurnCombatPhase::AwaitCommand;
+        level.RuntimeCommandMenuPage = "root";
+        level.RuntimeSelectedSkillId.clear();
+        level.RuntimeActiveActor = 0;
     }
 
     void ResetLevel(Scene* scene, TurnCombatLevelComponent& level)
