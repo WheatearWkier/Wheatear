@@ -726,3 +726,56 @@ attacks:
     hitPause: 0.035
     cameraShake: 0.020
     cameraShakeDuration: 0.070
+
+# 消耗品道具槽（数据驱动，可在编辑器自由增删）。
+# - slot: 槽位编号（HUD 命令 side:item:<slot> 触发）
+# - actionId: 对应输入动作（在「输入绑定」面板新增动作并绑定按键）
+# - kind: heal=回血 / mana=回蓝 / attack_buff=攻击增益（数值取自场景玩家组件）
+# - cooldown: 该槽冷却（秒）
+# 加一个道具 = 在此加一行 + 输入绑定面板新增动作绑键 + HUD 预设加槽位图标。
+itemSlots:
+  - slot: 1
+    actionId: side.item1
+    kind: heal
+    cooldown: 5.0
+  - slot: 2
+    actionId: side.item2
+    kind: mana
+    cooldown: 5.0
+  - slot: 3
+    actionId: side.item3
+    kind: attack_buff
+    cooldown: 10.0
+
+# 技能槽触发表（数据驱动）。
+# - slot: 槽位 ID（稳定标识，如 basic / launcher）
+# - actionId: 输入动作（在「输入绑定」面板重映射或新增）
+# - kind: 行为类型（basic / launcher / magic_bolt / dash / ally_support / break_limit）
+# - enabled: 是否启用
+# 说明：行为类型是运行时行为（C++），本表只决定「哪个动作触发哪种行为」；
+# 给现有技能加第二个热键 = 加一行；新行为类型需要 C++（与新增组件同级）。
+skillSlots:
+  - slot: basic
+    actionId: side.basic
+    kind: basic
+    enabled: true
+  - slot: launcher
+    actionId: side.launcher
+    kind: launcher
+    enabled: true
+  - slot: magic
+    actionId: side.magic
+    kind: magic_bolt
+    enabled: true
+  - slot: dash
+    actionId: side.dash
+    kind: dash
+    enabled: true
+  - slot: support
+    actionId: side.support
+    kind: ally_support
+    enabled: true
+  - slot: break_limit
+    actionId: side.break_limit
+    kind: break_limit
+    enabled: true

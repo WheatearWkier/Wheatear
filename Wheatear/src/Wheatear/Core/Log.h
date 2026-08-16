@@ -4,8 +4,20 @@
 #include "spdlog/spdlog.h"
 #include "spdlog/fmt/ostr.h"
 
+#include <chrono>
+#include <string>
+#include <vector>
+
 
 namespace Wheatear {
+
+	// A single captured log line, as surfaced to editor UI (console panel).
+	struct LogMessage
+	{
+		spdlog::level::level_enum Level = spdlog::level::info;
+		std::string Text;
+		std::chrono::system_clock::time_point Time;
+	};
 
 	class WHEATEAR_API Log
 	{
@@ -14,6 +26,11 @@ namespace Wheatear {
 
 		inline static std::shared_ptr<spdlog::logger>& GetCoreLogger() { return s_CoreLogger; }
 		inline static std::shared_ptr<spdlog::logger>& GetClientLogger() { return s_ClientLogger; }
+
+		// Editor-facing console buffer: append pending messages to `out` and
+		// clear the ring. Safe to call every frame from the editor UI.
+		static void DrainEditorMessages(std::vector<LogMessage>& out);
+		static void ClearEditorMessages();
 
 	private:
 		static std::shared_ptr<spdlog::logger> s_CoreLogger;

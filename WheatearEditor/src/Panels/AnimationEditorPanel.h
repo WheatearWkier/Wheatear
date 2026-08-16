@@ -63,6 +63,10 @@ namespace Wheatear {
 
         bool    m_DraggingCursor = false;
 
+        // Index into the current clip's event list while the command-builder
+        // popup for that event is open; -1 when closed.
+        int     m_CommandEditEventIndex = -1;
+
         std::unordered_map<std::string, AtlasConfig> m_AtlasConfigs;
 
         glm::vec4 m_SnapshotColor = glm::vec4(1.0f);

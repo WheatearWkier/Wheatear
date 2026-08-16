@@ -1,6 +1,7 @@
 #include "wtpch.h"
 #include "TurnCombatSkillService.h"
 
+#include "TurnCombatTuningService.h"
 #include "Wheatear/Core/Log.h"
 #include "Wheatear/Gameplay/Action/ActionDatabase.h"
 #include "Wheatear/Gameplay/Action/ActionRecipeQueries.h"
@@ -178,14 +179,16 @@ namespace Wheatear::TurnCombatSkillService {
 
     float CalculateDamage(const TurnSkillDefinition& skill,
         const TurnCombatantComponent& actor,
-        const TurnCombatantComponent& target)
+        const TurnCombatantComponent& target,
+        const TurnCombatLevelComponent& level)
     {
         const float offense = skill.Magic ? actor.Magic : actor.Attack;
+        const float defenseMultiplier = TurnCombatTuningService::GetTuning(level).Formula.DefenseMultiplier;
         const float defense = std::max(
             0.0f,
             target.Defense * GetDefenseMultiplier(target)
                 * (1.0f - skill.DefensePierce));
-        float damage = offense * skill.Power + 6.0f - defense * 0.62f;
+        float damage = offense * skill.Power + 6.0f - defense * defenseMultiplier;
         damage *= GetDamageTakenMultiplier(target);
         return std::max(1.0f, std::round(damage));
     }

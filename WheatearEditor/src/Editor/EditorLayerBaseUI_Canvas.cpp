@@ -47,6 +47,139 @@ namespace Wheatear {
             std::string Name;
         };
 
+        // Edge/center snapping for canvas dragging. Works in canvas-normalized
+        // space: the dragged widget's final rect is aligned against the other
+        // widgets' final rects (and the grid when Ctrl is held), then the
+        // adjustment is converted back into the parent-local rect the drag
+        // edits. Draws cyan guide lines across the canvas when snapped.
+        static bool SnapCanvasRect(UIWidgetLayout::Rect& localRect,
+            UIWidgetLayout::Context& layout,
+            Entity selected,
+            const std::vector<ViewportUIEntry>& entries,
+            const glm::vec2& regionMin,
+            const glm::vec2& regionSize,
+            float parentWidth,
+            float parentHeight,
+            ImDrawList* drawList,
+            int editHandle)
+        {
+            const UIWidgetLayout::Rect current =
+                UIWidgetLayout::ResolveRect(layout, static_cast<entt::entity>(selected));
+
+            const bool canLeft = editHandle == UIEdit_Move || editHandle == UIEdit_Left
+                || editHandle == UIEdit_TopLeft || editHandle == UIEdit_BottomLeft;
+            const bool canRight = editHandle == UIEdit_Move || editHandle == UIEdit_Right
+                || editHandle == UIEdit_TopRight || editHandle == UIEdit_BottomRight;
+            const bool canTop = editHandle == UIEdit_Move || editHandle == UIEdit_Top
+                || editHandle == UIEdit_TopLeft || editHandle == UIEdit_TopRight;
+            const bool canBottom = editHandle == UIEdit_Move || editHandle == UIEdit_Bottom
+                || editHandle == UIEdit_BottomLeft || editHandle == UIEdit_BottomRight;
+
+            const float threshold = 6.0f / std::max(regionSize.x, regionSize.y);
+            const bool gridSnap = Input::IsKeyPressed(WT_KEY_LEFT_CONTROL);
+            const float grid = gridSnap ? (1.0f / 64.0f) : 0.0f;
+
+            // Finds the nearest candidate edge (other widgets' left/center/
+            // right, or a grid line) and returns its delta from `value`.
+            auto snapEdge = [&](float value, char axis, float& outDelta, bool& outSnapped)
+            {
+                outSnapped = false;
+                outDelta = 0.0f;
+
+                float bestDelta = 0.0f;
+                float bestDistance = threshold;
+                for (const ViewportUIEntry& entry : entries)
+                {
+                    if (entry.EntityRef == selected)
+                        continue;
+                    const UIWidgetLayout::Rect& c = entry.Rect;
+                    const float candidates[3] = {
+                        axis == 'x' ? c.Left : c.Top,
+                        axis == 'x' ? (c.Left + c.Right) * 0.5f : (c.Top + c.Bottom) * 0.5f,
+                        axis == 'x' ? c.Right : c.Bottom
+                    };
+                    for (float candidate : candidates)
+                    {
+                        const float distance = std::abs(value - candidate);
+                        if (distance < bestDistance)
+                        {
+                            bestDistance = distance;
+                            bestDelta = candidate - value;
+                            outSnapped = true;
+                        }
+                    }
+                }
+
+                // Grid snap as a fallback when no widget edge is close.
+                if (!outSnapped && grid > 0.0f)
+                {
+                    const float snappedValue = std::round(value / grid) * grid;
+                    const float distance = std::abs(value - snappedValue);
+                    if (distance < threshold)
+                    {
+                        bestDelta = snappedValue - value;
+                        outSnapped = true;
+                    }
+                }
+                outDelta = outSnapped ? bestDelta : 0.0f;
+            };
+
+            float dx = 0.0f;
+            float dy = 0.0f;
+            bool snapped = false;
+            float d = 0.0f;
+            bool s = false;
+
+            if (editHandle == UIEdit_Move)
+            {
+                // Whole-rect translation: try left/center/right, then
+                // top/center/bottom; only the first hit moves the rect.
+                snapEdge(current.Left, 'x', d, s);
+                if (!s) snapEdge((current.Left + current.Right) * 0.5f, 'x', d, s);
+                if (!s) snapEdge(current.Right, 'x', d, s);
+                if (s) { dx = d; snapped = true; }
+                else
+                {
+                    snapEdge(current.Top, 'y', d, s);
+                    if (!s) snapEdge((current.Top + current.Bottom) * 0.5f, 'y', d, s);
+                    if (!s) snapEdge(current.Bottom, 'y', d, s);
+                    if (s) { dy = d; snapped = true; }
+                }
+            }
+            else
+            {
+                if (canLeft)      { snapEdge(current.Left, 'x', d, s); if (s) { dx = d; snapped = true; } }
+                else if (canRight){ snapEdge(current.Right, 'x', d, s); if (s) { dx = d; snapped = true; } }
+                if (canTop)       { snapEdge(current.Top, 'y', d, s); if (s) { dy = d; snapped = true; } }
+                else if (canBottom){ snapEdge(current.Bottom, 'y', d, s); if (s) { dy = d; snapped = true; } }
+            }
+
+            if (!snapped)
+                return false;
+
+            // Draw guide lines across the whole canvas.
+            const ImU32 guideColor = IM_COL32(86, 230, 244, 170);
+            const ImVec2 canvasMin = { regionMin.x, regionMin.y };
+            const ImVec2 canvasMax = { regionMin.x + regionSize.x, regionMin.y + regionSize.y };
+            if (dx != 0.0f)
+            {
+                const float lineX = regionMin.x + (current.Left + dx) * regionSize.x;
+                drawList->AddLine({ lineX, canvasMin.y }, { lineX, canvasMax.y }, guideColor, 1.5f);
+            }
+            if (dy != 0.0f)
+            {
+                const float lineY = regionMin.y + (current.Top + dy) * regionSize.y;
+                drawList->AddLine({ canvasMin.x, lineY }, { canvasMax.x, lineY }, guideColor, 1.5f);
+            }
+
+            // Convert the canvas-space delta back into the parent-local rect.
+            if (canLeft) localRect.Left += dx / parentWidth;
+            else if (canRight) localRect.Right += dx / parentWidth;
+            if (canTop) localRect.Top += dy / parentHeight;
+            else if (canBottom) localRect.Bottom += dy / parentHeight;
+            return true;
+        }
+
 
         static ImVec2 ToScreenPoint(const glm::vec2& viewportMin,
             const glm::vec2& viewportSize,
@@ -492,6 +625,14 @@ namespace Wheatear {
         ImGui::EndDisabled();
         ImGui::SameLine();
         EditorFloatingWindow::DrawToggleButton("UI Canvas Editor");
+        ImGui::SameLine();
+        ImGui::Checkbox(EditorLocale::Text("Snap", "对齐吸附"), &m_UISnapEnabled);
+        if (ImGui::IsItemHovered(ImGuiHoveredFlags_DelayShort))
+            ImGui::SetTooltip("%s", EditorLocale::Text(
+                "Align dragged widgets to other widgets' edges/centers. Hold Ctrl to snap to the grid instead, Alt to disable.",
+                "拖动时与其它控件边缘/中心对齐。按住 Ctrl 改为吸附网格，按住 Alt 临时关闭。"));
+        ImGui::SameLine();
+        ImGui::Checkbox(EditorLocale::Text("Grid", "网格"), &m_UIGridVisible);
 
         if (!m_UIEditingCanvas || !m_UIEditingCanvas.HasComponent<UICanvasComponent>())
         {
@@ -547,6 +688,12 @@ namespace Wheatear {
             { canvasMin.x, canvasMin.y },
             { canvasSize.x, canvasSize.y });
 
+        UI_DrawCanvasGridAndRulers(
+            { canvasMin.x, canvasMin.y },
+            { canvasSize.x, canvasSize.y },
+            referenceWidth,
+            referenceHeight);
+
         UI_DrawCanvasOverlay(
             { canvasMin.x, canvasMin.y },
             { canvasSize.x, canvasSize.y },
@@ -576,6 +723,76 @@ namespace Wheatear {
             ImVec2(0.0f, 1.0f),
             ImVec2(1.0f, 0.0f),
             IM_COL32(255, 255, 255, 255));
+    }
+
+    void EditorLayerBase::UI_DrawCanvasGridAndRulers(const glm::vec2& regionMin,
+        const glm::vec2& regionSize,
+        float referenceWidth,
+        float referenceHeight)
+    {
+        if (regionSize.x <= 1.0f || regionSize.y <= 1.0f)
+            return;
+
+        ImDrawList* drawList = ImGui::GetWindowDrawList();
+        const float canvasLeft = regionMin.x;
+        const float canvasTop = regionMin.y;
+        const float canvasRight = regionMin.x + regionSize.x;
+        const float canvasBottom = regionMin.y + regionSize.y;
+
+        constexpr float rulerHeight = 18.0f;
+        constexpr float rulerWidth = 18.0f;
+
+        // Ruler backgrounds (top + left), drawn just outside the canvas.
+        const ImU32 rulerBg = IM_COL32(34, 40, 48, 230);
+        const ImU32 rulerLine = IM_COL32(120, 150, 165, 220);
+        const ImU32 rulerText = IM_COL32(150, 185, 200, 230);
+        drawList->AddRectFilled({ canvasLeft, canvasTop - rulerHeight },
+            { canvasRight, canvasTop }, rulerBg);
+        drawList->AddRectFilled({ canvasLeft - rulerWidth, canvasTop },
+            { canvasLeft, canvasBottom }, rulerBg);
+
+        // Ticks: 8 divisions per axis, labeled with reference pixels.
+        const int divisions = 8;
+        const float stepX = referenceWidth / divisions;
+        const float stepY = referenceHeight / divisions;
+        for (int i = 0; i <= divisions; ++i)
+        {
+            // Top ruler.
+            const float x = canvasLeft + regionSize.x * (i / static_cast<float>(divisions));
+            drawList->AddLine({ x, canvasTop - rulerHeight }, { x, canvasTop }, rulerLine, 1.0f);
+            if (i < divisions)
+            {
+                const std::string label = std::to_string(static_cast<int>(stepX * i));
+                drawList->AddText({ x + 2.0f, canvasTop - rulerHeight + 2.0f }, rulerText, label.c_str());
+            }
+
+            // Left ruler.
+            const float y = canvasTop + regionSize.y * (i / static_cast<float>(divisions));
+            drawList->AddLine({ canvasLeft - rulerWidth, y }, { canvasLeft, y }, rulerLine, 1.0f);
+            if (i < divisions)
+            {
+                const std::string label = std::to_string(static_cast<int>(stepY * i));
+                drawList->AddText({ canvasLeft - rulerWidth + 2.0f, y + 2.0f }, rulerText, label.c_str());
+            }
+        }
+
+        if (!m_UIGridVisible)
+            return;
+
+        // Grid overlay inside the canvas (16x9 cells in reference space).
+        const ImU32 gridColor = IM_COL32(120, 160, 180, 38);
+        const int gridCols = 16;
+        const int gridRows = 9;
+        for (int i = 1; i < gridCols; ++i)
+        {
+            const float x = canvasLeft + regionSize.x * (i / static_cast<float>(gridCols));
+            drawList->AddLine({ x, canvasTop }, { x, canvasBottom }, gridColor, 1.0f);
+        }
+        for (int i = 1; i < gridRows; ++i)
+        {
+            const float y = canvasTop + regionSize.y * (i / static_cast<float>(gridRows));
+            drawList->AddLine({ canvasLeft, y }, { canvasRight, y }, gridColor, 1.0f);
+        }
     }
 
     void EditorLayerBase::UI_DrawCanvasOverlay(const glm::vec2& regionMin,
@@ -895,6 +1112,16 @@ namespace Wheatear {
                     localRect.Top = localRect.Bottom - minSize;
                 else
                     localRect.Bottom = localRect.Top + minSize;
+            }
+
+            // Align against other widgets' edges/centers (Ctrl = grid snap).
+            // Applied after the min-size clamp so a snapped resize cannot
+            // collapse the widget.
+            if (m_UISnapEnabled && !Input::IsKeyPressed(WT_KEY_LEFT_ALT))
+            {
+                SnapCanvasRect(localRect, layout, selected, entries,
+                    regionMin, regionSize, parentWidth, parentHeight,
+                    drawList, m_UIEditHandle);
             }
 
             ApplyLocalRectToWidget(widget, localRect);

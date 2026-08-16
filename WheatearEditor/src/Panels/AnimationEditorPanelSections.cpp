@@ -2,6 +2,7 @@
 #include "AnimationEditorPanel.h"
 
 #include "ContentBrowserPanel.h"
+#include "Editor/CommandBuilder.h"
 #include "Editor/EditorCommands.h"
 #include "Editor/EditorLocale.h"
 #include "Editor/EditorWidgets.h"
@@ -190,6 +191,11 @@ namespace Wheatear {
                 InputString("##command", event.Command, 320);
                 if (ImGui::IsItemHovered())
                     ImGui::SetTooltip(EditorLocale::Text("Placeholders: {entity} {clip} {event}", "占位符: {entity} {clip} {event}"));
+                ImGui::SameLine();
+                if (ImGui::SmallButton(EditorLocale::Text("Builder", "构建器")))
+                    m_CommandEditEventIndex = i;
+                if (ImGui::IsItemHovered())
+                    ImGui::SetTooltip(EditorLocale::Text("Open the command builder for this event", "为此事件打开命令构建器"));
 
                 ImGui::TableSetColumnIndex(4);
                 if (ImGui::SmallButton("X"))
@@ -214,6 +220,45 @@ namespace Wheatear {
         }
         else if (sortEvents)
             clip->SortEvents();
+
+        // Modal command builder for the event whose "Builder" button was
+        // pressed. Reuses the shared command word list (same helper the UI
+        // button and .wts editors use) so animation-event commands get the
+        // same scaffolding instead of a raw string field.
+        if (m_CommandEditEventIndex >= 0)
+        {
+            auto& events = clip->GetEvents();
+            if (m_CommandEditEventIndex < static_cast<int>(events.size()))
+            {
+                auto& event = events[m_CommandEditEventIndex];
+                ImGui::OpenPopup(EditorLocale::Text("Animation Event Command", "动画事件命令"));
+                if (ImGui::BeginPopupModal(EditorLocale::Text("Animation Event Command", "动画事件命令"),
+                    nullptr, ImGuiWindowFlags_AlwaysAutoResize))
+                {
+                    ImGui::TextDisabled(EditorLocale::Text("Event: %s  (%.3fs)",
+                        "事件: %s  (%.3fs)"), event.Name.c_str(), event.Time);
+                    ImGui::Separator();
+                    EditorCommandBuilder::DrawCommandBuilder("Command", event.Command, 512);
+                    ImGui::Separator();
+                    if (ImGui::Button(EditorLocale::Text("Done", "完成")))
+                    {
+                        m_CommandEditEventIndex = -1;
+                        ImGui::CloseCurrentPopup();
+                    }
+                    ImGui::SameLine();
+                    if (ImGui::Button(EditorLocale::Text("Cancel", "取消")))
+                    {
+                        m_CommandEditEventIndex = -1;
+                        ImGui::CloseCurrentPopup();
+                    }
+                    ImGui::EndPopup();
+                }
+            }
+            else
+            {
+                m_CommandEditEventIndex = -1;
+            }
+        }
     }
 
     void AnimationEditorPanel::DrawFramesSection()

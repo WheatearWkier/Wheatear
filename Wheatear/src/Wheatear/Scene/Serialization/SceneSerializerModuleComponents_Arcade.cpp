@@ -29,6 +29,7 @@ namespace Wheatear {
             o << YAML::Key << "BossDefeatFadeDuration" << YAML::Value << c.BossDefeatFadeDuration;
             o << YAML::Key << "VictorySceneCommand" << YAML::Value << YAML::DoubleQuoted << c.VictorySceneCommand;
             o << YAML::Key << "DefeatSceneCommand" << YAML::Value << YAML::DoubleQuoted << c.DefeatSceneCommand;
+            o << YAML::Key << "TuningPath" << YAML::Value << YAML::DoubleQuoted << c.TuningPath;
             o << YAML::EndMap;
         }
         static void Deserialize(const YAML::Node& n, ArcadeCombatLevelComponent& c) {
@@ -52,6 +53,7 @@ namespace Wheatear {
             c.BossDefeatFadeDuration = n["BossDefeatFadeDuration"].as<float>(c.BossDefeatFadeDuration);
             c.VictorySceneCommand = n["VictorySceneCommand"].as<std::string>(c.VictorySceneCommand);
             c.DefeatSceneCommand = n["DefeatSceneCommand"].as<std::string>(c.DefeatSceneCommand);
+            c.TuningPath = n["TuningPath"].as<std::string>(c.TuningPath);
         }
     };
 

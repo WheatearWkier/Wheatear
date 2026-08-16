@@ -3,6 +3,7 @@
 
 #include "../ComponentDrawers.h"
 #include "UIDrawers.h"
+#include "Assets/AssetRegistry.h"
 #include "Editor/EditorLocale.h"
 #include "Panels/SpriteSheetPickerPanel.h"
 
@@ -16,6 +17,28 @@
 #include "Wheatear/Renderer/Texture.h"
 
 namespace Wheatear {
+
+    namespace {
+
+        // When the artist drops a texture on a fresh sprite (PixelsPerUnit
+        // still at its 0 = legacy default), prefill from the asset registry's
+        // import settings so the authored PPU takes effect without hand-typing.
+        static void ApplyTextureImportDefaults(SpriteRendererComponent& c,
+            const std::filesystem::path& texturePath)
+        {
+            if (c.PixelsPerUnit != 0.0f)
+                return;
+
+            EditorAssetMetadata* metadata =
+                AssetRegistry::Get().FindMutableByPath(texturePath);
+            if (metadata && metadata->Kind == EditorAssetKind::Texture
+                && metadata->Texture.PixelsPerUnit > 0.0f)
+            {
+                c.PixelsPerUnit = metadata->Texture.PixelsPerUnit;
+            }
+        }
+
+    } // namespace
 
     void DrawSpriteRendererComponent(Entity entity)
     {
@@ -44,6 +67,7 @@ namespace Wheatear {
                         const std::filesystem::path texturePath =
                             AssetPath::ToProjectRelative(AssetPath::GetAssetRoot() / path);
                         c.Texture = Texture2D::Create(texturePath.generic_string());
+                        ApplyTextureImportDefaults(c, texturePath);
                     }
                     ImGui::EndDragDropTarget();
                 }

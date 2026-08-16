@@ -66,7 +66,8 @@ namespace Wheatear::TacticalCombatSkillService {
     WHEATEAR_API std::string FormatFramePath(const std::string& pattern, int frameIndex);
     WHEATEAR_API float CalculateDamage(const TacticalSkillDefinition& skill,
         const TacticalUnitComponent& actor,
-        const TacticalUnitComponent& target);
+        const TacticalUnitComponent& target,
+        const TacticalCombatLevelComponent& level);
     WHEATEAR_API float CalculateHeal(const TacticalSkillDefinition& skill,
         const TacticalUnitComponent& actor);
     WHEATEAR_API float GetDefenseMultiplier(const TacticalUnitComponent& unit);

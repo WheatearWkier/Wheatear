@@ -270,6 +270,12 @@
     <ClInclude Include="src\Wheatear\Gameplay\Action\ActionTypes.h">
       <Filter>src\Wheatear\Gameplay\Action</Filter>
     </ClInclude>
+    <ClInclude Include="src\Wheatear\Gameplay\Action\EffectFormula.h">
+      <Filter>src\Wheatear\Gameplay\Action</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Wheatear\Gameplay\Action\EffectRegistry.h">
+      <Filter>src\Wheatear\Gameplay\Action</Filter>
+    </ClInclude>
     <ClInclude Include="src\Wheatear\Gameplay\Action\StateRegistry.h">
       <Filter>src\Wheatear\Gameplay\Action</Filter>
     </ClInclude>
@@ -307,6 +313,9 @@
       <Filter>src\Wheatear\ImGui</Filter>
     </ClInclude>
     <ClInclude Include="src\Wheatear\Input\Input.h">
+      <Filter>src\Wheatear\Input</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Wheatear\Input\InputActionCatalog.h">
       <Filter>src\Wheatear\Input</Filter>
     </ClInclude>
     <ClInclude Include="src\Wheatear\Input\InputBindingService.h">
@@ -355,6 +364,9 @@
       <Filter>src\Wheatear\Modules\ArcadeCombat</Filter>
     </ClInclude>
     <ClInclude Include="src\Wheatear\Modules\ArcadeCombat\ArcadeCombatSystem.h">
+      <Filter>src\Wheatear\Modules\ArcadeCombat</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Wheatear\Modules\ArcadeCombat\ArcadeCombatTuningService.h">
       <Filter>src\Wheatear\Modules\ArcadeCombat</Filter>
     </ClInclude>
     <ClInclude Include="src\Wheatear\Modules\GameplayModuleComponents.h">
@@ -444,6 +456,9 @@
     <ClInclude Include="src\Wheatear\Modules\SideCombat\SideCombatResultService.h">
       <Filter>src\Wheatear\Modules\SideCombat</Filter>
     </ClInclude>
+    <ClInclude Include="src\Wheatear\Modules\SideCombat\SideCombatSkillRegistry.h">
+      <Filter>src\Wheatear\Modules\SideCombat</Filter>
+    </ClInclude>
     <ClInclude Include="src\Wheatear\Modules\SideCombat\SideCombatSystem.h">
       <Filter>src\Wheatear\Modules\SideCombat</Filter>
     </ClInclude>
@@ -483,6 +498,9 @@
     <ClInclude Include="src\Wheatear\Modules\TacticalCombat\TacticalCombatSystem.h">
       <Filter>src\Wheatear\Modules\TacticalCombat</Filter>
     </ClInclude>
+    <ClInclude Include="src\Wheatear\Modules\TacticalCombat\TacticalCombatTuningService.h">
+      <Filter>src\Wheatear\Modules\TacticalCombat</Filter>
+    </ClInclude>
     <ClInclude Include="src\Wheatear\Modules\TacticalCombat\TacticalCombatUIService.h">
       <Filter>src\Wheatear\Modules\TacticalCombat</Filter>
     </ClInclude>
@@ -508,6 +526,9 @@
       <Filter>src\Wheatear\Modules\TurnCombat</Filter>
     </ClInclude>
     <ClInclude Include="src\Wheatear\Modules\TurnCombat\TurnCombatTargetService.h">
+      <Filter>src\Wheatear\Modules\TurnCombat</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Wheatear\Modules\TurnCombat\TurnCombatTuningService.h">
       <Filter>src\Wheatear\Modules\TurnCombat</Filter>
     </ClInclude>
     <ClInclude Include="src\Wheatear\Modules\TurnCombat\TurnCombatUIService.h">
@@ -1916,6 +1937,12 @@
     <ClCompile Include="src\Wheatear\Gameplay\Action\ActionTypes.cpp">
       <Filter>src\Wheatear\Gameplay\Action</Filter>
     </ClCompile>
+    <ClCompile Include="src\Wheatear\Gameplay\Action\EffectFormula.cpp">
+      <Filter>src\Wheatear\Gameplay\Action</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Wheatear\Gameplay\Action\EffectRegistry.cpp">
+      <Filter>src\Wheatear\Gameplay\Action</Filter>
+    </ClCompile>
     <ClCompile Include="src\Wheatear\Gameplay\Action\StateRegistry.cpp">
       <Filter>src\Wheatear\Gameplay\Action</Filter>
     </ClCompile>
@@ -1952,6 +1979,9 @@
     <ClCompile Include="src\Wheatear\ImGui\ImGuiLayer.cpp">
       <Filter>src\Wheatear\ImGui</Filter>
     </ClCompile>
+    <ClCompile Include="src\Wheatear\Input\InputActionCatalog.cpp">
+      <Filter>src\Wheatear\Input</Filter>
+    </ClCompile>
     <ClCompile Include="src\Wheatear\Input\InputBindingService.cpp">
       <Filter>src\Wheatear\Input</Filter>
     </ClCompile>
@@ -1986,6 +2016,9 @@
       <Filter>src\Wheatear\Modules\ArcadeCombat</Filter>
     </ClCompile>
     <ClCompile Include="src\Wheatear\Modules\ArcadeCombat\ArcadeCombatSystem.cpp">
+      <Filter>src\Wheatear\Modules\ArcadeCombat</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Wheatear\Modules\ArcadeCombat\ArcadeCombatTuningService.cpp">
       <Filter>src\Wheatear\Modules\ArcadeCombat</Filter>
     </ClCompile>
     <ClCompile Include="src\Wheatear\Modules\ModuleBootstrap.cpp">
@@ -2063,6 +2096,9 @@
     <ClCompile Include="src\Wheatear\Modules\SideCombat\SideCombatResultService.cpp">
       <Filter>src\Wheatear\Modules\SideCombat</Filter>
     </ClCompile>
+    <ClCompile Include="src\Wheatear\Modules\SideCombat\SideCombatSkillRegistry.cpp">
+      <Filter>src\Wheatear\Modules\SideCombat</Filter>
+    </ClCompile>
     <ClCompile Include="src\Wheatear\Modules\SideCombat\SideCombatSystem.cpp">
       <Filter>src\Wheatear\Modules\SideCombat</Filter>
     </ClCompile>
@@ -2099,6 +2135,9 @@
     <ClCompile Include="src\Wheatear\Modules\TacticalCombat\TacticalCombatSystem.cpp">
       <Filter>src\Wheatear\Modules\TacticalCombat</Filter>
     </ClCompile>
+    <ClCompile Include="src\Wheatear\Modules\TacticalCombat\TacticalCombatTuningService.cpp">
+      <Filter>src\Wheatear\Modules\TacticalCombat</Filter>
+    </ClCompile>
     <ClCompile Include="src\Wheatear\Modules\TacticalCombat\TacticalCombatUIService.cpp">
       <Filter>src\Wheatear\Modules\TacticalCombat</Filter>
     </ClCompile>
@@ -2121,6 +2160,9 @@
       <Filter>src\Wheatear\Modules\TurnCombat</Filter>
     </ClCompile>
     <ClCompile Include="src\Wheatear\Modules\TurnCombat\TurnCombatTargetService.cpp">
+      <Filter>src\Wheatear\Modules\TurnCombat</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Wheatear\Modules\TurnCombat\TurnCombatTuningService.cpp">
       <Filter>src\Wheatear\Modules\TurnCombat</Filter>
     </ClCompile>
     <ClCompile Include="src\Wheatear\Modules\TurnCombat\TurnCombatUIService.cpp">

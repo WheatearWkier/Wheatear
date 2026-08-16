@@ -1,6 +1,7 @@
 #include "wtpch.h"
 #include "TacticalCombatSkillService.h"
 
+#include "TacticalCombatTuningService.h"
 #include "Wheatear/Core/Log.h"
 #include "Wheatear/Gameplay/Action/ActionDatabase.h"
 #include "Wheatear/Gameplay/Action/ActionRecipeQueries.h"
@@ -184,12 +185,16 @@ namespace Wheatear::TacticalCombatSkillService {
 
     float CalculateDamage(const TacticalSkillDefinition& skill,
         const TacticalUnitComponent& actor,
-        const TacticalUnitComponent& target)
+        const TacticalUnitComponent& target,
+        const TacticalCombatLevelComponent& level)
     {
         const float offense = skill.Magic ? actor.Magic : actor.Attack;
+        const float magicMultiplier = skill.Magic
+            ? TacticalCombatTuningService::GetTuning(level).Formula.MagicDefenseMultiplier
+            : 1.0f;
         const float defense = target.Defense
             * GetDefenseMultiplier(target)
-            * (skill.Magic ? 0.45f : 1.0f)
+            * magicMultiplier
             * (1.0f - skill.DefensePierce);
         float damage = std::max(6.0f, offense * skill.Power - defense);
         damage *= GetDamageTakenMultiplier(target);

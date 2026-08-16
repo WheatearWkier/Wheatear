@@ -36,6 +36,7 @@
 #include "Panels/DataFileEditorPanel.h"
 #include "Panels/EditorHelpPanel.h"
 #include "Panels/InputBindingsPanel.h"
+#include "Panels/ConsolePanel.h"
 #include "Editor/EditorCommands.h"
 #include "Panels/SceneHierarchy/SceneHierarchyPanel.h"
 #include "Panels/SpriteSheetPickerPanel.h"
@@ -290,6 +291,7 @@ namespace Wheatear {
 
         m_HelpPanel->OnImGuiRender();
         m_InputBindingsPanel->OnImGuiRender();
+        m_ConsolePanel->OnImGuiRender();
 
         ImGui::End();
     }
@@ -437,7 +439,7 @@ namespace Wheatear {
 
         if (!ImGui::BeginMenuBar()) return;
 
-        const EditorToolContext toolContext{ m_SceneHierarchyPanel->GetSelectedEntity() };
+        const EditorToolContext toolContext{ m_SceneHierarchyPanel->GetSelectedEntity(), m_ActiveScene.get() };
         auto drawMenuIcon = [&](const Ref<Texture2D>& icon)
         {
             const float iconSize = 16.0f;
@@ -653,6 +655,8 @@ namespace Wheatear {
             drawToolsByCategory(EditorToolCategory::Diagnostics);
             ImGui::MenuItem(EditorLocale::Text("Physics Colliders", "物理碰撞体"), nullptr, &m_ShowPhysicsColliders);
             ImGui::MenuItem(EditorLocale::Text("Stats Window", "统计窗口"), nullptr, &m_ShowStats);
+            if (ImGui::MenuItem(EditorLocale::Text("Console", "日志")))
+                m_ConsolePanel->SetOpen(true);
             ImGui::EndMenu();
         }
 

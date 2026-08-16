@@ -9,9 +9,14 @@
 
 namespace Wheatear {
 
+    class Scene;
+
     struct EditorToolContext
     {
         Entity SelectedEntity;
+        // The scene currently open in the editor (edit or play mode), when
+        // one exists; gameplay tool panels use it for live scene inspection.
+        Scene* ActiveScene = nullptr;
     };
 
     enum class EditorToolCategory

@@ -4,6 +4,7 @@
 #include "TurnCombatActionService.h"
 #include "TurnCombatSkillService.h"
 #include "TurnCombatTargetService.h"
+#include "TurnCombatTuningService.h"
 #include "TurnCombatUIService.h"
 #include "TurnCombatVisualService.h"
 #include "Wheatear/Gameplay/Services/GameplayEntityService.h"
@@ -108,6 +109,11 @@ namespace Wheatear::TurnCombatFlowService {
 
     void ResetLevel(Scene* scene, TurnCombatLevelComponent& level)
     {
+        // Data-driven global tuning overrides the scene-authored flow timings
+        // (hot-reloaded; component fields remain the per-scene fallback).
+        TurnCombatTuningService::ApplyLevelTuning(
+            TurnCombatTuningService::GetTuning(level), level);
+
         level.RuntimeElapsed = 0.0f;
         level.RuntimeFadeAlpha = 1.0f;
         level.RuntimePhase = TurnCombatPhase::Intro;

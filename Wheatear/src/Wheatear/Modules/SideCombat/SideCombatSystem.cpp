@@ -78,26 +78,58 @@ namespace Wheatear {
 
         // Route gameplay commands through the action layer so commands and
         // physical input share the same edge-detection path.
-        for (const std::string& command : CommandBus::DrainGameplayCommands("side:"))
+        const std::vector<std::string> commands = CommandBus::DrainGameplayCommands("side:");
+        if (!commands.empty())
         {
-            if (command == "side:item:1")
-                InputBindingService::InjectActionPress("side.item1");
-            else if (command == "side:item:2")
-                InputBindingService::InjectActionPress("side.item2");
-            else if (command == "side:item:3")
-                InputBindingService::InjectActionPress("side.item3");
-            else if (command == "side:basic")
-                InputBindingService::InjectActionPress("side.basic");
-            else if (command == "side:launcher")
-                InputBindingService::InjectActionPress("side.launcher");
-            else if (command == "side:magic")
-                InputBindingService::InjectActionPress("side.magic");
-            else if (command == "side:support")
-                InputBindingService::InjectActionPress("side.support");
-            else if (command == "side:dash")
-                InputBindingService::InjectActionPress("side.dash");
-            else if (command == "side:break_limit")
-                InputBindingService::InjectActionPress("side.break_limit");
+            // side:item:N maps onto the data-driven item slot table; resolve
+            // the tuning of the first active level to translate N into the
+            // slot's action id (extra slots need no code).
+            const SideCombatTuningService::SideCombatTuning* itemTuning = nullptr;
+            for (auto levelEntity : registry.view<SideCombatLevelComponent>())
+            {
+                auto& level = registry.get<SideCombatLevelComponent>(levelEntity);
+                if (level.PlayOnStart)
+                {
+                    itemTuning = &SideCombatTuningService::GetTuning(level);
+                    break;
+                }
+            }
+
+            for (const std::string& command : commands)
+            {
+                if (command.rfind("side:item:", 0) == 0)
+                {
+                    const std::string key = command.substr(10);
+                    bool routed = false;
+                    if (itemTuning)
+                    {
+                        for (const auto& slot : itemTuning->ItemSlots)
+                        {
+                            if (std::to_string(slot.Slot) == key)
+                            {
+                                InputBindingService::InjectActionPress(slot.ActionId);
+                                routed = true;
+                                break;
+                            }
+                        }
+                    }
+                    if (!routed)
+                        WT_CORE_WARN("SideCombat: no item slot matches command '{}'", command);
+                    continue;
+                }
+                if (command == "side:basic")
+                    InputBindingService::InjectActionPress("side.basic");
+                else if (command == "side:launcher")
+                    InputBindingService::InjectActionPress("side.launcher");
+                else if (command == "side:magic")
+                    InputBindingService::InjectActionPress("side.magic");
+                else if (command == "side:support")
+                    InputBindingService::InjectActionPress("side.support");
+                else if (command == "side:dash")
+                    InputBindingService::InjectActionPress("side.dash");
+                else if (command == "side:break_limit")
+                    InputBindingService::InjectActionPress("side.break_limit");
+            }
         }
 
         float horizontal = 0.0f;

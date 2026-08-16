@@ -178,6 +178,8 @@
     <ClInclude Include="src\Editor\YamlAssetDocument.h" />
     <ClInclude Include="src\Editor\YamlTreeEditor.h" />
     <ClInclude Include="src\Modules\ArcadeCombat\ArcadeCombatDrawer.h" />
+    <ClInclude Include="src\Modules\ArcadeCombat\ArcadeCombatTuningEditorPanel.h" />
+    <ClInclude Include="src\Modules\CombatUnitOverview.h" />
     <ClInclude Include="src\Modules\ModuleEditorBootstrap.h" />
     <ClInclude Include="src\Modules\Progression\ProgressionContentEditorPanel.h" />
     <ClInclude Include="src\Modules\Progression\ProgressionContentEditorPanelInternal.h" />
@@ -185,12 +187,15 @@
     <ClInclude Include="src\Modules\SideCombat\SideCombatHudPresetEditorPanel.h" />
     <ClInclude Include="src\Modules\SideCombat\SideCombatTuningEditorPanel.h" />
     <ClInclude Include="src\Modules\TacticalCombat\TacticalCombatDrawer.h" />
+    <ClInclude Include="src\Modules\TacticalCombat\TacticalCombatTuningEditorPanel.h" />
     <ClInclude Include="src\Modules\TurnCombat\TurnCombatDrawer.h" />
+    <ClInclude Include="src\Modules\TurnCombat\TurnCombatTuningEditorPanel.h" />
     <ClInclude Include="src\Modules\VisualNovel\VisualNovelDrawer.h" />
     <ClInclude Include="src\Modules\VisualNovel\VisualNovelScriptEditorPanel.h" />
     <ClInclude Include="src\Modules\VisualNovel\VisualNovelScriptEditorPanelInternal.h" />
     <ClInclude Include="src\Panels\AnimationEditorPanel.h" />
     <ClInclude Include="src\Panels\AssetAliasManifestEditorPanel.h" />
+    <ClInclude Include="src\Panels\ConsolePanel.h" />
     <ClInclude Include="src\Panels\ContentBrowserPanel.h" />
     <ClInclude Include="src\Panels\ContentBrowserRequests.h" />
     <ClInclude Include="src\Panels\DataFileEditorPanel.h" />
@@ -240,6 +245,7 @@
     <ClCompile Include="src\Editor\EditorWidgets.cpp" />
     <ClCompile Include="src\Editor\ModeSelectLayer.cpp" />
     <ClCompile Include="src\Modules\ArcadeCombat\ArcadeCombatDrawer.cpp" />
+    <ClCompile Include="src\Modules\ArcadeCombat\ArcadeCombatTuningEditorPanel.cpp" />
     <ClCompile Include="src\Modules\ModuleEditorBootstrap.cpp" />
     <ClCompile Include="src\Modules\Progression\ProgressionContentEditorPanel.cpp" />
     <ClCompile Include="src\Modules\Progression\ProgressionContentEditorPanel_Content.cpp" />
@@ -248,7 +254,9 @@
     <ClCompile Include="src\Modules\SideCombat\SideCombatHudPresetEditorPanel.cpp" />
     <ClCompile Include="src\Modules\SideCombat\SideCombatTuningEditorPanel.cpp" />
     <ClCompile Include="src\Modules\TacticalCombat\TacticalCombatDrawer.cpp" />
+    <ClCompile Include="src\Modules\TacticalCombat\TacticalCombatTuningEditorPanel.cpp" />
     <ClCompile Include="src\Modules\TurnCombat\TurnCombatDrawer.cpp" />
+    <ClCompile Include="src\Modules\TurnCombat\TurnCombatTuningEditorPanel.cpp" />
     <ClCompile Include="src\Modules\VisualNovel\VisualNovelDrawer.cpp" />
     <ClCompile Include="src\Modules\VisualNovel\VisualNovelScriptEditorPanel.cpp" />
     <ClCompile Include="src\Modules\VisualNovel\VisualNovelScriptEditorPanel_Rows.cpp" />
@@ -256,6 +264,7 @@
     <ClCompile Include="src\Panels\AnimationEditorPanelSections.cpp" />
     <ClCompile Include="src\Panels\AnimationEditorPanel_Timeline.cpp" />
     <ClCompile Include="src\Panels\AssetAliasManifestEditorPanel.cpp" />
+    <ClCompile Include="src\Panels\ConsolePanel.cpp" />
     <ClCompile Include="src\Panels\ContentBrowserPanel.cpp" />
     <ClCompile Include="src\Panels\DataFileEditorPanel.cpp" />
     <ClCompile Include="src\Panels\EditorHelpPanel.cpp" />

@@ -131,6 +131,58 @@ namespace Wheatear::SideCombatTuningService {
         bool CoreMove = false;
     };
 
+    // One consumable-item slot. Data-driven so designers can add extra item
+    // slots (new keys + effects) from the editor without touching C++: add a
+    // row here, create the matching input action (Input Bindings panel) and
+    // bind a key, and the runtime polls it like the built-in three slots.
+    enum class SideItemSlotKind
+    {
+        Heal = 0,       // restores Health by controller.HealItemAmount
+        Mana,           // restores Mana by controller.ManaItemAmount
+        AttackBuff      // sets AttackBuffMultiplier/Duration from controller
+    };
+
+    struct SideItemSlotTuning
+    {
+        int Slot = 0;
+        std::string ActionId = "side.item1";
+        SideItemSlotKind Kind = SideItemSlotKind::Heal;
+        float Cooldown = 5.0f;
+        // Optional WAO recipe id. When set, the item executes the recipe's
+        // effects (Heal / ConsumeResource / ModifyAttribute / AddState / ...)
+        // instead of the built-in kind path, so new effect types are authored
+        // as data in the WAO Action Editor instead of C++.
+        std::string RecipeId;
+    };
+
+    // One skill (combat move) slot. The skill's behaviour *kind* (basic /
+    // launcher / magic bolt / dash / ally support / break limit) is a runtime
+    // behaviour and stays in C++; the slot table decides which input action
+    // triggers which kind, so extra hotkeys and duplicated moves (a second
+    // magic bolt with a different WAO attack) need no code. `Custom` kinds
+    // dispatch through SideCombatSkillRegistry (see SideCombatSkillRegistry.h)
+    // so new skill behaviours are one registration instead of enum + switches.
+    enum class SideSkillSlotKind
+    {
+        Basic = 0,
+        Launcher,
+        MagicBolt,
+        Dash,
+        AllySupport,
+        BreakLimit,
+        Custom
+    };
+
+    struct SideSkillSlotTuning
+    {
+        std::string SlotId;                 // stable id, e.g. "basic"
+        std::string ActionId = "side.basic";
+        SideSkillSlotKind Kind = SideSkillSlotKind::Basic;
+        bool Enabled = true;
+        // Registered behaviour id used when Kind == Custom.
+        std::string CustomBehavior;
+    };
+
     struct SideUnlockProfile
     {
         std::string Id;
@@ -242,6 +294,10 @@ namespace Wheatear::SideCombatTuningService {
         std::unordered_map<std::string, SideAttackTuning> Attacks;
         std::unordered_map<std::string, SideSkillDefinition> Skills;
         SideProgressionTuning Progression;
+        // Consumable item slots (data-driven; see SideItemSlotTuning).
+        std::vector<SideItemSlotTuning> ItemSlots;
+        // Skill slots (data-driven trigger table; see SideSkillSlotTuning).
+        std::vector<SideSkillSlotTuning> SkillSlots;
     };
 
     WHEATEAR_API float CalculateSortZ(float groundY, const SideCombatTuning& tuning);

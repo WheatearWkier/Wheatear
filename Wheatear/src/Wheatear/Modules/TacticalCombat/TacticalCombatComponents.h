@@ -52,6 +52,11 @@ namespace Wheatear {
         std::string VictorySceneCommand = "event:tactical_combat_victory";
         std::string DefeatSceneCommand = "event:tactical_combat_retry";
 
+        // Global tuning data file (data-driven flow / board / colors).
+        // Empty = the default project path. Edited from the editor's
+        // "Tactical Combat Tuning Editor".
+        std::string TuningPath = "assets/vertical_slice/data/tactical_combat_tuning.yaml";
+
         float StartFadeDuration = 0.45f;
         float IntroDuration = 0.65f;
         float ActionDuration = 0.62f;

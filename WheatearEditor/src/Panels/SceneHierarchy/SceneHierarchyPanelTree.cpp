@@ -45,6 +45,7 @@ namespace Wheatear {
         }
 
         static constexpr const char* kHierarchyUIEntityPayload = "WT_HIERARCHY_UI_ENTITY";
+        static constexpr const char* kHierarchyFolderMemberPayload = "WT_HIERARCHY_FOLDER_MEMBER";
 
     } // namespace
     bool SceneHierarchyPanel::EntityPassesFilter(Entity entity) const
@@ -177,6 +178,106 @@ namespace Wheatear {
         m_ScrollToSelection = true;
     }
 
+    bool SceneHierarchyPanel::IsFolder(Entity entity) const
+    {
+        return entity && entity.HasComponent<EditorFolderComponent>();
+    }
+
+    bool SceneHierarchyPanel::CanReparentToFolder(Entity child, Entity folder) const
+    {
+        if (!m_Context || !child || !folder || child == folder)
+            return false;
+        if (!IsFolder(folder) || !child.HasComponent<IDComponent>())
+            return false;
+        // UI entities keep their widget hierarchy; folders group the rest.
+        if (child.HasComponent<UIWidgetComponent>())
+            return false;
+
+        const UUID folderID = folder.GetUUID();
+        if (!child.HasComponent<EditorFolderComponent>())
+            return true;
+
+        // Prevent cycles: the target folder must not live inside `child`
+        // when the child itself is a folder.
+        Entity cursor = folder;
+        std::unordered_set<uint32_t> visiting;
+        while (cursor && cursor.HasComponent<EditorFolderComponent>())
+        {
+            const uint32_t cursorKey = EntityKey(cursor);
+            if (!visiting.insert(cursorKey).second)
+                return false;
+            if (cursor == child)
+                return false;
+
+            const uint64_t parentUUID =
+                cursor.GetComponent<EditorFolderComponent>().ParentFolderUUID;
+            if (parentUUID == 0)
+                break;
+            cursor = m_Context->GetEntityByUUID(UUID(parentUUID));
+        }
+
+        return child.GetComponent<EditorFolderComponent>().ParentFolderUUID
+            != static_cast<uint64_t>(folderID);
+    }
+
+    void SceneHierarchyPanel::ReparentToFolderWithUndo(Entity child, Entity folder)
+    {
+        if (!CanReparentToFolder(child, folder))
+            return;
+
+        const uint64_t folderID = static_cast<uint64_t>(folder.GetUUID());
+        if (child.HasComponent<EditorFolderComponent>())
+        {
+            auto& folderComponent = child.GetComponent<EditorFolderComponent>();
+            const EditorFolderComponent before = folderComponent;
+            EditorFolderComponent after = before;
+            after.ParentFolderUUID = folderID;
+            auto command = MakeComponentValueCommand(child, before, after);
+            command->Execute();
+            CommandHistory::Get().Push(std::move(command));
+        }
+        else
+        {
+            auto command = std::make_unique<AddComponentCommand<EditorFolderComponent>>(child);
+            command->Execute();
+            child.GetComponent<EditorFolderComponent>().ParentFolderUUID = folderID;
+            CommandHistory::Get().Push(std::move(command));
+        }
+        m_SelectionContext = child;
+        m_ScrollToSelection = true;
+    }
+
+    void SceneHierarchyPanel::RemoveFromFolderWithUndo(Entity child)
+    {
+        if (!child || !child.HasComponent<EditorFolderComponent>())
+            return;
+
+        auto& folderComponent = child.GetComponent<EditorFolderComponent>();
+        if (folderComponent.ParentFolderUUID == 0)
+            return;
+
+        const EditorFolderComponent before = folderComponent;
+        EditorFolderComponent after = before;
+        after.ParentFolderUUID = 0;
+        auto command = MakeComponentValueCommand(child, before, after);
+        command->Execute();
+        CommandHistory::Get().Push(std::move(command));
+        m_SelectionContext = child;
+        m_ScrollToSelection = true;
+    }
+
+    void SceneHierarchyPanel::CreateFolderWithUndo(Entity parentFolder)
+    {
+        const uint64_t parentUUID = parentFolder
+            ? static_cast<uint64_t>(parentFolder.GetUUID())
+            : 0;
+        CreateEntityWithUndo("New Folder", [parentUUID](Entity created)
+        {
+            auto& folder = created.AddComponent<EditorFolderComponent>();
+            folder.ParentFolderUUID = parentUUID;
+        });
+    }
+
     std::vector<Entity> SceneHierarchyPanel::CollectUIChildrenRecursive(Entity entity,
         const UIChildMap& childMap) const
     {
@@ -234,6 +335,7 @@ namespace Wheatear {
 
     void SceneHierarchyPanel::DrawEntityNode(Entity entity,
         const UIChildMap& childMap,
+        const FolderChildMap& folderChildren,
         std::unordered_set<uint32_t>& drawn,
         bool& selectionVisible)
     {
@@ -251,7 +353,10 @@ namespace Wheatear {
         drawn.insert(key);
 
         const auto& tag = entity.GetComponent<TagComponent>().Tag;
-        const std::string displayName = std::string(EntityKindPrefix(entity)) + " " + tag;
+        const bool isFolder = IsFolder(entity);
+        std::string displayName = std::string(EntityKindPrefix(entity)) + " " + tag;
+        if (isFolder)
+            displayName = "📁 " + tag;
         bool hiddenInEditor = IsEntityHiddenInEditor(entity);
 
         std::vector<Entity> visibleChildren;
@@ -262,6 +367,16 @@ namespace Wheatear {
                 std::unordered_set<uint32_t> childFilterVisiting;
                 if (EntityOrDescendantPassesFilter(child, childMap, childFilterVisiting))
                     visibleChildren.push_back(child);
+            }
+        }
+        if (isFolder)
+        {
+            // Folder members (non-UI entities) render below the widget
+            // children, sorted by name at build time.
+            if (auto folderIt = folderChildren.find(key); folderIt != folderChildren.end())
+            {
+                for (Entity member : folderIt->second)
+                    visibleChildren.push_back(member);
             }
         }
 
@@ -307,7 +422,12 @@ namespace Wheatear {
 
         const bool inlineRenaming = selected && m_RenameRequested && entity == m_SelectionContext;
         if (inlineRenaming)
-            std::strncpy(m_RenameBuffer, displayName.c_str(), sizeof(m_RenameBuffer) - 1);
+        {
+            // Prefill the raw tag (no "[UI] " kind prefix) so committing
+            // without editing keeps the name intact.
+            std::strncpy(m_RenameBuffer, tag.c_str(), sizeof(m_RenameBuffer) - 1);
+            m_RenameBuffer[sizeof(m_RenameBuffer) - 1] = '\0';
+        }
 
         const bool opened = ImGui::TreeNodeEx(
             reinterpret_cast<void*>(static_cast<uint64_t>(static_cast<uint32_t>(entity))),
@@ -348,16 +468,30 @@ namespace Wheatear {
         if (ImGui::IsItemClicked())
             m_SelectionContext = entity;
 
-        if (entity.HasComponent<UIWidgetComponent>()
-            && entity.HasComponent<IDComponent>()
-            && !entity.HasComponent<UICanvasComponent>())
+        // Drag sources: UI widgets re-parent inside the widget hierarchy;
+        // other entities (and folders) can be dropped into editor folders.
+        if (entity.HasComponent<IDComponent>())
         {
-            if (ImGui::BeginDragDropSource(ImGuiDragDropFlags_SourceAllowNullID))
+            if (entity.HasComponent<UIWidgetComponent>()
+                && !entity.HasComponent<UICanvasComponent>())
             {
-                const uint64_t payload = static_cast<uint64_t>(entity.GetUUID());
-                ImGui::SetDragDropPayload(kHierarchyUIEntityPayload, &payload, sizeof(payload));
-                ImGui::TextUnformatted(displayName.c_str());
-                ImGui::EndDragDropSource();
+                if (ImGui::BeginDragDropSource(ImGuiDragDropFlags_SourceAllowNullID))
+                {
+                    const uint64_t payload = static_cast<uint64_t>(entity.GetUUID());
+                    ImGui::SetDragDropPayload(kHierarchyUIEntityPayload, &payload, sizeof(payload));
+                    ImGui::TextUnformatted(displayName.c_str());
+                    ImGui::EndDragDropSource();
+                }
+            }
+            else
+            {
+                if (ImGui::BeginDragDropSource(ImGuiDragDropFlags_SourceAllowNullID))
+                {
+                    const uint64_t payload = static_cast<uint64_t>(entity.GetUUID());
+                    ImGui::SetDragDropPayload(kHierarchyFolderMemberPayload, &payload, sizeof(payload));
+                    ImGui::TextUnformatted(displayName.c_str());
+                    ImGui::EndDragDropSource();
+                }
             }
         }
 
@@ -385,6 +519,32 @@ namespace Wheatear {
             }
         }
 
+        // Folder drop target: non-UI entities dropped onto a folder become
+        // members of it (undoable).
+        if (isFolder && entity.HasComponent<IDComponent>())
+        {
+            if (ImGui::BeginDragDropTarget())
+            {
+                const ImGuiPayload* previewPayload = ImGui::GetDragDropPayload();
+                if (previewPayload
+                    && previewPayload->IsDataType(kHierarchyFolderMemberPayload)
+                    && previewPayload->DataSize == sizeof(uint64_t))
+                {
+                    const uint64_t childID = *static_cast<const uint64_t*>(previewPayload->Data);
+                    Entity child = m_Context ? m_Context->GetEntityByUUID(UUID(childID)) : Entity{};
+                    if (CanReparentToFolder(child, entity))
+                    {
+                        const ImGuiPayload* payload = ImGui::AcceptDragDropPayload(
+                            kHierarchyFolderMemberPayload,
+                            ImGuiDragDropFlags_AcceptBeforeDelivery);
+                        if (payload && payload->IsDelivery())
+                            ReparentToFolderWithUndo(child, entity);
+                    }
+                }
+                ImGui::EndDragDropTarget();
+            }
+        }
+
         if (ImGui::IsItemHovered() && ImGui::IsMouseDoubleClicked(ImGuiMouseButton_Left))
         {
             m_SelectionContext = entity;
@@ -404,6 +564,21 @@ namespace Wheatear {
         {
             m_SelectionContext = entity;
 
+            if (isFolder)
+            {
+                const uint64_t folderID = static_cast<uint64_t>(entity.GetUUID());
+                if (ImGui::MenuItem(EditorLocale::Text("Create Subfolder", "创建子文件夹")))
+                    CreateFolderWithUndo(entity);
+                if (ImGui::MenuItem(EditorLocale::Text("Create Entity in Folder", "在文件夹中创建实体")))
+                {
+                    CreateEntityWithUndo("Empty Entity", [folderID](Entity created)
+                    {
+                        created.AddComponent<EditorFolderComponent>().ParentFolderUUID = folderID;
+                    });
+                }
+                ImGui::Separator();
+            }
+
             const UUID uiParentID = ResolveUIParentID(entity);
             if (static_cast<uint64_t>(uiParentID) != 0)
             {
@@ -418,6 +593,16 @@ namespace Wheatear {
             if (ImGui::MenuItem(EditorLocale::Text("Rename", "重命名")))
             {
                 m_RenameRequested = true;
+            }
+
+            if (!isFolder && entity.HasComponent<EditorFolderComponent>())
+            {
+                const auto& folder = entity.GetComponent<EditorFolderComponent>();
+                if (folder.ParentFolderUUID != 0
+                    && ImGui::MenuItem(EditorLocale::Text("Remove from Folder", "移出文件夹")))
+                {
+                    RemoveFromFolderWithUndo(entity);
+                }
             }
 
             if (ImGui::MenuItem(hiddenInEditor ? "Show in Editor" : "Hide in Editor"))
@@ -503,7 +688,7 @@ namespace Wheatear {
         if (opened)
         {
             for (Entity child : visibleChildren)
-                DrawEntityNode(child, childMap, drawn, selectionVisible);
+                DrawEntityNode(child, childMap, folderChildren, drawn, selectionVisible);
 
             if (!visibleChildren.empty())
                 ImGui::TreePop();

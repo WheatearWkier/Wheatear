@@ -327,6 +327,95 @@ namespace Wheatear::SideCombatTuningService {
             return definition;
         }
 
+        static SideItemSlotKind ReadItemSlotKind(const std::string& value, SideItemSlotKind fallback)
+        {
+            if (value == "mana")
+                return SideItemSlotKind::Mana;
+            if (value == "attack_buff")
+                return SideItemSlotKind::AttackBuff;
+            return fallback;
+        }
+
+        static std::vector<SideItemSlotTuning> ReadItemSlots(const YAML::Node& node)
+        {
+            // Built-in three slots mirror the legacy hard-coded behaviour
+            // (heal / mana / attack buff with the component-authored amounts).
+            std::vector<SideItemSlotTuning> slots = {
+                { 1, "side.item1", SideItemSlotKind::Heal, 5.0f, {} },
+                { 2, "side.item2", SideItemSlotKind::Mana, 5.0f, {} },
+                { 3, "side.item3", SideItemSlotKind::AttackBuff, 10.0f, {} }
+            };
+            if (!node || !node.IsSequence())
+                return slots;
+
+            slots.clear();
+            for (const YAML::Node& entry : node)
+            {
+                if (!entry.IsMap())
+                    continue;
+                SideItemSlotTuning slot;
+                slot.Slot = entry["slot"].as<int>(0);
+                slot.ActionId = entry["actionId"].as<std::string>("side.item" + std::to_string(slot.Slot));
+                slot.Kind = ReadItemSlotKind(entry["kind"].as<std::string>(""),
+                    SideItemSlotKind::Heal);
+                slot.Cooldown = entry["cooldown"].as<float>(5.0f);
+                slot.RecipeId = entry["recipeId"].as<std::string>("");
+                if (slot.Slot > 0)
+                    slots.push_back(std::move(slot));
+            }
+            return slots;
+        }
+
+        static SideSkillSlotKind ReadSkillSlotKind(const std::string& value, SideSkillSlotKind fallback)
+        {
+            if (value == "launcher")
+                return SideSkillSlotKind::Launcher;
+            if (value == "magic_bolt" || value == "magic")
+                return SideSkillSlotKind::MagicBolt;
+            if (value == "dash")
+                return SideSkillSlotKind::Dash;
+            if (value == "ally_support" || value == "support")
+                return SideSkillSlotKind::AllySupport;
+            if (value == "break_limit")
+                return SideSkillSlotKind::BreakLimit;
+            if (value == "custom")
+                return SideSkillSlotKind::Custom;
+            return fallback;
+        }
+
+        static std::vector<SideSkillSlotTuning> ReadSkillSlots(const YAML::Node& node)
+        {
+            // Built-in six slots mirror the legacy hard-coded action polling.
+            std::vector<SideSkillSlotTuning> slots = {
+                { "basic",        "side.basic",        SideSkillSlotKind::Basic,       true, {} },
+                { "launcher",     "side.launcher",     SideSkillSlotKind::Launcher,    true, {} },
+                { "magic",        "side.magic",        SideSkillSlotKind::MagicBolt,   true, {} },
+                { "dash",         "side.dash",         SideSkillSlotKind::Dash,        true, {} },
+                { "support",      "side.support",      SideSkillSlotKind::AllySupport, true, {} },
+                { "break_limit",  "side.break_limit",  SideSkillSlotKind::BreakLimit,  true, {} }
+            };
+            if (!node || !node.IsSequence())
+                return slots;
+
+            slots.clear();
+            for (const YAML::Node& entry : node)
+            {
+                if (!entry.IsMap())
+                    continue;
+                SideSkillSlotTuning slot;
+                slot.SlotId = entry["slot"].as<std::string>("");
+                slot.ActionId = entry["actionId"].as<std::string>(
+                    slot.SlotId.empty() ? "side.basic" : "side." + slot.SlotId);
+                slot.Kind = ReadSkillSlotKind(entry["kind"].as<std::string>(""),
+                    SideSkillSlotKind::Basic);
+                slot.Enabled = entry["enabled"].as<bool>(true);
+                slot.CustomBehavior = entry["customBehavior"].as<std::string>("");
+                if (!slot.SlotId.empty())
+                    slots.push_back(std::move(slot));
+            }
+            return slots;
+        }
+
         static std::unordered_map<std::string, SideSkillDefinition> ReadSkillDefinitions(
             const YAML::Node& node,
             const std::unordered_map<std::string, SideSkillDefinition>& fallback)
@@ -505,6 +594,8 @@ namespace Wheatear::SideCombatTuningService {
                 tuning.Enemy = ReadEnemyTuning(root["enemy"], tuning.Enemy);
                 tuning.Pickup = ReadPickupTuning(root["pickup"], tuning.Pickup);
                 tuning.Skills = ReadSkillDefinitions(root["skills"], tuning.Skills);
+                tuning.ItemSlots = ReadItemSlots(root["itemSlots"]);
+                tuning.SkillSlots = ReadSkillSlots(root["skillSlots"]);
                 tuning.Progression = ReadProgressionTuning(root["progression"], tuning.Progression);
 
                 if (YAML::Node attacks = root["attacks"])

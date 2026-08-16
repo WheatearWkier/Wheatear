@@ -120,6 +120,12 @@
     <ClInclude Include="src\Modules\ArcadeCombat\ArcadeCombatDrawer.h">
       <Filter>Modules\ArcadeCombat</Filter>
     </ClInclude>
+    <ClInclude Include="src\Modules\ArcadeCombat\ArcadeCombatTuningEditorPanel.h">
+      <Filter>Modules\ArcadeCombat</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Modules\CombatUnitOverview.h">
+      <Filter>Modules</Filter>
+    </ClInclude>
     <ClInclude Include="src\Modules\ModuleEditorBootstrap.h">
       <Filter>Modules</Filter>
     </ClInclude>
@@ -141,7 +147,13 @@
     <ClInclude Include="src\Modules\TacticalCombat\TacticalCombatDrawer.h">
       <Filter>Modules\TacticalCombat</Filter>
     </ClInclude>
+    <ClInclude Include="src\Modules\TacticalCombat\TacticalCombatTuningEditorPanel.h">
+      <Filter>Modules\TacticalCombat</Filter>
+    </ClInclude>
     <ClInclude Include="src\Modules\TurnCombat\TurnCombatDrawer.h">
+      <Filter>Modules\TurnCombat</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Modules\TurnCombat\TurnCombatTuningEditorPanel.h">
       <Filter>Modules\TurnCombat</Filter>
     </ClInclude>
     <ClInclude Include="src\Modules\VisualNovel\VisualNovelDrawer.h">
@@ -157,6 +169,9 @@
       <Filter>Panels</Filter>
     </ClInclude>
     <ClInclude Include="src\Panels\AssetAliasManifestEditorPanel.h">
+      <Filter>Panels</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Panels\ConsolePanel.h">
       <Filter>Panels</Filter>
     </ClInclude>
     <ClInclude Include="src\Panels\ContentBrowserPanel.h">
@@ -300,6 +315,9 @@
     <ClCompile Include="src\Modules\ArcadeCombat\ArcadeCombatDrawer.cpp">
       <Filter>Modules\ArcadeCombat</Filter>
     </ClCompile>
+    <ClCompile Include="src\Modules\ArcadeCombat\ArcadeCombatTuningEditorPanel.cpp">
+      <Filter>Modules\ArcadeCombat</Filter>
+    </ClCompile>
     <ClCompile Include="src\Modules\ModuleEditorBootstrap.cpp">
       <Filter>Modules</Filter>
     </ClCompile>
@@ -324,7 +342,13 @@
     <ClCompile Include="src\Modules\TacticalCombat\TacticalCombatDrawer.cpp">
       <Filter>Modules\TacticalCombat</Filter>
     </ClCompile>
+    <ClCompile Include="src\Modules\TacticalCombat\TacticalCombatTuningEditorPanel.cpp">
+      <Filter>Modules\TacticalCombat</Filter>
+    </ClCompile>
     <ClCompile Include="src\Modules\TurnCombat\TurnCombatDrawer.cpp">
+      <Filter>Modules\TurnCombat</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Modules\TurnCombat\TurnCombatTuningEditorPanel.cpp">
       <Filter>Modules\TurnCombat</Filter>
     </ClCompile>
     <ClCompile Include="src\Modules\VisualNovel\VisualNovelDrawer.cpp">
@@ -346,6 +370,9 @@
       <Filter>Panels</Filter>
     </ClCompile>
     <ClCompile Include="src\Panels\AssetAliasManifestEditorPanel.cpp">
+      <Filter>Panels</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Panels\ConsolePanel.cpp">
       <Filter>Panels</Filter>
     </ClCompile>
     <ClCompile Include="src\Panels\ContentBrowserPanel.cpp">

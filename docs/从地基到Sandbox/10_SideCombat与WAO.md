@@ -196,3 +196,113 @@ Part 7（动作层/注入）、Part 8（判定与物理）。
 - ✅ AI 状态机、VFX 信号路由、HUD 数据驱动
 
 下一步：**Part 11 其他玩法**——回合制/战棋/弹幕如何复用这套架构。
+
+---
+
+## 10.9 数据驱动扩展：效果、道具槽、技能槽（2026-08-16）
+
+把"新效果类型"和"新技能"也推进到编辑器可做，分三层：
+
+### 10.9.1 槽位表：道具槽与技能槽（`side_combat_tuning.yaml`）
+
+```yaml
+itemSlots:                      # 道具槽（表驱动轮询）
+  - slot: 4                    # 加道具 = 加一行 + 输入绑定加动作
+    actionId: side.item4
+    kind: heal                 # heal / mana / attack_buff
+    cooldown: 5.0
+    recipeId: side.potion      # 可选：绑定 WAO 配方（见 10.9.2）
+skillSlots:                    # 技能槽（表驱动触发）
+  - slot: basic
+    actionId: side.basic
+    kind: basic                # basic/launcher/magic_bolt/dash/ally_support/break_limit/custom
+    enabled: true
+    customBehavior: berserk    # kind=custom 时使用的注册行为
+```
+
+- 玩家服务不再写死 `side.item1/2/3` 与六个技能动作——**遍历表轮询**，
+  表里加一行 + 输入绑定加动作 = 新热键立即生效。
+- `side:item:N` 命令路由同样查表映射到槽位的动作 ID。
+
+### 10.9.2 效果扩展：公式表达式 + 自定义效果注册表
+
+`EffectSpec` 新增两个数据字段（WAO 动作编辑器中直接编辑）：
+
+```yaml
+effects:
+  - type: Damage
+    value: 30
+    formula: "min(target.max_health, target.health + 30)"  # 表达式覆盖 value
+  - type: Damage
+    customType: lifesteal      # 注册表效果
+    value: 0.3                 # 吸血比例（handler 读 InValue）
+```
+
+- **表达式求值器**（`Gameplay/Action/EffectFormula`）：递归下降解析
+  `+ - * / %`、比较、逻辑、`min/max/clamp/abs/round/floor/ceil/if`；
+  变量为属性字典（`source.attack / target.health / controller.mana` 等）。
+  求值结果覆盖 `Value`——"新效果"可以是纯数据（如吸血 = Damage +
+  `Heal(formula: "source.attack * 0.3")`）。
+- **效果注册表**（`Gameplay/Action/EffectRegistry`）：`Register("lifesteal", ...)`
+  一次注册即全局可用，编辑器 Custom Effect 下拉自动列出。handler 只操作
+  属性字典（不碰组件类型），由调用方写回——通用且安全。
+
+### 10.9.3 技能行为注册表（`SideCombatSkillRegistry`）
+
+`Register("berserk", "狂化", handler)` 一次注册后：
+Skill Slots 面板 kind 选 `custom` + Behavior 下拉选它，即可绑键触发。
+示例：`berserk`（扣 15% 血换 2 倍攻击 6 秒）。
+
+**边界收敛到最小**：纯逻辑原语（物理、AI、状态机原语）仍要写一次 C++ handler
+（≈10 行注册），但这是"注册一次、永久可在编辑器编排"，
+不再是"改枚举 + 改所有 switch"。
+
+---
+
+## 10.10 架构边界与改进方向：以"弹反"为例（2026-08-16 讨论）
+
+> 需求：敌方远程子弹飞来 → 玩家按键 → 子弹反向飞回（弹反）。
+> 这是"纯编辑器能不能做"的试金石。
+
+### 10.10.1 为什么纯编辑器做不了
+
+弹反拆解后需要三样能力，当前架构只覆盖第一样：
+
+| 需求 | 现有能力 | 差距 |
+|---|---|---|
+| 按键触发"弹反动作" | ✅ 技能槽表 + 输入绑定 | — |
+| 弹反**窗口**（按键后 0.2s 内有效） | ❌ 自定义行为是一次性调用 | 需要**可挂起的每帧状态**（进入姿态 → 每帧检测 → 结束） |
+| 找到来袭子弹 → 反向 → 换队 | ❌ 行为上下文只有玩家实体 | 需要**跨实体操作**：遍历场景子弹、改 `Velocity/Team` 组件 |
+
+根因：自定义行为注册表（10.9.3）与表达式求值器（10.9.2）都建立在
+**数值字典模型**上（`source.attack` 这种属性表），而弹反是
+**跨实体交互 + 持续状态 + 物理修改**的行为——属性字典表达不了
+"遍历子弹并把某个子弹的组件字段取反"。
+
+### 10.10.2 与商业引擎的区别
+
+- **UE GAS**：`GameplayAbility` 是 C++/蓝图类——"弹反"在 UE 里同样要
+  写一个 Ability（蓝图节点也是代码），但 GAS 提供**能力生命周期**
+  （激活/结束/取消）+ 目标数据（`TargetData` 直接引用实体），
+  所以跨实体交互是框架原语，不是插件。
+- **Unity**：`StatusEffect`/`Skill` 都要 C# 类；可视化脚本（Playmaker/GraphView）
+  提供节点图，但节点本身仍是代码。商业引擎的共识是：
+  **行为语义 = 代码（一次），行为编排 = 数据（之后）**。
+- **Wheatear 当前**：比商业引擎多数据化了两层（效果类型注册表 +
+  数值表达式），但**缺少"可挂起的行为状态机"和"实体查询原语"**——
+  这是与商业引擎在"行为系统"上的核心差距。
+
+### 10.10.3 改进路线（若要做）
+
+1. **短期（推荐）**：弹反 = 一次 C++ 注册（约 40 行）：
+   `SideCombatSkillRegistry` 注册 `parry`（进入弹反窗口状态）
+   + 一个每帧更新钩子（检测来袭弹幕 → 反向）。之后窗口时长、
+   反弹倍率、按键全部进编辑器调参。**"做一次"要代码，"调一辈子"是编辑器**。
+2. **中期**：行为状态机原语——`BehaviorComponent`（可挂起的每帧行为栈）
+   + 实体查询原语（`find projectiles in radius`），让"跨实体交互"类
+   行为也能数据编排。约数千行，需谨慎设计。
+3. **远期**：可视化行为图（节点 = 注册原语，连线 = 数据）——即
+   "技能蓝图"，工程量大且调试成本陡增，不建议近期做。
+
+**结论**：弹反现在是"一次 C++ 注册 + 编辑器调参"；
+纯编辑器化需要行为状态机系统，属于下一个架构里程碑。

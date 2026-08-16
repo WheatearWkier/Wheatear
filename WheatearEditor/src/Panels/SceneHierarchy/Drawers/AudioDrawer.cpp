@@ -1,5 +1,6 @@
 #include "wepch.h"
 #include "AudioDrawer.h"
+#include "Assets/AssetRegistry.h"
 #include "Editor/EditorLocale.h"
 #include "Editor/EditorWidgets.h"
 #include "Wheatear/Scene/Components.h"
@@ -10,6 +11,28 @@
 #include <filesystem>
 
 namespace Wheatear {
+
+    namespace {
+
+        // Prefill a fresh audio source (Volume still 1.0) from the asset
+        // registry's audio import settings when an audio file is dropped, so
+        // the authored DefaultVolume takes effect without hand-typing.
+        static void ApplyAudioImportDefaults(AudioSourceComponent& asc,
+            const std::filesystem::path& audioPath)
+        {
+            if (asc.Volume != 1.0f)
+                return;
+
+            EditorAssetMetadata* metadata =
+                AssetRegistry::Get().FindMutableByPath(audioPath);
+            if (metadata && metadata->Kind == EditorAssetKind::Audio)
+            {
+                asc.Volume = metadata->Audio.DefaultVolume;
+                asc.Loop = metadata->Audio.Loop;
+            }
+        }
+
+    } // namespace
 
     void DrawAudioSourceComponent(Entity entity)
     {
@@ -42,8 +65,10 @@ namespace Wheatear {
                     if (ext == ".wav" || ext == ".mp3" ||
                         ext == ".ogg" || ext == ".flac")
                     {
-                        asc.AudioFilePath = AssetPath::ToProjectRelative(
+                        const std::filesystem::path audioPath = AssetPath::ToProjectRelative(
                             AssetPath::GetAssetRoot() / dropped).generic_string();
+                        asc.AudioFilePath = audioPath.generic_string();
+                        ApplyAudioImportDefaults(asc, audioPath);
                         WT_CORE_INFO("AudioFilePath set to: {0}", asc.AudioFilePath);
                     }
                 }

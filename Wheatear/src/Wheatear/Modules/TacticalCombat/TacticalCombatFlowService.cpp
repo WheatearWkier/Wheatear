@@ -5,6 +5,7 @@
 #include "TacticalCombatActionService.h"
 #include "TacticalCombatBoardService.h"
 #include "TacticalCombatSkillService.h"
+#include "TacticalCombatTuningService.h"
 #include "TacticalCombatUIService.h"
 #include "TacticalCombatVisualService.h"
 #include "Wheatear/Gameplay/Services/GameplayFlowService.h"
@@ -16,6 +17,12 @@ namespace Wheatear::TacticalCombatFlowService {
 
     void ResetLevel(Scene* scene, TacticalCombatLevelComponent& level)
     {
+        // Data-driven global tuning overrides the scene-authored flow / board
+        // / color fields (hot-reloaded; component fields remain the per-scene
+        // fallback).
+        TacticalCombatTuningService::ApplyLevelTuning(
+            TacticalCombatTuningService::GetTuning(level), level);
+
         level.RuntimeElapsed = 0.0f;
         level.RuntimeFadeAlpha = 1.0f;
         level.RuntimePhase = TacticalCombatPhase::Intro;

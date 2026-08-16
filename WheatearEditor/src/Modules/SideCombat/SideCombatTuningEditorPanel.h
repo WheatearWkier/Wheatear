@@ -39,6 +39,8 @@ namespace Wheatear {
         void DrawAttacksTab();
         void DrawAnimationsTab();
         void DrawSkillsTab();
+        void DrawItemSlotsTab();
+        void DrawSkillSlotsTab();
         void DrawProgressionTab();
         void DrawRawPreviewTab();
 

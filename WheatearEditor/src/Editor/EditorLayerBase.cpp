@@ -4,6 +4,7 @@
 
 #include "Wheatear/Scene/Components.h"
 #include "Panels/AnimationEditorPanel.h"
+#include "Panels/ConsolePanel.h"
 #include "Panels/ContentBrowserPanel.h"
 #include "Panels/DataFileEditorPanel.h"
 #include "Panels/SceneHierarchy/SceneHierarchyPanel.h"
@@ -27,6 +28,7 @@ namespace Wheatear {
         , m_DataFileEditorPanel(std::make_unique<DataFileEditorPanel>())
         , m_HelpPanel(std::make_unique<EditorHelpPanel>())
         , m_InputBindingsPanel(std::make_unique<InputBindingsPanel>())
+        , m_ConsolePanel(std::make_unique<ConsolePanel>())
         , m_GizmoType(ImGuizmo::OPERATION::TRANSLATE)
     {
         m_SceneHierarchyPanel->SetEntityActivatedCallback(

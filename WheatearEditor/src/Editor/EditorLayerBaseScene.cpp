@@ -283,6 +283,7 @@ namespace Wheatear {
     void EditorLayerBase::SyncPanels()
     {
         m_SceneHierarchyPanel->SetContext(m_ActiveScene);
+        m_SceneHierarchyPanel->SetRuntimeMode(m_SceneState == SceneState::Play);
         m_AnimationEditorPanel->SetScene(m_ActiveScene);
     }
 

@@ -1,0 +1,34 @@
+schema: wheatear.tactical_combat.tuning.v1
+version: 0.1.0
+
+# 战棋战斗全局调参（数据驱动）。
+# - 由场景实体的 TacticalCombatLevelComponent.TuningPath 引用；
+#   运行时启动时覆盖组件里的流程时长、棋盘布局与地块配色
+#   （组件字段作为场景级回退）。
+# - 编辑器：「Gameplay ▸ Tactical Combat Tuning Editor」编辑此文件。
+
+# 关卡流程 / 棋盘（时长单位：秒）
+level:
+  startFadeDuration: 0.45
+  introDuration: 0.65
+  actionDuration: 0.62
+  enemyStepDuration: 0.42
+  victoryReturnDelay: 1.75
+  defeatReturnDelay: 1.35
+
+  # 棋盘
+  gridWidth: 8
+  gridHeight: 6
+  boardOrigin: [0.275, 0.115]
+  cellSize: [0.0625, 0.0875]
+
+  # 地块配色 [R, G, B, A]
+  tileNormalColor: [1, 1, 1, 0.92]
+  tileMoveColor: [0.32, 0.78, 1, 0.88]
+  tileAttackColor: [1, 0.36, 0.28, 0.92]
+  tileSelectedColor: [1, 0.88, 0.32, 1]
+
+# 伤害公式系数
+formula:
+  magicDefenseMultiplier: 0.45
+  minDamage: 6.0

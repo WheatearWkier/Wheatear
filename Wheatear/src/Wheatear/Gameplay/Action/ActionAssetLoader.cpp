@@ -150,6 +150,8 @@ namespace Wheatear::WAO {
             effect.Turns = ReadInt(node, { "turns", "Turns" });
             effect.Seconds = ReadFloat(node, { "seconds", "Seconds" });
             effect.DurationPolicy = ParseDurationPolicy(ReadString(node, { "durationPolicy", "DurationPolicy" }));
+            effect.CustomType = ReadString(node, { "customType", "custom" });
+            effect.Formula = ReadString(node, { "formula", "Formula" });
             return effect;
         }
 

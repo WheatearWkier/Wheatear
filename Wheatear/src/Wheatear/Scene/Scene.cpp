@@ -3,6 +3,7 @@
 #include "Components.h"
 #include "ComponentLifecycleRegistry.h"
 #include "Entity.h"
+#include "EntityReference.h"
 #include "SceneSerializer.h"
 
 #include "Wheatear/Assets/AssetPath.h"
@@ -389,6 +390,14 @@ namespace Wheatear {
     {
         if (name.empty())
             return {};
+
+        // Entity bindings are authored either as "@UUID" selectors (the
+        // editor writes those so renames never break bindings) or as plain
+        // names (legacy scenes / hand-authored data). Resolve the selector
+        // form first; every "find by name" call site automatically supports
+        // both through this single entry point.
+        if (EntityReferences::IsUUIDSelector(name))
+            return GetEntityByUUID(EntityReferences::ParseUUIDSelector(name));
 
         if (m_EntityLookupCacheDirty)
             RebuildEntityLookupCaches();

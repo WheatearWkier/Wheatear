@@ -84,6 +84,8 @@ namespace Wheatear {
         void DrawAssetRegistry() const;
         void DrawMissingReferences() const;
         void DrawSceneTransitions() const;
+        void DrawEntityBindings() const;
+        void ScanEntityBindings();
         void DrawAssetHygiene();
         void DrawHygieneCleanupPlan();
         void DrawAliasManifestEditor();
@@ -108,6 +110,9 @@ namespace Wheatear {
         ProjectSourceReport m_SourceReport;
         AssetHygieneReport m_HygieneReport;
         std::vector<AssetHygieneAction> m_HygieneActions;
+        // Dangling entity-name / @UUID bindings found inside scene files
+        // (Reference = bound value, SourceAsset = scene :: component.field).
+        std::vector<AssetReferenceRecord> m_MissingEntityBindings;
         EditorDocuments::YamlAssetDocument m_AliasManifestDocument;
         std::string m_Status;
         std::string m_AliasStatus;

@@ -31,6 +31,7 @@ namespace Wheatear {
         ImGui::DockBuilderDockWindow("Properties", right);
         ImGui::DockBuilderDockWindow("Stats", rightBottom);
         ImGui::DockBuilderDockWindow("Player Build", rightBottom);
+        ImGui::DockBuilderDockWindow("Console", rightBottom);
         ImGui::DockBuilderDockWindow("Content Browser", bottom);
         ImGui::DockBuilderDockWindow("Animation Editor", bottomRight);
         ImGui::DockBuilderDockWindow("Sprite Sheet Picker", bottomRight);

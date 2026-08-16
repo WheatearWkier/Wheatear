@@ -18,6 +18,7 @@
 namespace Wheatear {
 
     class AnimationEditorPanel;
+    class ConsolePanel;
     class ContentBrowserPanel;
     class DataFileEditorPanel;
     class EditorHelpPanel;
@@ -140,6 +141,12 @@ namespace Wheatear {
         void CommitPendingGizmoEdit();
         void CommitPendingUIEdit();
         void UpdateUITextFontDuringUIResize(Entity entity);
+
+        // UI canvas editor: grid overlay + rulers.
+        void UI_DrawCanvasGridAndRulers(const glm::vec2& regionMin,
+            const glm::vec2& regionSize,
+            float referenceWidth,
+            float referenceHeight);
         void StartPlayerPackageBuild();
         void ExecutePlayerPackageBuild();
         void PollPlayerPackageBuild();
@@ -196,6 +203,10 @@ namespace Wheatear {
         bool m_ShowPhysicsColliders = false;
         bool m_ShowUIOutlines = true;
         bool m_UIEditorOpen = true;
+
+        // UI canvas editor alignment helpers.
+        bool m_UISnapEnabled = true;   // edge/center snapping while dragging
+        bool m_UIGridVisible = false;  // grid + rulers overlay
         bool m_FocusCanvasEditor = false;
         bool m_UIEditorMouseOverCanvas = false;
         glm::vec2 m_UIEditorCanvasBounds[2] = {};
@@ -251,6 +262,7 @@ namespace Wheatear {
         std::unique_ptr<DataFileEditorPanel> m_DataFileEditorPanel;
         std::unique_ptr<EditorHelpPanel> m_HelpPanel;
         std::unique_ptr<InputBindingsPanel> m_InputBindingsPanel;
+        std::unique_ptr<ConsolePanel> m_ConsolePanel;
         Timestep m_LastTimestep;
 
         std::future<PlayerPackageResult> m_PlayerBuildFuture;

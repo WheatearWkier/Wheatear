@@ -6,10 +6,13 @@
 #include "SideCombatHitboxService.h"
 #include "SideCombatHitResolutionService.h"
 #include "SideCombatMath.h"
+#include "SideCombatSkillRegistry.h"
 #include "SideCombatTargetService.h"
 #include "Wheatear/Input/InputBindingService.h"
 #include "SideCombatTuningService.h"
 #include "Wheatear/Gameplay/Action/ActionRecipeQueries.h"
+#include "Wheatear/Gameplay/Action/EffectFormula.h"
+#include "Wheatear/Gameplay/Action/EffectRegistry.h"
 #include "Wheatear/Scene/Components.h"
 #include "Wheatear/Scene/Scene.h"
 
@@ -108,37 +111,199 @@ namespace Wheatear::SideCombatPlayerService {
             return best;
         }
 
-        static bool UseCombatItem(const SideCombatTuningService::SideCombatTuning& tuning,
-            int slot,
+        // Builds the attribute dictionary handed to formula evaluation and
+        // custom effect handlers for an item use (source == target == player).
+        static WAO::AttributeStore BuildItemAttributeStore(
+            const SideCombatantComponent& combatant,
+            const SidePlayerControllerComponent& controller)
+        {
+            WAO::AttributeStore vars;
+            vars.Set("source.health", combatant.Health);
+            vars.Set("source.max_health", combatant.MaxHealth);
+            vars.Set("source.attack", combatant.Attack);
+            vars.Set("source.defense", combatant.Defense);
+            vars.Set("source.move_speed", combatant.MoveSpeed);
+            vars.Set("target.health", combatant.Health);
+            vars.Set("target.max_health", combatant.MaxHealth);
+            vars.Set("target.attack", combatant.Attack);
+            vars.Set("target.defense", combatant.Defense);
+            vars.Set("controller.mana", controller.RuntimeMana);
+            vars.Set("controller.max_mana", std::max(1.0f, controller.MaxMana));
+            vars.Set("controller.heal_amount", controller.HealItemAmount);
+            vars.Set("controller.mana_amount", controller.ManaItemAmount);
+            vars.Set("controller.attack_buff_multiplier", controller.AttackBuffMultiplier);
+            vars.Set("controller.attack_buff_duration", controller.AttackBuffDuration);
+            return vars;
+        }
+
+        // Writes the mutated attribute dictionary back into the components.
+        static void WriteBackItemAttributes(const WAO::AttributeStore& vars,
             SideCombatantComponent& combatant,
             SidePlayerControllerComponent& controller)
         {
-            switch (slot)
+            combatant.Health = std::clamp(
+                vars.Get("target.health", combatant.Health),
+                0.0f,
+                combatant.MaxHealth);
+            controller.RuntimeMana = std::clamp(
+                vars.Get("controller.mana", controller.RuntimeMana),
+                0.0f,
+                std::max(1.0f, controller.MaxMana));
+        }
+
+        // Applies one WAO recipe effect to the combatant/controller for the
+        // item-slot use case. Returns true when the effect was applied.
+        static bool ApplyItemRecipeEffect(const WAO::EffectSpec& effect,
+            SideCombatantComponent& combatant,
+            SidePlayerControllerComponent& controller,
+            float cooldown)
+        {
+            // Custom registered effect semantics run first: the handler sees
+            // the attribute dictionary and may mutate it (write-back happens
+            // in the caller through WriteBackItemAttributes).
+            if (!effect.CustomType.empty())
             {
-            case 1:
+                WAO::CustomEffectContext context;
+                WAO::AttributeStore vars = BuildItemAttributeStore(combatant, controller);
+                context.Vars = &vars;
+                context.InValue = effect.Value;
+                if (WAO::EffectRegistry::Run(effect.CustomType, context))
+                {
+                    WriteBackItemAttributes(vars, combatant, controller);
+                    // Cooldown arms via the mana/heal/attack fields the
+                    // handler may have touched; a dedicated cooldown is not
+                    // part of the shared attribute contract, so reuse the
+                    // generic heal field as the item's cooldown gate.
+                    controller.RuntimeHealItemCooldown = std::max(
+                        controller.RuntimeHealItemCooldown, cooldown);
+                    return true;
+                }
+                return false;
+            }
+
+            // Formula override: evaluate the expression against the attribute
+            // dictionary and use the result as the effect's value.
+            if (!effect.Formula.empty())
+            {
+                WAO::AttributeStore vars = BuildItemAttributeStore(combatant, controller);
+                const float evaluated = WAO::EvaluateEffectFormula(effect.Formula, vars, effect.Value);
+                if (evaluated != effect.Value)
+                {
+                    WAO::EffectSpec resolved = effect;
+                    resolved.Value = evaluated;
+                    return ApplyItemRecipeEffect(resolved, combatant, controller, cooldown);
+                }
+            }
+
+            switch (effect.Type)
+            {
+            case WAO::EffectType::Heal:
+                if (controller.RuntimeHealItemCooldown > 0.0f)
+                    return false;
+                if (combatant.Health >= combatant.MaxHealth - 0.001f)
+                    return false;
+                combatant.Health = std::min(combatant.MaxHealth,
+                    combatant.Health + std::max(0.0f, effect.Value));
+                controller.RuntimeHealItemCooldown = std::max(0.0f, cooldown);
+                return true;
+            case WAO::EffectType::ConsumeResource:
+            case WAO::EffectType::ModifyAttribute:
+            {
+                // Negative resource cost restores mana (manaCost: -20);
+                // attribute ids containing "mana" behave the same way.
+                const std::string attributeId = effect.AttributeId;
+                const bool manaLike = attributeId.find("mana") != std::string::npos
+                    || attributeId.find("Mana") != std::string::npos;
+                if (manaLike)
+                {
+                    if (controller.RuntimeManaItemCooldown > 0.0f)
+                        return false;
+                    const float delta = effect.Type == WAO::EffectType::ConsumeResource
+                        ? -effect.Value
+                        : effect.Value;
+                    if (delta < 0.0f && controller.RuntimeMana >= controller.RuntimeManaMax - 0.001f)
+                        return false;
+                    controller.RuntimeMana = std::clamp(
+                        controller.RuntimeMana + delta,
+                        0.0f,
+                        controller.RuntimeManaMax);
+                    controller.RuntimeManaItemCooldown = std::max(0.0f, cooldown);
+                    return true;
+                }
+                if (attributeId.find("attack") != std::string::npos
+                    || attributeId.find("Attack") != std::string::npos)
+                {
+                    if (controller.RuntimeAttackBuffItemCooldown > 0.0f)
+                        return false;
+                    controller.RuntimeAttackBuffMultiplier = std::max(1.0f, effect.Value);
+                    controller.RuntimeAttackBuffTimer = std::max(0.0f, effect.Seconds);
+                    controller.RuntimeAttackBuffItemCooldown = std::max(0.0f, cooldown);
+                    return true;
+                }
+                return false;
+            }
+            default:
+                // Damage / states / signals on the player are out of scope for
+                // consumables; author the effect with the kinds above.
+                return false;
+            }
+        }
+
+        static bool UseCombatItem(const SideCombatTuningService::SideCombatTuning& tuning,
+            const SideCombatTuningService::SideItemSlotTuning& itemSlot,
+            SideCombatantComponent& combatant,
+            SidePlayerControllerComponent& controller)
+        {
+            // WAO-recipe items execute the recipe's effects (Heal /
+            // ConsumeResource / ModifyAttribute / ...), authored in the WAO
+            // Action Editor; the recipe's cooldown wins over the slot value.
+            if (!itemSlot.RecipeId.empty())
+            {
+                const WAO::ActionRecipe* recipe =
+                    WAO::FindRecipeOrWarn(itemSlot.RecipeId, "SideCombatItem");
+                if (recipe)
+                {
+                    const float cooldown = recipe->Cooldown > 0.0f
+                        ? recipe->Cooldown : itemSlot.Cooldown;
+                    bool anyApplied = false;
+                    for (const WAO::EffectSpec& effect : recipe->Effects)
+                    {
+                        if (ApplyItemRecipeEffect(effect, combatant, controller, cooldown))
+                            anyApplied = true;
+                    }
+                    return anyApplied;
+                }
+            }
+
+            // Data-driven item slots: the tuning table decides which effect a
+            // slot carries; amounts still come from the controller's authored
+            // fields so scenes keep their per-entity tuning.
+            switch (itemSlot.Kind)
+            {
+            case SideCombatTuningService::SideItemSlotKind::Heal:
                 if (controller.RuntimeHealItemCooldown > 0.0f)
                     return false;
                 if (combatant.Health >= combatant.MaxHealth - 0.001f)
                     return false;
                 combatant.Health = std::min(combatant.MaxHealth,
                     combatant.Health + std::max(0.0f, controller.HealItemAmount));
-                controller.RuntimeHealItemCooldown = std::max(0.0f, tuning.Player.HealItemCooldown);
+                controller.RuntimeHealItemCooldown = std::max(0.0f, itemSlot.Cooldown);
                 return true;
-            case 2:
+            case SideCombatTuningService::SideItemSlotKind::Mana:
                 if (controller.RuntimeManaItemCooldown > 0.0f)
                     return false;
                 if (controller.RuntimeMana >= controller.RuntimeManaMax - 0.001f)
                     return false;
                 controller.RuntimeMana = std::min(controller.RuntimeManaMax,
                     controller.RuntimeMana + std::max(0.0f, controller.ManaItemAmount));
-                controller.RuntimeManaItemCooldown = std::max(0.0f, tuning.Player.ManaItemCooldown);
+                controller.RuntimeManaItemCooldown = std::max(0.0f, itemSlot.Cooldown);
                 return true;
-            case 3:
+            case SideCombatTuningService::SideItemSlotKind::AttackBuff:
                 if (controller.RuntimeAttackBuffItemCooldown > 0.0f)
                     return false;
                 controller.RuntimeAttackBuffMultiplier = std::max(1.0f, controller.AttackBuffMultiplier);
                 controller.RuntimeAttackBuffTimer = std::max(0.0f, controller.AttackBuffDuration);
-                controller.RuntimeAttackBuffItemCooldown = std::max(0.0f, tuning.Player.AttackBuffItemCooldown);
+                controller.RuntimeAttackBuffItemCooldown = std::max(0.0f, itemSlot.Cooldown);
                 return true;
             default:
                 return false;
@@ -536,12 +701,16 @@ namespace Wheatear::SideCombatPlayerService {
         if (combatant.ControlsLocked || level.RuntimeVictory || level.RuntimeDefeat)
             return;
 
-        if (!inputLockedByCinematic && InputBindingService::IsActionPressed("side.item1"))
-            UseCombatItem(tuning, 1, combatant, controller);
-        if (!inputLockedByCinematic && InputBindingService::IsActionPressed("side.item2"))
-            UseCombatItem(tuning, 2, combatant, controller);
-        if (!inputLockedByCinematic && InputBindingService::IsActionPressed("side.item3"))
-            UseCombatItem(tuning, 3, combatant, controller);
+        // Poll every data-driven item slot; extra slots added in the tuning
+        // table (with a matching input action) light up automatically.
+        if (!inputLockedByCinematic)
+        {
+            for (const auto& itemSlot : tuning.ItemSlots)
+            {
+                if (InputBindingService::IsActionPressed(itemSlot.ActionId))
+                    UseCombatItem(tuning, itemSlot, combatant, controller);
+            }
+        }
 
         if (combatant.RuntimeHitStun > 0.0f ||
             combatant.RuntimeState == SideCombatState::Knockdown ||
@@ -621,21 +790,96 @@ namespace Wheatear::SideCombatPlayerService {
             SideCombatFeedbackService::PlaySfx(tuning.Feedback.JumpSound, tuning.Feedback.JumpSoundVolume);
         }
 
-        if (InputBindingService::IsActionPressed("side.break_limit") && canStartAction)
-            CreateBreakLimit(scene, level, player, combatant, controller);
-        else if (InputBindingService::IsActionPressed("side.dash") && controller.RuntimeDashCooldown <= 0.0f && canStartAction)
-            CreatePlayerDash(scene, level, player, combatant, controller);
-        else if (InputBindingService::IsActionPressed("side.support") && controller.RuntimeAllySupportCooldown <= 0.0f && canStartAction)
-            CreateAllySupport(scene, level, player, combatant, controller);
-        else if (InputBindingService::IsActionPressed("side.magic") && controller.RuntimeMagicBoltCooldown <= 0.0f && canStartAction)
-            CreatePlayerMagicBolt(scene, level, player, combatant, controller);
-        else if (InputBindingService::IsActionPressed("side.launcher")
-            || (InputBindingService::IsActionDown("move.down") && InputBindingService::IsActionPressed("side.basic")))
+        // Poll every data-driven skill slot. Extra slots added in the tuning
+        // table (with a matching input action) light up automatically; the
+        // slot's kind selects the runtime behaviour. Slots keep the legacy
+        // priority semantics: at most one skill starts per frame.
+        bool skillStarted = false;
+        for (const auto& skillSlot : tuning.SkillSlots)
         {
-            CreatePlayerLauncher(scene, level, player, combatant, controller);
+            if (skillStarted)
+                break;
+            if (!skillSlot.Enabled)
+                continue;
+            const bool pressed = InputBindingService::IsActionPressed(skillSlot.ActionId);
+            if (!pressed)
+                continue;
+
+            switch (skillSlot.Kind)
+            {
+            case SideCombatTuningService::SideSkillSlotKind::BreakLimit:
+                if (canStartAction)
+                {
+                    CreateBreakLimit(scene, level, player, combatant, controller);
+                    skillStarted = true;
+                }
+                break;
+            case SideCombatTuningService::SideSkillSlotKind::Dash:
+                if (controller.RuntimeDashCooldown <= 0.0f && canStartAction)
+                {
+                    CreatePlayerDash(scene, level, player, combatant, controller);
+                    skillStarted = true;
+                }
+                break;
+            case SideCombatTuningService::SideSkillSlotKind::AllySupport:
+                if (controller.RuntimeAllySupportCooldown <= 0.0f && canStartAction)
+                {
+                    CreateAllySupport(scene, level, player, combatant, controller);
+                    skillStarted = true;
+                }
+                break;
+            case SideCombatTuningService::SideSkillSlotKind::MagicBolt:
+                if (controller.RuntimeMagicBoltCooldown <= 0.0f && canStartAction)
+                {
+                    CreatePlayerMagicBolt(scene, level, player, combatant, controller);
+                    skillStarted = true;
+                }
+                break;
+            case SideCombatTuningService::SideSkillSlotKind::Launcher:
+                // Down + basic is the classic launcher shortcut; keep it
+                // working only for the default launcher slot.
+                if (skillSlot.SlotId == "launcher"
+                    && InputBindingService::IsActionDown("move.down")
+                    && InputBindingService::IsActionPressed("side.basic"))
+                {
+                    CreatePlayerLauncher(scene, level, player, combatant, controller);
+                    skillStarted = true;
+                }
+                else if (canStartAction)
+                {
+                    CreatePlayerLauncher(scene, level, player, combatant, controller);
+                    skillStarted = true;
+                }
+                break;
+            case SideCombatTuningService::SideSkillSlotKind::Custom:
+            {
+                // Registered custom behaviour (SideCombatSkillRegistry);
+                // new skill semantics are one registration, then authored as
+                // a skill slot with kind: custom + customBehavior: <id>.
+                if (canStartAction)
+                {
+                    SideCombatSkillRegistry::SkillBehaviorContext behaviorContext;
+                    behaviorContext.Scene = scene;
+                    behaviorContext.Level = &level;
+                    behaviorContext.Player = player;
+                    behaviorContext.Combatant = &combatant;
+                    behaviorContext.Controller = &controller;
+                    if (SideCombatSkillRegistry::Run(skillSlot.CustomBehavior, behaviorContext))
+                        skillStarted = true;
+                }
+                break;
+            }
+            case SideCombatTuningService::SideSkillSlotKind::Basic:
+            default:
+                if (!InputBindingService::IsActionDown("move.down")
+                    && controller.RuntimeBasicCooldown <= 0.0f && canStartAction)
+                {
+                    CreatePlayerBasic(scene, level, player, combatant, controller);
+                    skillStarted = true;
+                }
+                break;
+            }
         }
-        else if (!InputBindingService::IsActionDown("move.down") && InputBindingService::IsActionPressed("side.basic") && controller.RuntimeBasicCooldown <= 0.0f && canStartAction)
-            CreatePlayerBasic(scene, level, player, combatant, controller);
 
         if (player.HasComponent<SpriteRendererComponent>())
             player.GetComponent<SpriteRendererComponent>().FlipX = combatant.RuntimeFacing < 0.0f;

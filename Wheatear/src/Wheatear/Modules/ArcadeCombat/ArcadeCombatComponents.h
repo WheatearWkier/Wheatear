@@ -50,6 +50,11 @@ namespace Wheatear {
         std::string VictorySceneCommand = "";
         std::string DefeatSceneCommand = "";
 
+        // Global tuning data file (data-driven flow / boss / player feel).
+        // Empty = the default project path. Edited from the editor's
+        // "Arcade Combat Tuning Editor".
+        std::string TuningPath = "assets/vertical_slice/data/arcade_combat_tuning.yaml";
+
         float       RuntimeElapsed = 0.0f;
         float       RuntimeFadeAlpha = 1.0f;
         bool        RuntimePaused = false;

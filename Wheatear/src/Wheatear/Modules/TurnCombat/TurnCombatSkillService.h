@@ -59,7 +59,8 @@ namespace Wheatear::TurnCombatSkillService {
     WHEATEAR_API std::string ChooseEnemySkill(const TurnCombatantComponent& actor, int round);
     WHEATEAR_API float CalculateDamage(const TurnSkillDefinition& skill,
         const TurnCombatantComponent& actor,
-        const TurnCombatantComponent& target);
+        const TurnCombatantComponent& target,
+        const TurnCombatLevelComponent& level);
     WHEATEAR_API float CalculateHeal(const TurnSkillDefinition& skill,
         const TurnCombatantComponent& actor);
     WHEATEAR_API float GetDefenseMultiplier(const TurnCombatantComponent& combatant);

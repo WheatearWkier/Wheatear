@@ -77,6 +77,18 @@ namespace Wheatear::WAO {
         int Turns = 0;
         float Seconds = 0.0f;
         EffectDurationPolicy DurationPolicy = EffectDurationPolicy::Instant;
+
+        // Data-driven effect extensions (authored in the WAO Action Editor):
+        // - CustomType: id of a registered custom effect handler (see
+        //   EffectRegistry.h). Handlers run against a plain attribute
+        //   dictionary, so new effect semantics are one registration instead
+        //   of a C++ enum + switches.
+        // - Formula: numeric expression ("target.health + 30",
+        //   "min(target.max_health, target.health + 50)", ...) evaluated at
+        //   apply time; the result overrides Value. Combined with a Type this
+        //   authors new behaviour purely as data.
+        std::string CustomType;
+        std::string Formula;
     };
 
     struct ActionRecipe

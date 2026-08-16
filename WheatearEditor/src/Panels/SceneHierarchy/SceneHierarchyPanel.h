@@ -24,6 +24,10 @@ namespace Wheatear {
         void SetContext(const Ref<Scene>& context);
         void OnImGuiRender();
 
+        // Toggles the "Play (runtime copy)" notice in the Properties panel;
+        // set by the editor layer when entering/leaving play mode.
+        void SetRuntimeMode(bool runtimeMode) { m_RuntimeMode = runtimeMode; }
+
         Entity GetSelectedEntity() const { return m_SelectionContext; }
         void SetSelectedEntity(Entity entity);
         void SetEntityActivatedCallback(std::function<void(Entity)> callback);
@@ -34,6 +38,7 @@ namespace Wheatear {
 
     private:
         using UIChildMap = std::unordered_map<uint32_t, std::vector<Entity>>;
+        using FolderChildMap = std::unordered_map<uint32_t, std::vector<Entity>>;
 
         bool EntityPassesFilter(Entity entity) const;
         bool EntityOrDescendantPassesFilter(Entity entity,
@@ -45,6 +50,7 @@ namespace Wheatear {
             std::unordered_set<uint32_t>& visiting) const;
         void DrawEntityNode(Entity entity,
             const UIChildMap& childMap,
+            const FolderChildMap& folderChildren,
             std::unordered_set<uint32_t>& drawn,
             bool& selectionVisible);
         void MarkUIDescendantsDrawn(Entity entity,
@@ -61,6 +67,14 @@ namespace Wheatear {
         void ReparentUIWithUndo(Entity child,
             Entity parent,
             const UIChildMap& childMap);
+
+        // Editor folder grouping (non-UI entities only).
+        bool IsFolder(Entity entity) const;
+        bool CanReparentToFolder(Entity child, Entity folder) const;
+        void ReparentToFolderWithUndo(Entity child, Entity folder);
+        void RemoveFromFolderWithUndo(Entity child);
+        void CreateFolderWithUndo(Entity parentFolder = {});
+
         void DrawSceneSettings();
         Entity CreateEntityWithUndo(const std::string& name,
             const std::function<void(Entity)>& configure);
@@ -76,6 +90,7 @@ namespace Wheatear {
         Ref<Scene> m_Context;
         Entity m_SelectionContext;
         std::function<void(Entity)> m_EntityActivatedCallback;
+        bool m_RuntimeMode = false;
         bool m_ScrollToSelection = false;
         bool m_RenameRequested = false;
         char m_RenameBuffer[256] = {};

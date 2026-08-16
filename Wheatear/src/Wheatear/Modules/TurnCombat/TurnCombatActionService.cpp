@@ -293,7 +293,8 @@ namespace Wheatear::TurnCombatActionService {
                 const float damage = TurnCombatSkillService::CalculateDamage(
                     *skill,
                     actorCombatant,
-                    targetCombatant);
+                    targetCombatant,
+                    level);
                 const float applied = GameplayCombatService::ApplyDamage(
                     targetCombatant.Health,
                     damage);

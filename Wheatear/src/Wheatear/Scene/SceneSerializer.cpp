@@ -2,6 +2,7 @@
 #include "SceneSerializer.h"
 #include "Entity.h"
 #include "Components.h"
+#include "Wheatear/Modules/GameplayModuleComponents.h"
 #include "Wheatear/Scene/Serialization/SceneSerializerComponentGroups.h"
 
 #include "Wheatear/Assets/AssetPath.h"
@@ -311,6 +312,112 @@ namespace Wheatear {
                 auto& button = entity.GetComponent<UIButtonComponent>();
                 RemapUUIDSelectorsInText(button.OnClickFunction, idRemap);
             }
+
+            // Gameplay level/unit components bind scene entities by name or
+            // "@UUID" selector; remap any selector text so prefab instances
+            // keep pointing at the instance's own entities. Plain names are
+            // left untouched (they resolve by name at runtime).
+#define WT_REMAP_BINDINGS(componentType, ...)                                       \
+            if (entity.HasComponent<componentType>())                               \
+            {                                                                       \
+                auto& remapComponent = entity.GetComponent<componentType>();        \
+                std::string* remapFields[] = { __VA_ARGS__ };                       \
+                for (std::string* remapField : remapFields)                         \
+                    RemapUUIDSelectorsInText(*remapField, idRemap);                 \
+            }
+
+            WT_REMAP_BINDINGS(VisualNovelComponent,
+                &remapComponent.SpeakerTextEntityName,
+                &remapComponent.BodyTextEntityName,
+                &remapComponent.AdvanceHintEntityName,
+                &remapComponent.BackgroundEntityName,
+                &remapComponent.FloorEntityName,
+                &remapComponent.HistoryTextEntityName,
+                &remapComponent.AutoPlayIndicatorEntityName,
+                &remapComponent.CommandBarEntityName,
+                &remapComponent.CommandTooltipEntityName,
+                &remapComponent.HistoryPanelEntityName,
+                &remapComponent.HistoryScrollEntityName,
+                &remapComponent.SettingsPanelEntityName,
+                &remapComponent.SettingsTextEntityName,
+                &remapComponent.SaveLoadPanelEntityName,
+                &remapComponent.SaveLoadTextEntityName,
+                &remapComponent.SystemMessageEntityName,
+                &remapComponent.MusicNoticePanelEntityName,
+                &remapComponent.MusicNoticeTextEntityName);
+
+            WT_REMAP_BINDINGS(ArcadeCombatLevelComponent,
+                &remapComponent.PlayerEntityName,
+                &remapComponent.BossEntityName,
+                &remapComponent.FadeEntityName,
+                &remapComponent.PausePanelEntityName,
+                &remapComponent.MessageTextEntityName,
+                &remapComponent.WeaponTextEntityName,
+                &remapComponent.PlayerHealthBarEntityName,
+                &remapComponent.PlayerHealthTextEntityName,
+                &remapComponent.BossHealthBarEntityName,
+                &remapComponent.BossHealthTextEntityName);
+
+            WT_REMAP_BINDINGS(SideCombatLevelComponent,
+                &remapComponent.PlayerEntityName,
+                &remapComponent.BossEntityName,
+                &remapComponent.FadeEntityName,
+                &remapComponent.MessageTextEntityName,
+                &remapComponent.ComboTextEntityName,
+                &remapComponent.SkillTextEntityName,
+                &remapComponent.RewardTextEntityName,
+                &remapComponent.PlayerHealthBarEntityName,
+                &remapComponent.PlayerHealthTextEntityName,
+                &remapComponent.BossHealthBarEntityName,
+                &remapComponent.BossHealthTextEntityName,
+                &remapComponent.CameraEntityName,
+                &remapComponent.TopPanelEntityName,
+                &remapComponent.ComboPanelEntityName,
+                &remapComponent.ComboFrameEntityName,
+                &remapComponent.ComboLabelEntityName,
+                &remapComponent.ComboMultiplyEntityName,
+                &remapComponent.SkillBarPanelEntityName,
+                &remapComponent.SkillTooltipPanelEntityName,
+                &remapComponent.SkillTooltipTextEntityName,
+                &remapComponent.JoystickBaseEntityName,
+                &remapComponent.JoystickThumbEntityName,
+                &remapComponent.PlayerManaEntityName,
+                &remapComponent.PlayerUltimateFillEntityName,
+                &remapComponent.PlayerUltimateMaskEntityName,
+                &remapComponent.BossProtectionEntityName);
+
+            WT_REMAP_BINDINGS(TurnCombatLevelComponent,
+                &remapComponent.FadeEntityName,
+                &remapComponent.MessageTextEntityName,
+                &remapComponent.ActiveActorTextEntityName,
+                &remapComponent.TurnOrderTextEntityName,
+                &remapComponent.SkillDetailTextEntityName,
+                &remapComponent.CommandPanelEntityName,
+                &remapComponent.TargetHintTextEntityName,
+                &remapComponent.ActionFlashEntityName,
+                &remapComponent.ActionEffectEntityName);
+
+            WT_REMAP_BINDINGS(TurnCombatantComponent,
+                &remapComponent.HealthBarEntityName,
+                &remapComponent.ManaBarEntityName,
+                &remapComponent.StatusTextEntityName,
+                &remapComponent.TargetButtonEntityName,
+                &remapComponent.TargetMarkerEntityName);
+
+            WT_REMAP_BINDINGS(TacticalCombatLevelComponent,
+                &remapComponent.FadeEntityName,
+                &remapComponent.MessageTextEntityName,
+                &remapComponent.PhaseTextEntityName,
+                &remapComponent.DetailTextEntityName,
+                &remapComponent.CommandPanelEntityName,
+                &remapComponent.ActionEffectEntityName);
+
+            WT_REMAP_BINDINGS(TacticalUnitComponent,
+                &remapComponent.HealthBarEntityName,
+                &remapComponent.StatusTextEntityName,
+                &remapComponent.MarkerEntityName);
+
+#undef WT_REMAP_BINDINGS
         }
     }
 

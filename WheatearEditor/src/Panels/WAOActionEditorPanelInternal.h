@@ -782,6 +782,10 @@ namespace Wheatear::WAOActionEditorInternal {
                 if (effect.Seconds > 0.0f)
                     item["seconds"] = effect.Seconds;
                 item["durationPolicy"] = DurationPolicyYamlName(effect.DurationPolicy);
+                if (!effect.CustomType.empty())
+                    item["customType"] = effect.CustomType;
+                if (!effect.Formula.empty())
+                    item["formula"] = effect.Formula;
                 sequence.push_back(item);
             }
             node["effects"] = sequence;

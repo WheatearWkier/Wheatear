@@ -1,4 +1,4 @@
-#include "wepch.h"
+﻿#include "wepch.h"
 #include "ModuleEditorBootstrap.h"
 
 #include "Editor/EditorComponentRegistry.h"
@@ -7,11 +7,14 @@
 #include "Editor/EditorToolRegistry.h"
 #include "Editor/EditorCommands.h"
 #include "Modules/ArcadeCombat/ArcadeCombatDrawer.h"
+#include "Modules/ArcadeCombat/ArcadeCombatTuningEditorPanel.h"
 #include "Modules/SideCombat/SideCombatDrawer.h"
 #include "Modules/SideCombat/SideCombatHudPresetEditorPanel.h"
 #include "Modules/SideCombat/SideCombatTuningEditorPanel.h"
+#include "Modules/TurnCombat/TurnCombatTuningEditorPanel.h"
 #include "Modules/Progression/ProgressionContentEditorPanel.h"
 #include "Modules/TacticalCombat/TacticalCombatDrawer.h"
+#include "Modules/TacticalCombat/TacticalCombatTuningEditorPanel.h"
 #include "Modules/TurnCombat/TurnCombatDrawer.h"
 #include "Modules/VisualNovel/VisualNovelDrawer.h"
 #include "Modules/VisualNovel/VisualNovelScriptEditorPanel.h"
@@ -38,6 +41,24 @@ namespace Wheatear {
         static SideCombatTuningEditorPanel& GetSideCombatTuningEditorPanel()
         {
             static SideCombatTuningEditorPanel panel;
+            return panel;
+        }
+
+        static TurnCombatTuningEditorPanel& GetTurnCombatTuningEditorPanel()
+        {
+            static TurnCombatTuningEditorPanel panel;
+            return panel;
+        }
+
+        static ArcadeCombatTuningEditorPanel& GetArcadeCombatTuningEditorPanel()
+        {
+            static ArcadeCombatTuningEditorPanel panel;
+            return panel;
+        }
+
+        static TacticalCombatTuningEditorPanel& GetTacticalCombatTuningEditorPanel()
+        {
+            static TacticalCombatTuningEditorPanel panel;
             return panel;
         }
 
@@ -217,6 +238,57 @@ namespace Wheatear {
                 []()
                 {
                     GetSideCombatHudPresetEditorPanel().OnImGuiRender();
+                }
+            });
+
+            EditorToolRegistry::Register({
+                "Turn Combat Tuning Editor",
+                EditorToolCategory::Gameplay,
+                [](const EditorToolContext& context)
+                {
+                    std::string tuningPath = "assets/vertical_slice/data/turn_combat_tuning.yaml";
+                    if (context.SelectedEntity && context.SelectedEntity.HasComponent<TurnCombatLevelComponent>())
+                        tuningPath = context.SelectedEntity.GetComponent<TurnCombatLevelComponent>().TuningPath;
+
+                    GetTurnCombatTuningEditorPanel().Open(tuningPath, context.ActiveScene);
+                },
+                []()
+                {
+                    GetTurnCombatTuningEditorPanel().OnImGuiRender();
+                }
+            });
+
+            EditorToolRegistry::Register({
+                "Arcade Combat Tuning Editor",
+                EditorToolCategory::Gameplay,
+                [](const EditorToolContext& context)
+                {
+                    std::string tuningPath = "assets/vertical_slice/data/arcade_combat_tuning.yaml";
+                    if (context.SelectedEntity && context.SelectedEntity.HasComponent<ArcadeCombatLevelComponent>())
+                        tuningPath = context.SelectedEntity.GetComponent<ArcadeCombatLevelComponent>().TuningPath;
+
+                    GetArcadeCombatTuningEditorPanel().Open(tuningPath, context.ActiveScene);
+                },
+                []()
+                {
+                    GetArcadeCombatTuningEditorPanel().OnImGuiRender();
+                }
+            });
+
+            EditorToolRegistry::Register({
+                "Tactical Combat Tuning Editor",
+                EditorToolCategory::Gameplay,
+                [](const EditorToolContext& context)
+                {
+                    std::string tuningPath = "assets/vertical_slice/data/tactical_combat_tuning.yaml";
+                    if (context.SelectedEntity && context.SelectedEntity.HasComponent<TacticalCombatLevelComponent>())
+                        tuningPath = context.SelectedEntity.GetComponent<TacticalCombatLevelComponent>().TuningPath;
+
+                    GetTacticalCombatTuningEditorPanel().Open(tuningPath, context.ActiveScene);
+                },
+                []()
+                {
+                    GetTacticalCombatTuningEditorPanel().OnImGuiRender();
                 }
             });
 

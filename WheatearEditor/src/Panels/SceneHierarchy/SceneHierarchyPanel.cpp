@@ -498,6 +498,52 @@ namespace Wheatear {
             bool selectionVisible = !m_SelectionContext;
             std::unordered_set<uint32_t> drawn;
 
+            // Editor folder grouping: non-UI entities carrying
+            // EditorFolderComponent with a non-zero ParentFolderUUID are
+            // nested under the folder entity in the tree (UI entities keep
+            // their widget hierarchy and are never placed inside folders).
+            FolderChildMap folderChildren;
+            std::unordered_map<uint64_t, uint32_t> folderKeyByUUID;
+            for (auto entityID : registry.view<IDComponent>())
+            {
+                Entity entity{ entityID, m_Context.get() };
+                if (!entity.HasComponent<EditorFolderComponent>()
+                    || entity.HasComponent<UIWidgetComponent>())
+                    continue;
+                const uint64_t id = static_cast<uint64_t>(entity.GetComponent<IDComponent>().ID);
+                if (id != 0)
+                    folderKeyByUUID[id] = EntityKey(entity);
+            }
+            for (auto entityID : registry.view<IDComponent>())
+            {
+                Entity entity{ entityID, m_Context.get() };
+                if (!entity.HasComponent<EditorFolderComponent>()
+                    || entity.HasComponent<UIWidgetComponent>())
+                    continue;
+                const uint64_t parentUUID =
+                    entity.GetComponent<EditorFolderComponent>().ParentFolderUUID;
+                if (parentUUID == 0)
+                    continue;
+                auto folderIt = folderKeyByUUID.find(parentUUID);
+                if (folderIt == folderKeyByUUID.end())
+                    continue;   // dangling parent -> member falls back to root
+                folderChildren[folderIt->second].push_back(entity);
+            }
+            for (auto& [parentKey, children] : folderChildren)
+            {
+                std::sort(children.begin(), children.end(), [](Entity a, Entity b)
+                {
+                    return a.GetName() < b.GetName();
+                });
+            }
+
+            std::unordered_set<uint32_t> folderMemberKeys;
+            for (const auto& [parentKey, children] : folderChildren)
+            {
+                for (Entity child : children)
+                    folderMemberKeys.insert(EntityKey(child));
+            }
+
             for (auto entityID : registry.view<IDComponent>())
             {
                 Entity entity{ entityID, m_Context.get() };
@@ -506,7 +552,9 @@ namespace Wheatear {
                     continue;
                 if (uiChildKeys.find(key) != uiChildKeys.end())
                     continue;
-                DrawEntityNode(entity, uiChildren, drawn, selectionVisible);
+                if (folderMemberKeys.find(key) != folderMemberKeys.end())
+                    continue;
+                DrawEntityNode(entity, uiChildren, folderChildren, drawn, selectionVisible);
             }
 
             // Cycles or broken authoring data can leave UI entities without a root.
@@ -517,7 +565,7 @@ namespace Wheatear {
                 const uint32_t key = EntityKey(entity);
                 if (drawn.find(key) != drawn.end())
                     continue;
-                DrawEntityNode(entity, uiChildren, drawn, selectionVisible);
+                DrawEntityNode(entity, uiChildren, folderChildren, drawn, selectionVisible);
             }
 
             if (!selectionVisible)
@@ -545,6 +593,13 @@ namespace Wheatear {
         ImGui::End();
 
         ImGui::Begin("Properties");
+        if (m_RuntimeMode)
+        {
+            ImGui::TextColored(ImGui::GetStyleColorVec4(ImGuiCol_CheckMark),
+                "%s", EditorLocale::Text(
+                    "Play (runtime copy) - edits are discarded on stop",
+                    "播放（运行副本）- 停止后修改将丢弃"));
+        }
         if (m_Context)
             DrawSceneSettings();
         if (m_SelectionContext)
@@ -556,6 +611,9 @@ namespace Wheatear {
     {
         if (ImGui::MenuItem(EditorLocale::Text("Create Empty Entity", "创建空实体")))
             CreateEntityWithUndo("Empty Entity", [](Entity) {});
+
+        if (ImGui::MenuItem(EditorLocale::Text("Create Folder", "创建文件夹")))
+            CreateFolderWithUndo();
 
         ImGui::BeginDisabled(!HasHiddenEditorEntities());
         if (ImGui::MenuItem("Show All Hidden"))

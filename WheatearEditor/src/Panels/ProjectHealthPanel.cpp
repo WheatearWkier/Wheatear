@@ -10,8 +10,10 @@
 #include "Wheatear/Assets/AssetAliasRegistry.h"
 #include "Wheatear/Assets/AssetPath.h"
 #include "Wheatear/Core/EngineInfo.h"
+#include "Wheatear/Scene/EntityReference.h"
 
 #include <imgui/imgui.h>
+#include <yaml-cpp/yaml.h>
 
 #include <array>
 #include <algorithm>
@@ -75,6 +77,7 @@ namespace Wheatear {
         AssetRegistry::Get().Scan(options.ProjectRoot);
         AssetRegistry::Get().WriteRegistry();
         m_HygieneReport = BuildAssetHygieneReport(options.ProjectRoot, m_Report);
+        ScanEntityBindings();
         const size_t sourceSyncIssues = m_SourceReport.MissingFromProject.size()
             + m_SourceReport.StaleProjectEntries.size();
         m_Status = "Last scan: " + std::to_string(m_Report.IncludedAssets.size()) + " assets, "
@@ -82,7 +85,125 @@ namespace Wheatear {
             + std::to_string(m_Report.MissingSceneTransitions.size()) + " missing scene transition(s), "
             + std::to_string(sourceSyncIssues) + " source sync issue(s), "
             + std::to_string(m_HygieneReport.DuplicateGroups.size()) + " duplicate group(s), "
-            + std::to_string(m_HygieneReport.AliasIssues.size()) + " alias issue(s).";
+            + std::to_string(m_HygieneReport.AliasIssues.size()) + " alias issue(s), "
+            + std::to_string(m_MissingEntityBindings.size()) + " dangling entity binding(s).";
+    }
+
+    void ProjectHealthPanel::ScanEntityBindings()
+    {
+        m_MissingEntityBindings.clear();
+
+        const std::filesystem::path scenesDir =
+            AssetPath::GetProjectRoot() / "assets" / "scenes";
+        if (!std::filesystem::is_directory(scenesDir))
+            return;
+
+        for (const auto& entry : std::filesystem::directory_iterator(scenesDir))
+        {
+            if (!entry.is_regular_file())
+                continue;
+            const std::filesystem::path path = entry.path();
+            if (path.extension() != ".wt")
+                continue;
+
+            YAML::Node root;
+            try
+            {
+                root = YAML::LoadFile(path.string());
+            }
+            catch (...)
+            {
+                continue;
+            }
+            if (!root.IsMap())
+                continue;
+
+            const YAML::Node entities = root["Entities"];
+            if (!entities.IsSequence())
+                continue;
+
+            // Pass 1: collect entity tags and UUIDs of this scene.
+            std::unordered_set<std::string> tags;
+            std::unordered_set<uint64_t> uuids;
+            for (const YAML::Node& entity : entities)
+            {
+                if (!entity.IsMap())
+                    continue;
+                const YAML::Node tagNode = entity["TagComponent"];
+                if (tagNode && tagNode.IsMap())
+                {
+                    const std::string tag = tagNode["Tag"].as<std::string>("");
+                    if (!tag.empty())
+                        tags.insert(tag);
+                }
+                const uint64_t uuid = entity["Entity"].as<uint64_t>(0);
+                if (uuid != 0)
+                    uuids.insert(uuid);
+            }
+
+            // Pass 2: every *EntityName string field (or "@UUID" selector)
+            // must resolve to a tag / UUID of the same scene.
+            const std::string relativePath =
+                AssetPath::ToProjectRelative(path).generic_string();
+            for (const YAML::Node& entity : entities)
+            {
+                if (!entity.IsMap())
+                    continue;
+                for (auto componentIt = entity.begin(); componentIt != entity.end(); ++componentIt)
+                {
+                    const std::string componentKey = componentIt->first.as<std::string>("");
+                    const YAML::Node component = componentIt->second;
+                    if (!component.IsMap())
+                        continue;
+
+                    for (auto fieldIt = component.begin(); fieldIt != component.end(); ++fieldIt)
+                    {
+                        const std::string fieldKey = fieldIt->first.as<std::string>("");
+                        const YAML::Node fieldValue = fieldIt->second;
+                        if (!fieldValue.IsScalar())
+                            continue;
+
+                        const std::string value = fieldValue.as<std::string>("");
+                        if (value.empty())
+                            continue;
+
+                        // Binding-like fields: *EntityName members, or any
+                        // scalar carrying an "@UUID" selector. Skip runtime
+                        // state, prefixes and spawn names (those reference
+                        // entities created at runtime, not authored ones).
+                        const bool looksLikeBinding =
+                            fieldKey.find("EntityName") != std::string::npos
+                            || (!value.empty() && value.front() == '@');
+                        if (!looksLikeBinding)
+                            continue;
+                        if (fieldKey.rfind("Runtime", 0) == 0)
+                            continue;
+                        if (fieldKey.find("Prefix") != std::string::npos
+                            || fieldKey.find("Spawn") != std::string::npos)
+                            continue;
+
+                        bool resolved = false;
+                        if (value.front() == '@')
+                        {
+                            const uint64_t uuid = EntityReferences::ParseUUIDSelector(value);
+                            resolved = uuid != 0 && uuids.count(uuid) != 0;
+                        }
+                        else
+                        {
+                            resolved = tags.count(value) != 0;
+                        }
+
+                        if (!resolved)
+                        {
+                            m_MissingEntityBindings.push_back({
+                                value,
+                                relativePath + " :: " + componentKey + "." + fieldKey
+                            });
+                        }
+                    }
+                }
+            }
+        }
     }
 
 
@@ -103,7 +224,8 @@ namespace Wheatear {
             + m_SourceReport.MissingFromProject.size()
             + m_SourceReport.StaleProjectEntries.size()
             + m_HygieneReport.DuplicateGroups.size()
-            + m_HygieneReport.AliasIssues.size();
+            + m_HygieneReport.AliasIssues.size()
+            + m_MissingEntityBindings.size();
         EditorWidgets::PanelHeader(EditorLocale::Text("Project Health", "项目健康检查"), "Package dependency, asset hygiene, registry, and source/project sync validation.");
         EditorWidgets::StatusBadge(issueCount == 0 ? "Ready" : "Needs Attention",
             issueCount == 0 ? EditorWidgets::StatusKind::Success : EditorWidgets::StatusKind::Error);
@@ -155,6 +277,11 @@ namespace Wheatear {
             if (ImGui::BeginTabItem(EditorLocale::Text("Scene Links", "场景链接")))
             {
                 DrawSceneTransitions();
+                ImGui::EndTabItem();
+            }
+            if (ImGui::BeginTabItem(EditorLocale::Text("Entity Bindings", "实体绑定")))
+            {
+                DrawEntityBindings();
                 ImGui::EndTabItem();
             }
             if (ImGui::BeginTabItem(EditorLocale::Text("Unused Assets", "未使用资源")))
@@ -287,6 +414,36 @@ namespace Wheatear {
                 ImGui::TextWrapped("%s", record.Reference.c_str());
                 ImGui::TableSetColumnIndex(1);
                 ImGui::TextWrapped("%s", record.SourceAsset.empty() ? "(startup/builtin)" : record.SourceAsset.c_str());
+            }
+
+            ImGui::EndTable();
+        }
+    }
+
+    void ProjectHealthPanel::DrawEntityBindings() const
+    {
+        if (m_MissingEntityBindings.empty())
+        {
+            EditorWidgets::EmptyState(
+                EditorLocale::Text("No dangling entity bindings found.", "未发现悬空实体绑定。"),
+                "Every *EntityName field and @UUID selector in the scene files resolves to an entity of the same scene.");
+            return;
+        }
+
+        if (ImGui::BeginTable("EntityBindingTable", 2,
+            ImGuiTableFlags_Borders | ImGuiTableFlags_RowBg | ImGuiTableFlags_Resizable))
+        {
+            ImGui::TableSetupColumn(EditorLocale::Text("Bound Value", "绑定值"));
+            ImGui::TableSetupColumn(EditorLocale::Text("Source", "来源"));
+            ImGui::TableHeadersRow();
+
+            for (const AssetReferenceRecord& record : m_MissingEntityBindings)
+            {
+                ImGui::TableNextRow();
+                ImGui::TableSetColumnIndex(0);
+                ImGui::TextWrapped("%s", record.Reference.c_str());
+                ImGui::TableSetColumnIndex(1);
+                ImGui::TextWrapped("%s", record.SourceAsset.c_str());
             }
 
             ImGui::EndTable();

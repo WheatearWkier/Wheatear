@@ -2,6 +2,7 @@
 #include "InputBindingService.h"
 
 #include "Wheatear/Input/Input.h"
+#include "Wheatear/Input/InputActionCatalog.h"
 #include "Wheatear/Input/KeyCodes.h"
 #include "Wheatear/Input/MouseButtonCodes.h"
 #include "Wheatear/Config/UserSettings.h"
@@ -104,6 +105,14 @@ namespace Wheatear {
         if (auto it = bindings.find(actionId); it != bindings.end())
             return it->second;
 
+        // Data-driven defaults from assets/input/action_bindings.yaml
+        // (project overrides engine built-ins).
+        if (const std::vector<int>* catalogKeys = InputActionCatalog::GetDefaultKeys(actionId))
+        {
+            bindings[actionId] = *catalogKeys;
+            return bindings[actionId];
+        }
+
         const UserSettingsData defaults = UserSettings::Defaults();
         if (auto it = defaults.KeyBindings.find(actionId); it != defaults.KeyBindings.end())
         {
@@ -125,7 +134,10 @@ namespace Wheatear {
 
     void InputBindingService::ResetToDefaults()
     {
-        UserSettings::Get().KeyBindings = UserSettings::Defaults().KeyBindings;
+        // Drop all user remaps; GetKeys then resolves each action through the
+        // data-driven catalog first and the built-in C++ defaults last, so
+        // "reset" always yields the authored default bindings.
+        UserSettings::Get().KeyBindings.clear();
         UserSettings::Save();
     }
 

@@ -3,8 +3,10 @@
 
 #include "Editor/EditorFloatingWindow.h"
 #include "Editor/EditorLocale.h"
+#include "Editor/EditorWidgets.h"
 #include "Wheatear/Config/UserSettings.h"
 #include "Wheatear/Input/Input.h"
+#include "Wheatear/Input/InputActionCatalog.h"
 #include "Wheatear/Input/InputBindingService.h"
 #include "Wheatear/Input/KeyCodes.h"
 #include "Wheatear/Input/MouseButtonCodes.h"
@@ -51,6 +53,17 @@ namespace Wheatear {
             return keys;
         }
 
+        // Default keys for an action: data catalog first, C++ fallback.
+        std::vector<int> DefaultKeysFor(const std::string& actionId)
+        {
+            if (const std::vector<int>* catalogKeys = InputActionCatalog::GetDefaultKeys(actionId))
+                return *catalogKeys;
+
+            const UserSettingsData defaults = UserSettings::Defaults();
+            auto it = defaults.KeyBindings.find(actionId);
+            return (it != defaults.KeyBindings.end()) ? it->second : std::vector<int>{};
+        }
+
     } // namespace
 
     void InputBindingsPanel::OnImGuiRender()
@@ -58,7 +71,7 @@ namespace Wheatear {
         if (!m_Open)
             return;
 
-        if (!EditorFloatingWindow::Begin("Input Bindings", &m_Open, 0, { 520.0f, 560.0f }))
+        if (!EditorFloatingWindow::Begin("Input Bindings", &m_Open, 0, { 560.0f, 600.0f }))
         {
             EditorFloatingWindow::End();
             return;
@@ -68,6 +81,9 @@ namespace Wheatear {
         ImGui::TextDisabled("%s", EditorLocale::Text(
             "Click a binding and press a key / mouse button to remap. Right-click for reset / clear.",
             "点击绑定后按下新键 / 鼠标键即可重映射。右键可重置 / 清空。"));
+        ImGui::TextDisabled("%s", EditorLocale::Text(
+            "Actions are defined in assets/input/action_bindings.yaml; new actions are saved to the project.",
+            "动作定义在 assets/input/action_bindings.yaml；新增动作会保存到项目。"));
 
         if (!m_WaitingAction.empty())
         {
@@ -82,10 +98,14 @@ namespace Wheatear {
         }
         ImGui::Separator();
 
-        // Group actions by prefix, preserving default declaration order.
-        const auto& defaults = UserSettings::Defaults().KeyBindings;
+        DrawAddActionBar();
+        ImGui::Separator();
+
+        // Group actions by prefix, preserving catalog declaration order
+        // (catalog actions first, then C++ defaults not present in the file).
+        const std::vector<std::string> actionIds = InputActionCatalog::GetAllActionIds();
         std::string currentGroup;
-        for (const auto& [actionId, keys] : defaults)
+        for (const std::string& actionId : actionIds)
         {
             const size_t dot = actionId.find('.');
             const std::string group = (dot != std::string::npos)
@@ -106,17 +126,74 @@ namespace Wheatear {
         EditorFloatingWindow::End();
     }
 
+    void InputBindingsPanel::DrawAddActionBar()
+    {
+        ImGui::TextUnformatted(EditorLocale::Text("New Action:", "新动作:"));
+        ImGui::SameLine();
+        ImGui::SetNextItemWidth(220.0f);
+        EditorWidgets::InputString("##NewActionId", m_NewActionId, 64);
+        ImGui::SameLine();
+        if (ImGui::Button(EditorLocale::Text("Add", "添加")))
+        {
+            std::string id = m_NewActionId;
+            // Trim whitespace and reject ids without the prefix.group shape.
+            const size_t first = id.find_first_not_of(" \t\r\n");
+            const size_t last = id.find_last_not_of(" \t\r\n");
+            if (first != std::string::npos)
+                id = id.substr(first, last - first + 1);
+
+            if (id.empty())
+            {
+                ImGui::TextColored(ImGui::GetStyleColorVec4(ImGuiCol_TextDisabled),
+                    " %s", EditorLocale::Text("(enter an action id like side.dash)", "（输入动作 ID，如 side.dash）"));
+            }
+            else if (InputActionCatalog::FindDefinition(id))
+            {
+                // Re-adding a disabled built-in re-enables it.
+                InputActionDefinition definition = *InputActionCatalog::FindDefinition(id);
+                definition.Disabled = false;
+                InputActionCatalog::AddDefinition(definition);
+                m_NewActionId.clear();
+            }
+            else
+            {
+                InputActionDefinition definition;
+                definition.Id = id;
+                definition.Label = id;
+                definition.DefaultKeys = {};
+                InputActionCatalog::AddDefinition(definition);
+                m_NewActionId.clear();
+            }
+        }
+        if (ImGui::IsItemHovered(ImGuiHoveredFlags_DelayShort))
+            ImGui::SetTooltip("%s", EditorLocale::Text(
+                "Create a new input action. Give it default keys by clicking its binding row, then save.",
+                "创建新的输入动作。点击其绑定行给它默认键，然后保存。"));
+    }
+
     void InputBindingsPanel::DrawActionRow(const std::string& actionId)
     {
         ImGui::PushID(actionId.c_str());
 
+        const InputActionDefinition* definition = InputActionCatalog::FindDefinition(actionId);
+        const bool disabled = definition && definition->Disabled;
+
+        const std::string displayName = InputActionCatalog::GetDisplayLabel(actionId);
         const std::string label = InputBindingService::GetBindingLabel(actionId);
         const bool waiting = (m_WaitingAction == actionId);
 
-        ImGui::TextUnformatted(actionId.c_str());
-        ImGui::SameLine(220.0f);
-        ImGui::SetNextItemWidth(180.0f);
-        if (waiting)
+        if (disabled)
+            ImGui::PushStyleColor(ImGuiCol_Text, ImGui::GetStyleColorVec4(ImGuiCol_TextDisabled));
+        ImGui::TextUnformatted(displayName.c_str());
+        if (disabled)
+            ImGui::PopStyleColor();
+        ImGui::SameLine(230.0f);
+        ImGui::SetNextItemWidth(170.0f);
+        if (disabled)
+        {
+            ImGui::TextDisabled("%s", EditorLocale::Text("(disabled)", "（已停用）"));
+        }
+        else if (waiting)
         {
             ImGui::TextColored(ImGui::GetStyleColorVec4(ImGuiCol_CheckMark),
                 "%s", EditorLocale::Text("Press a key...", "按下按键..."));
@@ -124,17 +201,36 @@ namespace Wheatear {
         else
         {
             const std::string buttonLabel = label.empty() ? "-" : label;
-            if (ImGui::Button(buttonLabel.c_str(), ImVec2(180.0f, 0.0f)))
+            if (ImGui::Button(buttonLabel.c_str(), ImVec2(170.0f, 0.0f)))
                 m_WaitingAction = actionId;
         }
 
-        // Right-click menu: reset to default / clear bindings.
+        // Right-click menu: reset to default / clear / disable / remove.
         if (!waiting && ImGui::BeginPopupContextItem("##bind_ctx"))
         {
-            if (ImGui::MenuItem(EditorLocale::Text("Reset to Default", "重置为默认")))
-                InputBindingService::SetKeys(actionId, UserSettings::Defaults().KeyBindings[actionId]);
-            if (ImGui::MenuItem(EditorLocale::Text("Clear", "清空")))
-                InputBindingService::SetKeys(actionId, {});
+            if (!disabled)
+            {
+                if (ImGui::MenuItem(EditorLocale::Text("Reset to Default", "重置为默认")))
+                    InputBindingService::SetKeys(actionId, DefaultKeysFor(actionId));
+                if (ImGui::MenuItem(EditorLocale::Text("Clear", "清空")))
+                    InputBindingService::SetKeys(actionId, {});
+            }
+            if (definition)
+            {
+                if (disabled)
+                {
+                    if (ImGui::MenuItem(EditorLocale::Text("Restore", "恢复")))
+                    {
+                        InputActionDefinition restored = *definition;
+                        restored.Disabled = false;
+                        InputActionCatalog::AddDefinition(restored);
+                    }
+                }
+                else if (ImGui::MenuItem(EditorLocale::Text("Disable", "停用")))
+                {
+                    InputActionCatalog::RemoveDefinition(actionId);
+                }
+            }
             ImGui::EndPopup();
         }
 

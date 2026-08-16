@@ -542,6 +542,11 @@ namespace Wheatear {
                 UIInputSystem::OnMousePressed(m_ActiveScene.get());
             else
                 UIInputSystem::Reset();
+
+            // Ctrl+click in play mode picks the entity under the cursor so
+            // designers can inspect / tweak runtime values without stopping.
+            if (mouseInViewport && Input::IsKeyPressed(WT_KEY_LEFT_CONTROL))
+                SelectEditorEntity(PickViewportEditorEntity(mouse), false);
             return false;
         }
 

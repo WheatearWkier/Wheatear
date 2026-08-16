@@ -15,6 +15,20 @@ namespace Wheatear {
         }
     };
 
+    // Serialized so folder grouping survives scene saves (unlike the
+    // EditorHiddenComponent marker). Runtime systems never read it.
+    template<> struct ComponentSerializer<EditorFolderComponent> {
+        static constexpr const char* Key = "EditorFolderComponent";
+        static void Serialize(YAML::Emitter& o, const EditorFolderComponent& c) {
+            o << YAML::Key << Key << YAML::BeginMap;
+            o << YAML::Key << "ParentFolderUUID" << YAML::Value << c.ParentFolderUUID;
+            o << YAML::EndMap;
+        }
+        static void Deserialize(const YAML::Node& n, EditorFolderComponent& c) {
+            c.ParentFolderUUID = n["ParentFolderUUID"].as<uint64_t>(c.ParentFolderUUID);
+        }
+    };
+
     template<> struct ComponentSerializer<TransformComponent> {
         static constexpr const char* Key = "TransformComponent";
         static void Serialize(YAML::Emitter& o, const TransformComponent& c) {

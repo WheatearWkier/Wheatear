@@ -44,6 +44,18 @@ namespace Wheatear {
         EditorHiddenComponent(const EditorHiddenComponent&) = default;
     };
 
+    // Editor-only hierarchy folder marker. Unlike EditorHiddenComponent this
+    // one IS serialized so folder grouping survives scene saves; runtime
+    // systems never read it. Members are ordinary non-UI entities whose
+    // ParentFolderUUID points at the folder entity's ID (0 = root level).
+    struct EditorFolderComponent
+    {
+        uint64_t ParentFolderUUID = 0;
+
+        EditorFolderComponent() = default;
+        EditorFolderComponent(const EditorFolderComponent&) = default;
+    };
+
     struct TransformComponent
     {
         glm::vec3 Translation = { 0.0f, 0.0f, 0.0f };

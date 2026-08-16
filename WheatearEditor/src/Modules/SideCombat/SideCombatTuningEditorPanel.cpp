@@ -1,4 +1,4 @@
-#include "wepch.h"
+﻿#include "wepch.h"
 #include "SideCombatTuningEditorPanel.h"
 
 #include "Editor/EditorContentPickers.h"
@@ -10,6 +10,7 @@
 #include "Panels/DataFileEditorPanel.h"
 #include "Wheatear/Assets/AssetAliasRegistry.h"
 #include "Wheatear/Assets/AssetPath.h"
+#include "Wheatear/Modules/SideCombat/SideCombatSkillRegistry.h"
 
 #include <imgui/imgui.h>
 #include <yaml-cpp/yaml.h>
@@ -142,6 +143,18 @@ namespace Wheatear {
             if (ImGui::BeginTabItem("Skills"))
             {
                 DrawSkillsTab();
+                ImGui::EndTabItem();
+            }
+
+            if (ImGui::BeginTabItem(EditorLocale::Text("Item Slots", "道具槽")))
+            {
+                DrawItemSlotsTab();
+                ImGui::EndTabItem();
+            }
+
+            if (ImGui::BeginTabItem(EditorLocale::Text("Skill Slots", "技能槽")))
+            {
+                DrawSkillSlotsTab();
                 ImGui::EndTabItem();
             }
 
@@ -730,6 +743,294 @@ namespace Wheatear {
         if (DrawStringList(skill, "attackIds", "Attack Ids", 512)) m_Dirty = true;
         if (DrawInt(skill, "unlockChapter", "Unlock Chapter", 0, 99)) m_Dirty = true;
         if (DrawBool(skill, "coreMove", "Core Move")) m_Dirty = true;
+    }
+
+    void SideCombatTuningEditorPanel::DrawItemSlotsTab()
+    {
+        EditorWidgets::SectionHeader(EditorLocale::Text("Item Slots", "道具槽"),
+            "Data-driven consumable slots: add a row + an input action + a HUD slot to ship a new item with zero C++.");
+
+        ImGui::TextDisabled("%s", EditorLocale::Text(
+            "Add an item: 1) this table 2) Input Bindings panel > New Action 3) Side Combat HUD Preset > Item Slots",
+            "加道具三步：1) 本表加行 2) 输入绑定面板新增动作并绑键 3) HUD 预设编辑器加槽位图标"));
+
+        YAML::Node root = *m_Root;
+        YAML::Node slots = root["itemSlots"];
+        if (!slots || !slots.IsSequence())
+        {
+            root["itemSlots"] = YAML::Node(YAML::NodeType::Sequence);
+            slots = root["itemSlots"];
+        }
+
+        static const char* kKindNames[] = { "heal", "mana", "attack_buff" };
+
+        int deleteIndex = -1;
+        if (ImGui::BeginTable("##ItemSlots", 6,
+            ImGuiTableFlags_BordersInnerV | ImGuiTableFlags_RowBg | ImGuiTableFlags_SizingStretchProp))
+        {
+            ImGui::TableSetupColumn(EditorLocale::Text("Slot", "槽位"), ImGuiTableColumnFlags_WidthFixed, 48.0f);
+            ImGui::TableSetupColumn(EditorLocale::Text("Action Id", "动作 ID"), ImGuiTableColumnFlags_WidthStretch);
+            ImGui::TableSetupColumn(EditorLocale::Text("Kind", "效果"), ImGuiTableColumnFlags_WidthFixed, 105.0f);
+            ImGui::TableSetupColumn(EditorLocale::Text("WAO Recipe", "WAO 配方"), ImGuiTableColumnFlags_WidthStretch);
+            ImGui::TableSetupColumn(EditorLocale::Text("Cooldown (s)", "冷却(秒)"), ImGuiTableColumnFlags_WidthFixed, 90.0f);
+            ImGui::TableSetupColumn("", ImGuiTableColumnFlags_WidthFixed, 30.0f);
+            ImGui::TableHeadersRow();
+
+            for (size_t i = 0; i < slots.size(); ++i)
+            {
+                YAML::Node slot = slots[i];
+                if (!slot.IsMap())
+                    continue;
+
+                ImGui::PushID(static_cast<int>(i));
+                ImGui::TableNextRow();
+                ImGui::TableSetColumnIndex(0);
+                int slotNumber = slot["slot"].as<int>(static_cast<int>(i) + 1);
+                if (ImGui::DragInt("##slot", &slotNumber, 0.5f, 1, 32))
+                {
+                    slot["slot"] = slotNumber;
+                    m_Dirty = true;
+                }
+
+                ImGui::TableSetColumnIndex(1);
+                std::string actionId = slot["actionId"].as<std::string>("");
+                if (EditorWidgets::InputString("##action", actionId, 64))
+                {
+                    slot["actionId"] = actionId;
+                    m_Dirty = true;
+                }
+
+                ImGui::TableSetColumnIndex(2);
+                std::string kind = slot["kind"].as<std::string>("heal");
+                int kindIndex = 0;
+                for (int k = 0; k < 3; ++k)
+                {
+                    if (kind == kKindNames[k])
+                        kindIndex = k;
+                }
+                if (ImGui::BeginCombo("##kind", kKindNames[kindIndex]))
+                {
+                    for (int k = 0; k < 3; ++k)
+                    {
+                        const bool selected = kindIndex == k;
+                        if (ImGui::Selectable(kKindNames[k], selected))
+                        {
+                            slot["kind"] = kKindNames[k];
+                            m_Dirty = true;
+                        }
+                        if (selected)
+                            ImGui::SetItemDefaultFocus();
+                    }
+                    ImGui::EndCombo();
+                }
+
+                ImGui::TableSetColumnIndex(3);
+                std::string recipeId = slot["recipeId"].as<std::string>("");
+                if (EditorWidgets::InputString("##recipe", recipeId, 128))
+                {
+                    if (recipeId.empty())
+                        slot.remove("recipeId");
+                    else
+                        slot["recipeId"] = recipeId;
+                    m_Dirty = true;
+                }
+                if (ImGui::IsItemHovered(ImGuiHoveredFlags_DelayShort))
+                    ImGui::SetTooltip("%s", EditorLocale::Text(
+                        "Optional WAO action id: the item executes the recipe's effects (Heal / ConsumeResource / ModifyAttribute / ...) instead of the built-in kind.",
+                        "可选 WAO 动作 ID：道具改为执行配方的效果（治疗/资源/属性/状态…），效果类型无需改代码。"));
+
+                ImGui::TableSetColumnIndex(4);
+                float cooldown = slot["cooldown"].as<float>(5.0f);
+                if (ImGui::DragFloat("##cooldown", &cooldown, 0.1f, 0.0f, 120.0f, "%.1f"))
+                {
+                    slot["cooldown"] = cooldown;
+                    m_Dirty = true;
+                }
+
+                ImGui::TableSetColumnIndex(5);
+                if (ImGui::SmallButton("X"))
+                    deleteIndex = static_cast<int>(i);
+                ImGui::PopID();
+            }
+            ImGui::EndTable();
+        }
+
+        if (ImGui::Button(EditorLocale::Text("+ Add Item Slot", "+ 添加道具槽")))
+        {
+            int nextSlot = 1;
+            for (size_t i = 0; i < slots.size(); ++i)
+            {
+                if (slots[i].IsMap())
+                    nextSlot = std::max(nextSlot, slots[i]["slot"].as<int>(0) + 1);
+            }
+            YAML::Node entry;
+            entry["slot"] = nextSlot;
+            entry["actionId"] = "side.item" + std::to_string(nextSlot);
+            entry["kind"] = "heal";
+            entry["cooldown"] = 5.0f;
+            slots.push_back(entry);
+            m_Dirty = true;
+        }
+
+        if (deleteIndex >= 0 && deleteIndex < static_cast<int>(slots.size()))
+        {
+            slots.remove(deleteIndex);
+            m_Dirty = true;
+        }
+    }
+
+    void SideCombatTuningEditorPanel::DrawSkillSlotsTab()
+    {
+        EditorWidgets::SectionHeader(EditorLocale::Text("Skill Slots", "技能槽"),
+            "Data-driven trigger table: which input action starts which skill kind. Add a row + an input action to give a move its own hotkey.");
+
+        ImGui::TextDisabled("%s", EditorLocale::Text(
+            "The behaviour kinds (basic / launcher / magic / dash / support / break limit) are runtime behaviours; the table only decides triggers and hotkeys.",
+            "行为类型（普攻/升龙/弹幕/冲刺/援护/断限）是运行时行为；本表只决定触发动作与按键。"));
+
+        YAML::Node root = *m_Root;
+        YAML::Node slots = root["skillSlots"];
+        if (!slots || !slots.IsSequence())
+        {
+            root["skillSlots"] = YAML::Node(YAML::NodeType::Sequence);
+            slots = root["skillSlots"];
+        }
+
+        static const char* kKindNames[] = {
+            "basic", "launcher", "magic_bolt", "dash", "ally_support", "break_limit", "custom"
+        };
+
+        int deleteIndex = -1;
+        if (ImGui::BeginTable("##SkillSlots", 6,
+            ImGuiTableFlags_BordersInnerV | ImGuiTableFlags_RowBg | ImGuiTableFlags_SizingStretchProp))
+        {
+            ImGui::TableSetupColumn(EditorLocale::Text("Slot", "槽位"), ImGuiTableColumnFlags_WidthStretch);
+            ImGui::TableSetupColumn(EditorLocale::Text("Action Id", "动作 ID"), ImGuiTableColumnFlags_WidthStretch);
+            ImGui::TableSetupColumn(EditorLocale::Text("Kind", "行为类型"), ImGuiTableColumnFlags_WidthFixed, 120.0f);
+            ImGui::TableSetupColumn(EditorLocale::Text("Behavior", "注册行为"), ImGuiTableColumnFlags_WidthStretch);
+            ImGui::TableSetupColumn(EditorLocale::Text("Enabled", "启用"), ImGuiTableColumnFlags_WidthFixed, 56.0f);
+            ImGui::TableSetupColumn("", ImGuiTableColumnFlags_WidthFixed, 30.0f);
+            ImGui::TableHeadersRow();
+
+            for (size_t i = 0; i < slots.size(); ++i)
+            {
+                YAML::Node slot = slots[i];
+                if (!slot.IsMap())
+                    continue;
+
+                ImGui::PushID(static_cast<int>(i));
+                ImGui::TableNextRow();
+
+                ImGui::TableSetColumnIndex(0);
+                std::string slotId = slot["slot"].as<std::string>("");
+                if (EditorWidgets::InputString("##slot", slotId, 64))
+                {
+                    slot["slot"] = slotId;
+                    m_Dirty = true;
+                }
+
+                ImGui::TableSetColumnIndex(1);
+                std::string actionId = slot["actionId"].as<std::string>("");
+                if (EditorWidgets::InputString("##action", actionId, 64))
+                {
+                    slot["actionId"] = actionId;
+                    m_Dirty = true;
+                }
+
+                ImGui::TableSetColumnIndex(2);
+                std::string kind = slot["kind"].as<std::string>("basic");
+                int kindIndex = 0;
+                for (int k = 0; k < 7; ++k)
+                {
+                    if (kind == kKindNames[k])
+                        kindIndex = k;
+                }
+                if (ImGui::BeginCombo("##kind", kKindNames[kindIndex]))
+                {
+                    for (int k = 0; k < 7; ++k)
+                    {
+                        const bool selected = kindIndex == k;
+                        if (ImGui::Selectable(kKindNames[k], selected))
+                        {
+                            slot["kind"] = kKindNames[k];
+                            m_Dirty = true;
+                        }
+                        if (selected)
+                            ImGui::SetItemDefaultFocus();
+                    }
+                    ImGui::EndCombo();
+                }
+
+                ImGui::TableSetColumnIndex(3);
+                std::string customBehavior = slot["customBehavior"].as<std::string>("");
+                {
+                    // Pick from the registered skill behaviours, or type an id.
+                    const std::vector<std::string> behaviorIds =
+                        SideCombatSkillRegistry::AllIds();
+                    std::string preview = customBehavior.empty()
+                        ? "(none)"
+                        : std::string(SideCombatSkillRegistry::DisplayName(customBehavior))
+                            + " [" + customBehavior + "]";
+                    if (ImGui::BeginCombo("##behavior", preview.c_str()))
+                    {
+                        if (ImGui::Selectable("(none)", customBehavior.empty()))
+                        {
+                            slot.remove("customBehavior");
+                            m_Dirty = true;
+                        }
+                        for (const std::string& id : behaviorIds)
+                        {
+                            const bool selected = customBehavior == id;
+                            const std::string label = std::string(
+                                SideCombatSkillRegistry::DisplayName(id)) + " [" + id + "]";
+                            if (ImGui::Selectable(label.c_str(), selected))
+                            {
+                                slot["customBehavior"] = id;
+                                m_Dirty = true;
+                            }
+                            if (selected)
+                                ImGui::SetItemDefaultFocus();
+                        }
+                        ImGui::EndCombo();
+                    }
+                }
+                if (ImGui::IsItemHovered(ImGuiHoveredFlags_DelayShort))
+                    ImGui::SetTooltip("%s", EditorLocale::Text(
+                        "Registered behaviour used when Kind = custom (new behaviours are one C++ registration).",
+                        "Kind 为 custom 时使用的注册行为（新行为 = 一次 C++ 注册，之后编辑器可选）。"));
+
+                ImGui::TableSetColumnIndex(4);
+                bool enabled = slot["enabled"].as<bool>(true);
+                if (ImGui::Checkbox("##enabled", &enabled))
+                {
+                    slot["enabled"] = enabled;
+                    m_Dirty = true;
+                }
+
+                ImGui::TableSetColumnIndex(5);
+                if (ImGui::SmallButton("X"))
+                    deleteIndex = static_cast<int>(i);
+                ImGui::PopID();
+            }
+            ImGui::EndTable();
+        }
+
+        if (ImGui::Button(EditorLocale::Text("+ Add Skill Slot", "+ 添加技能槽")))
+        {
+            YAML::Node entry;
+            entry["slot"] = "move";
+            entry["actionId"] = "side.move";
+            entry["kind"] = "basic";
+            entry["enabled"] = true;
+            slots.push_back(entry);
+            m_Dirty = true;
+        }
+
+        if (deleteIndex >= 0 && deleteIndex < static_cast<int>(slots.size()))
+        {
+            slots.remove(deleteIndex);
+            m_Dirty = true;
+        }
     }
 
     void SideCombatTuningEditorPanel::DrawProgressionTab()

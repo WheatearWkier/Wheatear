@@ -8,6 +8,7 @@
 #include "ArcadeCombatPresentationService.h"
 #include "ArcadeCombatProjectileService.h"
 #include "ArcadeCombatOutcomeService.h"
+#include "ArcadeCombatTuningService.h"
 #include "Wheatear/Input/Input.h"
 #include "Wheatear/Input/InputBindingService.h"
 #include "Wheatear/Input/KeyCodes.h"
@@ -50,6 +51,15 @@ namespace Wheatear {
         for (auto e : registry.view<ArcadeCombatLevelComponent>())
         {
             auto& level = registry.get<ArcadeCombatLevelComponent>(e);
+
+            // Data-driven global tuning overrides the scene-authored flow /
+            // boss / player values (hot-reloaded; component fields remain the
+            // per-scene fallback).
+            const auto& tuning = ArcadeCombatTuningService::GetTuning(level);
+            ArcadeCombatTuningService::ApplyLevelTuning(tuning, level);
+            ArcadeCombatTuningService::ApplyBossTuning(tuning, scene, level);
+            ArcadeCombatTuningService::ApplyPlayerTuning(tuning, scene, level);
+
             ArcadeCombatLifecycleService::ResetLevelRuntime(scene, level);
             Entity boss = SceneQueries::FindEntityByName(scene, level.BossEntityName);
             ArcadeCombatLifecycleService::ResetBossPresentation(boss);

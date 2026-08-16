@@ -1,0 +1,28 @@
+schema: wheatear.arcade_combat.tuning.v1
+version: 0.1.0
+
+# 街机弹幕战斗全局调参（数据驱动）。
+# - 由场景实体的 ArcadeCombatLevelComponent.TuningPath 引用；
+#   运行时启动时覆盖组件里的流程时长、Boss 行为与玩家手感
+#   （组件字段作为场景级回退）。
+# - 编辑器：「Gameplay ▸ Arcade Combat Tuning Editor」编辑此文件。
+
+# 关卡流程（秒）
+level:
+  startFadeDuration: 0.85
+  victoryReturnDelay: 2.6
+  defeatReturnDelay: 2.2
+  resultSceneFadeDuration: 0.55
+  bossDefeatFadeDuration: 1.15
+
+# Boss 行为（秒）
+boss:
+  introDuration: 1.25
+  shootInterval: 1.05
+  jumpInterval: 2.7
+  jumpDuration: 0.65
+
+# 玩家手感
+player:
+  moveSpeed: 4.8
+  autoAim: true

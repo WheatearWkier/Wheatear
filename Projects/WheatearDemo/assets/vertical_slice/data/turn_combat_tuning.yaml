@@ -1,0 +1,20 @@
+schema: wheatear.turn_combat.tuning.v1
+version: 0.1.0
+
+# 回合制战斗全局调参（数据驱动）。
+# - 由场景实体的 TurnCombatLevelComponent.TuningPath 引用；
+#   运行时启动时覆盖组件里的流程时长（组件字段作为场景级回退）。
+# - 编辑器：「Gameplay ▸ Turn Combat Tuning Editor」编辑此文件。
+
+# 关卡流程时长（秒）
+level:
+  startFadeDuration: 0.55
+  introDuration: 0.80
+  actionDuration: 0.72
+  victoryReturnDelay: 1.80
+  defeatReturnDelay: 1.40
+
+# 伤害公式系数
+formula:
+  defenseMultiplier: 0.62
+  minDamage: 1.0

@@ -217,7 +217,7 @@ namespace Wheatear::TacticalCombatActionService {
         }
 
         const float damage = TacticalCombatSkillService::CalculateDamage(
-            *skill, actorUnit, targetUnit);
+            *skill, actorUnit, targetUnit, level);
         const float applied = GameplayCombatService::ApplyDamage(targetUnit.Health, damage);
         RecordTacticalEffect(ledger,
             intent,

@@ -4,10 +4,12 @@
 
 #include "Editor/EditorWidgets.h"
 #include "Wheatear/Gameplay/Action/ActionTypes.h"
+#include "Wheatear/Gameplay/Action/EffectRegistry.h"
 
 #include <imgui/imgui.h>
 
 #include <string>
+#include <vector>
 
 namespace Wheatear {
 
@@ -87,6 +89,10 @@ namespace Wheatear {
         {
             const WAO::EffectSpec& effect = m_EditRecipe.Effects[static_cast<size_t>(i)];
             std::string label = std::to_string(i + 1) + ". " + EffectTypeName(effect.Type) + " -> " + EffectTargetText(effect);
+            if (!effect.CustomType.empty())
+                label += " [custom: " + effect.CustomType + "]";
+            if (!effect.Formula.empty())
+                label += " [formula]";
             label = EditorWidgets::LabelWithId(label, "wao_effect:" + std::to_string(i));
             if (ImGui::Selectable(label.c_str(), i == m_SelectedEffectIndex))
                 m_SelectedEffectIndex = i;
@@ -163,6 +169,62 @@ namespace Wheatear {
                     ImGui::SetItemDefaultFocus();
             }
             ImGui::EndCombo();
+        }
+
+        ImGui::Separator();
+        ImGui::TextDisabled("Data-driven extensions (no C++ needed)");
+
+        // Custom registered effect semantics: pick from the registry or type
+        // an id; the runtime dispatches through WAO::EffectRegistry.
+        {
+            const std::vector<std::string> customIds = WAO::EffectRegistry::AllIds();
+            std::string preview = effect.CustomType.empty()
+                ? "(none)"
+                : std::string(WAO::EffectRegistry::DisplayName(effect.CustomType))
+                    + " [" + effect.CustomType + "]";
+            if (ImGui::BeginCombo("Custom Effect", preview.c_str()))
+            {
+                if (ImGui::Selectable("(none)", effect.CustomType.empty()))
+                {
+                    effect.CustomType.clear();
+                    changed = true;
+                }
+                for (const std::string& id : customIds)
+                {
+                    const bool selected = effect.CustomType == id;
+                    const std::string label = std::string(WAO::EffectRegistry::DisplayName(id)) + " [" + id + "]";
+                    if (ImGui::Selectable(label.c_str(), selected))
+                    {
+                        effect.CustomType = id;
+                        changed = true;
+                    }
+                    if (selected)
+                        ImGui::SetItemDefaultFocus();
+                }
+                ImGui::EndCombo();
+            }
+        }
+
+        // Numeric formula override: evaluated at apply time, result replaces
+        // Value. Works with any effect type ("target.health + 50" on a Heal,
+        // "min(target.max_health, target.health + 30)" on a Damage, ...).
+        {
+            std::string formula = effect.Formula;
+            if (EditorWidgets::InputString("Formula (override value)", formula, 256))
+            {
+                effect.Formula = formula;
+                changed = true;
+            }
+            if (ImGui::IsItemHovered(ImGuiHoveredFlags_DelayShort))
+            {
+                ImGui::SetTooltip(
+                    "Numeric expression evaluated at apply time; the result overrides Value.\n"
+                    "Variables: source.health / source.attack / source.defense /\n"
+                    "target.health / target.max_health / target.attack / target.defense /\n"
+                    "controller.mana / controller.max_mana / controller.heal_amount / ...\n"
+                    "Operators: + - * / %%  < <= > >= == !=  and or not\n"
+                    "Functions: min(a,b) max(a,b) clamp(v,a,b) abs(x) round(x) floor(x) ceil(x) if(c,a,b)");
+            }
         }
 
         if (changed)
