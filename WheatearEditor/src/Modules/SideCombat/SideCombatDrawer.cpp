@@ -9,7 +9,6 @@
 #include "Editor/TextAssetEditor.h"
 #include "Modules/SideCombat/SideCombatTuningEditorPanel.h"
 #include "Panels/SceneHierarchy/ComponentDrawers.h"
-#include "Wheatear/Modules/SideCombat/SideCombatHudPreset.h"
 #include "Wheatear/Assets/AssetAliasRegistry.h"
 #include "Wheatear/Scene/Components.h"
 
@@ -181,7 +180,6 @@ namespace Wheatear {
         }
 
         static std::unordered_map<std::string, EditorUI::TextAssetEditorState> s_TuningEditors;
-        static std::string s_HudPresetStatus;
 
     } // namespace
 
@@ -209,16 +207,7 @@ namespace Wheatear {
                     512 * 1024,
                     ImGuiInputTextFlags_ReadOnly | ImGuiInputTextFlags_AllowTabInput);
             }
-            if (ImGui::Button(EditorLocale::Text("Capture Scene HUD Layout", "捕获场景 HUD 布局")))
-            {
-                const int captured = SideCombatHudPreset::CaptureSceneLayout(level, entity.GetScene());
-                s_HudPresetStatus = captured > 0
-                    ? "Captured " + std::to_string(captured) + " HUD widget layout value(s)."
-                    : "No matching HUD widgets were found in the scene.";
-            }
             ImGui::SameLine();
-            if (!s_HudPresetStatus.empty())
-                ImGui::TextWrapped("%s", s_HudPresetStatus.c_str());
             ImGui::DragFloat2("Arena Min", glm::value_ptr(level.ArenaMin), 0.05f);
             ImGui::DragFloat2("Arena Max", glm::value_ptr(level.ArenaMax), 0.05f);
             ImGui::DragFloat("Ground Y", &level.GroundY, 0.02f, -20.0f, 20.0f);

@@ -1,7 +1,6 @@
 ﻿#include "wtpch.h"
 #include "SideCombatHudService.h"
 
-#include "SideCombatHudPreset.h"
 #include "SideCombatTuningService.h"
 #include "Wheatear/Assets/AssetAliasRegistry.h"
 #include "Wheatear/Input/InputBindingService.h"
@@ -1230,7 +1229,6 @@ namespace Wheatear::SideCombatHudService {
 
             if (!level.RuntimeHudLayoutConfigured)
             {
-                SideCombatHudPreset::CaptureSceneLayout(level, scene);
 
                 SetWidgetVisible(scene, level.SkillBarPanelEntityName, false);
                 SetWidgetVisible(scene, level.MessageTextEntityName, false);

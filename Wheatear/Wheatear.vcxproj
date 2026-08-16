@@ -250,7 +250,6 @@
     <ClInclude Include="src\Wheatear\Modules\SideCombat\SideCombatFeedbackService.h" />
     <ClInclude Include="src\Wheatear\Modules\SideCombat\SideCombatHitResolutionService.h" />
     <ClInclude Include="src\Wheatear\Modules\SideCombat\SideCombatHitboxService.h" />
-    <ClInclude Include="src\Wheatear\Modules\SideCombat\SideCombatHudPreset.h" />
     <ClInclude Include="src\Wheatear\Modules\SideCombat\SideCombatHudService.h" />
     <ClInclude Include="src\Wheatear\Modules\SideCombat\SideCombatLifecycleService.h" />
     <ClInclude Include="src\Wheatear\Modules\SideCombat\SideCombatMath.h" />
@@ -799,7 +798,6 @@
     <ClCompile Include="src\Wheatear\Modules\SideCombat\SideCombatFeedbackService.cpp" />
     <ClCompile Include="src\Wheatear\Modules\SideCombat\SideCombatHitResolutionService.cpp" />
     <ClCompile Include="src\Wheatear\Modules\SideCombat\SideCombatHitboxService.cpp" />
-    <ClCompile Include="src\Wheatear\Modules\SideCombat\SideCombatHudPreset.cpp" />
     <ClCompile Include="src\Wheatear\Modules\SideCombat\SideCombatHudService.cpp" />
     <ClCompile Include="src\Wheatear\Modules\SideCombat\SideCombatLifecycleService.cpp" />
     <ClCompile Include="src\Wheatear\Modules\SideCombat\SideCombatOutcomeService.cpp" />
