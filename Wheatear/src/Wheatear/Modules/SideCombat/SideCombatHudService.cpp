@@ -987,47 +987,52 @@ namespace Wheatear::SideCombatHudService {
             const bool breakDebuff = visible && combatant &&
                 combatant->RuntimeState == SideCombatState::Broken;
 
-            // Queue-style rows: active icons pack tightly from the start
-            // position; inactive icons are hidden and take no space, so the
-            // row never pre-occupies slots for states that are not present.
+            // Single merged queue: buff and debuff are all statuses, so they
+            // pack into one row starting at buffStart and wrap to a new row
+            // once the row is full. Row direction: player rows grow upward,
+            // boss rows grow downward (away from their health bars).
             struct IconSpec
             {
                 const char* Suffix;
                 SheetUVRect UV;
                 bool Active;
             };
-            auto placeRow = [&](const glm::vec2& start,
-                std::initializer_list<IconSpec> specs)
-            {
-                float x = start.x;
-                for (const IconSpec& spec : specs)
-                {
-                    Entity icon = EnsureSheetImage(scene, prefix + spec.Suffix,
-                        70, spec.UV, glm::vec4(1.0f), false, spec.Active);
-                    if (!icon || !icon.HasComponent<UIWidgetComponent>())
-                        continue;
-                    auto& widget = icon.GetComponent<UIWidgetComponent>();
-                    if (spec.Active)
-                    {
-                        widget.Position = { x, start.y };
-                        widget.Size = layout.Size;
-                        widget.Visible = true;
-                        x += layout.Size.x + layout.Gap;
-                    }
-                    else
-                    {
-                        widget.Visible = false;
-                    }
-                }
-            };
-            placeRow(buffStart, {
+            const IconSpec specs[] = {
                 { "_Buff_0", BuffAttackUV(), magicBuff },
-                { "_Buff_1", BuffShieldUV(), shieldBuff }
-            });
-            placeRow(debuffStart, {
+                { "_Buff_1", BuffShieldUV(), shieldBuff },
                 { "_Debuff_0", DebuffStateUV(), stateDebuff },
                 { "_Debuff_1", DebuffBreakUV(), breakDebuff }
-            });
+            };
+            constexpr int kIconsPerRow = 2;
+            const float rowGap = std::abs(debuffStart.y - buffStart.y);
+            const float rowStep = playerSide ? -rowGap : rowGap;
+            float x = buffStart.x;
+            float y = buffStart.y;
+            int inRow = 0;
+            for (const IconSpec& spec : specs)
+            {
+                Entity icon = EnsureSheetImage(scene, prefix + spec.Suffix,
+                    70, spec.UV, glm::vec4(1.0f), false, spec.Active);
+                if (!icon || !icon.HasComponent<UIWidgetComponent>())
+                    continue;
+                auto& widget = icon.GetComponent<UIWidgetComponent>();
+                if (!spec.Active)
+                {
+                    widget.Visible = false;
+                    continue;
+                }
+                if (inRow >= kIconsPerRow)
+                {
+                    x = buffStart.x;
+                    y += rowStep;
+                    inRow = 0;
+                }
+                widget.Position = { x, y };
+                widget.Size = layout.Size;
+                widget.Visible = true;
+                x += layout.Size.x + layout.Gap;
+                ++inRow;
+            }
         }
 
         // On-screen joystick drag state (module-wide so the input sampler can
@@ -1540,10 +1545,15 @@ namespace Wheatear::SideCombatHudService {
                     || combatant.RuntimeState == SideCombatState::SuperArmor;
                 const bool stateIcon = IsNegativeCombatState(combatant.RuntimeState);
                 const bool breakIcon = combatant.RuntimeState == SideCombatState::Broken;
+                // Single merged queue above the health bar; wraps upward once
+                // a row is full (enemy icons sit above the bar).
                 const float iconSize = 0.105f;
                 const float iconGap = 0.11f;
-                const float iconY = baseY + 0.15f;
+                constexpr int kIconsPerRow = 2;
+                const float rowGap = 0.13f;
                 float iconX = baseX - fullWidth * 0.5f;
+                float iconY = baseY + 0.15f;
+                int iconsInRow = 0;
                 auto placeIcon = [&](const std::string& suffix,
                     const SheetUVRect& uv,
                     bool on)
@@ -1552,10 +1562,24 @@ namespace Wheatear::SideCombatHudService {
                     if (!icon || !icon.HasComponent<TransformComponent>())
                         return;
                     auto& transform = icon.GetComponent<TransformComponent>();
-                    transform.Translation = { iconX + iconSize * 0.5f, iconY, z + 0.15f };
-                    transform.Scale = { iconSize, iconSize * 1.1f, 1.0f };
                     if (on)
+                    {
+                        if (iconsInRow >= kIconsPerRow)
+                        {
+                            iconX = baseX - fullWidth * 0.5f;
+                            iconY -= rowGap;
+                            iconsInRow = 0;
+                        }
+                        transform.Translation = { iconX + iconSize * 0.5f, iconY, z + 0.15f };
+                        transform.Scale = { iconSize, iconSize * 1.1f, 1.0f };
                         iconX += iconGap;
+                        ++iconsInRow;
+                    }
+                    else
+                    {
+                        transform.Translation = { 0.0f, -10.0f, 0.0f }; // parked off-screen
+                        transform.Scale = { 0.001f, 0.001f, 1.0f };
+                    }
                 };
                 placeIcon("_Buff_0", BuffAttackUV(), false);
                 placeIcon("_Buff_1", BuffShieldUV(), shieldIcon);
