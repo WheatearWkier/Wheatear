@@ -149,6 +149,15 @@ namespace Wheatear {
         if (InputBindingService::IsActionDown("move.up"))
             lane += 1.0f;
 
+        // On-screen joystick takes over while the player drags it; the stick
+        // y-axis follows the UI convention (up = -1), so it is flipped to
+        // match the lane convention (up = +1) used by PlayerInputState.
+        const glm::vec2 joystick = SideCombatHudService::GetJoystickInputDirection();
+        if (joystick.x != 0.0f)
+            horizontal = joystick.x;
+        if (joystick.y != 0.0f)
+            lane = -joystick.y;
+
         const SideCombatPlayerService::PlayerInputState input{
             horizontal,
             lane

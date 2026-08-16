@@ -3,10 +3,14 @@
 
 #include "SideCombatTuningService.h"
 #include "Wheatear/Assets/AssetAliasRegistry.h"
-#include "Wheatear/Input/InputBindingService.h"
+#include "Wheatear/Core/Application.h"
 #include "Wheatear/Core/Log.h"
+#include "Wheatear/Core/Window.h"
 #include "Wheatear/Gameplay/Services/GameplayUILayoutService.h"
 #include "Wheatear/Gameplay/Services/GameplayTextService.h"
+#include "Wheatear/Input/Input.h"
+#include "Wheatear/Input/InputBindingService.h"
+#include "Wheatear/Input/MouseButtonCodes.h"
 #include "Wheatear/Scene/Components.h"
 #include "Wheatear/Scene/Scene.h"
 #include "Wheatear/Scene/SceneQueries.h"
@@ -1004,6 +1008,24 @@ namespace Wheatear::SideCombatHudService {
                 glm::vec4(1.0f), false, breakDebuff);
         }
 
+        // On-screen joystick drag state (module-wide so the input sampler can
+        // consume it without touching the HUD internals).
+        bool g_JoystickDragging = false;
+        glm::vec2 g_JoystickDirection = { 0.0f, 0.0f };
+
+        // Quantizes a raw stick vector onto the 8-way grid ({-1,0,1}^2).
+        static glm::vec2 QuantizeEightWay(glm::vec2 direction)
+        {
+            const float length = glm::length(direction);
+            if (length < 0.35f)
+                return { 0.0f, 0.0f };
+            direction /= length;
+            return {
+                direction.x > 0.35f ? 1.0f : (direction.x < -0.35f ? -1.0f : 0.0f),
+                direction.y > 0.35f ? 1.0f : (direction.y < -0.35f ? -1.0f : 0.0f)
+            };
+        }
+
         static void UpdateJoystickVisual(Scene* scene, const SideCombatLevelComponent& level)
         {
             glm::vec2 basePosition = level.JoystickBaseLayout.Position;
@@ -1032,6 +1054,46 @@ namespace Wheatear::SideCombatHudService {
                 baseSize = baseWidget.Size;
             }
 
+            // Mouse drag: press inside the stick base to grab it, drag to
+            // steer (8-way), release to let go. The stick direction is shared
+            // with the movement sampler through GetJoystickInputDirection().
+            Window& window = Application::Get().GetWindow();
+            const glm::vec2 windowSize = {
+                std::max(1.0f, static_cast<float>(window.GetWidth())),
+                std::max(1.0f, static_cast<float>(window.GetHeight()))
+            };
+            const glm::vec2 baseCenterPx = (basePosition + baseSize * 0.5f) * windowSize;
+            const glm::vec2 baseHalfPx = baseSize * windowSize * 0.5f;
+            const glm::vec2 mousePx = { Input::GetMouseX(), Input::GetMouseY() };
+            // IsMouseButtonPressed reports the held state (GLFW_PRESS), which
+            // is exactly what a drag needs: grab while held inside the base,
+            // keep steering when the cursor leaves it, release on unpress.
+            const bool leftDown = Input::IsMouseButtonPressed(WT_MOUSE_BUTTON_LEFT);
+            const float travelPx = std::max(1.0f, level.JoystickThumbTravel.x * windowSize.x);
+
+            if (!g_JoystickDragging
+                && leftDown
+                && glm::abs(mousePx - baseCenterPx).x <= baseHalfPx.x
+                && glm::abs(mousePx - baseCenterPx).y <= baseHalfPx.y)
+            {
+                g_JoystickDragging = true;
+            }
+            if (g_JoystickDragging && !leftDown)
+            {
+                g_JoystickDragging = false;
+                g_JoystickDirection = { 0.0f, 0.0f };
+            }
+            if (g_JoystickDragging)
+            {
+                glm::vec2 raw = (mousePx - baseCenterPx) / travelPx;
+                const float rawLength = glm::length(raw);
+                if (rawLength > 1.0f)
+                    raw /= rawLength;
+                g_JoystickDirection = QuantizeEightWay(raw);
+                if (g_JoystickDirection.x != 0.0f || g_JoystickDirection.y != 0.0f)
+                    direction = g_JoystickDirection;
+            }
+
             const glm::vec2 thumbCenter = basePosition + baseSize * 0.5f +
                 direction * level.JoystickThumbTravel;
             Entity thumb = EnsureSheetImage(scene,
@@ -1040,7 +1102,7 @@ namespace Wheatear::SideCombatHudService {
                 thumbSize,
                 59,
                 JoystickUV(),
-                lengthSq > 0.01f
+                lengthSq > 0.01f || g_JoystickDragging
                     ? glm::vec4(0.84f, 1.0f, 1.0f, 0.92f)
                     : glm::vec4(0.66f, 0.80f, 0.84f, 0.52f));
             if (thumb && thumb.HasComponent<UIWidgetComponent>())
@@ -1708,6 +1770,11 @@ namespace Wheatear::SideCombatHudService {
 
         if (IsResultFadeActive(level))
             HideResultFadeTextHud(scene, level);
+    }
+
+    glm::vec2 GetJoystickInputDirection()
+    {
+        return g_JoystickDragging ? g_JoystickDirection : glm::vec2(0.0f);
     }
 
 } // namespace Wheatear::SideCombatHudService
