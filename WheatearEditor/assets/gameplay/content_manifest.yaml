@@ -4,8 +4,6 @@ aliases:
     action_directory: assets/gameplay/actions/
   side:
     tuning: assets/vertical_slice/data/side_combat_tuning.yaml
-    hud:
-      preset: assets/vertical_slice/data/side_combat_hud_preset.yaml
     path:
       characters: assets/vertical_slice/side_combat/characters/
       enemies: assets/vertical_slice/side_combat/enemies/
@@ -26,7 +24,6 @@ aliases:
         break_limit: assets/vertical_slice/side_combat/ui/icon_skill_break_limit.png
         enemy_shockwave: assets/vertical_slice/side_combat/vfx_sheets/static_effects/vfx_enemy_projectile_sheet.png
         enemy_claw: assets/vertical_slice/side_combat/vfx_sheets/static_effects/vfx_enemy_claw_sheet.png
-      hud:
         heal_potion: assets/vertical_slice/side_combat/ui/items/icon_item_heal_potion.png
         focus_vial: assets/vertical_slice/side_combat/ui/items/icon_item_focus_vial.png
         burst_bomb: assets/vertical_slice/side_combat/ui/items/icon_item_burst_bomb.png

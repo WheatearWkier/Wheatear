@@ -7,7 +7,6 @@
 #include "Editor/EditorLocale.h"
 #include "Editor/EditorWidgets.h"
 #include "Editor/TextAssetEditor.h"
-#include "Modules/SideCombat/SideCombatHudPresetEditorPanel.h"
 #include "Modules/SideCombat/SideCombatTuningEditorPanel.h"
 #include "Panels/SceneHierarchy/ComponentDrawers.h"
 #include "Wheatear/Modules/SideCombat/SideCombatHudPreset.h"
@@ -182,7 +181,6 @@ namespace Wheatear {
         }
 
         static std::unordered_map<std::string, EditorUI::TextAssetEditorState> s_TuningEditors;
-        static std::unordered_map<std::string, EditorUI::TextAssetEditorState> s_HudPresetEditors;
         static std::string s_HudPresetStatus;
 
     } // namespace
@@ -211,21 +209,6 @@ namespace Wheatear {
                     512 * 1024,
                     ImGuiInputTextFlags_ReadOnly | ImGuiInputTextFlags_AllowTabInput);
             }
-            EditorWidgets::DrawAssetReferenceField("HUD Preset",
-                level.HudPresetPath,
-                EditorWidgets::AssetReferenceKind::Data,
-                260);
-            if (ImGui::Button("Open Side Combat HUD Preset Editor"))
-                SideCombatEditorRequests::RequestOpenHudPreset(level.HudPresetPath);
-            ImGui::Checkbox(EditorLocale::Text("HUD Preset Overrides", "HUD 预设覆盖"), &level.HudPresetOverridesEnabled);
-            if (ImGui::Button(EditorLocale::Text("Apply HUD Preset", "应用 HUD 预设")))
-            {
-                const bool applied = SideCombatHudPreset::Apply(level);
-                s_HudPresetStatus = applied
-                    ? "Applied HUD preset."
-                    : "Failed to apply HUD preset.";
-            }
-            ImGui::SameLine();
             if (ImGui::Button(EditorLocale::Text("Capture Scene HUD Layout", "捕获场景 HUD 布局")))
             {
                 const int captured = SideCombatHudPreset::CaptureSceneLayout(level, entity.GetScene());
@@ -234,29 +217,8 @@ namespace Wheatear {
                     : "No matching HUD widgets were found in the scene.";
             }
             ImGui::SameLine();
-            if (ImGui::Button("Save Current HUD To Preset"))
-            {
-                const std::string resolvedPresetPath = AssetAliasRegistry::Resolve(level.HudPresetPath);
-                std::string status;
-                const bool saved = SideCombatHudPreset::Save(level, {}, &status);
-                s_HudPresetStatus = status.empty()
-                    ? (saved ? "Saved HUD preset." : "Failed to save HUD preset.")
-                    : status;
-                if (saved)
-                    s_HudPresetEditors.erase(resolvedPresetPath);
-            }
             if (!s_HudPresetStatus.empty())
                 ImGui::TextWrapped("%s", s_HudPresetStatus.c_str());
-            if (ImGui::CollapsingHeader("Advanced Raw Side Combat HUD Preset YAML"))
-            {
-                EditorWidgets::InlineStatus("Advanced raw preview. HUD preset should move to a structured preset editor next.", EditorWidgets::StatusKind::Warning);
-                EditorUI::DrawTextAssetEditor("Side Combat HUD Preset YAML",
-                    "SideCombatHudPresetEditor",
-                    AssetAliasRegistry::Resolve(level.HudPresetPath),
-                    s_HudPresetEditors,
-                    512 * 1024,
-                    ImGuiInputTextFlags_ReadOnly | ImGuiInputTextFlags_AllowTabInput);
-            }
             ImGui::DragFloat2("Arena Min", glm::value_ptr(level.ArenaMin), 0.05f);
             ImGui::DragFloat2("Arena Max", glm::value_ptr(level.ArenaMax), 0.05f);
             ImGui::DragFloat("Ground Y", &level.GroundY, 0.02f, -20.0f, 20.0f);
@@ -329,155 +291,152 @@ namespace Wheatear {
             ImGui::DragFloat("Wave 2 Right Wall", &level.Wave2RightWall, 0.05f, -50.0f, 50.0f);
             ImGui::DragFloat("Wave 3 Right Wall", &level.Wave3RightWall, 0.05f, -50.0f, 50.0f);
 
-            if (level.HudPresetOverridesEnabled)
+            ImGui::Separator();
+            ImGui::TextDisabled("Scene Bindings");
+            DrawSceneBinding(entity, "Player", level.PlayerEntityName);
+            DrawSceneBinding(entity, "Boss", level.BossEntityName);
+            DrawSceneBinding(entity, "Fade", level.FadeEntityName);
+            DrawSceneBinding(entity, "Message Text", level.MessageTextEntityName);
+            DrawSceneBinding(entity, "Combo Text", level.ComboTextEntityName);
+            DrawSceneBinding(entity, "Skill Text", level.SkillTextEntityName);
+            DrawSceneBinding(entity, "Reward Text", level.RewardTextEntityName);
+            DrawSceneBinding(entity, "Player Health Bar", level.PlayerHealthBarEntityName);
+            DrawSceneBinding(entity, "Player Health Text", level.PlayerHealthTextEntityName);
+            DrawSceneBinding(entity, "Boss Health Bar", level.BossHealthBarEntityName);
+            DrawSceneBinding(entity, "Boss Health Text", level.BossHealthTextEntityName);
+            DrawSceneBinding(entity, "Camera", level.CameraEntityName);
+            DrawSceneBinding(entity, "Top Panel", level.TopPanelEntityName);
+            DrawSceneBinding(entity, "Combo Panel", level.ComboPanelEntityName);
+            DrawSceneBinding(entity, "Combo Frame", level.ComboFrameEntityName);
+            DrawSceneBinding(entity, "Combo Label", level.ComboLabelEntityName);
+            DrawSceneBinding(entity, "Combo Multiply", level.ComboMultiplyEntityName);
+            InputString("Combo Digit Prefix", level.ComboDigitPrefix, 128);
+            DrawSceneBinding(entity, "Skill Bar Panel", level.SkillBarPanelEntityName);
+            DrawSceneBinding(entity, "Skill Tooltip Panel", level.SkillTooltipPanelEntityName);
+            DrawSceneBinding(entity, "Skill Tooltip Text", level.SkillTooltipTextEntityName);
+            DrawSceneBinding(entity, "Joystick Base", level.JoystickBaseEntityName);
+            DrawSceneBinding(entity, "Joystick Thumb", level.JoystickThumbEntityName);
+            DrawSceneBinding(entity, "Player Mana", level.PlayerManaEntityName);
+            DrawSceneBinding(entity, "Player Ultimate Fill", level.PlayerUltimateFillEntityName);
+            DrawSceneBinding(entity, "Player Ultimate Mask", level.PlayerUltimateMaskEntityName);
+            DrawSceneBinding(entity, "Boss Protection", level.BossProtectionEntityName);
+            InputString("Player Status Prefix", level.PlayerStatusPrefix, 128);
+            InputString("Enemy Status Prefix", level.EnemyStatusPrefix, 128);
+            InputString("Skill Prefix", level.SkillPrefix, 128);
+            InputString("Item Slot Prefix", level.ItemSlotPrefix, 128);
+
+            if (ImGui::CollapsingHeader("HUD Layout"))
             {
-                ImGui::Separator();
-                ImGui::TextDisabled("Scene Bindings");
-                DrawSceneBinding(entity, "Player", level.PlayerEntityName);
-                DrawSceneBinding(entity, "Boss", level.BossEntityName);
-                DrawSceneBinding(entity, "Fade", level.FadeEntityName);
-                DrawSceneBinding(entity, "Message Text", level.MessageTextEntityName);
-                DrawSceneBinding(entity, "Combo Text", level.ComboTextEntityName);
-                DrawSceneBinding(entity, "Skill Text", level.SkillTextEntityName);
-                DrawSceneBinding(entity, "Reward Text", level.RewardTextEntityName);
-                DrawSceneBinding(entity, "Player Health Bar", level.PlayerHealthBarEntityName);
-                DrawSceneBinding(entity, "Player Health Text", level.PlayerHealthTextEntityName);
-                DrawSceneBinding(entity, "Boss Health Bar", level.BossHealthBarEntityName);
-                DrawSceneBinding(entity, "Boss Health Text", level.BossHealthTextEntityName);
-                DrawSceneBinding(entity, "Camera", level.CameraEntityName);
-                DrawSceneBinding(entity, "Top Panel", level.TopPanelEntityName);
-                DrawSceneBinding(entity, "Combo Panel", level.ComboPanelEntityName);
-                DrawSceneBinding(entity, "Combo Frame", level.ComboFrameEntityName);
-                DrawSceneBinding(entity, "Combo Label", level.ComboLabelEntityName);
-                DrawSceneBinding(entity, "Combo Multiply", level.ComboMultiplyEntityName);
-                InputString("Combo Digit Prefix", level.ComboDigitPrefix, 128);
-                DrawSceneBinding(entity, "Skill Bar Panel", level.SkillBarPanelEntityName);
-                DrawSceneBinding(entity, "Skill Tooltip Panel", level.SkillTooltipPanelEntityName);
-                DrawSceneBinding(entity, "Skill Tooltip Text", level.SkillTooltipTextEntityName);
-                DrawSceneBinding(entity, "Joystick Base", level.JoystickBaseEntityName);
-                DrawSceneBinding(entity, "Joystick Thumb", level.JoystickThumbEntityName);
-                DrawSceneBinding(entity, "Player Mana", level.PlayerManaEntityName);
-                DrawSceneBinding(entity, "Player Ultimate Fill", level.PlayerUltimateFillEntityName);
-                DrawSceneBinding(entity, "Player Ultimate Mask", level.PlayerUltimateMaskEntityName);
-                DrawSceneBinding(entity, "Boss Protection", level.BossProtectionEntityName);
-                InputString("Player Status Prefix", level.PlayerStatusPrefix, 128);
-                InputString("Enemy Status Prefix", level.EnemyStatusPrefix, 128);
-                InputString("Skill Prefix", level.SkillPrefix, 128);
-                InputString("Item Slot Prefix", level.ItemSlotPrefix, 128);
+                DrawHudRect("Top Panel", level.TopPanelLayout);
+                DrawHudRect("Player Health", level.PlayerHealthLayout);
+                DrawHudRect("Player Mana", level.PlayerManaLayout);
+                DrawHudRect("Player Ultimate", level.PlayerUltimateLayout);
+                DrawHudRect("Player Health Text", level.PlayerHealthTextLayout);
+                DrawHudRect("Boss Panel", level.BossPanelLayout);
+                DrawHudRect("Boss Health", level.BossHealthLayout);
+                DrawHudRect("Boss Protection", level.BossProtectionLayout);
+                DrawHudRect("Boss Health Text", level.BossHealthTextLayout);
+                DrawHudRect("Combo Text", level.ComboTextLayout);
+                DrawHudRect("Combo Frame", level.ComboFrameLayout);
+                DrawHudRect("Skill Tooltip", level.SkillTooltipLayout);
+                ImGui::DragFloat2("Skill Tooltip Padding", glm::value_ptr(level.SkillTooltipPadding), 0.001f, 0.0f, 1.0f, "%.3f");
+                DrawHudRect("Joystick Base", level.JoystickBaseLayout);
+                ImGui::DragFloat2("Joystick Thumb Size", glm::value_ptr(level.JoystickThumbSize), 0.001f, 0.0f, 1.0f, "%.3f");
+                ImGui::DragFloat2("Joystick Thumb Travel", glm::value_ptr(level.JoystickThumbTravel), 0.001f, 0.0f, 1.0f, "%.3f");
+                DrawStatusBadgeLayout("Player Status", level.PlayerStatusLayout);
+                DrawStatusBadgeLayout("Enemy Status", level.EnemyStatusLayout);
+            }
 
-                if (ImGui::CollapsingHeader("HUD Layout"))
+            if (ImGui::CollapsingHeader("Skill HUD Slots"))
+            {
+                for (int i = 0; i < (int)level.SkillHudSlots.size(); ++i)
                 {
-                    DrawHudRect("Top Panel", level.TopPanelLayout);
-                    DrawHudRect("Player Health", level.PlayerHealthLayout);
-                    DrawHudRect("Player Mana", level.PlayerManaLayout);
-                    DrawHudRect("Player Ultimate", level.PlayerUltimateLayout);
-                    DrawHudRect("Player Health Text", level.PlayerHealthTextLayout);
-                    DrawHudRect("Boss Panel", level.BossPanelLayout);
-                    DrawHudRect("Boss Health", level.BossHealthLayout);
-                    DrawHudRect("Boss Protection", level.BossProtectionLayout);
-                    DrawHudRect("Boss Health Text", level.BossHealthTextLayout);
-                    DrawHudRect("Combo Text", level.ComboTextLayout);
-                    DrawHudRect("Combo Frame", level.ComboFrameLayout);
-                    DrawHudRect("Skill Tooltip", level.SkillTooltipLayout);
-                    ImGui::DragFloat2("Skill Tooltip Padding", glm::value_ptr(level.SkillTooltipPadding), 0.001f, 0.0f, 1.0f, "%.3f");
-                    DrawHudRect("Joystick Base", level.JoystickBaseLayout);
-                    ImGui::DragFloat2("Joystick Thumb Size", glm::value_ptr(level.JoystickThumbSize), 0.001f, 0.0f, 1.0f, "%.3f");
-                    ImGui::DragFloat2("Joystick Thumb Travel", glm::value_ptr(level.JoystickThumbTravel), 0.001f, 0.0f, 1.0f, "%.3f");
-                    DrawStatusBadgeLayout("Player Status", level.PlayerStatusLayout);
-                    DrawStatusBadgeLayout("Enemy Status", level.EnemyStatusLayout);
-                }
-
-                if (ImGui::CollapsingHeader("Skill HUD Slots"))
-                {
-                    for (int i = 0; i < (int)level.SkillHudSlots.size(); ++i)
+                    ImGui::PushID(i);
+                    const std::string header = level.SkillHudSlots[i].Key.empty()
+                        ? "Skill Slot " + std::to_string(i + 1)
+                        : "Skill Slot " + level.SkillHudSlots[i].Key;
+                    bool removeSlot = false;
+                    if (ImGui::TreeNodeEx(header.c_str(), ImGuiTreeNodeFlags_DefaultOpen))
                     {
-                        ImGui::PushID(i);
-                        const std::string header = level.SkillHudSlots[i].Key.empty()
-                            ? "Skill Slot " + std::to_string(i + 1)
-                            : "Skill Slot " + level.SkillHudSlots[i].Key;
-                        bool removeSlot = false;
-                        if (ImGui::TreeNodeEx(header.c_str(), ImGuiTreeNodeFlags_DefaultOpen))
-                        {
-                            DrawSkillHudSlotRow(level.SkillHudSlots[i], i);
-                            if (ImGui::Button("Remove"))
-                                removeSlot = true;
-                            ImGui::TreePop();
-                        }
-                        ImGui::PopID();
-                        if (removeSlot)
-                        {
-                            level.SkillHudSlots.erase(level.SkillHudSlots.begin() + i);
-                            break;
-                        }
+                        DrawSkillHudSlotRow(level.SkillHudSlots[i], i);
+                        if (ImGui::Button("Remove"))
+                            removeSlot = true;
+                        ImGui::TreePop();
                     }
-                    if (ImGui::Button("Add Skill Slot"))
-                        level.SkillHudSlots.emplace_back();
-                }
-
-                if (ImGui::CollapsingHeader("Combat Item HUD Slots"))
-                {
-                    for (int i = 0; i < (int)level.CombatItemHudSlots.size(); ++i)
+                    ImGui::PopID();
+                    if (removeSlot)
                     {
-                        ImGui::PushID(i);
-                        const std::string header = level.CombatItemHudSlots[i].Key.empty()
-                            ? "Item Slot " + std::to_string(i + 1)
-                            : "Item Slot " + level.CombatItemHudSlots[i].Key;
-                        bool removeSlot = false;
-                        if (ImGui::TreeNodeEx(header.c_str(), ImGuiTreeNodeFlags_DefaultOpen))
-                        {
-                            DrawCombatItemHudSlotRow(level.CombatItemHudSlots[i], i);
-                            if (ImGui::Button("Remove"))
-                                removeSlot = true;
-                            ImGui::TreePop();
-                        }
-                        ImGui::PopID();
-                        if (removeSlot)
-                        {
-                            level.CombatItemHudSlots.erase(level.CombatItemHudSlots.begin() + i);
-                            break;
-                        }
+                        level.SkillHudSlots.erase(level.SkillHudSlots.begin() + i);
+                        break;
                     }
-                    if (ImGui::Button("Add Item Slot"))
-                        level.CombatItemHudSlots.emplace_back();
                 }
+                if (ImGui::Button("Add Skill Slot"))
+                    level.SkillHudSlots.emplace_back();
+            }
 
-                if (ImGui::CollapsingHeader("HUD Text"))
+            if (ImGui::CollapsingHeader("Combat Item HUD Slots"))
+            {
+                for (int i = 0; i < (int)level.CombatItemHudSlots.size(); ++i)
                 {
-                    InputString("Locked", level.HudLockedText, 128);
-                    InputString("Unavailable", level.HudUnavailableText, 128);
-                    InputString("Insufficient Mana", level.HudInsufficientManaText, 128);
-                    InputString("Condition", level.HudConditionText, 128);
-                    InputString("Gauge", level.HudGaugeText, 128);
-                    InputString("Combo", level.HudComboText, 128);
-                    InputString("Armor", level.HudArmorText, 128);
-                    InputString("Cooldown Prefix", level.HudCooldownPrefix, 128);
-                    InputString("Seconds Suffix", level.HudSecondsSuffix, 128);
-                    InputString("Mana Not Enough Tooltip", level.HudManaNotEnoughTooltip, 260);
-                    InputString("Not Unlocked Tooltip", level.HudNotUnlockedTooltip, 260);
-                    InputString("Break Gauge Tooltip", level.BreakLimitGaugeNotEnoughTooltip, 260);
-                    InputString("Break Combo Tooltip", level.BreakLimitComboNotEnoughTooltip, 260);
-                    InputString("Break Boss Tooltip", level.BreakLimitBossNotReadyTooltip, 260);
-                    InputString("Default Message", level.HudDefaultMessage, 512);
-                    InputString("Air Basic Message", level.HudAirBasicMessage, 260);
-                    InputString("Magic Message", level.HudMagicMessage, 260);
-                    InputString("Dash Message", level.HudDashMessage, 260);
-                    InputString("Reserved Skill Message", level.HudReservedSkillMessage, 260);
-                    InputString("Support Message", level.HudSupportMessage, 260);
-                    InputString("Break Limit Input", level.HudBreakLimitInputMessage, 260);
-                    InputString("Break Limit Debug", level.HudBreakLimitDebugInputMessage, 260);
-                    InputString("Victory Message", level.HudVictoryMessage, 260);
-                    InputString("Defeat Message", level.HudDefeatMessage, 260);
-                    InputString("High Air Message", level.HudHighAirMessage, 260);
-                    InputString("Low Air Message", level.HudLowAirMessage, 260);
-                    InputString("Break Limit Hint", level.HudBreakLimitHintMessage, 260);
-                    InputString("Player Health Label", level.HudPlayerHealthLabel, 128);
-                    InputString("Boss Health Label", level.HudBossHealthLabel, 128);
-                    InputString("Boss Protection Label", level.HudBossProtectionLabel, 128);
-                    InputString("Mana Gauge Label", level.HudManaGaugeLabel, 128);
-                    InputString("Air Actions Label", level.HudAirActionsLabel, 128);
-                    InputString("Reward Fallback", level.HudRewardFallbackText, 260);
-                    InputString("Collected Prefix", level.HudCollectedPrefix, 128);
+                    ImGui::PushID(i);
+                    const std::string header = level.CombatItemHudSlots[i].Key.empty()
+                        ? "Item Slot " + std::to_string(i + 1)
+                        : "Item Slot " + level.CombatItemHudSlots[i].Key;
+                    bool removeSlot = false;
+                    if (ImGui::TreeNodeEx(header.c_str(), ImGuiTreeNodeFlags_DefaultOpen))
+                    {
+                        DrawCombatItemHudSlotRow(level.CombatItemHudSlots[i], i);
+                        if (ImGui::Button("Remove"))
+                            removeSlot = true;
+                        ImGui::TreePop();
+                    }
+                    ImGui::PopID();
+                    if (removeSlot)
+                    {
+                        level.CombatItemHudSlots.erase(level.CombatItemHudSlots.begin() + i);
+                        break;
+                    }
                 }
+                if (ImGui::Button("Add Item Slot"))
+                    level.CombatItemHudSlots.emplace_back();
+            }
+
+            if (ImGui::CollapsingHeader("HUD Text"))
+            {
+                InputString("Locked", level.HudLockedText, 128);
+                InputString("Unavailable", level.HudUnavailableText, 128);
+                InputString("Insufficient Mana", level.HudInsufficientManaText, 128);
+                InputString("Condition", level.HudConditionText, 128);
+                InputString("Gauge", level.HudGaugeText, 128);
+                InputString("Combo", level.HudComboText, 128);
+                InputString("Armor", level.HudArmorText, 128);
+                InputString("Cooldown Prefix", level.HudCooldownPrefix, 128);
+                InputString("Seconds Suffix", level.HudSecondsSuffix, 128);
+                InputString("Mana Not Enough Tooltip", level.HudManaNotEnoughTooltip, 260);
+                InputString("Not Unlocked Tooltip", level.HudNotUnlockedTooltip, 260);
+                InputString("Break Gauge Tooltip", level.BreakLimitGaugeNotEnoughTooltip, 260);
+                InputString("Break Combo Tooltip", level.BreakLimitComboNotEnoughTooltip, 260);
+                InputString("Break Boss Tooltip", level.BreakLimitBossNotReadyTooltip, 260);
+                InputString("Default Message", level.HudDefaultMessage, 512);
+                InputString("Air Basic Message", level.HudAirBasicMessage, 260);
+                InputString("Magic Message", level.HudMagicMessage, 260);
+                InputString("Dash Message", level.HudDashMessage, 260);
+                InputString("Reserved Skill Message", level.HudReservedSkillMessage, 260);
+                InputString("Support Message", level.HudSupportMessage, 260);
+                InputString("Break Limit Input", level.HudBreakLimitInputMessage, 260);
+                InputString("Break Limit Debug", level.HudBreakLimitDebugInputMessage, 260);
+                InputString("Victory Message", level.HudVictoryMessage, 260);
+                InputString("Defeat Message", level.HudDefeatMessage, 260);
+                InputString("High Air Message", level.HudHighAirMessage, 260);
+                InputString("Low Air Message", level.HudLowAirMessage, 260);
+                InputString("Break Limit Hint", level.HudBreakLimitHintMessage, 260);
+                InputString("Player Health Label", level.HudPlayerHealthLabel, 128);
+                InputString("Boss Health Label", level.HudBossHealthLabel, 128);
+                InputString("Boss Protection Label", level.HudBossProtectionLabel, 128);
+                InputString("Mana Gauge Label", level.HudManaGaugeLabel, 128);
+                InputString("Air Actions Label", level.HudAirActionsLabel, 128);
+                InputString("Reward Fallback", level.HudRewardFallbackText, 260);
+                InputString("Collected Prefix", level.HudCollectedPrefix, 128);
             }
 
             ImGui::Separator();

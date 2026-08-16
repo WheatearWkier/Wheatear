@@ -3,24 +3,16 @@
 #include "SideCombatComponents.h"
 #include "Wheatear/Core/Core.h"
 
-#include <string>
-
 namespace Wheatear {
     class Scene;
 }
 
 namespace Wheatear::SideCombatHudPreset {
 
-    WHEATEAR_API const char* DefaultPath();
-
-    WHEATEAR_API bool Apply(SideCombatLevelComponent& level,
-        const std::string& sourcePath = {});
-
+    // Captures the on-scene UI widget positions/sizes back into the level's
+    // layout fields at runtime start, keeping the component fields in sync
+    // with what the canvas editor actually placed.
     WHEATEAR_API int CaptureSceneLayout(SideCombatLevelComponent& level,
         Scene* scene);
-
-    WHEATEAR_API bool Save(const SideCombatLevelComponent& level,
-        const std::string& sourcePath = {},
-        std::string* status = nullptr);
 
 } // namespace Wheatear::SideCombatHudPreset

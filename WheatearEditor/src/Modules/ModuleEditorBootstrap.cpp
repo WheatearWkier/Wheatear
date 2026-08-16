@@ -9,7 +9,6 @@
 #include "Modules/ArcadeCombat/ArcadeCombatDrawer.h"
 #include "Modules/ArcadeCombat/ArcadeCombatTuningEditorPanel.h"
 #include "Modules/SideCombat/SideCombatDrawer.h"
-#include "Modules/SideCombat/SideCombatHudPresetEditorPanel.h"
 #include "Modules/SideCombat/SideCombatTuningEditorPanel.h"
 #include "Modules/TurnCombat/TurnCombatTuningEditorPanel.h"
 #include "Modules/Progression/ProgressionContentEditorPanel.h"
@@ -62,11 +61,6 @@ namespace Wheatear {
             return panel;
         }
 
-        static SideCombatHudPresetEditorPanel& GetSideCombatHudPresetEditorPanel()
-        {
-            static SideCombatHudPresetEditorPanel panel;
-            return panel;
-        }
 
         static ProgressionContentEditorPanel& GetProgressionContentEditorPanel()
         {
@@ -221,23 +215,6 @@ namespace Wheatear {
                 []()
                 {
                     GetSideCombatTuningEditorPanel().OnImGuiRender();
-                }
-            });
-
-            EditorToolRegistry::Register({
-                "Side Combat HUD Preset Editor",
-                EditorToolCategory::Gameplay,
-                [](const EditorToolContext& context)
-                {
-                    std::string presetPath = "side.hud.preset";
-                    if (context.SelectedEntity && context.SelectedEntity.HasComponent<SideCombatLevelComponent>())
-                        presetPath = context.SelectedEntity.GetComponent<SideCombatLevelComponent>().HudPresetPath;
-
-                    GetSideCombatHudPresetEditorPanel().Open(presetPath);
-                },
-                []()
-                {
-                    GetSideCombatHudPresetEditorPanel().OnImGuiRender();
                 }
             });
 

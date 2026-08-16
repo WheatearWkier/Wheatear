@@ -56,8 +56,6 @@ namespace Wheatear {
         bool        PlayOnStart = true;
         std::string LevelId = "CH02_MAIN_BearAwakening";
         std::string TuningPath = "side.tuning";
-        std::string HudPresetPath = "side.hud.preset";
-        bool        HudPresetOverridesEnabled = false;
         glm::vec2   ArenaMin = { -8.8f, -4.0f };
         glm::vec2   ArenaMax = { 8.8f, 4.6f };
         float       GroundY = -3.25f;
@@ -290,7 +288,7 @@ namespace Wheatear {
         float       RuntimeWaveRightWall = 8.8f;
         bool        RuntimeHudLayoutConfigured = false;
 
-        SideCombatLevelComponent();
+        SideCombatLevelComponent() = default;
         SideCombatLevelComponent(const SideCombatLevelComponent&) = default;
     };
 
