@@ -2,12 +2,14 @@
 #include "ProgressionSystem.h"
 
 #include "GameProgress.h"
+#include "ProgressionContent.h"
 #include "ProgressionEquipmentPageService.h"
 #include "ProgressionResultPageService.h"
 #include "ProgressionSaveLoadPageService.h"
 #include "ProgressionSkillTreePageService.h"
 #include "ProgressionSettingsPageService.h"
 #include "Wheatear/Assets/AssetAliasRegistry.h"
+#include "Wheatear/Gameplay/Services/GameplayUILayoutService.h"
 #include "Wheatear/Modules/VisualNovel/VisualNovelSystem.h"
 #include "Wheatear/Runtime/CommandBus.h"
 #include "Wheatear/Runtime/SceneTransitionService.h"
@@ -28,6 +30,7 @@ namespace Wheatear {
     namespace {
 
         using SceneQueries::FindEntityByName;
+        using GameplayUILayoutService::SetButtonCommand;
         using UIRuntimeTools::SetProgress;
         using UIRuntimeTools::SetText;
         using Wheatear::StringUtils::ToLower;
@@ -505,7 +508,19 @@ namespace Wheatear {
             SetText(scene, "Equipment_Details", GameProgress::BuildEquipmentDetails());
             SetText(scene, "Equipment_PageText", GameProgress::BuildEquipmentPageText());
             SetText(scene, "Equipment_Materials", GameProgress::BuildEquipmentMaterials());
-            SetText(scene, "Equipment_Button_UpgradeArmor", GameProgress::GetTravelerArmorUpgradeButtonText());
+            SetText(scene, "Equipment_Button_UpgradeArmor", GameProgress::GetEquipmentUpgradeButtonText());
+            // Drive the upgrade button from the selected equipment's recipe so
+            // new recipes (upgrades.yaml) work without editing the scene.
+            if (const auto* recipe = ProgressionContent::FindUpgradeForEquipment(state.SelectedEquipmentId))
+            {
+                SetButtonCommand(scene, "Equipment_Button_UpgradeArmor",
+                    std::string("progression:upgrade_item:") + recipe->Id);
+            }
+            else
+            {
+                SetButtonCommand(scene, "Equipment_Button_UpgradeArmor",
+                    "progression:upgrade_traveler_armor");
+            }
             SetProgress(scene, "Equipment_ArmorBar",
                 static_cast<float>(state.TravelerArmorLevel),
                 1.0f);

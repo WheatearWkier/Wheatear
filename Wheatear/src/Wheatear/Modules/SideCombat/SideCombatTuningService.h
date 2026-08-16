@@ -260,6 +260,28 @@ namespace Wheatear::SideCombatTuningService {
         float BearBossChargeSpeed = 7.20f;
     };
 
+    // Per-kind enemy template used by the data-driven wave table
+    // (SideCombatLevelComponent::WaveSpawns): values default to the classic
+    // beast-path grunt so a missing entry always behaves like the demo.
+    struct EnemyTypeDefinition
+    {
+        std::string Id;              // grunt / thrower / pouncer
+        float MaxHealth = 260.0f;
+        float Attack = 28.0f;
+        float Defense = 8.0f;
+        float MoveSpeed = 3.9f;
+        glm::vec2 CollisionSize = { 0.86f, 0.48f };
+        float CollisionHeight = 1.05f;
+        float KnockbackResistance = 0.04f;
+        float AggroRange = 8.0f;
+        float AttackRange = 1.18f;
+        float PreferredRange = 0.95f;
+        float AttackInterval = 1.25f;
+        float LaneTolerance = 0.42f;
+        glm::vec3 RenderScale = { 1.72f, 1.72f, 1.0f };
+        glm::vec3 ShadowScale = { 1.22f, 0.40f, 1.0f };
+    };
+
     struct SidePickupTuning
     {
         float PickupRadius = 0.45f;
@@ -298,6 +320,8 @@ namespace Wheatear::SideCombatTuningService {
         std::vector<SideItemSlotTuning> ItemSlots;
         // Skill slots (data-driven trigger table; see SideSkillSlotTuning).
         std::vector<SideSkillSlotTuning> SkillSlots;
+        // Per-kind enemy templates (data-driven wave table; see EnemyTypeDefinition).
+        std::unordered_map<std::string, EnemyTypeDefinition> EnemyTypes;
     };
 
     WHEATEAR_API float CalculateSortZ(float groundY, const SideCombatTuning& tuning);

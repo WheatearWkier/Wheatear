@@ -100,10 +100,33 @@ namespace Wheatear::ProgressionContent {
             if (!node)
                 return upgrade;
 
+            upgrade.EquipmentId = node["equipmentId"]
+                ? node["equipmentId"].as<std::string>() : std::string{};
+            upgrade.DisplayName = node["name"]
+                ? node["name"].as<std::string>() : std::string{};
+            upgrade.TargetLevel = node["targetLevel"]
+                ? node["targetLevel"].as<int>(1) : 1;
+            upgrade.GoldCost = node["goldCost"]
+                ? node["goldCost"].as<int>(0) : 0;
             upgrade.Costs = ReadCosts(node["costs"]);
             upgrade.Bonus = ReadAttributeBonus(node["attributeBonus"]);
             upgrade.UnlockSkills = ReadStringList(node["unlockSkills"]);
+            upgrade.ResultMessage = node["resultMessage"]
+                ? node["resultMessage"].as<std::string>() : std::string{};
+            upgrade.NotificationTitle = node["notification"]
+                ? node["notification"].as<std::string>() : std::string{};
             return upgrade;
+        }
+
+        static const UpgradeDefinition* FindUpgradeIn(const std::vector<UpgradeDefinition>& upgrades,
+            const std::string& id)
+        {
+            for (const auto& upgrade : upgrades)
+            {
+                if (upgrade.Id == id)
+                    return &upgrade;
+            }
+            return nullptr;
         }
 
         static Content BuildFallbackContent()
@@ -129,6 +152,11 @@ namespace Wheatear::ProgressionContent {
                 { "MAT-BEAST-SINEW", "兽筋", 0 },
                 { "MAT-BEAST-CLAW", "熊爪", 0 }
             };
+            content.MagicSwordLv2.Id = "magicSwordLv2";
+            content.MagicSwordLv2.EquipmentId = ""; // special upgrade: unlocked via the skill tree
+            content.MagicSwordLv2.DisplayName = "魔剑";
+            content.MagicSwordLv2.TargetLevel = 2;
+            content.MagicSwordLv2.GoldCost = 0;
             content.MagicSwordLv2.Costs = {
                 { "MAT-MAGIC-CORE-T0", "魔核碎片", 1 },
                 { "MAT-BEAST-SINEW", "兽筋", 2 },
@@ -139,12 +167,22 @@ namespace Wheatear::ProgressionContent {
             content.MagicSwordLv2.UnlockSkills = {
                 "magic_sword_lv2"
             };
+            content.MagicSwordLv2.ResultMessage = "魔剑 Lv2 觉醒：基础斩击、跳斩和火球衔接更稳定。";
+            content.MagicSwordLv2.NotificationTitle = "魔剑 Lv2 已觉醒";
+            content.TravelerArmorLv1.Id = "travelerArmorLv1";
+            content.TravelerArmorLv1.EquipmentId = "traveler_armor";
+            content.TravelerArmorLv1.DisplayName = "旅人护衣";
+            content.TravelerArmorLv1.TargetLevel = 1;
+            content.TravelerArmorLv1.GoldCost = 0;
             content.TravelerArmorLv1.Costs = {
                 { "MAT-BEAST-SINEW", "兽筋", 1 },
                 { "MAT-BEAST-CLAW", "熊爪", 1 }
             };
             content.TravelerArmorLv1.Bonus.HP = 30;
             content.TravelerArmorLv1.Bonus.DEF = 2;
+            content.TravelerArmorLv1.ResultMessage = "旅人护衣 +1：生命和防御提高，低空连击失误更不容易暴毙。";
+            content.TravelerArmorLv1.NotificationTitle = "旅人护衣 +1 完成";
+            content.Upgrades = { content.MagicSwordLv2, content.TravelerArmorLv1 };
             content.Dungeons = {
                 {
                     content.MainDungeonId,
@@ -445,6 +483,8 @@ namespace Wheatear::ProgressionContent {
                 content->MagicSwordLv2 = fallback.MagicSwordLv2;
             if (content->TravelerArmorLv1.Costs.empty())
                 content->TravelerArmorLv1 = fallback.TravelerArmorLv1;
+            if (content->Upgrades.empty())
+                content->Upgrades = fallback.Upgrades;
             if (content->Dungeons.empty())
                 content->Dungeons = fallback.Dungeons;
             if (content->DungeonRewardSummary.empty())
@@ -468,8 +508,28 @@ namespace Wheatear::ProgressionContent {
             LoadMaterials(root["materials"], content);
             if (const YAML::Node upgrades = root["upgrades"])
             {
-                content->MagicSwordLv2 = ReadUpgrade(upgrades["magicSwordLv2"]);
-                content->TravelerArmorLv1 = ReadUpgrade(upgrades["travelerArmorLv1"]);
+                // The upgrades: table is the single source of truth; iterate
+                // the whole map so new recipes are picked up without code.
+                content->Upgrades.clear();
+                if (upgrades.IsMap())
+                {
+                    for (const auto& entry : upgrades)
+                    {
+                        if (!entry.first.IsScalar())
+                            continue;
+
+                        UpgradeDefinition upgrade = ReadUpgrade(entry.second);
+                        upgrade.Id = entry.first.as<std::string>();
+                        content->Upgrades.push_back(std::move(upgrade));
+                    }
+                }
+
+                // Keep the two legacy named fields in sync so the existing
+                // skill-tree / armor flows keep working unchanged.
+                if (const UpgradeDefinition* magicSword = FindUpgradeIn(content->Upgrades, "magicSwordLv2"))
+                    content->MagicSwordLv2 = *magicSword;
+                if (const UpgradeDefinition* armor = FindUpgradeIn(content->Upgrades, "travelerArmorLv1"))
+                    content->TravelerArmorLv1 = *armor;
             }
             LoadDungeons(root["dungeons"], content);
             if (const YAML::Node rewardSummary = root["dungeonRewardSummary"])
@@ -599,6 +659,41 @@ namespace Wheatear::ProgressionContent {
         {
             if (item.Id == equipmentId)
                 return &item;
+        }
+        return nullptr;
+    }
+
+    const GameProgress::RelationshipRecord* FindRelationship(const std::string& characterId)
+    {
+        const auto& content = Get();
+        for (const auto& record : content.Relationships)
+        {
+            if (record.CharacterId == characterId)
+                return &record;
+        }
+        return nullptr;
+    }
+
+    const UpgradeDefinition* FindUpgrade(const std::string& upgradeId)
+    {
+        const auto& content = Get();
+        for (const auto& upgrade : content.Upgrades)
+        {
+            if (upgrade.Id == upgradeId)
+                return &upgrade;
+        }
+        return nullptr;
+    }
+
+    const UpgradeDefinition* FindUpgradeForEquipment(const std::string& equipmentId)
+    {
+        if (equipmentId.empty())
+            return nullptr;
+        const auto& content = Get();
+        for (const auto& upgrade : content.Upgrades)
+        {
+            if (!upgrade.EquipmentId.empty() && upgrade.EquipmentId == equipmentId)
+                return &upgrade;
         }
         return nullptr;
     }

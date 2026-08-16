@@ -728,7 +728,8 @@ namespace Wheatear {
             }
 
             ImGui::Separator();
-            if (!(m_PackageSceneInput.rfind("assets/scenes/", 0) == 0))
+            const bool scenePathValid = (m_PackageSceneInput.rfind("assets/scenes/", 0) == 0);
+            if (!scenePathValid)
                 ImGui::TextColored(ImVec4(1.0f, 0.4f, 0.35f, 1.0f),
                     "Scene path must start with assets/scenes/");
 
@@ -743,12 +744,14 @@ namespace Wheatear {
             EditorWidgets::HelpTooltip("MSBuild configuration used to build the player and editor.");
 
             ImGui::Separator();
+            ImGui::BeginDisabled(!scenePathValid);
             if (ImGui::Button("Package"))
             {
                 m_PackageScenePath = m_PackageSceneInput;
                 m_PackageScenePickerOpen = false;
                 ExecutePlayerPackageBuild();
             }
+            ImGui::EndDisabled();
             ImGui::SameLine();
             if (ImGui::Button("Cancel"))
                 m_PackageScenePickerOpen = false;

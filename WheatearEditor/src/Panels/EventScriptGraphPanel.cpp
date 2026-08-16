@@ -165,13 +165,15 @@ namespace Wheatear {
         switch (type)
         {
         case EventScriptInstructionType::Command:
-            instruction.Text = defaultText.empty() ? "scene:assets/scenes/VerticalSliceHub.wt" : defaultText;
+            // A neutral placeholder instead of a demo-scene default so new
+            // scripts cannot accidentally reference an unrelated scene.
+            instruction.Text = defaultText.empty() ? "scene:assets/scenes/" : defaultText;
             break;
         case EventScriptInstructionType::Wait:
             instruction.Seconds = 0.10f;
             break;
         case EventScriptInstructionType::If:
-            instruction.Text = defaultText.empty() ? "flag FLAG_HUB_UNLOCKED" : defaultText;
+            instruction.Text = defaultText.empty() ? "flag " : defaultText;
             break;
         case EventScriptInstructionType::EndIf:
             break;

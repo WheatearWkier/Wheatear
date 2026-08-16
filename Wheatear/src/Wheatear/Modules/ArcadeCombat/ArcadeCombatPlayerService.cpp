@@ -4,6 +4,7 @@
 #include "ArcadeCombatMath.h"
 #include "ArcadeCombatProjectileService.h"
 #include "ArcadeCombatSignalHandlers.h"
+#include "ArcadeCombatTuningService.h"
 #include "Wheatear/Input/InputBindingService.h"
 #include "Wheatear/Gameplay/Action/ActionRecipeQueries.h"
 #include "Wheatear/Gameplay/Action/ActionResolver.h"
@@ -104,49 +105,32 @@ namespace Wheatear::ArcadeCombatPlayerService {
         if (boss && boss.HasComponent<TransformComponent>())
             direction = ArcadeCombatMath::DirectionTo(transform.Translation, boss.GetComponent<TransformComponent>().Translation);
 
-        const glm::vec3 muzzle = transform.Translation + glm::vec3(direction * 0.55f, 0.05f);
         const WAO::ActionRecipe* recipe = ResolveWeaponRecipe(controller.CurrentWeapon);
         if (!recipe)
             return;
 
+        const auto& tuning = ArcadeCombatTuningService::GetTuning(level);
+        const auto& weapon = ArcadeCombatTuningService::GetWeaponTuning(
+            tuning, controller.CurrentWeapon);
+
+        controller.WeaponCooldown = std::max(0.01f, recipe->Cooldown);
+
         ArcadeCombatSignalHandlers::ProjectileSpawnPayload payload;
         payload.SceneContext = scene;
+        payload.EntityName = weapon.EntityName;
+        payload.Position = weapon.Melee
+            ? transform.Translation + glm::vec3(direction * weapon.SlashOffset, 0.0f)
+            : transform.Translation + glm::vec3(direction * weapon.MuzzleOffset.x, weapon.MuzzleOffset.y);
+        payload.Velocity = direction * weapon.Speed;
+        payload.Damage = WAO::PrimaryEffectValue(*recipe, WAO::EffectType::Damage,
+            controller.CurrentWeapon == ArcadeWeaponType::Cannon ? 24.0f
+                : controller.CurrentWeapon == ArcadeWeaponType::Katana ? 18.0f : 8.0f);
+        payload.Lifetime = weapon.Lifetime;
+        payload.Radius = weapon.Radius;
         payload.Team = (int)ArcadeTeam::Player;
-        switch (controller.CurrentWeapon)
-        {
-        case ArcadeWeaponType::Gun:
-            controller.WeaponCooldown = std::max(0.01f, recipe->Cooldown);
-            payload.EntityName = "Arcade_PlayerBullet";
-            payload.Position = muzzle;
-            payload.Velocity = direction * 9.0f;
-            payload.Damage = WAO::PrimaryEffectValue(*recipe, WAO::EffectType::Damage, 8.0f);
-            payload.Lifetime = 1.4f;
-            payload.Radius = 0.13f;
-            payload.Color = { 1.0f, 0.90f, 0.35f, 1.0f };
-            break;
-        case ArcadeWeaponType::Cannon:
-            controller.WeaponCooldown = std::max(0.01f, recipe->Cooldown);
-            payload.EntityName = "Arcade_PlayerCannon";
-            payload.Position = muzzle;
-            payload.Velocity = direction * 5.3f;
-            payload.Damage = WAO::PrimaryEffectValue(*recipe, WAO::EffectType::Damage, 24.0f);
-            payload.Lifetime = 2.0f;
-            payload.Radius = 0.28f;
-            payload.Color = { 1.0f, 0.42f, 0.16f, 1.0f };
-            payload.Heavy = true;
-            break;
-        case ArcadeWeaponType::Katana:
-            controller.WeaponCooldown = std::max(0.01f, recipe->Cooldown);
-            payload.EntityName = "Arcade_KatanaSlash";
-            payload.Position = transform.Translation + glm::vec3(direction * 0.8f, 0.0f);
-            payload.Velocity = direction;
-            payload.Damage = WAO::PrimaryEffectValue(*recipe, WAO::EffectType::Damage, 18.0f);
-            payload.Lifetime = 0.12f;
-            payload.Radius = 0.75f;
-            payload.Color = { 0.85f, 0.96f, 1.0f, 0.82f };
-            payload.Melee = true;
-            break;
-        }
+        payload.Color = weapon.Color;
+        payload.Heavy = weapon.Heavy;
+        payload.Melee = weapon.Melee;
 
         const std::string detail = "fire " + recipe->DisplayName;
         WAO::ActionResolveContext actionContext;

@@ -225,6 +225,25 @@ namespace Wheatear {
         };
         std::vector<DeathReward> DeathRewards;
 
+        // Data-driven enemy waves: each entry spawns `Count` enemies of the
+        // given kind inside [SpawnMinX, SpawnMaxX] when the level starts.
+        // When the table is non-empty the runtime removes scene-placed enemy
+        // entities (except the boss) and generates them from this table, so
+        // wave composition is tuned in the editor instead of dragging
+        // entities into the viewport.
+        struct WaveSpawnDef
+        {
+            bool  Enabled = true;
+            int   WaveIndex = 0;   // 0-based; matches SideEnemyAIComponent::WaveIndex
+            int   EnemyKind = 0;   // SideEnemyKind (0=Grunt 1=Thrower 2=Pouncer 3=BearBoss)
+            int   Count = 1;
+            float SpawnMinX = -7.5f;
+            float SpawnMaxX = 7.5f;
+            float GroundYOffset = 0.0f;
+            float HpVariance = 0.0f; // 0..1: per-spawn HP jitter (0.1 = +/-10%)
+        };
+        std::vector<WaveSpawnDef> WaveSpawns;
+
         bool        WaveModeEnabled = false;
         int         WaveCount = 3;
         float       Wave1RightWall = -2.2f;

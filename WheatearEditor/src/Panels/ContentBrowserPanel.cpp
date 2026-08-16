@@ -24,6 +24,7 @@
 #include "Wheatear/Scene/Components.h"
 #include "Wheatear/Scene/Scene.h"
 #include "Wheatear/Scene/SceneSerializer.h"
+#include "Wheatear/Utils/PlatformUtils.h"
 
 #include <imgui/imgui.h>
 #include <imgui/imgui_internal.h>
@@ -610,6 +611,171 @@ namespace Wheatear {
         }
     }
 
+    void ContentBrowserPanel::ImportAssetsIntoCurrentDirectory()
+    {
+        const std::vector<std::string> files = Wheatear::FileDialogs::OpenFiles(
+            "All Supported Files\0*.png;*.jpg;*.jpeg;*.webp;*.wav;*.mp3;*.ogg;*.ttf;*.ttc;*.otf;*.obj;*.glsl;*.yaml;*.yml;*.json\0"
+            "All Files\0*.*\0");
+        if (files.empty())
+            return;
+
+        std::error_code error;
+        if (!std::filesystem::is_directory(m_CurrentDirectory, error))
+            m_CurrentDirectory = GetEditorAssetPath();
+
+        size_t imported = 0;
+        std::vector<std::string> skipped;
+        for (const std::string& file : files)
+        {
+            const std::filesystem::path source(file);
+            if (!std::filesystem::is_regular_file(source, error))
+            {
+                skipped.push_back(source.filename().string());
+                continue;
+            }
+
+            std::filesystem::path target = m_CurrentDirectory / source.filename();
+            for (int i = 2; std::filesystem::exists(target, error); ++i)
+            {
+                const std::string stem = source.stem().string() + " (" + std::to_string(i) + ")";
+                target = m_CurrentDirectory / (stem + source.extension().string());
+            }
+
+            if (std::filesystem::copy_file(source, target,
+                    std::filesystem::copy_options::overwrite_existing, error))
+            {
+                ++imported;
+            }
+            else
+            {
+                skipped.push_back(source.filename().string());
+            }
+        }
+
+        if (imported > 0)
+        {
+            AssetRegistry::Get().Scan(AssetPath::GetProjectRoot());
+            AssetRegistry::Get().WriteRegistry();
+            m_SelectedPath = m_CurrentDirectory;
+        }
+
+        m_RegistryStatus = "Imported " + std::to_string(imported) + " asset(s)"
+            + (skipped.empty() ? "." : "; skipped: " + std::to_string(skipped.size()));
+    }
+
+    void ContentBrowserPanel::CreateNewSceneFile()
+    {
+        std::filesystem::path candidate = m_CurrentDirectory / "new_scene.wt";
+        for (int i = 2; std::filesystem::exists(candidate); ++i)
+            candidate = m_CurrentDirectory / ("new_scene_" + std::to_string(i) + ".wt");
+
+        // Minimal scene: a primary orthographic camera, a UI canvas and a
+        // permissive save policy, ready for 2D content.
+        const std::string templateText =
+            "Scene: New Scene\n"
+            "SavePolicy:\n"
+            "  CanSave: true\n"
+            "  CanLoad: true\n"
+            "  SaveDirectory: assets/saves\n"
+            "  AutoLoadSlot: 0\n"
+            "Entities:\n"
+            "  - Entity: 1000000001\n"
+            "    TagComponent:\n"
+            "      Tag: Main Camera\n"
+            "    TransformComponent:\n"
+            "      Translation: [0, 0, 10]\n"
+            "      Rotation: [0, 0, 0]\n"
+            "      Scale: [1, 1, 1]\n"
+            "    CameraComponent:\n"
+            "      Camera:\n"
+            "        ProjectionType: 1\n"
+            "        OrthographicSize: 5\n"
+            "        OrthographicNear: -1\n"
+            "        OrthographicFar: 100\n"
+            "      Primary: true\n"
+            "      FixedAspectRatio: false\n"
+            "  - Entity: 1000000002\n"
+            "    TagComponent:\n"
+            "      Tag: WT_UI_Canvas\n"
+            "    TransformComponent:\n"
+            "      Translation: [0, 0, 0]\n"
+            "      Rotation: [0, 0, 0]\n"
+            "      Scale: [1, 1, 1]\n"
+            "    UICanvasComponent:\n"
+            "      Visible: true\n"
+            "      ReferenceWidth: 1920\n"
+            "      ReferenceHeight: 1080\n"
+            "    UIWidgetComponent:\n"
+            "      Visible: true\n"
+            "      Position: [0, 0]\n"
+            "      Size: [1, 1]\n"
+            "      Rotation: 0\n"
+            "      Anchor: 0\n"
+            "      SortOrder: 0\n"
+            "      ParentEntity: 0\n";
+
+        if (EditorWidgets::WriteFileText(candidate, templateText))
+        {
+            m_SelectedPath = candidate;
+            m_RegistryStatus = "Created scene: " + candidate.filename().string();
+            if (m_OnOpenScene)
+                m_OnOpenScene(candidate);
+        }
+        else
+        {
+            m_RegistryStatus = "Failed to create scene.";
+        }
+    }
+
+    void ContentBrowserPanel::CreateNewDataFile()
+    {
+        std::filesystem::path candidate = m_CurrentDirectory / "new_data.yaml";
+        for (int i = 2; std::filesystem::exists(candidate); ++i)
+            candidate = m_CurrentDirectory / ("new_data_" + std::to_string(i) + ".yaml");
+
+        const std::string templateText =
+            "# Wheatear data file (YAML).\n"
+            "# 在 Data File Editor 中编辑；运行时按各模块约定读取字段。\n"
+            "schema: custom.data.v1\n";
+
+        if (EditorWidgets::WriteFileText(candidate, templateText))
+        {
+            m_SelectedPath = candidate;
+            m_RegistryStatus = "Created data file: " + candidate.filename().string();
+            DataFileEditorRequests::RequestOpen(
+                AssetPath::ToProjectRelative(candidate).generic_string());
+        }
+        else
+        {
+            m_RegistryStatus = "Failed to create data file.";
+        }
+    }
+
+    void ContentBrowserPanel::CreateNewSpriteSheetFile()
+    {
+        std::filesystem::path candidate = m_CurrentDirectory / "new_sheet.wtsheet";
+        for (int i = 2; std::filesystem::exists(candidate); ++i)
+            candidate = m_CurrentDirectory / ("new_sheet_" + std::to_string(i) + ".wtsheet");
+
+        const std::string templateText =
+            "texture: ''\n"
+            "columns: 1\n"
+            "rows: 1\n"
+            "rects: {}\n";
+
+        if (EditorWidgets::WriteFileText(candidate, templateText))
+        {
+            m_SelectedPath = candidate;
+            m_RegistryStatus = "Created sprite sheet: " + candidate.filename().string();
+            DataFileEditorRequests::RequestOpen(
+                AssetPath::ToProjectRelative(candidate).generic_string());
+        }
+        else
+        {
+            m_RegistryStatus = "Failed to create sprite sheet.";
+        }
+    }
+
     void ContentBrowserPanel::DrawToolbar()
     {
         const bool canBack    = m_HistoryIndex > 0;
@@ -793,6 +959,8 @@ namespace Wheatear {
             ImGui::SetTooltip(EditorLocale::Text("Asset management actions", "资产管理操作"));
         if (ImGui::BeginPopup("##browser_tools"))
         {
+            if (ImGui::MenuItem(EditorLocale::Text("Import Assets...", "导入资源...")))
+                ImportAssetsIntoCurrentDirectory();
             if (ImGui::MenuItem(EditorLocale::Text("Rescan Asset Registry", "重扫资源注册表")))
             {
                 AssetRegistry::Get().Scan(AssetPath::GetProjectRoot());
@@ -1206,6 +1374,9 @@ namespace Wheatear {
 
         if (ImGui::BeginPopupContextWindow("##DirCtx", ImGuiPopupFlags_MouseButtonRight | ImGuiPopupFlags_NoOpenOverItems))
         {
+            if (ImGui::MenuItem(EditorLocale::Text("Import Assets...", "导入资源...")))
+                ImportAssetsIntoCurrentDirectory();
+            ImGui::Separator();
             if (ImGui::MenuItem(EditorLocale::Text("New Folder", "新建文件夹")))
             {
                 std::filesystem::path candidate = m_CurrentDirectory / "New Folder";
@@ -1297,6 +1468,12 @@ namespace Wheatear {
                     m_RegistryStatus = "Failed to create animation clip.";
                 }
             }
+            if (ImGui::MenuItem(EditorLocale::Text("New Scene (.wt)", "新建场景 (.wt)")))
+                CreateNewSceneFile();
+            if (ImGui::MenuItem(EditorLocale::Text("New Sprite Sheet (.wtsheet)", "新建图集 (.wtsheet)")))
+                CreateNewSpriteSheetFile();
+            if (ImGui::MenuItem(EditorLocale::Text("New Data File (.yaml)", "新建数据文件 (.yaml)")))
+                CreateNewDataFile();
             ImGui::EndPopup();
         }
 

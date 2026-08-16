@@ -557,6 +557,145 @@ namespace Wheatear {
 
 
 
+    void EditorLayerBase::UI_AlignSelection(UISelectionAction action)
+    {
+        if (m_SceneState != SceneState::Edit || !m_ActiveScene)
+            return;
+
+        UIWidgetLayout::Context layout(m_ActiveScene.get());
+        Entity anchor = m_SceneHierarchyPanel->GetSelectedEntity();
+        if (!anchor || !anchor.HasComponent<UIWidgetComponent>())
+            return;
+
+        // Targets = multi-selection minus the anchor (the anchor stays put).
+        std::vector<Entity> targets;
+        for (const UUID& uuid : m_UIMultiSelect)
+        {
+            Entity entity = m_ActiveScene->GetEntityByUUID(uuid);
+            if (!entity || !entity.HasComponent<UIWidgetComponent>())
+                continue;
+            if (entity == anchor)
+                continue;
+            targets.push_back(entity);
+        }
+        if (targets.empty())
+            return;
+
+        auto resolveRect = [&](Entity entity) -> UIWidgetLayout::Rect
+        {
+            return UIWidgetLayout::ResolveRect(
+                layout, static_cast<entt::entity>(entity));
+        };
+        auto parentRectOf = [&](Entity entity) -> UIWidgetLayout::Rect
+        {
+            const auto& widget = entity.GetComponent<UIWidgetComponent>();
+            if (widget.ParentEntity != 0)
+            {
+                Entity parent = m_ActiveScene->GetEntityByUUID(widget.ParentEntity);
+                if (parent && parent.HasComponent<UIWidgetComponent>())
+                    return resolveRect(parent);
+            }
+            return { 0.0f, 0.0f, 1.0f, 1.0f }; // canvas root
+        };
+
+        const UIWidgetLayout::Rect anchorRect = resolveRect(anchor);
+        const float anchorCenterX = (anchorRect.Left + anchorRect.Right) * 0.5f;
+        const float anchorCenterY = (anchorRect.Top + anchorRect.Bottom) * 0.5f;
+
+        struct TargetLayout
+        {
+            Entity EntityRef;
+            UIWidgetLayout::Rect Rect;
+            UIWidgetLayout::Rect ParentRect;
+            float CenterX = 0.0f;
+            float CenterY = 0.0f;
+        };
+        std::vector<TargetLayout> layouts;
+        layouts.reserve(targets.size());
+        for (Entity target : targets)
+        {
+            TargetLayout entry;
+            entry.EntityRef = target;
+            entry.Rect = resolveRect(target);
+            entry.ParentRect = parentRectOf(target);
+            entry.CenterX = (entry.Rect.Left + entry.Rect.Right) * 0.5f;
+            entry.CenterY = (entry.Rect.Top + entry.Rect.Bottom) * 0.5f;
+            layouts.push_back(entry);
+        }
+
+        // Distribute: sort by center, keep first/last, spread the rest evenly.
+        if (action == UISelectionAction::DistributeHorizontal
+            || action == UISelectionAction::DistributeVertical)
+        {
+            const bool horizontal = action == UISelectionAction::DistributeHorizontal;
+            std::sort(layouts.begin(), layouts.end(),
+                [horizontal](const TargetLayout& a, const TargetLayout& b)
+                {
+                    return horizontal ? a.CenterX < b.CenterX : a.CenterY < b.CenterY;
+                });
+            if (layouts.size() >= 3)
+            {
+                const float first = horizontal ? layouts.front().CenterX : layouts.front().CenterY;
+                const float last = horizontal ? layouts.back().CenterX : layouts.back().CenterY;
+                for (size_t i = 1; i + 1 < layouts.size(); ++i)
+                {
+                    const float t = static_cast<float>(i) / static_cast<float>(layouts.size() - 1);
+                    const float targetCenter = first + (last - first) * t;
+                    if (horizontal)
+                        layouts[i].CenterX = targetCenter;
+                    else
+                        layouts[i].CenterY = targetCenter;
+                }
+            }
+        }
+
+        for (const TargetLayout& entry : layouts)
+        {
+            Entity target = entry.EntityRef; // non-const handle for widget mutation
+            auto& widget = target.GetComponent<UIWidgetComponent>();
+            UIWidgetComponent before = widget;
+            const float parentWidth = std::max(0.0001f, entry.ParentRect.Right - entry.ParentRect.Left);
+            const float parentHeight = std::max(0.0001f, entry.ParentRect.Bottom - entry.ParentRect.Top);
+            const float sizeX = entry.Rect.Right - entry.Rect.Left;
+            const float sizeY = entry.Rect.Bottom - entry.Rect.Top;
+
+            glm::vec2 position = widget.Position;
+            switch (action)
+            {
+            case UISelectionAction::AlignLeft:
+                position.x = (anchorRect.Left - entry.ParentRect.Left) / parentWidth;
+                break;
+            case UISelectionAction::AlignRight:
+                position.x = (anchorRect.Right - entry.ParentRect.Left - sizeX) / parentWidth;
+                break;
+            case UISelectionAction::AlignTop:
+                position.y = (anchorRect.Top - entry.ParentRect.Top) / parentHeight;
+                break;
+            case UISelectionAction::AlignBottom:
+                position.y = (anchorRect.Bottom - entry.ParentRect.Top - sizeY) / parentHeight;
+                break;
+            case UISelectionAction::AlignHCenter:
+                position.x = (anchorCenterX - entry.ParentRect.Left - sizeX * 0.5f) / parentWidth;
+                break;
+            case UISelectionAction::AlignVCenter:
+                position.y = (anchorCenterY - entry.ParentRect.Top - sizeY * 0.5f) / parentHeight;
+                break;
+            case UISelectionAction::DistributeHorizontal:
+                position.x = (entry.CenterX - entry.ParentRect.Left - sizeX * 0.5f) / parentWidth;
+                break;
+            case UISelectionAction::DistributeVertical:
+                position.y = (entry.CenterY - entry.ParentRect.Top - sizeY * 0.5f) / parentHeight;
+                break;
+            }
+
+            if (position == widget.Position)
+                continue;
+            widget.Position = position;
+            CommandHistory::Get().Push(
+                MakeComponentValueCommand(entry.EntityRef, before, widget));
+        }
+    }
+
     void EditorLayerBase::UI_CanvasEditor()
     {
         m_UIEditorMouseOverCanvas = false;
@@ -633,6 +772,42 @@ namespace Wheatear {
                 "拖动时与其它控件边缘/中心对齐。按住 Ctrl 改为吸附网格，按住 Alt 临时关闭。"));
         ImGui::SameLine();
         ImGui::Checkbox(EditorLocale::Text("Grid", "网格"), &m_UIGridVisible);
+
+        // --- Multi-select alignment toolbar ----------------------------------
+        const bool hasMultiSelection = !m_UIMultiSelect.empty();
+        ImGui::SameLine();
+        ImGui::SeparatorEx(ImGuiSeparatorFlags_Vertical);
+        ImGui::SameLine();
+        ImGui::BeginDisabled(!hasMultiSelection);
+        if (ImGui::SmallButton("L")) UI_AlignSelection(UISelectionAction::AlignLeft);
+        if (ImGui::IsItemHovered()) ImGui::SetTooltip("%s", EditorLocale::Text("Align Left (multi-select)", "左对齐（多选）"));
+        ImGui::SameLine();
+        if (ImGui::SmallButton("H")) UI_AlignSelection(UISelectionAction::AlignHCenter);
+        if (ImGui::IsItemHovered()) ImGui::SetTooltip("%s", EditorLocale::Text("Align Horizontal Center", "水平居中"));
+        ImGui::SameLine();
+        if (ImGui::SmallButton("R")) UI_AlignSelection(UISelectionAction::AlignRight);
+        if (ImGui::IsItemHovered()) ImGui::SetTooltip("%s", EditorLocale::Text("Align Right", "右对齐"));
+        ImGui::SameLine();
+        if (ImGui::SmallButton("T")) UI_AlignSelection(UISelectionAction::AlignTop);
+        if (ImGui::IsItemHovered()) ImGui::SetTooltip("%s", EditorLocale::Text("Align Top", "顶对齐"));
+        ImGui::SameLine();
+        if (ImGui::SmallButton("V")) UI_AlignSelection(UISelectionAction::AlignVCenter);
+        if (ImGui::IsItemHovered()) ImGui::SetTooltip("%s", EditorLocale::Text("Align Vertical Center", "垂直居中"));
+        ImGui::SameLine();
+        if (ImGui::SmallButton("B")) UI_AlignSelection(UISelectionAction::AlignBottom);
+        if (ImGui::IsItemHovered()) ImGui::SetTooltip("%s", EditorLocale::Text("Align Bottom", "底对齐"));
+        ImGui::SameLine();
+        if (ImGui::SmallButton("DH")) UI_AlignSelection(UISelectionAction::DistributeHorizontal);
+        if (ImGui::IsItemHovered()) ImGui::SetTooltip("%s", EditorLocale::Text("Distribute Horizontally", "水平等距分布"));
+        ImGui::SameLine();
+        if (ImGui::SmallButton("DV")) UI_AlignSelection(UISelectionAction::DistributeVertical);
+        if (ImGui::IsItemHovered()) ImGui::SetTooltip("%s", EditorLocale::Text("Distribute Vertically", "垂直等距分布"));
+        ImGui::EndDisabled();
+        ImGui::SameLine();
+        ImGui::BeginDisabled(!hasMultiSelection);
+        if (ImGui::SmallButton("Clear Sel"))
+            m_UIMultiSelect.clear();
+        ImGui::EndDisabled();
 
         if (!m_UIEditingCanvas || !m_UIEditingCanvas.HasComponent<UICanvasComponent>())
         {
@@ -916,8 +1091,23 @@ namespace Wheatear {
 
             if (clickedUI)
             {
-                SelectEditorEntity(clickedUI, false);
-                selected = clickedUI;
+                if (Input::IsKeyPressed(WT_KEY_LEFT_CONTROL) || Input::IsKeyPressed(WT_KEY_RIGHT_CONTROL))
+                {
+                    // Ctrl+click toggles the multi-selection; the hierarchy
+                    // selection stays as the alignment anchor.
+                    const UUID uuid = clickedUI.GetUUID();
+                    auto it = std::find(m_UIMultiSelect.begin(), m_UIMultiSelect.end(), uuid);
+                    if (it != m_UIMultiSelect.end())
+                        m_UIMultiSelect.erase(it);
+                    else
+                        m_UIMultiSelect.push_back(uuid);
+                }
+                else
+                {
+                    m_UIMultiSelect.clear();
+                    SelectEditorEntity(clickedUI, false);
+                    selected = clickedUI;
+                }
             }
         }
 
@@ -963,11 +1153,17 @@ namespace Wheatear {
             }
 
             const bool isSelected = selected == entry.EntityRef;
+            const bool isMultiSelected = !isSelected
+                && std::find(m_UIMultiSelect.begin(), m_UIMultiSelect.end(),
+                    entry.EntityRef.GetUUID()) != m_UIMultiSelect.end();
             const ImU32 color = isSelected
                 ? IM_COL32(82, 230, 244, 245)
-                : IM_COL32(112, 185, 196, drawBackdrop ? 145 : 105);
-            if (isSelected || m_ShowUIOutlines || drawBackdrop)
-                DrawUIOutline(drawList, rectMin, rectMax, entry.EntityRef, color, isSelected ? 2.0f : 1.0f);
+                : (isMultiSelected
+                    ? IM_COL32(245, 208, 82, 230)
+                    : IM_COL32(112, 185, 196, drawBackdrop ? 145 : 105));
+            if (isSelected || isMultiSelected || m_ShowUIOutlines || drawBackdrop)
+                DrawUIOutline(drawList, rectMin, rectMax, entry.EntityRef,
+                    color, (isSelected || isMultiSelected) ? 2.0f : 1.0f);
 
             if (isSelected)
             {

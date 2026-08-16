@@ -109,9 +109,52 @@ namespace Wheatear::SideCombatTuningService {
             return values;
         }
 
-        static SideAttackTuning ReadAttackTuning(const YAML::Node& node, const SideAttackTuning& fallback)
+        static EnemyTypeDefinition ReadEnemyType(const YAML::Node& node, const EnemyTypeDefinition& fallback)
         {
-            SideAttackTuning tuning = fallback;
+            EnemyTypeDefinition definition = fallback;
+            if (!node)
+                return definition;
+
+            definition.Id = node["id"].as<std::string>(definition.Id);
+            definition.MaxHealth = node["maxHealth"].as<float>(definition.MaxHealth);
+            definition.Attack = node["attack"].as<float>(definition.Attack);
+            definition.Defense = node["defense"].as<float>(definition.Defense);
+            definition.MoveSpeed = node["moveSpeed"].as<float>(definition.MoveSpeed);
+            definition.CollisionSize = ReadVec2(node["collisionSize"], definition.CollisionSize);
+            definition.CollisionHeight = node["collisionHeight"].as<float>(definition.CollisionHeight);
+            definition.KnockbackResistance = node["knockbackResistance"].as<float>(definition.KnockbackResistance);
+            definition.AggroRange = node["aggroRange"].as<float>(definition.AggroRange);
+            definition.AttackRange = node["attackRange"].as<float>(definition.AttackRange);
+            definition.PreferredRange = node["preferredRange"].as<float>(definition.PreferredRange);
+            definition.AttackInterval = node["attackInterval"].as<float>(definition.AttackInterval);
+            definition.LaneTolerance = node["laneTolerance"].as<float>(definition.LaneTolerance);
+            if (const YAML::Node scale = node["renderScale"])
+            {
+                if (scale && scale.IsSequence() && scale.size() >= 3)
+                {
+                    definition.RenderScale = {
+                        scale[0].as<float>(definition.RenderScale.x),
+                        scale[1].as<float>(definition.RenderScale.y),
+                        scale[2].as<float>(definition.RenderScale.z)
+                    };
+                }
+            }
+            if (const YAML::Node shadow = node["shadowScale"])
+            {
+                if (shadow && shadow.IsSequence() && shadow.size() >= 3)
+                {
+                    definition.ShadowScale = {
+                        shadow[0].as<float>(definition.ShadowScale.x),
+                        shadow[1].as<float>(definition.ShadowScale.y),
+                        shadow[2].as<float>(definition.ShadowScale.z)
+                    };
+                }
+            }
+            return definition;
+        }
+
+        static SideAttackTuning ReadAttackTuning(const YAML::Node& node, const SideAttackTuning& fallback)
+        {            SideAttackTuning tuning = fallback;
             if (!node)
                 return tuning;
 
@@ -608,6 +651,19 @@ namespace Wheatear::SideCombatTuningService {
                             ? fallbackIt->second
                             : SideAttackTuning{};
                         tuning.Attacks[id] = ReadAttackTuning(it->second, fallback);
+                    }
+                }
+
+                if (YAML::Node enemyTypes = root["enemyTypes"])
+                {
+                    for (auto it = enemyTypes.begin(); it != enemyTypes.end(); ++it)
+                    {
+                        const std::string id = it->first.as<std::string>();
+                        const auto fallbackIt = tuning.EnemyTypes.find(id);
+                        const EnemyTypeDefinition fallback = fallbackIt != tuning.EnemyTypes.end()
+                            ? fallbackIt->second
+                            : EnemyTypeDefinition{};
+                        tuning.EnemyTypes[id] = ReadEnemyType(it->second, fallback);
                     }
                 }
                 tuning.Loaded = true;

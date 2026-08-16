@@ -4,6 +4,7 @@
 #include "ArcadeCombatMath.h"
 #include "ArcadeCombatProjectileService.h"
 #include "ArcadeCombatSignalHandlers.h"
+#include "ArcadeCombatTuningService.h"
 #include "Wheatear/Gameplay/Action/ActionRecipeQueries.h"
 #include "Wheatear/Gameplay/Action/ActionResolver.h"
 #include "Wheatear/Scene/Components.h"
@@ -32,11 +33,19 @@ namespace Wheatear::ArcadeCombatBossService {
             boss.RuntimeJumpTimer = 0.0f;
             boss.RuntimeJumpStart = transform.Translation;
 
-            const float x = std::sin(level.RuntimeElapsed * 1.73f) * 5.4f;
-            const float y = 2.0f + std::cos(level.RuntimeElapsed * 1.11f) * 0.65f;
+            const auto& tuning = ArcadeCombatTuningService::GetTuning(level);
+            const float x = std::sin(level.RuntimeElapsed * tuning.Boss.JumpXFrequency)
+                * tuning.Boss.JumpXAmplitude;
+            const float y = tuning.Boss.JumpYBase
+                + std::cos(level.RuntimeElapsed * tuning.Boss.JumpYFrequency)
+                * tuning.Boss.JumpYAmplitude;
             boss.RuntimeJumpTarget = {
-                std::clamp(x, level.ArenaMin.x + 1.2f, level.ArenaMax.x - 1.2f),
-                std::clamp(y, level.ArenaMin.y + 1.2f, level.ArenaMax.y - 0.9f),
+                std::clamp(x,
+                    level.ArenaMin.x + tuning.Boss.JumpMarginX,
+                    level.ArenaMax.x - tuning.Boss.JumpMarginX),
+                std::clamp(y,
+                    level.ArenaMin.y + tuning.Boss.JumpMarginTop,
+                    level.ArenaMax.y - tuning.Boss.JumpMarginBottom),
                 transform.Translation.z
             };
         }
@@ -89,7 +98,8 @@ namespace Wheatear::ArcadeCombatBossService {
             bossComponent.RuntimeJumpProgress += dt / std::max(0.01f, bossComponent.JumpDuration);
             const float t = std::clamp(bossComponent.RuntimeJumpProgress, 0.0f, 1.0f);
             transform.Translation = glm::mix(bossComponent.RuntimeJumpStart, bossComponent.RuntimeJumpTarget, t);
-            transform.Translation.y += std::sin(t * Pi) * 0.85f;
+            const auto& tuning = ArcadeCombatTuningService::GetTuning(level);
+            transform.Translation.y += std::sin(t * Pi) * tuning.Boss.JumpArcHeight;
             if (t >= 1.0f)
                 bossComponent.RuntimeJumping = false;
         }
@@ -109,16 +119,19 @@ namespace Wheatear::ArcadeCombatBossService {
                 transform.Translation,
                 player.GetComponent<TransformComponent>().Translation);
 
+            const auto& tuning = ArcadeCombatTuningService::GetTuning(level);
             ArcadeCombatSignalHandlers::ProjectileSpawnPayload payload;
             payload.SceneContext = scene;
-            payload.EntityName = "Arcade_BossBullet";
-            payload.Position = transform.Translation + glm::vec3(direction * 0.65f, -0.1f);
-            payload.Velocity = direction * 4.2f;
+            payload.EntityName = tuning.Boss.BulletEntityName;
+            payload.Position = transform.Translation
+                + glm::vec3(direction * tuning.Boss.BulletSpawnOffset.x,
+                    tuning.Boss.BulletSpawnOffset.y);
+            payload.Velocity = direction * tuning.Boss.BulletSpeed;
             payload.Damage = WAO::PrimaryEffectValue(*shotRecipe, WAO::EffectType::Damage, 12.0f);
-            payload.Lifetime = 2.4f;
-            payload.Radius = 0.19f;
+            payload.Lifetime = tuning.Boss.BulletLifetime;
+            payload.Radius = tuning.Boss.BulletRadius;
             payload.Team = (int)ArcadeTeam::Enemy;
-            payload.Color = { 0.95f, 0.22f, 0.34f, 1.0f };
+            payload.Color = tuning.Boss.BulletColor;
 
             const std::string detail = "fire " + shotRecipe->DisplayName;
             WAO::ActionResolveContext actionContext;

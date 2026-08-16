@@ -55,6 +55,7 @@ namespace Wheatear {
         std::string m_RawPreview;
         std::unique_ptr<YAML::Node> m_Root;
         Scene* m_Scene = nullptr;   // scene open in the editor (unit overview)
+        std::string m_SelectedWeapon = "gun";
         std::unordered_map<uint32_t, ArcadeCombatantComponent> m_UnitEditSnapshots;
         std::unordered_map<std::string, std::string> m_NewScalarValues;
         std::unordered_map<std::string, std::string> m_NewMapKeys;

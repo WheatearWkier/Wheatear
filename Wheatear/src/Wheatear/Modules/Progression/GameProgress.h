@@ -87,6 +87,11 @@ namespace Wheatear::GameProgress {
         int Gold = 0;
         PlayerAttributes Attributes;
 
+        // Per-equipment upgrade levels (id -> level); the two legacy int
+        // fields above remain the authoritative source for their items and
+        // stay in sync whenever those items are upgraded.
+        std::unordered_map<std::string, int> EquipmentLevels;
+
         std::unordered_map<std::string, int> Materials;
         std::unordered_map<std::string, std::string> MaterialNames;
         std::unordered_map<std::string, int> BestCombosByDungeon;
@@ -151,6 +156,12 @@ namespace Wheatear::GameProgress {
     WHEATEAR_API bool CanUpgradeTravelerArmorToLv1();
     WHEATEAR_API bool TryUpgradeTravelerArmorToLv1();
 
+    // Generic data-driven equipment upgrades (upgrades.yaml table).
+    WHEATEAR_API bool CanUpgradeEquipment(const std::string& upgradeId);
+    WHEATEAR_API bool TryUpgradeEquipment(const std::string& upgradeId);
+    WHEATEAR_API int GetEquipmentLevel(const std::string& equipmentId);
+    WHEATEAR_API std::string GetEquipmentUpgradeButtonText();
+
     WHEATEAR_API CommandResult ExecuteCommand(const std::string& command);
 
     WHEATEAR_API std::string BuildHubSubtitle();
@@ -170,7 +181,6 @@ namespace Wheatear::GameProgress {
     WHEATEAR_API std::string BuildEquipmentTooltip(const std::string& equipmentId);
     WHEATEAR_API std::string BuildEquipmentPageText();
     WHEATEAR_API std::string BuildEquipmentMaterials();
-    WHEATEAR_API std::string GetTravelerArmorUpgradeButtonText();
     WHEATEAR_API std::string GetEquipmentToggleButtonText();
     WHEATEAR_API bool IsEquipmentOwned(const std::string& equipmentId);
     WHEATEAR_API bool IsEquipmentEquipped(const std::string& equipmentId);

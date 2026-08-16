@@ -96,6 +96,22 @@ namespace Wheatear {
             ImGui::PopID();
         }
 
+        static void DrawWaveSpawnRow(Entity entity, SideCombatLevelComponent::WaveSpawnDef& spawn, int index)
+        {
+            ImGui::PushID(index);
+            ImGui::Checkbox(EditorLocale::Text("Enabled", "启用"), &spawn.Enabled);
+            ImGui::DragInt(EditorLocale::Text("Wave Index", "波次"), &spawn.WaveIndex, 1.0f, 0, 2);
+            ImGui::DragInt(EditorLocale::Text("Enemy Kind", "敌人类型"), &spawn.EnemyKind, 1.0f, 0, 2);
+            ImGui::SameLine();
+            EditorWidgets::HelpTooltip("0 = Grunt, 1 = Thrower, 2 = Pouncer (boss stays scene-driven)");
+            ImGui::DragInt(EditorLocale::Text("Count", "数量"), &spawn.Count, 1.0f, 1, 32);
+            ImGui::DragFloat(EditorLocale::Text("Spawn Min X", "出生 X 最小"), &spawn.SpawnMinX, 0.1f, -30.0f, 30.0f);
+            ImGui::DragFloat(EditorLocale::Text("Spawn Max X", "出生 X 最大"), &spawn.SpawnMaxX, 0.1f, -30.0f, 30.0f);
+            ImGui::DragFloat(EditorLocale::Text("Ground Y Offset", "地面 Y 偏移"), &spawn.GroundYOffset, 0.05f, -10.0f, 10.0f);
+            ImGui::DragFloat(EditorLocale::Text("HP Variance", "生命浮动"), &spawn.HpVariance, 0.01f, 0.0f, 1.0f, "%.2f");
+            ImGui::PopID();
+        }
+
         static void DrawHudRect(const char* label, SideCombatLevelComponent::HudRect& rect)
         {
             ImGui::PushID(label);
@@ -277,6 +293,33 @@ namespace Wheatear {
             }
             if (ImGui::Button("Add Reward"))
                 level.DeathRewards.emplace_back();
+
+            ImGui::Separator();
+            ImGui::TextDisabled("Wave Spawns (data-driven enemies)");
+            ImGui::SameLine();
+            EditorWidgets::HelpTooltip(
+                "Enemies are generated from this table at runtime; scene-placed "
+                "enemy entities (except the boss) are removed while it is non-empty.");
+            for (int i = 0; i < (int)level.WaveSpawns.size(); ++i)
+            {
+                ImGui::PushID(i);
+                const std::string header = "Wave Spawn " + std::to_string(i + 1);
+                bool removeSpawn = false;
+                if (ImGui::CollapsingHeader(header.c_str(), ImGuiTreeNodeFlags_DefaultOpen))
+                {
+                    DrawWaveSpawnRow(entity, level.WaveSpawns[i], i);
+                    if (ImGui::Button("Remove"))
+                        removeSpawn = true;
+                }
+                ImGui::PopID();
+                if (removeSpawn)
+                {
+                    level.WaveSpawns.erase(level.WaveSpawns.begin() + i);
+                    break;
+                }
+            }
+            if (ImGui::Button("Add Wave Spawn"))
+                level.WaveSpawns.emplace_back();
 
             ImGui::Separator();
             ImGui::TextDisabled("Wave / Air Wall Flow");

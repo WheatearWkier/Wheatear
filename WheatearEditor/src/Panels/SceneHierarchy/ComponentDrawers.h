@@ -8,6 +8,23 @@
 #include "Editor/EditorLocale.h"
 #include "Editor/EditorCommands.h"
 namespace Wheatear {
+
+    // Structural component edits (reset / remove) are suppressed while the
+    // editor plays a runtime copy; the hierarchy panel flips this flag.
+    inline bool& ComponentDrawReadOnlyState()
+    {
+        static bool value = false;
+        return value;
+    }
+    inline void SetComponentDrawReadOnly(bool readOnly)
+    {
+        ComponentDrawReadOnlyState() = readOnly;
+    }
+    inline bool IsComponentDrawReadOnly()
+    {
+        return ComponentDrawReadOnlyState();
+    }
+
     template<typename T, typename UIFunction>
     void DrawComponent(const std::string& name, Entity entity, UIFunction uiFunction)
     {
@@ -33,11 +50,15 @@ namespace Wheatear {
         const float componentTop = ImGui::GetItemRectMin().y;
         ImGui::PopStyleVar();
         ImGui::SameLine(contentRegion.x - lineHeight * 0.5f);
+        const bool readOnly = IsComponentDrawReadOnly();
+        ImGui::BeginDisabled(readOnly);
         if (ImGui::Button("...", ImVec2{ lineHeight, lineHeight }))
             ImGui::OpenPopup("ComponentSettings");
+        ImGui::EndDisabled();
         bool removeComponent = false;
         if (ImGui::BeginPopup("ComponentSettings"))
         {
+            ImGui::BeginDisabled(readOnly);
             if (ImGui::MenuItem(EditorLocale::Text("Reset", "重置")))
             {
                 T before = entity.GetComponent<T>();
@@ -49,6 +70,7 @@ namespace Wheatear {
             ImGui::Separator();
             if (ImGui::MenuItem(EditorLocale::Text("Remove Component", "移除组件")))
                 removeComponent = true;
+            ImGui::EndDisabled();
             ImGui::EndPopup();
         }
         if (open)

@@ -76,6 +76,7 @@ namespace Wheatear::EditorCommandBuilder {
         case CommandKind::SideDash: return EditorLocale::Text("Side: Dash", "横版: 冲刺");
         case CommandKind::SideBreakLimit: return EditorLocale::Text("Side: Break Limit", "横版: 破限");
         case CommandKind::ProgUpgradeTravelerArmor: return EditorLocale::Text("Progression: Upgrade Armor", "成长: 升级护甲");
+        case CommandKind::ProgUpgradeItem: return EditorLocale::Text("Progression: Upgrade Item", "成长: 升级装备");
         case CommandKind::ProgLearnSelectedSkill: return EditorLocale::Text("Progression: Learn Skill", "成长: 学习技能");
         case CommandKind::ProgSelectSkillNode: return EditorLocale::Text("Progression: Select Skill Node", "成长: 选择技能节点");
         case CommandKind::ProgEquipmentPageSlider: return EditorLocale::Text("Progression: Equipment Page Slider", "成长: 装备页滑条");
@@ -85,10 +86,7 @@ namespace Wheatear::EditorCommandBuilder {
         case CommandKind::ProgToggleSelectedEquipment: return EditorLocale::Text("Progression: Toggle Equip", "成长: 穿脱装备");
         case CommandKind::ProgSelectEquipment: return EditorLocale::Text("Progression: Select Equipment", "成长: 选择装备");
         case CommandKind::ProgReset: return EditorLocale::Text("Progression: Reset (New Game)", "成长: 重置（新游戏）");
-        case CommandKind::ProgSelectSupportMentor: return EditorLocale::Text("Progression: Support Mentor", "成长: 支援-导师");
-        case CommandKind::ProgSelectSupportWhiteMage: return EditorLocale::Text("Progression: Support White Mage", "成长: 支援-白魔法师");
-        case CommandKind::ProgSelectSupportGuard: return EditorLocale::Text("Progression: Support Guard", "成长: 支援-卫士");
-        case CommandKind::ProgSelectSupportBlackMage: return EditorLocale::Text("Progression: Support Black Mage", "成长: 支援-黑魔法师");
+        case CommandKind::ProgSelectSupport: return EditorLocale::Text("Progression: Select Support", "成长: 配置支援");
         case CommandKind::ProgTextSpeedUp: return EditorLocale::Text("Settings: Text Speed +", "设置: 文字速度 +");
         case CommandKind::ProgTextSpeedDown: return EditorLocale::Text("Settings: Text Speed -", "设置: 文字速度 -");
         case CommandKind::ProgMasterVolumeUp: return EditorLocale::Text("Settings: Master Volume +", "设置: 主音量 +");
@@ -218,6 +216,7 @@ namespace Wheatear::EditorCommandBuilder {
 
         // ---- progression: long tail ----
         case CommandKind::ProgUpgradeTravelerArmor: return "progression:upgrade_traveler_armor";
+        case CommandKind::ProgUpgradeItem: return "progression:upgrade_item:" + spec.Primary;
         case CommandKind::ProgLearnSelectedSkill: return "progression:learn_selected_skill";
         case CommandKind::ProgSelectSkillNode: return "progression:select_skill_node:" + spec.Primary;
         case CommandKind::ProgEquipmentPageSlider:
@@ -228,10 +227,7 @@ namespace Wheatear::EditorCommandBuilder {
         case CommandKind::ProgToggleSelectedEquipment: return "progression:toggle_selected_equipment";
         case CommandKind::ProgSelectEquipment: return "progression:select_equipment_" + spec.Primary;
         case CommandKind::ProgReset: return "progression:reset";
-        case CommandKind::ProgSelectSupportMentor: return "progression:select_support_mentor";
-        case CommandKind::ProgSelectSupportWhiteMage: return "progression:select_support_white_mage";
-        case CommandKind::ProgSelectSupportGuard: return "progression:select_support_guard";
-        case CommandKind::ProgSelectSupportBlackMage: return "progression:select_support_black_mage";
+        case CommandKind::ProgSelectSupport: return "progression:select_support:" + spec.Primary;
         case CommandKind::ProgTextSpeedUp: return "progression:text_speed_up";
         case CommandKind::ProgTextSpeedDown: return "progression:text_speed_down";
         case CommandKind::ProgMasterVolumeUp: return "progression:master_volume_up";
@@ -568,6 +564,11 @@ namespace Wheatear::EditorCommandBuilder {
         {
             const std::string action = command.substr(12);
             if (action == "upgrade_traveler_armor") spec.Kind = CommandKind::ProgUpgradeTravelerArmor;
+            else if (StartsWith(action, "upgrade_item:"))
+            {
+                spec.Kind = CommandKind::ProgUpgradeItem;
+                spec.Primary = action.substr(13);
+            }
             else if (action == "learn_selected_skill") spec.Kind = CommandKind::ProgLearnSelectedSkill;
             else if (StartsWith(action, "select_skill_node:"))
             {
@@ -593,10 +594,33 @@ namespace Wheatear::EditorCommandBuilder {
                 spec.Primary = action.substr(17);
             }
             else if (action == "reset") spec.Kind = CommandKind::ProgReset;
-            else if (action == "select_support_mentor") spec.Kind = CommandKind::ProgSelectSupportMentor;
-            else if (action == "select_support_white_mage") spec.Kind = CommandKind::ProgSelectSupportWhiteMage;
-            else if (action == "select_support_guard") spec.Kind = CommandKind::ProgSelectSupportGuard;
-            else if (action == "select_support_black_mage") spec.Kind = CommandKind::ProgSelectSupportBlackMage;
+            else if (StartsWith(action, "select_support:"))
+            {
+                spec.Kind = CommandKind::ProgSelectSupport;
+                spec.Primary = action.substr(15);
+            }
+            // Legacy select_support_<name> commands; map onto the table-driven
+            // form so old scene buttons still render and work.
+            else if (action == "select_support_mentor")
+            {
+                spec.Kind = CommandKind::ProgSelectSupport;
+                spec.Primary = "mentor";
+            }
+            else if (action == "select_support_white_mage")
+            {
+                spec.Kind = CommandKind::ProgSelectSupport;
+                spec.Primary = "white_mage";
+            }
+            else if (action == "select_support_guard")
+            {
+                spec.Kind = CommandKind::ProgSelectSupport;
+                spec.Primary = "shield_guard";
+            }
+            else if (action == "select_support_black_mage")
+            {
+                spec.Kind = CommandKind::ProgSelectSupport;
+                spec.Primary = "black_mage";
+            }
             else if (action == "text_speed_up") spec.Kind = CommandKind::ProgTextSpeedUp;
             else if (action == "text_speed_down") spec.Kind = CommandKind::ProgTextSpeedDown;
             else if (action == "master_volume_up") spec.Kind = CommandKind::ProgMasterVolumeUp;
@@ -775,8 +799,7 @@ namespace Wheatear::EditorCommandBuilder {
             CommandKind::ProgEquipmentPage2,
             CommandKind::ProgSelectEquipmentSlot, CommandKind::ProgToggleSelectedEquipment,
             CommandKind::ProgSelectEquipment, CommandKind::ProgReset,
-            CommandKind::ProgSelectSupportMentor, CommandKind::ProgSelectSupportWhiteMage,
-            CommandKind::ProgSelectSupportGuard, CommandKind::ProgSelectSupportBlackMage,
+            CommandKind::ProgUpgradeItem, CommandKind::ProgSelectSupport,
             CommandKind::ProgTextSpeedUp, CommandKind::ProgTextSpeedDown,
             CommandKind::ProgMasterVolumeUp, CommandKind::ProgMasterVolumeDown,
             CommandKind::ProgBgmVolumeUp, CommandKind::ProgBgmVolumeDown,

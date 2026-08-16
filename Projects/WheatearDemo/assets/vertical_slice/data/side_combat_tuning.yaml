@@ -779,3 +779,55 @@ skillSlots:
     actionId: side.break_limit
     kind: break_limit
     enabled: true
+
+# 敌人种类模板（数据驱动波次表 SideCombatLevelComponent.WaveSpawns 引用）。
+# 每行 = 一种 SideEnemyKind 的生成参数；数值默认值 = 场景内置小兵（claw beast）。
+# 新种类 = 在 SideCombatTuningService 的 kind 枚举/生成器外增加处理（当前 Grunt/Thrower/Pouncer）。
+enemyTypes:
+  grunt:
+    maxHealth: 260
+    attack: 28
+    defense: 8
+    moveSpeed: 3.9
+    collisionSize: [0.86, 0.48]
+    collisionHeight: 1.05
+    knockbackResistance: 0.04
+    aggroRange: 8.0
+    attackRange: 1.18
+    preferredRange: 0.95
+    attackInterval: 1.25
+    laneTolerance: 0.42
+    renderScale: [1.72, 1.72, 1.0]
+    shadowScale: [1.22, 0.4, 1.0]
+  thrower:
+    # 远程掷弹手：血低攻高、射程远、移速慢
+    maxHealth: 190
+    attack: 34
+    defense: 6
+    moveSpeed: 3.2
+    collisionSize: [0.86, 0.48]
+    collisionHeight: 1.05
+    knockbackResistance: 0.04
+    aggroRange: 10.0
+    attackRange: 2.2
+    preferredRange: 1.8
+    attackInterval: 1.6
+    laneTolerance: 0.42
+    renderScale: [1.72, 1.72, 1.0]
+    shadowScale: [1.22, 0.4, 1.0]
+  pouncer:
+    # 突袭者：攻快脆皮、移速快
+    maxHealth: 170
+    attack: 26
+    defense: 5
+    moveSpeed: 4.6
+    collisionSize: [0.86, 0.48]
+    collisionHeight: 1.05
+    knockbackResistance: 0.02
+    aggroRange: 9.0
+    attackRange: 1.05
+    preferredRange: 0.8
+    attackInterval: 0.9
+    laneTolerance: 0.42
+    renderScale: [1.72, 1.72, 1.0]
+    shadowScale: [1.22, 0.4, 1.0]

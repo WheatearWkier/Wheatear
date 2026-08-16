@@ -75,7 +75,7 @@ Entities:
       NormalColor: [0.360000014, 0.159999996, 0.25999999, 0.939999998]
       HoverColor: [0.540000021, 0.239999995, 0.379999995, 0.980000019]
       PressedColor: [0.239999995, 0.100000001, 0.170000002, 1]
-      OnClickFunction: "progression:select_support_black_mage"
+      OnClickFunction: "progression:select_support:black_mage"
   - Entity: 983000052
     TagComponent:
       Tag: Support_Button_3
@@ -113,7 +113,7 @@ Entities:
       NormalColor: [0.200000003, 0.300000012, 0.5, 0.939999998]
       HoverColor: [0.300000012, 0.430000007, 0.699999988, 0.980000019]
       PressedColor: [0.129999995, 0.200000003, 0.349999994, 1]
-      OnClickFunction: "progression:select_support_guard"
+      OnClickFunction: "progression:select_support:shield_guard"
   - Entity: 983000051
     TagComponent:
       Tag: Support_Button_2
@@ -151,7 +151,7 @@ Entities:
       NormalColor: [0.129999995, 0.300000012, 0.25999999, 0.939999998]
       HoverColor: [0.200000003, 0.439999998, 0.379999995, 0.980000019]
       PressedColor: [0.0799999982, 0.200000003, 0.180000007, 1]
-      OnClickFunction: "progression:select_support_white_mage"
+      OnClickFunction: "progression:select_support:white_mage"
   - Entity: 983000050
     TagComponent:
       Tag: Support_Button_1
@@ -189,7 +189,7 @@ Entities:
       NormalColor: [0.270000011, 0.219999999, 0.479999989, 0.939999998]
       HoverColor: [0.400000006, 0.319999993, 0.680000007, 0.980000019]
       PressedColor: [0.180000007, 0.140000001, 0.340000004, 1]
-      OnClickFunction: "progression:select_support_mentor"
+      OnClickFunction: "progression:select_support:mentor"
   - Entity: 983000022
     TagComponent:
       Tag: Support_Status

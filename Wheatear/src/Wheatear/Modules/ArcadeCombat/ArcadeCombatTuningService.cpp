@@ -35,9 +35,82 @@ namespace Wheatear::ArcadeCombatTuningService {
             return !error;
         }
 
+        static glm::vec2 ReadVec2(const YAML::Node& node, const glm::vec2& fallback)
+        {
+            if (!node || !node.IsSequence() || node.size() < 2)
+                return fallback;
+            return { node[0].as<float>(fallback.x), node[1].as<float>(fallback.y) };
+        }
+
+        static glm::vec4 ReadVec4(const YAML::Node& node, const glm::vec4& fallback)
+        {
+            if (!node || !node.IsSequence() || node.size() < 4)
+                return fallback;
+            return {
+                node[0].as<float>(fallback.r),
+                node[1].as<float>(fallback.g),
+                node[2].as<float>(fallback.b),
+                node[3].as<float>(fallback.a)
+            };
+        }
+
+        static ArcadeWeaponTuning ReadWeapon(const YAML::Node& node,
+            const ArcadeWeaponTuning& fallback)
+        {
+            if (!node || !node.IsMap())
+                return fallback;
+
+            ArcadeWeaponTuning weapon;
+            weapon.EntityName = node["entityName"].as<std::string>(fallback.EntityName);
+            weapon.Speed = node["speed"].as<float>(fallback.Speed);
+            weapon.Lifetime = node["lifetime"].as<float>(fallback.Lifetime);
+            weapon.Radius = node["radius"].as<float>(fallback.Radius);
+            weapon.Color = ReadVec4(node["color"], fallback.Color);
+            weapon.MuzzleOffset = ReadVec2(node["muzzleOffset"], fallback.MuzzleOffset);
+            weapon.Heavy = node["heavy"].as<bool>(fallback.Heavy);
+            weapon.Melee = node["melee"].as<bool>(fallback.Melee);
+            weapon.SlashOffset = node["slashOffset"].as<float>(fallback.SlashOffset);
+            return weapon;
+        }
+
+        // Classic payloads; the tuning yaml overlays these per weapon so a
+        // missing entry always preserves the historical behaviour.
+        static void PrefillDefaultWeapons(std::unordered_map<std::string, ArcadeWeaponTuning>& weapons)
+        {
+            ArcadeWeaponTuning gun;
+            gun.EntityName = "Arcade_PlayerBullet";
+            gun.Speed = 9.0f;
+            gun.Lifetime = 1.4f;
+            gun.Radius = 0.13f;
+            gun.Color = { 1.0f, 0.90f, 0.35f, 1.0f };
+            gun.MuzzleOffset = { 0.55f, 0.05f };
+            weapons["gun"] = gun;
+
+            ArcadeWeaponTuning cannon;
+            cannon.EntityName = "Arcade_PlayerCannon";
+            cannon.Speed = 5.3f;
+            cannon.Lifetime = 2.0f;
+            cannon.Radius = 0.28f;
+            cannon.Color = { 1.0f, 0.42f, 0.16f, 1.0f };
+            cannon.MuzzleOffset = { 0.55f, 0.05f };
+            cannon.Heavy = true;
+            weapons["cannon"] = cannon;
+
+            ArcadeWeaponTuning katana;
+            katana.EntityName = "Arcade_KatanaSlash";
+            katana.Speed = 1.0f;
+            katana.Lifetime = 0.12f;
+            katana.Radius = 0.75f;
+            katana.Color = { 0.85f, 0.96f, 1.0f, 0.82f };
+            katana.SlashOffset = 0.8f;
+            katana.Melee = true;
+            weapons["katana"] = katana;
+        }
+
         static ArcadeCombatTuning LoadTuning(const std::string& path)
         {
             ArcadeCombatTuning tuning;
+            PrefillDefaultWeapons(tuning.Player.Weapons);
             if (path.empty())
             {
                 tuning.Loaded = true;
@@ -64,12 +137,46 @@ namespace Wheatear::ArcadeCombatTuningService {
                     tuning.Boss.ShootInterval = boss["shootInterval"].as<float>(tuning.Boss.ShootInterval);
                     tuning.Boss.JumpInterval = boss["jumpInterval"].as<float>(tuning.Boss.JumpInterval);
                     tuning.Boss.JumpDuration = boss["jumpDuration"].as<float>(tuning.Boss.JumpDuration);
+
+                    tuning.Boss.JumpXFrequency = boss["jumpXFrequency"].as<float>(tuning.Boss.JumpXFrequency);
+                    tuning.Boss.JumpYFrequency = boss["jumpYFrequency"].as<float>(tuning.Boss.JumpYFrequency);
+                    tuning.Boss.JumpXAmplitude = boss["jumpXAmplitude"].as<float>(tuning.Boss.JumpXAmplitude);
+                    tuning.Boss.JumpYAmplitude = boss["jumpYAmplitude"].as<float>(tuning.Boss.JumpYAmplitude);
+                    tuning.Boss.JumpYBase = boss["jumpYBase"].as<float>(tuning.Boss.JumpYBase);
+                    tuning.Boss.JumpArcHeight = boss["jumpArcHeight"].as<float>(tuning.Boss.JumpArcHeight);
+                    tuning.Boss.JumpMarginX = boss["jumpMarginX"].as<float>(tuning.Boss.JumpMarginX);
+                    tuning.Boss.JumpMarginTop = boss["jumpMarginTop"].as<float>(tuning.Boss.JumpMarginTop);
+                    tuning.Boss.JumpMarginBottom = boss["jumpMarginBottom"].as<float>(tuning.Boss.JumpMarginBottom);
+
+                    tuning.Boss.BulletEntityName = boss["bulletEntityName"].as<std::string>(tuning.Boss.BulletEntityName);
+                    tuning.Boss.BulletSpeed = boss["bulletSpeed"].as<float>(tuning.Boss.BulletSpeed);
+                    tuning.Boss.BulletLifetime = boss["bulletLifetime"].as<float>(tuning.Boss.BulletLifetime);
+                    tuning.Boss.BulletRadius = boss["bulletRadius"].as<float>(tuning.Boss.BulletRadius);
+                    tuning.Boss.BulletColor = ReadVec4(boss["bulletColor"], tuning.Boss.BulletColor);
+                    tuning.Boss.BulletSpawnOffset = ReadVec2(boss["bulletSpawnOffset"], tuning.Boss.BulletSpawnOffset);
                 }
 
                 if (const YAML::Node player = root["player"])
                 {
                     tuning.Player.MoveSpeed = player["moveSpeed"].as<float>(tuning.Player.MoveSpeed);
                     tuning.Player.AutoAim = player["autoAim"].as<bool>(tuning.Player.AutoAim);
+                    if (const YAML::Node weapons = player["weapons"])
+                    {
+                        if (weapons.IsMap())
+                        {
+                            for (const auto& entry : weapons)
+                            {
+                                if (!entry.first.IsScalar())
+                                    continue;
+                                const std::string weaponId = entry.first.as<std::string>();
+                                const ArcadeWeaponTuning fallback =
+                                    tuning.Player.Weapons.count(weaponId)
+                                        ? tuning.Player.Weapons[weaponId]
+                                        : ArcadeWeaponTuning{};
+                                tuning.Player.Weapons[weaponId] = ReadWeapon(entry.second, fallback);
+                            }
+                        }
+                    }
                 }
 
                 tuning.Loaded = true;
@@ -97,8 +204,7 @@ namespace Wheatear::ArcadeCombatTuningService {
 
     const ArcadeCombatTuning& GetTuning(const ArcadeCombatLevelComponent& level)
     {
-        static std::unordered_map<std::string, ArcadeCombatTuningCacheEntry> cache;
-        static constexpr auto kCheckInterval = std::chrono::milliseconds(500);
+        static std::unordered_map<std::string, ArcadeCombatTuningCacheEntry> cache;        static constexpr auto kCheckInterval = std::chrono::milliseconds(500);
 
         const std::string key = level.TuningPath.empty() ? "__default__" : level.TuningPath;
         const std::filesystem::path resolvedPath = ResolveTuningPath(level.TuningPath);
@@ -136,6 +242,33 @@ namespace Wheatear::ArcadeCombatTuningService {
         }
 
         return it->second.Tuning;
+    }
+
+    const ArcadeWeaponTuning& GetWeaponTuning(const ArcadeCombatTuning& tuning,
+        ArcadeWeaponType weapon)
+    {
+        static const ArcadeWeaponTuning kGun = [] {
+            std::unordered_map<std::string, ArcadeWeaponTuning> defaults;
+            PrefillDefaultWeapons(defaults);
+            return defaults["gun"];
+        }();
+        static const ArcadeWeaponTuning kCannon = [] {
+            std::unordered_map<std::string, ArcadeWeaponTuning> defaults;
+            PrefillDefaultWeapons(defaults);
+            return defaults["cannon"];
+        }();
+        static const ArcadeWeaponTuning kKatana = [] {
+            std::unordered_map<std::string, ArcadeWeaponTuning> defaults;
+            PrefillDefaultWeapons(defaults);
+            return defaults["katana"];
+        }();
+
+        const char* id = weapon == ArcadeWeaponType::Cannon ? "cannon"
+            : weapon == ArcadeWeaponType::Katana ? "katana" : "gun";
+        if (auto it = tuning.Player.Weapons.find(id); it != tuning.Player.Weapons.end())
+            return it->second;
+        return weapon == ArcadeWeaponType::Cannon ? kCannon
+            : weapon == ArcadeWeaponType::Katana ? kKatana : kGun;
     }
 
     void ApplyLevelTuning(const ArcadeCombatTuning& tuning, ArcadeCombatLevelComponent& level)

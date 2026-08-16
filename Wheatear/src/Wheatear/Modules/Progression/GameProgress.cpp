@@ -278,6 +278,8 @@ namespace Wheatear::GameProgress {
             }
         }
 
+
+
         static int ParseInt(const std::string& value, int fallback)
         {
             try
@@ -309,6 +311,41 @@ namespace Wheatear::GameProgress {
             if (value == "0" || value == "false" || value == "False")
                 return false;
             return fallback;
+        }
+
+        static std::string JoinIntMap(const std::unordered_map<std::string, int>& values)
+        {
+            std::vector<std::pair<std::string, int>> sorted(values.begin(), values.end());
+            std::sort(sorted.begin(), sorted.end(),
+                [](const auto& a, const auto& b) { return a.first < b.first; });
+
+            std::ostringstream stream;
+            for (size_t i = 0; i < sorted.size(); ++i)
+            {
+                if (i > 0)
+                    stream << "|";
+                stream << sorted[i].first << ":" << sorted[i].second;
+            }
+            return stream.str();
+        }
+
+        static void LoadIntMap(std::unordered_map<std::string, int>& values, const std::string& line)
+        {
+            values.clear();
+
+            std::stringstream stream(line);
+            std::string item;
+            while (std::getline(stream, item, '|'))
+            {
+                const size_t split = item.find(':');
+                if (split == std::string::npos)
+                    continue;
+
+                const std::string key = item.substr(0, split);
+                const std::string value = item.substr(split + 1);
+                if (!key.empty())
+                    values[key] = ParseInt(value, 0);
+            }
         }
 
         static std::optional<int> ParseTrailingSlot(const std::string& value, const std::string& prefix)
@@ -376,11 +413,6 @@ namespace Wheatear::GameProgress {
         static std::vector<MaterialCost> MagicSwordLv2Cost()
         {
             return ProgressionContent::Get().MagicSwordLv2.Costs;
-        }
-
-        static std::vector<MaterialCost> TravelerArmorLv1Cost()
-        {
-            return ProgressionContent::Get().TravelerArmorLv1.Costs;
         }
 
         static void ApplyAttributeBonus(State& state, const ProgressionContent::AttributeBonus& bonus)
@@ -748,6 +780,7 @@ namespace Wheatear::GameProgress {
         output << "unlockedSkills=" << JoinSet(state.UnlockedSkills) << "\n";
         output << "ownedEquipment=" << JoinSet(state.OwnedEquipment) << "\n";
         output << "equippedItems=" << JoinMap(state.EquippedItemsBySlot) << "\n";
+        output << "equipmentLevels=" << JoinIntMap(state.EquipmentLevels) << "\n";
         output << "storyFlags=" << JoinSet(state.StoryFlags) << "\n";
         output << "activeSupport=" << state.ActiveSupportCharacterId << "\n";
 
@@ -809,6 +842,7 @@ namespace Wheatear::GameProgress {
             else if (key == "unlockedSkills") LoadSet(loaded.UnlockedSkills, value);
             else if (key == "ownedEquipment") LoadSet(loaded.OwnedEquipment, value);
             else if (key == "equippedItems") LoadMap(loaded.EquippedItemsBySlot, value);
+            else if (key == "equipmentLevels") LoadIntMap(loaded.EquipmentLevels, value);
             else if (key == "storyFlags") LoadSet(loaded.StoryFlags, value);
             else if (key == "activeSupport") loaded.ActiveSupportCharacterId = value;
             else if (key.rfind("material.", 0) == 0)
@@ -1095,32 +1129,121 @@ namespace Wheatear::GameProgress {
         return true;
     }
 
+    // Per-equipment upgrade level: prefers the EquipmentLevels table and
+    // falls back to the legacy int fields so old saves keep their levels.
+    int GetEquipmentLevel(const std::string& equipmentId)
+    {
+        const State& state = GetState();
+        int level = 0;
+        if (auto it = state.EquipmentLevels.find(equipmentId); it != state.EquipmentLevels.end())
+            level = it->second;
+        if (equipmentId == TravelerArmorUpgradeEquipmentId())
+            level = std::max(level, state.TravelerArmorLevel);
+        return level;
+    }
+
+    static std::string UpgradeDisplayName(const ProgressionContent::UpgradeDefinition& upgrade)
+    {
+        return upgrade.DisplayName.empty() ? upgrade.EquipmentId : upgrade.DisplayName;
+    }
+
+    static const ProgressionContent::UpgradeDefinition* FindSelectedEquipmentUpgrade()
+    {
+        const State& state = GetState();
+        if (state.SelectedEquipmentId.empty())
+            return nullptr;
+        for (const auto& upgrade : ProgressionContent::Get().Upgrades)
+        {
+            if (!upgrade.EquipmentId.empty() && upgrade.EquipmentId == state.SelectedEquipmentId)
+                return &upgrade;
+        }
+        return nullptr;
+    }
+
+    static bool SpendGold(int amount)
+    {
+        State& state = GetState();
+        if (amount <= 0)
+            return true;
+        if (state.Gold < amount)
+            return false;
+        state.Gold -= amount;
+        return true;
+    }
+
+    bool CanUpgradeEquipment(const std::string& upgradeId)
+    {
+        const ProgressionContent::UpgradeDefinition* upgrade = ProgressionContent::FindUpgrade(upgradeId);
+        if (!upgrade || upgrade->EquipmentId.empty())
+            return false;
+
+        const State& state = GetState();
+        if (state.OwnedEquipment.find(upgrade->EquipmentId) == state.OwnedEquipment.end())
+            return false;
+        if (GetEquipmentLevel(upgrade->EquipmentId) >= upgrade->TargetLevel)
+            return false;
+        return HasMaterials(upgrade->Costs) && state.Gold >= upgrade->GoldCost;
+    }
+
+    bool TryUpgradeEquipment(const std::string& upgradeId)
+    {
+        State& state = GetState();
+        const ProgressionContent::UpgradeDefinition* upgrade = ProgressionContent::FindUpgrade(upgradeId);
+        if (!upgrade)
+        {
+            state.LastResultMessage = "未找到强化配方：" + upgradeId;
+            return false;
+        }
+        if (upgrade->EquipmentId.empty())
+        {
+            state.LastResultMessage = "该强化需要从技能树或专属入口进行。";
+            return false;
+        }
+
+        const std::string displayName = UpgradeDisplayName(*upgrade);
+        if (GetEquipmentLevel(upgrade->EquipmentId) >= upgrade->TargetLevel)
+        {
+            state.LastResultMessage = displayName + " 已经强化到 +"
+                + std::to_string(upgrade->TargetLevel) + "。";
+            return false;
+        }
+        if (!SpendMaterials(upgrade->Costs))
+        {
+            state.LastResultMessage = displayName + " 材料不足：" + BuildCostText(upgrade->Costs);
+            return false;
+        }
+        if (!SpendGold(upgrade->GoldCost))
+        {
+            state.LastResultMessage = displayName + " 金币不足（需要 "
+                + std::to_string(upgrade->GoldCost) + "）。";
+            return false;
+        }
+
+        state.EquipmentLevels[upgrade->EquipmentId] = upgrade->TargetLevel;
+        // Keep the legacy field in sync so existing UI/skill-tree paths work.
+        if (upgrade->EquipmentId == TravelerArmorUpgradeEquipmentId())
+            state.TravelerArmorLevel = upgrade->TargetLevel;
+        ApplyAttributeBonus(state, upgrade->Bonus);
+        for (const std::string& skillId : upgrade->UnlockSkills)
+            state.UnlockedSkills.insert(skillId);
+
+        if (!upgrade->ResultMessage.empty())
+            state.LastResultMessage = upgrade->ResultMessage;
+        else
+            state.LastResultMessage = displayName + " 强化到 +" + std::to_string(upgrade->TargetLevel) + "。";
+        if (!upgrade->NotificationTitle.empty())
+            PushNotification(state, upgrade->NotificationTitle);
+        return true;
+    }
+
     bool CanUpgradeTravelerArmorToLv1()
     {
-        return GetState().TravelerArmorLevel < 1 && HasMaterials(TravelerArmorLv1Cost());
+        return CanUpgradeEquipment("travelerArmorLv1");
     }
 
     bool TryUpgradeTravelerArmorToLv1()
     {
-        State& state = GetState();
-        if (state.TravelerArmorLevel >= 1)
-        {
-            state.LastResultMessage = "旅人护衣已经强化到 +1。";
-            return false;
-        }
-
-        const std::vector<MaterialCost> costs = TravelerArmorLv1Cost();
-        if (!SpendMaterials(costs))
-        {
-            state.LastResultMessage = "旅人护衣 +1 材料不足：" + BuildCostText(costs);
-            return false;
-        }
-
-        state.TravelerArmorLevel = 1;
-        ApplyAttributeBonus(state, ProgressionContent::Get().TravelerArmorLv1.Bonus);
-        state.LastResultMessage = "旅人护衣 +1：生命和防御提高，低空连击失误更不容易暴毙。";
-        PushNotification(state, "旅人护衣 +1 完成");
-        return true;
+        return TryUpgradeEquipment("travelerArmorLv1");
     }
 
     CommandResult ExecuteCommand(const std::string& command)
@@ -1133,6 +1256,8 @@ namespace Wheatear::GameProgress {
         result.Handled = true;
         if (action == "upgrade_traveler_armor")
         {
+            // Legacy alias for the table-driven recipe, keeping the original
+            // "select the armor first" gate.
             if (GetState().SelectedEquipmentId != TravelerArmorUpgradeEquipmentId())
             {
                 GetState().LastResultMessage = "当前选中装备暂未开放强化。请选择旅人护衣查看竖切强化流程。";
@@ -1141,7 +1266,27 @@ namespace Wheatear::GameProgress {
             else
             {
                 result.Changed = TryUpgradeTravelerArmorToLv1();
-                result.Success = result.Changed || GetState().TravelerArmorLevel >= 1;
+                result.Success = result.Changed
+                    || GetEquipmentLevel(TravelerArmorUpgradeEquipmentId()) >= 1;
+            }
+        }
+        else if (action.rfind("upgrade_item:", 0) == 0)
+        {
+            State& state = GetState();
+            const std::string upgradeId = action.substr(13);
+            const ProgressionContent::UpgradeDefinition* upgrade =
+                ProgressionContent::FindUpgrade(upgradeId);
+            if (!upgrade)
+            {
+                state.LastResultMessage = "未找到强化配方：" + upgradeId;
+                result.Success = true;
+            }
+            else
+            {
+                result.Changed = TryUpgradeEquipment(upgradeId);
+                result.Success = result.Changed
+                    || (!upgrade->EquipmentId.empty()
+                        && GetEquipmentLevel(upgrade->EquipmentId) >= upgrade->TargetLevel);
             }
         }
         else if (action == "learn_selected_skill")
@@ -1319,19 +1464,34 @@ namespace Wheatear::GameProgress {
             state.LastResultMessage = "当前章节切换到第 " + std::to_string(chapter) + " 章。";
             result.Success = true;
         }
-        else if (action == "select_support_mentor")
+        else if (action.rfind("select_support:", 0) == 0)
         {
-            GetState().ActiveSupportCharacterId = "mentor";
-            GetState().LastResultMessage = "已配置支援：魔剑士导师。当前竖切中提供空连指导和短冷却支援。";
-            result.Changed = true;
-            result.Success = true;
-        }
-        else if (action == "select_support_white_mage"
-            || action == "select_support_guard"
-            || action == "select_support_black_mage")
-        {
-            GetState().LastResultMessage = "该队友将在后续章节加入；当前竖切先保留支援槽入口。";
-            result.Success = true;
+            State& state = GetState();
+            std::string characterId = action.substr(15);
+            // Legacy command names predate the table-driven lookup; keep them
+            // as aliases so existing scene buttons keep working.
+            if (characterId == "guard")
+                characterId = "shield_guard";
+
+            const RelationshipRecord* record =
+                ProgressionContent::FindRelationship(characterId);
+            if (!record)
+            {
+                state.LastResultMessage = "未找到支援角色：" + characterId;
+                result.Success = true;
+            }
+            else if (!record->Unlocked)
+            {
+                state.LastResultMessage = "该队友将在后续章节加入；当前竖切先保留支援槽入口。";
+                result.Success = true;
+            }
+            else
+            {
+                state.ActiveSupportCharacterId = record->CharacterId;
+                state.LastResultMessage = "已配置支援：" + record->DisplayName + "。";
+                result.Changed = true;
+                result.Success = true;
+            }
         }
         else if (ProgressionSettingsCommandService::IsSettingsCommand(action))
         {
@@ -1660,8 +1820,9 @@ namespace Wheatear::GameProgress {
         stream << item.Name << "\n";
         stream << "槽位  " << item.Slot << "\n";
         stream << "状态  " << (equipped ? "已装备" : (owned ? "背包中" : item.Status));
-        if (state.SelectedEquipmentId == TravelerArmorUpgradeEquipmentId())
-            stream << " +" << state.TravelerArmorLevel;
+        const int upgradeLevel = GetEquipmentLevel(state.SelectedEquipmentId);
+        if (upgradeLevel > 0)
+            stream << " +" << upgradeLevel;
         stream << "\n";
         stream << "属性  " << item.Stats << "\n";
         stream << "来源  " << item.Source;
@@ -1695,21 +1856,30 @@ namespace Wheatear::GameProgress {
     {
         std::ostringstream stream;
         stream << "材料  " << BuildMaterialInventoryText() << "\n";
-        if (GetState().SelectedEquipmentId == TravelerArmorUpgradeEquipmentId())
-            stream << "+1 需求  " << BuildCostText(TravelerArmorLv1Cost());
+        if (const auto* recipe = FindSelectedEquipmentUpgrade())
+        {
+            stream << "+" << recipe->TargetLevel << " 需求  " << BuildCostText(recipe->Costs);
+            if (recipe->GoldCost > 0)
+                stream << " / 金币 " << recipe->GoldCost;
+        }
         else
+        {
             stream << "当前装备不可强化。";
+        }
         return stream.str();
     }
 
-    std::string GetTravelerArmorUpgradeButtonText()
+    std::string GetEquipmentUpgradeButtonText()
     {
         const State& state = GetState();
-        if (state.SelectedEquipmentId != TravelerArmorUpgradeEquipmentId())
-            return "选择旅人护衣强化";
-        if (state.TravelerArmorLevel >= 1)
-            return "旅人护衣 +1 已完成";
-        return CanUpgradeTravelerArmorToLv1() ? "强化旅人护衣 +1" : "材料不足";
+        const auto* recipe = FindSelectedEquipmentUpgrade();
+        if (!recipe)
+            return "选择可强化装备查看配方";
+        if (GetEquipmentLevel(state.SelectedEquipmentId) >= recipe->TargetLevel)
+            return UpgradeDisplayName(*recipe) + " +" + std::to_string(recipe->TargetLevel) + " 已完成";
+        if (CanUpgradeEquipment(recipe->Id))
+            return "强化 " + UpgradeDisplayName(*recipe) + " +" + std::to_string(recipe->TargetLevel);
+        return "材料不足";
     }
 
     std::string GetEquipmentToggleButtonText()

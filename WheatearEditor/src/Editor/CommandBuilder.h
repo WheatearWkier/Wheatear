@@ -70,11 +70,11 @@ namespace Wheatear::EditorCommandBuilder {
         SideSupport, SideDash, SideBreakLimit,
 
         // progression: long tail (GameProgress::ExecuteCommand)
-        ProgUpgradeTravelerArmor, ProgLearnSelectedSkill, ProgSelectSkillNode,
+        ProgUpgradeTravelerArmor, ProgUpgradeItem, ProgLearnSelectedSkill, ProgSelectSkillNode,
         ProgEquipmentPageSlider, ProgEquipmentPage1, ProgEquipmentPage2,
         ProgSelectEquipmentSlot, ProgToggleSelectedEquipment, ProgSelectEquipment,
         ProgReset,
-        ProgSelectSupportMentor, ProgSelectSupportWhiteMage, ProgSelectSupportGuard, ProgSelectSupportBlackMage,
+        ProgSelectSupport, // progression:select_support:<characterId> (Primary = id)
         ProgTextSpeedUp, ProgTextSpeedDown,
         ProgMasterVolumeUp, ProgMasterVolumeDown,
         ProgBgmVolumeUp, ProgBgmVolumeDown,

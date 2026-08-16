@@ -11,6 +11,7 @@
 
 #include <Wheatear/Core/EngineInfo.h>
 #include <Wheatear/Core/EntryPoint.h>
+#include <Wheatear/Config/PlayerConfig.h>
 
 #include <filesystem>
 #include <cstdlib>
@@ -135,7 +136,8 @@ namespace Wheatear
             return false;
         }
 
-        static std::filesystem::path ReadStartupScene(ApplicationCommandLineArgs args)
+        static std::filesystem::path ReadStartupScene(ApplicationCommandLineArgs args,
+            const std::filesystem::path& projectRoot)
         {
             for (int i = 1; i < args.Count; ++i)
             {
@@ -148,10 +150,15 @@ namespace Wheatear
                 }
             }
 
+            // No explicit argument: honour the project-level startup scene
+            // (assets/game/player.config) before the engine default.
+            if (!projectRoot.empty())
+                return LoadRuntimePlayerConfig(projectRoot / "assets" / "game" / "player.config").StartupScene;
             return EngineInfo::DefaultStartupScene;
         }
 
-        static std::filesystem::path ReadPackageStartupScene(ApplicationCommandLineArgs args)
+        static std::filesystem::path ReadPackageStartupScene(ApplicationCommandLineArgs args,
+            const std::filesystem::path& projectRoot)
         {
             for (int i = 1; i < args.Count; ++i)
             {
@@ -164,6 +171,10 @@ namespace Wheatear
                 }
             }
 
+            // No explicit argument: honour the project-level startup scene
+            // (assets/game/player.config) before the engine default.
+            if (!projectRoot.empty())
+                return LoadRuntimePlayerConfig(projectRoot / "assets" / "game" / "player.config").StartupScene;
             return EngineInfo::DefaultStartupScene;
         }
 
@@ -193,7 +204,7 @@ namespace Wheatear
             AssetDependencyScanOptions options;
             options.ProjectRoot = AssetPath::GetProjectRoot();
             options.BuiltinRoot = AssetPath::GetEngineRoot();
-            options.StartupAsset = ReadStartupScene(args);
+            options.StartupAsset = ReadStartupScene(args, projectRoot);
             options.IncludeBuiltinAssets = true;
             options.IncludeUnusedAssets = ReadIncludeUnusedAssets(args);
 
@@ -285,7 +296,7 @@ namespace Wheatear
             AssetPath::SetEngineRoot(AssetPath::DiscoverProjectRoot());
 
             PlayerPackageOptions options;
-            options.StartupScene = ReadPackageStartupScene(args);
+            options.StartupScene = ReadPackageStartupScene(args, AssetPath::GetProjectRoot());
             options.Configuration = ReadPackageConfiguration(args);
             options.IncludeDebugSymbols = false;
 

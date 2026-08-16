@@ -1,11 +1,12 @@
 schema: wheatear.arcade_combat.tuning.v1
-version: 0.1.0
+version: 0.2.0
 
 # 街机弹幕战斗全局调参（数据驱动）。
 # - 由场景实体的 ArcadeCombatLevelComponent.TuningPath 引用；
 #   运行时启动时覆盖组件里的流程时长、Boss 行为与玩家手感
 #   （组件字段作为场景级回退）。
 # - 编辑器：「Gameplay ▸ Arcade Combat Tuning Editor」编辑此文件。
+# - 新字段默认值 = 引擎内置常量；缺字段时行为与旧版本一致。
 
 # 关卡流程（秒）
 level:
@@ -22,7 +23,54 @@ boss:
   jumpInterval: 2.7
   jumpDuration: 0.65
 
+  # 跳跃目标点 = 利萨茹曲线（sin/cos 频率与振幅）在场地内的收缩范围
+  jumpXFrequency: 1.73
+  jumpYFrequency: 1.11
+  jumpXAmplitude: 5.4
+  jumpYAmplitude: 0.65
+  jumpYBase: 2.0
+  # 跳跃抛物线弧高
+  jumpArcHeight: 0.85
+  # 场地边缘收缩（下/上/左/右）
+  jumpMarginX: 1.2
+  jumpMarginTop: 1.2
+  jumpMarginBottom: 0.9
+
+  # Boss 子弹弹道
+  bulletEntityName: Arcade_BossBullet
+  bulletSpeed: 4.2
+  bulletLifetime: 2.4
+  bulletRadius: 0.19
+  bulletColor: [0.95, 0.22, 0.34, 1.0]
+  bulletSpawnOffset: [0.65, -0.1]
+
 # 玩家手感
 player:
   moveSpeed: 4.8
   autoAim: true
+
+  # 武器弹道（冷却/伤害来自 WAO recipe：arcade.gun / cannon / katana）
+  weapons:
+    gun:
+      entityName: Arcade_PlayerBullet
+      speed: 9.0
+      lifetime: 1.4
+      radius: 0.13
+      color: [1.0, 0.9, 0.35, 1.0]
+      muzzleOffset: [0.55, 0.05]
+    cannon:
+      entityName: Arcade_PlayerCannon
+      speed: 5.3
+      lifetime: 2.0
+      radius: 0.28
+      color: [1.0, 0.42, 0.16, 1.0]
+      muzzleOffset: [0.55, 0.05]
+      heavy: true
+    katana:
+      entityName: Arcade_KatanaSlash
+      speed: 1.0
+      lifetime: 0.12
+      radius: 0.75
+      color: [0.85, 0.96, 1.0, 0.82]
+      slashOffset: 0.8
+      melee: true

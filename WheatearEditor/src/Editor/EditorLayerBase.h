@@ -160,6 +160,17 @@ namespace Wheatear {
             const glm::vec2& screenMouse);
         void ActivateHierarchyEntity(Entity entity);
         void OpenCanvasEditorForEntity(Entity entity);
+
+        // UI canvas editor multi-select alignment / distribution. Operates on
+        // m_UIMultiSelect with the hierarchy selection as anchor; each action
+        // commits one undo record per affected widget.
+        enum class UISelectionAction
+        {
+            AlignLeft, AlignRight, AlignTop, AlignBottom,
+            AlignHCenter, AlignVCenter,
+            DistributeHorizontal, DistributeVertical
+        };
+        void UI_AlignSelection(UISelectionAction action);
         void FrameEditorCameraOnEntity(Entity entity);
         void FrameEditorCameraOnScene();
         void LoadPlayScene(const std::filesystem::path& scenePath);
@@ -210,6 +221,9 @@ namespace Wheatear {
         bool m_FocusCanvasEditor = false;
         bool m_UIEditorMouseOverCanvas = false;
         glm::vec2 m_UIEditorCanvasBounds[2] = {};
+        // Multi-selection for the UI canvas editor: Ctrl+click toggles entries;
+        // the scene-hierarchy selection stays the alignment anchor.
+        std::vector<UUID> m_UIMultiSelect;
         bool m_ShowStats = true;
         bool m_ContentDrawerOpen = false;
         bool m_RequestDefaultDockspaceLayout = false;

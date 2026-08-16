@@ -92,6 +92,7 @@ namespace Wheatear {
         void DrawSourceSync() const;
         void LoadAliasManifest();
         void SaveAliasManifest();
+        void SaveStartupScene();
         void BuildHygieneCleanupPlan();
         bool ApplySelectedHygieneActions();
         void DrawAssetList(const char* tableId,

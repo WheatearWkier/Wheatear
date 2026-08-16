@@ -20,9 +20,16 @@ namespace Wheatear::ProgressionContent {
 
     struct UpgradeDefinition
     {
+        std::string Id;              // key inside the upgrades: table
+        std::string EquipmentId;     // empty = special upgrade (e.g. magic sword, skill-tree driven)
+        std::string DisplayName;
+        int TargetLevel = 1;
+        int GoldCost = 0;
         std::vector<GameProgress::MaterialCost> Costs;
         AttributeBonus Bonus;
         std::vector<std::string> UnlockSkills;
+        std::string ResultMessage;
+        std::string NotificationTitle;
     };
 
     struct DungeonDefinition
@@ -92,8 +99,9 @@ namespace Wheatear::ProgressionContent {
         std::vector<std::string> InitialUnlockedDungeons;
         std::vector<std::string> InitialStoryFlags;
         std::vector<GameProgress::MaterialCost> Materials;
-        UpgradeDefinition MagicSwordLv2;
-        UpgradeDefinition TravelerArmorLv1;
+        UpgradeDefinition MagicSwordLv2;    // legacy named fields; kept in sync
+        UpgradeDefinition TravelerArmorLv1; // with the generic Upgrades table
+        std::vector<UpgradeDefinition> Upgrades;
         std::vector<DungeonDefinition> Dungeons;
         std::vector<std::string> DungeonRewardSummary;
         std::vector<GameProgress::RelationshipRecord> Relationships;
@@ -109,5 +117,8 @@ namespace Wheatear::ProgressionContent {
     WHEATEAR_API const DungeonDefinition* FindDungeon(const std::string& dungeonId);
     WHEATEAR_API const SkillNodeDefinition* FindSkillNode(const std::string& nodeId);
     WHEATEAR_API const EquipmentDefinition* FindEquipment(const std::string& equipmentId);
+    WHEATEAR_API const GameProgress::RelationshipRecord* FindRelationship(const std::string& characterId);
+    WHEATEAR_API const UpgradeDefinition* FindUpgrade(const std::string& upgradeId);
+    WHEATEAR_API const UpgradeDefinition* FindUpgradeForEquipment(const std::string& equipmentId);
 
 } // namespace Wheatear::ProgressionContent

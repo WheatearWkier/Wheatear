@@ -62,7 +62,12 @@ namespace Wheatear {
             if (!level.PlayOnStart)
                 continue;
 
+            WT_CORE_INFO("SideCombat: level '{}' runtime start (waves={})",
+                level.LevelId, level.WaveSpawns.size());
             ApplyActiveDungeonProfile(level);
+            // Data-driven wave table replaces scene-placed enemies before any
+            // runtime state is initialized; no-op when the table is empty.
+            SideCombatLifecycleService::SpawnWavesFromTable(scene, level);
             SideCombatLifecycleService::ResetLevelRuntime(scene, level);
             SideCombatLifecycleService::ResetCombatants(scene, level);
         }

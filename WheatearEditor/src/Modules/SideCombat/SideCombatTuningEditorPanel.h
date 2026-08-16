@@ -41,6 +41,7 @@ namespace Wheatear {
         void DrawSkillsTab();
         void DrawItemSlotsTab();
         void DrawSkillSlotsTab();
+        void DrawEnemyTypesTab();
         void DrawProgressionTab();
         void DrawRawPreviewTab();
 
@@ -55,6 +56,7 @@ namespace Wheatear {
         std::string m_SelectedAttackId;
         std::string m_SelectedSkillId;
         std::string m_SelectedProfileId;
+        std::string m_SelectedEnemyType;
         std::string m_SelectedPlayerAnimId;
         std::string m_SelectedGruntAnimId;
         std::string m_SelectedBossAnimId;

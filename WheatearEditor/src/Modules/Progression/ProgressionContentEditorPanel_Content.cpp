@@ -260,6 +260,10 @@ namespace Wheatear {
                 key = "newUpgrade" + std::to_string(i);
 
             YAML::Node upgrade(YAML::NodeType::Map);
+            upgrade["name"] = "新强化";
+            upgrade["equipmentId"] = "";
+            upgrade["targetLevel"] = 1;
+            upgrade["goldCost"] = 0;
             upgrade["costs"] = YAML::Node(YAML::NodeType::Sequence);
             upgrade["attributeBonus"] = YAML::Node(YAML::NodeType::Map);
             upgrade["unlockSkills"] = YAML::Node(YAML::NodeType::Sequence);
@@ -302,9 +306,15 @@ namespace Wheatear {
             changed = true;
         }
 
+        changed |= DrawTextField(upgrade, "Display Name", "name", 160);
+        changed |= DrawIdField(upgrade, "Equipment", "equipmentId", "equipment");
+        changed |= DrawIntField(upgrade, "Target Level", "targetLevel", 1, 1, 99);
+        changed |= DrawIntField(upgrade, "Gold Cost", "goldCost", 0, 0, 999999);
         changed |= DrawCostsField(upgrade);
         changed |= DrawAttributeBonusField(upgrade);
         changed |= DrawStringListField(upgrade, "Unlock Skills", "unlockSkills", BuildContentIds("skill"));
+        changed |= DrawMultilineField(upgrade, "Result Message", "resultMessage", 52.0f);
+        changed |= DrawTextField(upgrade, "Notification Title", "notification", 200);
 
         ImGui::Separator();
         if (ImGui::Button("Duplicate Upgrade"))

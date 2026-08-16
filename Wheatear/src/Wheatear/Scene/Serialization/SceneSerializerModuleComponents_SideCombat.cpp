@@ -49,6 +49,46 @@ namespace Wheatear {
         }
     }
 
+    static void SerializeSideWaveSpawns(YAML::Emitter& o, const std::vector<SideCombatLevelComponent::WaveSpawnDef>& spawns)
+    {
+        o << YAML::Key << "WaveSpawns" << YAML::Value << YAML::BeginSeq;
+        for (const auto& spawn : spawns)
+        {
+            o << YAML::BeginMap;
+            o << YAML::Key << "Enabled" << YAML::Value << spawn.Enabled;
+            o << YAML::Key << "WaveIndex" << YAML::Value << spawn.WaveIndex;
+            o << YAML::Key << "EnemyKind" << YAML::Value << spawn.EnemyKind;
+            o << YAML::Key << "Count" << YAML::Value << spawn.Count;
+            o << YAML::Key << "SpawnMinX" << YAML::Value << spawn.SpawnMinX;
+            o << YAML::Key << "SpawnMaxX" << YAML::Value << spawn.SpawnMaxX;
+            o << YAML::Key << "GroundYOffset" << YAML::Value << spawn.GroundYOffset;
+            o << YAML::Key << "HpVariance" << YAML::Value << spawn.HpVariance;
+            o << YAML::EndMap;
+        }
+        o << YAML::EndSeq;
+    }
+
+    static void DeserializeSideWaveSpawns(const YAML::Node& node, std::vector<SideCombatLevelComponent::WaveSpawnDef>& spawns)
+    {
+        if (!node)
+            return;
+
+        spawns.clear();
+        for (const auto& spawnNode : node)
+        {
+            SideCombatLevelComponent::WaveSpawnDef spawn;
+            spawn.Enabled = spawnNode["Enabled"].as<bool>(spawn.Enabled);
+            spawn.WaveIndex = spawnNode["WaveIndex"].as<int>(spawn.WaveIndex);
+            spawn.EnemyKind = spawnNode["EnemyKind"].as<int>(spawn.EnemyKind);
+            spawn.Count = spawnNode["Count"].as<int>(spawn.Count);
+            spawn.SpawnMinX = spawnNode["SpawnMinX"].as<float>(spawn.SpawnMinX);
+            spawn.SpawnMaxX = spawnNode["SpawnMaxX"].as<float>(spawn.SpawnMaxX);
+            spawn.GroundYOffset = spawnNode["GroundYOffset"].as<float>(spawn.GroundYOffset);
+            spawn.HpVariance = spawnNode["HpVariance"].as<float>(spawn.HpVariance);
+            spawns.push_back(spawn);
+        }
+    }
+
     static void SerializeSideHudRect(YAML::Emitter& o, const char* key, const SideCombatLevelComponent::HudRect& rect)
     {
         o << YAML::Key << key << YAML::Value << YAML::BeginMap;
@@ -296,6 +336,7 @@ namespace Wheatear {
             o << YAML::Key << "ComboDropDelay" << YAML::Value << c.ComboDropDelay;
             o << YAML::Key << "FirstClearRewardText" << YAML::Value << YAML::DoubleQuoted << c.FirstClearRewardText;
             SerializeSideDeathRewards(o, c.DeathRewards);
+            SerializeSideWaveSpawns(o, c.WaveSpawns);
             o << YAML::Key << "WaveModeEnabled" << YAML::Value << c.WaveModeEnabled;
             o << YAML::Key << "WaveCount" << YAML::Value << c.WaveCount;
             o << YAML::Key << "Wave1RightWall" << YAML::Value << c.Wave1RightWall;
@@ -412,6 +453,7 @@ namespace Wheatear {
             c.ComboDropDelay = n["ComboDropDelay"].as<float>(c.ComboDropDelay);
             c.FirstClearRewardText = n["FirstClearRewardText"].as<std::string>(c.FirstClearRewardText);
             DeserializeSideDeathRewards(n["DeathRewards"], c.DeathRewards);
+            DeserializeSideWaveSpawns(n["WaveSpawns"], c.WaveSpawns);
             c.WaveModeEnabled = n["WaveModeEnabled"].as<bool>(c.WaveModeEnabled);
             c.WaveCount = n["WaveCount"].as<int>(c.WaveCount);
             c.Wave1RightWall = n["Wave1RightWall"].as<float>(c.Wave1RightWall);

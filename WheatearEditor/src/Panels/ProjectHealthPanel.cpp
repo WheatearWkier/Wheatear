@@ -9,6 +9,7 @@
 #include "Editor/GameplayEditorShell.h"
 #include "Wheatear/Assets/AssetAliasRegistry.h"
 #include "Wheatear/Assets/AssetPath.h"
+#include "Wheatear/Config/PlayerConfig.h"
 #include "Wheatear/Core/EngineInfo.h"
 #include "Wheatear/Scene/EntityReference.h"
 
@@ -35,10 +36,33 @@ namespace Wheatear {
     {
         m_Open = true;
         if (m_StartupScene.empty())
-            m_StartupScene = EngineInfo::DefaultStartupScene;
+        {
+            // Project-level startup scene lives in assets/game/player.config;
+            // fall back to the engine default when the project has none.
+            const std::filesystem::path projectConfig =
+                AssetPath::GetProjectRoot() / "assets" / "game" / "player.config";
+            const RuntimePlayerConfig config = LoadRuntimePlayerConfig(projectConfig);
+            m_StartupScene = config.StartupScene.generic_string();
+        }
         if (!m_AliasManifestDocument.IsLoaded())
             LoadAliasManifest();
         Refresh();
+    }
+
+    void ProjectHealthPanel::SaveStartupScene()
+    {
+        const std::filesystem::path configPath =
+            AssetPath::GetProjectRoot() / "assets" / "game" / "player.config";
+        const RuntimePlayerConfig config{ m_StartupScene };
+        if (SaveRuntimePlayerConfig(configPath, config, EngineInfo::EditorName))
+        {
+            m_Status = "Startup scene saved to " + configPath.generic_string();
+            Refresh();
+        }
+        else
+        {
+            m_Status = "Failed to save startup scene config: " + configPath.generic_string();
+        }
     }
 
     void ProjectHealthPanel::LoadAliasManifest()
@@ -245,6 +269,9 @@ namespace Wheatear {
 
         EditorWidgets::SectionHeader(EditorLocale::Text("Scan Scope", "扫描范围"), "The startup scene defines the package dependency closure.");
         EditorWidgets::InputString(EditorLocale::Text("Startup Scene", "启动场景"), m_StartupScene, 384);
+        ImGui::SameLine();
+        if (ImGui::Button(EditorLocale::Text("Save Startup Scene", "保存启动场景")))
+            SaveStartupScene();
         ImGui::SameLine();
         ImGui::Checkbox(EditorLocale::Text("Scan Unused Assets", "扫描未使用资源"), &m_IncludeUnusedAssets);
 

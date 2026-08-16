@@ -41,6 +41,27 @@ namespace Wheatear {
                 DataFileEditorRequests::RequestOpen(sourcePath);
         }
 
+        // YAML [x, y, z] sequence -> DragFloat3 (missing/invalid -> defaults).
+        static bool DrawVec3Field(YAML::Node node, const char* key, const char* label)
+        {
+            float values[3] = { 1.0f, 1.0f, 1.0f };
+            const YAML::Node existing = node[key];
+            if (existing && existing.IsSequence() && existing.size() >= 3)
+            {
+                values[0] = existing[0].as<float>(values[0]);
+                values[1] = existing[1].as<float>(values[1]);
+                values[2] = existing[2].as<float>(values[2]);
+            }
+            if (!ImGui::DragFloat3(label, values, 0.01f))
+                return false;
+
+            node[key] = YAML::Node(YAML::NodeType::Sequence);
+            node[key].push_back(values[0]);
+            node[key].push_back(values[1]);
+            node[key].push_back(values[2]);
+            return true;
+        }
+
     } // namespace
 
     namespace SideCombatEditorRequests {
@@ -155,6 +176,12 @@ namespace Wheatear {
             if (ImGui::BeginTabItem(EditorLocale::Text("Skill Slots", "技能槽")))
             {
                 DrawSkillSlotsTab();
+                ImGui::EndTabItem();
+            }
+
+            if (ImGui::BeginTabItem(EditorLocale::Text("Enemy Types", "敌人种类")))
+            {
+                DrawEnemyTypesTab();
                 ImGui::EndTabItem();
             }
 
@@ -1031,6 +1058,77 @@ namespace Wheatear {
             slots.remove(deleteIndex);
             m_Dirty = true;
         }
+    }
+
+    void SideCombatTuningEditorPanel::DrawEnemyTypesTab()
+    {
+        EditorWidgets::SectionHeader(EditorLocale::Text("Enemy Types", "敌人种类"),
+            "Per-kind templates used by the data-driven wave table (level component ▸ Wave Spawns).");
+
+        YAML::Node root = *m_Root;
+        YAML::Node types = root["enemyTypes"];
+        if (!types || !types.IsMap())
+        {
+            root["enemyTypes"] = YAML::Node(YAML::NodeType::Map);
+            types = root["enemyTypes"];
+        }
+
+        std::vector<std::string> keys;
+        for (const auto& entry : types)
+        {
+            if (entry.first.IsScalar())
+                keys.push_back(entry.first.as<std::string>());
+        }
+        if (keys.empty())
+        {
+            keys = { "grunt", "thrower", "pouncer" };
+            for (const std::string& key : keys)
+                types[key] = YAML::Node(YAML::NodeType::Map);
+        }
+
+        if (m_SelectedEnemyType.empty() ||
+            std::find(keys.begin(), keys.end(), m_SelectedEnemyType) == keys.end())
+            m_SelectedEnemyType = keys.front();
+
+        const float listWidth = std::max(220.0f, ImGui::GetContentRegionAvail().x * 0.28f);
+        ImGui::BeginChild("##EnemyTypeList", ImVec2(listWidth, 0.0f), true);
+        for (const std::string& key : keys)
+        {
+            if (ImGui::Selectable(key.c_str(), key == m_SelectedEnemyType))
+                m_SelectedEnemyType = key;
+        }
+        ImGui::EndChild();
+
+        ImGui::SameLine();
+        ImGui::BeginChild("##EnemyTypeDetails", ImVec2(0.0f, 0.0f), true);
+        YAML::Node type = types[m_SelectedEnemyType];
+        if (!type.IsMap())
+        {
+            type = YAML::Node(YAML::NodeType::Map);
+            types[m_SelectedEnemyType] = type;
+        }
+
+        m_Dirty |= DrawFloat(type, "maxHealth", "Max Health", 1.0f, 1.0f, 99999.0f);
+        m_Dirty |= DrawFloat(type, "attack", "Attack", 1.0f, 0.0f, 9999.0f);
+        m_Dirty |= DrawFloat(type, "defense", "Defense", 1.0f, 0.0f, 9999.0f);
+        m_Dirty |= DrawFloat(type, "moveSpeed", "Move Speed", 0.05f, 0.0f, 30.0f);
+        m_Dirty |= DrawVec2(type, "collisionSize", "Collision Size", 0.01f);
+        m_Dirty |= DrawFloat(type, "collisionHeight", "Collision Height", 0.01f, 0.1f, 10.0f);
+        m_Dirty |= DrawFloat(type, "knockbackResistance", "Knockback Resistance", 0.005f, 0.0f, 1.0f);
+        m_Dirty |= DrawFloat(type, "aggroRange", "Aggro Range", 0.1f, 0.0f, 50.0f);
+        m_Dirty |= DrawFloat(type, "attackRange", "Attack Range", 0.05f, 0.0f, 20.0f);
+        m_Dirty |= DrawFloat(type, "preferredRange", "Preferred Range", 0.05f, 0.0f, 20.0f);
+        m_Dirty |= DrawFloat(type, "attackInterval", "Attack Interval (s)", 0.05f, 0.1f, 10.0f);
+        m_Dirty |= DrawFloat(type, "laneTolerance", "Lane Tolerance", 0.01f, 0.0f, 5.0f);
+        m_Dirty |= DrawVec3Field(type, "renderScale", "Render Scale");
+        m_Dirty |= DrawVec3Field(type, "shadowScale", "Shadow Scale");
+
+        ImGui::Separator();
+        ImGui::TextDisabled("%s", EditorLocale::Text(
+            "Values default to the classic claw-beast grunt; new kinds still need a "
+            "runtime behaviour (SideEnemyKind + AI), then only tuning here.",
+            "数值默认值 = 经典爪兽小兵；新种类仍需运行时行为（枚举+AI），之后只需在此调参。"));
+        ImGui::EndChild();
     }
 
     void SideCombatTuningEditorPanel::DrawProgressionTab()

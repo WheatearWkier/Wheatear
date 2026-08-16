@@ -111,8 +111,13 @@ namespace Wheatear {
         ImGui::SameLine();
         ImGui::PushItemWidth(-1);
 
+        // Structural edits (add/remove/reset components) are disabled while
+        // playing: the runtime copy is ephemeral and such edits would be
+        // silently discarded on stop.
+        ImGui::BeginDisabled(m_RuntimeMode);
         if (ImGui::Button(EditorLocale::Text("Add Component", "添加组件")))
             ImGui::OpenPopup("AddComponent");
+        ImGui::EndDisabled();
 
         if (ImGui::BeginPopup("AddComponent"))
         {

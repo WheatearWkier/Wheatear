@@ -81,6 +81,13 @@ namespace Wheatear {
         void NavigateBack();
         void NavigateForward();
 
+        // OS file import: multi-select dialog -> copy into the current
+        // directory (unique names) -> registry rescan.
+        void ImportAssetsIntoCurrentDirectory();
+        void CreateNewSceneFile();
+        void CreateNewDataFile();
+        void CreateNewSpriteSheetFile();
+
         AssetType      GetAssetType(const std::filesystem::path& path) const;
         Ref<Texture2D> GetIconForType(AssetType type) const;
 

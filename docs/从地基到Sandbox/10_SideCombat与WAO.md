@@ -306,3 +306,37 @@ Skill Slots 面板 kind 选 `custom` + Behavior 下拉选它，即可绑键触�
 
 **结论**：弹反现在是"一次 C++ 注册 + 编辑器调参"；
 纯编辑器化需要行为状态机系统，属于下一个架构里程碑。
+
+---
+
+## 10.11 敌人波次数据驱动（2026-08-16）
+
+新关卡不再需要把敌人实体拖进视口。两层数据 + 一个运行时生成器：
+
+### 10.11.1 波次表（场景组件 `SideCombatLevelComponent.WaveSpawns`）
+
+```yaml
+WaveSpawns:
+  - Enabled: true
+    WaveIndex: 0        # 波次（0-based，与 SideEnemyAIComponent.WaveIndex 一致）
+    EnemyKind: 0        # 0=Grunt 1=Thrower 2=Pouncer（Boss 走场景 BossEntityName）
+    Count: 2            # 数量
+    SpawnMinX: -4.2     # 出生 X 范围（均布）
+    SpawnMaxX: -2.4
+    GroundYOffset: 0
+    HpVariance: 0.08    # 每只 HP ±8% 抖动
+```
+
+Inspector 直接增删行（撤销栈）；表非空时运行时移除场景静态小兵（Boss 保留）
+并按表生成敌人 + `{Tag}_Shadow` 影子实体，波次激活 / 动画桥接 / 掉落全走既有管线。
+
+### 10.11.2 敌人种类模板（tuning `enemyTypes`）
+
+每种 `SideEnemyKind` 一行：数值（HP/攻/防/速/碰撞）+ AI 参数（索敌/攻击距离/间隔）
++ 渲染与阴影缩放。Tuning 面板「敌人种类」页签编辑。**新种类仍需一次 C++**（枚举 + AI 分支），
+之后即可纯数据消费——与 10.9/10.10 的边界判断一致。
+
+### 10.11.3 场景迁移示例
+
+`SideCombatBeastPath.wt` 删除 270 行静态敌人实体，改为 2 条波次记录
+（波1×2 + 波2×3，HP 浮动 8%），运行日志验证 `spawned 5 enemy(ies)`。

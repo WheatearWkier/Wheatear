@@ -3,12 +3,14 @@
 
 #include "SideCombatTuningService.h"
 #include "SideCombatVisualService.h"
+#include "Wheatear/Gameplay/Services/GameplayVisualService.h"
 #include "Wheatear/Modules/Progression/GameProgress.h"
 #include "Wheatear/Scene/Components.h"
 #include "Wheatear/Scene/Scene.h"
 #include "Wheatear/UI/UIRuntimeTools.h"
 
 #include <algorithm>
+#include <cstdlib>
 
 namespace Wheatear::SideCombatLifecycleService {
 
@@ -104,6 +106,159 @@ namespace Wheatear::SideCombatLifecycleService {
         }
 
     } // namespace
+
+    namespace {
+
+        // Maps a SideEnemyKind onto the enemyTypes: tuning key. The boss is
+        // not part of the wave table (it lives on the scene via
+        // BossEntityName and follows the classic bear-boss flow).
+        static const char* EnemyKindId(SideEnemyKind kind)
+        {
+            switch (kind)
+            {
+            case SideEnemyKind::Thrower: return "thrower";
+            case SideEnemyKind::Pouncer: return "pouncer";
+            case SideEnemyKind::BearBoss: return "bear_boss";
+            default: return "grunt";
+            }
+        }
+
+        static std::string EnemyIdleTexture(const SideCombatTuningService::SideCombatTuning& tuning)
+        {
+            auto it = tuning.GruntAnimations.Clips.find("idle");
+            if (it != tuning.GruntAnimations.Clips.end() && !it->second.Atlas.SheetPath.empty())
+                return it->second.Atlas.SheetPath;
+            return "assets/vertical_slice/side_combat/sheets/runtime_enemies/en_claw_beast_idle_sheet.png";
+        }
+
+    } // namespace
+
+    void SpawnWavesFromTable(Scene* scene, SideCombatLevelComponent& level)
+    {
+        if (!scene)
+            return;
+        if (level.WaveSpawns.empty())
+        {
+            WT_CORE_INFO("SideCombat: wave table empty for level '{}'; keeping scene-placed enemies.",
+                level.LevelId);
+            return;
+        }
+
+        const auto& tuning = SideCombatTuningService::GetTuning(level);
+        auto& registry = scene->GetRegistry();
+
+        // Remove statically placed enemies (except the boss) so the wave
+        // table is the single source of enemy composition.
+        Entity bossEntity = scene->GetEntityByName(level.BossEntityName);
+        std::vector<entt::entity> staleEnemies;
+        for (auto e : registry.view<SideCombatantComponent, SideEnemyAIComponent>())
+        {
+            if (registry.get<SideCombatantComponent>(e).Team != (int)SideCombatTeam::Enemy)
+                continue;
+            if (bossEntity && e == static_cast<entt::entity>(bossEntity))
+                continue;
+            staleEnemies.push_back(e);
+        }
+        for (entt::entity e : staleEnemies)
+            scene->DestroyEntityImmediate(Entity{ e, scene });
+
+        const std::string idleTexture = EnemyIdleTexture(tuning);
+        int spawnCounter = 0;
+        for (const auto& spawn : level.WaveSpawns)
+        {
+            if (!spawn.Enabled || spawn.Count <= 0)
+                continue;
+            const SideEnemyKind kind = static_cast<SideEnemyKind>(
+                std::clamp(spawn.EnemyKind, 0, static_cast<int>(SideEnemyKind::BearBoss)));
+            if (kind == SideEnemyKind::BearBoss)
+                continue; // boss flow stays scene-driven
+
+            const auto& type = [&]() -> const SideCombatTuningService::EnemyTypeDefinition&
+            {
+                auto it = tuning.EnemyTypes.find(EnemyKindId(kind));
+                if (it != tuning.EnemyTypes.end())
+                    return it->second;
+                static const SideCombatTuningService::EnemyTypeDefinition kDefault;
+                return kDefault;
+            }();
+
+            const float minX = std::min(spawn.SpawnMinX, spawn.SpawnMaxX);
+            const float maxX = std::max(spawn.SpawnMinX, spawn.SpawnMaxX);
+            const float groundY = level.GroundY + spawn.GroundYOffset;
+            const float hpJitter = std::clamp(spawn.HpVariance, 0.0f, 1.0f);
+
+            for (int i = 0; i < spawn.Count; ++i)
+            {
+                const float t = spawn.Count > 1
+                    ? static_cast<float>(i) / static_cast<float>(spawn.Count - 1)
+                    : 0.5f;
+                const float x = minX + (maxX - minX) * t;
+                const std::string tag = "SC_Enemy_W" + std::to_string(spawn.WaveIndex)
+                    + "_K" + std::to_string(spawn.EnemyKind)
+                    + "_" + std::to_string(i);
+
+                Entity enemy = scene->CreateEntity(tag);
+                // CreateEntity already provides ID/Transform/Tag; only the
+                // combat components are added here.
+                auto& transform = enemy.GetComponent<TransformComponent>();
+                transform.Translation = { x, groundY, -0.04f };
+                transform.Scale = type.RenderScale;
+
+                auto& sprite = enemy.AddComponent<SpriteRendererComponent>();
+                sprite.Texture = GameplayVisualService::LoadTextureCached(idleTexture);
+                sprite.UVMax = { 0.25f, 1.0f };
+
+                // Optional HP jitter so same-type spawns vary a little.
+                float maxHealth = type.MaxHealth;
+                if (hpJitter > 0.0f)
+                {
+                    const float jitter = (std::rand() / static_cast<float>(RAND_MAX) * 2.0f - 1.0f) * hpJitter;
+                    maxHealth = std::max(1.0f, maxHealth * (1.0f + jitter));
+                }
+
+                auto& combatant = enemy.AddComponent<SideCombatantComponent>();
+                combatant.Team = (int)SideCombatTeam::Enemy;
+                combatant.MaxHealth = maxHealth;
+                combatant.Health = maxHealth;
+                combatant.Attack = type.Attack;
+                combatant.Defense = type.Defense;
+                combatant.MoveSpeed = type.MoveSpeed;
+                combatant.CollisionSize = type.CollisionSize;
+                combatant.CollisionHeight = type.CollisionHeight;
+                combatant.KnockbackResistance = type.KnockbackResistance;
+
+                auto& ai = enemy.AddComponent<SideEnemyAIComponent>();
+                ai.Kind = kind;
+                ai.WaveIndex = std::clamp(spawn.WaveIndex, 0, GetWaveCount(level) - 1);
+                ai.AggroRange = type.AggroRange;
+                ai.AttackRange = type.AttackRange;
+                ai.PreferredRange = type.PreferredRange;
+                ai.AttackInterval = type.AttackInterval;
+                ai.LaneTolerance = type.LaneTolerance;
+                ai.PatrolMinX = minX;
+                ai.PatrolMaxX = maxX;
+
+                // Companion shadow entity; the visual service syncs it via the
+                // "{tag}_Shadow" convention.
+                Entity shadow = scene->CreateEntity(tag + "_Shadow");
+                auto& shadowTransform = shadow.GetComponent<TransformComponent>();
+                shadowTransform.Translation = { x, groundY, -0.07f };
+                shadowTransform.Scale = type.ShadowScale;
+                auto& shadowSprite = shadow.AddComponent<SpriteRendererComponent>();
+                shadowSprite.Texture = GameplayVisualService::LoadTextureCached(
+                    "assets/vertical_slice/side_combat/ui/blob_shadow_soft.png");
+                shadowSprite.Color = { 0.0f, 0.0f, 0.0f, 0.54f };
+
+                ++spawnCounter;
+            }
+        }
+
+        if (spawnCounter > 0)
+        {
+            WT_CORE_INFO("SideCombat: spawned {} enemy(ies) from the wave table for level '{}'",
+                spawnCounter, level.LevelId);
+        }
+    }
 
     void ResetLevelRuntime(Scene* scene, SideCombatLevelComponent& level)
     {

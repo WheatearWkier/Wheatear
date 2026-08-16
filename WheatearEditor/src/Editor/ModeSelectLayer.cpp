@@ -5,6 +5,7 @@
 #include "Wheatear/Core/Application.h"
 #include "Wheatear/Core/EngineInfo.h"
 #include "Wheatear/Assets/AssetPath.h"
+#include "Wheatear/Config/PlayerConfig.h"
 
 #include "EditorLayer2D.h"
 #include "EditorLayer3D.h"
@@ -44,9 +45,15 @@ namespace Wheatear {
         }
 
         // Minimal scene template for newly created projects: an orthogonal
-        // camera entity, ready for 2D content.
+        // camera + a UI canvas, ready for 2D content, with a permissive save
+        // policy so new games can save/load immediately.
         const char* kNewProjectSceneTemplate =
             "Scene: Start\n"
+            "SavePolicy:\n"
+            "  CanSave: true\n"
+            "  CanLoad: true\n"
+            "  SaveDirectory: assets/saves\n"
+            "  AutoLoadSlot: 0\n"
             "Entities:\n"
             "  - Entity: 1000000001\n"
             "    TagComponent:\n"
@@ -62,7 +69,26 @@ namespace Wheatear {
             "        OrthographicNear: -1\n"
             "        OrthographicFar: 100\n"
             "      Primary: true\n"
-            "      FixedAspectRatio: false\n";
+            "      FixedAspectRatio: false\n"
+            "  - Entity: 1000000002\n"
+            "    TagComponent:\n"
+            "      Tag: WT_UI_Canvas\n"
+            "    TransformComponent:\n"
+            "      Translation: [0, 0, 0]\n"
+            "      Rotation: [0, 0, 0]\n"
+            "      Scale: [1, 1, 1]\n"
+            "    UICanvasComponent:\n"
+            "      Visible: true\n"
+            "      ReferenceWidth: 1920\n"
+            "      ReferenceHeight: 1080\n"
+            "    UIWidgetComponent:\n"
+            "      Visible: true\n"
+            "      Position: [0, 0]\n"
+            "      Size: [1, 1]\n"
+            "      Rotation: 0\n"
+            "      Anchor: 0\n"
+            "      SortOrder: 0\n"
+            "      ParentEntity: 0\n";
 
         bool WriteFileText(const std::filesystem::path& path, const std::string& text)
         {
@@ -415,6 +441,14 @@ namespace Wheatear {
                         && WriteFileText(scenePath, kNewProjectSceneTemplate);
                     if (created)
                     {
+                        // New projects boot into their template scene until
+                        // the designer changes it in Project Health.
+                        RuntimePlayerConfig projectConfig;
+                        projectConfig.StartupScene = "assets/scenes/Start.wt";
+                        SaveRuntimePlayerConfig(
+                            projectRoot / "assets" / "game" / "player.config",
+                            projectConfig,
+                            EngineInfo::EditorName);
                         if (ApplyProject(projectRoot))
                             m_ProjectMessage += " (created)";
                     }

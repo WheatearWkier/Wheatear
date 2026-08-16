@@ -5,6 +5,7 @@
 #include "Wheatear/Core/Application.h"
 #include "Wheatear/Assets/AssetPath.h"
 #include "Wheatear/Assets/SpriteSheetAsset.h"
+#include "Wheatear/Config/PlayerConfig.h"
 #include "Wheatear/Core/EngineInfo.h"
 #include "Wheatear/Input/Input.h"
 #include "Wheatear/Input/KeyCodes.h"
@@ -35,6 +36,7 @@
 #include "Editor/EditorCommands.h"
 #include "Editor/EditorLocale.h"
 #include "Panels/SceneHierarchy/SceneHierarchyPanel.h"
+#include "Panels/SceneHierarchy/ComponentDrawers.h"
 #include "Panels/SpriteSheetPickerPanel.h"
 
 #include <imgui/imgui.h>
@@ -284,6 +286,7 @@ namespace Wheatear {
     {
         m_SceneHierarchyPanel->SetContext(m_ActiveScene);
         m_SceneHierarchyPanel->SetRuntimeMode(m_SceneState == SceneState::Play);
+        SetComponentDrawReadOnly(m_SceneState == SceneState::Play);
         m_AnimationEditorPanel->SetScene(m_ActiveScene);
     }
 
@@ -676,7 +679,19 @@ namespace Wheatear {
             SaveScene();
         }
 
-        m_PackageScenePath = m_EditorScenePath.generic_string();
+        // Default the startup scene to the project-level config when the
+        // project has one; otherwise keep the currently open scene.
+        const std::filesystem::path projectConfig =
+            AssetPath::GetProjectRoot() / "assets" / "game" / "player.config";
+        if (std::filesystem::exists(projectConfig))
+        {
+            const RuntimePlayerConfig config = LoadRuntimePlayerConfig(projectConfig);
+            m_PackageScenePath = config.StartupScene.generic_string();
+        }
+        else
+        {
+            m_PackageScenePath = m_EditorScenePath.generic_string();
+        }
         m_PackageSceneInput = m_PackageScenePath;
         m_PackageScenePickerOpen = true;
     }

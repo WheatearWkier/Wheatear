@@ -272,6 +272,26 @@ namespace Wheatear {
         m_Dirty |= DrawFloat(boss, "shootInterval", "Shoot Interval (s)", 0.01f, 0.0f, 10.0f);
         m_Dirty |= DrawFloat(boss, "jumpInterval", "Jump Interval (s)", 0.01f, 0.0f, 10.0f);
         m_Dirty |= DrawFloat(boss, "jumpDuration", "Jump Duration (s)", 0.01f, 0.0f, 10.0f);
+
+        ImGui::Separator();
+        ImGui::TextDisabled("%s", EditorLocale::Text("Jump path (Lissajous inside the arena)", "跳跃轨迹（场地内利萨茹曲线）"));
+        m_Dirty |= DrawFloat(boss, "jumpXFrequency", "Jump X Frequency", 0.01f, 0.0f, 10.0f);
+        m_Dirty |= DrawFloat(boss, "jumpYFrequency", "Jump Y Frequency", 0.01f, 0.0f, 10.0f);
+        m_Dirty |= DrawFloat(boss, "jumpXAmplitude", "Jump X Amplitude", 0.05f, 0.0f, 20.0f);
+        m_Dirty |= DrawFloat(boss, "jumpYAmplitude", "Jump Y Amplitude", 0.05f, 0.0f, 10.0f);
+        m_Dirty |= DrawFloat(boss, "jumpYBase", "Jump Y Base", 0.05f, -5.0f, 10.0f);
+        m_Dirty |= DrawFloat(boss, "jumpArcHeight", "Jump Arc Height", 0.01f, 0.0f, 5.0f);
+        m_Dirty |= DrawFloat(boss, "jumpMarginX", "Jump Margin X", 0.01f, 0.0f, 10.0f);
+        m_Dirty |= DrawFloat(boss, "jumpMarginTop", "Jump Margin Top", 0.01f, 0.0f, 10.0f);
+        m_Dirty |= DrawFloat(boss, "jumpMarginBottom", "Jump Margin Bottom", 0.01f, 0.0f, 10.0f);
+
+        ImGui::Separator();
+        ImGui::TextDisabled("%s", EditorLocale::Text("Bullet payload", "子弹弹道"));
+        m_Dirty |= DrawString(boss, "bulletEntityName", "Bullet Entity Name", 160);
+        m_Dirty |= DrawFloat(boss, "bulletSpeed", "Bullet Speed", 0.05f, 0.0f, 30.0f);
+        m_Dirty |= DrawFloat(boss, "bulletLifetime", "Bullet Lifetime (s)", 0.01f, 0.05f, 10.0f);
+        m_Dirty |= DrawFloat(boss, "bulletRadius", "Bullet Radius", 0.01f, 0.01f, 5.0f);
+        m_Dirty |= DrawVec2(boss, "bulletSpawnOffset", "Bullet Spawn Offset", 0.01f);
     }
 
     void ArcadeCombatTuningEditorPanel::DrawPlayerTab()
@@ -279,6 +299,33 @@ namespace Wheatear {
         YAML::Node player = EnsureMap(*m_Root, "player");
         m_Dirty |= DrawFloat(player, "moveSpeed", "Move Speed", 0.05f, 0.0f, 30.0f);
         m_Dirty |= DrawBool(player, "autoAim", "Auto Aim");
+
+        ImGui::Separator();
+        ImGui::TextDisabled("%s", EditorLocale::Text(
+            "Weapon payloads (cooldown/damage come from WAO recipes)",
+            "武器弹道（冷却/伤害来自 WAO recipe）"));
+        YAML::Node weapons = EnsureMap(player, "weapons");
+        if (m_SelectedWeapon.empty())
+            m_SelectedWeapon = "gun";
+        if (ImGui::BeginCombo(EditorLocale::Text("Weapon", "武器"), m_SelectedWeapon.c_str()))
+        {
+            for (const char* key : { "gun", "cannon", "katana" })
+            {
+                if (ImGui::Selectable(key, m_SelectedWeapon == key))
+                    m_SelectedWeapon = key;
+            }
+            ImGui::EndCombo();
+        }
+
+        YAML::Node weapon = EnsureMap(weapons, m_SelectedWeapon.c_str());
+        m_Dirty |= DrawString(weapon, "entityName", "Entity Name", 160);
+        m_Dirty |= DrawFloat(weapon, "speed", "Speed", 0.05f, 0.0f, 40.0f);
+        m_Dirty |= DrawFloat(weapon, "lifetime", "Lifetime (s)", 0.01f, 0.01f, 10.0f);
+        m_Dirty |= DrawFloat(weapon, "radius", "Radius", 0.01f, 0.01f, 5.0f);
+        m_Dirty |= DrawVec2(weapon, "muzzleOffset", "Muzzle Offset", 0.01f);
+        m_Dirty |= DrawFloat(weapon, "slashOffset", "Slash Offset", 0.01f, 0.0f, 5.0f);
+        m_Dirty |= DrawBool(weapon, "heavy", "Heavy");
+        m_Dirty |= DrawBool(weapon, "melee", "Melee");
     }
 
     void ArcadeCombatTuningEditorPanel::DrawSceneUnitsTab()

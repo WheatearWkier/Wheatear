@@ -299,7 +299,7 @@ namespace Wheatear {
             EditorLocale::Text("Adds a node after the current selection.", "在当前选择后添加节点。"));
         if (ImGui::SmallButton("Scene"))
         {
-            AddInstruction(EventScriptInstructionType::Command, "scene:assets/scenes/VerticalSliceHub.wt");
+            AddInstruction(EventScriptInstructionType::Command, "scene:assets/scenes/");
             ImGui::EndChild();
             return;
         }
@@ -313,14 +313,14 @@ namespace Wheatear {
         ImGui::SameLine();
         if (ImGui::SmallButton("Set Flag"))
         {
-            AddInstruction(EventScriptInstructionType::Command, "progression:set_flag FLAG_HUB_UNLOCKED");
+            AddInstruction(EventScriptInstructionType::Command, "progression:set_flag ");
             ImGui::EndChild();
             return;
         }
         ImGui::SameLine();
         if (ImGui::SmallButton("Dungeon"))
         {
-            AddInstruction(EventScriptInstructionType::Command, "progression:set_active_dungeon CH02_MAIN_BearAwakening");
+            AddInstruction(EventScriptInstructionType::Command, "progression:set_active_dungeon ");
             ImGui::EndChild();
             return;
         }
@@ -403,11 +403,11 @@ namespace Wheatear {
                         instruction.Text.clear();
                         instruction.Seconds = 0.0f;
                         if (type == EventScriptInstructionType::Command)
-                            instruction.Text = "scene:assets/scenes/VerticalSliceHub.wt";
+                            instruction.Text = "scene:assets/scenes/";
                         else if (type == EventScriptInstructionType::Wait)
                             instruction.Seconds = 0.10f;
                         else if (type == EventScriptInstructionType::If)
-                            instruction.Text = "flag FLAG_HUB_UNLOCKED";
+                            instruction.Text = "flag ";
                         changed = true;
                     }
                 }
@@ -478,7 +478,7 @@ namespace Wheatear {
             const int insertIndex = std::clamp(m_SelectedInstruction, 0, static_cast<int>(mutableBlock->Instructions.size()));
             EventScriptInstruction ifInstruction;
             ifInstruction.Type = EventScriptInstructionType::If;
-            ifInstruction.Text = "flag FLAG_HUB_UNLOCKED";
+            ifInstruction.Text = "flag ";
             EventScriptInstruction endIfInstruction;
             endIfInstruction.Type = EventScriptInstructionType::EndIf;
             mutableBlock->Instructions.insert(mutableBlock->Instructions.begin() + insertIndex, ifInstruction);

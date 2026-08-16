@@ -42,6 +42,16 @@ void RuntimeSceneLayer::OnAttach()
     Wheatear::WAO::ActionDebugHistory::Clear();
 
     Wheatear::RuntimePlayerConfig config = Wheatear::LoadRuntimePlayerConfig();
+    // Packaged games carry the config next to the executable (cwd chain);
+    // developer mode (--project) keeps it inside the project root, so fall
+    // back to that location when the cwd chain finds nothing.
+    if (Wheatear::FindRuntimePlayerConfigPath().empty())
+    {
+        const std::filesystem::path projectConfig =
+            Wheatear::AssetPath::GetProjectRoot() / "assets" / "game" / "player.config";
+        if (std::filesystem::exists(projectConfig))
+            config = Wheatear::LoadRuntimePlayerConfig(projectConfig);
+    }
     std::filesystem::path requestedPath = config.StartupScene.empty()
         ? m_DefaultScenePath
         : config.StartupScene;
