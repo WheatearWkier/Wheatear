@@ -18,6 +18,8 @@
 #include "Wheatear/UI/UIRuntimeTools.h"
 
 #include <algorithm>
+#include <unordered_map>
+#include <vector>
 #include <array>
 #include <cmath>
 #include <sstream>
@@ -987,22 +989,52 @@ namespace Wheatear::SideCombatHudService {
             const bool breakDebuff = visible && combatant &&
                 combatant->RuntimeState == SideCombatState::Broken;
 
-            // Single merged queue: buff and debuff are all statuses, so they
-            // pack into one row starting at buffStart and wrap to a new row
-            // once the row is full. Row direction: player rows grow upward,
-            // boss rows grow downward (away from their health bars).
+            // FIFO queue: buffs and debuffs are all statuses, so they share
+            // one queue ordered by when each state appeared (earliest first).
+            // A state that stays active keeps its slot (re-procs do not
+            // re-queue); when it drops, the ones behind it shift forward.
             struct IconSpec
             {
                 const char* Suffix;
                 SheetUVRect UV;
                 bool Active;
+                int EntryOrder;
             };
-            const IconSpec specs[] = {
-                { "_Buff_0", BuffAttackUV(), magicBuff },
-                { "_Buff_1", BuffShieldUV(), shieldBuff },
-                { "_Debuff_0", DebuffStateUV(), stateDebuff },
-                { "_Debuff_1", DebuffBreakUV(), breakDebuff }
+            static int s_IconClock = 0;
+            ++s_IconClock;
+            static std::unordered_map<std::string, int> s_IconEntryOrder;
+            static std::unordered_map<std::string, bool> s_IconPrevActive;
+            const IconSpec baseSpecs[] = {
+                { "_Buff_0", BuffAttackUV(), magicBuff, 0 },
+                { "_Buff_1", BuffShieldUV(), shieldBuff, 0 },
+                { "_Debuff_0", DebuffStateUV(), stateDebuff, 0 },
+                { "_Debuff_1", DebuffBreakUV(), breakDebuff, 0 }
             };
+            std::vector<IconSpec> specs;
+            specs.reserve(4);
+            for (const IconSpec& spec : baseSpecs)
+            {
+                const std::string key = prefix + spec.Suffix;
+                const bool wasActive = s_IconPrevActive[key];
+                s_IconPrevActive[key] = spec.Active;
+                if (spec.Active && !wasActive)
+                    s_IconEntryOrder[key] = s_IconClock;
+                if (!spec.Active)
+                    s_IconEntryOrder.erase(key);
+
+                IconSpec ordered = spec;
+                ordered.EntryOrder = spec.Active ? s_IconEntryOrder[key] : 0;
+                specs.push_back(ordered);
+            }
+            // Earliest entry first; ties (same frame) keep the spec order.
+            std::stable_sort(specs.begin(), specs.end(),
+                [](const IconSpec& a, const IconSpec& b)
+                {
+                    if (a.Active != b.Active)
+                        return a.Active;
+                    return a.EntryOrder < b.EntryOrder;
+                });
+
             constexpr int kIconsPerRow = 2;
             const float rowGap = std::abs(debuffStart.y - buffStart.y);
             const float rowStep = playerSide ? -rowGap : rowGap;
@@ -1545,8 +1577,49 @@ namespace Wheatear::SideCombatHudService {
                     || combatant.RuntimeState == SideCombatState::SuperArmor;
                 const bool stateIcon = IsNegativeCombatState(combatant.RuntimeState);
                 const bool breakIcon = combatant.RuntimeState == SideCombatState::Broken;
-                // Single merged queue above the health bar; wraps upward once
-                // a row is full (enemy icons sit above the bar).
+                // FIFO queue above the health bar (earliest state first);
+                // wraps upward once a row is full.
+                struct WorldIconSpec
+                {
+                    const char* Suffix;
+                    SheetUVRect UV;
+                    bool Active;
+                    int EntryOrder;
+                };
+                static int s_WorldIconClock = 0;
+                ++s_WorldIconClock;
+                static std::unordered_map<std::string, int> s_WorldIconEntryOrder;
+                static std::unordered_map<std::string, bool> s_WorldIconPrevActive;
+                const WorldIconSpec baseWorldSpecs[] = {
+                    { "_Buff_0", BuffAttackUV(), false, 0 },
+                    { "_Buff_1", BuffShieldUV(), shieldIcon, 0 },
+                    { "_Debuff_0", DebuffStateUV(), stateIcon, 0 },
+                    { "_Debuff_1", DebuffBreakUV(), breakIcon, 0 }
+                };
+                std::vector<WorldIconSpec> worldSpecs;
+                worldSpecs.reserve(4);
+                for (const WorldIconSpec& spec : baseWorldSpecs)
+                {
+                    const std::string key = tag + spec.Suffix;
+                    const bool wasActive = s_WorldIconPrevActive[key];
+                    s_WorldIconPrevActive[key] = spec.Active;
+                    if (spec.Active && !wasActive)
+                        s_WorldIconEntryOrder[key] = s_WorldIconClock;
+                    if (!spec.Active)
+                        s_WorldIconEntryOrder.erase(key);
+
+                    WorldIconSpec ordered = spec;
+                    ordered.EntryOrder = spec.Active ? s_WorldIconEntryOrder[key] : 0;
+                    worldSpecs.push_back(ordered);
+                }
+                std::stable_sort(worldSpecs.begin(), worldSpecs.end(),
+                    [](const WorldIconSpec& a, const WorldIconSpec& b)
+                    {
+                        if (a.Active != b.Active)
+                            return a.Active;
+                        return a.EntryOrder < b.EntryOrder;
+                    });
+
                 const float iconSize = 0.105f;
                 const float iconGap = 0.11f;
                 constexpr int kIconsPerRow = 2;
@@ -1554,15 +1627,13 @@ namespace Wheatear::SideCombatHudService {
                 float iconX = baseX - fullWidth * 0.5f;
                 float iconY = baseY + 0.15f;
                 int iconsInRow = 0;
-                auto placeIcon = [&](const std::string& suffix,
-                    const SheetUVRect& uv,
-                    bool on)
+                for (const WorldIconSpec& spec : worldSpecs)
                 {
-                    Entity icon = EnsureWorldStatusIcon(scene, tag + suffix, uv, on);
+                    Entity icon = EnsureWorldStatusIcon(scene, tag + spec.Suffix, spec.UV, spec.Active);
                     if (!icon || !icon.HasComponent<TransformComponent>())
-                        return;
+                        continue;
                     auto& transform = icon.GetComponent<TransformComponent>();
-                    if (on)
+                    if (spec.Active)
                     {
                         if (iconsInRow >= kIconsPerRow)
                         {
@@ -1580,11 +1651,7 @@ namespace Wheatear::SideCombatHudService {
                         transform.Translation = { 0.0f, -10.0f, 0.0f }; // parked off-screen
                         transform.Scale = { 0.001f, 0.001f, 1.0f };
                     }
-                };
-                placeIcon("_Buff_0", BuffAttackUV(), false);
-                placeIcon("_Buff_1", BuffShieldUV(), shieldIcon);
-                placeIcon("_Debuff_0", DebuffStateUV(), stateIcon);
-                placeIcon("_Debuff_1", DebuffBreakUV(), breakIcon);
+                }
             }
         }
 
