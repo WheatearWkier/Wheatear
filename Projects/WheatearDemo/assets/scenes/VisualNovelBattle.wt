@@ -1,470 +1,1012 @@
-﻿Scene: Untitled
+Scene: Untitled
 SavePolicy:
   CanSave: false
   CanLoad: false
   SaveDirectory: assets/saves
   AutoLoadSlot: 0
 Entities:
-  - Entity: 930000022
-    TagComponent:
-      Tag: FlowController
-    TransformComponent:
-      Translation: [0, 0, 0]
-      Rotation: [0, 0, 0]
-      Scale: [1, 1, 1]
-    EventScriptComponent:
-      ScriptPath: "assets/events/vertical_slice_flow.wts"
-      StartEvent: "on_start"
-      RunOnStart: false
-      RunOnce: false
-      Enabled: true
-  - Entity: 930000021
-    TagComponent:
-      Tag: WT_UI_Canvas
-    TransformComponent:
-      Translation: [0, 0, 0]
-      Rotation: [0, 0, 0]
-      Scale: [1, 1, 1]
-    UICanvasComponent:
-      Visible: true
-      ReferenceWidth: 1920
-      ReferenceHeight: 1080
-    UIWidgetComponent:
-      Visible: true
-      Position: [0, 0]
-      Size: [1, 1]
-      Rotation: 0
-      Anchor: 0
-      SortOrder: 0
-  - Entity: 930009001
-    TagComponent:
-      Tag: Battle_HUDGroup
-    TransformComponent:
-      Translation: [0, 0, 0]
-      Rotation: [0, 0, 0]
-      Scale: [1, 1, 1]
-    UIWidgetComponent:
-      Visible: true
-      EditorVisible: true
-      Position: [0, 0]
-      Size: [1, 1]
-      Rotation: 0
-      Anchor: 0
-      SortOrder: 1
-      ParentEntity: 930000021
-  - Entity: 930009002
-    TagComponent:
-      Tag: Battle_MessageGroup
-    TransformComponent:
-      Translation: [0, 0, 0]
-      Rotation: [0, 0, 0]
-      Scale: [1, 1, 1]
-    UIWidgetComponent:
-      Visible: true
-      EditorVisible: true
-      Position: [0, 0]
-      Size: [1, 1]
-      Rotation: 0
-      Anchor: 0
-      SortOrder: 1
-      ParentEntity: 930000021
-  - Entity: 930009003
-    TagComponent:
-      Tag: Battle_OverlayGroup
-    TransformComponent:
-      Translation: [0, 0, 0]
-      Rotation: [0, 0, 0]
-      Scale: [1, 1, 1]
-    UIWidgetComponent:
-      Visible: true
-      EditorVisible: true
-      Position: [0, 0]
-      Size: [1, 1]
-      Rotation: 0
-      Anchor: 0
-      SortOrder: 1
-      ParentEntity: 930000021
-  - Entity: 930000001
-    TagComponent:
-      Tag: Battle_Camera
-    TransformComponent:
-      Translation: [0, 0, 0]
-      Rotation: [0, 0, 0]
-      Scale: [1, 1, 1]
-    CameraComponent:
-      Camera:
-        ProjectionType: 1
-        PerspectiveFOV: 0.785398185
-        PerspectiveNear: 0.00999999978
-        PerspectiveFar: 1000
-        OrthographicSize: 10
-        OrthographicNear: -1
-        OrthographicFar: 1
-      Primary: true
-      FixedAspectRatio: false
-  - Entity: 930000002
-    TagComponent:
-      Tag: Battle_Background
-    TransformComponent:
-      Translation: [0, 0.2, -0.9]
-      Rotation: [0, 0, 0]
-      Scale: [20, 11, 1]
-    SpriteRendererComponent:
-      Color: [1, 1, 1, 1]
-      Texture: assets/vertical_slice/arcade_combat/backgrounds/bg_arcade_arena_grid.png
-      TilingFactor: 1
-
-  - Entity: 930000030
-    TagComponent:
-      Tag: Battle_BGM
-    TransformComponent:
-      Translation: [0, 0, 0]
-      Rotation: [0, 0, 0]
-      Scale: [1, 1, 1]
-    AudioSourceComponent:
-      AudioFilePath: assets/vertical_slice/arcade_combat/audio/arcade_battle_bgm.wav
-      Volume: 0.34
-      Loop: true
-      PlayOnStart: true
-  - Entity: 930000003
-    TagComponent:
-      Tag: Battle_ArenaFloor
-    TransformComponent:
-      Translation: [0, -0.1, -0.75]
-      Rotation: [0, 0, 0]
-      Scale: [16.8, 8.2, 1]
-    SpriteRendererComponent:
-      Color: [1, 1, 1, 0]
-      Texture: ""
-      TilingFactor: 1
-  - Entity: 930000004
-    TagComponent:
-      Tag: Battle_DangerLight
-    TransformComponent:
-      Translation: [0, 3.75, -0.65]
-      Rotation: [0, 0, 0]
-      Scale: [15.5, 0.22, 1]
-    SpriteRendererComponent:
-      Color: [1, 1, 1, 1]
-      Texture: assets/vertical_slice/arcade_combat/ui/ui_arcade_danger_bar.png
-      TilingFactor: 1
-  - Entity: 930000005
-    TagComponent:
-      Tag: Battle_TriggerGlow
-    TransformComponent:
-      Translation: [0, -1.65, -0.38]
-      Rotation: [0, 0, 0]
-      Scale: [1.45, 1.45, 1]
-    CircleRendererComponent:
-      Color: [0.42, 1, 0.72, 0.75]
-      Thickness: 0.22
-      Fade: 0.02
-    ArcadeTriggerComponent:
-      Type: 0
-      TriggerName: BossIntro
-      Radius: 0.82
-  - Entity: 930000006
-    TagComponent:
-      Tag: Battle_Player
-    TransformComponent:
-      Translation: [0, -3.2, -0.05]
-      Rotation: [0, 0, 0]
-      Scale: [0.58, 0.78, 1]
-    SpriteRendererComponent:
-      Color: [1, 1, 1, 1]
-      Texture: assets/vertical_slice/arcade_combat/characters/protag_arcade_mage.png
-      TilingFactor: 1
-    ArcadeCombatantComponent:
-      Team: 1
-      MaxHealth: 120
-      Health: 120
-      MoveSpeed: 4.8
-      CollisionRadius: 0.42
-      Invulnerable: false
-    ArcadePlayerControllerComponent:
-      CurrentWeapon: 0
-      AutoAim: true
-  - Entity: 930000007
-    TagComponent:
-      Tag: Battle_Boss
-    TransformComponent:
-      Translation: [0, 2.2, -0.05]
-      Rotation: [0, 0, 0]
-      Scale: [1.28, 1.28, 1]
-    SpriteRendererComponent:
-      Color: [1, 1, 1, 0]
-      Texture: assets/vertical_slice/arcade_combat/characters/boss_arcade_mage.png
-      TilingFactor: 1
-    ArcadeCombatantComponent:
-      Team: 2
-      MaxHealth: 220
-      Health: 220
-      MoveSpeed: 0
-      CollisionRadius: 0.72
-      Invulnerable: false
-    ArcadeBossComponent:
-      Active: false
-      IntroStartPosition: [0, 6, -0.05]
-      FightPosition: [0, 2.2, -0.05]
-      IntroDuration: 1.25
-      ShootInterval: 1.05
-      JumpInterval: 2.7
-      JumpDuration: 0.65
-  - Entity: 930000008
-    TagComponent:
-      Tag: Battle_Cover_Left
-    TransformComponent:
-      Translation: [-3.15, -0.55, -0.12]
-      Rotation: [0, 0, 0]
-      Scale: [1.35, 0.70, 1]
-    SpriteRendererComponent:
-      Color: [1, 1, 1, 0.96]
-      Texture: assets/vertical_slice/arcade_combat/props/prop_arcade_cover_block.png
-      TilingFactor: 1
-    ArcadeCoverComponent:
-      Radius: 0.78
-      MaxHealth: 85
-      Health: 85
-      BlocksProjectiles: true
-  - Entity: 930000009
-    TagComponent:
-      Tag: Battle_Cover_Right
-    TransformComponent:
-      Translation: [3.05, -0.85, -0.12]
-      Rotation: [0, 0, 0]
-      Scale: [1.45, 0.75, 1]
-    SpriteRendererComponent:
-      Color: [1, 1, 1, 0.96]
-      Texture: assets/vertical_slice/arcade_combat/props/prop_arcade_cover_block.png
-      TilingFactor: 1
-    ArcadeCoverComponent:
-      Radius: 0.82
-      MaxHealth: 90
-      Health: 90
-      BlocksProjectiles: true
-  - Entity: 930000010
-    TagComponent:
-      Tag: Battle_Cover_Center
-    TransformComponent:
-      Translation: [0.15, 0.55, -0.12]
-      Rotation: [0, 0, 0]
-      Scale: [1.25, 0.62, 1]
-    SpriteRendererComponent:
-      Color: [1, 1, 1, 0.88]
-      Texture: assets/vertical_slice/arcade_combat/props/prop_arcade_cover_block.png
-      TilingFactor: 1
-    ArcadeCoverComponent:
-      Radius: 0.68
-      MaxHealth: 70
-      Health: 70
-      BlocksProjectiles: true
-  - Entity: 930000011
-    TagComponent:
-      Tag: Battle_Controller
-    TransformComponent:
-      Translation: [0, 0, 0]
-      Rotation: [0, 0, 0]
-      Scale: [1, 1, 1]
-    ArcadeCombatLevelComponent:
-      PlayOnStart: true
-      ArenaMin: [-7.6, -3.85]
-      ArenaMax: [7.6, 4.05]
-      PlayerEntityName: Battle_Player
-      BossEntityName: Battle_Boss
-      FadeEntityName: Battle_Fade
-      PausePanelEntityName: Battle_PausePanel
-      MessageTextEntityName: Battle_Message
-      WeaponTextEntityName: Battle_WeaponText
-      PlayerHealthBarEntityName: Battle_PlayerHealth
-      PlayerHealthTextEntityName: Battle_PlayerHealthText
-      BossHealthBarEntityName: Battle_BossHealth
-      BossHealthTextEntityName: Battle_BossHealthText
-      StartFadeDuration: 0.85
-      VictoryReturnDelay: 2.6
-      DefeatReturnDelay: 2.2
-      ResultSceneFadeDuration: 0.55
-      BossDefeatFadeDuration: 1.15
-      VictorySceneCommand: "event:fake_combat_victory"
-      DefeatSceneCommand: ""
-  - Entity: 930000012
-    TagComponent:
-      Tag: Battle_PlayerHealth
-    TransformComponent:
-      Translation: [0, 0, 0]
-      Rotation: [0, 0, 0]
-      Scale: [1, 1, 1]
-    UIWidgetComponent:
-      Visible: true
-      Position: [0.035, 0.045]
-      Size: [0.24, 0.026]
-      Rotation: 0
-      Anchor: 0
-      SortOrder: 20
-      ParentEntity: 930009001
-    UIProgressBarComponent:
-      Value: 120
-      MaxValue: 120
-      ForegroundColor: [0.22, 0.82, 0.58, 0.95]
-      BackgroundColor: [0.05, 0.08, 0.09, 0.78]
-  - Entity: 930000013
-    TagComponent:
-      Tag: Battle_PlayerHealthText
-    TransformComponent:
-      Translation: [0, 0, 0]
-      Rotation: [0, 0, 0]
-      Scale: [1, 1, 1]
-    UIWidgetComponent:
-      Visible: true
-      Position: [0.035, 0.015]
-      Size: [0.22, 0.03]
-      Rotation: 0
-      Anchor: 0
-      SortOrder: 21
-      ParentEntity: 930009001
-    UITextComponent:
-      Text: "生命 120/120"
-      Color: [0.88, 0.96, 0.92, 1]
-      FontSize: 18
-      FontPath: assets/fonts/wqy-microhei.ttc
-  - Entity: 930000014
-    TagComponent:
-      Tag: Battle_BossHealth
-    TransformComponent:
-      Translation: [0, 0, 0]
-      Rotation: [0, 0, 0]
-      Scale: [1, 1, 1]
-    UIWidgetComponent:
-      Visible: true
-      Position: [0.5, 0.045]
-      Size: [0.36, 0.026]
-      Rotation: 0
-      Anchor: 4
-      SortOrder: 20
-      ParentEntity: 930009001
-    UIProgressBarComponent:
-      Value: 220
-      MaxValue: 220
-      ForegroundColor: [0.86, 0.20, 0.30, 0.95]
-      BackgroundColor: [0.06, 0.04, 0.06, 0.78]
-  - Entity: 930000015
-    TagComponent:
-      Tag: Battle_BossHealthText
-    TransformComponent:
-      Translation: [0, 0, 0]
-      Rotation: [0, 0, 0]
-      Scale: [1, 1, 1]
-    UIWidgetComponent:
-      Visible: true
-      Position: [0.5, 0.014]
-      Size: [0.24, 0.03]
-      Rotation: 0
-      Anchor: 4
-      SortOrder: 21
-      ParentEntity: 930009001
-    UITextComponent:
-      Text: "首领 --/--"
-      Color: [1, 0.86, 0.88, 1]
-      FontSize: 18
-      FontPath: assets/fonts/wqy-microhei.ttc
-  - Entity: 930000016
-    TagComponent:
-      Tag: Battle_WeaponText
-    TransformComponent:
-      Translation: [0, 0, 0]
-      Rotation: [0, 0, 0]
-      Scale: [1, 1, 1]
-    UIWidgetComponent:
-      Visible: true
-      Position: [0.035, 0.925]
-      Size: [0.48, 0.04]
-      Rotation: 0
-      Anchor: 0
-      SortOrder: 22
-      ParentEntity: 930009001
-    UITextComponent:
-      Text: "武器: 手枪  [1 手枪] [2 重炮] [3 太刀]"
-      Color: [0.86, 0.94, 0.98, 1]
-      FontSize: 18
-      FontPath: assets/fonts/wqy-microhei.ttc
-  - Entity: 930000017
-    TagComponent:
-      Tag: Battle_Message
-    TransformComponent:
-      Translation: [0, 0, 0]
-      Rotation: [0, 0, 0]
-      Scale: [1, 1, 1]
-    UIWidgetComponent:
-      Visible: true
-      Position: [0.5, 0.86]
-      Size: [0.78, 0.045]
-      Rotation: 0
-      Anchor: 4
-      SortOrder: 23
-      ParentEntity: 930009002
-    UITextComponent:
-      Text: "移动到发光点。"
-      Color: [0.92, 0.96, 0.92, 1]
-      FontSize: 18
-      FontPath: assets/fonts/wqy-microhei.ttc
-  - Entity: 930000018
-    TagComponent:
-      Tag: Battle_PausePanel
-    TransformComponent:
-      Translation: [0, 0, 0]
-      Rotation: [0, 0, 0]
-      Scale: [1, 1, 1]
-    UIWidgetComponent:
-      Visible: false
-      Position: [0.5, 0.5]
-      Size: [0.34, 0.18]
-      Rotation: 0
-      Anchor: 4
-      SortOrder: 80
-      ParentEntity: 930009003
-    UIPanelComponent:
-      BackgroundColor: [0.03, 0.04, 0.06, 0.90]
-      BorderColor: [0.45, 0.82, 0.92, 0.82]
-      BorderThickness: 2
-    UITextComponent:
-      Text: "已暂停"
-      Color: [0.90, 0.96, 0.98, 1]
-      FontSize: 38
-      FontPath: assets/fonts/wqy-microhei.ttc
-  - Entity: 930000020
-    TagComponent:
-      Tag: Battle_ScriptDirectorText
-    TransformComponent:
-      Translation: [0, 0, 0]
-      Rotation: [0, 0, 0]
-      Scale: [1, 1, 1]
-    UIWidgetComponent:
-      Visible: true
-      Position: [0.5, 0.805]
-      Size: [0.72, 0.04]
-      Rotation: 0
-      Anchor: 4
-      SortOrder: 24
-      ParentEntity: 930009002
-    UITextComponent:
-      Text: "原生战斗流程已接管，胜利后返回剧情。"
-      Color: [0.72, 0.92, 1, 1]
-      FontSize: 16
-      FontPath: assets/fonts/wqy-microhei.ttc
-  - Entity: 930000019
-    TagComponent:
-      Tag: Battle_Fade
-    TransformComponent:
-      Translation: [0, 0, 0]
-      Rotation: [0, 0, 0]
-      Scale: [1, 1, 1]
-    UIWidgetComponent:
-      Visible: true
-      Position: [0.5, 0.5]
-      Size: [1, 1]
-      Rotation: 0
-      Anchor: 4
-      SortOrder: 100
-      ParentEntity: 930009003
-    UIImageComponent:
-      Color: [0, 0, 0, 1]
-      TexturePath: ""
+- Entity: 930000022
+  TagComponent:
+    Tag: FlowController
+  TransformComponent:
+    Translation:
+    - 0
+    - 0
+    - 0
+    Rotation:
+    - 0
+    - 0
+    - 0
+    Scale:
+    - 1
+    - 1
+    - 1
+  EventScriptComponent:
+    ScriptPath: assets/events/vertical_slice_flow.wts
+    StartEvent: on_start
+    RunOnStart: false
+    RunOnce: false
+    Enabled: true
+- Entity: 930000021
+  TagComponent:
+    Tag: WT_UI_Canvas
+  TransformComponent:
+    Translation:
+    - 0
+    - 0
+    - 0
+    Rotation:
+    - 0
+    - 0
+    - 0
+    Scale:
+    - 1
+    - 1
+    - 1
+  UICanvasComponent:
+    Visible: true
+    ReferenceWidth: 1920
+    ReferenceHeight: 1080
+  UIWidgetComponent:
+    Visible: true
+    Position:
+    - 0
+    - 0
+    Size:
+    - 1
+    - 1
+    Rotation: 0
+    Anchor: 0
+    SortOrder: 0
+- Entity: 930009001
+  TagComponent:
+    Tag: Battle_HUDGroup
+  TransformComponent:
+    Translation:
+    - 0
+    - 0
+    - 0
+    Rotation:
+    - 0
+    - 0
+    - 0
+    Scale:
+    - 1
+    - 1
+    - 1
+  UIWidgetComponent:
+    Visible: true
+    EditorVisible: true
+    Position:
+    - 0
+    - 0
+    Size:
+    - 1
+    - 1
+    Rotation: 0
+    Anchor: 0
+    SortOrder: 1
+    ParentEntity: 930000021
+- Entity: 930009002
+  TagComponent:
+    Tag: Battle_MessageGroup
+  TransformComponent:
+    Translation:
+    - 0
+    - 0
+    - 0
+    Rotation:
+    - 0
+    - 0
+    - 0
+    Scale:
+    - 1
+    - 1
+    - 1
+  UIWidgetComponent:
+    Visible: true
+    EditorVisible: true
+    Position:
+    - 0
+    - 0
+    Size:
+    - 1
+    - 1
+    Rotation: 0
+    Anchor: 0
+    SortOrder: 1
+    ParentEntity: 930000021
+- Entity: 930009003
+  TagComponent:
+    Tag: Battle_OverlayGroup
+  TransformComponent:
+    Translation:
+    - 0
+    - 0
+    - 0
+    Rotation:
+    - 0
+    - 0
+    - 0
+    Scale:
+    - 1
+    - 1
+    - 1
+  UIWidgetComponent:
+    Visible: true
+    EditorVisible: true
+    Position:
+    - 0
+    - 0
+    Size:
+    - 1
+    - 1
+    Rotation: 0
+    Anchor: 0
+    SortOrder: 1
+    ParentEntity: 930000021
+- Entity: 930000001
+  TagComponent:
+    Tag: Battle_Camera
+  TransformComponent:
+    Translation:
+    - 0
+    - 0
+    - 0
+    Rotation:
+    - 0
+    - 0
+    - 0
+    Scale:
+    - 1
+    - 1
+    - 1
+  CameraComponent:
+    Camera:
+      ProjectionType: 1
+      PerspectiveFOV: 0.785398185
+      PerspectiveNear: 0.00999999978
+      PerspectiveFar: 1000
+      OrthographicSize: 10
+      OrthographicNear: -1
+      OrthographicFar: 1
+    Primary: true
+    FixedAspectRatio: false
+- Entity: 930000002
+  TagComponent:
+    Tag: Battle_Background
+  TransformComponent:
+    Translation:
+    - 0
+    - 0.2
+    - -0.9
+    Rotation:
+    - 0
+    - 0
+    - 0
+    Scale:
+    - 20
+    - 11
+    - 1
+  SpriteRendererComponent:
+    Color:
+    - 1
+    - 1
+    - 1
+    - 1
+    Texture: assets/vertical_slice/arcade_combat/backgrounds/bg_arcade_arena_grid.png
+    TilingFactor: 1
+- Entity: 930000030
+  TagComponent:
+    Tag: Battle_BGM
+  TransformComponent:
+    Translation:
+    - 0
+    - 0
+    - 0
+    Rotation:
+    - 0
+    - 0
+    - 0
+    Scale:
+    - 1
+    - 1
+    - 1
+  AudioSourceComponent:
+    AudioFilePath: assets/vertical_slice/arcade_combat/audio/arcade_battle_bgm.wav
+    Volume: 0.34
+    Loop: true
+    PlayOnStart: true
+- Entity: 930000003
+  TagComponent:
+    Tag: Battle_ArenaFloor
+  TransformComponent:
+    Translation:
+    - 0
+    - -0.1
+    - -0.75
+    Rotation:
+    - 0
+    - 0
+    - 0
+    Scale:
+    - 16.8
+    - 8.2
+    - 1
+  SpriteRendererComponent:
+    Color:
+    - 1
+    - 1
+    - 1
+    - 0
+    Texture: ''
+    TilingFactor: 1
+- Entity: 930000004
+  TagComponent:
+    Tag: Battle_DangerLight
+  TransformComponent:
+    Translation:
+    - 0
+    - 3.75
+    - -0.65
+    Rotation:
+    - 0
+    - 0
+    - 0
+    Scale:
+    - 15.5
+    - 0.22
+    - 1
+  SpriteRendererComponent:
+    Color:
+    - 1
+    - 1
+    - 1
+    - 1
+    Texture: assets/vertical_slice/arcade_combat/ui/ui_arcade_danger_bar.png
+    TilingFactor: 1
+- Entity: 930000005
+  TagComponent:
+    Tag: Battle_TriggerGlow
+  TransformComponent:
+    Translation:
+    - 0
+    - -1.65
+    - -0.38
+    Rotation:
+    - 0
+    - 0
+    - 0
+    Scale:
+    - 1.45
+    - 1.45
+    - 1
+  CircleRendererComponent:
+    Color:
+    - 0.42
+    - 1
+    - 0.72
+    - 0.75
+    Thickness: 0.22
+    Fade: 0.02
+  ArcadeTriggerComponent:
+    Type: 0
+    TriggerName: BossIntro
+    Radius: 0.82
+- Entity: 930000006
+  TagComponent:
+    Tag: Battle_Player
+  TransformComponent:
+    Translation:
+    - 0
+    - -3.2
+    - -0.05
+    Rotation:
+    - 0
+    - 0
+    - 0
+    Scale:
+    - 0.58
+    - 0.78
+    - 1
+  SpriteRendererComponent:
+    Color:
+    - 1
+    - 1
+    - 1
+    - 1
+    Texture: assets/vertical_slice/arcade_combat/characters/protag_arcade_mage.png
+    TilingFactor: 1
+  ArcadeCombatantComponent:
+    Team: 1
+    MaxHealth: 120
+    Health: 120
+    MoveSpeed: 4.8
+    CollisionRadius: 0.42
+    Invulnerable: false
+  ArcadePlayerControllerComponent:
+    CurrentWeapon: 0
+    AutoAim: true
+- Entity: 930000007
+  TagComponent:
+    Tag: Battle_Boss
+  TransformComponent:
+    Translation:
+    - 0
+    - 2.2
+    - -0.05
+    Rotation:
+    - 0
+    - 0
+    - 0
+    Scale:
+    - 1.28
+    - 1.28
+    - 1
+  SpriteRendererComponent:
+    Color:
+    - 1
+    - 1
+    - 1
+    - 0
+    Texture: assets/vertical_slice/arcade_combat/characters/boss_arcade_mage.png
+    TilingFactor: 1
+  ArcadeCombatantComponent:
+    Team: 2
+    MaxHealth: 220
+    Health: 220
+    MoveSpeed: 0
+    CollisionRadius: 0.72
+    Invulnerable: false
+  ArcadeBossComponent:
+    Active: false
+    IntroStartPosition:
+    - 0
+    - 6
+    - -0.05
+    FightPosition:
+    - 0
+    - 2.2
+    - -0.05
+    IntroDuration: 1.25
+    ShootInterval: 1.05
+    JumpInterval: 2.7
+    JumpDuration: 0.65
+- Entity: 930000008
+  TagComponent:
+    Tag: Battle_Cover_Left
+  TransformComponent:
+    Translation:
+    - -3.15
+    - -0.55
+    - -0.12
+    Rotation:
+    - 0
+    - 0
+    - 0
+    Scale:
+    - 1.35
+    - 0.7
+    - 1
+  SpriteRendererComponent:
+    Color:
+    - 1
+    - 1
+    - 1
+    - 0.96
+    Texture: assets/vertical_slice/arcade_combat/props/prop_arcade_cover_block.png
+    TilingFactor: 1
+  ArcadeCoverComponent:
+    Radius: 0.78
+    MaxHealth: 85
+    Health: 85
+    BlocksProjectiles: true
+- Entity: 930000009
+  TagComponent:
+    Tag: Battle_Cover_Right
+  TransformComponent:
+    Translation:
+    - 3.05
+    - -0.85
+    - -0.12
+    Rotation:
+    - 0
+    - 0
+    - 0
+    Scale:
+    - 1.45
+    - 0.75
+    - 1
+  SpriteRendererComponent:
+    Color:
+    - 1
+    - 1
+    - 1
+    - 0.96
+    Texture: assets/vertical_slice/arcade_combat/props/prop_arcade_cover_block.png
+    TilingFactor: 1
+  ArcadeCoverComponent:
+    Radius: 0.82
+    MaxHealth: 90
+    Health: 90
+    BlocksProjectiles: true
+- Entity: 930000010
+  TagComponent:
+    Tag: Battle_Cover_Center
+  TransformComponent:
+    Translation:
+    - 0.15
+    - 0.55
+    - -0.12
+    Rotation:
+    - 0
+    - 0
+    - 0
+    Scale:
+    - 1.25
+    - 0.62
+    - 1
+  SpriteRendererComponent:
+    Color:
+    - 1
+    - 1
+    - 1
+    - 0.88
+    Texture: assets/vertical_slice/arcade_combat/props/prop_arcade_cover_block.png
+    TilingFactor: 1
+  ArcadeCoverComponent:
+    Radius: 0.68
+    MaxHealth: 70
+    Health: 70
+    BlocksProjectiles: true
+- Entity: 930000011
+  TagComponent:
+    Tag: Battle_Controller
+  TransformComponent:
+    Translation:
+    - 0
+    - 0
+    - 0
+    Rotation:
+    - 0
+    - 0
+    - 0
+    Scale:
+    - 1
+    - 1
+    - 1
+  ArcadeCombatLevelComponent:
+    PlayOnStart: true
+    ArenaMin:
+    - -7.6
+    - -3.85
+    ArenaMax:
+    - 7.6
+    - 4.05
+    PlayerEntityName: Battle_Player
+    BossEntityName: Battle_Boss
+    FadeEntityName: Battle_Fade
+    PausePanelEntityName: Battle_PausePanel
+    MessageTextEntityName: Battle_Message
+    WeaponTextEntityName: Battle_WeaponText
+    PlayerHealthBarEntityName: Battle_PlayerHealth
+    PlayerHealthTextEntityName: Battle_PlayerHealthText
+    BossHealthBarEntityName: Battle_BossHealth
+    BossHealthTextEntityName: Battle_BossHealthText
+    StartFadeDuration: 0.85
+    VictoryReturnDelay: 2.6
+    DefeatReturnDelay: 2.2
+    ResultSceneFadeDuration: 0.55
+    BossDefeatFadeDuration: 1.15
+    VictorySceneCommand: event:fake_combat_victory
+    DefeatSceneCommand: ''
+- Entity: 930000012
+  TagComponent:
+    Tag: Battle_PlayerHealth
+  TransformComponent:
+    Translation:
+    - 0
+    - 0
+    - 0
+    Rotation:
+    - 0
+    - 0
+    - 0
+    Scale:
+    - 1
+    - 1
+    - 1
+  UIWidgetComponent:
+    Visible: true
+    Position:
+    - 0.035
+    - 0.045
+    Size:
+    - 0.24
+    - 0.026
+    Rotation: 0
+    Anchor: 0
+    SortOrder: 20
+    ParentEntity: 930009001
+  UIProgressBarComponent:
+    Value: 120
+    MaxValue: 120
+    ForegroundColor:
+    - 0.22
+    - 0.82
+    - 0.58
+    - 0.95
+    BackgroundColor:
+    - 0.05
+    - 0.08
+    - 0.09
+    - 0.78
+- Entity: 930000013
+  TagComponent:
+    Tag: Battle_PlayerHealthText
+  TransformComponent:
+    Translation:
+    - 0
+    - 0
+    - 0
+    Rotation:
+    - 0
+    - 0
+    - 0
+    Scale:
+    - 1
+    - 1
+    - 1
+  UIWidgetComponent:
+    Visible: true
+    Position:
+    - 0.035
+    - 0.015
+    Size:
+    - 0.22
+    - 0.03
+    Rotation: 0
+    Anchor: 0
+    SortOrder: 21
+    ParentEntity: 930009001
+  UITextComponent:
+    Text: 生命 120/120
+    Color:
+    - 0.88
+    - 0.96
+    - 0.92
+    - 1
+    FontSize: 18
+    FontPath: assets/fonts/wqy-microhei.ttc
+- Entity: 930000014
+  TagComponent:
+    Tag: Battle_BossHealth
+  TransformComponent:
+    Translation:
+    - 0
+    - 0
+    - 0
+    Rotation:
+    - 0
+    - 0
+    - 0
+    Scale:
+    - 1
+    - 1
+    - 1
+  UIWidgetComponent:
+    Visible: true
+    Position:
+    - 0.5
+    - 0.045
+    Size:
+    - 0.36
+    - 0.026
+    Rotation: 0
+    Anchor: 4
+    SortOrder: 20
+    ParentEntity: 930009001
+  UIProgressBarComponent:
+    Value: 220
+    MaxValue: 220
+    ForegroundColor:
+    - 0.86
+    - 0.2
+    - 0.3
+    - 0.95
+    BackgroundColor:
+    - 0.06
+    - 0.04
+    - 0.06
+    - 0.78
+- Entity: 930000015
+  TagComponent:
+    Tag: Battle_BossHealthText
+  TransformComponent:
+    Translation:
+    - 0
+    - 0
+    - 0
+    Rotation:
+    - 0
+    - 0
+    - 0
+    Scale:
+    - 1
+    - 1
+    - 1
+  UIWidgetComponent:
+    Visible: true
+    Position:
+    - 0.5
+    - 0.014
+    Size:
+    - 0.24
+    - 0.03
+    Rotation: 0
+    Anchor: 4
+    SortOrder: 21
+    ParentEntity: 930009001
+  UITextComponent:
+    Text: 首领 --/--
+    Color:
+    - 1
+    - 0.86
+    - 0.88
+    - 1
+    FontSize: 18
+    FontPath: assets/fonts/wqy-microhei.ttc
+- Entity: 930000018
+  TagComponent:
+    Tag: Battle_PausePanel
+  TransformComponent:
+    Translation:
+    - 0
+    - 0
+    - 0
+    Rotation:
+    - 0
+    - 0
+    - 0
+    Scale:
+    - 1
+    - 1
+    - 1
+  UIWidgetComponent:
+    Visible: false
+    Position:
+    - 0.5
+    - 0.5
+    Size:
+    - 0.34
+    - 0.18
+    Rotation: 0
+    Anchor: 4
+    SortOrder: 80
+    ParentEntity: 930009003
+  UIPanelComponent:
+    BackgroundColor:
+    - 0.03
+    - 0.04
+    - 0.06
+    - 0.9
+    BorderColor:
+    - 0.45
+    - 0.82
+    - 0.92
+    - 0.82
+    BorderThickness: 2
+  UITextComponent:
+    Text: 已暂停
+    Color:
+    - 0.9
+    - 0.96
+    - 0.98
+    - 1
+    FontSize: 38
+    FontPath: assets/fonts/wqy-microhei.ttc
+- Entity: 930000019
+  TagComponent:
+    Tag: Battle_Fade
+  TransformComponent:
+    Translation:
+    - 0
+    - 0
+    - 0
+    Rotation:
+    - 0
+    - 0
+    - 0
+    Scale:
+    - 1
+    - 1
+    - 1
+  UIWidgetComponent:
+    Visible: true
+    Position:
+    - 0.5
+    - 0.5
+    Size:
+    - 1
+    - 1
+    Rotation: 0
+    Anchor: 4
+    SortOrder: 100
+    ParentEntity: 930009003
+  UIImageComponent:
+    Color:
+    - 0
+    - 0
+    - 0
+    - 1
+    TexturePath: ''
+- Entity: 930000100
+  TagComponent:
+    Tag: AR_JoystickBase
+  TransformComponent:
+    Translation:
+    - 0
+    - 0
+    - 0
+    Rotation:
+    - 0
+    - 0
+    - 0
+    Scale:
+    - 1
+    - 1
+    - 1
+  UIWidgetComponent:
+    Visible: true
+    EditorVisible: true
+    Position:
+    - 0.03
+    - 0.72
+    Size:
+    - 0.13
+    - 0.21
+    Rotation: 0
+    Anchor: 0
+    SortOrder: 40
+    ParentEntity: 930000021
+  UIPanelComponent:
+    BackgroundColor:
+    - 0.12
+    - 0.14
+    - 0.18
+    - 0.72
+    BorderColor:
+    - 0.4
+    - 0.85
+    - 0.9
+    - 0.55
+    BorderThickness: 0.003
+- Entity: 930000101
+  TagComponent:
+    Tag: AR_JoystickThumb
+  TransformComponent:
+    Translation:
+    - 0
+    - 0
+    - 0
+    Rotation:
+    - 0
+    - 0
+    - 0
+    Scale:
+    - 1
+    - 1
+    - 1
+  UIWidgetComponent:
+    Visible: true
+    EditorVisible: true
+    Position:
+    - 0.095
+    - 0.825
+    Size:
+    - 0.05
+    - 0.088
+    Rotation: 0
+    Anchor: 0
+    SortOrder: 41
+    ParentEntity: 930000021
+  UIPanelComponent:
+    BackgroundColor:
+    - 0.85
+    - 0.95
+    - 1.0
+    - 0.85
+    BorderColor:
+    - 0.4
+    - 0.85
+    - 0.9
+    - 0.9
+    BorderThickness: 0.003
+- Entity: 930000110
+  TagComponent:
+    Tag: AR_Weapon_1
+  TransformComponent:
+    Translation:
+    - 0
+    - 0
+    - 0
+    Rotation:
+    - 0
+    - 0
+    - 0
+    Scale:
+    - 1
+    - 1
+    - 1
+  UIWidgetComponent:
+    Visible: true
+    EditorVisible: true
+    Position:
+    - 0.04
+    - 0.63
+    Size:
+    - 0.09
+    - 0.075
+    Rotation: 0
+    Anchor: 0
+    SortOrder: 40
+    ParentEntity: 930000021
+  UIPanelComponent:
+    BackgroundColor:
+    - 0.12
+    - 0.14
+    - 0.18
+    - 0.72
+    BorderColor:
+    - 0.4
+    - 0.85
+    - 0.9
+    - 0.4
+    BorderThickness: 0.003
+  UITextComponent:
+    Text: 手枪
+    Color: &id001
+    - 1
+    - 1
+    - 1
+    - 1
+    FontSize: 0.026
+    FontPath: assets/fonts/wqy-microhei.ttc
+- Entity: 930000111
+  TagComponent:
+    Tag: AR_Weapon_2
+  TransformComponent:
+    Translation:
+    - 0
+    - 0
+    - 0
+    Rotation:
+    - 0
+    - 0
+    - 0
+    Scale:
+    - 1
+    - 1
+    - 1
+  UIWidgetComponent:
+    Visible: true
+    EditorVisible: true
+    Position:
+    - 0.04
+    - 0.545
+    Size:
+    - 0.09
+    - 0.075
+    Rotation: 0
+    Anchor: 0
+    SortOrder: 40
+    ParentEntity: 930000021
+  UIPanelComponent:
+    BackgroundColor:
+    - 0.12
+    - 0.14
+    - 0.18
+    - 0.72
+    BorderColor:
+    - 0.4
+    - 0.85
+    - 0.9
+    - 0.4
+    BorderThickness: 0.003
+  UITextComponent:
+    Text: 重炮
+    Color: *id001
+    FontSize: 0.026
+    FontPath: assets/fonts/wqy-microhei.ttc
+- Entity: 930000112
+  TagComponent:
+    Tag: AR_Weapon_3
+  TransformComponent:
+    Translation:
+    - 0
+    - 0
+    - 0
+    Rotation:
+    - 0
+    - 0
+    - 0
+    Scale:
+    - 1
+    - 1
+    - 1
+  UIWidgetComponent:
+    Visible: true
+    EditorVisible: true
+    Position:
+    - 0.04
+    - 0.46
+    Size:
+    - 0.09
+    - 0.075
+    Rotation: 0
+    Anchor: 0
+    SortOrder: 40
+    ParentEntity: 930000021
+  UIPanelComponent:
+    BackgroundColor:
+    - 0.12
+    - 0.14
+    - 0.18
+    - 0.72
+    BorderColor:
+    - 0.4
+    - 0.85
+    - 0.9
+    - 0.4
+    BorderThickness: 0.003
+  UITextComponent:
+    Text: 太刀
+    Color: *id001
+    FontSize: 0.026
+    FontPath: assets/fonts/wqy-microhei.ttc
+- Entity: 930000120
+  TagComponent:
+    Tag: AR_Attack
+  TransformComponent:
+    Translation:
+    - 0
+    - 0
+    - 0
+    Rotation:
+    - 0
+    - 0
+    - 0
+    Scale:
+    - 1
+    - 1
+    - 1
+  UIWidgetComponent:
+    Visible: true
+    EditorVisible: true
+    Position:
+    - 0.84
+    - 0.72
+    Size:
+    - 0.13
+    - 0.21
+    Rotation: 0
+    Anchor: 0
+    SortOrder: 40
+    ParentEntity: 930000021
+  UIPanelComponent:
+    BackgroundColor:
+    - 0.16
+    - 0.2
+    - 0.26
+    - 0.78
+    BorderColor:
+    - 0.95
+    - 0.6
+    - 0.35
+    - 0.7
+    BorderThickness: 0.003
+  UITextComponent:
+    Text: 攻击
+    Color: *id001
+    FontSize: 0.03
+    FontPath: assets/fonts/wqy-microhei.ttc

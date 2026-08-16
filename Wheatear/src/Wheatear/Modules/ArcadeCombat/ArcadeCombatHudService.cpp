@@ -1,8 +1,17 @@
 #include "wtpch.h"
 #include "ArcadeCombatHudService.h"
 
+#include "Wheatear/Core/Application.h"
+#include "Wheatear/Core/Window.h"
 #include "Wheatear/Gameplay/Services/GameplayUIService.h"
+#include "Wheatear/Input/Input.h"
+#include "Wheatear/Input/MouseButtonCodes.h"
+#include "Wheatear/Scene/Components.h"
+#include "Wheatear/Scene/SceneQueries.h"
 #include "Wheatear/UI/UIRuntimeTools.h"
+
+#include <algorithm>
+#include <cmath>
 
 #include <string>
 
@@ -34,12 +43,113 @@ namespace Wheatear::ArcadeCombatHudService {
             if (level.RuntimeBossIntroStarted && !level.RuntimeBossIntroFinished)
                 return "首领登场中，暂时无法行动。";
             if (!level.RuntimeBossIntroStarted)
-                return "移动到发光点。WASD 移动，鼠标 / J 攻击，1/2/3 切换武器。";
+                return "移动到发光点。左摇杆 / WASD 移动，攻击键 / J 攻击，武器框 / 1 2 3 切换。";
             if (player && player->ControlsLocked)
                 return "战斗演出中，暂时无法行动。";
             if (boss && boss->Active)
                 return "战斗开始。利用掩体、切换武器，并保持移动。";
             return "准备。";
+        }
+
+
+        // ---- on-screen touch controls -------------------------------------
+        bool g_TouchDragging = false;
+        glm::vec2 g_TouchMove = { 0.0f, 0.0f };
+        bool g_TouchAttackHeld = false;
+        int g_TouchWeaponPressed = -1;
+        bool g_WeaponButtonLastHeld[3] = { false, false, false };
+
+        static glm::vec2 TouchWindowSize()
+        {
+            Window& window = Application::Get().GetWindow();
+            return {
+                std::max(1.0f, static_cast<float>(window.GetWidth())),
+                std::max(1.0f, static_cast<float>(window.GetHeight()))
+            };
+        }
+
+        static bool PointInTouchWidget(Scene* scene,
+            const std::string& name,
+            const glm::vec2& mousePx,
+            const glm::vec2& windowSize)
+        {
+            Entity widget = SceneQueries::FindEntityByName(scene, name);
+            if (!widget || !widget.HasComponent<UIWidgetComponent>())
+                return false;
+            const auto& ui = widget.GetComponent<UIWidgetComponent>();
+            const glm::vec2 minPx = ui.Position * windowSize;
+            const glm::vec2 maxPx = (ui.Position + ui.Size) * windowSize;
+            return mousePx.x >= minPx.x && mousePx.x <= maxPx.x
+                && mousePx.y >= minPx.y && mousePx.y <= maxPx.y;
+        }
+
+        static void UpdateTouchControls(Scene* scene)
+        {
+            const glm::vec2 windowSize = TouchWindowSize();
+            const glm::vec2 mousePx = { Input::GetMouseX(), Input::GetMouseY() };
+            // IsMouseButtonPressed reports the held state (GLFW_PRESS).
+            const bool leftDown = Input::IsMouseButtonPressed(WT_MOUSE_BUTTON_LEFT);
+
+            // Joystick: grab inside the base, steer (free direction), release.
+            Entity base = SceneQueries::FindEntityByName(scene, "AR_JoystickBase");
+            Entity thumb = SceneQueries::FindEntityByName(scene, "AR_JoystickThumb");
+            if (base && base.HasComponent<UIWidgetComponent>())
+            {
+                const auto& baseWidget = base.GetComponent<UIWidgetComponent>();
+                const glm::vec2 centerPx = (baseWidget.Position + baseWidget.Size * 0.5f) * windowSize;
+                const glm::vec2 halfPx = baseWidget.Size * windowSize * 0.5f;
+
+                if (!g_TouchDragging
+                    && leftDown
+                    && glm::abs(mousePx.x - centerPx.x) <= halfPx.x
+                    && glm::abs(mousePx.y - centerPx.y) <= halfPx.y)
+                {
+                    g_TouchDragging = true;
+                }
+                if (g_TouchDragging && !leftDown)
+                {
+                    g_TouchDragging = false;
+                    g_TouchMove = { 0.0f, 0.0f };
+                }
+
+                glm::vec2 stickPosition = baseWidget.Position;
+                if (g_TouchDragging)
+                {
+                    glm::vec2 raw = (mousePx - centerPx) / halfPx;
+                    const float rawLength = glm::length(raw);
+                    if (rawLength > 1.0f)
+                        raw /= rawLength;
+                    g_TouchMove = raw;
+                    stickPosition = baseWidget.Position + baseWidget.Size * 0.5f
+                        + raw * (baseWidget.Size * 0.30f);
+                }
+                else
+                {
+                    stickPosition = baseWidget.Position + baseWidget.Size * 0.5f;
+                }
+
+                if (thumb && thumb.HasComponent<UIWidgetComponent>())
+                {
+                    auto& thumbWidget = thumb.GetComponent<UIWidgetComponent>();
+                    thumbWidget.Position = stickPosition - thumbWidget.Size * 0.5f;
+                }
+            }
+
+            // Attack button: held while pressed inside its area.
+            g_TouchAttackHeld = leftDown
+                && PointInTouchWidget(scene, "AR_Attack", mousePx, windowSize);
+
+            // Weapon buttons: edge-triggered on press.
+            g_TouchWeaponPressed = -1;
+            for (int i = 0; i < 3; ++i)
+            {
+                const std::string name = "AR_Weapon_" + std::to_string(i + 1);
+                const bool held = leftDown
+                    && PointInTouchWidget(scene, name, mousePx, windowSize);
+                if (held && !g_WeaponButtonLastHeld[i])
+                    g_TouchWeaponPressed = i;
+                g_WeaponButtonLastHeld[i] = held;
+            }
         }
 
     } // namespace
@@ -49,6 +159,8 @@ namespace Wheatear::ArcadeCombatHudService {
         Entity player,
         Entity boss)
     {
+        UpdateTouchControls(scene);
+
         const ArcadeCombatantComponent* playerCombatant =
             player && player.HasComponent<ArcadeCombatantComponent>()
             ? &player.GetComponent<ArcadeCombatantComponent>()
@@ -92,6 +204,22 @@ namespace Wheatear::ArcadeCombatHudService {
 
         UIRuntimeTools::SetWidgetVisible(scene, level.PausePanelEntityName, level.RuntimePaused);
         UIRuntimeTools::SetText(scene, level.MessageTextEntityName, BuildMessage(level, playerCombatant, bossComponent));
+    }
+
+
+    glm::vec2 GetTouchMovement()
+    {
+        return g_TouchDragging ? g_TouchMove : glm::vec2(0.0f);
+    }
+
+    bool GetTouchAttackHeld()
+    {
+        return g_TouchAttackHeld;
+    }
+
+    int GetTouchWeaponPressed()
+    {
+        return g_TouchWeaponPressed;
     }
 
 } // namespace Wheatear::ArcadeCombatHudService

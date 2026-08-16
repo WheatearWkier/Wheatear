@@ -27,10 +27,6 @@ namespace Wheatear::GameplayUILayoutService {
 
     WHEATEAR_API Entity EnsureUIWidget(Scene* scene,
         const std::string& entityName,
-        const std::string& parentName,
-        glm::vec2 position,
-        glm::vec2 size,
-        int sortOrder,
         bool visible = true);
     WHEATEAR_API Entity EnsurePager(Scene* scene, const std::string& pagerName, int pageCount);
     WHEATEAR_API Entity EnsurePanel(Scene* scene,

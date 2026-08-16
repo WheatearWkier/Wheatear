@@ -33,7 +33,18 @@ namespace Wheatear {
             if (InputBindingService::IsActionDown("move.down"))
                 input.Movement.y -= 1.0f;
 
-            input.AttackHeld = InputBindingService::IsActionDown("arcade.attack");
+            input.AttackHeld = InputBindingService::IsActionDown("arcade.attack")
+                || ArcadeCombatHudService::GetTouchAttackHeld();
+
+            // On-screen joystick takes over while dragged; its y-axis follows
+            // the UI convention (up = -1), so it is flipped to match the world
+            // convention (up = +1) used by PlayerInputState.
+            const glm::vec2 touch = ArcadeCombatHudService::GetTouchMovement();
+            if (touch.x != 0.0f || touch.y != 0.0f)
+            {
+                input.Movement.x = touch.x;
+                input.Movement.y = -touch.y;
+            }
             return input;
         }
 

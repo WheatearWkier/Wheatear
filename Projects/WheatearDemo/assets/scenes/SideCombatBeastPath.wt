@@ -804,17 +804,17 @@ Entities:
     - 0.01
     JoystickBaseLayout:
       Position:
-      - 0.047
-      - 0.79
+      - 0.04
+      - 0.75
       Size:
-      - 0.08
-      - 0.142
+      - 0.12
+      - 0.21
     JoystickThumbSize:
-    - 0.033
-    - 0.059
+    - 0.05
+    - 0.088
     JoystickThumbTravel:
-    - 0.022
-    - 0.039
+    - 0.033
+    - 0.058
     PlayerStatusLayout:
       BuffStart:
       - 0.388
@@ -4846,7 +4846,7 @@ Entities:
     EditorVisible: true
     Position:
     - 0.0379999988
-    - 0.662
+    - 0.6
     Size:
     - 0.0520000011
     - 0.0920000002
@@ -5171,7 +5171,7 @@ Entities:
     EditorVisible: true
     Position:
     - 0.0960000008
-    - 0.662
+    - 0.6
     Size:
     - 0.0520000011
     - 0.0920000002
@@ -5496,7 +5496,7 @@ Entities:
     EditorVisible: true
     Position:
     - 0.153999999
-    - 0.662
+    - 0.6
     Size:
     - 0.0520000011
     - 0.0920000002
@@ -5820,11 +5820,11 @@ Entities:
     Visible: true
     EditorVisible: true
     Position:
-    - 0.0469999984
-    - 0.790000021
+    - 0.04
+    - 0.75
     Size:
-    - 0.0799999982
-    - 0.142000005
+    - 0.12
+    - 0.21
     Rotation: 0
     Anchor: 0
     SortOrder: 58
@@ -5867,8 +5867,8 @@ Entities:
     - 0.0705000013
     - 0.831499994
     Size:
-    - 0.0329999998
-    - 0.0590000004
+    - 0.05
+    - 0.088
     Rotation: 0
     Anchor: 0
     SortOrder: 59

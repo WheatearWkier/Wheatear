@@ -4,6 +4,7 @@
 #include "ArcadeCombatMath.h"
 #include "ArcadeCombatProjectileService.h"
 #include "ArcadeCombatSignalHandlers.h"
+#include "ArcadeCombatHudService.h"
 #include "ArcadeCombatTuningService.h"
 #include "Wheatear/Input/InputBindingService.h"
 #include "Wheatear/Gameplay/Action/ActionRecipeQueries.h"
@@ -48,6 +49,14 @@ namespace Wheatear::ArcadeCombatPlayerService {
         if (InputBindingService::IsActionPressed("arcade.weapon2"))
             controller.CurrentWeapon = ArcadeWeaponType::Cannon;
         if (InputBindingService::IsActionPressed("arcade.weapon3"))
+            controller.CurrentWeapon = ArcadeWeaponType::Katana;
+
+        const int touchWeapon = ArcadeCombatHudService::GetTouchWeaponPressed();
+        if (touchWeapon == (int)ArcadeWeaponType::Gun)
+            controller.CurrentWeapon = ArcadeWeaponType::Gun;
+        else if (touchWeapon == (int)ArcadeWeaponType::Cannon)
+            controller.CurrentWeapon = ArcadeWeaponType::Cannon;
+        else if (touchWeapon == (int)ArcadeWeaponType::Katana)
             controller.CurrentWeapon = ArcadeWeaponType::Katana;
     }
 

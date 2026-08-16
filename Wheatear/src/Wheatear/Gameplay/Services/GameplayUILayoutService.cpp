@@ -44,16 +44,8 @@ namespace Wheatear::GameplayUILayoutService {
 
     Entity EnsureUIWidget(Scene* scene,
         const std::string& entityName,
-        const std::string& parentName,
-        glm::vec2 position,
-        glm::vec2 size,
-        int sortOrder,
         bool visible)
     {
-        (void)parentName;
-        (void)position;
-        (void)size;
-        (void)sortOrder;
 
         Entity entity = FindAuthoredUIWidget(scene, entityName);
         if (entity && entity.HasComponent<UIWidgetComponent>())
@@ -78,10 +70,6 @@ namespace Wheatear::GameplayUILayoutService {
         float borderThickness,
         bool clipChildren)
     {
-        (void)parentName;
-        (void)position;
-        (void)size;
-        (void)sortOrder;
         (void)background;
         (void)border;
         (void)borderThickness;
@@ -97,10 +85,6 @@ namespace Wheatear::GameplayUILayoutService {
         int sortOrder,
         float contentHeight)
     {
-        (void)parentName;
-        (void)position;
-        (void)size;
-        (void)sortOrder;
         (void)contentHeight;
         return FindAuthoredScrollView(scene, entityName);
     }
@@ -115,10 +99,6 @@ namespace Wheatear::GameplayUILayoutService {
         float fontSize,
         glm::vec4 color)
     {
-        (void)parentName;
-        (void)position;
-        (void)size;
-        (void)sortOrder;
         (void)fontSize;
         (void)color;
 
@@ -168,10 +148,6 @@ namespace Wheatear::GameplayUILayoutService {
         float maxValue,
         const std::string& command)
     {
-        (void)parentName;
-        (void)position;
-        (void)size;
-        (void)sortOrder;
         (void)minValue;
         (void)maxValue;
 

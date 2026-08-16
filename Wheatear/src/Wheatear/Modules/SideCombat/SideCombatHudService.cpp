@@ -279,8 +279,6 @@ namespace Wheatear::SideCombatHudService {
 
         static Entity EnsureTransparentWidget(Scene* scene,
             const std::string& name,
-            glm::vec2 position,
-            glm::vec2 size,
             int sortOrder,
             bool visible = true,
             bool button = false)
@@ -290,10 +288,6 @@ namespace Wheatear::SideCombatHudService {
 
             Entity entity = GameplayUILayoutService::EnsureUIWidget(scene,
                 name,
-                kSideCombatCanvasName,
-                position,
-                size,
-                sortOrder,
                 visible);
             if (!entity)
                 return {};
@@ -319,8 +313,6 @@ namespace Wheatear::SideCombatHudService {
 
         static Entity EnsureSheetImage(Scene* scene,
             const std::string& name,
-            glm::vec2 position,
-            glm::vec2 size,
             int sortOrder,
             const SheetUVRect& uv,
             glm::vec4 color = glm::vec4(1.0f),
@@ -328,7 +320,7 @@ namespace Wheatear::SideCombatHudService {
             bool visible = true,
             bool forceImage = false)
         {
-            Entity entity = EnsureTransparentWidget(scene, name, position, size, sortOrder, visible, button);
+            Entity entity = EnsureTransparentWidget(scene, name, button);
             if (!entity)
                 return {};
 
@@ -364,7 +356,7 @@ namespace Wheatear::SideCombatHudService {
             glm::vec4 color = glm::vec4(1.0f),
             bool visible = true)
         {
-            Entity entity = EnsureTransparentWidget(scene, name, position, size, sortOrder, visible, false);
+            Entity entity = EnsureTransparentWidget(scene, name, false);
             if (!entity)
                 return {};
 
@@ -406,8 +398,6 @@ namespace Wheatear::SideCombatHudService {
             const float width = std::max(0.001f, size.x * ratio);
             Entity entity = EnsureSheetImage(scene,
                 name,
-                position,
-                { width, size.y },
                 sortOrder,
                 uv,
                 color,
@@ -682,15 +672,15 @@ namespace Wheatear::SideCombatHudService {
                 const glm::vec2 framePosition = slot.Position;
                 const glm::vec2 iconPosition = framePosition + slot.IconInset;
                 SetItemSlotVisible(scene, prefix, true);
-                EnsureSheetImage(scene, prefix + "_Frame", framePosition, slot.FrameSize, 58, ItemFrameUV());
+                EnsureSheetImage(scene, prefix + "_Frame", 58, ItemFrameUV());
                 if (slot.UseSheetIcon)
                 {
-                    EnsureSheetImage(scene, prefix + "_Icon", iconPosition, slot.IconSize, 60, SheetRect(slot.IconSheetPixels),
+                    EnsureSheetImage(scene, prefix + "_Icon", 60, SheetRect(slot.IconSheetPixels),
                         glm::vec4(1.0f), true);
                 }
                 else
                 {
-                    Entity icon = EnsureTransparentWidget(scene, prefix + "_Icon", iconPosition, slot.IconSize, 60, true, true);
+                    Entity icon = EnsureTransparentWidget(scene, prefix + "_Icon", 60, true, true);
                     if (icon)
                     {
                         if (icon.HasComponent<UIImageComponent>())
@@ -706,7 +696,7 @@ namespace Wheatear::SideCombatHudService {
                         }
                     }
                 }
-                EnsureTransparentWidget(scene, prefix + "_Button", framePosition, slot.FrameSize, 62, true, true);
+                EnsureTransparentWidget(scene, prefix + "_Button", 62, true, true);
                 EnsureCooldownOverlay(scene, prefix + "_Cooldown", iconPosition, slot.IconSize, 61, slot.UseSheetIcon
                     ? SheetRect(slot.IconSheetPixels)
                     : SheetRect(glm::vec4{ 0.0f, 0.0f, 1.0f, 1.0f }));
@@ -808,10 +798,6 @@ namespace Wheatear::SideCombatHudService {
 
             Entity entity = GameplayUILayoutService::EnsureUIWidget(scene,
                 name,
-                kSideCombatCanvasName,
-                position,
-                size,
-                sortOrder,
                 false);
             if (!entity)
                 return {};
@@ -853,8 +839,8 @@ namespace Wheatear::SideCombatHudService {
             bool visible = true)
         {
             const std::string& prefix = s_SkillPrefix;
-            EnsureTransparentWidget(scene, prefix + "Slot_" + key, position, size, 61, visible, true);
-            EnsureSheetImage(scene, prefix + "Icon_" + key, position, size, 64, uv, iconColor, true, visible);
+            EnsureTransparentWidget(scene, prefix + "Slot_" + key, 61, visible, true);
+            EnsureSheetImage(scene, prefix + "Icon_" + key, 64, uv, iconColor, true, visible);
             EnsureCooldownOverlay(scene, prefix + "Cooldown_" + key, position, size, 66, uv);
             EnsureHudText(scene, prefix + "CooldownText_" + key,
                 position + glm::vec2(size.x * 0.12f, size.y * 0.35f),
@@ -883,9 +869,9 @@ namespace Wheatear::SideCombatHudService {
             bool visible = true)
         {
             const std::string& prefix = s_SkillPrefix;
-            EnsureTransparentWidget(scene, prefix + "Slot_" + key, position, size, 61, visible, true);
+            EnsureTransparentWidget(scene, prefix + "Slot_" + key, 61, visible, true);
 
-            Entity icon = EnsureTransparentWidget(scene, prefix + "Icon_" + key, position, size, 64, visible, true);
+            Entity icon = EnsureTransparentWidget(scene, prefix + "Icon_" + key, 64, visible, true);
             if (icon)
             {
                 const bool hadAuthoredImage = icon.HasComponent<UIImageComponent>() &&
@@ -910,7 +896,7 @@ namespace Wheatear::SideCombatHudService {
                 }
             }
 
-            Entity overlay = EnsureTransparentWidget(scene, prefix + "Cooldown_" + key, position, size, 66, false, false);
+            Entity overlay = EnsureTransparentWidget(scene, prefix + "Cooldown_" + key, 66, false, false);
             if (overlay)
             {
                 if (!overlay.HasComponent<UIImageComponent>())
@@ -998,13 +984,13 @@ namespace Wheatear::SideCombatHudService {
                     (!playerSide && combatant->RuntimeProtectionMax > 0.0f &&
                         combatant->RuntimeProtection <= 0.01f));
 
-            EnsureSheetImage(scene, prefix + "_Buff_0", buffStart, size, 70, BuffAttackUV(),
+            EnsureSheetImage(scene, prefix + "_Buff_0", 70, BuffAttackUV(),
                 glm::vec4(1.0f), false, magicBuff);
-            EnsureSheetImage(scene, prefix + "_Buff_1", buffStart + glm::vec2(gap, 0.0f), size, 70, BuffShieldUV(),
+            EnsureSheetImage(scene, prefix + "_Buff_1", 70, BuffShieldUV(),
                 glm::vec4(1.0f), false, shieldBuff);
-            EnsureSheetImage(scene, prefix + "_Debuff_0", debuffStart, size, 70, DebuffStateUV(),
+            EnsureSheetImage(scene, prefix + "_Debuff_0", 70, DebuffStateUV(),
                 glm::vec4(1.0f), false, stateDebuff);
-            EnsureSheetImage(scene, prefix + "_Debuff_1", debuffStart + glm::vec2(gap, 0.0f), size, 70, DebuffBreakUV(),
+            EnsureSheetImage(scene, prefix + "_Debuff_1", 70, DebuffBreakUV(),
                 glm::vec4(1.0f), false, breakDebuff);
         }
 
@@ -1045,7 +1031,7 @@ namespace Wheatear::SideCombatHudService {
             if (lengthSq > 1.0f)
                 direction /= std::sqrt(lengthSq);
 
-            Entity base = EnsureSheetImage(scene, level.JoystickBaseEntityName, basePosition, baseSize, 58, JoystickUV(),
+            Entity base = EnsureSheetImage(scene, level.JoystickBaseEntityName, 58, JoystickUV(),
                 { 1.0f, 1.0f, 1.0f, 0.86f });
             if (base && base.HasComponent<UIWidgetComponent>())
             {
@@ -1098,8 +1084,6 @@ namespace Wheatear::SideCombatHudService {
                 direction * level.JoystickThumbTravel;
             Entity thumb = EnsureSheetImage(scene,
                 level.JoystickThumbEntityName,
-                thumbCenter - thumbSize * 0.5f,
-                thumbSize,
                 59,
                 JoystickUV(),
                 lengthSq > 0.01f || g_JoystickDragging
@@ -1224,7 +1208,7 @@ namespace Wheatear::SideCombatHudService {
             const float top = framePosition.y + (frameSize.y - glyphHeight) * 0.50f;
             float x = framePosition.x + (frameSize.x - totalWidth) * 0.50f;
 
-            EnsureSheetImage(scene, level.ComboFrameEntityName, framePosition, frameSize, 38,
+            EnsureSheetImage(scene, level.ComboFrameEntityName, 38,
                 ComboFrameUV(), { 1.0f, 1.0f, 1.0f, 0.94f }, false, true);
 
             const float labelWidth = label.Aspect * glyphHeight;
@@ -1297,14 +1281,14 @@ namespace Wheatear::SideCombatHudService {
                 SetWidgetVisible(scene, level.SkillTextEntityName, false);
                 SetWidgetVisible(scene, level.RewardTextEntityName, false);
 
-                EnsureSheetImage(scene, level.TopPanelEntityName, level.TopPanelLayout.Position, level.TopPanelLayout.Size, 18, PlayerFrameUV());
+                EnsureSheetImage(scene, level.TopPanelEntityName, 18, PlayerFrameUV());
                 EnsureSheetFill(scene, level.PlayerHealthBarEntityName, level.PlayerHealthLayout.Position, level.PlayerHealthLayout.Size, 24,
                     RedBarUV(), playerHealthRatio);
                 SetWidgetVisible(scene, level.PlayerUltimateFillEntityName, false);
                 EnsureHudText(scene, level.PlayerHealthTextEntityName, level.PlayerHealthTextLayout.Position, level.PlayerHealthTextLayout.Size, 30,
                     "", 13.0f, { 0.95f, 0.98f, 1.0f, 1.0f });
 
-                EnsureSheetImage(scene, level.ComboPanelEntityName, level.BossPanelLayout.Position, level.BossPanelLayout.Size, 18,
+                EnsureSheetImage(scene, level.ComboPanelEntityName, 18,
                     BossFrameUV(), glm::vec4(1.0f), false, bossVisible);
                 EnsureSheetFill(scene, level.BossHealthBarEntityName, level.BossHealthLayout.Position, level.BossHealthLayout.Size, 24,
                     CyanBarUV(), bossHealthRatio, glm::vec4(1.0f), bossVisible);
