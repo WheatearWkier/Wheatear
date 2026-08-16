@@ -7,6 +7,7 @@
 #include "Wheatear/Core/Log.h"
 #include "Wheatear/Core/Window.h"
 #include "Wheatear/Gameplay/Services/GameplayUILayoutService.h"
+#include "Wheatear/Gameplay/Services/GameplayVisualService.h"
 #include "Wheatear/Gameplay/Services/GameplayTextService.h"
 #include "Wheatear/Input/Input.h"
 #include "Wheatear/Input/InputBindingService.h"
@@ -979,10 +980,12 @@ namespace Wheatear::SideCombatHudService {
                     combatant->RuntimeState == SideCombatState::SuperArmor ||
                     combatant->RuntimeProtection > 0.0f);
             const bool stateDebuff = visible && combatant && IsNegativeCombatState(combatant->RuntimeState);
+            // "Broken" is the only true break state: protection == 0 is the
+            // boss's normal starting condition (it grows on hits and refills
+            // during protection recovery), so it must not be mistaken for a
+            // broken guard.
             const bool breakDebuff = visible && combatant &&
-                (combatant->RuntimeState == SideCombatState::Broken ||
-                    (!playerSide && combatant->RuntimeProtectionMax > 0.0f &&
-                        combatant->RuntimeProtection <= 0.01f));
+                combatant->RuntimeState == SideCombatState::Broken;
 
             EnsureSheetImage(scene, prefix + "_Buff_0", 70, BuffAttackUV(),
                 glm::vec4(1.0f), false, magicBuff);
@@ -1372,8 +1375,15 @@ namespace Wheatear::SideCombatHudService {
             Entity entity = FindEntityByName(scene, name);
             if (!entity)
             {
-                WarnMissingAuthoredHud(scene, name, "entity");
-                return {};
+                // Wave-spawned enemies have no authored HUD entities; create
+                // a plain colored sprite on demand. It is named after the
+                // enemy (reused each frame, re-created after scene reloads;
+                // stale ones simply stay hidden once the enemy is gone).
+                entity = scene->CreateEntity(name);
+                auto& created = entity.AddComponent<SpriteRendererComponent>();
+                created.Texture = nullptr;
+                created.Color = color;
+                return entity;
             }
 
             if (!entity.HasComponent<SpriteRendererComponent>())
@@ -1395,6 +1405,31 @@ namespace Wheatear::SideCombatHudService {
             Entity entity = FindEntityByName(scene, name);
             if (entity && entity.HasComponent<SpriteRendererComponent>())
                 entity.GetComponent<SpriteRendererComponent>().Color.a = 0.0f;
+        }
+
+        static Entity EnsureWorldBadge(Scene* scene,
+            const std::string& name,
+            const SheetUVRect& uv,
+            bool visible)
+        {
+            if (!scene)
+                return {};
+
+            Entity entity = FindEntityByName(scene, name);
+            if (!entity)
+            {
+                entity = scene->CreateEntity(name);
+                entity.AddComponent<SpriteRendererComponent>();
+            }
+            if (!entity.HasComponent<SpriteRendererComponent>())
+                return {};
+
+            auto& sprite = entity.GetComponent<SpriteRendererComponent>();
+            sprite.Texture = GameplayVisualService::LoadTextureCached(SideUISheetPath());
+            sprite.UVMin = uv.Min;
+            sprite.UVMax = uv.Max;
+            sprite.Color.a = visible ? 1.0f : 0.0f;
+            return entity;
         }
 
         static void UpdateEnemyHealthBars(Scene* scene,
@@ -1463,6 +1498,36 @@ namespace Wheatear::SideCombatHudService {
                     };
                     transform.Scale = { fillWidth, 0.052f, 1.0f };
                 }
+
+                // Status badges follow the health bar: a row above it, sized
+                // to the bar (each badge ~ bar height x 1.15), only taking
+                // space while active.
+                const bool shieldBadge = combatant.RuntimeInvulnerableTimer > 0.0f
+                    || combatant.Invulnerable
+                    || combatant.RuntimeState == SideCombatState::SuperArmor;
+                const bool stateBadge = IsNegativeCombatState(combatant.RuntimeState);
+                const bool breakBadge = combatant.RuntimeState == SideCombatState::Broken;
+                const float badgeSize = 0.105f;
+                const float badgeGap = 0.11f;
+                const float badgeY = baseY + 0.15f;
+                float badgeX = baseX - fullWidth * 0.5f;
+                auto placeBadge = [&](const std::string& suffix,
+                    const SheetUVRect& uv,
+                    bool on)
+                {
+                    Entity badge = EnsureWorldBadge(scene, tag + suffix, uv, on);
+                    if (!badge || !badge.HasComponent<TransformComponent>())
+                        return;
+                    auto& transform = badge.GetComponent<TransformComponent>();
+                    transform.Translation = { badgeX + badgeSize * 0.5f, badgeY, z + 0.15f };
+                    transform.Scale = { badgeSize, badgeSize * 1.1f, 1.0f };
+                    if (on)
+                        badgeX += badgeGap;
+                };
+                placeBadge("_Buff_0", BuffAttackUV(), false);
+                placeBadge("_Buff_1", BuffShieldUV(), shieldBadge);
+                placeBadge("_Debuff_0", DebuffStateUV(), stateBadge);
+                placeBadge("_Debuff_1", DebuffBreakUV(), breakBadge);
             }
         }
 
