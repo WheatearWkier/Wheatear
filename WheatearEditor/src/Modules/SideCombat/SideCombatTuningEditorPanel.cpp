@@ -4,6 +4,7 @@
 #include "Editor/EditorContentPickers.h"
 #include "Editor/EditorFloatingWindow.h"
 #include "Editor/EditorLocale.h"
+#include "Editor/EditorRequests.h"
 #include "Editor/EditorWidgets.h"
 #include "Editor/GameplayEditorShell.h"
 #include "Editor/YamlTreeEditor.h"
@@ -11,6 +12,7 @@
 #include "Wheatear/Assets/AssetAliasRegistry.h"
 #include "Wheatear/Assets/AssetPath.h"
 #include "Wheatear/Modules/SideCombat/SideCombatSkillRegistry.h"
+#include "Wheatear/Utils/StringUtils.h"
 
 #include <imgui/imgui.h>
 #include <yaml-cpp/yaml.h>
@@ -26,6 +28,38 @@ namespace Wheatear {
         static std::string s_PendingOpenPath;
 
         using namespace EditorWidgets;
+
+        // Adds a new map entry (attacks / skills / profiles / enemyTypes):
+        // a small input + Add button. Returns the newly created key (empty
+        // when nothing was added) so callers can select it immediately.
+        static std::string DrawAddMapEntryBar(const char* label,
+            YAML::Node map,
+            const std::string& bufferKey,
+            std::unordered_map<std::string, std::string>& buffers,
+            bool& dirty)
+        {
+            std::string& buffer = buffers[bufferKey];
+            char input[256] = {};
+            std::strncpy(input, buffer.c_str(), sizeof(input) - 1);
+            const bool enterPressed = ImGui::InputText(label, input, sizeof(input),
+                ImGuiInputTextFlags_EnterReturnsTrue);
+            buffer = input;
+            ImGui::SameLine();
+            const bool clicked = ImGui::Button((std::string("Add##") + label).c_str());
+            if (!(enterPressed || clicked))
+                return {};
+
+            const std::string key = StringUtils::Trim(buffer);
+            if (key.empty() || map[key])
+            {
+                buffer.clear();
+                return {};
+            }
+            map[key] = YAML::Node(YAML::NodeType::Map);
+            dirty = true;
+            buffer.clear();
+            return key;
+        }
 
         static void DrawRawPreview(const std::string& text, const char* sourcePath)
         {
@@ -217,7 +251,8 @@ namespace Wheatear {
 
     void SideCombatTuningEditorPanel::Load()
     {
-        m_ResolvedPath = AssetPath::Resolve(AssetAliasRegistry::Resolve(m_SourcePath));
+        // Tunings are game content: read and write from the project root only.
+        m_ResolvedPath = EditorWidgets::ResolveWritableProjectAsset(m_SourcePath);
         m_Status.clear();
         m_RawPreview.clear();
         m_ParseValid = false;
@@ -233,6 +268,8 @@ namespace Wheatear {
         }
 
         m_RawPreview = text;
+        m_RawEditText = text;
+        m_RawEdited = false;
 
         try
         {
@@ -258,6 +295,22 @@ namespace Wheatear {
         if (!m_ParseValid)
         {
             m_Status = "Save blocked: YAML is invalid";
+            return;
+        }
+
+        // Raw edits are authoritative: write the text verbatim (preserves
+        // hand-written comments). Otherwise re-serialize from the tree.
+        if (m_RawEdited)
+        {
+            if (!WriteFileText(m_ResolvedPath, m_RawEditText))
+            {
+                m_Status = "Save failed";
+                return;
+            }
+            m_RawPreview = m_RawEditText;
+            m_RawEdited = false;
+            m_Dirty = false;
+            m_Status = "Saved (raw text)";
             return;
         }
 
@@ -527,6 +580,12 @@ namespace Wheatear {
         YAML::Node root = *m_Root;
         YAML::Node attacks = EnsureMap(root, "attacks");
         const std::vector<std::string> keys = MapKeys(attacks);
+        if (const std::string added = DrawAddMapEntryBar(
+                "New Attack Id", attacks, "attacks", m_NewMapKeys, m_Dirty);
+            !added.empty())
+        {
+            m_SelectedAttackId = added;
+        }
         if (!BeginSelector("Attack", keys, m_SelectedAttackId))
         {
             EditorWidgets::EmptyState("No attacks in YAML.", "Add attack entries to the side-combat tuning data before authoring skills.");
@@ -756,6 +815,12 @@ namespace Wheatear {
         YAML::Node root = *m_Root;
         YAML::Node skills = EnsureMap(root, "skills");
         const std::vector<std::string> keys = MapKeys(skills);
+        if (const std::string added = DrawAddMapEntryBar(
+                "New Skill Id", skills, "skills", m_NewMapKeys, m_Dirty);
+            !added.empty())
+        {
+            m_SelectedSkillId = added;
+        }
         if (!BeginSelector("Skill", keys, m_SelectedSkillId))
         {
             EditorWidgets::EmptyState("No skills in YAML.", "Add skill entries to expose player moves through data.");
@@ -777,9 +842,9 @@ namespace Wheatear {
         EditorWidgets::SectionHeader(EditorLocale::Text("Item Slots", "道具槽"),
             "Data-driven consumable slots: add a row + an input action + a HUD slot to ship a new item with zero C++.");
 
+        // One-click shortcuts for the three-step item workflow.
         ImGui::TextDisabled("%s", EditorLocale::Text(
-            "Add an item: 1) this table 2) Input Bindings panel > New Action 3) Side Combat HUD Preset > Item Slots",
-            "加道具三步：1) 本表加行 2) 输入绑定面板新增动作并绑键 3) HUD 预设编辑器加槽位图标"));
+            "Add an item:", "加一个道具："));
 
         YAML::Node root = *m_Root;
         YAML::Node slots = root["itemSlots"];
@@ -788,6 +853,29 @@ namespace Wheatear {
             root["itemSlots"] = YAML::Node(YAML::NodeType::Sequence);
             slots = root["itemSlots"];
         }
+
+        if (ImGui::Button(EditorLocale::Text("1) Add Item Row Below", "1) 在下方添加道具行")))
+        {
+            int nextSlot = 1;
+            for (const YAML::Node& slot : slots)
+            {
+                if (slot && slot.IsMap())
+                    nextSlot = std::max(nextSlot, slot["slot"].as<int>(nextSlot) + 1);
+            }
+            YAML::Node newSlot(YAML::NodeType::Map);
+            newSlot["slot"] = nextSlot;
+            newSlot["actionId"] = "side.item" + std::to_string(nextSlot);
+            newSlot["kind"] = "heal";
+            slots.push_back(newSlot);
+            m_Dirty = true;
+        }
+        ImGui::SameLine();
+        if (ImGui::Button(EditorLocale::Text("2) Open Input Bindings", "2) 打开输入绑定面板")))
+            EditorRequests::RequestOpenInputBindings();
+        ImGui::SameLine();
+        if (ImGui::Button(EditorLocale::Text("3) Select Side Combat Level", "3) 选中场景战斗关卡实体")))
+            EditorRequests::RequestSelectSideCombatLevelEntity();
+        ImGui::Separator();
 
         static const char* kKindNames[] = { "heal", "mana", "attack_buff" };
 
@@ -1090,6 +1178,13 @@ namespace Wheatear {
             std::find(keys.begin(), keys.end(), m_SelectedEnemyType) == keys.end())
             m_SelectedEnemyType = keys.front();
 
+        if (const std::string added = DrawAddMapEntryBar(
+                "New Enemy Type", types, "enemyTypes", m_NewMapKeys, m_Dirty);
+            !added.empty())
+        {
+            m_SelectedEnemyType = added;
+        }
+
         const float listWidth = std::max(220.0f, ImGui::GetContentRegionAvail().x * 0.28f);
         ImGui::BeginChild("##EnemyTypeList", ImVec2(listWidth, 0.0f), true);
         for (const std::string& key : keys)
@@ -1141,6 +1236,12 @@ namespace Wheatear {
 
         YAML::Node profiles = EnsureMap(progression, "profiles");
         const std::vector<std::string> keys = MapKeys(profiles);
+        if (const std::string added = DrawAddMapEntryBar(
+                "New Profile Id", profiles, "profiles", m_NewMapKeys, m_Dirty);
+            !added.empty())
+        {
+            m_SelectedProfileId = added;
+        }
         if (!BeginSelector("Profile", keys, m_SelectedProfileId))
         {
             EditorWidgets::EmptyState("No profiles in YAML.", "Add progression profiles so packaged builds can switch loadouts without recompiling.");
@@ -1164,9 +1265,52 @@ namespace Wheatear {
 
     void SideCombatTuningEditorPanel::DrawRawPreviewTab()
     {
-        EditorWidgets::SectionHeader("Raw Preview", "Generated YAML preview. Save writes this text back to disk.");
-        RefreshRawPreview();
-        DrawRawPreview(m_RawPreview, m_SourcePath.c_str());
+        EditorWidgets::SectionHeader("Raw YAML", "Editable raw text. Apply parses it into the structured tabs; Save writes it back verbatim.");
+
+        const bool changed = EditorWidgets::InputMultilineString(
+            "##SideCombatRawEdit",
+            m_RawEditText,
+            ImVec2(-1.0f, -1.0f),
+            std::max<size_t>(m_RawEditText.size() + 1, 8192),
+            ImGuiInputTextFlags_AllowTabInput);
+        if (changed)
+            m_RawEdited = true;
+
+        ImGui::Spacing();
+        if (ImGui::Button(EditorLocale::Text("Apply Raw To Editor", "应用原始文本到编辑器")))
+        {
+            try
+            {
+                YAML::Node parsed = YAML::Load(m_RawEditText);
+                if (!parsed.IsMap())
+                {
+                    m_Status = "Raw text must be a YAML map.";
+                }
+                else
+                {
+                    *m_Root = parsed;
+                    m_Dirty = true;
+                    m_ParseValid = true;
+                    RefreshSelections();
+                    RefreshRawPreview();
+                    m_Status = "Applied raw text to structured tabs.";
+                }
+            }
+            catch (const std::exception& e)
+            {
+                m_Status = std::string("Parse failed: ") + e.what();
+            }
+        }
+        ImGui::SameLine();
+        if (ImGui::Button(EditorLocale::Text("Reload From Disk", "从磁盘重新加载")))
+        {
+            Load();
+            m_Status = "Reloaded from disk.";
+        }
+        ImGui::SameLine();
+        ImGui::TextDisabled("%s", EditorLocale::Text(
+            "Save writes this text verbatim (comments preserved).",
+            "保存将按此文本原样写回（保留注释）。"));
     }
 
 } // namespace Wheatear

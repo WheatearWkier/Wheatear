@@ -127,7 +127,10 @@ namespace Wheatear::EditorCommandBuilder {
         {
         case CommandKind::None: return {};
         case CommandKind::Scene: return "scene:" + spec.Primary;
-        case CommandKind::Event: return "event:" + spec.Primary;
+        case CommandKind::Event:
+            return spec.Target.empty()
+                ? "event:" + spec.Primary
+                : "event:" + spec.Target + ":" + spec.Primary;
         case CommandKind::NewGame: return "newgame:" + spec.Primary;
         case CommandKind::LoadGame: return "loadgame:" + spec.Primary + ":" + std::to_string(std::max(1, spec.Number));
         case CommandKind::GameSaveOpenSaveMenu: return "gamesave:open_save_menu";
@@ -293,6 +296,14 @@ namespace Wheatear::EditorCommandBuilder {
         {
             spec.Kind = CommandKind::Event;
             spec.Primary = PayloadAfter(command, "event:");
+            // Grammar: event:@UUID:name -> direct call to one entity; the
+            // selector is kept in Target so the builder UI can edit both.
+            const std::vector<std::string> parts = splitColon(command);
+            if (parts.size() >= 3 && parts[1].size() > 1 && parts[1].front() == '@')
+            {
+                spec.Target = parts[1];
+                spec.Primary = parts[2];
+            }
             return spec;
         }
 
@@ -673,6 +684,7 @@ namespace Wheatear::EditorCommandBuilder {
         }
         else
         {
+            spec.Target.clear();
             // Defaults for commands that carry arguments.
             if (kind == CommandKind::TurnMenu)
             {
@@ -881,6 +893,16 @@ namespace Wheatear::EditorCommandBuilder {
                 command = BuildCommand(spec);
                 changed = true;
             }
+            if (EditorWidgets::InputString(
+                    "Target (@UUID, empty = broadcast)", spec.Target, 128))
+            {
+                command = BuildCommand(spec);
+                changed = true;
+            }
+            EditorWidgets::HelpTooltip(
+                "Leave empty to broadcast to every EventScriptComponent. "
+                "To target a single entity, type its @UUID selector here; "
+                "the command becomes event:@UUID:name.");
             break;
         case CommandKind::GameSaveSlotSave:
         case CommandKind::GameSaveLoadSlot:

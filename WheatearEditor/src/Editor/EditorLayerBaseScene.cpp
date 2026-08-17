@@ -1,6 +1,7 @@
 #include "wepch.h"
 #include "Wheatear/Utils/StringUtils.h"
 #include "EditorLayerBase.h"
+#include "EditorRequests.h"
 
 #include "Wheatear/Core/Application.h"
 #include "Wheatear/Assets/AssetPath.h"
@@ -17,6 +18,7 @@
 #include "Wheatear/ImGui/ImGuiLayer.h"
 #include "Wheatear/Modules/GameplayModuleRuntime.h"
 #include "Wheatear/Modules/Progression/GameProgress.h"
+#include "Wheatear/Modules/SideCombat/SideCombatComponents.h"
 #include "Wheatear/Renderer/Framebuffer.h"
 #include "Wheatear/Renderer/RenderCommand.h"
 #include "Wheatear/Renderer/Renderer2D.h"
@@ -33,11 +35,12 @@
 #include "Assets/UITemplateFactory.h"
 #include "Editor/EditorCanvasTools.h"
 #include "Panels/AnimationEditorPanel.h"
+#include "Panels/InputBindingsPanel.h"
+#include "Panels/SpriteSheetPickerPanel.h"
 #include "Editor/EditorCommands.h"
 #include "Editor/EditorLocale.h"
 #include "Panels/SceneHierarchy/SceneHierarchyPanel.h"
 #include "Panels/SceneHierarchy/ComponentDrawers.h"
-#include "Panels/SpriteSheetPickerPanel.h"
 
 #include <imgui/imgui.h>
 #include <imgui/imgui_internal.h>
@@ -286,8 +289,39 @@ namespace Wheatear {
     {
         m_SceneHierarchyPanel->SetContext(m_ActiveScene);
         m_SceneHierarchyPanel->SetRuntimeMode(m_SceneState == SceneState::Play);
+        m_SceneHierarchyPanel->SetSceneMultiSelect(
+            std::unordered_set<UUID>(m_SceneMultiSelect.begin(),
+                m_SceneMultiSelect.end()));
         SetComponentDrawReadOnly(m_SceneState == SceneState::Play);
         m_AnimationEditorPanel->SetScene(m_ActiveScene);
+        m_SpriteSheetPickerPanel->SetScene(m_ActiveScene);
+
+        // Consume editor-wide requests posted by panels without an
+        // EditorLayerBase handle.
+        if (EditorRequests::ConsumeOpenInputBindingsRequest())
+            m_InputBindingsPanel->SetOpen(true);
+
+        if (EditorRequests::ConsumeSelectSideCombatLevelEntityRequest() && m_ActiveScene)
+        {
+            for (auto id : m_ActiveScene->GetRegistry()
+                .view<SideCombatLevelComponent>())
+            {
+                Entity entity{ id, m_ActiveScene.get() };
+                if (entity)
+                {
+                    ActivateHierarchyEntity(entity);
+                    break;
+                }
+            }
+        }
+
+        UUID selectUUID = 0;
+        if (EditorRequests::ConsumeSelectEntityRequest(selectUUID) && m_ActiveScene)
+        {
+            Entity entity = m_ActiveScene->GetEntityByUUID(selectUUID);
+            if (entity)
+                ActivateHierarchyEntity(entity);
+        }
     }
 
     void EditorLayerBase::ClearEntitySelection()
@@ -703,7 +737,8 @@ namespace Wheatear {
 
         PlayerPackageOptions options;
         options.StartupScene = m_PackageScenePath.empty() ? m_EditorScenePath : std::filesystem::path(m_PackageScenePath);
-        options.Configuration = m_PackageConfiguration;
+        // Packaging is the final-product flow: always Release.
+        options.Configuration = "Release";
         options.IncludeDebugSymbols = false;
         m_PlayerBuildStatus = "Packaging player and editor...";
             

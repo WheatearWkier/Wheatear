@@ -227,5 +227,5 @@ powershell -NoProfile -ExecutionPolicy Bypass -File scripts\Build-WheatearEditor
 - `WheatearSandbox/`：独立运行器
 - `Projects/`：用户项目目录（`WheatearDemo/` 是 Sandbox 演示项目，含场景/图集/数据表）
 - `docs/`：设计文档、系统说明和竖切记录
-- `Builds/Windows/Player/<project>/<config>/`：打包产物（exe + content.wtpack + 解包缓存）
-- `Builds/Windows/Editor/<project>/<config>/`：编辑器打包产物
+- `Builds/Windows/Player/<打包名>/`：打包产物（固定 Release，目录名取项目 `player.config` 的 `PackageName`，如 `Demo`；exe + content.wtpack + 解包缓存）
+- `Builds/Windows/Editor/`：编辑器打包产物（工具本体，无工程嵌套）

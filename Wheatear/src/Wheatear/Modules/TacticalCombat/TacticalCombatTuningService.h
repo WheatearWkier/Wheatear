@@ -5,7 +5,10 @@
 
 #include <glm/glm.hpp>
 
+#include <filesystem>
 #include <string>
+#include <string_view>
+#include <vector>
 
 namespace Wheatear::TacticalCombatTuningService {
 
@@ -39,13 +42,61 @@ namespace Wheatear::TacticalCombatTuningService {
         float MinDamage = 6.0f;
     };
 
+    // One frame-animation slot of a tactical unit (idle / attack / hit / down).
+    struct TacticalFrameTuning
+    {
+        std::string Sheet;
+        int CellWidth = 96;
+        int CellHeight = 112;
+        int Columns = 4;
+        int StartFrame = 0;
+        int Count = 1;
+    };
+
+    // Data-table entry for a tactical unit. Matched at runtime start against
+    // scene entities whose TagComponent.Tag uses the tactical unit prefix plus
+    // <Tag>; the tuning
+    // values overwrite TacticalUnitComponent fields (scene component acts as
+    // per-scene fallback when the tag is not present in the tuning).
+    struct TacticalUnitTuning
+    {
+        std::string Tag;
+        int Team = 0;
+        int Slot = 0;
+        int GridX = 0;
+        int GridY = 0;
+        std::string DisplayName = "Unit";
+        std::string ClassName;
+
+        float MaxHealth = 100.0f;
+        float Attack = 24.0f;
+        float Magic = 18.0f;
+        float Defense = 8.0f;
+        int MoveRange = 3;
+        int AttackRange = 1;
+        bool Controllable = false;
+
+        std::string BasicSkillId = "sword_slash";
+        std::string Skill1Id;
+        std::string Skill2Id;
+
+        TacticalFrameTuning IdleFrames;
+        TacticalFrameTuning AttackFrames;
+        TacticalFrameTuning HitFrames;
+        TacticalFrameTuning DownFrames;
+        float AnimationFrameRate = 8.0f;
+    };
+
     struct TacticalCombatTuning
     {
         bool Loaded = false;
         TacticalLevelTuning Level;
         TacticalFormulaTuning Formula;
+        std::vector<TacticalUnitTuning> Units;
     };
 
+    WHEATEAR_API std::filesystem::path TuningSourcePath(const TacticalCombatLevelComponent& level);
+    WHEATEAR_API bool IsFieldManagedByTuning(std::string_view fieldId);
     WHEATEAR_API const TacticalCombatTuning& GetTuning(const TacticalCombatLevelComponent& level);
 
     // Overwrites the level's flow / board / color fields with the tuning
@@ -54,5 +105,12 @@ namespace Wheatear::TacticalCombatTuningService {
     // component fields.
     WHEATEAR_API void ApplyLevelTuning(const TacticalCombatTuning& tuning,
         TacticalCombatLevelComponent& level);
+
+    // Applies the tuning's unit table to scene entities whose tag is
+    // the tactical unit prefix plus <tag> (matching units are overwritten, non-matching scene
+    // units keep their component values). Called at runtime start; the
+    // editor exposes the same operation for edit-time preview.
+    WHEATEAR_API size_t ApplyUnitTuningToScene(Scene* scene,
+        const TacticalCombatTuning& tuning);
 
 } // namespace Wheatear::TacticalCombatTuningService

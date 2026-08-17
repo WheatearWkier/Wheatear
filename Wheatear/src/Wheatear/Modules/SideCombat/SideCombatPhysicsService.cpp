@@ -9,6 +9,7 @@
 #include "Wheatear/Scene/Scene.h"
 
 #include <algorithm>
+#include <filesystem>
 
 namespace Wheatear::SideCombatPhysicsService {
 
@@ -26,8 +27,12 @@ namespace Wheatear::SideCombatPhysicsService {
             return;
 
         const auto& tuning = SideCombatTuningService::GetTuning(level);
-        const float laneMinY = level.LaneMinY < level.LaneMaxY ? level.LaneMinY : tuning.LaneMinY;
-        const float laneMaxY = level.LaneMinY < level.LaneMaxY ? level.LaneMaxY : tuning.LaneMaxY;
+        const std::filesystem::path tuningPath = SideCombatTuningService::TuningSourcePath(level);
+        const bool tuningLoaded = !tuningPath.empty() && std::filesystem::exists(tuningPath);
+        const float authoredLaneMinY = tuningLoaded ? tuning.LaneMinY : level.LaneMinY;
+        const float authoredLaneMaxY = tuningLoaded ? tuning.LaneMaxY : level.LaneMaxY;
+        const float laneMinY = std::min(authoredLaneMinY, authoredLaneMaxY);
+        const float laneMaxY = std::max(authoredLaneMinY, authoredLaneMaxY);
         // Normalize arena bounds: std::clamp requires lo <= hi (hand-edited
         // scenes may invert ArenaMin/ArenaMax, which would be UB).
         const float arenaLo = std::min(level.ArenaMin.x, level.ArenaMax.x);

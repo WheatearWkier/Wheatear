@@ -5,12 +5,15 @@
 #include "Editor/EditorContentPickers.h"
 #include "Editor/EditorLocale.h"
 #include "Editor/EditorWidgets.h"
+#include "Modules/TurnCombat/TurnCombatTuningEditorPanel.h"
 #include "Panels/SceneHierarchy/ComponentDrawers.h"
+#include "Wheatear/Modules/TurnCombat/TurnCombatTuningService.h"
 #include "Wheatear/Modules/TurnCombat/TurnCombatComponents.h"
 #include "Wheatear/Scene/Components.h"
 
 #include <imgui/imgui.h>
 
+#include <filesystem>
 #include <string>
 
 namespace Wheatear {
@@ -63,11 +66,30 @@ namespace Wheatear {
             EditorWidgets::StatusBadge("Edits Scene", EditorWidgets::StatusKind::Success);
             ImGui::Checkbox(EditorLocale::Text("Play On Start", "开始时播放"), &level.PlayOnStart);
             InputString("Level Id", level.LevelId, 220);
+            const std::filesystem::path tuningPath = TurnCombatTuningService::TuningSourcePath(level);
+            const bool tuningLoaded = !tuningPath.empty() && std::filesystem::exists(tuningPath);
+            if (tuningLoaded)
+            {
+                EditorWidgets::InlineStatus(
+                    "Turn combat tuning YAML is authoritative for the timing fields below.",
+                    EditorWidgets::StatusKind::Warning);
+                ImGui::SameLine();
+                if (ImGui::Button(EditorLocale::Text("Open Turn Combat Tuning Editor", "打开回合战斗调参编辑器")))
+                    TurnCombatEditorRequests::RequestOpenTuning(level.TuningPath);
+            }
+            else if (!level.TuningPath.empty())
+            {
+                EditorWidgets::InlineStatus(
+                    "Turn combat tuning YAML was not found; scene timing fields remain editable fallbacks.",
+                    EditorWidgets::StatusKind::Warning);
+            }
+            ImGui::BeginDisabled(tuningLoaded);
             ImGui::DragFloat("Start Fade", &level.StartFadeDuration, 0.02f, 0.0f, 5.0f);
             ImGui::DragFloat("Intro Duration", &level.IntroDuration, 0.02f, 0.0f, 10.0f);
             ImGui::DragFloat(EditorLocale::Text("Action Duration", "行动时长"), &level.ActionDuration, 0.02f, 0.1f, 5.0f);
             ImGui::DragFloat("Victory Return Delay", &level.VictoryReturnDelay, 0.05f, 0.0f, 10.0f);
             ImGui::DragFloat(EditorLocale::Text("Defeat Return Delay", "战败返回延迟"), &level.DefeatReturnDelay, 0.05f, 0.0f, 10.0f);
+            ImGui::EndDisabled();
             DrawCommandBuilder("Victory Command", level.VictorySceneCommand, 260);
             DrawCommandBuilder("Defeat Command", level.DefeatSceneCommand, 260);
 

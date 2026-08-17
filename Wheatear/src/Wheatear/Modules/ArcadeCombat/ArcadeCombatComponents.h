@@ -1,5 +1,7 @@
 #pragma once
 
+#include "Wheatear/Gameplay/SystemBindingRegistry.h"
+
 #include <string>
 
 #include <glm/glm.hpp>
@@ -31,16 +33,16 @@ namespace Wheatear {
         glm::vec2   ArenaMin = { -8.0f, -4.2f };
         glm::vec2   ArenaMax = { 8.0f, 4.2f };
 
-        std::string PlayerEntityName = "Battle_Player";
-        std::string BossEntityName = "Battle_Boss";
-        std::string FadeEntityName = "Battle_Fade";
-        std::string PausePanelEntityName = "Battle_PausePanel";
-        std::string MessageTextEntityName = "Battle_Message";
-        std::string WeaponTextEntityName = "Battle_WeaponText";
-        std::string PlayerHealthBarEntityName = "Battle_PlayerHealth";
-        std::string PlayerHealthTextEntityName = "Battle_PlayerHealthText";
-        std::string BossHealthBarEntityName = "Battle_BossHealth";
-        std::string BossHealthTextEntityName = "Battle_BossHealthText";
+        std::string PlayerEntityName = SystemBindings::Arcade::Player;
+        std::string BossEntityName = SystemBindings::Arcade::Boss;
+        std::string FadeEntityName = SystemBindings::Arcade::Fade;
+        std::string PausePanelEntityName = SystemBindings::Arcade::PausePanel;
+        std::string MessageTextEntityName = SystemBindings::Arcade::MessageText;
+        std::string WeaponTextEntityName = SystemBindings::Arcade::WeaponText;
+        std::string PlayerHealthBarEntityName = SystemBindings::Arcade::PlayerHealthBar;
+        std::string PlayerHealthTextEntityName = SystemBindings::Arcade::PlayerHealthText;
+        std::string BossHealthBarEntityName = SystemBindings::Arcade::BossHealthBar;
+        std::string BossHealthTextEntityName = SystemBindings::Arcade::BossHealthText;
 
         float       StartFadeDuration = 0.8f;
         float       VictoryReturnDelay = 2.6f;

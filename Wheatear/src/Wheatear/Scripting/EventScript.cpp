@@ -80,13 +80,38 @@ namespace Wheatear {
         std::string rawLine;
         EventScriptBlock* current = nullptr;
         int lineNumber = 0;
+        // Comment lines ('#' / '//') pending attachment to the next block or
+        // instruction; comments before the first event become the header.
+        std::vector<std::string> pendingComments;
+
+        auto attachPending = [&pendingComments](EventScriptBlock& block)
+        {
+            if (!pendingComments.empty())
+            {
+                block.LeadingComments = pendingComments;
+                pendingComments.clear();
+            }
+        };
+        auto attachPendingInstruction = [&pendingComments](EventScriptInstruction& instruction)
+        {
+            if (!pendingComments.empty())
+            {
+                instruction.LeadingComments = pendingComments;
+                pendingComments.clear();
+            }
+        };
 
         while (std::getline(stream, rawLine))
         {
             ++lineNumber;
             std::string line = Trim(rawLine);
-            if (line.empty() || StartsWith(line, "#") || StartsWith(line, "//"))
+            if (line.empty())
                 continue;
+            if (StartsWith(line, "#") || StartsWith(line, "//"))
+            {
+                pendingComments.push_back(line);
+                continue;
+            }
 
             const std::string lower = ToLower(line);
             if (StartsWith(lower, "event "))
@@ -96,11 +121,22 @@ namespace Wheatear {
                 {
                     WT_CORE_WARN("EventScript: empty event name at line {}", lineNumber);
                     current = nullptr;
+                    pendingComments.clear();
                     continue;
                 }
 
-                m_Events.push_back({ eventName, {} });
+                m_Events.push_back({ eventName, lineNumber, {}, {} });
                 current = &m_Events.back();
+                if (m_Events.size() == 1)
+                {
+                    // Comments above the very first event are the file header.
+                    m_HeaderComments = pendingComments;
+                    pendingComments.clear();
+                }
+                else
+                {
+                    attachPending(*current);
+                }
                 continue;
             }
 
@@ -111,28 +147,51 @@ namespace Wheatear {
                 {
                     WT_CORE_WARN("EventScript: empty event name at line {}", lineNumber);
                     current = nullptr;
+                    pendingComments.clear();
                     continue;
                 }
 
-                m_Events.push_back({ eventName, {} });
+                m_Events.push_back({ eventName, lineNumber, {}, {} });
                 current = &m_Events.back();
+                if (m_Events.size() == 1)
+                {
+                    m_HeaderComments = pendingComments;
+                    pendingComments.clear();
+                }
+                else
+                {
+                    attachPending(*current);
+                }
                 continue;
             }
 
             if (!current)
             {
+                // Instruction outside any event: preserve the line verbatim
+                // instead of dropping it, so editor round-trips never destroy
+                // hand-written content. Comments stay pending (they may belong
+                // to the next event or block).
+                EventScriptInstruction orphan;
+                orphan.Type = EventScriptInstructionType::RawLine;
+                orphan.Text = line;
+                orphan.SourceLine = lineNumber;
+                m_OrphanLines.push_back(std::move(orphan));
                 WT_CORE_WARN("EventScript: instruction outside event at line {}", lineNumber);
                 continue;
             }
 
             if (lower == "end" || lower == "endevent")
             {
+                // Comments after "end" belong to the next event, not to the
+                // last instruction of the closed block.
+                pendingComments.clear();
                 current = nullptr;
                 continue;
             }
 
             EventScriptInstruction instruction;
             instruction.SourceLine = lineNumber;
+            attachPendingInstruction(instruction);
 
             if (StartsWith(lower, "command ") || StartsWith(lower, "cmd "))
             {
@@ -169,12 +228,29 @@ namespace Wheatear {
             }
             else
             {
+                // Unknown instruction: keep the line verbatim as RawLine so
+                // the editor round-trip is lossless; the executor ignores it.
                 WT_CORE_WARN("EventScript: unknown instruction '{}' at line {}", line, lineNumber);
-                continue;
+                instruction.Type = EventScriptInstructionType::RawLine;
+                instruction.Text = line;
             }
 
             current->Instructions.push_back(std::move(instruction));
         }
+    }
+
+    size_t EventScript::GetUnrecognizedLineCount() const
+    {
+        size_t count = m_OrphanLines.size();
+        for (const EventScriptBlock& block : m_Events)
+        {
+            for (const EventScriptInstruction& instruction : block.Instructions)
+            {
+                if (instruction.Type == EventScriptInstructionType::RawLine)
+                    ++count;
+            }
+        }
+        return count;
     }
 
 } // namespace Wheatear

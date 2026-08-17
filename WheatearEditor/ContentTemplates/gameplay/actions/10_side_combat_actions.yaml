@@ -1,0 +1,235 @@
+actions:
+  - id: side.basic1
+    displayName: Basic Slash I
+    description: First ground-chain slash.
+    icon: side.skill.icon.basic
+    animation: side_basic1
+    sound: assets/vertical_slice/side_combat/audio/swing_light.wav
+    effect: side.vfx.basic_slash
+    cooldown: 0.19
+    duration: 0.31
+    startup: 0.06
+    recovery: 0.10
+    hitTime: 0.06
+    cancelStart: 0.12
+    cancelEnd: 0.26
+    movementScale: 0.58
+    tags: [Gameplay.SideCombat, Gameplay.Combat, Attack.Basic, Combo.Ground]
+    signals: [side.action.start, side.action.hit]
+
+  - id: side.basic2
+    displayName: Basic Slash II
+    description: Second ground-chain slash.
+    icon: side.skill.icon.basic
+    animation: side_basic2
+    sound: assets/vertical_slice/side_combat/audio/swing_light.wav
+    effect: side.vfx.basic_slash
+    cooldown: 0.19
+    duration: 0.34
+    startup: 0.07
+    recovery: 0.12
+    hitTime: 0.07
+    cancelStart: 0.13
+    cancelEnd: 0.30
+    movementScale: 0.52
+    tags: [Gameplay.SideCombat, Gameplay.Combat, Attack.Basic, Combo.Ground]
+    signals: [side.action.start, side.action.hit]
+
+  - id: side.basic3
+    displayName: Basic Finisher
+    description: Ground-chain finisher with stronger lift.
+    icon: side.skill.icon.basic
+    animation: side_basic3
+    sound: assets/vertical_slice/side_combat/audio/swing_heavy.wav
+    effect: side.vfx.basic_slash
+    cooldown: 0.27
+    duration: 0.44
+    startup: 0.09
+    recovery: 0.18
+    hitTime: 0.09
+    cancelStart: 0.19
+    cancelEnd: 0.39
+    movementScale: 0.36
+    tags: [Gameplay.SideCombat, Gameplay.Combat, Attack.Basic, Combo.Ground, Combo.Launch]
+    signals: [side.action.start, side.action.hit]
+
+  - id: side.air_basic
+    displayName: Air Slash
+    description: Air combo filler with hang-time support.
+    icon: side.skill.icon.basic
+    animation: side_air_basic
+    sound: assets/vertical_slice/side_combat/audio/swing_air.wav
+    effect: side.vfx.basic_slash
+    cooldown: 0.16
+    duration: 0.28
+    startup: 0.04
+    recovery: 0.10
+    hitTime: 0.04
+    cancelStart: 0.09
+    cancelEnd: 0.24
+    movementScale: 0.90
+    tags: [Gameplay.SideCombat, Gameplay.Combat, Attack.Basic, Combo.Air]
+    signals: [side.action.start, side.action.hit]
+
+  - id: side.launcher
+    displayName: Launcher
+    description: Ground opener that sends targets upward.
+    icon: side.skill.icon.launcher
+    animation: side_launcher
+    sound: assets/vertical_slice/side_combat/audio/swing_upper.wav
+    effect: side.vfx.launcher_slash
+    cooldown: 0.42
+    duration: 0.53
+    startup: 0.11
+    recovery: 0.20
+    hitTime: 0.11
+    cancelStart: 0.20
+    cancelEnd: 0.44
+    movementScale: 0.35
+    tags: [Gameplay.SideCombat, Gameplay.Combat, Attack.Launcher, Combo.Launch]
+    signals: [side.action.start, side.action.hit]
+
+  - id: side.air_chase
+    displayName: Air Chase
+    description: Air relaunch tool for combo extension.
+    icon: side.skill.icon.launcher
+    animation: side_air_chase
+    sound: assets/vertical_slice/side_combat/audio/swing_air.wav
+    effect: side.vfx.launcher_slash
+    cooldown: 0.36
+    duration: 0.39
+    startup: 0.06
+    recovery: 0.14
+    hitTime: 0.06
+    cancelStart: 0.11
+    cancelEnd: 0.32
+    movementScale: 0.86
+    tags: [Gameplay.SideCombat, Gameplay.Combat, Attack.Launcher, Combo.Air, Combo.Relaunch]
+    signals: [side.action.start, side.action.hit]
+
+  - id: side.magic_bolt
+    displayName: Magic Bolt
+    description: Ranged magic hit used inside combo routes.
+    icon: side.skill.icon.magic
+    animation: side_magic_bolt
+    sound: assets/vertical_slice/side_combat/audio/magic_cast.wav
+    effect: side.vfx.magic_bolt
+    cooldown: 0.64
+    duration: 0.50
+    startup: 0.10
+    recovery: 0.20
+    hitTime: 0.10
+    cancelStart: 0.18
+    cancelEnd: 0.40
+    movementScale: 0.72
+    tags: [Gameplay.SideCombat, Gameplay.Combat, Attack.Magic, Combo.RouteTool]
+    signals: [side.action.start, side.action.hit]
+
+  - id: side.ally_support
+    displayName: Ally Support
+    description: Partner assist hit with high control value.
+    icon: side.skill.icon.support
+    animation: side_ally_support
+    sound: assets/vertical_slice/side_combat/audio/support_cast.wav
+    effect: side.vfx.ally_support
+    cooldown: 4.20
+    duration: 0.76
+    startup: 0.18
+    recovery: 0.24
+    hitTime: 0.18
+    cancelStart: 0.28
+    cancelEnd: 0.60
+    movementScale: 0.70
+    tags: [Gameplay.SideCombat, Gameplay.Combat, Attack.Support, Affection.Support]
+    signals: [side.action.start, side.action.hit]
+
+  - id: side.dash
+    displayName: Dash Attack
+    description: Brief invulnerable dash attack.
+    icon: side.skill.icon.dash
+    animation: side_dash
+    sound: assets/vertical_slice/side_combat/audio/swing_air.wav
+    effect: side.vfx.launcher_slash
+    cooldown: 1.00
+    duration: 0.32
+    startup: 0.05
+    recovery: 0.08
+    hitTime: 0.05
+    cancelStart: 0.14
+    cancelEnd: 0.30
+    movementScale: 0.00
+    resourceCost:
+      mana: 16
+    tags: [Gameplay.SideCombat, Gameplay.Combat, Gameplay.Movement, Skill.Dash, Attack.Dash, Invulnerable]
+    signals: [side.action.start, side.dash.start]
+
+  - id: side.break_limit
+    displayName: Break Limit
+    description: Clears boss protection during super armor.
+    icon: side.skill.icon.break_limit
+    animation: side_break_limit
+    sound: assets/vertical_slice/side_combat/audio/break_limit.wav
+    effect: side.vfx.launcher_slash
+    cooldown: 3.00
+    duration: 0.32
+    startup: 0.04
+    recovery: 0.10
+    hitTime: 0.04
+    cancelStart: 0.10
+    cancelEnd: 0.24
+    movementScale: 0.70
+    resourceCost:
+      magic_sword: 1.5
+    tags: [Gameplay.SideCombat, Gameplay.Combat, Attack.BreakLimit, Boss.Protection]
+    signals: [side.action.start, side.action.hit, side.break_limit.flash]
+
+  - id: side.enemy_claw
+    displayName: Enemy Claw
+    description: Grunt and boss melee slash.
+    icon: side.skill.icon.enemy_claw
+    animation: enemy_claw
+    sound: assets/vertical_slice/side_combat/audio/enemy_swing.wav
+    effect: side.vfx.enemy_claw
+    duration: 0.93
+    startup: 0.32
+    recovery: 0.42
+    hitTime: 0.32
+    cancelStart: 0.32
+    cancelEnd: 0.93
+    movementScale: 0.12
+    tags: [Gameplay.SideCombat, Gameplay.Combat, Enemy, Attack.Melee]
+    signals: [side.action.start, side.action.hit]
+
+  - id: side.bear_charge
+    displayName: Bear Charge
+    description: Boss charge attack.
+    icon: side.skill.icon.enemy_claw
+    animation: bear_charge
+    sound: assets/vertical_slice/side_combat/audio/bear_charge.wav
+    effect: side.vfx.enemy_claw
+    duration: 1.50
+    startup: 0.48
+    recovery: 0.70
+    hitTime: 0.48
+    cancelStart: 0.48
+    cancelEnd: 1.50
+    movementScale: 0.08
+    tags: [Gameplay.SideCombat, Gameplay.Combat, Enemy, Attack.Charge, Boss]
+    signals: [side.action.start, side.action.hit]
+
+  - id: side.bear_shockwave
+    displayName: Bear Shockwave
+    description: Boss shockwave burst.
+    icon: side.skill.icon.enemy_shockwave
+    animation: bear_shockwave
+    sound: assets/vertical_slice/side_combat/audio/shockwave_cast.wav
+    effect: side.vfx.enemy_projectile
+    duration: 1.15
+    startup: 0.52
+    recovery: 0.20
+    hitTime: 0.52
+    cancelStart: 0.52
+    cancelEnd: 1.15
+    movementScale: 0.05
+    tags: [Gameplay.SideCombat, Gameplay.Combat, Enemy, Attack.Shockwave, Boss]
+    signals: [side.action.start, side.action.hit]

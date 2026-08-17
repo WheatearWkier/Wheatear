@@ -65,6 +65,7 @@ namespace Wheatear {
     void ProgressionContentEditorPanel::LoadManifest()
     {
         m_ManifestDocument.SetSourcePath(m_ManifestPath);
+        m_ManifestDocument.SetWriteDestination(EditorDocuments::DocumentWriteDestination::ProjectRoot);
         m_ManifestDocument.Load();
         m_ManifestLoaded = true;
         RefreshEntriesFromManifest();
@@ -147,6 +148,7 @@ namespace Wheatear {
         }
 
         m_SelectedDocument.SetSourcePath(m_SelectedPath);
+        m_SelectedDocument.SetWriteDestination(EditorDocuments::DocumentWriteDestination::ProjectRoot);
         m_SelectedDocument.Load();
         m_SelectedAssetLoaded = true;
         m_Status = m_SelectedDocument.GetStatus();
@@ -636,6 +638,11 @@ namespace Wheatear {
                     m_SelectedDocument.MarkDirty();
                     m_Status = "Baked skill tree layout into YAML.";
                 }
+                if (ImGui::IsItemHovered())
+                    ImGui::SetTooltip("%s",
+                        "Canvas drags write positions immediately; this button also "
+                        "bakes layout for nodes that were never dragged (auto-layout).",
+                        "画布拖拽即时写入 YAML；此按钮额外把从未手动拖过的节点（自动布局）烘焙为显式坐标。");
 
                 ImGui::PopID();
             }

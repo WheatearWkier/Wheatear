@@ -249,6 +249,8 @@ namespace Wheatear
             return 1;
         }
 
+        // Packaging is the final-product flow: it always produces a Release
+        // package unless an explicit --configuration override is given.
         static std::string ReadPackageConfiguration(ApplicationCommandLineArgs args)
         {
             for (int i = 1; i < args.Count; ++i)
@@ -261,11 +263,11 @@ namespace Wheatear
                     const std::string value = args[i + 1];
                     if (value == "Debug" || value == "Release")
                         return value;
-                    WT_CORE_WARN("Unknown package configuration '{}'; falling back to Debug.", value);
-                    return "Debug";
+                    WT_CORE_WARN("Unknown package configuration '{}'; falling back to Release.", value);
+                    return "Release";
                 }
             }
-            return "Debug";
+            return "Release";
         }
 
         static int RunPackagePlayer(ApplicationCommandLineArgs args)

@@ -4,6 +4,7 @@
 #include "Wheatear/Core/Application.h"
 #include "Wheatear/Core/Window.h"
 #include "Wheatear/Gameplay/Services/GameplayUIService.h"
+#include "Wheatear/Gameplay/SystemBindingRegistry.h"
 #include "Wheatear/Input/Input.h"
 #include "Wheatear/Input/MouseButtonCodes.h"
 #include "Wheatear/Scene/Components.h"
@@ -91,8 +92,8 @@ namespace Wheatear::ArcadeCombatHudService {
             const bool leftDown = Input::IsMouseButtonPressed(WT_MOUSE_BUTTON_LEFT);
 
             // Joystick: grab inside the base, steer (free direction), release.
-            Entity base = SceneQueries::FindEntityByName(scene, "AR_JoystickBase");
-            Entity thumb = SceneQueries::FindEntityByName(scene, "AR_JoystickThumb");
+            Entity base = SceneQueries::FindEntityByName(scene, SystemBindings::Arcade::JoystickBase);
+            Entity thumb = SceneQueries::FindEntityByName(scene, SystemBindings::Arcade::JoystickThumb);
             if (base && base.HasComponent<UIWidgetComponent>())
             {
                 const auto& baseWidget = base.GetComponent<UIWidgetComponent>();
@@ -137,13 +138,13 @@ namespace Wheatear::ArcadeCombatHudService {
 
             // Attack button: held while pressed inside its area.
             g_TouchAttackHeld = leftDown
-                && PointInTouchWidget(scene, "AR_Attack", mousePx, windowSize);
+                && PointInTouchWidget(scene, SystemBindings::Arcade::AttackButton, mousePx, windowSize);
 
             // Weapon buttons: edge-triggered on press.
             g_TouchWeaponPressed = -1;
             for (int i = 0; i < 3; ++i)
             {
-                const std::string name = "AR_Weapon_" + std::to_string(i + 1);
+                const std::string name = SystemBindings::IndexedName(SystemBindings::Arcade::WeaponPrefix, i + 1);
                 const bool held = leftDown
                     && PointInTouchWidget(scene, name, mousePx, windowSize);
                 if (held && !g_WeaponButtonLastHeld[i])

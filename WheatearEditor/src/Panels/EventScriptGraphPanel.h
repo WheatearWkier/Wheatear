@@ -28,6 +28,7 @@ namespace Wheatear {
         void DrawToolbar();
         void DrawGraph();
         void DrawSourceEditor();
+        void DrawOrphansPanel();
         void DrawDetails(const EventScriptBlock* block);
         void RefreshScriptFromSource();
         void SyncEditableEventsFromScript();
@@ -35,6 +36,7 @@ namespace Wheatear {
         bool SaveGraph();
         void AddEvent();
         void AddInstruction(EventScriptInstructionType type, const std::string& defaultText = {});
+        void CommitRawTextToGraph();
 
         const EventScriptBlock* GetSelectedBlock() const;
         EventScriptBlock* GetSelectedBlockMutable();
@@ -49,6 +51,13 @@ namespace Wheatear {
         EditorUI::TextAssetEditorState m_SourceEditorState;
         EventScript m_Script;
         std::vector<EventScriptBlock> m_EditableEvents;
+        // Lines that appeared outside any event block; kept editable so the
+        // graph round-trip is lossless (nothing is silently dropped).
+        std::vector<EventScriptInstruction> m_EditableOrphans;
+        // When true the source preview owns the document: raw text edits are
+        // authoritative and Save writes them verbatim (after re-parsing).
+        bool m_RawSourceMode = false;
+        bool m_RawSourceEdited = false;
         int m_SelectedInstruction = -1;
         ImVec2 m_GraphPan = { 18.0f, 18.0f };
         float m_Zoom = 1.0f;

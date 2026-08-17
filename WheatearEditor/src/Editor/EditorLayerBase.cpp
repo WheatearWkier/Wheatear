@@ -1,5 +1,6 @@
 #include "wepch.h"
 #include "EditorLayerBase.h"
+#include "EditorRequests.h"
 #include "Wheatear/Assets/AssetPath.h"
 
 #include "Wheatear/Scene/Components.h"
@@ -16,6 +17,56 @@
 
 namespace Wheatear {
 
+    // =========================================================================
+    // EditorRequests implementation (consumed in SyncPanels).
+
+    namespace EditorRequests {
+
+        static bool s_OpenInputBindingsRequested = false;
+        static bool s_SelectSideCombatLevelRequested = false;
+        static bool s_SelectEntityRequested = false;
+        static UUID s_SelectEntityUUID = 0;
+
+        void RequestOpenInputBindings()
+        {
+            s_OpenInputBindingsRequested = true;
+        }
+
+        bool ConsumeOpenInputBindingsRequest()
+        {
+            const bool value = s_OpenInputBindingsRequested;
+            s_OpenInputBindingsRequested = false;
+            return value;
+        }
+
+        void RequestSelectSideCombatLevelEntity()
+        {
+            s_SelectSideCombatLevelRequested = true;
+        }
+
+        bool ConsumeSelectSideCombatLevelEntityRequest()
+        {
+            const bool value = s_SelectSideCombatLevelRequested;
+            s_SelectSideCombatLevelRequested = false;
+            return value;
+        }
+
+        void RequestSelectEntity(UUID uuid)
+        {
+            s_SelectEntityUUID = uuid;
+            s_SelectEntityRequested = true;
+        }
+
+        bool ConsumeSelectEntityRequest(UUID& uuid)
+        {
+            if (!s_SelectEntityRequested)
+                return false;
+            uuid = s_SelectEntityUUID;
+            s_SelectEntityRequested = false;
+            return true;
+        }
+
+    } // namespace EditorRequests
 
     // =========================================================================
 
@@ -32,7 +83,7 @@ namespace Wheatear {
         , m_GizmoType(ImGuizmo::OPERATION::TRANSLATE)
     {
         m_SceneHierarchyPanel->SetEntityActivatedCallback(
-            [this](Entity entity) { ActivateHierarchyEntity(entity); });
+            [this](Entity entity, bool additive) { ActivateHierarchyEntity(entity, additive); });
 
         m_ContentBrowserPanel->SetOnOpenSceneCallback(
             [this](const std::filesystem::path& path) { OpenScene(path); });

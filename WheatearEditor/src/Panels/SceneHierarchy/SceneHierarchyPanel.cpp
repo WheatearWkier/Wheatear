@@ -667,7 +667,7 @@ namespace Wheatear {
         m_SelectionContext = entity;
     }
 
-    void SceneHierarchyPanel::SetEntityActivatedCallback(std::function<void(Entity)> callback)
+    void SceneHierarchyPanel::SetEntityActivatedCallback(std::function<void(Entity, bool)> callback)
     {
         m_EntityActivatedCallback = std::move(callback);
     }

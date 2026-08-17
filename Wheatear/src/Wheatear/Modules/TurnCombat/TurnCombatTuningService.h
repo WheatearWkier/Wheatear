@@ -3,7 +3,9 @@
 #include "TurnCombatComponents.h"
 #include "Wheatear/Core/Core.h"
 
+#include <filesystem>
 #include <string>
+#include <string_view>
 
 namespace Wheatear::TurnCombatTuningService {
 
@@ -32,6 +34,8 @@ namespace Wheatear::TurnCombatTuningService {
         TurnFormulaTuning Formula;
     };
 
+    WHEATEAR_API std::filesystem::path TuningSourcePath(const TurnCombatLevelComponent& level);
+    WHEATEAR_API bool IsFieldManagedByTuning(std::string_view fieldId);
     WHEATEAR_API const TurnCombatTuning& GetTuning(const TurnCombatLevelComponent& level);
 
     // Overwrites the level's flow timings with the tuning values (when the

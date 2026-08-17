@@ -4,6 +4,7 @@
 #include "GameProgress.h"
 #include "Wheatear/Config/UserSettings.h"
 #include "Wheatear/Gameplay/Services/GameplayUILayoutService.h"
+#include "Wheatear/Gameplay/SystemBindingRegistry.h"
 #include "Wheatear/Scene/SceneQueries.h"
 
 #include <array>
@@ -35,22 +36,22 @@ namespace Wheatear::ProgressionSettingsPageService {
 
         static void BindAuthoredAudioControls(Scene* scene)
         {
-            if (!HasEntity(scene, "Settings_ControlPanel"))
+            if (!HasEntity(scene, SystemBindings::Progression::SettingsControlPanel))
                 return;
 
             for (const char* label : {
-                "Settings_MasterVolumeLabel",
-                "Settings_BGMVolumeLabel",
-                "Settings_SFXVolumeLabel"
+                SystemBindings::Progression::SettingsMasterVolumeLabel,
+                SystemBindings::Progression::SettingsBGMVolumeLabel,
+                SystemBindings::Progression::SettingsSFXVolumeLabel
             })
             {
                 FindAuthoredText(scene, label);
             }
 
             constexpr std::array<ControlBinding, 3> sliders = {{
-                { "Settings_MasterVolumeSlider", "progression:set_master_volume" },
-                { "Settings_BGMVolumeSlider", "progression:set_bgm_volume" },
-                { "Settings_SFXVolumeSlider", "progression:set_sfx_volume" },
+                { SystemBindings::Progression::SettingsMasterVolumeSlider, "progression:set_master_volume" },
+                { SystemBindings::Progression::SettingsBGMVolumeSlider, "progression:set_bgm_volume" },
+                { SystemBindings::Progression::SettingsSFXVolumeSlider, "progression:set_sfx_volume" },
             }};
             for (const auto& binding : sliders)
             {
@@ -59,12 +60,12 @@ namespace Wheatear::ProgressionSettingsPageService {
             }
 
             constexpr std::array<ControlBinding, 6> buttons = {{
-                { "Settings_Button_VolumeDown", "progression:master_volume_down" },
-                { "Settings_Button_VolumeUp", "progression:master_volume_up" },
-                { "Settings_Button_BGMDown", "progression:bgm_volume_down" },
-                { "Settings_Button_BGMUp", "progression:bgm_volume_up" },
-                { "Settings_Button_SFXDown", "progression:sfx_volume_down" },
-                { "Settings_Button_SFXUp", "progression:sfx_volume_up" },
+                { SystemBindings::Progression::SettingsVolumeDownButton, "progression:master_volume_down" },
+                { SystemBindings::Progression::SettingsVolumeUpButton, "progression:master_volume_up" },
+                { SystemBindings::Progression::SettingsBGMDownButton, "progression:bgm_volume_down" },
+                { SystemBindings::Progression::SettingsBGMUpButton, "progression:bgm_volume_up" },
+                { SystemBindings::Progression::SettingsSFXDownButton, "progression:sfx_volume_down" },
+                { SystemBindings::Progression::SettingsSFXUpButton, "progression:sfx_volume_up" },
             }};
             for (const auto& binding : buttons)
             {
@@ -80,10 +81,10 @@ namespace Wheatear::ProgressionSettingsPageService {
         BindAuthoredAudioControls(scene);
 
         const auto& settings = UserSettings::Get();
-        SetSliderValue(scene, "Settings_TextSpeedSlider", static_cast<float>(settings.TextSpeed));
-        SetSliderValue(scene, "Settings_MasterVolumeSlider", static_cast<float>(settings.MasterVolume));
-        SetSliderValue(scene, "Settings_BGMVolumeSlider", static_cast<float>(settings.BGMVolume));
-        SetSliderValue(scene, "Settings_SFXVolumeSlider", static_cast<float>(settings.SFXVolume));
+        SetSliderValue(scene, SystemBindings::Progression::SettingsTextSpeedSlider, static_cast<float>(settings.TextSpeed));
+        SetSliderValue(scene, SystemBindings::Progression::SettingsMasterVolumeSlider, static_cast<float>(settings.MasterVolume));
+        SetSliderValue(scene, SystemBindings::Progression::SettingsBGMVolumeSlider, static_cast<float>(settings.BGMVolume));
+        SetSliderValue(scene, SystemBindings::Progression::SettingsSFXVolumeSlider, static_cast<float>(settings.SFXVolume));
     }
 
 } // namespace Wheatear::ProgressionSettingsPageService

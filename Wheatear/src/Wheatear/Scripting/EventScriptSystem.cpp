@@ -336,6 +336,10 @@ namespace Wheatear {
             case EventScriptInstructionType::EndIf:
                 ++component.RuntimeInstructionIndex;
                 break;
+            case EventScriptInstructionType::RawLine:
+                // Preserved uninterpretable line: skip without executing.
+                ++component.RuntimeInstructionIndex;
+                break;
             }
         }
 

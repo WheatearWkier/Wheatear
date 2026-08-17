@@ -4,6 +4,7 @@
 #include "TacticalCombatBoardService.h"
 #include "TacticalCombatSkillService.h"
 #include "Wheatear/Assets/AssetAliasRegistry.h"
+#include "Wheatear/Gameplay/SystemBindingRegistry.h"
 #include "Wheatear/Gameplay/Services/GameplayEntityService.h"
 #include "Wheatear/Gameplay/Services/GameplayUILayoutService.h"
 #include "Wheatear/Scene/Components.h"
@@ -41,17 +42,17 @@ namespace Wheatear::TacticalCombatUIService {
             const CommandSlot& slot,
             bool visible)
         {
-            const std::string prefix = "TK_Command_" + std::to_string(index);
+            const std::string prefix = SystemBindings::IndexedName(SystemBindings::Tactical::CommandPrefix, index);
             const bool show = visible && slot.Enabled && !slot.Command.empty();
-            UIRuntimeTools::SetWidgetVisible(scene, prefix + "_Root", show);
-            UIRuntimeTools::SetWidgetVisible(scene, prefix + "_Icon", show);
-            UIRuntimeTools::SetWidgetVisible(scene, prefix + "_Text", show);
+            UIRuntimeTools::SetWidgetVisible(scene, prefix + SystemBindings::Tactical::CommandRootSuffix, show);
+            UIRuntimeTools::SetWidgetVisible(scene, prefix + SystemBindings::Tactical::CommandIconSuffix, show);
+            UIRuntimeTools::SetWidgetVisible(scene, prefix + SystemBindings::Tactical::CommandTextSuffix, show);
             if (!show)
                 return;
 
-            GameplayUILayoutService::SetButtonCommand(scene, prefix + "_Root", slot.Command);
-            UIRuntimeTools::SetText(scene, prefix + "_Text", slot.Label);
-            UIRuntimeTools::SetImageTexture(scene, prefix + "_Icon", slot.Icon, true);
+            GameplayUILayoutService::SetButtonCommand(scene, prefix + SystemBindings::Tactical::CommandRootSuffix, slot.Command);
+            UIRuntimeTools::SetText(scene, prefix + SystemBindings::Tactical::CommandTextSuffix, slot.Label);
+            UIRuntimeTools::SetImageTexture(scene, prefix + SystemBindings::Tactical::CommandIconSuffix, slot.Icon, true);
         }
 
         static std::array<CommandSlot, 4> BuildRootSlots()
@@ -172,7 +173,7 @@ namespace Wheatear::TacticalCombatUIService {
             Entity selected = GameplayEntityService::Resolve(scene, level.RuntimeSelectedUnit);
             if (!selected || !selected.HasComponent<TacticalUnitComponent>())
             {
-                UIRuntimeTools::SetWidgetVisible(scene, "TK_CancelButton", false);
+                UIRuntimeTools::SetWidgetVisible(scene, SystemBindings::Tactical::CancelButton, false);
                 UIRuntimeTools::SetText(scene, level.DetailTextEntityName, "请选择一个我方单位。");
                 return;
             }
@@ -190,14 +191,14 @@ namespace Wheatear::TacticalCombatUIService {
                 SetCommandSlot(scene, i + 1, slots[i], commandVisible);
 
             const bool cancelVisible = commandVisible;
-            UIRuntimeTools::SetWidgetVisible(scene, "TK_CancelButton", cancelVisible);
+            UIRuntimeTools::SetWidgetVisible(scene, SystemBindings::Tactical::CancelButton, cancelVisible);
             GameplayUILayoutService::SetButtonCommand(
                 scene,
-                "TK_CancelButton",
+                SystemBindings::Tactical::CancelButton,
                 "tactic:cancel");
             UIRuntimeTools::SetText(
                 scene,
-                "TK_CancelText",
+                SystemBindings::Tactical::CancelText,
                 level.RuntimeCommandMenuPage == "root" ? "取消" : "返回");
 
             std::ostringstream detail;

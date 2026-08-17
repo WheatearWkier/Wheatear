@@ -315,6 +315,7 @@ namespace Wheatear {
     void AssetAliasManifestEditorPanel::Load()
     {
         m_Document.SetSourcePath(m_SourcePath);
+        m_Document.SetWriteDestination(EditorDocuments::DocumentWriteDestination::ProjectRoot);
         m_Document.Load();
         m_Status = m_Document.GetStatus();
         m_SelectedAlias.clear();

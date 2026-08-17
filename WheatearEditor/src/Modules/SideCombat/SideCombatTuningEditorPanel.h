@@ -62,6 +62,8 @@ namespace Wheatear {
         std::string m_SelectedBossAnimId;
         std::array<char, 64> m_NewAnimId{};
         std::string m_RawPreview;
+        std::string m_RawEditText;   // editable raw view (original file text)
+        bool m_RawEdited = false;    // save writes m_RawEditText verbatim
         std::unique_ptr<YAML::Node> m_Root;
         // Per-path "add" scratch state for the shared Advanced tree editor.
         std::unordered_map<std::string, std::string> m_NewScalarValues;

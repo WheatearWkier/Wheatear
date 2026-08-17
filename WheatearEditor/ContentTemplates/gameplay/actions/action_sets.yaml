@@ -1,0 +1,14 @@
+version: 1
+sets:
+  - key: arcade
+    label: Arcade Combat
+    path: assets/gameplay/actions/00_arcade_actions.yaml
+  - key: side
+    label: Side Combat
+    path: assets/gameplay/actions/10_side_combat_actions.yaml
+  - key: turn
+    label: Turn Combat
+    path: assets/gameplay/actions/20_turn_combat_actions.yaml
+  - key: tactical
+    label: Tactical Combat
+    path: assets/gameplay/actions/30_tactical_combat_actions.yaml

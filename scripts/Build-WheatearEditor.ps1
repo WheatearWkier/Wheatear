@@ -1,5 +1,5 @@
 param(
-    [string]$Configuration = "Debug",
+    [string]$Configuration = "Release",
     [string]$Platform = "x64",
     [string]$Verbosity = "m"
 )
@@ -17,6 +17,8 @@ $repositoryRoot = (Resolve-Path (Join-Path $scriptRoot "..")).Path
     -LogFile "build-editor-msbuild.log"
 
 $sourceDir = Join-Path $repositoryRoot "bin\$Configuration-windows-x86_64\WheatearEditor"
+# Same layout as the packager's editor package: the editor tool lives
+# directly under Builds\Windows\Editor (no per-project nesting).
 $targetDir = Join-Path $repositoryRoot "Builds\Windows\Editor"
 
 if (-not (Test-Path -LiteralPath $sourceDir)) {

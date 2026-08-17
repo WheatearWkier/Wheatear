@@ -4,8 +4,10 @@
 #include "Wheatear/Core/Core.h"
 #include "Wheatear/Scene/Entity.h"
 
+#include <filesystem>
 #include <string>
 #include <unordered_map>
+#include <string_view>
 
 namespace Wheatear::ArcadeCombatTuningService {
 
@@ -81,14 +83,14 @@ namespace Wheatear::ArcadeCombatTuningService {
         ArcadePlayerTuning Player;
     };
 
+    WHEATEAR_API std::filesystem::path TuningSourcePath(const ArcadeCombatLevelComponent& level);
+    WHEATEAR_API bool IsFieldManagedByTuning(std::string_view fieldId);
     WHEATEAR_API const ArcadeCombatTuning& GetTuning(const ArcadeCombatLevelComponent& level);
 
     // Weapon payload for the given weapon type; falls back to the baked
     // default when the tuning table has no entry for it.
     WHEATEAR_API const ArcadeWeaponTuning& GetWeaponTuning(const ArcadeCombatTuning& tuning,
         ArcadeWeaponType weapon);
-
-    WHEATEAR_API const ArcadeCombatTuning& GetTuning(const ArcadeCombatLevelComponent& level);
 
     // Applies the tuning values to the scene at runtime start: level flow
     // timings onto the level component, boss behaviour onto the boss entity

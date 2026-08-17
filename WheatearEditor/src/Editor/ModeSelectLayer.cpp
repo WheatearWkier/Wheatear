@@ -99,6 +99,42 @@ namespace Wheatear {
             return output.good();
         }
 
+        // Seed a freshly created project with the shared content templates
+        // (gameplay data, fonts, input bindings) so the project is
+        // self-contained from day one. The engine root keeps no live copy of
+        // this content; ContentTemplates is a pure creation-time seed.
+        void CopyContentTemplatesToProject(const std::filesystem::path& projectRoot)
+        {
+            const std::filesystem::path templateRoot =
+                AssetPath::GetEngineRoot() / "ContentTemplates";
+            if (!std::filesystem::is_directory(templateRoot))
+                return;
+
+            const char* const subdirectories[] = { "gameplay", "fonts", "input" };
+            for (const char* sub : subdirectories)
+            {
+                std::error_code error;
+                const std::filesystem::path source = templateRoot / sub;
+                if (!std::filesystem::is_directory(source, error))
+                    continue;
+
+                const std::filesystem::path destination = projectRoot / "assets" / sub;
+                std::filesystem::create_directories(destination.parent_path(), error);
+                if (error)
+                    continue;
+                error.clear();
+
+                std::filesystem::copy(
+                    source,
+                    destination,
+                    std::filesystem::copy_options::recursive
+                        | std::filesystem::copy_options::overwrite_existing,
+                    error);
+                if (error)
+                    continue;
+            }
+        }
+
     } // namespace
 
     ModeSelectLayer::ModeSelectLayer()
@@ -441,6 +477,7 @@ namespace Wheatear {
                         && WriteFileText(scenePath, kNewProjectSceneTemplate);
                     if (created)
                     {
+                        CopyContentTemplatesToProject(projectRoot);
                         // New projects boot into their template scene until
                         // the designer changes it in Project Health.
                         RuntimePlayerConfig projectConfig;

@@ -170,6 +170,7 @@
     <ClInclude Include="src\Editor\EditorLayerBase.h" />
     <ClInclude Include="src\Editor\EditorLocale.h" />
     <ClInclude Include="src\Editor\EditorPlatform.h" />
+    <ClInclude Include="src\Editor\EditorRequests.h" />
     <ClInclude Include="src\Editor\EditorToolRegistry.h" />
     <ClInclude Include="src\Editor\EditorWidgets.h" />
     <ClInclude Include="src\Editor\GameplayEditorShell.h" />

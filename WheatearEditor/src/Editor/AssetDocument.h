@@ -13,6 +13,17 @@
 
 namespace Wheatear::EditorDocuments {
 
+    // Where Save() writes. Game-content documents (aliases, WAO recipes,
+    // progression content, tunings) must write into the project root so the
+    // project stays self-contained; generic documents keep the default
+    // runtime-resolution behaviour ("first existing candidate", which may fall
+    // back to the engine root for engine-owned files).
+    enum class DocumentWriteDestination
+    {
+        RuntimeResolve = 0,
+        ProjectRoot
+    };
+
     class TextAssetDocument
     {
     public:
@@ -29,6 +40,9 @@ namespace Wheatear::EditorDocuments {
             m_Status.clear();
         }
 
+        void SetWriteDestination(DocumentWriteDestination destination) { m_WriteDestination = destination; }
+        DocumentWriteDestination GetWriteDestination() const { return m_WriteDestination; }
+
         const std::string& GetSourcePath() const { return m_SourcePath; }
         const std::filesystem::path& GetResolvedPath() const { return m_ResolvedPath; }
         const std::string& GetText() const { return m_Text; }
@@ -41,6 +55,16 @@ namespace Wheatear::EditorDocuments {
             if (m_SourcePath.empty())
                 return {};
             return AssetPath::Resolve(AssetAliasRegistry::Resolve(m_SourcePath));
+        }
+
+        std::filesystem::path ResolveWritePath() const
+        {
+            if (m_SourcePath.empty())
+                return {};
+            const std::filesystem::path resolved = AssetAliasRegistry::Resolve(m_SourcePath);
+            if (m_WriteDestination == DocumentWriteDestination::ProjectRoot)
+                return AssetPath::GetProjectRoot() / resolved;
+            return AssetPath::Resolve(resolved);
         }
 
         void SetText(std::string text, bool dirty = true)
@@ -128,7 +152,7 @@ namespace Wheatear::EditorDocuments {
 
         bool Save()
         {
-            m_ResolvedPath = ResolvePath();
+            m_ResolvedPath = ResolveWritePath();
 
             if (m_SourcePath.empty())
             {
@@ -177,6 +201,7 @@ namespace Wheatear::EditorDocuments {
         bool m_Loaded = false;
         bool m_Dirty = false;
         std::string m_Status;
+        DocumentWriteDestination m_WriteDestination = DocumentWriteDestination::RuntimeResolve;
     };
 
 } // namespace Wheatear::EditorDocuments

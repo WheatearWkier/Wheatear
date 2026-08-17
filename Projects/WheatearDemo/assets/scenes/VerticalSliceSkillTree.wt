@@ -1,4 +1,9 @@
-﻿Scene: VerticalSliceSkillTree
+Scene: Untitled
+SavePolicy:
+  CanSave: true
+  CanLoad: true
+  SaveDirectory: assets/saves
+  AutoLoadSlot: 0
 Entities:
   - Entity: 970000001
     TagComponent:
@@ -22,13 +27,42 @@ Entities:
     TagComponent:
       Tag: SkillTree_Background
     TransformComponent:
-      Translation: [0, 0.35, -0.8]
+      Translation: [0, 0.349999994, -0.800000012]
       Rotation: [0, 0, 0]
       Scale: [20, 11.25, 1]
     SpriteRendererComponent:
-      Color: [0.72, 0.84, 0.92, 1]
+      Color: [0.720000029, 0.839999974, 0.920000017, 1]
       Texture: assets/vertical_slice/vn/backgrounds/bg_forest_camp_night.png
       TilingFactor: 1
+      UVMin: [0, 0]
+      UVMax: [1, 1]
+      FlipX: false
+      DrawOffset: [0, 0]
+      DrawScale: [1, 1]
+      PixelsPerUnit: 0
+      SpriteSheet: ""
+      CellIndex: -1
+      SubRect: ""
+  - Entity: 970000003
+    TagComponent:
+      Tag: WT_UI_Canvas
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    UICanvasComponent:
+      Visible: true
+      ReferenceWidth: 1920
+      ReferenceHeight: 1080
+    UIWidgetComponent:
+      Visible: true
+      EditorVisible: true
+      Position: [0, 0]
+      Size: [1, 1]
+      Rotation: 0
+      Anchor: 0
+      SortOrder: 0
+      ParentEntity: 0
   - Entity: 970000010
     TagComponent:
       Tag: SkillTree_MainPanel
@@ -38,16 +72,21 @@ Entities:
       Scale: [1, 1, 1]
     UIWidgetComponent:
       Visible: true
-      Position: [0.04, 0.07]
-      Size: [0.92, 0.8]
-      Rotation: 0.0
+      EditorVisible: true
+      Position: [0.0399999917, 0.0699999928]
+      Size: [0.920000076, 0.800000012]
+      Rotation: 0
       Anchor: 0
       SortOrder: 10
-      ParentEntity: 0
+      ParentEntity: 970000003
     UIPanelComponent:
-      BackgroundColor: [0.035, 0.047, 0.058, 0.88]
-      BorderColor: [0.26, 0.66, 0.72, 0.92]
-      BorderThickness: 2.0
+      BackgroundColor: [0.0350000001, 0.0469999984, 0.0579999983, 0.879999995]
+      BorderColor: [0.25999999, 0.660000026, 0.720000029, 0.920000017]
+      BorderThickness: 2
+      ClipChildren: false
+      Draggable: false
+      ConstrainDragToParent: true
+      DragHandleHeight: 0.119999997
   - Entity: 970000011
     TagComponent:
       Tag: SkillTree_Title
@@ -57,21 +96,26 @@ Entities:
       Scale: [1, 1, 1]
     UIWidgetComponent:
       Visible: true
-      Position: [0.075, 0.105]
-      Size: [0.46, 0.06]
-      Rotation: 0.0
+      EditorVisible: true
+      Position: [0.0750000179, 0.0867142752]
+      Size: [0.460000008, 0.0599999949]
+      Rotation: 0
       Anchor: 0
       SortOrder: 42
-      ParentEntity: 0
+      ParentEntity: 970000003
     UITextComponent:
       Text: "魔剑技能树"
-      Color: [0.9, 0.99, 1.0, 1]
+      Color: [0.899999976, 0.99000001, 1, 1]
       FontSize: 42
       FontPath: assets/fonts/wqy-microhei.ttc
-      ShadowColor: [0.01, 0.015, 0.018, 0.9]
-      ShadowOffset: [2.4, 2.4]
-      OutlineColor: [0.0, 0.0, 0.0, 0.94]
-      OutlineThickness: 1.8
+      Padding: [-1, -1, -1, -1]
+      AutoFit: true
+      HorizontalAlign: 0
+      VerticalAlign: 0
+      ShadowColor: [0.00999999978, 0.0149999997, 0.0179999992, 0.899999976]
+      ShadowOffset: [2.4000001, 2.4000001]
+      OutlineColor: [0, 0, 0, 0.939999998]
+      OutlineThickness: 1.79999995
   - Entity: 970000012
     TagComponent:
       Tag: SkillTree_Subtitle
@@ -81,21 +125,26 @@ Entities:
       Scale: [1, 1, 1]
     UIWidgetComponent:
       Visible: true
-      Position: [0.075, 0.17]
-      Size: [0.7, 0.035]
-      Rotation: 0.0
+      EditorVisible: true
+      Position: [0.0750000179, 0.153999999]
+      Size: [0.460642904, 0.050999999]
+      Rotation: 0
       Anchor: 0
       SortOrder: 42
-      ParentEntity: 0
+      ParentEntity: 970000003
     UITextComponent:
       Text: "第 2 章 / 魔剑 Lv1 / 主角 Lv1"
-      Color: [0.7, 0.9, 0.92, 1]
-      FontSize: 18
+      Color: [0.699999988, 0.899999976, 0.920000017, 1]
+      FontSize: 25
       FontPath: assets/fonts/wqy-microhei.ttc
-      ShadowColor: [0.01, 0.015, 0.018, 0.82]
-      ShadowOffset: [1.6, 1.6]
-      OutlineColor: [0.0, 0.0, 0.0, 0.86]
-      OutlineThickness: 1.1
+      Padding: [-1, -1, -1, -1]
+      AutoFit: true
+      HorizontalAlign: 0
+      VerticalAlign: 0
+      ShadowColor: [0.00999999978, 0.0149999997, 0.0179999992, 0.819999993]
+      ShadowOffset: [1.60000002, 1.60000002]
+      OutlineColor: [0, 0, 0, 0.860000014]
+      OutlineThickness: 1.10000002
   - Entity: 970000013
     TagComponent:
       Tag: SkillTree_View
@@ -105,529 +154,663 @@ Entities:
       Scale: [1, 1, 1]
     UIWidgetComponent:
       Visible: true
-      Position: [0.06, 0.215]
-      Size: [0.61, 0.57]
-      Rotation: 0.0
+      EditorVisible: true
+      Position: [0.0599999987, 0.215000004]
+      Size: [0.610000014, 0.569999993]
+      Rotation: 0
       Anchor: 0
       SortOrder: 18
-      ParentEntity: 0
+      ParentEntity: 970000003
     UIPanelComponent:
-      BackgroundColor: [0.03, 0.045, 0.052, 0.76]
-      BorderColor: [0.18, 0.58, 0.62, 0.88]
-      BorderThickness: 2.0
+      BackgroundColor: [0.0299999993, 0.0450000018, 0.0520000011, 0.75999999]
+      BorderColor: [0.180000007, 0.579999983, 0.620000005, 0.879999995]
+      BorderThickness: 2
+      ClipChildren: false
+      Draggable: false
+      ConstrainDragToParent: true
+      DragHandleHeight: 0.119999997
     UISkillTreeViewComponent:
       Pan: [0, 0]
-      MinPan: [-0.46, -0.46]
-      MaxPan: [0.46, 0.46]
-      NodeSize: [0.076, 0.104]
-      NodeEdgeInset: 0.05
-      LineThickness: 0.0095
-      CurveAmount: 0.045
+      MinPan: [-0.460000008, -0.460000008]
+      MaxPan: [0.460000008, 0.460000008]
+      NodeSize: [0.0759999976, 0.104000002]
+      NodeEdgeInset: 0.0500000007
+      LineThickness: 0.00949999969
+      CurveAmount: 0.0450000018
+      VirtualizationMargin: 0.119999997
+      LineSegments: 24
+      BackgroundRingCount: 4
+      DrawLineGlow: true
       CommandPrefix: "progression:select_skill_node:"
-      BackgroundColor: [0.01, 0.018, 0.02, 0.22]
-      GridColor: [0.13, 0.27, 0.24, 0.22]
-      LineColor: [0.18, 0.34, 0.30, 0.58]
-      ActiveLineColor: [0.38, 0.96, 0.72, 0.82]
-      NodeColor: [0.08, 0.12, 0.12, 0.95]
-      LockedNodeColor: [0.05, 0.06, 0.065, 0.90]
-      HoverNodeColor: [0.42, 0.86, 0.72, 0.96]
-      SelectedNodeColor: [1.0, 0.82, 0.38, 0.98]
-      CoreNodeColor: [0.18, 0.42, 0.40, 0.98]
-      LockColor: [0.0, 0.0, 0.0, 0.54]
+      BackgroundColor: [0.00999999978, 0.0179999992, 0.0199999996, 0.219999999]
+      GridColor: [0.129999995, 0.270000011, 0.239999995, 0.219999999]
+      LineColor: [0.180000007, 0.340000004, 0.300000012, 0.579999983]
+      ActiveLineColor: [0.379999995, 0.959999979, 0.720000029, 0.819999993]
+      LineGlowColor: [0.280000001, 0.879999995, 0.639999986, 0.180000007]
+      NodeColor: [0.0799999982, 0.119999997, 0.119999997, 0.949999988]
+      LockedNodeColor: [0.0500000007, 0.0599999987, 0.0649999976, 0.899999976]
+      HoverNodeColor: [0.419999987, 0.860000014, 0.720000029, 0.959999979]
+      SelectedNodeColor: [1, 0.819999993, 0.379999995, 0.980000019]
+      CoreNodeColor: [0.180000007, 0.419999987, 0.400000006, 0.980000019]
+      LockColor: [0, 0, 0, 0.540000021]
       SelectedNodeId: "magic_sword_core"
       Nodes:
         - Id: "magic_sword_core"
           ParentId: ""
-          Position: [0.500000, 0.500000]
+          Position: [0.5, 0.5]
           IconPath: "assets/vertical_slice/ui/skill_tree/skill_magic_sword_core.png"
+          Branch: ""
+          UnlockChapter: 1
           Learned: true
           Available: true
           Selected: true
           Locked: false
         - Id: "magic_sword_lv2"
           ParentId: "magic_sword_core"
-          Position: [0.500000, 0.360000]
+          Position: [0.5, 0.360000014]
           IconPath: "assets/vertical_slice/ui/skill_tree/skill_magic_sword_core.png"
+          Branch: ""
+          UnlockChapter: 1
           Learned: false
           Available: true
           Selected: false
           Locked: true
         - Id: "ME-01"
           ParentId: "magic_sword_core"
-          Position: [0.500000, 0.351000]
+          Position: [0.5, 0.351000011]
           IconPath: "assets/vertical_slice/ui/skill_tree/skill_me.png"
+          Branch: ""
+          UnlockChapter: 1
           Learned: false
           Available: true
           Selected: false
           Locked: true
         - Id: "ME-02"
           ParentId: "ME-01"
-          Position: [0.516325, 0.294648]
+          Position: [0.516324997, 0.294647992]
           IconPath: "assets/vertical_slice/ui/skill_tree/skill_me.png"
+          Branch: ""
+          UnlockChapter: 1
           Learned: false
           Available: true
           Selected: false
           Locked: true
         - Id: "ME-03"
           ParentId: "ME-02"
-          Position: [0.540922, 0.244253]
+          Position: [0.540921986, 0.244252995]
           IconPath: "assets/vertical_slice/ui/skill_tree/skill_me.png"
+          Branch: ""
+          UnlockChapter: 1
           Learned: false
           Available: true
           Selected: false
           Locked: true
         - Id: "ME-04"
           ParentId: "ME-03"
-          Position: [0.566956, 0.224006]
+          Position: [0.566955984, 0.224005997]
           IconPath: "assets/vertical_slice/ui/skill_tree/skill_me.png"
+          Branch: ""
+          UnlockChapter: 1
           Learned: false
           Available: true
           Selected: false
           Locked: true
         - Id: "ME-05"
           ParentId: "ME-04"
-          Position: [0.606403, 0.176026]
+          Position: [0.606402993, 0.176026002]
           IconPath: "assets/vertical_slice/ui/skill_tree/skill_me.png"
+          Branch: ""
+          UnlockChapter: 1
           Learned: false
           Available: true
           Selected: false
           Locked: true
         - Id: "ME-06"
           ParentId: "ME-05"
-          Position: [0.652220, 0.136592]
+          Position: [0.652220011, 0.136592001]
           IconPath: "assets/vertical_slice/ui/skill_tree/skill_me.png"
+          Branch: ""
+          UnlockChapter: 1
           Learned: false
           Available: true
           Selected: false
           Locked: true
         - Id: "ME-07"
           ParentId: "ME-06"
-          Position: [0.691997, 0.127578]
+          Position: [0.691996992, 0.127578005]
           IconPath: "assets/vertical_slice/ui/skill_tree/skill_me.png"
+          Branch: ""
+          UnlockChapter: 1
           Learned: false
           Available: true
           Selected: false
           Locked: true
         - Id: "ME-08"
           ParentId: "ME-07"
-          Position: [0.750959, 0.095531]
+          Position: [0.750958979, 0.0955310017]
           IconPath: "assets/vertical_slice/ui/skill_tree/skill_me.png"
+          Branch: ""
+          UnlockChapter: 1
           Learned: false
           Available: true
           Selected: false
           Locked: true
         - Id: "ME-09"
           ParentId: "ME-08"
-          Position: [0.813648, 0.074012]
+          Position: [0.813647985, 0.0740119964]
           IconPath: "assets/vertical_slice/ui/skill_tree/skill_me.png"
+          Branch: ""
+          UnlockChapter: 1
           Learned: false
           Available: true
           Selected: false
           Locked: true
         - Id: "ME-10"
           ParentId: "ME-09"
-          Position: [0.862793, 0.081315]
+          Position: [0.862793028, 0.0813150033]
           IconPath: "assets/vertical_slice/ui/skill_tree/skill_me.png"
+          Branch: ""
+          UnlockChapter: 1
           Learned: false
           Available: true
           Selected: false
           Locked: true
         - Id: "ME-11"
           ParentId: "ME-10"
-          Position: [0.935456, 0.071399]
+          Position: [0.935455978, 0.0713990033]
           IconPath: "assets/vertical_slice/ui/skill_tree/skill_me.png"
+          Branch: ""
+          UnlockChapter: 1
           Learned: false
           Available: true
           Selected: false
           Locked: true
         - Id: "ME-12"
           ParentId: "ME-11"
-          Position: [1.008654, 0.073189]
+          Position: [1.008654, 0.0731889978]
           IconPath: "assets/vertical_slice/ui/skill_tree/skill_me.png"
+          Branch: ""
+          UnlockChapter: 1
           Learned: false
           Available: true
           Selected: false
           Locked: true
         - Id: "MA-01"
           ParentId: "magic_sword_core"
-          Position: [0.641707, 0.453956]
+          Position: [0.641707003, 0.453956008]
           IconPath: "assets/vertical_slice/ui/skill_tree/skill_ma.png"
+          Branch: ""
+          UnlockChapter: 1
           Learned: false
           Available: true
           Selected: false
           Locked: true
         - Id: "MA-02"
           ParentId: "MA-01"
-          Position: [0.700497, 0.452705]
+          Position: [0.700496972, 0.452704996]
           IconPath: "assets/vertical_slice/ui/skill_tree/skill_ma.png"
+          Branch: ""
+          UnlockChapter: 1
           Learned: false
           Available: true
           Selected: false
           Locked: true
         - Id: "MA-03"
           ParentId: "MA-02"
-          Position: [0.756125, 0.461514]
+          Position: [0.756124973, 0.461513996]
           IconPath: "assets/vertical_slice/ui/skill_tree/skill_ma.png"
+          Branch: ""
+          UnlockChapter: 1
           Learned: false
           Available: true
           Selected: false
           Locked: true
         - Id: "MA-04"
           ParentId: "MA-03"
-          Position: [0.783370, 0.481088]
+          Position: [0.783370018, 0.481088012]
           IconPath: "assets/vertical_slice/ui/skill_tree/skill_ma.png"
+          Branch: ""
+          UnlockChapter: 1
           Learned: false
           Available: true
           Selected: false
           Locked: true
         - Id: "MA-05"
           ParentId: "MA-04"
-          Position: [0.840957, 0.505410]
+          Position: [0.840956986, 0.505410016]
           IconPath: "assets/vertical_slice/ui/skill_tree/skill_ma.png"
+          Branch: ""
+          UnlockChapter: 1
           Learned: false
           Available: true
           Selected: false
           Locked: true
         - Id: "MA-06"
           ParentId: "MA-05"
-          Position: [0.892095, 0.538697]
+          Position: [0.892095029, 0.538697004]
           IconPath: "assets/vertical_slice/ui/skill_tree/skill_ma.png"
+          Branch: ""
+          UnlockChapter: 1
           Learned: false
           Available: true
           Selected: false
           Locked: true
         - Id: "MA-07"
           ParentId: "MA-06"
-          Position: [0.912164, 0.575376]
+          Position: [0.912163973, 0.575375974]
           IconPath: "assets/vertical_slice/ui/skill_tree/skill_ma.png"
+          Branch: ""
+          UnlockChapter: 1
           Learned: false
           Available: true
           Selected: false
           Locked: true
         - Id: "MA-08"
           ParentId: "MA-07"
-          Position: [0.959585, 0.623927]
+          Position: [0.959585011, 0.623926997]
           IconPath: "assets/vertical_slice/ui/skill_tree/skill_ma.png"
+          Branch: ""
+          UnlockChapter: 1
           Learned: false
           Available: true
           Selected: false
           Locked: true
         - Id: "MA-09"
           ParentId: "MA-08"
-          Position: [0.997669, 0.679350]
+          Position: [0.997668982, 0.679350019]
           IconPath: "assets/vertical_slice/ui/skill_tree/skill_ma.png"
+          Branch: ""
+          UnlockChapter: 1
           Learned: false
           Available: true
           Selected: false
           Locked: true
         - Id: "MA-10"
           ParentId: "MA-09"
-          Position: [1.003936, 0.730140]
+          Position: [1.00393605, 0.730139971]
           IconPath: "assets/vertical_slice/ui/skill_tree/skill_ma.png"
+          Branch: ""
+          UnlockChapter: 1
           Learned: false
           Available: true
           Selected: false
           Locked: true
         - Id: "MA-11"
           ParentId: "MA-10"
-          Position: [1.032977, 0.798759]
+          Position: [1.03297698, 0.798758984]
           IconPath: "assets/vertical_slice/ui/skill_tree/skill_ma.png"
+          Branch: ""
+          UnlockChapter: 1
           Learned: false
           Available: true
           Selected: false
           Locked: true
         - Id: "MA-12"
           ParentId: "MA-11"
-          Position: [1.050481, 0.871304]
+          Position: [1.05048096, 0.871303976]
           IconPath: "assets/vertical_slice/ui/skill_tree/skill_ma.png"
+          Branch: ""
+          UnlockChapter: 1
           Learned: false
           Available: true
           Selected: false
           Locked: true
         - Id: "FU-01"
           ParentId: "magic_sword_core"
-          Position: [0.587580, 0.620544]
+          Position: [0.587580025, 0.620544016]
           IconPath: "assets/vertical_slice/ui/skill_tree/skill_fu.png"
+          Branch: ""
+          UnlockChapter: 1
           Learned: false
           Available: true
           Selected: false
           Locked: true
         - Id: "FU-02"
           ParentId: "FU-01"
-          Position: [0.606937, 0.676069]
+          Position: [0.606936991, 0.676069021]
           IconPath: "assets/vertical_slice/ui/skill_tree/skill_fu.png"
+          Branch: ""
+          UnlockChapter: 1
           Learned: false
           Available: true
           Selected: false
           Locked: true
         - Id: "FU-03"
           ParentId: "FU-02"
-          Position: [0.615749, 0.731696]
+          Position: [0.615749002, 0.73169601]
           IconPath: "assets/vertical_slice/ui/skill_tree/skill_fu.png"
+          Branch: ""
+          UnlockChapter: 1
           Learned: false
           Available: true
           Selected: false
           Locked: true
         - Id: "FU-04"
           ParentId: "FU-03"
-          Position: [0.605552, 0.763656]
+          Position: [0.605552018, 0.76365602]
           IconPath: "assets/vertical_slice/ui/skill_tree/skill_fu.png"
+          Branch: ""
+          UnlockChapter: 1
           Learned: false
           Available: true
           Selected: false
           Locked: true
         - Id: "FU-05"
           ParentId: "FU-04"
-          Position: [0.600216, 0.825941]
+          Position: [0.600215971, 0.825941026]
           IconPath: "assets/vertical_slice/ui/skill_tree/skill_fu.png"
+          Branch: ""
+          UnlockChapter: 1
           Learned: false
           Available: true
           Selected: false
           Locked: true
         - Id: "FU-06"
           ParentId: "FU-05"
-          Position: [0.584361, 0.884862]
+          Position: [0.584361017, 0.884862006]
           IconPath: "assets/vertical_slice/ui/skill_tree/skill_fu.png"
+          Branch: ""
+          UnlockChapter: 1
           Learned: false
           Available: true
           Selected: false
           Locked: true
         - Id: "FU-07"
           ParentId: "FU-06"
-          Position: [0.555679, 0.915284]
+          Position: [0.555679023, 0.915283978]
           IconPath: "assets/vertical_slice/ui/skill_tree/skill_fu.png"
+          Branch: ""
+          UnlockChapter: 1
           Learned: false
           Available: true
           Selected: false
           Locked: true
         - Id: "FU-08"
           ParentId: "FU-07"
-          Position: [0.524158, 0.975387]
+          Position: [0.524158001, 0.975386977]
           IconPath: "assets/vertical_slice/ui/skill_tree/skill_fu.png"
+          Branch: ""
+          UnlockChapter: 1
           Learned: false
           Available: true
           Selected: false
           Locked: true
         - Id: "FU-09"
           ParentId: "FU-08"
-          Position: [0.483216, 1.028734]
+          Position: [0.483215988, 1.02873397]
           IconPath: "assets/vertical_slice/ui/skill_tree/skill_fu.png"
+          Branch: ""
+          UnlockChapter: 1
           Learned: false
           Available: true
           Selected: false
           Locked: true
         - Id: "FU-10"
           ParentId: "FU-09"
-          Position: [0.436849, 1.050389]
+          Position: [0.436848998, 1.05038905]
           IconPath: "assets/vertical_slice/ui/skill_tree/skill_fu.png"
+          Branch: ""
+          UnlockChapter: 1
           Learned: false
           Available: true
           Selected: false
           Locked: true
         - Id: "FU-11"
           ParentId: "FU-10"
-          Position: [0.380562, 1.099212]
+          Position: [0.380562007, 1.09921205]
           IconPath: "assets/vertical_slice/ui/skill_tree/skill_fu.png"
+          Branch: ""
+          UnlockChapter: 1
           Learned: false
           Available: true
           Selected: false
           Locked: true
         - Id: "FU-12"
           ParentId: "FU-11"
-          Position: [0.316977, 1.138278]
+          Position: [0.316976994, 1.13827801]
           IconPath: "assets/vertical_slice/ui/skill_tree/skill_fu.png"
+          Branch: ""
+          UnlockChapter: 1
           Learned: false
           Available: true
           Selected: false
           Locked: true
         - Id: "MO-01"
           ParentId: "magic_sword_core"
-          Position: [0.412420, 0.620544]
+          Position: [0.412420005, 0.620544016]
           IconPath: "assets/vertical_slice/ui/skill_tree/skill_mo.png"
+          Branch: ""
+          UnlockChapter: 1
           Learned: false
           Available: true
           Selected: false
           Locked: true
         - Id: "MO-02"
           ParentId: "MO-01"
-          Position: [0.365593, 0.656112]
+          Position: [0.365592986, 0.656112015]
           IconPath: "assets/vertical_slice/ui/skill_tree/skill_mo.png"
+          Branch: ""
+          UnlockChapter: 1
           Learned: false
           Available: true
           Selected: false
           Locked: true
         - Id: "MO-03"
           ParentId: "MO-02"
-          Position: [0.315412, 0.681682]
+          Position: [0.315412015, 0.681681991]
           IconPath: "assets/vertical_slice/ui/skill_tree/skill_mo.png"
+          Branch: ""
+          UnlockChapter: 1
           Learned: false
           Available: true
           Selected: false
           Locked: true
         - Id: "MO-04"
           ParentId: "MO-03"
-          Position: [0.281865, 0.681860]
+          Position: [0.281865001, 0.68186003]
           IconPath: "assets/vertical_slice/ui/skill_tree/skill_mo.png"
+          Branch: ""
+          UnlockChapter: 1
           Learned: false
           Available: true
           Selected: false
           Locked: true
         - Id: "MO-05"
           ParentId: "MO-04"
-          Position: [0.220980, 0.696033]
+          Position: [0.220980003, 0.696033001]
           IconPath: "assets/vertical_slice/ui/skill_tree/skill_mo.png"
+          Branch: ""
+          UnlockChapter: 1
           Learned: false
           Available: true
           Selected: false
           Locked: true
         - Id: "MO-06"
           ParentId: "MO-05"
-          Position: [0.160043, 0.699162]
+          Position: [0.160043001, 0.699162006]
           IconPath: "assets/vertical_slice/ui/skill_tree/skill_mo.png"
+          Branch: ""
+          UnlockChapter: 1
           Learned: false
           Available: true
           Selected: false
           Locked: true
         - Id: "MO-07"
           ParentId: "MO-06"
-          Position: [0.122247, 0.681284]
+          Position: [0.122247003, 0.68128401]
           IconPath: "assets/vertical_slice/ui/skill_tree/skill_mo.png"
+          Branch: ""
+          UnlockChapter: 1
           Learned: false
           Available: true
           Selected: false
           Locked: true
         - Id: "MO-08"
           ParentId: "MO-07"
-          Position: [0.055346, 0.669878]
+          Position: [0.0553460009, 0.669878006]
           IconPath: "assets/vertical_slice/ui/skill_tree/skill_mo.png"
+          Branch: ""
+          UnlockChapter: 1
           Learned: false
           Available: true
           Selected: false
           Locked: true
         - Id: "MO-09"
           ParentId: "MO-08"
-          Position: [-0.008042, 0.647425]
+          Position: [-0.00804200023, 0.647424996]
           IconPath: "assets/vertical_slice/ui/skill_tree/skill_mo.png"
+          Branch: ""
+          UnlockChapter: 1
           Learned: false
           Available: true
           Selected: false
           Locked: true
         - Id: "MO-10"
           ParentId: "MO-09"
-          Position: [-0.042966, 0.610019]
+          Position: [-0.0429660007, 0.610019028]
           IconPath: "assets/vertical_slice/ui/skill_tree/skill_mo.png"
+          Branch: ""
+          UnlockChapter: 1
           Learned: false
           Available: true
           Selected: false
           Locked: true
         - Id: "MO-11"
           ParentId: "MO-10"
-          Position: [-0.106793, 0.571575]
+          Position: [-0.106793001, 0.571574986]
           IconPath: "assets/vertical_slice/ui/skill_tree/skill_mo.png"
+          Branch: ""
+          UnlockChapter: 1
           Learned: false
           Available: true
           Selected: false
           Locked: true
         - Id: "MO-12"
           ParentId: "MO-11"
-          Position: [-0.163596, 0.523173]
+          Position: [-0.163596004, 0.523172975]
           IconPath: "assets/vertical_slice/ui/skill_tree/skill_mo.png"
+          Branch: ""
+          UnlockChapter: 1
           Learned: false
           Available: true
           Selected: false
           Locked: true
         - Id: "LI-01"
           ParentId: "magic_sword_core"
-          Position: [0.358293, 0.453956]
+          Position: [0.358292997, 0.453956008]
           IconPath: "assets/vertical_slice/ui/skill_tree/skill_li.png"
+          Branch: ""
+          UnlockChapter: 1
           Learned: false
           Available: true
           Selected: false
           Locked: true
         - Id: "LI-02"
           ParentId: "LI-01"
-          Position: [0.309743, 0.421016]
+          Position: [0.309742987, 0.421016008]
           IconPath: "assets/vertical_slice/ui/skill_tree/skill_li.png"
+          Branch: ""
+          UnlockChapter: 1
           Learned: false
           Available: true
           Selected: false
           Locked: true
         - Id: "LI-03"
           ParentId: "LI-02"
-          Position: [0.269416, 0.382050]
+          Position: [0.269416004, 0.382050008]
           IconPath: "assets/vertical_slice/ui/skill_tree/skill_li.png"
+          Branch: ""
+          UnlockChapter: 1
           Learned: false
           Available: true
           Selected: false
           Locked: true
         - Id: "LI-04"
           ParentId: "LI-03"
-          Position: [0.258204, 0.351035]
+          Position: [0.258204013, 0.351034999]
           IconPath: "assets/vertical_slice/ui/skill_tree/skill_li.png"
+          Branch: ""
+          UnlockChapter: 1
           Learned: false
           Available: true
           Selected: false
           Locked: true
         - Id: "LI-05"
           ParentId: "LI-04"
-          Position: [0.224763, 0.298691]
+          Position: [0.224763006, 0.298691005]
           IconPath: "assets/vertical_slice/ui/skill_tree/skill_li.png"
+          Branch: ""
+          UnlockChapter: 1
           Learned: false
           Available: true
           Selected: false
           Locked: true
         - Id: "LI-06"
           ParentId: "LI-05"
-          Position: [0.201417, 0.242931]
+          Position: [0.201416999, 0.242930993]
           IconPath: "assets/vertical_slice/ui/skill_tree/skill_li.png"
+          Branch: ""
+          UnlockChapter: 1
           Learned: false
           Available: true
           Selected: false
           Locked: true
         - Id: "LI-07"
           ParentId: "LI-06"
-          Position: [0.205136, 0.202315]
+          Position: [0.205136001, 0.202315003]
           IconPath: "assets/vertical_slice/ui/skill_tree/skill_li.png"
+          Branch: ""
+          UnlockChapter: 1
           Learned: false
           Available: true
           Selected: false
           Locked: true
         - Id: "LI-08"
           ParentId: "LI-07"
-          Position: [0.192878, 0.136336]
+          Position: [0.192877993, 0.136335999]
           IconPath: "assets/vertical_slice/ui/skill_tree/skill_li.png"
+          Branch: ""
+          UnlockChapter: 1
           Learned: false
           Available: true
           Selected: false
           Locked: true
         - Id: "LI-09"
           ParentId: "LI-08"
-          Position: [0.191784, 0.070065]
+          Position: [0.191783994, 0.0700649992]
           IconPath: "assets/vertical_slice/ui/skill_tree/skill_li.png"
+          Branch: ""
+          UnlockChapter: 1
           Learned: false
           Available: true
           Selected: false
           Locked: true
         - Id: "LI-10"
           ParentId: "LI-09"
-          Position: [0.213916, 0.025583]
+          Position: [0.213916004, 0.0255830009]
           IconPath: "assets/vertical_slice/ui/skill_tree/skill_li.png"
+          Branch: ""
+          UnlockChapter: 1
           Learned: false
           Available: true
           Selected: false
           Locked: true
         - Id: "LI-11"
           ParentId: "LI-10"
-          Position: [0.226939, -0.046588]
+          Position: [0.226938993, -0.0465879999]
           IconPath: "assets/vertical_slice/ui/skill_tree/skill_li.png"
+          Branch: ""
+          UnlockChapter: 1
           Learned: false
           Available: true
           Selected: false
           Locked: true
         - Id: "LI-12"
           ParentId: "LI-11"
-          Position: [0.251261, -0.115650]
+          Position: [0.251260996, -0.115649998]
           IconPath: "assets/vertical_slice/ui/skill_tree/skill_li.png"
+          Branch: ""
+          UnlockChapter: 1
           Learned: false
           Available: true
           Selected: false
@@ -641,16 +824,21 @@ Entities:
       Scale: [1, 1, 1]
     UIWidgetComponent:
       Visible: true
-      Position: [0.7, 0.215]
-      Size: [0.235, 0.57]
-      Rotation: 0.0
+      EditorVisible: true
+      Position: [0.698332548, 0.215000004]
+      Size: [0.236667454, 0.569999933]
+      Rotation: 0
       Anchor: 0
       SortOrder: 18
-      ParentEntity: 0
+      ParentEntity: 970000003
     UIPanelComponent:
-      BackgroundColor: [0.04, 0.046, 0.056, 0.84]
-      BorderColor: [0.56, 0.72, 0.76, 0.88]
-      BorderThickness: 2.0
+      BackgroundColor: [0.0399999991, 0.0460000001, 0.0560000017, 0.839999974]
+      BorderColor: [0.560000002, 0.720000029, 0.75999999, 0.879999995]
+      BorderThickness: 2
+      ClipChildren: false
+      Draggable: false
+      ConstrainDragToParent: true
+      DragHandleHeight: 0.119999997
   - Entity: 970000015
     TagComponent:
       Tag: SkillTree_DragHint
@@ -660,142 +848,26 @@ Entities:
       Scale: [1, 1, 1]
     UIWidgetComponent:
       Visible: true
-      Position: [0.075, 0.735]
-      Size: [0.52, 0.03]
-      Rotation: 0.0
+      EditorVisible: true
+      Position: [0.0636685491, 0.700753987]
+      Size: [0.309801668, 0.0612243414]
+      Rotation: 0
       Anchor: 0
       SortOrder: 42
-      ParentEntity: 0
+      ParentEntity: 970000003
     UITextComponent:
       Text: "拖动画布浏览完整技能树；点击节点查看详情"
-      Color: [0.7, 0.88, 0.88, 1]
-      FontSize: 16
+      Color: [0.699999988, 0.879999995, 0.879999995, 1]
+      FontSize: 24.2745838
       FontPath: assets/fonts/wqy-microhei.ttc
-      ShadowColor: [0.01, 0.015, 0.018, 0.82]
-      ShadowOffset: [1.6, 1.6]
-      OutlineColor: [0.0, 0.0, 0.0, 0.86]
-      OutlineThickness: 1.1
-  - Entity: 970000030
-    TagComponent:
-      Tag: SkillTree_Status
-    TransformComponent:
-      Translation: [0, 0, 0]
-      Rotation: [0, 0, 0]
-      Scale: [1, 1, 1]
-    UIWidgetComponent:
-      Visible: true
-      Position: [0.085, 0.792]
-      Size: [0.56, 0.07]
-      Rotation: 0.0
-      Anchor: 0
-      SortOrder: 42
-      ParentEntity: 0
-    UITextComponent:
-      Text: "魔剑 Lv1 / 完整技能网"
-      Color: [0.88, 0.98, 0.92, 1]
-      FontSize: 16
-      FontPath: assets/fonts/wqy-microhei.ttc
-      ShadowColor: [0.01, 0.015, 0.018, 0.82]
-      ShadowOffset: [1.6, 1.6]
-      OutlineColor: [0.0, 0.0, 0.0, 0.86]
-      OutlineThickness: 1.1
-  - Entity: 970000031
-    TagComponent:
-      Tag: SkillTree_Details
-    TransformComponent:
-      Translation: [0, 0, 0]
-      Rotation: [0, 0, 0]
-      Scale: [1, 1, 1]
-    UIWidgetComponent:
-      Visible: true
-      Position: [0.725, 0.255]
-      Size: [0.18, 0.3]
-      Rotation: 0.0
-      Anchor: 0
-      SortOrder: 42
-      ParentEntity: 0
-    UITextComponent:
-      Text: "魔剑核心"
-      Color: [0.96, 0.99, 0.94, 1]
-      FontSize: 18
-      FontPath: assets/fonts/wqy-microhei.ttc
-      ShadowColor: [0.01, 0.015, 0.018, 0.82]
-      ShadowOffset: [1.6, 1.6]
-      OutlineColor: [0.0, 0.0, 0.0, 0.86]
-      OutlineThickness: 1.1
-  - Entity: 970000032
-    TagComponent:
-      Tag: SkillTree_Materials
-    TransformComponent:
-      Translation: [0, 0, 0]
-      Rotation: [0, 0, 0]
-      Scale: [1, 1, 1]
-    UIWidgetComponent:
-      Visible: true
-      Position: [0.725, 0.59]
-      Size: [0.18, 0.11]
-      Rotation: 0.0
-      Anchor: 0
-      SortOrder: 42
-      ParentEntity: 0
-    UITextComponent:
-      Text: "材料"
-      Color: [1.0, 0.93, 0.72, 1]
-      FontSize: 15
-      FontPath: assets/fonts/wqy-microhei.ttc
-      ShadowColor: [0.01, 0.015, 0.018, 0.82]
-      ShadowOffset: [1.6, 1.6]
-      OutlineColor: [0.0, 0.0, 0.0, 0.86]
-      OutlineThickness: 1.1
-  - Entity: 970000033
-    TagComponent:
-      Tag: SkillTree_MagicSwordBar
-    TransformComponent:
-      Translation: [0, 0, 0]
-      Rotation: [0, 0, 0]
-      Scale: [1, 1, 1]
-    UIWidgetComponent:
-      Visible: true
-      Position: [0.725, 0.725]
-      Size: [0.18, 0.018]
-      Rotation: 0.0
-      Anchor: 0
-      SortOrder: 44
-      ParentEntity: 0
-    UIProgressBarComponent:
-      Value: 1
-      MaxValue: 2
-      ForegroundColor: [0.35, 0.88, 0.86, 1]
-      BackgroundColor: [0.05, 0.08, 0.1, 0.92]
-  - Entity: 970000034
-    TagComponent:
-      Tag: SkillTree_Button_LearnSelectedSkill
-    TransformComponent:
-      Translation: [0, 0, 0]
-      Rotation: [0, 0, 0]
-      Scale: [1, 1, 1]
-    UIWidgetComponent:
-      Visible: true
-      Position: [0.725, 0.755]
-      Size: [0.18, 0.052]
-      Rotation: 0.0
-      Anchor: 0
-      SortOrder: 55
-      ParentEntity: 0
-    UIButtonComponent:
-      NormalColor: [0.74, 0.52, 0.2, 0.94]
-      HoverColor: [0.92, 0.72, 0.3, 0.96]
-      PressedColor: [0.52, 0.35, 0.14, 0.96]
-      OnClickFunction: "progression:learn_selected_skill"
-    UITextComponent:
-      Text: "学习选中节点"
-      Color: [1.0, 0.94, 0.78, 1]
-      FontSize: 18
-      FontPath: assets/fonts/wqy-microhei.ttc
-      ShadowColor: [0.01, 0.015, 0.018, 0.78]
-      ShadowOffset: [1.6, 1.6]
-      OutlineColor: [0.0, 0.0, 0.0, 0.86]
-      OutlineThickness: 1.2
+      Padding: [-1, -1, -1, -1]
+      AutoFit: true
+      HorizontalAlign: 0
+      VerticalAlign: 0
+      ShadowColor: [0.00999999978, 0.0149999997, 0.0179999992, 0.819999993]
+      ShadowOffset: [1.60000002, 1.60000002]
+      OutlineColor: [0, 0, 0, 0.860000014]
+      OutlineThickness: 1.10000002
   - Entity: 970000035
     TagComponent:
       Tag: SkillTree_Button_Back
@@ -805,23 +877,143 @@ Entities:
       Scale: [1, 1, 1]
     UIWidgetComponent:
       Visible: true
-      Position: [0.075, 0.825]
-      Size: [0.15, 0.05]
-      Rotation: 0.0
+      EditorVisible: true
+      Position: [0.0685693771, 0.805862427]
+      Size: [0.151331484, 0.0499999523]
+      Rotation: 0
       Anchor: 0
       SortOrder: 55
-      ParentEntity: 0
-    UIButtonComponent:
-      NormalColor: [0.1, 0.12, 0.14, 0.9]
-      HoverColor: [0.2, 0.24, 0.28, 0.96]
-      PressedColor: [0.07, 0.08, 0.1, 0.96]
-      OnClickFunction: "scene:assets/scenes/VerticalSliceHub.wt"
+      ParentEntity: 970000003
     UITextComponent:
       Text: "返回据点"
-      Color: [0.9, 0.96, 0.94, 1]
-      FontSize: 18
+      Color: [0.899999976, 0.959999979, 0.939999998, 1]
+      FontSize: 30
       FontPath: assets/fonts/wqy-microhei.ttc
-      ShadowColor: [0.01, 0.015, 0.018, 0.78]
-      ShadowOffset: [1.6, 1.6]
-      OutlineColor: [0.0, 0.0, 0.0, 0.86]
-      OutlineThickness: 1.2
+      Padding: [-1, -1, -1, -1]
+      AutoFit: true
+      HorizontalAlign: 0
+      VerticalAlign: 0
+      ShadowColor: [0.00999999978, 0.0149999997, 0.0179999992, 0.779999971]
+      ShadowOffset: [1.60000002, 1.60000002]
+      OutlineColor: [0, 0, 0, 0.860000014]
+      OutlineThickness: 1.20000005
+    UIButtonComponent:
+      NormalColor: [0.100000001, 0.119999997, 0.140000001, 0.899999976]
+      HoverColor: [0.200000003, 0.239999995, 0.280000001, 0.959999979]
+      PressedColor: [0.0700000003, 0.0799999982, 0.100000001, 0.959999979]
+      OnClickFunction: "scene:assets/scenes/VerticalSliceHub.wt"
+      TooltipText: ""
+  - Entity: 970000031
+    TagComponent:
+      Tag: SkillTree_Details
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    UIWidgetComponent:
+      Visible: true
+      EditorVisible: true
+      Position: [0.722733736, 0.226797283]
+      Size: [0.180000067, 0.300000012]
+      Rotation: 0
+      Anchor: 0
+      SortOrder: 42
+      ParentEntity: 970000003
+    UITextComponent:
+      Text: "魔剑核心"
+      Color: [0.959999979, 0.99000001, 0.939999998, 1]
+      FontSize: 25
+      FontPath: assets/fonts/wqy-microhei.ttc
+      Padding: [-1, -1, -1, -1]
+      AutoFit: false
+      HorizontalAlign: 0
+      VerticalAlign: 0
+      ShadowColor: [0.00999999978, 0.0149999997, 0.0179999992, 0.819999993]
+      ShadowOffset: [1.60000002, 1.60000002]
+      OutlineColor: [0, 0, 0, 0.860000014]
+      OutlineThickness: 1.10000002
+  - Entity: 970000032
+    TagComponent:
+      Tag: SkillTree_Materials
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    UIWidgetComponent:
+      Visible: true
+      EditorVisible: true
+      Position: [0.722733736, 0.557768226]
+      Size: [0.180000067, 0.110000014]
+      Rotation: 0
+      Anchor: 0
+      SortOrder: 42
+      ParentEntity: 970000003
+    UITextComponent:
+      Text: "材料"
+      Color: [1, 0.930000007, 0.720000029, 1]
+      FontSize: 20
+      FontPath: assets/fonts/wqy-microhei.ttc
+      Padding: [-1, -1, -1, -1]
+      AutoFit: false
+      HorizontalAlign: 0
+      VerticalAlign: 0
+      ShadowColor: [0.00999999978, 0.0149999997, 0.0179999992, 0.819999993]
+      ShadowOffset: [1.60000002, 1.60000002]
+      OutlineColor: [0, 0, 0, 0.860000014]
+      OutlineThickness: 1.10000002
+  - Entity: 970000033
+    TagComponent:
+      Tag: SkillTree_MagicSwordBar
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    UIWidgetComponent:
+      Visible: true
+      EditorVisible: true
+      Position: [0.722733736, 0.682695985]
+      Size: [0.180000007, 0.0180000067]
+      Rotation: 0
+      Anchor: 0
+      SortOrder: 44
+      ParentEntity: 970000003
+    UIProgressBarComponent:
+      Value: 1
+      MaxValue: 2
+      ForegroundColor: [0.349999994, 0.879999995, 0.860000014, 1]
+      BackgroundColor: [0.0500000007, 0.0799999982, 0.100000001, 0.920000017]
+  - Entity: 970000034
+    TagComponent:
+      Tag: SkillTree_Button_LearnSelectedSkill
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    UIWidgetComponent:
+      Visible: true
+      EditorVisible: true
+      Position: [0.722733736, 0.71974659]
+      Size: [0.180000067, 0.0520000458]
+      Rotation: 0
+      Anchor: 0
+      SortOrder: 55
+      ParentEntity: 970000003
+    UITextComponent:
+      Text: "学习选中节点"
+      Color: [1, 0.939999998, 0.779999971, 1]
+      FontSize: 30
+      FontPath: assets/fonts/wqy-microhei.ttc
+      Padding: [-1, -1, -1, -1]
+      AutoFit: true
+      HorizontalAlign: 0
+      VerticalAlign: 0
+      ShadowColor: [0.00999999978, 0.0149999997, 0.0179999992, 0.779999971]
+      ShadowOffset: [1.60000002, 1.60000002]
+      OutlineColor: [0, 0, 0, 0.860000014]
+      OutlineThickness: 1.20000005
+    UIButtonComponent:
+      NormalColor: [0.74000001, 0.519999981, 0.200000003, 0.939999998]
+      HoverColor: [0.920000017, 0.720000029, 0.300000012, 0.959999979]
+      PressedColor: [0.519999981, 0.349999994, 0.140000001, 0.959999979]
+      OnClickFunction: "progression:learn_selected_skill"
+      TooltipText: ""

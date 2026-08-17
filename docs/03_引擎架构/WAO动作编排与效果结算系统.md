@@ -323,7 +323,7 @@ struct ActionIntent
 
 动作配方描述一个动作如何执行。
 
-它可以来自 YAML、编辑器资源、内置 C++ 默认库，后续也可以由剧情脚本临时生成。
+它可以来自 YAML（`assets/gameplay/actions/*.yaml`），后续也可以由剧情脚本临时生成。
 
 建议字段：
 
@@ -413,39 +413,36 @@ TacticalActionResolver
 
 效果包是一组准备提交的效果。
 
-常见效果类型：
+当前 `EffectType` 已落地的效果类型（`Gameplay/Action/ActionTypes.h`）：
+
 - `Damage`
 - `Heal`
 - `ModifyAttribute`
 - `AddState`
 - `RemoveState`
-- `AddTag`
-- `RemoveTag`
 - `StartCooldown`
 - `ConsumeResource`
 - `Launch`
 - `HitStun`
-- `ResetJump`
-- `ResetAirActions`
-- `ModifyProtection`
-- `SpawnProjectile`
-- `SpawnPickup`
 - `EmitSignal`
+
+> 设计建议（尚未落地，`EffectType` 暂未包含）：`AddTag` / `RemoveTag` / `ResetJump` /
+> `ResetAirActions` / `ModifyProtection` / `SpawnProjectile` / `SpawnPickup` /
+> `AddComboScore` / `ResetAirHang`。断限追击等玩法目前通过 `ModifyAttribute` /
+> `EmitSignal` 组合表达，保护槽增减走玩法服务自己的字段，不在效果类型里。
 
 一个动作可以生成多个效果。
 
-例如断限追击：
+例如断限追击（当前落地形态：`Damage` + `EmitSignal` 组合，保护槽、重置空中行动等规则由玩法服务处理）：
 
 ```text
 Damage
-ModifyProtection(-BreakLimitProtectionReduce)
-ResetJump
-ResetAirActions
-ResetAirHang
-AddComboScore
 EmitSignal(vfx_break_limit)
 EmitSignal(hit_pause_heavy)
 ```
+
+> 设计初稿曾计划 `ModifyProtection` / `ResetJump` / `ResetAirActions` / `ResetAirHang` /
+> `AddComboScore` 等效果类型，尚未实现，见 4.4 标注。
 
 #### 4.5 EffectLedger
 
@@ -517,16 +514,18 @@ StoreDebugRecord
 
 状态注册表管理运行时状态。
 
-状态包括：
-- `State.Dead`
-- `State.Stunned`
-- `State.Guarding`
-- `State.Burning`
-- `State.Regeneration`
-- `State.DefenseDown`
-- `State.Invulnerable`
-- `State.Launched`
-- `State.SuperArmor`
+`StateRegistry` 内置状态（`Gameplay/Action/StateRegistry.h`）：
+
+- `State.Guard`（`guard`）
+- `State.Regeneration`（`regen`）
+- `State.Burn`（`burn`）
+- `State.DefenseDown`（`def_down`）
+- `State.Stun`（`stun`）
+
+> 设计建议（尚未落地）：`Dead` / `Stunned` / `Guarding` / `Burning` /
+> `Regeneration` / `DefenseDown` / `Invulnerable` / `Launched` / `SuperArmor`
+> 等更细的枚举化状态集。当前 5 个内置状态以字符串 id 注册，
+> 玩法需要更多状态时可自行 `Register` 扩展。
 
 注意：标签可以帮助查状态，但状态本身不能只是字符串。
 
@@ -639,10 +638,10 @@ WAO 统一：
 
 ### 6. 编辑器设计
 
-WAO 应当有独立编辑器面板：
+WAO 应当有独立编辑器面板（已实现为 `WAO Action Editor`，入口 `Window / WAO Action Editor`）：
 
 ```text
-View -> WAO Action Editor
+Window / WAO Action Editor
 ```
 
 面板结构：
@@ -1021,7 +1020,7 @@ Boss 发弹也拥有 WAO recipe，伤害从 recipe 读取；AI 发弹节奏仍�
 - `side.bear_charge`
 - `side.bear_shockwave`
 
-玩家和敌人每次启动动作时，会根据 `side_combat_tuning.yaml` 生成对应 WAO recipe，并注册到 `ActionDatabase`。
+玩家和敌人使用的 WAO recipe 在引擎启动时由 `ActionAssetLoader::LoadManifest/LoadDirectory` 从 `10_side_combat_actions.yaml` 一次性加载并注册到 `ActionDatabase`；运行时 `SideCombatActionService` 只做 `FindRecipe` 查找，不会每次启动动作时重新生成 recipe。
 
 `SideCombatActionService` 现在会读取 recipe 的：
 
@@ -1049,13 +1048,7 @@ Boss 发弹也拥有 WAO recipe，伤害从 recipe 读取；AI 发弹节奏仍�
 
 ### 编辑器调试工具
 
-已新增 `WAO Action Debugger` 编辑器面板。
-
-打开方式：
-
-```text
-View -> WAO Action Debugger
-```
+已新增 `WAO Action Editor` 编辑器面板（`Window / WAO Action Editor`）。
 
 当前面板能力：
 
@@ -1078,7 +1071,7 @@ View -> WAO Action Debugger
 - 横板玩家动作启动
 - 横板敌人动作启动
 
-这意味着进入 Play 模式后，测试弹幕或横板战斗，再打开 WAO Action Debugger，就可以看到最近动作痕迹。
+这意味着进入 Play 模式后，测试弹幕或横板战斗，再打开 WAO Action Editor，就可以看到最近动作痕迹。
 
 每次编辑器进入 Play 模式时会清空运行账本，确保本轮调试只显示当前试玩会话的动作记录。
 Sandbox 启动时也会清空一次运行账本。
@@ -1164,11 +1157,11 @@ WheatearEditor/assets/gameplay/actions/
 WAO::ActionAssetLoader::LoadDirectory("assets/gameplay/actions");
 ```
 
-加载顺序上先注册 C++ 默认 recipe，再加载 YAML，所以 YAML 可以覆盖显示名、图标、音效、VFX、标签、效果预览、资源消耗和表现信号。横板格斗的手感数值仍以 `side_combat_tuning.yaml` 为主，action YAML 主要承担动作资产元数据和 WAO 调试语义。
+加载顺序上：recipe 全部来自 action YAML（`ActionDatabase::Register` 的唯一调用方是 `ActionAssetLoader`），不存在 C++ 默认 recipe。运行时编辑保存 YAML 会把当前 recipe 重新注册到 `ActionDatabase`。横板格斗的手感数值仍以 `side_combat_tuning.yaml` 为主，action YAML 主要承担动作资产元数据和 WAO 调试语义。
 
 ### 2026-08-01 调试器生产力更新
 
-`WAO Action Debugger` 已从单纯列表升级为按玩法模块组织的调试入口：
+`WAO Action Editor` 已从单纯列表升级为按玩法模块组织的调试入口：
 
 - 左侧 action 列表支持按 `arcade`、`side`、`turn`、`tactical` 模块折叠分组。
 - 仍然保留 id、标签、名称、描述过滤，方便快速定位某个 recipe。
@@ -1178,7 +1171,7 @@ WAO::ActionAssetLoader::LoadDirectory("assets/gameplay/actions");
 这一步的意义是：WAO 不只是运行时战斗能力，也开始成为内容排错工具。以后策划或程序看到某个技能图标、音效、VFX 不对，可以从 action debugger 直接追到对应数据资产，而不是在代码和资源目录里盲找。
 ### 2026-08-02 Action Recipe 编辑落地
 
-`WAO Action Debugger` 现在不只是查看器，也具备第一阶段 authoring 能力：
+`WAO Action Editor` 现在不只是查看器，也具备第一阶段 authoring 能力：
 
 - Recipe 页新增 `Edit Recipe`。
 - 可编辑显示名、描述、图标、动画、音效、VFX、冷却、前摇、命中帧、后摇、取消窗口、移动倍率。
@@ -1192,8 +1185,8 @@ WAO::ActionAssetLoader::LoadDirectory("assets/gameplay/actions");
 用户偏好已经从 `GameProgress` 进度存档里拆出，落到 `UserSettings`：
 
 ```text
-Wheatear/src/Wheatear/Core/UserSettings.h
-Wheatear/src/Wheatear/Core/InputBindingService.h
+Wheatear/src/Wheatear/Config/UserSettings.h
+Wheatear/src/Wheatear/Input/InputBindingService.h
 assets/saves/user_settings.wtsettings
 ```
 

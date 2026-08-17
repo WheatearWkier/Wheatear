@@ -200,6 +200,7 @@
     <ClInclude Include="src\Wheatear\Gameplay\Action\EffectFormula.h" />
     <ClInclude Include="src\Wheatear\Gameplay\Action\EffectRegistry.h" />
     <ClInclude Include="src\Wheatear\Gameplay\Action\StateRegistry.h" />
+    <ClInclude Include="src\Wheatear\Gameplay\SystemBindingRegistry.h" />
     <ClInclude Include="src\Wheatear\Gameplay\Services\GameplayAudioService.h" />
     <ClInclude Include="src\Wheatear\Gameplay\Services\GameplayCombatService.h" />
     <ClInclude Include="src\Wheatear\Gameplay\Services\GameplayEntityService.h" />

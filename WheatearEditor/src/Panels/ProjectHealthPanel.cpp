@@ -11,6 +11,7 @@
 #include "Wheatear/Assets/AssetPath.h"
 #include "Wheatear/Config/PlayerConfig.h"
 #include "Wheatear/Core/EngineInfo.h"
+#include "Wheatear/Gameplay/SystemBindingRegistry.h"
 #include "Wheatear/Scene/EntityReference.h"
 
 #include <imgui/imgui.h>
@@ -31,6 +32,36 @@
 namespace Wheatear {
 
     using namespace ProjectHealthPanelInternal;
+
+    namespace {
+
+        static bool StartsWith(std::string_view value, std::string_view prefix)
+        {
+            return value.size() >= prefix.size()
+                && value.substr(0, prefix.size()) == prefix;
+        }
+
+        static bool MatchesSystemBindingContext(
+            const std::unordered_set<std::string>& tags,
+            const std::unordered_set<std::string>& components,
+            std::string_view context)
+        {
+            if (context.empty())
+                return false;
+
+            const std::string key(context);
+            if (components.count(key) != 0 || tags.count(key) != 0)
+                return true;
+
+            for (const std::string& tag : tags)
+            {
+                if (StartsWith(tag, context))
+                    return true;
+            }
+            return false;
+        }
+
+    } // namespace
 
     void ProjectHealthPanel::Open(const EditorToolContext&)
     {
@@ -53,7 +84,10 @@ namespace Wheatear {
     {
         const std::filesystem::path configPath =
             AssetPath::GetProjectRoot() / "assets" / "game" / "player.config";
-        const RuntimePlayerConfig config{ m_StartupScene };
+        // Preserve existing fields (e.g. PackageName) while updating the
+        // startup scene.
+        RuntimePlayerConfig config = LoadRuntimePlayerConfig(configPath);
+        config.StartupScene = m_StartupScene;
         if (SaveRuntimePlayerConfig(configPath, config, EngineInfo::EditorName))
         {
             m_Status = "Startup scene saved to " + configPath.generic_string();
@@ -68,6 +102,7 @@ namespace Wheatear {
     void ProjectHealthPanel::LoadAliasManifest()
     {
         m_AliasManifestDocument.SetSourcePath(m_AliasManifestPath);
+        m_AliasManifestDocument.SetWriteDestination(EditorDocuments::DocumentWriteDestination::ProjectRoot);
         m_AliasManifestDocument.Load();
         m_AliasStatus = m_AliasManifestDocument.GetStatus();
         m_SelectedAlias.clear();
@@ -102,6 +137,7 @@ namespace Wheatear {
         AssetRegistry::Get().WriteRegistry();
         m_HygieneReport = BuildAssetHygieneReport(options.ProjectRoot, m_Report);
         ScanEntityBindings();
+        ScanSystemBindings();
         const size_t sourceSyncIssues = m_SourceReport.MissingFromProject.size()
             + m_SourceReport.StaleProjectEntries.size();
         m_Status = "Last scan: " + std::to_string(m_Report.IncludedAssets.size()) + " assets, "
@@ -110,7 +146,91 @@ namespace Wheatear {
             + std::to_string(sourceSyncIssues) + " source sync issue(s), "
             + std::to_string(m_HygieneReport.DuplicateGroups.size()) + " duplicate group(s), "
             + std::to_string(m_HygieneReport.AliasIssues.size()) + " alias issue(s), "
+            + std::to_string(m_MissingSystemBindings.size()) + " missing system binding(s), "
             + std::to_string(m_MissingEntityBindings.size()) + " dangling entity binding(s).";
+    }
+
+    void ProjectHealthPanel::ScanSystemBindings()
+    {
+        m_MissingSystemBindings.clear();
+
+        const std::filesystem::path scenesDir =
+            AssetPath::GetProjectRoot() / "assets" / "scenes";
+        if (!std::filesystem::is_directory(scenesDir))
+            return;
+
+        for (const auto& entry : std::filesystem::directory_iterator(scenesDir))
+        {
+            if (!entry.is_regular_file())
+                continue;
+            const std::filesystem::path path = entry.path();
+            if (path.extension() != ".wt")
+                continue;
+
+            YAML::Node root;
+            try
+            {
+                root = YAML::LoadFile(path.string());
+            }
+            catch (...)
+            {
+                continue;
+            }
+            if (!root.IsMap())
+                continue;
+
+            const YAML::Node entities = root["Entities"];
+            if (!entities.IsSequence())
+                continue;
+
+            std::unordered_set<std::string> tags;
+            std::unordered_set<std::string> components;
+            for (const YAML::Node& entity : entities)
+            {
+                if (!entity.IsMap())
+                    continue;
+
+                const YAML::Node tagNode = entity["TagComponent"];
+                if (tagNode && tagNode.IsMap())
+                {
+                    const std::string tag = tagNode["Tag"].as<std::string>("");
+                    if (!tag.empty())
+                        tags.insert(tag);
+                }
+
+                for (auto componentIt = entity.begin(); componentIt != entity.end(); ++componentIt)
+                {
+                    const std::string componentKey = componentIt->first.as<std::string>("");
+                    if (!componentKey.empty())
+                        components.insert(componentKey);
+                }
+            }
+
+            const std::string relativePath =
+                AssetPath::ToProjectRelative(path).generic_string();
+            for (const SystemBindings::BindingRecord& binding : SystemBindings::AllBindings())
+            {
+                if (!binding.Required)
+                    continue;
+                if (!MatchesSystemBindingContext(tags, components, binding.Context))
+                    continue;
+
+                for (const std::string& name : SystemBindings::EvaluateNames(binding))
+                {
+                    if (tags.count(name) != 0)
+                        continue;
+
+                    m_MissingSystemBindings.push_back({
+                        relativePath,
+                        std::string(binding.Id),
+                        name,
+                        std::string(binding.Owner),
+                        std::string(binding.Context),
+                        std::string(binding.Description)
+                    });
+                }
+            }
+        }
     }
 
     void ProjectHealthPanel::ScanEntityBindings()
@@ -249,6 +369,7 @@ namespace Wheatear {
             + m_SourceReport.StaleProjectEntries.size()
             + m_HygieneReport.DuplicateGroups.size()
             + m_HygieneReport.AliasIssues.size()
+            + m_MissingSystemBindings.size()
             + m_MissingEntityBindings.size();
         EditorWidgets::PanelHeader(EditorLocale::Text("Project Health", "项目健康检查"), "Package dependency, asset hygiene, registry, and source/project sync validation.");
         EditorWidgets::StatusBadge(issueCount == 0 ? "Ready" : "Needs Attention",
@@ -309,6 +430,11 @@ namespace Wheatear {
             if (ImGui::BeginTabItem(EditorLocale::Text("Entity Bindings", "实体绑定")))
             {
                 DrawEntityBindings();
+                ImGui::EndTabItem();
+            }
+            if (ImGui::BeginTabItem(EditorLocale::Text("System Bindings", "系统绑定")))
+            {
+                DrawSystemBindings();
                 ImGui::EndTabItem();
             }
             if (ImGui::BeginTabItem(EditorLocale::Text("Unused Assets", "未使用资源")))
@@ -377,6 +503,8 @@ namespace Wheatear {
         SummaryLine("Project Entries", m_SourceReport.ScannedProjectEntries);
         SummaryLine("Source Sync Issues",
             m_SourceReport.MissingFromProject.size() + m_SourceReport.StaleProjectEntries.size());
+        SummaryLine("Missing System Bindings", m_MissingSystemBindings.size());
+        SummaryLine("Dangling Entity Bindings", m_MissingEntityBindings.size());
     }
 
     void ProjectHealthPanel::DrawAssetRegistry() const
@@ -471,6 +599,49 @@ namespace Wheatear {
                 ImGui::TextWrapped("%s", record.Reference.c_str());
                 ImGui::TableSetColumnIndex(1);
                 ImGui::TextWrapped("%s", record.SourceAsset.c_str());
+            }
+
+            ImGui::EndTable();
+        }
+    }
+
+    void ProjectHealthPanel::DrawSystemBindings() const
+    {
+        if (m_MissingSystemBindings.empty())
+        {
+            EditorWidgets::EmptyState(
+                EditorLocale::Text("No missing system bindings found.", "未发现缺失系统绑定。"),
+                "All required runtime UI/entity names registered in SystemBindingRegistry resolve in their matching scenes.");
+            return;
+        }
+
+        if (ImGui::BeginTable("SystemBindingTable", 6,
+            ImGuiTableFlags_Borders | ImGuiTableFlags_RowBg | ImGuiTableFlags_Resizable | ImGuiTableFlags_ScrollY,
+            ImVec2(0, 420)))
+        {
+            ImGui::TableSetupColumn(EditorLocale::Text("Scene", "场景"));
+            ImGui::TableSetupColumn("Owner");
+            ImGui::TableSetupColumn("Binding");
+            ImGui::TableSetupColumn(EditorLocale::Text("Missing Name", "缺失名称"));
+            ImGui::TableSetupColumn("Context");
+            ImGui::TableSetupColumn(EditorLocale::Text("Description", "描述"));
+            ImGui::TableHeadersRow();
+
+            for (const SystemBindingIssue& issue : m_MissingSystemBindings)
+            {
+                ImGui::TableNextRow();
+                ImGui::TableSetColumnIndex(0);
+                ImGui::TextWrapped("%s", issue.SceneAsset.c_str());
+                ImGui::TableSetColumnIndex(1);
+                ImGui::TextWrapped("%s", issue.Owner.c_str());
+                ImGui::TableSetColumnIndex(2);
+                ImGui::TextWrapped("%s", issue.BindingId.c_str());
+                ImGui::TableSetColumnIndex(3);
+                ImGui::TextWrapped("%s", issue.BindingName.c_str());
+                ImGui::TableSetColumnIndex(4);
+                ImGui::TextWrapped("%s", issue.Context.c_str());
+                ImGui::TableSetColumnIndex(5);
+                ImGui::TextWrapped("%s", issue.Description.c_str());
             }
 
             ImGui::EndTable();

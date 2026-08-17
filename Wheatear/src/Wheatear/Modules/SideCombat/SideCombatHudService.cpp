@@ -3,6 +3,7 @@
 
 #include "SideCombatTuningService.h"
 #include "Wheatear/Assets/AssetAliasRegistry.h"
+#include "Wheatear/Gameplay/SystemBindingRegistry.h"
 #include "Wheatear/Core/Application.h"
 #include "Wheatear/Core/Log.h"
 #include "Wheatear/Core/Window.h"
@@ -45,7 +46,7 @@ namespace Wheatear::SideCombatHudService {
         static constexpr float kSideUISheetHeight = 1440.0f;
         static constexpr float kComboFontSheetWidth = 512.0f;
         static constexpr float kComboFontSheetHeight = 288.0f;
-        static std::string s_SkillPrefix = "SC_Skill";
+        static std::string s_SkillPrefix = SystemBindings::Side::SkillPrefix;
 
         // Skill-slot entity names are built from a fixed prefix + slot key and
         // reconstructed every frame (~5 strings per slot × 7 slots). Cache the
@@ -70,6 +71,12 @@ namespace Wheatear::SideCombatHudService {
         static const SkillSlotNames& CachedSkillSlotNames(std::string_view key)
         {
             static std::unordered_map<std::string, SkillSlotNames, TransparentStringHash, std::equal_to<>> cache;
+            static std::string cachedPrefix;
+            if (cachedPrefix != s_SkillPrefix)
+            {
+                cache.clear();
+                cachedPrefix = s_SkillPrefix;
+            }
             auto it = cache.find(key);
             if (it == cache.end())
             {
@@ -100,6 +107,49 @@ namespace Wheatear::SideCombatHudService {
                     entityName,
                     missing);
             }
+        }
+
+        static bool ReadAuthoredWidgetRect(Scene* scene,
+            const std::string& entityName,
+            glm::vec2& position,
+            glm::vec2& size)
+        {
+            if (!scene || entityName.empty())
+                return false;
+
+            Entity entity = FindEntityByName(scene, entityName);
+            if (!entity || !entity.HasComponent<UIWidgetComponent>())
+                return false;
+
+            const auto& widget = entity.GetComponent<UIWidgetComponent>();
+            if (widget.Size.x <= 0.0f || widget.Size.y <= 0.0f)
+                return false;
+
+            position = widget.Position;
+            size = widget.Size;
+            return true;
+        }
+
+        static bool AdoptAuthoredHudRect(Scene* scene,
+            const std::string& entityName,
+            SideCombatLevelComponent::HudRect& rect)
+        {
+            glm::vec2 position;
+            glm::vec2 size;
+            if (!ReadAuthoredWidgetRect(scene, entityName, position, size))
+                return false;
+
+            rect.Position = position;
+            rect.Size = size;
+            return true;
+        }
+
+        static bool AdoptAuthoredHudSize(Scene* scene,
+            const std::string& entityName,
+            glm::vec2& size)
+        {
+            glm::vec2 position;
+            return ReadAuthoredWidgetRect(scene, entityName, position, size);
         }
 
         struct SheetUVRect
@@ -323,7 +373,7 @@ namespace Wheatear::SideCombatHudService {
             bool visible = true,
             bool forceImage = false)
         {
-            Entity entity = EnsureTransparentWidget(scene, name, button);
+            Entity entity = EnsureTransparentWidget(scene, name, sortOrder, visible, button);
             if (!entity)
                 return {};
 
@@ -359,7 +409,7 @@ namespace Wheatear::SideCombatHudService {
             glm::vec4 color = glm::vec4(1.0f),
             bool visible = true)
         {
-            Entity entity = EnsureTransparentWidget(scene, name, false);
+            Entity entity = EnsureTransparentWidget(scene, name, sortOrder, visible);
             if (!entity)
                 return {};
 
@@ -663,7 +713,7 @@ namespace Wheatear::SideCombatHudService {
             const SideCombatLevelComponent& level)
         {
             const std::string itemSlotPrefix = level.ItemSlotPrefix.empty()
-                ? "SC_ItemSlot_"
+                ? SystemBindings::Side::ItemSlotPrefix
                 : level.ItemSlotPrefix;
 
             for (const auto& slot : level.CombatItemHudSlots)
@@ -735,7 +785,7 @@ namespace Wheatear::SideCombatHudService {
             const SidePlayerControllerComponent* controller)
         {
             const std::string itemSlotPrefix = level.ItemSlotPrefix.empty()
-                ? "SC_ItemSlot_"
+                ? SystemBindings::Side::ItemSlotPrefix
                 : level.ItemSlotPrefix;
 
             for (const auto& slot : level.CombatItemHudSlots)
@@ -763,7 +813,7 @@ namespace Wheatear::SideCombatHudService {
                 return;
 
             const std::string itemSlotPrefix = level.ItemSlotPrefix.empty()
-                ? "SC_ItemSlot_"
+                ? SystemBindings::Side::ItemSlotPrefix
                 : level.ItemSlotPrefix;
             for (const auto& slot : level.CombatItemHudSlots)
             {
@@ -804,6 +854,15 @@ namespace Wheatear::SideCombatHudService {
                 false);
             if (!entity)
                 return {};
+
+            if (entity.HasComponent<UIWidgetComponent>())
+            {
+                auto& widget = entity.GetComponent<UIWidgetComponent>();
+                widget.Position = position;
+                widget.Size = size;
+                widget.SortOrder = sortOrder;
+                widget.Visible = false;
+            }
 
             ClearPanelVisual(entity);
             ClearProgressVisual(entity);
@@ -965,7 +1024,7 @@ namespace Wheatear::SideCombatHudService {
         static void UpdateStatusIcons(Scene* scene,
             const std::string& prefix,
             glm::vec2 buffStart,
-            glm::vec2 debuffStart,
+            glm::vec2 debuffStart,   // kept for scene compatibility; unused
             const SideCombatLevelComponent::StatusIconLayout& layout,
             const SideCombatantComponent* combatant,
             const SidePlayerControllerComponent* controller,
@@ -1035,9 +1094,12 @@ namespace Wheatear::SideCombatHudService {
                     return a.EntryOrder < b.EntryOrder;
                 });
 
+            // FIFO queue layout: kIconsPerRow icons per row (horizontal cap).
+            // BuffStart is the first-row anchor; RowsGrowDown decides whether
+            // wrapped rows move down (boss HUD) or up (player HUD).
             constexpr int kIconsPerRow = 2;
-            const float rowGap = std::abs(debuffStart.y - buffStart.y);
-            const float rowStep = playerSide ? -rowGap : rowGap;
+            const float rowGap = layout.Size.y + 0.008f;
+            const float rowStep = layout.RowsGrowDown ? rowGap : -rowGap;
             float x = buffStart.x;
             float y = buffStart.y;
             int inRow = 0;
@@ -1206,7 +1268,7 @@ namespace Wheatear::SideCombatHudService {
             HideComboCounter(scene, level);
 
             const std::string itemSlotPrefix = level.ItemSlotPrefix.empty()
-                ? "SC_ItemSlot_"
+                ? SystemBindings::Side::ItemSlotPrefix
                 : level.ItemSlotPrefix;
             for (const auto& slot : level.CombatItemHudSlots)
             {
@@ -1312,6 +1374,63 @@ namespace Wheatear::SideCombatHudService {
             }
         }
 
+        static void AdoptAuthoredSideCombatHudLayout(Scene* scene, SideCombatLevelComponent& level)
+        {
+            AdoptAuthoredHudRect(scene, level.TopPanelEntityName, level.TopPanelLayout);
+            AdoptAuthoredHudRect(scene, level.PlayerHealthBarEntityName, level.PlayerHealthLayout);
+            AdoptAuthoredHudRect(scene, level.PlayerManaEntityName, level.PlayerManaLayout);
+            AdoptAuthoredHudRect(scene, level.PlayerUltimateMaskEntityName, level.PlayerUltimateLayout);
+            AdoptAuthoredHudRect(scene, level.PlayerHealthTextEntityName, level.PlayerHealthTextLayout);
+            AdoptAuthoredHudRect(scene, level.ComboPanelEntityName, level.BossPanelLayout);
+            AdoptAuthoredHudRect(scene, level.BossHealthBarEntityName, level.BossHealthLayout);
+            AdoptAuthoredHudRect(scene, level.BossProtectionEntityName, level.BossProtectionLayout);
+            AdoptAuthoredHudRect(scene, level.BossHealthTextEntityName, level.BossHealthTextLayout);
+            AdoptAuthoredHudRect(scene, level.ComboTextEntityName, level.ComboTextLayout);
+            AdoptAuthoredHudRect(scene, level.ComboFrameEntityName, level.ComboFrameLayout);
+            AdoptAuthoredHudRect(scene, level.SkillTooltipPanelEntityName, level.SkillTooltipLayout);
+            AdoptAuthoredHudRect(scene, level.JoystickBaseEntityName, level.JoystickBaseLayout);
+            AdoptAuthoredHudSize(scene, level.JoystickThumbEntityName, level.JoystickThumbSize);
+
+            for (auto& slot : level.SkillHudSlots)
+            {
+                if (!slot.Enabled || slot.Key.empty())
+                    continue;
+
+                const SkillSlotNames& names = CachedSkillSlotNames(slot.Key);
+                const glm::vec2 oldPosition = slot.Position;
+                if (ReadAuthoredWidgetRect(scene, names.Slot, slot.Position, slot.Size))
+                    slot.TooltipPosition += slot.Position - oldPosition;
+            }
+
+            const std::string itemSlotPrefix = level.ItemSlotPrefix.empty()
+                ? SystemBindings::Side::ItemSlotPrefix
+                : level.ItemSlotPrefix;
+            for (auto& slot : level.CombatItemHudSlots)
+            {
+                if (!slot.Enabled || slot.Key.empty())
+                    continue;
+
+                const std::string prefix = itemSlotPrefix + slot.Key;
+                glm::vec2 framePosition;
+                glm::vec2 frameSize;
+                if (ReadAuthoredWidgetRect(scene, prefix + "_Frame", framePosition, frameSize))
+                {
+                    const glm::vec2 oldPosition = slot.Position;
+                    slot.Position = framePosition;
+                    slot.FrameSize = frameSize;
+                    slot.TooltipPosition += slot.Position - oldPosition;
+                }
+
+                glm::vec2 iconPosition;
+                glm::vec2 iconSize;
+                if (ReadAuthoredWidgetRect(scene, prefix + "_Icon", iconPosition, iconSize))
+                {
+                    slot.IconInset = iconPosition - slot.Position;
+                    slot.IconSize = iconSize;
+                }
+            }
+        }
+
         static void ConfigureSideCombatHudLayout(Scene* scene,
             SideCombatLevelComponent& level,
             const SideCombatTuningService::SideCombatTuning& tuning,
@@ -1348,6 +1467,7 @@ namespace Wheatear::SideCombatHudService {
 
             if (!level.RuntimeHudLayoutConfigured)
             {
+                AdoptAuthoredSideCombatHudLayout(scene, level);
 
                 SetWidgetVisible(scene, level.SkillBarPanelEntityName, false);
                 SetWidgetVisible(scene, level.MessageTextEntityName, false);
@@ -1502,6 +1622,30 @@ namespace Wheatear::SideCombatHudService {
             return entity;
         }
 
+        static void HideWorldStatusIcon(Scene* scene, const std::string& name)
+        {
+            Entity icon = FindEntityByName(scene, name);
+            if (!icon)
+                return;
+
+            if (icon.HasComponent<SpriteRendererComponent>())
+                icon.GetComponent<SpriteRendererComponent>().Color.a = 0.0f;
+            if (icon.HasComponent<TransformComponent>())
+            {
+                auto& transform = icon.GetComponent<TransformComponent>();
+                transform.Translation = { 0.0f, -10.0f, 0.0f };
+                transform.Scale = { 0.001f, 0.001f, 1.0f };
+            }
+        }
+
+        static void HideWorldStatusIcons(Scene* scene, const std::string& tag)
+        {
+            HideWorldStatusIcon(scene, tag + "_Buff_0");
+            HideWorldStatusIcon(scene, tag + "_Buff_1");
+            HideWorldStatusIcon(scene, tag + "_Debuff_0");
+            HideWorldStatusIcon(scene, tag + "_Debuff_1");
+        }
+
         static void UpdateEnemyHealthBars(Scene* scene,
             const SideCombatLevelComponent& level,
             const SideCombatTuningService::SideCombatTuning& tuning)
@@ -1528,6 +1672,7 @@ namespace Wheatear::SideCombatHudService {
                 {
                     HideWorldHealthSprite(scene, backName);
                     HideWorldHealthSprite(scene, fillName);
+                    HideWorldStatusIcons(scene, tag);
                     continue;
                 }
 
@@ -1569,9 +1714,13 @@ namespace Wheatear::SideCombatHudService {
                     transform.Scale = { fillWidth, 0.052f, 1.0f };
                 }
 
-                // Status icons follow the health bar: a row above it, sized
-                // to the bar (each icon ~ bar height x 1.15), only taking
-                // space while active.
+                // Status icons follow the health bar. The first row sits just
+                // above the small enemy bar; wrapped rows grow upward.
+                const float iconSize = 0.36f;
+                const float healthBarHalfHeight = 0.0475f;   // back scale.y / 2
+                const float iconHalfHeight = iconSize * 0.55f;
+                const float iconTop = baseY + healthBarHalfHeight
+                    + iconHalfHeight + 0.008f;
                 const bool shieldIcon = combatant.RuntimeInvulnerableTimer > 0.0f
                     || combatant.Invulnerable
                     || combatant.RuntimeState == SideCombatState::SuperArmor;
@@ -1620,12 +1769,12 @@ namespace Wheatear::SideCombatHudService {
                         return a.EntryOrder < b.EntryOrder;
                     });
 
-                const float iconSize = 0.105f;
-                const float iconGap = 0.11f;
+                const float iconGap = iconSize + 0.02f;
                 constexpr int kIconsPerRow = 2;
-                const float rowGap = 0.13f;
-                float iconX = baseX - fullWidth * 0.5f;
-                float iconY = baseY + 0.15f;
+                const float rowGap = iconSize + 0.03f;
+                const float barHalfWidth = (fullWidth + 0.08f) * 0.5f;
+                float iconX = baseX - barHalfWidth;   // align with bar left edge
+                float iconY = iconTop;                // just above the bar
                 int iconsInRow = 0;
                 for (const WorldIconSpec& spec : worldSpecs)
                 {
@@ -1637,8 +1786,8 @@ namespace Wheatear::SideCombatHudService {
                     {
                         if (iconsInRow >= kIconsPerRow)
                         {
-                            iconX = baseX - fullWidth * 0.5f;
-                            iconY -= rowGap;
+                            iconX = baseX - barHalfWidth;
+                            iconY += rowGap;
                             iconsInRow = 0;
                         }
                         transform.Translation = { iconX + iconSize * 0.5f, iconY, z + 0.15f };
@@ -1665,7 +1814,7 @@ namespace Wheatear::SideCombatHudService {
         if (!scene)
             return;
 
-        s_SkillPrefix = level.SkillPrefix.empty() ? "SC_Skill" : level.SkillPrefix;
+        s_SkillPrefix = level.SkillPrefix.empty() ? SystemBindings::Side::SkillPrefix : level.SkillPrefix;
 
         const SideCombatantComponent* playerCombatant =
             player && player.HasComponent<SideCombatantComponent>()

@@ -12,6 +12,8 @@
 #include "Wheatear/Assets/AssetPath.h"
 #include "Wheatear/Core/Log.h"
 #include "Wheatear/Modules/TacticalCombat/TacticalCombatComponents.h"
+#include "Wheatear/Gameplay/SystemBindingRegistry.h"
+#include "Wheatear/Modules/TacticalCombat/TacticalCombatTuningService.h"
 #include "Wheatear/Scene/Entity.h"
 #include "Wheatear/Scene/Scene.h"
 
@@ -221,7 +223,7 @@ namespace Wheatear {
         m_Status.clear();
         m_ParseValid = false;
 
-        m_ResolvedPath = AssetPath::Resolve(m_SourcePath);
+        m_ResolvedPath = EditorWidgets::ResolveWritableProjectAsset(m_SourcePath);
         std::string text;
         if (!EditorWidgets::ReadFileText(m_ResolvedPath, text))
         {
@@ -321,6 +323,36 @@ namespace Wheatear {
     {
         if (m_Scene)
         {
+            // Apply the tuning unit table to the open scene for edit-time
+            // preview (same operation the runtime performs at start).
+            auto levelView = m_Scene->GetRegistry().view<TacticalCombatLevelComponent>();
+            if (!levelView.empty())
+            {
+                const auto& level = m_Scene->GetRegistry()
+                    .get<TacticalCombatLevelComponent>(levelView.front());
+                const auto& tuning = TacticalCombatTuningService::GetTuning(level);
+
+                ImGui::TextDisabled(
+                    EditorLocale::Text(
+                        "Tuning unit table: %zu entries. Matches entities by Tag %s<tag>.",
+                        "调参单位表：%zu 条。按实体 Tag %s<tag> 匹配。"),
+                    tuning.Units.size(),
+                    SystemBindings::Tactical::UnitPrefix);
+                if (ImGui::Button(EditorLocale::Text(
+                    "Apply Tuning Units To Scene", "把调参单位表应用到场景")))
+                {
+                    const size_t applied =
+                        TacticalCombatTuningService::ApplyUnitTuningToScene(m_Scene, tuning);
+                    m_Status = std::to_string(applied) + " unit(s) applied from tuning table.";
+                }
+                if (ImGui::IsItemHovered())
+                    ImGui::SetTooltip("%s", EditorLocale::Text(
+                        "Overwrites matching TacticalUnitComponent values from the tuning table "
+                        "(same as runtime start). Save the scene to persist.",
+                        "用调参表的数值覆盖匹配的战棋单位组件（与运行时启动一致）。保存场景后生效。"));
+                ImGui::Separator();
+            }
+
             ImGui::TextDisabled("%s", EditorLocale::Text(
                 "Edits the open scene (Ctrl+Z undo, save the scene to persist).",
                 "编辑当前打开的场景（Ctrl+Z 撤销，保存场景后生效）。"));

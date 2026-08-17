@@ -151,6 +151,12 @@ namespace Wheatear {
         void ExecutePlayerPackageBuild();
         void PollPlayerPackageBuild();
         void ProcessDeferredViewportAssetDrop();
+        // Copies engine built-in gameplay content (actions / progression /
+        // input bindings) into the project so a project stops inheriting the
+        // engine's vertical-slice data. Existing project files are never
+        // overwritten.
+        void SyncBuiltinContentToProject();
+        std::string m_BuiltinSyncStatus;
         void SelectEditorEntity(Entity entity, bool preferMoveGizmo);
         Entity PickViewportEditorEntity(const glm::vec2& screenMouse);
         Entity PickSceneSpriteEntityAtViewportPoint(const glm::vec2& screenMouse);
@@ -158,7 +164,7 @@ namespace Wheatear {
             const glm::vec2& regionSize,
             Entity canvasEntity,
             const glm::vec2& screenMouse);
-        void ActivateHierarchyEntity(Entity entity);
+        void ActivateHierarchyEntity(Entity entity, bool additive = false);
         void OpenCanvasEditorForEntity(Entity entity);
 
         // UI canvas editor multi-select alignment / distribution. Operates on
@@ -171,6 +177,20 @@ namespace Wheatear {
             DistributeHorizontal, DistributeVertical
         };
         void UI_AlignSelection(UISelectionAction action);
+
+        // Scene-entity multi-select (non-UI entities; UI multi-select lives in
+        // m_UIMultiSelect). Ctrl+click toggles membership in the hierarchy or
+        // viewport; the hierarchy selection acts as the alignment anchor.
+        void ToggleSceneMultiSelect(Entity entity);
+        void ClearSceneMultiSelect();
+        void AlignSceneSelection(UISelectionAction action);
+
+        // Copy / paste a single entity with its widget subtree through an
+        // internal Prefab v2 clipboard file (assets/cache/clipboard.wtprefab).
+        void CopySelectedEntity();
+        void PasteClipboardEntity();
+        bool HasClipboardEntity() const { return m_HasClipboardEntity; }
+
         void FrameEditorCameraOnEntity(Entity entity);
         void FrameEditorCameraOnScene();
         void LoadPlayScene(const std::filesystem::path& scenePath);
@@ -197,6 +217,8 @@ namespace Wheatear {
         std::filesystem::path m_PendingScenePath;
 
         Entity m_HoveredEntity;
+        std::vector<UUID> m_SceneMultiSelect;   // non-UI entity multi-select
+        bool m_HasClipboardEntity = false;
 
         glm::vec2 m_ViewportSize = { 0.0f, 0.0f };
         glm::vec2 m_ViewportBounds[2] = {};
@@ -285,7 +307,6 @@ namespace Wheatear {
         bool m_PackageScenePickerOpen = false;
         std::string m_PackageScenePath;
         std::string m_PackageSceneInput;
-        std::string m_PackageConfiguration = "Debug";
         std::filesystem::path m_LastPlayerBuildDirectory;
         std::filesystem::path m_LastEditorBuildDirectory;
         std::filesystem::path m_DeferredSceneOpenPath;

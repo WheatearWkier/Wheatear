@@ -5,11 +5,15 @@
 #include "Editor/EditorContentPickers.h"
 #include "Editor/EditorLocale.h"
 #include "Editor/EditorWidgets.h"
+#include "Modules/TacticalCombat/TacticalCombatTuningEditorPanel.h"
 #include "Panels/SceneHierarchy/ComponentDrawers.h"
+#include "Wheatear/Gameplay/SystemBindingRegistry.h"
+#include "Wheatear/Modules/TacticalCombat/TacticalCombatTuningService.h"
 #include "Wheatear/Modules/TacticalCombat/TacticalCombatComponents.h"
 
 #include <imgui/imgui.h>
 
+#include <filesystem>
 #include <string>
 
 namespace Wheatear {
@@ -66,14 +70,34 @@ namespace Wheatear {
             InputString("Level Id", level.LevelId, 240);
 
             ImGui::Separator();
+            const std::filesystem::path tuningPath = TacticalCombatTuningService::TuningSourcePath(level);
+            const bool tuningLoaded = !tuningPath.empty() && std::filesystem::exists(tuningPath);
+            if (tuningLoaded)
+            {
+                EditorWidgets::InlineStatus(
+                    "Tactical combat tuning YAML is authoritative for the board and timing fields below.",
+                    EditorWidgets::StatusKind::Warning);
+                ImGui::SameLine();
+                if (ImGui::Button(EditorLocale::Text("Open Tactical Combat Tuning Editor", "打开战棋战斗调参编辑器")))
+                    TacticalCombatEditorRequests::RequestOpenTuning(level.TuningPath);
+            }
+            else if (!level.TuningPath.empty())
+            {
+                EditorWidgets::InlineStatus(
+                    "Tactical combat tuning YAML was not found; scene board and timing fields remain editable fallbacks.",
+                    EditorWidgets::StatusKind::Warning);
+            }
+            ImGui::BeginDisabled(tuningLoaded);
             ImGui::TextDisabled("Grid");
             ImGui::DragInt("Grid Width", &level.GridWidth, 1.0f, 1, 32);
             ImGui::DragInt("Grid Height", &level.GridHeight, 1.0f, 1, 32);
             ImGui::DragFloat2("Board Origin", &level.BoardOrigin.x, 0.002f, 0.0f, 1.0f);
             ImGui::DragFloat2("Cell Size", &level.CellSize.x, 0.002f, 0.005f, 0.3f);
+            ImGui::EndDisabled();
             InputString("Cell Prefix", level.CellEntityPrefix);
             InputString("Unit Prefix", level.UnitEntityPrefix);
 
+            ImGui::BeginDisabled(tuningLoaded);
             ImGui::Separator();
             ImGui::TextDisabled("Timing");
             ImGui::DragFloat("Start Fade", &level.StartFadeDuration, 0.02f, 0.0f, 5.0f);
@@ -82,6 +106,13 @@ namespace Wheatear {
             ImGui::DragFloat(EditorLocale::Text("Enemy Step", "敌人步数"), &level.EnemyStepDuration, 0.02f, 0.1f, 5.0f);
             ImGui::DragFloat("Victory Delay", &level.VictoryReturnDelay, 0.05f, 0.0f, 10.0f);
             ImGui::DragFloat(EditorLocale::Text("Defeat Delay", "战败延迟"), &level.DefeatReturnDelay, 0.05f, 0.0f, 10.0f);
+            ImGui::Separator();
+            ImGui::TextDisabled("Tile Highlight Colors");
+            ImGui::ColorEdit4(EditorLocale::Text("Normal", "普通"), &level.TileNormalColor.x);
+            ImGui::ColorEdit4(EditorLocale::Text("Move", "移动"), &level.TileMoveColor.x);
+            ImGui::ColorEdit4(EditorLocale::Text("Attack", "攻击"), &level.TileAttackColor.x);
+            ImGui::ColorEdit4(EditorLocale::Text("Selected", "选中"), &level.TileSelectedColor.x);
+            ImGui::EndDisabled();
 
             ImGui::Separator();
             ImGui::TextDisabled("Scene Bindings");
@@ -93,13 +124,6 @@ namespace Wheatear {
             EditorContentPickers::DrawSceneEntityField("Action Effect", entity, level.ActionEffectEntityName);
             DrawCommandBuilder("Victory Command", level.VictorySceneCommand, 300);
             DrawCommandBuilder("Defeat Command", level.DefeatSceneCommand, 300);
-
-            ImGui::Separator();
-            ImGui::TextDisabled("Tile Highlight Colors");
-            ImGui::ColorEdit4(EditorLocale::Text("Normal", "普通"), &level.TileNormalColor.x);
-            ImGui::ColorEdit4(EditorLocale::Text("Move", "移动"), &level.TileMoveColor.x);
-            ImGui::ColorEdit4(EditorLocale::Text("Attack", "攻击"), &level.TileAttackColor.x);
-            ImGui::ColorEdit4(EditorLocale::Text("Selected", "选中"), &level.TileSelectedColor.x);
 
             ImGui::Separator();
             ImGui::TextDisabled("Runtime");

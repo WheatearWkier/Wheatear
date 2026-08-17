@@ -5,6 +5,7 @@
 #include "Wheatear/Assets/AssetAliasRegistry.h"
 #include "Wheatear/Gameplay/Services/GameplayRewardService.h"
 #include "Wheatear/Gameplay/Services/GameplayUIService.h"
+#include "Wheatear/Gameplay/SystemBindingRegistry.h"
 #include "Wheatear/Scene/Entity.h"
 #include "Wheatear/Scene/SceneQueries.h"
 #include "Wheatear/UI/UIRuntimeTools.h"
@@ -67,7 +68,7 @@ namespace Wheatear::ProgressionResultPageService {
 
         static void SetResultDropVisible(Scene* scene, const ResultDropIcon& icon, bool visible)
         {
-            const std::string prefix = std::string("Result_Drop_") + icon.Key;
+            const std::string prefix = std::string(SystemBindings::Progression::ResultDropPrefix) + icon.Key;
             SetWidgetVisible(scene, prefix + "_Frame", visible);
             SetWidgetVisible(scene, prefix + "_Icon", visible);
             SetWidgetVisible(scene, prefix + "_Button", visible);
@@ -93,7 +94,7 @@ namespace Wheatear::ProgressionResultPageService {
 
     void UpdateDrops(Scene* scene)
     {
-        if (!FindEntityByName(scene, "Result_Drop_Core_Frame"))
+        if (!FindEntityByName(scene, SystemBindings::Progression::ResultDropCoreFrame))
             return;
 
         const auto& state = GameProgress::GetState();
@@ -104,7 +105,7 @@ namespace Wheatear::ProgressionResultPageService {
         int index = 0;
         for (const ResultDropIcon& icon : GetResultDropIcons())
         {
-            const std::string prefix = std::string("Result_Drop_") + icon.Key;
+            const std::string prefix = std::string(SystemBindings::Progression::ResultDropPrefix) + icon.Key;
             const std::string amount = hasResult
                 ? GetResultDropAmount(state.LastDungeonResult, icon)
                 : "0";
@@ -139,8 +140,8 @@ namespace Wheatear::ProgressionResultPageService {
             hoveredPosition.y
         };
         GameplayUIService::SetTooltip(scene,
-            "Result_DropTooltipPanel",
-            "Result_DropTooltipText",
+            SystemBindings::Progression::ResultDropTooltipPanel,
+            SystemBindings::Progression::ResultDropTooltipText,
             showTooltip,
             tooltipPosition,
             tooltipSize,

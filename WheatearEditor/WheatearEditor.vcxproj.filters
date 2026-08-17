@@ -96,6 +96,9 @@
     <ClInclude Include="src\Editor\EditorPlatform.h">
       <Filter>Editor</Filter>
     </ClInclude>
+    <ClInclude Include="src\Editor\EditorRequests.h">
+      <Filter>Editor</Filter>
+    </ClInclude>
     <ClInclude Include="src\Editor\EditorToolRegistry.h">
       <Filter>Editor</Filter>
     </ClInclude>

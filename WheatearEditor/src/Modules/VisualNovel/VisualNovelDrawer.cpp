@@ -8,6 +8,7 @@
 #include "Editor/EditorWidgets.h"
 #include "Modules/VisualNovel/VisualNovelScriptEditorPanel.h"
 #include "Panels/SceneHierarchy/ComponentDrawers.h"
+#include "Wheatear/Gameplay/SystemBindingRegistry.h"
 #include "Wheatear/Scene/Components.h"
 
 #include <imgui/imgui.h>
@@ -30,7 +31,7 @@ namespace Wheatear {
             for (auto entityID : registry.view<TagComponent, UIWidgetComponent>())
             {
                 auto& tag = registry.get<TagComponent>(entityID).Tag;
-                if (!StringUtils::StartsWith(tag, "VN_"))
+                if (!StringUtils::StartsWith(tag, SystemBindings::VisualNovel::RootPrefix))
                     continue;
 
                 bool visible = visiblePrefixes.empty();
@@ -105,27 +106,27 @@ namespace Wheatear {
                 if (ImGui::Button(EditorLocale::Text("Hide Auxiliary Pages", "隐藏辅助页")))
                 {
                     SetVNEditorPreview(entity, {
-                        "VN_DialoguePanel",
-                        "VN_SpeakerText",
-                        "VN_BodyText",
-                        "VN_AdvanceHint",
-                        "VN_Choice",
-                        "VN_Command",
-                        "VN_AutoPlayIndicator",
-                        "VN_SystemMessage"
+                        SystemBindings::VisualNovel::DialoguePanel,
+                        SystemBindings::VisualNovel::SpeakerText,
+                        SystemBindings::VisualNovel::BodyText,
+                        SystemBindings::VisualNovel::AdvanceHint,
+                        SystemBindings::VisualNovel::ChoicePrefix,
+                        SystemBindings::VisualNovel::CommandPrefix,
+                        SystemBindings::VisualNovel::AutoPlayIndicator,
+                        SystemBindings::VisualNovel::SystemMessage
                     });
                 }
 
                 if (ImGui::Button(EditorLocale::Text("Show History Page", "显示历史页")))
-                    SetVNEditorPreview(entity, { "VN_History" });
+                    SetVNEditorPreview(entity, { SystemBindings::VisualNovel::HistoryPrefix });
                 ImGui::SameLine();
                 if (ImGui::Button(EditorLocale::Text("Show Settings Page", "显示设置页")))
-                    SetVNEditorPreview(entity, { "VN_Settings" });
+                    SetVNEditorPreview(entity, { SystemBindings::VisualNovel::SettingsPrefix });
                 ImGui::SameLine();
                 if (ImGui::Button(EditorLocale::Text("Show Save/Load Page", "显示存档页")))
-                    SetVNEditorPreview(entity, { "VN_SaveLoad" });
+                    SetVNEditorPreview(entity, { SystemBindings::VisualNovel::SaveLoadPrefix });
                 if (ImGui::Button(EditorLocale::Text("Show Music Notice", "显示音乐提示")))
-                    SetVNEditorPreview(entity, { "VN_MusicNotice" });
+                    SetVNEditorPreview(entity, { SystemBindings::VisualNovel::MusicNoticePrefix });
             });
     }
 

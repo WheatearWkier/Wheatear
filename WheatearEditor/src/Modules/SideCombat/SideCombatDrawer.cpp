@@ -10,12 +10,15 @@
 #include "Modules/SideCombat/SideCombatTuningEditorPanel.h"
 #include "Panels/SceneHierarchy/ComponentDrawers.h"
 #include "Wheatear/Assets/AssetAliasRegistry.h"
+#include "Wheatear/Modules/SideCombat/SideCombatTuningService.h"
 #include "Wheatear/Scene/Components.h"
+#include "Wheatear/Scene/Scene.h"
 
 #include <imgui/imgui.h>
 #include <glm/gtc/type_ptr.hpp>
 
 #include <algorithm>
+#include <filesystem>
 #include <unordered_map>
 
 namespace Wheatear {
@@ -131,6 +134,7 @@ namespace Wheatear {
                 ImGui::DragFloat2(EditorLocale::Text("Debuff Start", "减益起始"), glm::value_ptr(layout.DebuffStart), 0.001f, 0.0f, 1.0f, "%.3f");
                 ImGui::DragFloat2("Size", glm::value_ptr(layout.Size), 0.001f, 0.0f, 1.0f, "%.3f");
                 ImGui::DragFloat(EditorLocale::Text("Gap", "间距"), &layout.Gap, 0.001f, 0.0f, 1.0f, "%.3f");
+                ImGui::Checkbox(EditorLocale::Text("Rows Grow Down", "行向下增长"), &layout.RowsGrowDown);
                 ImGui::TreePop();
             }
             ImGui::PopID();
@@ -179,6 +183,43 @@ namespace Wheatear {
             ImGui::PopID();
         }
 
+        static const SideCombatLevelComponent* FindSideCombatLevel(Scene* scene)
+        {
+            if (!scene)
+                return nullptr;
+
+            auto& registry = scene->GetRegistry();
+            for (auto entity : registry.view<SideCombatLevelComponent>())
+                return &registry.get<SideCombatLevelComponent>(entity);
+            return nullptr;
+        }
+
+        static bool IsSideCombatTuningLoaded(Scene* scene, std::filesystem::path* tuningPath = nullptr)
+        {
+            const SideCombatLevelComponent* level = FindSideCombatLevel(scene);
+            if (!level)
+                return false;
+
+            const std::filesystem::path path = SideCombatTuningService::TuningSourcePath(*level);
+            if (tuningPath)
+                *tuningPath = path;
+            return !path.empty() && std::filesystem::exists(path);
+        }
+
+        static void DrawSideTuningAuthorityTools(Scene* scene, const char* message)
+        {
+            const SideCombatLevelComponent* level = FindSideCombatLevel(scene);
+            if (!level)
+                return;
+
+            EditorWidgets::InlineStatus(message, EditorWidgets::StatusKind::Warning);
+            ImGui::SameLine();
+            ImGui::PushID(message);
+            if (ImGui::Button(EditorLocale::Text("Open Side Combat Tuning Editor", "打开横版战斗调参编辑器")))
+                SideCombatEditorRequests::RequestOpenTuning(level->TuningPath);
+            ImGui::PopID();
+        }
+
         static std::unordered_map<std::string, EditorUI::TextAssetEditorState> s_TuningEditors;
 
     } // namespace
@@ -195,8 +236,32 @@ namespace Wheatear {
                 level.TuningPath,
                 EditorWidgets::AssetReferenceKind::Data,
                 260);
-            if (ImGui::Button(EditorLocale::Text("Open Side Combat Tuning Editor", "打开横版战斗调参编辑器")))
-                SideCombatEditorRequests::RequestOpenTuning(level.TuningPath);
+            ImGui::DragFloat2("Arena Min", glm::value_ptr(level.ArenaMin), 0.05f);
+            ImGui::DragFloat2("Arena Max", glm::value_ptr(level.ArenaMax), 0.05f);
+            ImGui::TextDisabled("Arena bounds are world walls and air cap; laneMinY/laneMaxY live in the tuning YAML.");
+            const std::filesystem::path tuningPath = SideCombatTuningService::TuningSourcePath(level);
+            const bool tuningLoaded = !tuningPath.empty() && std::filesystem::exists(tuningPath);
+            if (tuningLoaded)
+            {
+                EditorWidgets::InlineStatus(
+                    "Side combat tuning YAML is authoritative for the lane and combo fields below.",
+                    EditorWidgets::StatusKind::Warning);
+                ImGui::SameLine();
+                if (ImGui::Button(EditorLocale::Text("Open Side Combat Tuning Editor", "打开横版战斗调参编辑器")))
+                    SideCombatEditorRequests::RequestOpenTuning(level.TuningPath);
+            }
+            else if (!level.TuningPath.empty())
+            {
+                EditorWidgets::InlineStatus(
+                    "Side combat tuning YAML was not found; scene lane fields remain editable fallbacks.",
+                    EditorWidgets::StatusKind::Warning);
+            }
+            ImGui::DragFloat("Ground Y", &level.GroundY, 0.02f, -20.0f, 20.0f);
+            ImGui::BeginDisabled(tuningLoaded);
+            ImGui::DragFloat("Lane Min Y", &level.LaneMinY, 0.02f, -20.0f, 20.0f);
+            ImGui::DragFloat("Lane Max Y", &level.LaneMaxY, 0.02f, -20.0f, 20.0f);
+            ImGui::DragFloat("Combo Drop Delay", &level.ComboDropDelay, 0.02f, 0.2f, 5.0f);
+            ImGui::EndDisabled();
             if (ImGui::CollapsingHeader("Advanced Raw Side Combat Tuning YAML"))
             {
                 EditorWidgets::InlineStatus("Advanced raw preview. Prefer Side Combat Tuning Editor for normal authoring.", EditorWidgets::StatusKind::Warning);
@@ -207,17 +272,10 @@ namespace Wheatear {
                     512 * 1024,
                     ImGuiInputTextFlags_ReadOnly | ImGuiInputTextFlags_AllowTabInput);
             }
-            ImGui::SameLine();
-            ImGui::DragFloat2("Arena Min", glm::value_ptr(level.ArenaMin), 0.05f);
-            ImGui::DragFloat2("Arena Max", glm::value_ptr(level.ArenaMax), 0.05f);
-            ImGui::DragFloat("Ground Y", &level.GroundY, 0.02f, -20.0f, 20.0f);
-            ImGui::DragFloat("Lane Min Y", &level.LaneMinY, 0.02f, -20.0f, 20.0f);
-            ImGui::DragFloat("Lane Max Y", &level.LaneMaxY, 0.02f, -20.0f, 20.0f);
             ImGui::DragFloat("Start Fade", &level.StartFadeDuration, 0.02f, 0.0f, 5.0f);
             ImGui::DragFloat("Victory Return Delay", &level.VictoryReturnDelay, 0.05f, 0.0f, 20.0f);
             ImGui::DragFloat(EditorLocale::Text("Defeat Return Delay", "战败返回延迟"), &level.DefeatReturnDelay, 0.05f, 0.0f, 20.0f);
             ImGui::DragFloat("Result Fade", &level.ResultSceneFadeDuration, 0.02f, 0.0f, 5.0f);
-            ImGui::DragFloat("Combo Drop Delay", &level.ComboDropDelay, 0.02f, 0.2f, 5.0f);
             DrawCommandBuilder("Victory Command", level.VictorySceneCommand, 260);
             DrawCommandBuilder("Defeat Command", level.DefeatSceneCommand, 260);
             InputString("First Clear Reward", level.FirstClearRewardText, 260);
@@ -442,14 +500,24 @@ namespace Wheatear {
 
     void DrawSideCombatantComponent(Entity entity)
     {
-        DrawComponent<SideCombatantComponent>("Side Combatant", entity, [](auto& combatant)
+        DrawComponent<SideCombatantComponent>("Side Combatant", entity, [entity](auto& combatant)
         {
+            const bool tuningLoaded = IsSideCombatTuningLoaded(entity.GetScene());
+            const bool tuningManagedMoveSpeed =
+                tuningLoaded &&
+                (entity.HasComponent<SidePlayerControllerComponent>() ||
+                    (entity.HasComponent<SideEnemyAIComponent>() &&
+                        entity.GetComponent<SideEnemyAIComponent>().Kind == SideEnemyKind::BearBoss));
+            if (tuningManagedMoveSpeed)
+                DrawSideTuningAuthorityTools(entity.GetScene(), "Side combat tuning YAML is authoritative for Move Speed.");
             DrawTeamCombo(combatant.Team);
             ImGui::DragFloat("Max Health", &combatant.MaxHealth, 1.0f, 1.0f, 99999.0f);
             ImGui::DragFloat("Health", &combatant.Health, 1.0f, 0.0f, combatant.MaxHealth);
             ImGui::DragFloat(EditorLocale::Text("Attack", "攻击"), &combatant.Attack, 0.5f, 0.0f, 9999.0f);
             ImGui::DragFloat(EditorLocale::Text("Defense", "防御"), &combatant.Defense, 0.5f, 0.0f, 9999.0f);
+            ImGui::BeginDisabled(tuningManagedMoveSpeed);
             ImGui::DragFloat("Move Speed", &combatant.MoveSpeed, 0.05f, 0.0f, 80.0f);
+            ImGui::EndDisabled();
             ImGui::DragFloat2("Collision Size", glm::value_ptr(combatant.CollisionSize), 0.02f, 0.05f, 20.0f);
             ImGui::DragFloat("Collision Height", &combatant.CollisionHeight, 0.02f, 0.05f, 20.0f);
             ImGui::DragFloat("Gravity Scale", &combatant.GravityScale, 0.02f, 0.0f, 5.0f);
@@ -470,8 +538,14 @@ namespace Wheatear {
 
     void DrawSidePlayerControllerComponent(Entity entity)
     {
-        DrawComponent<SidePlayerControllerComponent>("Side Player Controller", entity, [](auto& controller)
+        DrawComponent<SidePlayerControllerComponent>("Side Player Controller", entity, [entity](auto& controller)
         {
+            const bool tuningLoaded = IsSideCombatTuningLoaded(entity.GetScene());
+            if (tuningLoaded)
+            {
+                DrawSideTuningAuthorityTools(entity.GetScene(), "Side combat tuning YAML is authoritative for movement and cooldown fields below.");
+            }
+            ImGui::BeginDisabled(tuningLoaded);
             ImGui::DragInt("Max Jumps", &controller.MaxJumps, 1.0f, 1, 3);
             ImGui::DragFloat("Jump Impulse", &controller.JumpImpulse, 0.05f, 0.0f, 40.0f);
             ImGui::DragFloat("Gravity", &controller.Gravity, 0.05f, 0.0f, 80.0f);
@@ -489,12 +563,15 @@ namespace Wheatear {
             ImGui::DragFloat("Dash Mana Cost", &controller.DashManaCost, 0.5f, 0.0f, 100.0f);
             ImGui::DragFloat("Dash Speed", &controller.DashSpeed, 0.05f, 0.0f, 40.0f);
             ImGui::DragFloat("Dash Invulnerable Time", &controller.DashInvulnerableTime, 0.005f, 0.0f, 2.0f);
+            ImGui::EndDisabled();
 
             ImGui::Separator();
             ImGui::TextDisabled("Items / Mana / Buffs");
+            ImGui::BeginDisabled(tuningLoaded);
             ImGui::DragFloat("Heal Item Cooldown", &controller.HealItemCooldown, 0.1f, 0.0f, 30.0f);
             ImGui::DragFloat("Mana Item Cooldown", &controller.ManaItemCooldown, 0.1f, 0.0f, 30.0f);
             ImGui::DragFloat("Attack Buff Item Cooldown", &controller.AttackBuffItemCooldown, 0.1f, 0.0f, 60.0f);
+            ImGui::EndDisabled();
             ImGui::DragFloat("Max Mana", &controller.MaxMana, 1.0f, 0.0f, 500.0f);
             ImGui::DragFloat("Launcher Mana Cost", &controller.LauncherManaCost, 0.5f, 0.0f, 100.0f);
             ImGui::DragFloat("Magic Bolt Mana Cost", &controller.MagicBoltManaCost, 0.5f, 0.0f, 100.0f);
@@ -527,17 +604,25 @@ namespace Wheatear {
 
     void DrawSideEnemyAIComponent(Entity entity)
     {
-        DrawComponent<SideEnemyAIComponent>("Side Enemy AI", entity, [](auto& ai)
+        DrawComponent<SideEnemyAIComponent>("Side Enemy AI", entity, [entity](auto& ai)
         {
+            const bool tuningLoaded = IsSideCombatTuningLoaded(entity.GetScene());
             DrawEnemyKindCombo(ai.Kind);
             ImGui::DragInt("Wave Index", &ai.WaveIndex, 1.0f, -1, 3);
+            const bool lockBearBossTuning = tuningLoaded && ai.Kind == SideEnemyKind::BearBoss;
+            if (lockBearBossTuning)
+                DrawSideTuningAuthorityTools(entity.GetScene(), "Side combat tuning YAML is authoritative for Bear Boss AI.");
+            ImGui::BeginDisabled(lockBearBossTuning);
             ImGui::DragFloat("Aggro Range", &ai.AggroRange, 0.05f, 0.0f, 80.0f);
             ImGui::DragFloat(EditorLocale::Text("Attack Range", "攻击范围"), &ai.AttackRange, 0.05f, 0.0f, 20.0f);
             ImGui::DragFloat("Preferred Range", &ai.PreferredRange, 0.05f, 0.0f, 20.0f);
             ImGui::DragFloat("Attack Interval", &ai.AttackInterval, 0.02f, 0.05f, 20.0f);
+            ImGui::EndDisabled();
             ImGui::DragFloat("Patrol Min X", &ai.PatrolMinX, 0.05f);
             ImGui::DragFloat("Patrol Max X", &ai.PatrolMaxX, 0.05f);
+            ImGui::BeginDisabled(lockBearBossTuning);
             ImGui::DragFloat("Lane Tolerance", &ai.LaneTolerance, 0.02f, 0.0f, 5.0f);
+            ImGui::EndDisabled();
 
             ImGui::Separator();
             ImGui::TextDisabled("Runtime");
@@ -573,16 +658,21 @@ namespace Wheatear {
 
     void DrawSidePickupComponent(Entity entity)
     {
-        DrawComponent<SidePickupComponent>("Side Pickup", entity, [](auto& pickup)
+        DrawComponent<SidePickupComponent>("Side Pickup", entity, [entity](auto& pickup)
         {
+            const bool tuningLoaded = IsSideCombatTuningLoaded(entity.GetScene());
             EditorContentPickers::DrawProgressionIdField("Item Id",
                 pickup.ItemId,
                 EditorContentPickers::ProgressionIdKind::Material);
             InputString("Display Name", pickup.DisplayName);
             ImGui::DragInt(EditorLocale::Text("Amount", "数量"), &pickup.Amount, 1.0f, 1, 999);
+            if (tuningLoaded)
+                DrawSideTuningAuthorityTools(entity.GetScene(), "Side combat tuning YAML is authoritative for pickup radius and attract fields.");
+            ImGui::BeginDisabled(tuningLoaded);
             ImGui::DragFloat("Pickup Radius", &pickup.PickupRadius, 0.01f, 0.01f, 5.0f);
             ImGui::DragFloat("Attract Radius", &pickup.AttractRadius, 0.05f, 0.0f, 20.0f);
             ImGui::DragFloat("Attract Speed", &pickup.AttractSpeed, 0.05f, 0.0f, 40.0f);
+            ImGui::EndDisabled();
         });
     }
 

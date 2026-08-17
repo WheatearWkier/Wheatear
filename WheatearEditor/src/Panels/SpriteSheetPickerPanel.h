@@ -26,6 +26,7 @@ namespace Wheatear {
         };
 
         void SetEntity(Entity entity);
+        void SetScene(const Ref<Scene>& scene) { m_Scene = scene; }
         void OnImGuiRender();
 
         void OpenForEntity(Entity entity);
@@ -65,6 +66,10 @@ namespace Wheatear {
         bool IsCellValid(int col, int row) const;
         Ref<AnimationClip> GetOrCreateTargetClip();
         void ApplySequenceToClip(const Ref<AnimationClip>& clip);
+        // Batch: apply the selected cell's texture + trimmed UV to every
+        // SpriteRenderer / UI Image in the open scene using this texture.
+        size_t CountEntitiesUsingTexture() const;
+        void ApplyCellToAllEntitiesUsingTexture();
 
         // Decodes the current texture (CPU) and computes each cell's opaque
         // content bounding box into m_Trims.
@@ -72,7 +77,11 @@ namespace Wheatear {
 
     private:
         Entity m_Entity;
+        Ref<Scene> m_Scene;
         bool m_Open = false;
+
+        bool m_ShowBatchConfirm = false;
+        size_t m_BatchTargetCount = 0;
 
         bool m_ShowReplaceConfirm = false;
         std::string m_ReplaceConfirmClipName;

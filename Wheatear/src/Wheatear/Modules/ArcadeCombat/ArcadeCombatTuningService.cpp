@@ -202,9 +202,30 @@ namespace Wheatear::ArcadeCombatTuningService {
 
     } // namespace
 
+    std::filesystem::path TuningSourcePath(const ArcadeCombatLevelComponent& level)
+    {
+        return ResolveTuningPath(level.TuningPath);
+    }
+
+    bool IsFieldManagedByTuning(std::string_view fieldId)
+    {
+        return fieldId == "StartFadeDuration"
+            || fieldId == "VictoryReturnDelay"
+            || fieldId == "DefeatReturnDelay"
+            || fieldId == "ResultSceneFadeDuration"
+            || fieldId == "BossDefeatFadeDuration"
+            || fieldId == "IntroDuration"
+            || fieldId == "ShootInterval"
+            || fieldId == "JumpInterval"
+            || fieldId == "JumpDuration"
+            || fieldId == "MoveSpeed"
+            || fieldId == "AutoAim";
+    }
+
     const ArcadeCombatTuning& GetTuning(const ArcadeCombatLevelComponent& level)
     {
-        static std::unordered_map<std::string, ArcadeCombatTuningCacheEntry> cache;        static constexpr auto kCheckInterval = std::chrono::milliseconds(500);
+        static std::unordered_map<std::string, ArcadeCombatTuningCacheEntry> cache;
+        static constexpr auto kCheckInterval = std::chrono::milliseconds(500);
 
         const std::string key = level.TuningPath.empty() ? "__default__" : level.TuningPath;
         const std::filesystem::path resolvedPath = ResolveTuningPath(level.TuningPath);

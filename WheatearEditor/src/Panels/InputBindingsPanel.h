@@ -25,8 +25,13 @@ namespace Wheatear {
         void CommitBinding(const std::string& actionId, int binding);
 
         bool m_Open = false;
-        std::string m_WaitingAction;     // non-empty while waiting for a key
+        std::string m_WaitingAction;     // non-empty while waiting for keys
         std::string m_NewActionId;
+
+        // Label editing modal.
+        std::string m_LabelEditAction;
+        char m_LabelEditBuffer[256] = {};
+        bool m_ShowLabelEdit = false;
     };
 
 } // namespace Wheatear

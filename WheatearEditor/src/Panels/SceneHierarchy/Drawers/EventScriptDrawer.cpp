@@ -74,6 +74,9 @@ namespace Wheatear {
                         case EventScriptInstructionType::EndIf:
                             preview = "endif";
                             break;
+                        case EventScriptInstructionType::RawLine:
+                            preview = "(unrecognized) " + instruction.Text;
+                            break;
                         }
                         if (!preview.empty())
                         {

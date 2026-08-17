@@ -2,6 +2,7 @@
 #include "ProgressionSaveLoadPageService.h"
 
 #include "Wheatear/Gameplay/Services/GameplayUILayoutService.h"
+#include "Wheatear/Gameplay/SystemBindingRegistry.h"
 #include "Wheatear/Modules/Progression/GameProgress.h"
 #include "Wheatear/Scene/SceneQueries.h"
 #include "Wheatear/UI/UIRuntimeTools.h"
@@ -27,45 +28,45 @@ namespace Wheatear::ProgressionSaveLoadPageService {
 
         static void UpdateConfirmPanel(Scene* scene, bool visible, int pendingOverwriteSlot)
         {
-            SetWidgetVisible(scene, "SaveLoad_ConfirmPanel", visible);
-            SetWidgetVisible(scene, "SaveLoad_ConfirmText", visible);
-            SetWidgetVisible(scene, "SaveLoad_ConfirmYes", visible);
-            SetWidgetVisible(scene, "SaveLoad_ConfirmNo", visible);
+            SetWidgetVisible(scene, SystemBindings::Progression::SaveLoadConfirmPanel, visible);
+            SetWidgetVisible(scene, SystemBindings::Progression::SaveLoadConfirmText, visible);
+            SetWidgetVisible(scene, SystemBindings::Progression::SaveLoadConfirmYes, visible);
+            SetWidgetVisible(scene, SystemBindings::Progression::SaveLoadConfirmNo, visible);
 
             if (!visible)
                 return;
 
-            SetText(scene, "SaveLoad_ConfirmText",
+            SetText(scene, SystemBindings::Progression::SaveLoadConfirmText,
                 pendingOverwriteSlot > 0
                     ? "该槽位已有存档。\n是否覆盖 " + std::to_string(pendingOverwriteSlot) + " 号槽？"
                     : "");
-            SetButtonCommand(scene, "SaveLoad_ConfirmYes", "gamesave:confirm_overwrite");
-            SetButtonCommand(scene, "SaveLoad_ConfirmNo", "gamesave:cancel_overwrite");
+            SetButtonCommand(scene, SystemBindings::Progression::SaveLoadConfirmYes, "gamesave:confirm_overwrite");
+            SetButtonCommand(scene, SystemBindings::Progression::SaveLoadConfirmNo, "gamesave:cancel_overwrite");
         }
 
     } // namespace
 
     void EnsureLayout(Scene* scene, bool saveMode, int pendingOverwriteSlot, const std::string& saveDirectory)
     {
-        if (!HasEntity(scene, "SaveLoad_SlotScroll"))
+        if (!HasEntity(scene, SystemBindings::Progression::SaveLoadSlotScroll))
             return;
 
         const std::string resolvedSaveDirectory = saveDirectory.empty() ? "assets/saves" : saveDirectory;
-        SetWidgetVisible(scene, "SaveLoad_MainPanel", true);
-        SetWidgetVisible(scene, "SaveLoad_Icon", true);
-        SetWidgetVisible(scene, "SaveLoad_Title", true);
-        SetWidgetVisible(scene, "SaveLoad_Close", true);
-        SetWidgetVisible(scene, "SaveLoad_SlotScroll", true);
-        FindAuthoredScrollView(scene, "SaveLoad_SlotScroll");
-        FindAuthoredButton(scene, "SaveLoad_Close");
+        SetWidgetVisible(scene, SystemBindings::Progression::SaveLoadMainPanel, true);
+        SetWidgetVisible(scene, SystemBindings::Progression::SaveLoadIcon, true);
+        SetWidgetVisible(scene, SystemBindings::Progression::SaveLoadTitle, true);
+        SetWidgetVisible(scene, SystemBindings::Progression::SaveLoadClose, true);
+        SetWidgetVisible(scene, SystemBindings::Progression::SaveLoadSlotScroll, true);
+        FindAuthoredScrollView(scene, SystemBindings::Progression::SaveLoadSlotScroll);
+        FindAuthoredButton(scene, SystemBindings::Progression::SaveLoadClose);
 
-        SetText(scene, "SaveLoad_Title", saveMode ? "保存" : "读取");
-        SetText(scene, "SaveLoad_Close", "关闭");
-        SetButtonCommand(scene, "SaveLoad_Close", "gamesave:close");
+        SetText(scene, SystemBindings::Progression::SaveLoadTitle, saveMode ? "保存" : "读取");
+        SetText(scene, SystemBindings::Progression::SaveLoadClose, "关闭");
+        SetButtonCommand(scene, SystemBindings::Progression::SaveLoadClose, "gamesave:close");
 
         for (int slot = 1; slot <= GameProgress::GetMaxSaveSlots(); ++slot)
         {
-            const std::string entityName = "SaveLoad_Slot_" + std::to_string(slot);
+            const std::string entityName = SystemBindings::IndexedName(SystemBindings::Progression::SaveLoadSlotPrefix, slot);
             if (!FindAuthoredButton(scene, entityName))
                 continue;
 

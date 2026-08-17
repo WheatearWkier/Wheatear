@@ -4,6 +4,7 @@
 #include "TurnCombatSkillService.h"
 #include "TurnCombatTargetService.h"
 #include "Wheatear/Assets/AssetAliasRegistry.h"
+#include "Wheatear/Gameplay/SystemBindingRegistry.h"
 #include "Wheatear/Gameplay/Services/GameplayEntityService.h"
 #include "Wheatear/Gameplay/Services/GameplayUILayoutService.h"
 #include "Wheatear/Scene/Components.h"
@@ -37,19 +38,19 @@ namespace Wheatear::TurnCombatUIService {
 
         static void SetCommandSlot(Scene* scene, int index, const CommandSlot& slot, bool visible)
         {
-            const std::string prefix = "TC_Command_" + std::to_string(index);
+            const std::string prefix = SystemBindings::IndexedName(SystemBindings::Turn::CommandPrefix, index);
             const bool show = visible && slot.Enabled && !slot.Command.empty();
-            UIRuntimeTools::SetWidgetVisible(scene, prefix + "_Root", show);
-            UIRuntimeTools::SetWidgetVisible(scene, prefix + "_Icon", show);
-            UIRuntimeTools::SetWidgetVisible(scene, prefix + "_Text", show);
+            UIRuntimeTools::SetWidgetVisible(scene, prefix + SystemBindings::Turn::CommandRootSuffix, show);
+            UIRuntimeTools::SetWidgetVisible(scene, prefix + SystemBindings::Turn::CommandIconSuffix, show);
+            UIRuntimeTools::SetWidgetVisible(scene, prefix + SystemBindings::Turn::CommandTextSuffix, show);
             if (!show)
                 return;
 
-            GameplayUILayoutService::SetButtonCommand(scene, prefix + "_Root", slot.Command);
-            UIRuntimeTools::SetText(scene, prefix + "_Text", slot.Label);
-            UIRuntimeTools::SetImageTexture(scene, prefix + "_Icon", slot.Icon, true);
+            GameplayUILayoutService::SetButtonCommand(scene, prefix + SystemBindings::Turn::CommandRootSuffix, slot.Command);
+            UIRuntimeTools::SetText(scene, prefix + SystemBindings::Turn::CommandTextSuffix, slot.Label);
+            UIRuntimeTools::SetImageTexture(scene, prefix + SystemBindings::Turn::CommandIconSuffix, slot.Icon, true);
 
-            Entity icon = SceneQueries::FindEntityByName(scene, prefix + "_Icon");
+            Entity icon = SceneQueries::FindEntityByName(scene, prefix + SystemBindings::Turn::CommandIconSuffix);
             if (icon && icon.HasComponent<UIImageComponent>())
                 icon.GetComponent<UIImageComponent>().Color = slot.Enabled
                     ? glm::vec4{ 1.0f, 1.0f, 1.0f, 1.0f }

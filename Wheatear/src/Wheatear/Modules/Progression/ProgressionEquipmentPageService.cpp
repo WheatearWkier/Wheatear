@@ -4,6 +4,7 @@
 #include "GameProgress.h"
 #include "ProgressionContent.h"
 #include "Wheatear/Gameplay/Services/GameplayUILayoutService.h"
+#include "Wheatear/Gameplay/SystemBindingRegistry.h"
 #include "Wheatear/Scene/Components.h"
 #include "Wheatear/Scene/Entity.h"
 #include "Wheatear/Scene/EntityReference.h"
@@ -62,20 +63,20 @@ namespace Wheatear::ProgressionEquipmentPageService {
         }
 
         static constexpr std::array<EquipmentSlotView, 4> kSlots = {
-            EquipmentSlotView{ "armor", "Equipment_SlotArmor", "Equipment_SlotArmor_Button", { 0.105f, 0.335f } },
-            EquipmentSlotView{ "ring", "Equipment_SlotRing", "Equipment_SlotRing_Button", { 0.205f, 0.335f } },
-            EquipmentSlotView{ "charm", "Equipment_SlotCharm", "Equipment_SlotCharm_Button", { 0.105f, 0.470f } },
-            EquipmentSlotView{ "boots", "Equipment_SlotBoots", "Equipment_SlotBoots_Button", { 0.205f, 0.470f } }
+            EquipmentSlotView{ "armor", SystemBindings::Progression::EquipmentSlotArmor, SystemBindings::Progression::EquipmentSlotArmorButton, { 0.105f, 0.335f } },
+            EquipmentSlotView{ "ring", SystemBindings::Progression::EquipmentSlotRing, SystemBindings::Progression::EquipmentSlotRingButton, { 0.205f, 0.335f } },
+            EquipmentSlotView{ "charm", SystemBindings::Progression::EquipmentSlotCharm, SystemBindings::Progression::EquipmentSlotCharmButton, { 0.105f, 0.470f } },
+            EquipmentSlotView{ "boots", SystemBindings::Progression::EquipmentSlotBoots, SystemBindings::Progression::EquipmentSlotBootsButton, { 0.205f, 0.470f } }
         };
 
     } // namespace
 
     int SyncPager(Scene* scene)
     {
-        if (!HasEntity(scene, "Equipment_Pager"))
+        if (!HasEntity(scene, SystemBindings::Progression::EquipmentPager))
             return GameProgress::GetState().EquipmentPage;
 
-        Entity pager = FindAuthoredPager(scene, "Equipment_Pager");
+        Entity pager = FindAuthoredPager(scene, SystemBindings::Progression::EquipmentPager);
         if (!pager)
             return GameProgress::GetState().EquipmentPage;
 
@@ -90,25 +91,25 @@ namespace Wheatear::ProgressionEquipmentPageService {
 
     void EnsureLayout(Scene* scene)
     {
-        if (!HasEntity(scene, "Equipment_Details"))
+        if (!HasEntity(scene, SystemBindings::Progression::EquipmentDetails))
             return;
 
-        if (HasEntity(scene, "Equipment_DetailsScroll"))
+        if (HasEntity(scene, SystemBindings::Progression::EquipmentDetailsScroll))
         {
-            FindAuthoredScrollView(scene, "Equipment_DetailsScroll");
+            FindAuthoredScrollView(scene, SystemBindings::Progression::EquipmentDetailsScroll);
         }
 
-        if (HasEntity(scene, "Equipment_MaterialsScroll"))
+        if (HasEntity(scene, SystemBindings::Progression::EquipmentMaterialsScroll))
         {
-            FindAuthoredScrollView(scene, "Equipment_MaterialsScroll");
+            FindAuthoredScrollView(scene, SystemBindings::Progression::EquipmentMaterialsScroll);
         }
     }
 
     void UpdateItems(Scene* scene)
     {
         const auto& state = GameProgress::GetState();
-        Entity pager = HasEntity(scene, "Equipment_Pager")
-            ? FindAuthoredPager(scene, "Equipment_Pager")
+        Entity pager = HasEntity(scene, SystemBindings::Progression::EquipmentPager)
+            ? FindAuthoredPager(scene, SystemBindings::Progression::EquipmentPager)
             : Entity{};
         const glm::vec2 frameSize = { 0.075f, 0.098f };
         const glm::vec2 origin = { 0.385f, 0.335f };
@@ -156,7 +157,7 @@ namespace Wheatear::ProgressionEquipmentPageService {
             const int slot = (i - 1) % 4;
             const glm::vec2 pos = { origin.x + static_cast<float>(slot % 2) * step.x,
                                     origin.y + static_cast<float>(slot / 2) * step.y };
-            const std::string item = "Equipment_Item_" + std::to_string(i);
+            const std::string item = SystemBindings::IndexedName(SystemBindings::Progression::EquipmentItemPrefix, i);
             const std::string frame = item + "_Frame";
             const std::string button = item + "_Button";
             const size_t itemIndex = static_cast<size_t>((page - 1) * 4 + slot);
@@ -191,23 +192,23 @@ namespace Wheatear::ProgressionEquipmentPageService {
             }
         }
 
-        Entity equipmentPager = FindEntityByName(scene, "Equipment_Pager");
+        Entity equipmentPager = FindEntityByName(scene, SystemBindings::Progression::EquipmentPager);
         const std::string pagerSelector = equipmentPager
             ? EntityReferences::MakeUUIDSelector(equipmentPager.GetUUID())
             : std::string{};
         if (!pagerSelector.empty())
         {
-            SetButtonCommand(scene, "Equipment_Button_Page1", "ui:pager:" + pagerSelector + ":page:1");
-            SetButtonCommand(scene, "Equipment_Button_Page2", "ui:pager:" + pagerSelector + ":page:2");
+            SetButtonCommand(scene, SystemBindings::Progression::EquipmentButtonPage1, "ui:pager:" + pagerSelector + ":page:1");
+            SetButtonCommand(scene, SystemBindings::Progression::EquipmentButtonPage2, "ui:pager:" + pagerSelector + ":page:2");
         }
-        SetWidgetVisible(scene, "Equipment_PageSlider", false);
+        SetWidgetVisible(scene, SystemBindings::Progression::EquipmentPageSlider, false);
 
-        SetText(scene, "Equipment_Button_Toggle", GameProgress::GetEquipmentToggleButtonText());
-        SetButtonCommand(scene, "Equipment_Button_Toggle", "progression:toggle_selected_equipment");
+        SetText(scene, SystemBindings::Progression::EquipmentToggleButton, GameProgress::GetEquipmentToggleButtonText());
+        SetButtonCommand(scene, SystemBindings::Progression::EquipmentToggleButton, "progression:toggle_selected_equipment");
 
         const bool showTooltip = !hoveredEquipmentId.empty();
-        SetWidgetVisible(scene, "Equipment_TooltipPanel", showTooltip);
-        SetWidgetVisible(scene, "Equipment_TooltipText", showTooltip);
+        SetWidgetVisible(scene, SystemBindings::Progression::EquipmentTooltipPanel, showTooltip);
+        SetWidgetVisible(scene, SystemBindings::Progression::EquipmentTooltipText, showTooltip);
         if (!showTooltip)
             return;
 
@@ -215,11 +216,11 @@ namespace Wheatear::ProgressionEquipmentPageService {
         glm::vec2 tooltipPosition = hoveredPosition + glm::vec2(frameSize.x + 0.012f, 0.0f);
         tooltipPosition.x = std::clamp(tooltipPosition.x, 0.055f, 0.915f - tooltipSize.x);
         tooltipPosition.y = std::clamp(tooltipPosition.y, 0.125f, 0.835f - tooltipSize.y);
-        SetWidgetTopLeft(scene, "Equipment_TooltipPanel", tooltipPosition, tooltipSize);
-        SetWidgetTopLeft(scene, "Equipment_TooltipText",
+        SetWidgetTopLeft(scene, SystemBindings::Progression::EquipmentTooltipPanel, tooltipPosition, tooltipSize);
+        SetWidgetTopLeft(scene, SystemBindings::Progression::EquipmentTooltipText,
             tooltipPosition + glm::vec2(0.012f, 0.010f),
             tooltipSize - glm::vec2(0.024f, 0.020f));
-        SetText(scene, "Equipment_TooltipText", GameProgress::BuildEquipmentTooltip(hoveredEquipmentId));
+        SetText(scene, SystemBindings::Progression::EquipmentTooltipText, GameProgress::BuildEquipmentTooltip(hoveredEquipmentId));
     }
 
 } // namespace Wheatear::ProgressionEquipmentPageService

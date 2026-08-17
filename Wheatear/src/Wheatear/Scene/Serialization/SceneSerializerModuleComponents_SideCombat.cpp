@@ -112,6 +112,7 @@ namespace Wheatear {
         o << YAML::Key << "DebuffStart" << YAML::Value << layout.DebuffStart;
         o << YAML::Key << "Size" << YAML::Value << layout.Size;
         o << YAML::Key << "Gap" << YAML::Value << layout.Gap;
+        o << YAML::Key << "RowsGrowDown" << YAML::Value << layout.RowsGrowDown;
         o << YAML::EndMap;
     }
 
@@ -124,6 +125,7 @@ namespace Wheatear {
         layout.DebuffStart = node["DebuffStart"].as<glm::vec2>(layout.DebuffStart);
         layout.Size = node["Size"].as<glm::vec2>(layout.Size);
         layout.Gap = node["Gap"].as<float>(layout.Gap);
+        layout.RowsGrowDown = node["RowsGrowDown"].as<bool>(layout.RowsGrowDown);
     }
 
     static void SerializeSideSkillHudSlots(YAML::Emitter& o, const std::vector<SideCombatLevelComponent::SkillHudSlot>& slots)

@@ -273,6 +273,54 @@ namespace Wheatear {
 
                 if (ImGui::BeginTabItem(EditorLocale::Text("Raw", "原始文本")))
                 {
+                    // Find & replace toolbar (global text replacement across
+                    // the whole raw document; useful for renaming ids/flags).
+                    ImGui::SetNextItemWidth(180.0f);
+                    ImGui::InputText("##DataFileFind", m_FindText, sizeof(m_FindText),
+                        ImGuiInputTextFlags_CharsNoBlank);
+                    ImGui::SameLine();
+                    ImGui::SetNextItemWidth(180.0f);
+                    ImGui::InputText("##DataFileReplace", m_ReplaceText, sizeof(m_ReplaceText));
+                    ImGui::SameLine();
+                    const bool hasFind = m_FindText[0] != '\0';
+                    ImGui::BeginDisabled(!hasFind);
+                    if (ImGui::Button(EditorLocale::Text("Replace All", "全部替换")))
+                    {
+                        const std::string find = m_FindText;
+                        const std::string replace = m_ReplaceText;
+                        size_t count = 0;
+                        std::string result;
+                        result.reserve(m_RawText.size());
+                        size_t pos = 0;
+                        while (true)
+                        {
+                            const size_t hit = m_RawText.find(find, pos);
+                            if (hit == std::string::npos)
+                            {
+                                result.append(m_RawText, pos, std::string::npos);
+                                break;
+                            }
+                            result.append(m_RawText, pos, hit - pos);
+                            result.append(replace);
+                            pos = hit + find.size();
+                            ++count;
+                        }
+                        if (count > 0)
+                        {
+                            m_RawText = std::move(result);
+                            m_TreeEdited = false;
+                            m_Dirty = true;
+                            m_ParseValid = false;
+                        }
+                        m_FindStatus = count > 0
+                            ? "Replaced " + std::to_string(count) + " occurrence(s)."
+                            : "No matches.";
+                    }
+                    ImGui::EndDisabled();
+                    ImGui::SameLine();
+                    if (!m_FindStatus.empty())
+                        ImGui::TextColored(ImVec4(0.9f, 0.85f, 0.4f, 1.0f), "%s", m_FindStatus.c_str());
+
                     std::string edited = m_RawText;
                     const bool changed = EditorWidgets::InputMultilineString(
                         "##DataFileRaw",

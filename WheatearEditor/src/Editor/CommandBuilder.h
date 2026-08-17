@@ -91,6 +91,8 @@ namespace Wheatear::EditorCommandBuilder {
         CommandKind Kind = CommandKind::None;
         std::string Primary;   // scene path / event name / @UUID selector / target name / page key
         std::string Secondary; // action keyword for ui:pager & anim; clip name for anim:play
+        // Direct call target for event: commands ("@UUID"); empty = broadcast.
+        std::string Target;
         std::string Raw;
         int Number = 1;        // slot / chapter / page index / tactic cell row
         int Number2 = 0;       // tactic cell column
@@ -209,7 +211,7 @@ namespace Wheatear::EditorCommandBuilder {
                 else if (StartsWith(lower, "event:"))
                 {
                     const std::string eventName = StripEventName(trimmed.substr(6));
-                    if (!eventName.empty())
+                    if (!eventName.empty() && eventName.front() != '@')
                         events.insert(eventName);
                 }
             }

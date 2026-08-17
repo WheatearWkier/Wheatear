@@ -90,7 +90,7 @@ namespace Wheatear {
             ImGui::Separator();
             ImGui::TextColored(ImGui::GetStyleColorVec4(ImGuiCol_CheckMark),
                 "%s %s", m_WaitingAction.c_str(),
-                EditorLocale::Text("... press a key (Esc to cancel)", "… 等待按键（Esc 取消）"));
+                EditorLocale::Text("... press key(s) (Esc to finish)", "… 依次按下按键（Esc 结束）"));
 
             const int pressed = PollPressedInput();
             if (pressed != 0)
@@ -205,7 +205,8 @@ namespace Wheatear {
                 m_WaitingAction = actionId;
         }
 
-        // Right-click menu: reset to default / clear / disable / remove.
+        // Right-click menu: reset to default / clear / disable / remove /
+        // edit display label.
         if (!waiting && ImGui::BeginPopupContextItem("##bind_ctx"))
         {
             if (!disabled)
@@ -214,6 +215,15 @@ namespace Wheatear {
                     InputBindingService::SetKeys(actionId, DefaultKeysFor(actionId));
                 if (ImGui::MenuItem(EditorLocale::Text("Clear", "清空")))
                     InputBindingService::SetKeys(actionId, {});
+                ImGui::Separator();
+                if (ImGui::MenuItem(EditorLocale::Text("Edit Label...", "编辑显示名...")))
+                {
+                    m_LabelEditAction = actionId;
+                    const std::string currentLabel = InputActionCatalog::GetDisplayLabel(actionId);
+                    std::strncpy(m_LabelEditBuffer, currentLabel.c_str(), sizeof(m_LabelEditBuffer) - 1);
+                    m_LabelEditBuffer[sizeof(m_LabelEditBuffer) - 1] = '\0';
+                    m_ShowLabelEdit = true;
+                }
             }
             if (definition)
             {
@@ -232,6 +242,44 @@ namespace Wheatear {
                 }
             }
             ImGui::EndPopup();
+        }
+
+        // Display-label editing modal (persisted with the catalog file).
+        if (m_ShowLabelEdit && !m_LabelEditAction.empty())
+        {
+            ImGui::OpenPopup("##bind_label_edit");
+            ImGui::SetNextWindowPos(ImGui::GetMainViewport()->GetCenter(),
+                ImGuiCond_Appearing, ImVec2(0.5f, 0.5f));
+            if (ImGui::BeginPopupModal("##bind_label_edit", nullptr,
+                    ImGuiWindowFlags_AlwaysAutoResize))
+            {
+                ImGui::Text("%s", EditorLocale::Text(
+                    "Display label for '%s'", "'%s' 的显示名"),
+                    m_LabelEditAction.c_str());
+                ImGui::SetNextItemWidth(260.0f);
+                ImGui::InputText("##label_input", m_LabelEditBuffer, sizeof(m_LabelEditBuffer));
+                ImGui::Separator();
+                ImGui::Spacing();
+                if (ImGui::Button(EditorLocale::Text("Apply", "应用"), ImVec2(120.0f, 0.0f)))
+                {
+                    if (const InputActionDefinition* existing =
+                            InputActionCatalog::FindDefinition(m_LabelEditAction))
+                    {
+                        InputActionDefinition updated = *existing;
+                        updated.Label = m_LabelEditBuffer;
+                        InputActionCatalog::AddDefinition(updated);
+                    }
+                    m_ShowLabelEdit = false;
+                    m_LabelEditAction.clear();
+                }
+                ImGui::SameLine();
+                if (ImGui::Button(EditorLocale::Text("Cancel", "取消"), ImVec2(100.0f, 0.0f)))
+                {
+                    m_ShowLabelEdit = false;
+                    m_LabelEditAction.clear();
+                }
+                ImGui::EndPopup();
+            }
         }
 
         ImGui::PopID();
@@ -258,14 +306,18 @@ namespace Wheatear {
     {
         if (binding == WT_KEY_ESCAPE)
         {
-            m_WaitingAction.clear();   // Esc cancels
+            m_WaitingAction.clear();   // Esc finishes/cancels
             return;
         }
 
-        // Replace the whole binding with the new key (a single-key binding is
-        // the common case; multi-key defaults can be re-added via Reset).
-        InputBindingService::SetKeys(actionId, { binding });
-        m_WaitingAction.clear();
+        // Multi-key bindings: keep waiting and append each pressed key to the
+        // existing set (duplicates are ignored). Esc finishes the sequence.
+        std::vector<int> keys = InputBindingService::GetKeys(actionId);
+        if (std::find(keys.begin(), keys.end(), binding) == keys.end())
+        {
+            keys.push_back(binding);
+            InputBindingService::SetKeys(actionId, keys);
+        }
     }
 
 } // namespace Wheatear

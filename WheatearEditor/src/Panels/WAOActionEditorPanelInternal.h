@@ -14,6 +14,7 @@
 #include "Wheatear/Gameplay/Action/ActionRecipeQueries.h"
 #include "Wheatear/Gameplay/Action/ActionRunner.h"
 #include "Wheatear/Gameplay/Action/StateRegistry.h"
+#include "Wheatear/Utils/StringUtils.h"
 
 #include <yaml-cpp/yaml.h>
 
@@ -21,6 +22,7 @@
 
 #include <algorithm>
 #include <cctype>
+#include <cstdlib>
 #include <filesystem>
 #include <fstream>
 #include <iterator>
@@ -333,7 +335,9 @@ namespace Wheatear::WAOActionEditorInternal {
 
         inline std::filesystem::path ActionSetsManifestPath()
         {
-            return AssetPath::Resolve(
+            // The manifest rows themselves live in project assets; game
+            // content must never be written back to the engine root.
+            return EditorWidgets::ResolveWritableProjectAsset(
                 AssetAliasRegistry::Path("wao.action_sets", "assets/gameplay/actions/action_sets.yaml"));
         }
 
@@ -748,6 +752,15 @@ namespace Wheatear::WAOActionEditorInternal {
             node["resourceCost"] = map;
         }
 
+        inline bool IsNumericParamValue(const std::string& value)
+        {
+            if (value.empty())
+                return false;
+            char* end = nullptr;
+            std::strtof(value.c_str(), &end);
+            return end && *end == '\0';
+        }
+
         inline void WriteParams(YAML::Node node, const std::unordered_map<std::string, std::string>& values)
         {
             YAML::Node map(YAML::NodeType::Map);
@@ -756,19 +769,62 @@ namespace Wheatear::WAOActionEditorInternal {
                 [](const auto& a, const auto& b) { return a.first < b.first; });
             for (const auto& [id, value] : sorted)
             {
-                if (!id.empty())
+                if (id.empty())
+                    continue;
+                // Keep numeric params unquoted ("manaCost: 8", not "manaCost: \"8\"")
+                // so diff noise stays out of version control.
+                if (IsNumericParamValue(value))
+                {
+                    char* end = nullptr;
+                    const long long intValue = std::strtoll(value.c_str(), &end, 10);
+                    if (end && *end == '\0')
+                        map[id] = static_cast<int>(intValue);
+                    else
+                        map[id] = std::strtof(value.c_str(), nullptr);
+                }
+                else
+                {
                     map[id] = value;
+                }
             }
             node["params"] = map;
         }
 
         inline void WriteEffects(YAML::Node node, const std::vector<WAO::EffectSpec>& effects)
         {
+            // Original "type" spellings are preserved (e.g. "Damage") so an
+            // edit round-trip does not rewrite unrelated casing in git diffs.
+            std::vector<std::string> originalTypes;
+            if (const YAML::Node original = node["effects"])
+            {
+                if (original.IsSequence())
+                {
+                    for (const YAML::Node& entry : original)
+                    {
+                        if (entry && entry["type"])
+                            originalTypes.push_back(entry["type"].as<std::string>());
+                        else
+                            originalTypes.emplace_back();
+                    }
+                }
+            }
+
             YAML::Node sequence(YAML::NodeType::Sequence);
+            size_t index = 0;
             for (const WAO::EffectSpec& effect : effects)
             {
                 YAML::Node item(YAML::NodeType::Map);
-                item["type"] = EffectTypeYamlName(effect.Type);
+                const std::string canonical = EffectTypeYamlName(effect.Type);
+                std::string typeText = canonical;
+                if (index < originalTypes.size())
+                {
+                    const std::string originalLower =
+                        StringUtils::ToLower(StringUtils::Trim(originalTypes[index]));
+                    if (!originalLower.empty() && originalLower == StringUtils::ToLower(canonical))
+                        typeText = originalTypes[index];   // keep original casing
+                }
+                item["type"] = typeText;
+                ++index;
                 if (!effect.AttributeId.empty())
                     item["attribute"] = effect.AttributeId;
                 if (!effect.StateId.empty())
@@ -808,9 +864,15 @@ namespace Wheatear::WAOActionEditorInternal {
             node["startup"] = recipe.Startup;
             node["hitTime"] = recipe.HitTime;
             node["recovery"] = recipe.Recovery;
-            node["cancelStart"] = recipe.CancelStart;
-            node["cancelEnd"] = recipe.CancelEnd;
-            node["movementScale"] = recipe.MovementScale;
+            // Template-only fields: only overwrite when the source YAML already
+            // carries them, so saving an older recipe does not add fields that
+            // were never authored (keeps git diffs minimal).
+            if (node["cancelStart"])
+                node["cancelStart"] = recipe.CancelStart;
+            if (node["cancelEnd"])
+                node["cancelEnd"] = recipe.CancelEnd;
+            if (node["movementScale"])
+                node["movementScale"] = recipe.MovementScale;
             WriteStringSequence(node, "tags", recipe.Tags);
             WriteStringSequence(node, "requiredStates", recipe.RequiredStates);
             WriteStringSequence(node, "blockedStates", recipe.BlockedStates);

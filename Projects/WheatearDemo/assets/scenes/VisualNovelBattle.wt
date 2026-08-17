@@ -656,6 +656,80 @@ Entities:
     - 1
     FontSize: 18
     FontPath: assets/fonts/wqy-microhei.ttc
+- Entity: 930000016
+  TagComponent:
+    Tag: Battle_Message
+  TransformComponent:
+    Translation:
+    - 0
+    - 0
+    - 0
+    Rotation:
+    - 0
+    - 0
+    - 0
+    Scale:
+    - 1
+    - 1
+    - 1
+  UIWidgetComponent:
+    Visible: true
+    Position:
+    - 0.5
+    - 0.885
+    Size:
+    - 0.78
+    - 0.05
+    Rotation: 0
+    Anchor: 4
+    SortOrder: 28
+    ParentEntity: 930009002
+  UITextComponent:
+    Text: 移动到发光点。左摇杆 / WASD 移动，攻击键 / J 攻击，武器框 / 1 2 3 切换。
+    Color:
+    - 0.94
+    - 0.96
+    - 0.99
+    - 1
+    FontSize: 16
+    FontPath: assets/fonts/wqy-microhei.ttc
+- Entity: 930000017
+  TagComponent:
+    Tag: Battle_WeaponText
+  TransformComponent:
+    Translation:
+    - 0
+    - 0
+    - 0
+    Rotation:
+    - 0
+    - 0
+    - 0
+    Scale:
+    - 1
+    - 1
+    - 1
+  UIWidgetComponent:
+    Visible: true
+    Position:
+    - 0.5
+    - 0.835
+    Size:
+    - 0.72
+    - 0.04
+    Rotation: 0
+    Anchor: 4
+    SortOrder: 29
+    ParentEntity: 930009002
+  UITextComponent:
+    Text: "武器: 手枪  [1 手枪] [2 重炮] [3 太刀]"
+    Color:
+    - 1
+    - 0.96
+    - 0.88
+    - 1
+    FontSize: 15
+    FontPath: assets/fonts/wqy-microhei.ttc
 - Entity: 930000018
   TagComponent:
     Tag: Battle_PausePanel

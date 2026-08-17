@@ -10,6 +10,11 @@ namespace Wheatear {
     struct RuntimePlayerConfig
     {
         std::filesystem::path StartupScene = EngineInfo::DefaultStartupScene;
+
+        // Optional release name for the packaged player directory, e.g.
+        // Projects/WheatearDemo with PackageName=Demo packages to
+        // Builds/Windows/Player/Demo. Empty falls back to the project key.
+        std::string PackageName;
     };
 
     WHEATEAR_API std::filesystem::path FindRuntimePlayerConfigPath(const std::filesystem::path& start = {});

@@ -492,6 +492,12 @@ namespace Wheatear {
             break;
 
         case WT_KEY_D: if (ctrl) OnDuplicateEntity(); break;
+        case WT_KEY_C:
+            if (ctrl) CopySelectedEntity();
+            break;
+        case WT_KEY_V:
+            if (ctrl) PasteClipboardEntity();
+            break;
         case WT_KEY_F:
             if (m_SceneState == SceneState::Edit)
             {
@@ -555,6 +561,10 @@ namespace Wheatear {
             && !ImGuizmo::IsOver()
             && !Input::IsKeyPressed(WT_KEY_LEFT_ALT))
         {
+            const bool additive = Input::IsKeyPressed(WT_KEY_LEFT_CONTROL)
+                || Input::IsKeyPressed(WT_KEY_RIGHT_CONTROL);
+            if (additive)
+                ToggleSceneMultiSelect(PickViewportEditorEntity(mouse));
             SelectEditorEntity(PickViewportEditorEntity(mouse), true);
         }
         return false;

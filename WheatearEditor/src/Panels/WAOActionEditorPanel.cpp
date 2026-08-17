@@ -93,6 +93,9 @@ namespace Wheatear {
         if (ImGui::Button(EditorLocale::Text("New Action", "新建动作")))
             CreateRecipeInSet(m_NewActionSetKey.empty() ? FirstActionSetKey() : m_NewActionSetKey);
         ImGui::SameLine();
+        if (ImGui::Button(EditorLocale::Text("Manage Action Sets", "管理动作集")))
+            m_ShowActionSetsPanel = !m_ShowActionSetsPanel;
+        ImGui::SameLine();
         ImGui::BeginDisabled(m_SelectedActionId.empty());
         if (ImGui::Button(EditorLocale::Text("Duplicate", "复制")))
             DuplicateSelectedRecipe();
@@ -120,6 +123,12 @@ namespace Wheatear {
         ImGui::BeginChild("##wao_action_detail", ImVec2(0.0f, 0.0f), true);
         DrawActionDetails();
         ImGui::EndChild();
+
+        if (m_ShowActionSetsPanel)
+        {
+            ImGui::Separator();
+            DrawActionSetsPanel();
+        }
 
         EditorFloatingWindow::End();
     }

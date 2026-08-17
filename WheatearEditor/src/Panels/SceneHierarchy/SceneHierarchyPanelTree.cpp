@@ -387,6 +387,7 @@ namespace Wheatear {
             flags |= ImGuiTreeNodeFlags_DefaultOpen;
 
         const bool selected = m_SelectionContext == entity;
+        const bool multiSelected = m_SceneMultiSelect.count(entity.GetUUID()) > 0;
         std::unordered_set<uint32_t> canvasSelectionVisiting;
         const bool canvasOwnsSelection = entity.HasComponent<UICanvasComponent>()
             && IsUIDescendantOf(entity, m_SelectionContext, childMap, canvasSelectionVisiting);
@@ -396,6 +397,14 @@ namespace Wheatear {
             flags |= ImGuiTreeNodeFlags_Selected;
             if (selected)
                 selectionVisible = true;
+        }
+
+        // Multi-selected rows share the canvas-selection tint so the group
+        // stays visible next to the primary (anchor) selection.
+        if (multiSelected && !selected && !canvasOwnsSelection)
+        {
+            ImGui::PushStyleColor(ImGuiCol_Header, ImVec4(0.18f, 0.28f, 0.25f, 0.72f));
+            ImGui::PushStyleColor(ImGuiCol_HeaderHovered, ImVec4(0.22f, 0.36f, 0.32f, 0.82f));
         }
 
         if (canvasOwnsSelection && !selected)
@@ -462,11 +471,22 @@ namespace Wheatear {
         if (hiddenInEditor)
             ImGui::PopStyleColor();
 
+        if (multiSelected && !selected && !canvasOwnsSelection)
+            ImGui::PopStyleColor(2);
+
         if (canvasOwnsSelection && !selected)
             ImGui::PopStyleColor(2);
 
         if (ImGui::IsItemClicked())
+        {
             m_SelectionContext = entity;
+            if (m_EntityActivatedCallback)
+            {
+                const bool additive = ImGui::IsKeyDown(ImGuiKey_LeftCtrl)
+                    || ImGui::IsKeyDown(ImGuiKey_RightCtrl);
+                m_EntityActivatedCallback(entity, additive);
+            }
+        }
 
         // Drag sources: UI widgets re-parent inside the widget hierarchy;
         // other entities (and folders) can be dropped into editor folders.
@@ -549,7 +569,7 @@ namespace Wheatear {
         {
             m_SelectionContext = entity;
             if (m_EntityActivatedCallback)
-                m_EntityActivatedCallback(entity);
+                m_EntityActivatedCallback(entity, false);
         }
 
         if (selected && m_ScrollToSelection)

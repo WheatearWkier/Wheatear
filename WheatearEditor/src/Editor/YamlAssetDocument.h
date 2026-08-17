@@ -29,6 +29,15 @@ namespace Wheatear::EditorDocuments {
 
         const std::string& GetSourcePath() const { return m_TextDocument.GetSourcePath(); }
         const std::filesystem::path& GetResolvedPath() const { return m_TextDocument.GetResolvedPath(); }
+
+        void SetWriteDestination(DocumentWriteDestination destination)
+        {
+            m_TextDocument.SetWriteDestination(destination);
+        }
+        DocumentWriteDestination GetWriteDestination() const
+        {
+            return m_TextDocument.GetWriteDestination();
+        }
         YAML::Node& Root() { return m_Root; }
         const YAML::Node& Root() const { return m_Root; }
         const std::string& GetRawPreview() const { return m_RawPreview; }

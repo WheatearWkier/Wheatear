@@ -51,6 +51,11 @@ namespace Wheatear {
         std::string m_RawText;
         std::string m_Status;
 
+        // Raw-view find & replace.
+        char m_FindText[256] = {};
+        char m_ReplaceText[256] = {};
+        std::string m_FindStatus;
+
         YAML::Node m_YamlRoot;
         std::unordered_map<std::string, std::string> m_NewScalarValues;
         std::unordered_map<std::string, std::string> m_NewMapKeys;

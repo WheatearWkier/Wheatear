@@ -596,7 +596,7 @@ Entities:
     VictorySceneCommand: event:beast_path_victory
     DefeatSceneCommand: event:beast_path_retry
     ComboDropDelay: 1.14999998
-    FirstClearRewardText: 閼惧嘲绶? 閸忕晫鐡?x2 / 閻斿﹦鍩?x2 / 姒勬梹鐗崇喊搴ｅ x0-1
+    FirstClearRewardText: "首通奖励: 魔核碎片 x2 / 兽筋 x2 / 熊爪 x0-1"
     DeathRewards:
     - Enabled: true
       EnemyKind: 3
@@ -738,11 +738,11 @@ Entities:
       - 0.02
     PlayerUltimateLayout:
       Position:
-      - 0.073
-      - 0.193
+      - 0.131950393
+      - 0.191721946
       Size:
-      - 0.225
-      - 0.073
+      - 0.176833227
+      - 0.0512730479
     PlayerHealthTextLayout:
       Position:
       - 0.126
@@ -826,17 +826,19 @@ Entities:
       - 0.031
       - 0.055
       Gap: 0.04
+      RowsGrowDown: false
     EnemyStatusLayout:
       BuffStart:
-      - 0.602
-      - 0.202
+      - 0.613
+      - 0.174
       DebuffStart:
-      - 0.602
-      - 0.26
+      - 0.613
+      - 0.174
       Size:
       - 0.031
       - 0.055
       Gap: 0.04
+      RowsGrowDown: true
     SkillHudSlots:
     - Enabled: true
       Key: J

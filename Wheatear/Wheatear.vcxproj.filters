@@ -279,6 +279,9 @@
     <ClInclude Include="src\Wheatear\Gameplay\Action\StateRegistry.h">
       <Filter>src\Wheatear\Gameplay\Action</Filter>
     </ClInclude>
+    <ClInclude Include="src\Wheatear\Gameplay\SystemBindingRegistry.h">
+      <Filter>src\Wheatear\Gameplay</Filter>
+    </ClInclude>
     <ClInclude Include="src\Wheatear\Gameplay\Services\GameplayAudioService.h">
       <Filter>src\Wheatear\Gameplay\Services</Filter>
     </ClInclude>

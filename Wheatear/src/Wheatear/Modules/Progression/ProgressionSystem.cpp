@@ -10,6 +10,7 @@
 #include "ProgressionSettingsPageService.h"
 #include "Wheatear/Assets/AssetAliasRegistry.h"
 #include "Wheatear/Gameplay/Services/GameplayUILayoutService.h"
+#include "Wheatear/Gameplay/SystemBindingRegistry.h"
 #include "Wheatear/Modules/VisualNovel/VisualNovelSystem.h"
 #include "Wheatear/Runtime/CommandBus.h"
 #include "Wheatear/Runtime/SceneTransitionService.h"
@@ -254,7 +255,7 @@ namespace Wheatear {
 
         static void SyncActivePolicyIfSaveLoadPage(Scene* scene)
         {
-            if (HasEntity(scene, "SaveLoad_SlotScroll"))
+            if (HasEntity(scene, SystemBindings::Progression::SaveLoadSlotScroll))
                 SetActiveSavePolicy(scene ? scene->GetEffectiveSavePolicy() : SavePolicy{});
         }
 
@@ -451,28 +452,28 @@ namespace Wheatear {
         }
         static void UpdateHub(Scene* scene)
         {
-            if (!HasEntity(scene, "Hub_Status"))
+            if (!HasEntity(scene, SystemBindings::Progression::HubStatus))
                 return;
 
-            SetText(scene, "Hub_Subtitle", GameProgress::BuildHubSubtitle());
-            SetText(scene, "Hub_Status", GameProgress::BuildHubStatus());
-            SetText(scene, "Hub_Button_Dungeon", GameProgress::GetDungeonButtonText());
-            SetText(scene, "Hub_Button_Skill", GameProgress::GetSkillButtonText());
-            SetText(scene, "Hub_Button_Equip", GameProgress::GetEquipmentButtonText());
+            SetText(scene, SystemBindings::Progression::HubSubtitle, GameProgress::BuildHubSubtitle());
+            SetText(scene, SystemBindings::Progression::HubStatus, GameProgress::BuildHubStatus());
+            SetText(scene, SystemBindings::Progression::HubDungeonButton, GameProgress::GetDungeonButtonText());
+            SetText(scene, SystemBindings::Progression::HubSkillButton, GameProgress::GetSkillButtonText());
+            SetText(scene, SystemBindings::Progression::HubEquipmentButton, GameProgress::GetEquipmentButtonText());
         }
 
         static void UpdateResult(Scene* scene)
         {
-            if (!HasEntity(scene, "Result_Stats"))
+            if (!HasEntity(scene, SystemBindings::Progression::ResultStats))
                 return;
 
             const auto& state = GameProgress::GetState();
-            SetText(scene, "Result_Title", GameProgress::BuildResultTitle());
-            SetText(scene, "Result_Stats", GameProgress::BuildResultStats());
-            SetText(scene, "Result_Rewards", state.LastDungeonResult.Valid
+            SetText(scene, SystemBindings::Progression::ResultTitle, GameProgress::BuildResultTitle());
+            SetText(scene, SystemBindings::Progression::ResultStats, GameProgress::BuildResultStats());
+            SetText(scene, SystemBindings::Progression::ResultRewards, state.LastDungeonResult.Valid
                 ? "掉落奖励\n悬停图标查看用途与数量。\n下一步：回据点升级，或者重刷练习连击。"
                 : "还没有掉落记录。\n完成一个地下城后，这里会显示材料图标。");
-            SetProgress(scene, "Result_EXPBar",
+            SetProgress(scene, SystemBindings::Progression::ResultEXPBar,
                 static_cast<float>(state.Experience),
                 static_cast<float>(state.ExperienceToNext));
             ProgressionResultPageService::UpdateDrops(scene);
@@ -480,16 +481,16 @@ namespace Wheatear {
 
         static void UpdateSkillTree(Scene* scene)
         {
-            if (!HasEntity(scene, "SkillTree_Status"))
+            if (!HasEntity(scene, SystemBindings::Progression::SkillTreeView))
                 return;
 
             const auto& state = GameProgress::GetState();
-            SetText(scene, "SkillTree_Subtitle", GameProgress::BuildHubSubtitle());
-            SetText(scene, "SkillTree_Status", GameProgress::BuildSkillTreeStatus());
-            SetText(scene, "SkillTree_Details", GameProgress::BuildSkillTreeDetails());
-            SetText(scene, "SkillTree_Materials", GameProgress::BuildSkillTreeMaterials());
-            SetText(scene, "SkillTree_Button_LearnSelectedSkill", GameProgress::GetSkillTreeLearnButtonText());
-            SetProgress(scene, "SkillTree_MagicSwordBar",
+            SetText(scene, SystemBindings::Progression::SkillTreeSubtitle, GameProgress::BuildHubSubtitle());
+            SetText(scene, SystemBindings::Progression::SkillTreeStatus, GameProgress::BuildSkillTreeStatus());
+            SetText(scene, SystemBindings::Progression::SkillTreeDetails, GameProgress::BuildSkillTreeDetails());
+            SetText(scene, SystemBindings::Progression::SkillTreeMaterials, GameProgress::BuildSkillTreeMaterials());
+            SetText(scene, SystemBindings::Progression::SkillTreeLearnButton, GameProgress::GetSkillTreeLearnButtonText());
+            SetProgress(scene, SystemBindings::Progression::SkillTreeMagicSwordBar,
                 static_cast<float>(state.MagicSwordLevel),
                 2.0f);
             ProgressionSkillTreePageService::SyncView(scene);
@@ -497,31 +498,31 @@ namespace Wheatear {
 
         static void UpdateEquipment(Scene* scene)
         {
-            if (!HasEntity(scene, "Equipment_Status"))
+            if (!HasEntity(scene, SystemBindings::Progression::EquipmentStatus))
                 return;
 
             ProgressionEquipmentPageService::EnsureLayout(scene);
             ProgressionEquipmentPageService::SyncPager(scene);
             const auto& state = GameProgress::GetState();
-            SetText(scene, "Equipment_Subtitle", GameProgress::BuildHubSubtitle());
-            SetText(scene, "Equipment_Status", GameProgress::BuildEquipmentStatus());
-            SetText(scene, "Equipment_Details", GameProgress::BuildEquipmentDetails());
-            SetText(scene, "Equipment_PageText", GameProgress::BuildEquipmentPageText());
-            SetText(scene, "Equipment_Materials", GameProgress::BuildEquipmentMaterials());
-            SetText(scene, "Equipment_Button_UpgradeArmor", GameProgress::GetEquipmentUpgradeButtonText());
+            SetText(scene, SystemBindings::Progression::EquipmentSubtitle, GameProgress::BuildHubSubtitle());
+            SetText(scene, SystemBindings::Progression::EquipmentStatus, GameProgress::BuildEquipmentStatus());
+            SetText(scene, SystemBindings::Progression::EquipmentDetails, GameProgress::BuildEquipmentDetails());
+            SetText(scene, SystemBindings::Progression::EquipmentPageText, GameProgress::BuildEquipmentPageText());
+            SetText(scene, SystemBindings::Progression::EquipmentMaterials, GameProgress::BuildEquipmentMaterials());
+            SetText(scene, SystemBindings::Progression::EquipmentUpgradeArmorButton, GameProgress::GetEquipmentUpgradeButtonText());
             // Drive the upgrade button from the selected equipment's recipe so
             // new recipes (upgrades.yaml) work without editing the scene.
             if (const auto* recipe = ProgressionContent::FindUpgradeForEquipment(state.SelectedEquipmentId))
             {
-                SetButtonCommand(scene, "Equipment_Button_UpgradeArmor",
+                SetButtonCommand(scene, SystemBindings::Progression::EquipmentUpgradeArmorButton,
                     std::string("progression:upgrade_item:") + recipe->Id);
             }
             else
             {
-                SetButtonCommand(scene, "Equipment_Button_UpgradeArmor",
+                SetButtonCommand(scene, SystemBindings::Progression::EquipmentUpgradeArmorButton,
                     "progression:upgrade_traveler_armor");
             }
-            SetProgress(scene, "Equipment_ArmorBar",
+            SetProgress(scene, SystemBindings::Progression::EquipmentArmorBar,
                 static_cast<float>(state.TravelerArmorLevel),
                 1.0f);
             ProgressionEquipmentPageService::UpdateItems(scene);
@@ -529,45 +530,45 @@ namespace Wheatear {
 
         static void UpdateDungeonSelect(Scene* scene)
         {
-            if (!HasEntity(scene, "Dungeon_Status"))
+            if (!HasEntity(scene, SystemBindings::Progression::DungeonStatus))
                 return;
 
-            SetText(scene, "Dungeon_Subtitle", GameProgress::BuildHubSubtitle());
-            SetText(scene, "Dungeon_Status", GameProgress::BuildDungeonSelectStatus());
-            SetText(scene, "Dungeon_Rewards", GameProgress::BuildDungeonSelectRewards());
+            SetText(scene, SystemBindings::Progression::DungeonSubtitle, GameProgress::BuildHubSubtitle());
+            SetText(scene, SystemBindings::Progression::DungeonStatus, GameProgress::BuildDungeonSelectStatus());
+            SetText(scene, SystemBindings::Progression::DungeonRewards, GameProgress::BuildDungeonSelectRewards());
         }
 
         static void UpdateRelationship(Scene* scene)
         {
-            if (!HasEntity(scene, "Relationship_Status"))
+            if (!HasEntity(scene, SystemBindings::Progression::RelationshipStatus))
                 return;
 
-            SetText(scene, "Relationship_Subtitle", GameProgress::BuildHubSubtitle());
-            SetText(scene, "Relationship_Status", GameProgress::BuildRelationshipStatus());
+            SetText(scene, SystemBindings::Progression::RelationshipSubtitle, GameProgress::BuildHubSubtitle());
+            SetText(scene, SystemBindings::Progression::RelationshipStatus, GameProgress::BuildRelationshipStatus());
         }
 
         static void UpdateSupport(Scene* scene)
         {
-            if (!HasEntity(scene, "Support_Status"))
+            if (!HasEntity(scene, SystemBindings::Progression::SupportStatus))
                 return;
 
-            SetText(scene, "Support_Subtitle", GameProgress::BuildHubSubtitle());
-            SetText(scene, "Support_Status", GameProgress::BuildSupportStatus());
+            SetText(scene, SystemBindings::Progression::SupportSubtitle, GameProgress::BuildHubSubtitle());
+            SetText(scene, SystemBindings::Progression::SupportStatus, GameProgress::BuildSupportStatus());
         }
 
         static void UpdateSettings(Scene* scene)
         {
-            if (!HasEntity(scene, "Settings_Status"))
+            if (!HasEntity(scene, SystemBindings::Progression::SettingsStatus))
                 return;
 
             ProgressionSettingsPageService::UpdateAudioControls(scene);
-            SetText(scene, "Settings_Subtitle", GameProgress::BuildHubSubtitle());
-            SetText(scene, "Settings_Status", GameProgress::BuildSettingsStatus());
+            SetText(scene, SystemBindings::Progression::SettingsSubtitle, GameProgress::BuildHubSubtitle());
+            SetText(scene, SystemBindings::Progression::SettingsStatus, GameProgress::BuildSettingsStatus());
         }
 
         static void UpdateSaveLoad(Scene* scene)
         {
-            if (!HasEntity(scene, "SaveLoad_SlotScroll"))
+            if (!HasEntity(scene, SystemBindings::Progression::SaveLoadSlotScroll))
                 return;
 
             ProgressionSaveLoadPageService::EnsureLayout(
@@ -627,7 +628,7 @@ namespace Wheatear {
         }
         s_ActiveSavePolicy.SaveDirectory = NormalizeSaveDirectory(s_ActiveSaveDirectory);
 
-        if (HasEntity(scene, "SaveLoad_SlotScroll"))
+        if (HasEntity(scene, SystemBindings::Progression::SaveLoadSlotScroll))
         {
             scene->ClearSavePolicyOverrides();
             scene->PushSavePolicyOverride(s_ActiveSavePolicy);

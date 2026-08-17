@@ -359,6 +359,13 @@ namespace Wheatear {
             ImGui::EndChild();
             return;
         }
+        ImGui::SameLine();
+        if (ImGui::SmallButton("Add Unrecognized"))
+        {
+            AddInstruction(EventScriptInstructionType::RawLine);
+            ImGui::EndChild();
+            return;
+        }
 
         if (m_SelectedInstruction < 0)
         {
@@ -436,6 +443,22 @@ namespace Wheatear {
             if (DrawConditionBuilder(condition))
             {
                 instruction.Text = condition;
+                changed = true;
+            }
+        }
+        else if (instruction.Type == EventScriptInstructionType::RawLine)
+        {
+            ImGui::TextDisabled("Unrecognized line - preserved verbatim on save instead of being dropped.");
+            std::string raw = instruction.Text;
+            if (EditorWidgets::InputString("Text", raw, 512))
+            {
+                instruction.Text = raw;
+                changed = true;
+            }
+            if (ImGui::SmallButton("Convert to Command"))
+            {
+                instruction.Type = EventScriptInstructionType::Command;
+                instruction.Text = Trim(instruction.Text);
                 changed = true;
             }
         }

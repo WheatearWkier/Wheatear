@@ -4,6 +4,7 @@
 #include "TacticalCombatCommandService.h"
 #include "TacticalCombatComponents.h"
 #include "TacticalCombatFlowService.h"
+#include "TacticalCombatTuningService.h"
 #include "Wheatear/Runtime/CommandBus.h"
 #include "Wheatear/Scene/Scene.h"
 
@@ -21,6 +22,13 @@ namespace Wheatear {
         for (auto entity : registry.view<TacticalCombatLevelComponent>())
         {
             auto& level = registry.get<TacticalCombatLevelComponent>(entity);
+
+            // The tuning unit table is the authoritative data source; scene
+            // component values act as per-scene fallbacks for unmatched tags.
+            const auto& tuning = TacticalCombatTuningService::GetTuning(level);
+            TacticalCombatTuningService::ApplyUnitTuningToScene(scene, tuning);
+            TacticalCombatTuningService::ApplyLevelTuning(tuning, level);
+
             if (level.PlayOnStart)
                 TacticalCombatFlowService::ResetLevel(scene, level);
         }

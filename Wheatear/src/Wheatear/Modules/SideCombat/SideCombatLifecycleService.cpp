@@ -3,6 +3,7 @@
 
 #include "SideCombatTuningService.h"
 #include "SideCombatVisualService.h"
+#include "Wheatear/Gameplay/SystemBindingRegistry.h"
 #include "Wheatear/Gameplay/Services/GameplayVisualService.h"
 #include "Wheatear/Modules/Progression/GameProgress.h"
 #include "Wheatear/Scene/Components.h"
@@ -54,9 +55,9 @@ namespace Wheatear::SideCombatLifecycleService {
             if (registry.all_of<TagComponent>(entity))
             {
                 const auto& tag = registry.get<TagComponent>(entity);
-                if (HasTagPrefix(tag, "SC_Wave2_"))
+                if (HasTagPrefix(tag, SystemBindings::Side::Wave2Prefix))
                     return 1;
-                if (HasTagPrefix(tag, "SC_Wave1_"))
+                if (HasTagPrefix(tag, SystemBindings::Side::Wave1Prefix))
                     return 0;
             }
 
@@ -193,7 +194,7 @@ namespace Wheatear::SideCombatLifecycleService {
                     ? static_cast<float>(i) / static_cast<float>(spawn.Count - 1)
                     : 0.5f;
                 const float x = minX + (maxX - minX) * t;
-                const std::string tag = "SC_Enemy_W" + std::to_string(spawn.WaveIndex)
+                const std::string tag = std::string(SystemBindings::Side::EnemyWavePrefix) + std::to_string(spawn.WaveIndex)
                     + "_K" + std::to_string(spawn.EnemyKind)
                     + "_" + std::to_string(i);
 

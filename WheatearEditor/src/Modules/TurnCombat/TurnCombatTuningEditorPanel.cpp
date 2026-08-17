@@ -188,7 +188,7 @@ namespace Wheatear {
         m_Status.clear();
         m_ParseValid = false;
 
-        m_ResolvedPath = AssetPath::Resolve(m_SourcePath);
+        m_ResolvedPath = EditorWidgets::ResolveWritableProjectAsset(m_SourcePath);
         std::string text;
         if (!EditorWidgets::ReadFileText(m_ResolvedPath, text))
         {

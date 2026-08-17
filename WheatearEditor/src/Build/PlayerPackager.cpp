@@ -270,6 +270,10 @@ namespace Wheatear {
             return std::string(buffer, 8);
         }
 
+        // Package key is the project's path relative to the repository with the
+        // repository's project container directory (Projects/) dropped, so
+        // Projects/WheatearDemo maps to the short key WheatearDemo while nested
+        // projects (Projects/Sub/GameA) stay unique.
         static std::filesystem::path BuildProjectPackageKey(const std::filesystem::path& repositoryRoot,
             const std::filesystem::path& projectRoot)
         {
@@ -289,6 +293,8 @@ namespace Wheatear {
                         const std::string segment = SanitizePathComponent(part.generic_string());
                         if (segment == "." || segment == "..")
                             continue;
+                        if (StringUtils::ToLower(segment) == "projects")
+                            continue;
                         key /= segment;
                     }
 
@@ -302,17 +308,33 @@ namespace Wheatear {
             return std::filesystem::path(basename + "-" + fingerprint);
         }
 
-        static std::filesystem::path DefaultPackageDirectory(const std::filesystem::path& repositoryRoot,
-            const std::filesystem::path& projectRoot,
-            const std::string& configuration,
-            const char* packageKind)
+        // The player package directory is the release name: the project's
+        // player.config PackageName (e.g. "Demo") when set, otherwise the
+        // short project key. Layout: Builds/Windows/Player/<release name>.
+        static std::filesystem::path DefaultPlayerPackageDirectory(const std::filesystem::path& repositoryRoot,
+            const std::filesystem::path& projectRoot)
+        {
+            const RuntimePlayerConfig projectConfig =
+                LoadRuntimePlayerConfig(projectRoot / "assets" / "game" / "player.config");
+            const std::string packageName = SanitizePathComponent(
+                projectConfig.PackageName.empty()
+                    ? BuildProjectPackageKey(repositoryRoot, projectRoot).generic_string()
+                    : projectConfig.PackageName);
+            return repositoryRoot
+                / "Builds"
+                / "Windows"
+                / "Player"
+                / packageName;
+        }
+
+        // The editor package is the tool itself: no per-project nesting.
+        // Layout: Builds/Windows/Editor.
+        static std::filesystem::path DefaultEditorPackageDirectory(const std::filesystem::path& repositoryRoot)
         {
             return repositoryRoot
                 / "Builds"
                 / "Windows"
-                / packageKind
-                / BuildProjectPackageKey(repositoryRoot, projectRoot)
-                / SanitizePathComponent(configuration);
+                / "Editor";
         }
 
         static constexpr const char* kAssetPackFilename = "content.wtpack";
@@ -361,6 +383,7 @@ namespace Wheatear {
         static bool CopyRuntimeBinaries(const std::filesystem::path& source,
             const std::filesystem::path& destination,
             bool includeDebugSymbols,
+            const std::string* skipFileName,
             std::string* errorMessage)
         {
             if (!std::filesystem::exists(source))
@@ -393,6 +416,16 @@ namespace Wheatear {
 
                 if (!shouldCopy)
                     continue;
+
+                // A running editor executable inside the editor package cannot
+                // be overwritten (the image file is locked); leave it in place.
+                if (skipFileName &&
+                    entry.path().filename().generic_string() == *skipFileName)
+                {
+                    WT_CORE_INFO("PlayerPackager: keeping running binary '{}' in place",
+                        (destination / entry.path().filename()).string());
+                    continue;
+                }
 
                 std::filesystem::copy_file(entry.path(), destination / entry.path().filename(),
                     std::filesystem::copy_options::overwrite_existing, error);
@@ -763,10 +796,10 @@ namespace Wheatear {
 
         const std::filesystem::path projectRoot = AssetPath::GetProjectRoot();
         const std::filesystem::path outputDirectory = options.OutputDirectory.empty()
-            ? DefaultPackageDirectory(repositoryRoot, projectRoot, options.Configuration, "Player")
+            ? DefaultPlayerPackageDirectory(repositoryRoot, projectRoot)
             : options.OutputDirectory;
         const std::filesystem::path editorOutputDirectory = options.EditorOutputDirectory.empty()
-            ? DefaultPackageDirectory(repositoryRoot, projectRoot, options.Configuration, "Editor")
+            ? DefaultEditorPackageDirectory(repositoryRoot)
             : options.EditorOutputDirectory;
         const std::filesystem::path buildsRoot = repositoryRoot / "Builds";
 
@@ -851,9 +884,27 @@ namespace Wheatear {
         if (!CleanPackageDirectory(outputDirectory, &cleanError))
             return Fail("Failed to clean previous package directory: " + cleanError, outputDirectory);
         error.clear();
-        std::filesystem::remove_all(editorOutputDirectory, error);
-        if (error)
-            return Fail("Failed to clean previous editor package directory: " + error.message(), editorOutputDirectory);
+
+        // "Self-package" case: the packaged editor is running from inside its
+        // own editor package directory. Windows locks the image file of the
+        // running executable, so the directory cannot be removed wholesale and
+        // that executable cannot be overwritten. Keep the directory and the
+        // running exe in place (it is the very binary the user launched) and
+        // refresh the rest of the package.
+        const bool runningInsideEditorPackage =
+            !currentExecutable.empty() &&
+            FileSystem::IsSubPath(currentExecutable, editorOutputDirectory);
+        if (!runningInsideEditorPackage)
+        {
+            std::filesystem::remove_all(editorOutputDirectory, error);
+            if (error)
+                return Fail("Failed to clean previous editor package directory: " + error.message(), editorOutputDirectory);
+        }
+        else
+        {
+            WT_CORE_INFO("PlayerPackager: running editor executable lives inside the editor package '{}'; keeping it in place",
+                editorOutputDirectory.string());
+        }
 
         if (!FileSystem::EnsureDirectory(outputDirectory, &errorMessage))
             return Fail("Failed to create package directory: " + errorMessage, outputDirectory);
@@ -861,12 +912,16 @@ namespace Wheatear {
             return Fail("Failed to create editor package directory: " + errorMessage, editorOutputDirectory);
 
         if (!CopyRuntimeBinaries(runtimeBinaryDirectory, outputDirectory,
-            options.IncludeDebugSymbols, &errorMessage))
+            options.IncludeDebugSymbols, nullptr, &errorMessage))
         {
             return Fail("Failed to copy runtime binaries: " + errorMessage, outputDirectory);
         }
+        const std::string runningEditorFileName =
+            runningInsideEditorPackage ? currentExecutable.filename().generic_string() : std::string();
         if (!CopyRuntimeBinaries(editorBinaryDirectory, editorOutputDirectory,
-            options.IncludeDebugSymbols, &errorMessage))
+            options.IncludeDebugSymbols,
+            runningEditorFileName.empty() ? nullptr : &runningEditorFileName,
+            &errorMessage))
         {
             return Fail("Failed to copy editor binaries: " + errorMessage, editorOutputDirectory);
         }

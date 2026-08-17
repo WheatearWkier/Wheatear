@@ -144,8 +144,7 @@ namespace Wheatear {
 
     float AudioEngine::PercentToGain(float percent)
     {
-        const float normalized = std::clamp(percent, 0.0f, 100.0f) / 100.0f;
-        return std::pow(normalized, 1.5f);
+        return std::clamp(percent, 0.0f, 100.0f) / 100.0f;
     }
     void AudioEngine::Shutdown()
     {

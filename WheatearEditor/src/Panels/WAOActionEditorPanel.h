@@ -50,6 +50,7 @@ namespace Wheatear {
     private:
         bool m_Open = false;
         bool m_GroupByModule = true;
+        bool m_ShowActionSetsPanel = false;
         char m_Filter[128] = {};
         std::string m_SelectedActionId;
         uint64_t m_SelectedRecordSequence = 0;

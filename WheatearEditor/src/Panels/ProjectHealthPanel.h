@@ -72,6 +72,16 @@ namespace Wheatear {
         uintmax_t SizeBytes = 0;
     };
 
+    struct SystemBindingIssue
+    {
+        std::string SceneAsset;
+        std::string BindingId;
+        std::string BindingName;
+        std::string Owner;
+        std::string Context;
+        std::string Description;
+    };
+
     class ProjectHealthPanel
     {
     public:
@@ -85,7 +95,9 @@ namespace Wheatear {
         void DrawMissingReferences() const;
         void DrawSceneTransitions() const;
         void DrawEntityBindings() const;
+        void DrawSystemBindings() const;
         void ScanEntityBindings();
+        void ScanSystemBindings();
         void DrawAssetHygiene();
         void DrawHygieneCleanupPlan();
         void DrawAliasManifestEditor();
@@ -114,6 +126,7 @@ namespace Wheatear {
         // Dangling entity-name / @UUID bindings found inside scene files
         // (Reference = bound value, SourceAsset = scene :: component.field).
         std::vector<AssetReferenceRecord> m_MissingEntityBindings;
+        std::vector<SystemBindingIssue> m_MissingSystemBindings;
         EditorDocuments::YamlAssetDocument m_AliasManifestDocument;
         std::string m_Status;
         std::string m_AliasStatus;

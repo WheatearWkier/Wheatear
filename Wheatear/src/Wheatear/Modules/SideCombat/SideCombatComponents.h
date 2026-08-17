@@ -106,6 +106,7 @@ namespace Wheatear {
             glm::vec2 DebuffStart = { 0.0f, 0.0f };
             glm::vec2 Size = { 0.0f, 0.0f };
             float Gap = 0.0f;
+            bool RowsGrowDown = false;
         };
 
         struct SkillHudSlot

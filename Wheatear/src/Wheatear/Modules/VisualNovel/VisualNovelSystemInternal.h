@@ -14,6 +14,7 @@
 #include "Wheatear/Core/Log.h"
 #include "Wheatear/Config/UserSettings.h"
 #include "Wheatear/Gameplay/Services/GameplayAudioService.h"
+#include "Wheatear/Gameplay/SystemBindingRegistry.h"
 #include "Wheatear/Modules/Progression/GameProgress.h"
 #include "Wheatear/Runtime/CommandBus.h"
 #include "Wheatear/Renderer/Texture.h"
@@ -356,14 +357,14 @@ namespace Wheatear::VisualNovelSystemInternal {
         inline const std::array<VNCommandButtonSpec, 8>& VNCommandButtonSpecs()
         {
             static const std::array<VNCommandButtonSpec, 8> specs = {{
-                { "VN_Command_Save", 0 },
-                { "VN_Command_Load", 1 },
-                { "VN_Command_QuickSave", 2 },
-                { "VN_Command_QuickLoad", 3 },
-                { "VN_Command_Settings", 4 },
-                { "VN_Command_History", 5 },
-                { "VN_Command_Auto", 6 },
-                { "VN_Command_Skip", 7 },
+                { SystemBindings::VisualNovel::CommandSave, 0 },
+                { SystemBindings::VisualNovel::CommandLoad, 1 },
+                { SystemBindings::VisualNovel::CommandQuickSave, 2 },
+                { SystemBindings::VisualNovel::CommandQuickLoad, 3 },
+                { SystemBindings::VisualNovel::CommandSettings, 4 },
+                { SystemBindings::VisualNovel::CommandHistory, 5 },
+                { SystemBindings::VisualNovel::CommandAuto, 6 },
+                { SystemBindings::VisualNovel::CommandSkip, 7 },
             }};
             return specs;
         }
@@ -574,7 +575,7 @@ namespace Wheatear::VisualNovelSystemInternal {
             const glm::vec2 buttonSize = { 0.055f, 0.055f };
 
             EnsureVNSettingsText(scene,
-                "VN_Settings_MasterVolumeLabel",
+                SystemBindings::VisualNovel::SettingsMasterVolumeLabel,
                 canvasTag,
                 { 0.245f, 0.382f },
                 labelSize,
@@ -584,7 +585,7 @@ namespace Wheatear::VisualNovelSystemInternal {
                 labelColor,
                 visible);
             EnsureVNSettingsSlider(scene,
-                "VN_Settings_MasterVolumeSlider",
+                SystemBindings::VisualNovel::SettingsMasterVolumeSlider,
                 canvasTag,
                 { 0.470f, 0.389f },
                 sliderSize,
@@ -592,7 +593,7 @@ namespace Wheatear::VisualNovelSystemInternal {
                 "progression:set_master_volume",
                 visible);
             EnsureVNSettingsButton(scene,
-                "VN_Settings_MasterVolumeDown",
+                SystemBindings::VisualNovel::SettingsMasterVolumeDown,
                 canvasTag,
                 { 0.690f, 0.377f },
                 buttonSize,
@@ -601,7 +602,7 @@ namespace Wheatear::VisualNovelSystemInternal {
                 "progression:master_volume_down",
                 visible);
             EnsureVNSettingsButton(scene,
-                "VN_Settings_MasterVolumeUp",
+                SystemBindings::VisualNovel::SettingsMasterVolumeUp,
                 canvasTag,
                 { 0.750f, 0.377f },
                 buttonSize,
@@ -611,7 +612,7 @@ namespace Wheatear::VisualNovelSystemInternal {
                 visible);
 
             EnsureVNSettingsText(scene,
-                "VN_Settings_BGMVolumeLabel",
+                SystemBindings::VisualNovel::SettingsBGMVolumeLabel,
                 canvasTag,
                 { 0.245f, 0.452f },
                 labelSize,
@@ -621,7 +622,7 @@ namespace Wheatear::VisualNovelSystemInternal {
                 labelColor,
                 visible);
             EnsureVNSettingsSlider(scene,
-                "VN_Settings_BGMVolumeSlider",
+                SystemBindings::VisualNovel::SettingsBGMVolumeSlider,
                 canvasTag,
                 { 0.470f, 0.459f },
                 sliderSize,
@@ -629,7 +630,7 @@ namespace Wheatear::VisualNovelSystemInternal {
                 "progression:set_bgm_volume",
                 visible);
             EnsureVNSettingsButton(scene,
-                "VN_Settings_BGMVolumeDown",
+                SystemBindings::VisualNovel::SettingsBGMVolumeDown,
                 canvasTag,
                 { 0.690f, 0.447f },
                 buttonSize,
@@ -638,7 +639,7 @@ namespace Wheatear::VisualNovelSystemInternal {
                 "progression:bgm_volume_down",
                 visible);
             EnsureVNSettingsButton(scene,
-                "VN_Settings_BGMVolumeUp",
+                SystemBindings::VisualNovel::SettingsBGMVolumeUp,
                 canvasTag,
                 { 0.750f, 0.447f },
                 buttonSize,
@@ -648,7 +649,7 @@ namespace Wheatear::VisualNovelSystemInternal {
                 visible);
 
             EnsureVNSettingsText(scene,
-                "VN_Settings_SFXVolumeLabel",
+                SystemBindings::VisualNovel::SettingsSFXVolumeLabel,
                 canvasTag,
                 { 0.245f, 0.522f },
                 labelSize,
@@ -658,7 +659,7 @@ namespace Wheatear::VisualNovelSystemInternal {
                 labelColor,
                 visible);
             EnsureVNSettingsSlider(scene,
-                "VN_Settings_SFXVolumeSlider",
+                SystemBindings::VisualNovel::SettingsSFXVolumeSlider,
                 canvasTag,
                 { 0.470f, 0.529f },
                 sliderSize,
@@ -666,7 +667,7 @@ namespace Wheatear::VisualNovelSystemInternal {
                 "progression:set_sfx_volume",
                 visible);
             EnsureVNSettingsButton(scene,
-                "VN_Settings_SFXVolumeDown",
+                SystemBindings::VisualNovel::SettingsSFXVolumeDown,
                 canvasTag,
                 { 0.690f, 0.517f },
                 buttonSize,
@@ -675,7 +676,7 @@ namespace Wheatear::VisualNovelSystemInternal {
                 "progression:sfx_volume_down",
                 visible);
             EnsureVNSettingsButton(scene,
-                "VN_Settings_SFXVolumeUp",
+                SystemBindings::VisualNovel::SettingsSFXVolumeUp,
                 canvasTag,
                 { 0.750f, 0.517f },
                 buttonSize,
@@ -684,9 +685,9 @@ namespace Wheatear::VisualNovelSystemInternal {
                 "progression:sfx_volume_up",
                 visible);
 
-            SetVNSettingsSliderValue(scene, "VN_Settings_MasterVolumeSlider", static_cast<float>(settings.MasterVolume));
-            SetVNSettingsSliderValue(scene, "VN_Settings_BGMVolumeSlider", static_cast<float>(settings.BGMVolume));
-            SetVNSettingsSliderValue(scene, "VN_Settings_SFXVolumeSlider", static_cast<float>(settings.SFXVolume));
+            SetVNSettingsSliderValue(scene, SystemBindings::VisualNovel::SettingsMasterVolumeSlider, static_cast<float>(settings.MasterVolume));
+            SetVNSettingsSliderValue(scene, SystemBindings::VisualNovel::SettingsBGMVolumeSlider, static_cast<float>(settings.BGMVolume));
+            SetVNSettingsSliderValue(scene, SystemBindings::VisualNovel::SettingsSFXVolumeSlider, static_cast<float>(settings.SFXVolume));
         }
 
         inline void PreloadTextForEntity(Scene* scene, const std::string& entityName, const std::string& value)
@@ -714,13 +715,13 @@ namespace Wheatear::VisualNovelSystemInternal {
             bool showHistory)
         {
             const std::string name = spec.EntityName;
-            if (name == "VN_Command_Auto")
+            if (name == SystemBindings::VisualNovel::CommandAuto)
                 return autoPlay;
-            if (name == "VN_Command_Skip")
+            if (name == SystemBindings::VisualNovel::CommandSkip)
                 return skipMode;
-            if (name == "VN_Command_Settings")
+            if (name == SystemBindings::VisualNovel::CommandSettings)
                 return showSettings;
-            if (name == "VN_Command_History")
+            if (name == SystemBindings::VisualNovel::CommandHistory)
                 return showHistory;
             return false;
         }
@@ -805,8 +806,8 @@ namespace Wheatear::VisualNovelSystemInternal {
                     IsVNCommandActive(specs[i], autoPlay, skipMode, showSettings, showHistory));
             }
 
-            SetWidgetVisible(scene, "VN_Command_Hide", false);
-            SetText(scene, "VN_Command_Hide", "");
+            SetWidgetVisible(scene, SystemBindings::VisualNovel::CommandHide, false);
+            SetText(scene, SystemBindings::VisualNovel::CommandHide, "");
         }
 
         inline void SetTextVisible(Scene* scene,
@@ -1150,7 +1151,7 @@ namespace Wheatear::VisualNovelSystemInternal {
                     return true;
             }
 
-            return IsEntityHoveredButton(scene, "VN_Command_Hide");
+            return IsEntityHoveredButton(scene, SystemBindings::VisualNovel::CommandHide);
         }
 
         inline void UpdateVNCommandTooltip(Scene* scene,
@@ -1170,7 +1171,7 @@ namespace Wheatear::VisualNovelSystemInternal {
                 }
 
                 if (tooltipText.empty())
-                    TryGetHoveredButtonTooltip(scene, "VN_Command_Hide", tooltipText);
+                    TryGetHoveredButtonTooltip(scene, SystemBindings::VisualNovel::CommandHide, tooltipText);
             }
 
             if (!tooltipText.empty())
@@ -1234,18 +1235,18 @@ namespace Wheatear::VisualNovelSystemInternal {
             const SavePolicy& policy = ResolveSceneSavePolicy(scene);
             if ((saveMode && !policy.CanSave) || (!saveMode && !policy.CanLoad))
             {
-                SetWidgetsWithPrefixVisible(scene, "VN_SaveLoad", false);
+                SetWidgetsWithPrefixVisible(scene, SystemBindings::VisualNovel::SaveLoadPrefix, false);
                 SetWidgetVisible(scene, component.SaveLoadPanelEntityName, false);
                 return;
             }
 
-            const bool useSlotScroll = static_cast<bool>(FindEntityByName(scene, "VN_SaveLoadSlotScroll"));
-            SetWidgetVisible(scene, "VN_SaveLoad_SaveSlot1", visible && !useSlotScroll && saveMode);
-            SetWidgetVisible(scene, "VN_SaveLoad_LoadSlot1", visible && !useSlotScroll && !saveMode);
-            SetButtonCommand(scene, "VN_SaveLoad_SaveSlot1", "gamesave:slot_save_1");
-            SetButtonCommand(scene, "VN_SaveLoad_LoadSlot1", "gamesave:load_1");
+            const bool useSlotScroll = static_cast<bool>(FindEntityByName(scene, SystemBindings::VisualNovel::SaveLoadSlotScroll));
+            SetWidgetVisible(scene, SystemBindings::VisualNovel::SaveLoadSaveSlot1, visible && !useSlotScroll && saveMode);
+            SetWidgetVisible(scene, SystemBindings::VisualNovel::SaveLoadLoadSlot1, visible && !useSlotScroll && !saveMode);
+            SetButtonCommand(scene, SystemBindings::VisualNovel::SaveLoadSaveSlot1, "gamesave:slot_save_1");
+            SetButtonCommand(scene, SystemBindings::VisualNovel::SaveLoadLoadSlot1, "gamesave:load_1");
 
-            SetText(scene, "VN_SaveLoadTitle", saveMode ? "保存" : "读取");
+            SetText(scene, SystemBindings::VisualNovel::SaveLoadTitle, saveMode ? "保存" : "读取");
             SetTextVisible(scene,
                 component.SaveLoadTextEntityName,
                 "",
@@ -1254,7 +1255,7 @@ namespace Wheatear::VisualNovelSystemInternal {
             if (useSlotScroll)
             {
                 Entity scroll = EnsureVNSettingsWidget(scene,
-                    "VN_SaveLoadSlotScroll",
+                    SystemBindings::VisualNovel::SaveLoadSlotScroll,
                     component.SaveLoadPanelEntityName,
                     { 0.055f, 0.325f },
                     { 0.890f, 0.585f },
@@ -1265,16 +1266,16 @@ namespace Wheatear::VisualNovelSystemInternal {
                     if (scroll.HasComponent<UIScrollViewComponent>())
                         scroll.GetComponent<UIScrollViewComponent>().ClampOffset();
                     else
-                        WarnMissingAuthoredVNUI(scene, "VN_SaveLoadSlotScroll", "UIScrollViewComponent");
+                        WarnMissingAuthoredVNUI(scene, SystemBindings::VisualNovel::SaveLoadSlotScroll, "UIScrollViewComponent");
                 }
 
                 for (int slot = 1; slot <= GameProgress::GetMaxSaveSlots(); ++slot)
                 {
                     constexpr float slotStep = 0.195f;
-                    const std::string entityName = "VN_SaveLoad_Slot_" + std::to_string(slot);
+                    const std::string entityName = SystemBindings::IndexedName(SystemBindings::VisualNovel::SaveLoadSlotPrefix, slot);
                     Entity slotEntity = EnsureVNSettingsButton(scene,
                         entityName,
-                        "VN_SaveLoadSlotScroll",
+                        SystemBindings::VisualNovel::SaveLoadSlotScroll,
                         { 0.025f, 0.025f + static_cast<float>(slot - 1) * slotStep },
                         { 0.940f, 0.180f },
                         120 + slot,
@@ -1290,7 +1291,7 @@ namespace Wheatear::VisualNovelSystemInternal {
 
             const bool confirmVisible = visible && saveMode && pendingOverwriteSlot > 0;
             EnsureVNSettingsWidget(scene,
-                "VN_SaveLoadConfirmPanel",
+                SystemBindings::VisualNovel::SaveLoadConfirmPanel,
                 component.SaveLoadPanelEntityName,
                 { 0.20f, 0.37f },
                 { 0.60f, 0.23f },
@@ -1298,8 +1299,8 @@ namespace Wheatear::VisualNovelSystemInternal {
                 confirmVisible);
 
             EnsureVNSettingsText(scene,
-                "VN_SaveLoadConfirmText",
-                "VN_SaveLoadConfirmPanel",
+                SystemBindings::VisualNovel::SaveLoadConfirmText,
+                SystemBindings::VisualNovel::SaveLoadConfirmPanel,
                 { 0.08f, 0.14f },
                 { 0.84f, 0.36f },
                 261,
@@ -1310,8 +1311,8 @@ namespace Wheatear::VisualNovelSystemInternal {
                 { 0.98f, 0.94f, 0.82f, 1.0f },
                 confirmVisible);
             EnsureVNSettingsButton(scene,
-                "VN_SaveLoadConfirmYes",
-                "VN_SaveLoadConfirmPanel",
+                SystemBindings::VisualNovel::SaveLoadConfirmYes,
+                SystemBindings::VisualNovel::SaveLoadConfirmPanel,
                 { 0.16f, 0.64f },
                 { 0.25f, 0.24f },
                 262,
@@ -1319,8 +1320,8 @@ namespace Wheatear::VisualNovelSystemInternal {
                 "vn:confirm_overwrite",
                 confirmVisible);
             EnsureVNSettingsButton(scene,
-                "VN_SaveLoadConfirmNo",
-                "VN_SaveLoadConfirmPanel",
+                SystemBindings::VisualNovel::SaveLoadConfirmNo,
+                SystemBindings::VisualNovel::SaveLoadConfirmPanel,
                 { 0.58f, 0.64f },
                 { 0.25f, 0.24f },
                 262,

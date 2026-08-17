@@ -94,6 +94,13 @@ namespace Wheatear {
                 m_Dirty = true;
             }
             ImGui::SameLine();
+            if (ImGui::Button(EditorLocale::Text("Duplicate", "复制行")))
+            {
+                m_Rows.insert(m_Rows.begin() + m_SelectedRow + 1, row);
+                ++m_SelectedRow;
+                m_Dirty = true;
+            }
+            ImGui::SameLine();
             if (ImGui::Button(EditorLocale::Text("Delete", "删除")))
             {
                 m_Rows.erase(m_Rows.begin() + m_SelectedRow);

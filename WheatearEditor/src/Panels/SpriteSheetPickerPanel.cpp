@@ -204,6 +204,31 @@ namespace Wheatear {
             }
         }
 
+        // Confirmation before batch-applying the cell to the whole scene.
+        if (m_ShowBatchConfirm)
+        {
+            ImGui::OpenPopup(EditorLocale::Text("Batch Apply", "批量应用"));
+            ImGui::SetNextWindowPos(ImGui::GetMainViewport()->GetCenter(),
+                ImGuiCond_Appearing, ImVec2(0.5f, 0.5f));
+            if (ImGui::BeginPopupModal(EditorLocale::Text("Batch Apply", "批量应用"),
+                    nullptr, ImGuiWindowFlags_AlwaysAutoResize))
+            {
+                ImGui::Text("%s", EditorLocale::Text(
+                    "Rewrite texture + UV of %zu entity(ies) using this texture? "
+                    "This overwrites their current UVs.",
+                    "将 %zu 个使用该纹理的实体的纹理 + UV 改写为当前格子？将覆盖它们现有的 UV。"),
+                    m_BatchTargetCount);
+                ImGui::Separator();
+                ImGui::Spacing();
+                if (ImGui::Button(EditorLocale::Text("Apply", "应用"), ImVec2(120.0f, 0.0f)))
+                    ApplyCellToAllEntitiesUsingTexture();
+                ImGui::SameLine();
+                if (ImGui::Button(EditorLocale::Text("Cancel", "取消"), ImVec2(100.0f, 0.0f)))
+                    m_ShowBatchConfirm = false;
+                ImGui::EndPopup();
+            }
+        }
+
         EditorFloatingWindow::End();
     }
 
@@ -1077,7 +1102,80 @@ namespace Wheatear {
         }
 
         ImGui::Separator();
+
+        // Batch: apply the selected cell to every entity in the open scene
+        // that uses this texture (SpriteRenderer or UI Image).
+        const bool canBatch = hasTexture && static_cast<bool>(m_Scene);
+        if (ButtonDisabled(EditorLocale::Text(
+            "Apply Cell To All Entities Using This Texture",
+            "把当前格子应用到使用该纹理的全部实体"), !canBatch, wideButton))
+        {
+            m_BatchTargetCount = CountEntitiesUsingTexture();
+            m_ShowBatchConfirm = m_BatchTargetCount > 0;
+            if (!m_ShowBatchConfirm)
+                m_LastAction = "No entities in the open scene use this texture.";
+        }
+        HelpMarker("Rewrites texture + trimmed UV of every SpriteRenderer / UI Image "
+            "in the open scene whose texture matches this sheet. Use after cutting "
+            "a sheet into new cells to refresh all references at once.");
+
+        ImGui::Separator();
         ImGui::TextDisabled("Sequence mode: %s", SequenceModeName(m_SequenceMode));
+    }
+
+    size_t SpriteSheetPickerPanel::CountEntitiesUsingTexture() const
+    {
+        if (!m_Scene || m_TexturePath.empty())
+            return 0;
+
+        size_t count = 0;
+        auto& registry = m_Scene->GetRegistry();
+        for (auto id : registry.view<SpriteRendererComponent>())
+        {
+            const auto& sprite = registry.get<SpriteRendererComponent>(id);
+            if (sprite.Texture && sprite.Texture->GetPath() == m_TexturePath)
+                ++count;
+        }
+        for (auto id : registry.view<UIImageComponent>())
+        {
+            const auto& image = registry.get<UIImageComponent>(id);
+            if (image.Texture && image.Texture->GetPath() == m_TexturePath)
+                ++count;
+        }
+        return count;
+    }
+
+    void SpriteSheetPickerPanel::ApplyCellToAllEntitiesUsingTexture()
+    {
+        if (!m_Scene || m_TexturePath.empty())
+            return;
+
+        const glm::vec2 uvMin = GetTrimmedUVMin(m_SelectedCol, m_SelectedRow);
+        const glm::vec2 uvMax = GetTrimmedUVMax(m_SelectedCol, m_SelectedRow);
+
+        size_t applied = 0;
+        auto& registry = m_Scene->GetRegistry();
+        for (auto id : registry.view<SpriteRendererComponent>())
+        {
+            auto& sprite = registry.get<SpriteRendererComponent>(id);
+            if (!sprite.Texture || sprite.Texture->GetPath() != m_TexturePath)
+                continue;
+            sprite.UVMin = uvMin;
+            sprite.UVMax = uvMax;
+            ++applied;
+        }
+        for (auto id : registry.view<UIImageComponent>())
+        {
+            auto& image = registry.get<UIImageComponent>(id);
+            if (!image.Texture || image.Texture->GetPath() != m_TexturePath)
+                continue;
+            image.UVMin = uvMin;
+            image.UVMax = uvMax;
+            ++applied;
+        }
+
+        m_LastAction = "Applied cell to " + std::to_string(applied) + " entit(ies).";
+        m_ShowBatchConfirm = false;
     }
 
 } // namespace Wheatear

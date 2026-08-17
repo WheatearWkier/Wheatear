@@ -1,0 +1,13 @@
+equipmentSlots:
+  - id: 'weapon'
+    name: '副武器'
+  - id: 'armor'
+    name: '防具'
+  - id: 'ring'
+    name: '戒指'
+  - id: 'charm'
+    name: '护符'
+  - id: 'boots'
+    name: '足部'
+  - id: 'special'
+    name: '特殊'

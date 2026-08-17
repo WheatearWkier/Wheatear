@@ -1,5 +1,7 @@
 #pragma once
 
+#include "Wheatear/Gameplay/SystemBindingRegistry.h"
+
 #include "Wheatear/Core/UUID.h"
 #include "Wheatear/Gameplay/Action/ActionTypes.h"
 #include "Wheatear/Gameplay/Services/GameplayVisualService.h"
@@ -40,14 +42,14 @@ namespace Wheatear {
         glm::vec2 BoardOrigin = { 0.275f, 0.115f };
         glm::vec2 CellSize = { 0.0625f, 0.0875f };
 
-        std::string CellEntityPrefix = "TK_Cell_";
-        std::string UnitEntityPrefix = "TK_Unit_";
-        std::string FadeEntityName = "TK_Fade";
-        std::string MessageTextEntityName = "TK_MessageText";
-        std::string PhaseTextEntityName = "TK_PhaseText";
-        std::string DetailTextEntityName = "TK_DetailText";
-        std::string CommandPanelEntityName = "TK_CommandPanel";
-        std::string ActionEffectEntityName = "TK_ActionEffect";
+        std::string CellEntityPrefix = SystemBindings::Tactical::CellPrefix;
+        std::string UnitEntityPrefix = SystemBindings::Tactical::UnitPrefix;
+        std::string FadeEntityName = SystemBindings::Tactical::Fade;
+        std::string MessageTextEntityName = SystemBindings::Tactical::MessageText;
+        std::string PhaseTextEntityName = SystemBindings::Tactical::PhaseText;
+        std::string DetailTextEntityName = SystemBindings::Tactical::DetailText;
+        std::string CommandPanelEntityName = SystemBindings::Tactical::CommandPanel;
+        std::string ActionEffectEntityName = SystemBindings::Tactical::ActionEffect;
 
         std::string VictorySceneCommand = "event:tactical_combat_victory";
         std::string DefeatSceneCommand = "event:tactical_combat_retry";

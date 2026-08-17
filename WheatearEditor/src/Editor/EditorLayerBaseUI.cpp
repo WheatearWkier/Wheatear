@@ -316,11 +316,26 @@ namespace Wheatear {
         m_AnimationEditorPanel->SetEntity(cameraEntity);
     }
 
-    void EditorLayerBase::ActivateHierarchyEntity(Entity entity)
+    void EditorLayerBase::ActivateHierarchyEntity(Entity entity, bool additive)
     {
         if (m_SceneState != SceneState::Edit || !entity)
             return;
 
+        if (additive)
+        {
+            // Ctrl+click: toggle membership in the scene multi-select while
+            // keeping the clicked entity as the primary (anchor) selection.
+            const UUID uuid = entity.GetUUID();
+            auto it = std::find(m_SceneMultiSelect.begin(), m_SceneMultiSelect.end(), uuid);
+            if (it != m_SceneMultiSelect.end())
+                m_SceneMultiSelect.erase(it);
+            else
+                m_SceneMultiSelect.push_back(uuid);
+            SelectEditorEntity(entity, !entity.HasComponent<UIWidgetComponent>());
+            return;
+        }
+
+        m_SceneMultiSelect.clear();
         SelectEditorEntity(entity, !entity.HasComponent<UIWidgetComponent>());
 
         if (entity.HasComponent<UIWidgetComponent>())
@@ -330,6 +345,273 @@ namespace Wheatear {
         }
 
         FrameEditorCameraOnEntity(entity);
+    }
+
+    void EditorLayerBase::ToggleSceneMultiSelect(Entity entity)
+    {
+        if (!entity)
+            return;
+        const UUID uuid = entity.GetUUID();
+        auto it = std::find(m_SceneMultiSelect.begin(), m_SceneMultiSelect.end(), uuid);
+        if (it != m_SceneMultiSelect.end())
+            m_SceneMultiSelect.erase(it);
+        else
+            m_SceneMultiSelect.push_back(uuid);
+    }
+
+    void EditorLayerBase::ClearSceneMultiSelect()
+    {
+        m_SceneMultiSelect.clear();
+    }
+
+    void EditorLayerBase::SyncBuiltinContentToProject()
+    {
+        const std::filesystem::path engineRoot = AssetPath::GetEngineRoot();
+        const std::filesystem::path projectRoot = AssetPath::GetProjectRoot();
+        const std::filesystem::path templateRoot = engineRoot / "ContentTemplates";
+
+        // The engine root no longer carries a live copy of game content;
+        // ContentTemplates is the creation/sync seed for projects.
+        const std::vector<std::pair<std::string, std::string>> entries = {
+            { "gameplay/actions",               "assets/gameplay/actions" },
+            { "gameplay/content_manifest.yaml", "assets/gameplay/content_manifest.yaml" },
+            { "gameplay/progression",           "assets/gameplay/progression" },
+            { "fonts",                          "assets/fonts" },
+            { "input/action_bindings.yaml",     "assets/input/action_bindings.yaml" },
+        };
+
+        size_t copied = 0;
+        size_t skipped = 0;
+        std::error_code ec;
+
+        for (const auto& [sourceRel, targetRel] : entries)
+        {
+            const std::filesystem::path source = templateRoot / sourceRel;
+            const std::filesystem::path target = projectRoot / targetRel;
+            if (!std::filesystem::exists(source, ec))
+                continue;
+
+            if (std::filesystem::is_directory(source, ec))
+            {
+                for (const auto& entry :
+                    std::filesystem::recursive_directory_iterator(source, ec))
+                {
+                    if (ec || !entry.is_regular_file(ec))
+                        continue;
+                    const std::filesystem::path relative =
+                        std::filesystem::relative(entry.path(), source, ec);
+                    const std::filesystem::path destination = target / relative;
+                    if (std::filesystem::exists(destination, ec))
+                    {
+                        ++skipped;
+                        continue;
+                    }
+                    std::filesystem::create_directories(
+                        destination.parent_path(), ec);
+                    std::filesystem::copy_file(entry.path(), destination,
+                        std::filesystem::copy_options::none, ec);
+                    if (!ec)
+                        ++copied;
+                }
+            }
+            else if (std::filesystem::exists(source, ec))
+            {
+                if (std::filesystem::exists(target, ec))
+                {
+                    ++skipped;
+                    continue;
+                }
+                std::filesystem::create_directories(target.parent_path(), ec);
+                std::filesystem::copy_file(source, target,
+                    std::filesystem::copy_options::none, ec);
+                if (!ec)
+                    ++copied;
+            }
+        }
+
+        // Refresh the registry so the copied content shows up immediately.
+        AssetRegistry::Get().Scan(projectRoot);
+        AssetRegistry::Get().WriteRegistry();
+
+        m_BuiltinSyncStatus = "Copied " + std::to_string(copied)
+            + " file(s) to project (" + std::to_string(skipped)
+            + " already present, kept).";
+    }
+
+    // Scene-entity counterpart of UI_AlignSelection: operates on world-space
+    // TransformComponent positions instead of normalized widget rects. The
+    // hierarchy selection acts as the anchor; each affected entity commits one
+    // undo record.
+    void EditorLayerBase::AlignSceneSelection(UISelectionAction action)
+    {
+        if (m_SceneState != SceneState::Edit || !m_ActiveScene)
+            return;
+
+        Entity anchor = m_SceneHierarchyPanel->GetSelectedEntity();
+        if (!anchor || !anchor.HasComponent<TransformComponent>())
+            return;
+
+        const glm::vec3 anchorPos = anchor.GetComponent<TransformComponent>().Translation;
+
+        std::vector<Entity> targets;
+        for (const UUID& uuid : m_SceneMultiSelect)
+        {
+            Entity entity = m_ActiveScene->GetEntityByUUID(uuid);
+            if (!entity || !entity.HasComponent<TransformComponent>())
+                continue;
+            if (entity == anchor)
+                continue;
+            targets.push_back(entity);
+        }
+        if (targets.empty())
+            return;
+
+        // Distribute: sort by center axis, keep first/last, spread the rest.
+        if (action == UISelectionAction::DistributeHorizontal
+            || action == UISelectionAction::DistributeVertical)
+        {
+            const bool horizontal = action == UISelectionAction::DistributeHorizontal;
+            std::sort(targets.begin(), targets.end(),
+                [horizontal](Entity a, Entity b)
+                {
+                    const glm::vec3& pa = a.GetComponent<TransformComponent>().Translation;
+                    const glm::vec3& pb = b.GetComponent<TransformComponent>().Translation;
+                    return horizontal ? pa.x < pb.x : pa.y < pb.y;
+                });
+            if (targets.size() >= 3)
+            {
+                const glm::vec3& firstPos =
+                    targets.front().GetComponent<TransformComponent>().Translation;
+                const glm::vec3& lastPos =
+                    targets.back().GetComponent<TransformComponent>().Translation;
+                const float first = horizontal ? firstPos.x : firstPos.y;
+                const float last = horizontal ? lastPos.x : lastPos.y;
+                for (size_t i = 1; i + 1 < targets.size(); ++i)
+                {
+                    const float t = static_cast<float>(i)
+                        / static_cast<float>(targets.size() - 1);
+                    Entity target = targets[i];
+                    auto& transform = target.GetComponent<TransformComponent>();
+                    TransformComponent before = transform;
+                    if (horizontal)
+                        transform.Translation.x = first + (last - first) * t;
+                    else
+                        transform.Translation.y = first + (last - first) * t;
+                    if (transform.Translation != before.Translation)
+                    {
+                        CommandHistory::Get().Push(
+                            MakeComponentValueCommand(target, before, transform));
+                    }
+                }
+            }
+            return;
+        }
+
+        for (Entity target : targets)
+        {
+            auto& transform = target.GetComponent<TransformComponent>();
+            TransformComponent before = transform;
+            switch (action)
+            {
+            case UISelectionAction::AlignLeft:
+            case UISelectionAction::AlignRight:
+            case UISelectionAction::AlignHCenter:
+                transform.Translation.x = anchorPos.x;
+                break;
+            case UISelectionAction::AlignTop:
+            case UISelectionAction::AlignBottom:
+            case UISelectionAction::AlignVCenter:
+                transform.Translation.y = anchorPos.y;
+                break;
+            default:
+                break;
+            }
+            if (transform.Translation != before.Translation)
+            {
+                CommandHistory::Get().Push(
+                    MakeComponentValueCommand(target, before, transform));
+            }
+        }
+    }
+
+    void EditorLayerBase::CopySelectedEntity()
+    {
+        if (m_SceneState != SceneState::Edit || !m_EditorScene)
+            return;
+
+        Entity selected = m_SceneHierarchyPanel->GetSelectedEntity();
+        if (!selected || !selected.HasComponent<IDComponent>())
+            return;
+
+        const std::filesystem::path clipboardPath =
+            AssetPath::GetProjectRoot() / "assets" / "cache" / "clipboard.wtprefab";
+        std::error_code error;
+        std::filesystem::create_directories(clipboardPath.parent_path(), error);
+        if (SceneSerializer::SerializePrefab(selected, clipboardPath))
+            m_HasClipboardEntity = true;
+    }
+
+    void EditorLayerBase::PasteClipboardEntity()
+    {
+        if (m_SceneState != SceneState::Edit || !m_EditorScene || !m_HasClipboardEntity)
+            return;
+
+        const std::filesystem::path clipboardPath =
+            AssetPath::GetProjectRoot() / "assets" / "cache" / "clipboard.wtprefab";
+        if (!std::filesystem::exists(clipboardPath))
+        {
+            m_HasClipboardEntity = false;
+            return;
+        }
+
+        Entity root = SceneSerializer::DeserializePrefab(clipboardPath, m_EditorScene.get());
+        if (!root)
+            return;
+
+        // UI roots whose original parent was outside the copied subtree end up
+        // with a dangling ParentEntity after remap; re-parent under the current
+        // selection (or detach to the canvas root).
+        if (root.HasComponent<UIWidgetComponent>())
+        {
+            auto& widget = root.GetComponent<UIWidgetComponent>();
+            if (widget.ParentEntity != 0)
+            {
+                Entity parent = m_EditorScene->GetEntityByUUID(widget.ParentEntity);
+                if (!parent || parent.GetUUID() == root.GetUUID())
+                {
+                    Entity current = m_SceneHierarchyPanel->GetSelectedEntity();
+                    if (current && current != root
+                        && current.HasComponent<UIWidgetComponent>())
+                        widget.ParentEntity = current.GetUUID();
+                    else
+                        widget.ParentEntity = 0;
+                }
+            }
+        }
+
+        // Unique name (mirrors InstantiatePrefab).
+        const std::string baseName = root.GetName() + "Copy";
+        std::string finalName = baseName;
+        int index = 1;
+        while (true)
+        {
+            bool exists = false;
+            for (auto id : m_EditorScene->GetRegistry().view<IDComponent>())
+            {
+                Entity other{ id, m_EditorScene.get() };
+                if (other && other != root && other.GetName() == finalName)
+                    exists = true;
+            }
+            if (!exists)
+                break;
+            finalName = baseName + std::to_string(index++);
+        }
+        if (root.HasComponent<TagComponent>())
+            root.GetComponent<TagComponent>().Tag = finalName;
+
+        m_SceneMultiSelect.clear();
+        SelectEditorEntity(root, true);
+        FrameEditorCameraOnEntity(root);
     }
 
     void EditorLayerBase::SelectEditorEntity(Entity entity, bool preferMoveGizmo)
@@ -459,7 +741,6 @@ namespace Wheatear {
             if (std::strcmp(label, "Event Script Editor") == 0) return EditorLocale::Text("Event Script Editor", "事件脚本编辑器");
             if (std::strcmp(label, "VN Script Editor") == 0) return EditorLocale::Text("VN Script Editor", "视觉小说脚本编辑器");
             if (std::strcmp(label, "Side Combat Tuning Editor") == 0) return EditorLocale::Text("Side Combat Tuning Editor", "横版战斗调参编辑器");
-            if (std::strcmp(label, "Side Combat HUD Preset Editor") == 0) return EditorLocale::Text("Side Combat HUD Preset Editor", "横版战斗 HUD 预设编辑器");
             if (std::strcmp(label, "WAO Action Editor") == 0) return EditorLocale::Text("WAO Action Editor", "WAO 动作编辑器");
             if (std::strcmp(label, "Asset Alias / Manifest Editor") == 0) return EditorLocale::Text("Asset Alias / Manifest Editor", "资产别名 / 清单编辑器");
             if (std::strcmp(label, "Progression Content Editor") == 0) return EditorLocale::Text("Progression Content Editor", "成长内容编辑器");
@@ -530,6 +811,32 @@ namespace Wheatear {
             drawMenuIcon(m_IconRedo);
             if (ImGui::MenuItem(EditorLocale::Text("Redo", "重做"), "Ctrl+Y / Ctrl+Shift+Z", false, CommandHistory::Get().CanRedo()))
                 CommandHistory::Get().Redo();
+            ImGui::Separator();
+            if (ImGui::MenuItem(EditorLocale::Text("Copy", "复制"), "Ctrl+C",
+                    false, m_SceneHierarchyPanel->GetSelectedEntity()))
+                CopySelectedEntity();
+            if (ImGui::MenuItem(EditorLocale::Text("Paste", "粘贴"), "Ctrl+V",
+                    false, HasClipboardEntity()))
+                PasteClipboardEntity();
+            ImGui::Separator();
+            if (ImGui::BeginMenu(EditorLocale::Text("Align", "对齐（多选）")))
+            {
+                const bool hasMulti = !m_SceneMultiSelect.empty();
+                if (ImGui::MenuItem(EditorLocale::Text("Align Left (X)", "对齐 X 轴"), nullptr, false, hasMulti))
+                    AlignSceneSelection(UISelectionAction::AlignLeft);
+                if (ImGui::MenuItem(EditorLocale::Text("Align Right (X)", "对齐 X 轴"), nullptr, false, hasMulti))
+                    AlignSceneSelection(UISelectionAction::AlignRight);
+                if (ImGui::MenuItem(EditorLocale::Text("Align Top (Y)", "对齐 Y 轴"), nullptr, false, hasMulti))
+                    AlignSceneSelection(UISelectionAction::AlignTop);
+                if (ImGui::MenuItem(EditorLocale::Text("Align Bottom (Y)", "对齐 Y 轴"), nullptr, false, hasMulti))
+                    AlignSceneSelection(UISelectionAction::AlignBottom);
+                ImGui::Separator();
+                if (ImGui::MenuItem(EditorLocale::Text("Distribute Horizontally", "水平等距分布"), nullptr, false, hasMulti))
+                    AlignSceneSelection(UISelectionAction::DistributeHorizontal);
+                if (ImGui::MenuItem(EditorLocale::Text("Distribute Vertically", "垂直等距分布"), nullptr, false, hasMulti))
+                    AlignSceneSelection(UISelectionAction::DistributeVertical);
+                ImGui::EndMenu();
+            }
             ImGui::EndMenu();
         }
 
@@ -603,7 +910,6 @@ namespace Wheatear {
             drawLocalizedFloatingWindowItem("Event Script Editor", [&]() { openToolByLabel("Event Script Editor"); });
             drawLocalizedFloatingWindowItem("VN Script Editor", [&]() { openToolByLabel("VN Script Editor"); });
             drawLocalizedFloatingWindowItem("Side Combat Tuning Editor", [&]() { openToolByLabel("Side Combat Tuning Editor"); });
-            drawLocalizedFloatingWindowItem("Side Combat HUD Preset Editor", [&]() { openToolByLabel("Side Combat HUD Preset Editor"); });
             drawLocalizedFloatingWindowItem("WAO Action Editor", [&]() { openToolByLabel("WAO Action Editor"); });
             drawLocalizedFloatingWindowItem("Asset Alias / Manifest Editor", [&]() { openToolByLabel("Asset Alias / Manifest Editor"); });
             drawLocalizedFloatingWindowItem("Project Health", [&]() { openToolByLabel("Project Health"); });
@@ -632,6 +938,22 @@ namespace Wheatear {
                 AssetRegistry::Get().Scan(AssetPath::GetProjectRoot());
                 AssetRegistry::Get().WriteRegistry();
             }
+            ImGui::Separator();
+            if (ImGui::MenuItem(EditorLocale::Text(
+                "Sync Content Templates To Project",
+                "同步内容模板到项目")))
+            {
+                SyncBuiltinContentToProject();
+            }
+            if (ImGui::IsItemHovered())
+                ImGui::SetTooltip("%s", EditorLocale::Text(
+                    "Copies the content templates (gameplay data / fonts / "
+                    "input bindings) into this project so the project is "
+                    "self-contained. Existing project files are kept.",
+                    "把内容模板（玩法数据 / 字体 / 输入绑定）复制到当前项目，"
+                    "使项目自包含。已存在的项目文件不会被覆盖。"));
+            if (!m_BuiltinSyncStatus.empty())
+                ImGui::TextDisabled("%s", m_BuiltinSyncStatus.c_str());
             drawToolsByCategory(EditorToolCategory::Assets);
             ImGui::EndMenu();
         }
@@ -734,15 +1056,7 @@ namespace Wheatear {
                     "Scene path must start with assets/scenes/");
 
             ImGui::Separator();
-            static const char* kConfigurations[] = { "Debug", "Release", "Dist" };
-            int configIndex = 0;
-            for (int i = 0; i < IM_ARRAYSIZE(kConfigurations); ++i)
-                if (m_PackageConfiguration == kConfigurations[i]) { configIndex = i; break; }
-            if (ImGui::Combo("Build Configuration", &configIndex, kConfigurations, IM_ARRAYSIZE(kConfigurations)))
-                m_PackageConfiguration = kConfigurations[configIndex];
-            ImGui::SameLine();
-            EditorWidgets::HelpTooltip("MSBuild configuration used to build the player and editor.");
-
+            ImGui::TextDisabled("Release build (packaging is the final product)");
             ImGui::Separator();
             ImGui::BeginDisabled(!scenePathValid);
             if (ImGui::Button("Package"))

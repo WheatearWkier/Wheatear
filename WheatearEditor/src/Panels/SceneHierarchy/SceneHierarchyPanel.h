@@ -30,7 +30,14 @@ namespace Wheatear {
 
         Entity GetSelectedEntity() const { return m_SelectionContext; }
         void SetSelectedEntity(Entity entity);
-        void SetEntityActivatedCallback(std::function<void(Entity)> callback);
+        // second param: additive (Ctrl+click multi-select)
+        void SetEntityActivatedCallback(std::function<void(Entity, bool)> callback);
+        // Non-UI multi-select set for row highlighting; synced by the editor
+        // layer each frame from its m_SceneMultiSelect.
+        void SetSceneMultiSelect(const std::unordered_set<UUID>& set)
+        {
+            m_SceneMultiSelect = set;
+        }
 
         // Create-entity menu items shared by the hierarchy's own right-click
         // context menu and the viewport's right-click menu.
@@ -89,7 +96,8 @@ namespace Wheatear {
     private:
         Ref<Scene> m_Context;
         Entity m_SelectionContext;
-        std::function<void(Entity)> m_EntityActivatedCallback;
+        std::function<void(Entity, bool)> m_EntityActivatedCallback;
+        std::unordered_set<UUID> m_SceneMultiSelect;
         bool m_RuntimeMode = false;
         bool m_ScrollToSelection = false;
         bool m_RenameRequested = false;

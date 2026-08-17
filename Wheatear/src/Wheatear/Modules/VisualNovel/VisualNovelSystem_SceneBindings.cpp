@@ -5,6 +5,7 @@
 #include "Wheatear/Assets/AssetAliasRegistry.h"
 #include "Wheatear/Assets/AssetPath.h"
 #include "Wheatear/Core/Log.h"
+#include "Wheatear/Gameplay/SystemBindingRegistry.h"
 #include "Wheatear/Modules/Progression/GameProgress.h"
 #include "Wheatear/Renderer/Texture.h"
 #include "Wheatear/Scene/Components.h"
@@ -175,16 +176,16 @@ namespace Wheatear {
 
         UpdateVNSettingsAudioControls(scene, component, state.ShowSettings);
 
-        SetWidgetsWithPrefixVisible(scene, "VN_Command", showStoryUi);
-        SetWidgetsWithPrefixVisible(scene, "VN_History", state.ShowHistory);
-        SetWidgetsWithPrefixVisible(scene, "VN_Settings", state.ShowSettings);
-        SetWidgetsWithPrefixVisible(scene, "VN_SaveLoad", state.ShowSaveLoad);
+        SetWidgetsWithPrefixVisible(scene, SystemBindings::VisualNovel::CommandPrefix, showStoryUi);
+        SetWidgetsWithPrefixVisible(scene, SystemBindings::VisualNovel::HistoryPrefix, state.ShowHistory);
+        SetWidgetsWithPrefixVisible(scene, SystemBindings::VisualNovel::SettingsPrefix, state.ShowSettings);
+        SetWidgetsWithPrefixVisible(scene, SystemBindings::VisualNovel::SaveLoadPrefix, state.ShowSaveLoad);
 
         SetWidgetVisible(scene, component.CommandBarEntityName, showStoryUi);
         SetWidgetVisible(scene, component.HistoryPanelEntityName, state.ShowHistory);
         SetWidgetVisible(scene, component.SettingsPanelEntityName, state.ShowSettings);
         SetWidgetVisible(scene, component.SaveLoadPanelEntityName, state.ShowSaveLoad);
-        SetText(scene, "VN_Command_Auto", state.Runtime.IsAutoPlay() ? "自动开" : "自动");
+        SetText(scene, SystemBindings::VisualNovel::CommandAuto, state.Runtime.IsAutoPlay() ? "自动开" : "自动");
 
         ApplyVNCommandBar(scene,
             component,
@@ -217,7 +218,7 @@ namespace Wheatear {
 
         if (!line)
         {
-            SetWidgetVisible(scene, "VN_DialoguePanel", showStoryUi);
+            SetWidgetVisible(scene, SystemBindings::VisualNovel::DialoguePanel, showStoryUi);
             SetText(scene, component.SpeakerTextEntityName, "");
             SetText(scene, component.BodyTextEntityName, "");
             SetText(scene, component.AdvanceHintEntityName, "");
@@ -227,7 +228,7 @@ namespace Wheatear {
             return;
         }
 
-        SetWidgetVisible(scene, "VN_DialoguePanel", showStoryUi);
+        SetWidgetVisible(scene, SystemBindings::VisualNovel::DialoguePanel, showStoryUi);
         SetWidgetVisible(scene, component.SpeakerTextEntityName, showStoryUi && !waitingForChoice);
         SetWidgetVisible(scene, component.BodyTextEntityName, showStoryUi);
         SetWidgetVisible(scene, component.AdvanceHintEntityName, showStoryUi);

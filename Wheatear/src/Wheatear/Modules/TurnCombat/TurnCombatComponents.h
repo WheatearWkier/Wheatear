@@ -1,5 +1,7 @@
 #pragma once
 
+#include "Wheatear/Gameplay/SystemBindingRegistry.h"
+
 #include "Wheatear/Core/UUID.h"
 #include "Wheatear/Gameplay/Action/ActionTypes.h"
 #include "Wheatear/Gameplay/Services/GameplayVisualService.h"
@@ -42,15 +44,15 @@ namespace Wheatear {
         bool PlayOnStart = true;
         std::string LevelId = "CH01_TURN_MagicSwordTrial";
 
-        std::string FadeEntityName = "TC_Fade";
-        std::string MessageTextEntityName = "TC_MessageText";
-        std::string ActiveActorTextEntityName = "TC_ActiveActorText";
-        std::string TurnOrderTextEntityName = "TC_TurnOrderText";
-        std::string SkillDetailTextEntityName = "TC_SkillDetailText";
-        std::string CommandPanelEntityName = "TC_CommandPanel";
-        std::string TargetHintTextEntityName = "TC_TargetHintText";
-        std::string ActionFlashEntityName = "TC_ActionFlash";
-        std::string ActionEffectEntityName = "TC_ActionEffect";
+        std::string FadeEntityName = SystemBindings::Turn::Fade;
+        std::string MessageTextEntityName = SystemBindings::Turn::MessageText;
+        std::string ActiveActorTextEntityName = SystemBindings::Turn::ActiveActorText;
+        std::string TurnOrderTextEntityName = SystemBindings::Turn::TurnOrderText;
+        std::string SkillDetailTextEntityName = SystemBindings::Turn::SkillDetailText;
+        std::string CommandPanelEntityName = SystemBindings::Turn::CommandPanel;
+        std::string TargetHintTextEntityName = SystemBindings::Turn::TargetHintText;
+        std::string ActionFlashEntityName = SystemBindings::Turn::ActionFlash;
+        std::string ActionEffectEntityName = SystemBindings::Turn::ActionEffect;
 
         std::string VictorySceneCommand = "event:turn_combat_victory";
         std::string DefeatSceneCommand = "event:turn_combat_retry";

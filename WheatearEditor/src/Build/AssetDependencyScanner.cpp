@@ -324,7 +324,6 @@ namespace Wheatear {
             AddDirectoryFiles(projectRoot, "assets/shaders", assets, nullptr, nullptr, assetSources);
             AddDirectoryFiles(projectRoot, "assets/gameplay/actions", assets, parseQueue, missingReferences, assetSources);
             AddDirectoryFiles(projectRoot, "assets/gameplay/progression", assets, parseQueue, missingReferences, assetSources);
-            TryAddAsset(projectRoot, "assets/gameplay/content_manifest.yaml", {}, assets, parseQueue, missingReferences, {}, assetSources);
             TryAddAsset(projectRoot, AssetAliasRegistry::Path("font.ui_default", "assets/fonts/wqy-microhei.ttc"), {}, assets, nullptr, nullptr, {}, assetSources);
             TryAddAsset(projectRoot, "assets/fonts/licenses/WenQuanYiMicroHei/LICENSE_Apache2.txt", {}, assets, nullptr, nullptr, {}, assetSources);
             TryAddAsset(projectRoot, "assets/fonts/licenses/WenQuanYiMicroHei/LICENSE_GPLv3.txt", {}, assets, nullptr, nullptr, {}, assetSources);
@@ -421,6 +420,10 @@ namespace Wheatear {
         {
             TryAddAsset(projectRoot, startupAsset, {}, &assets, &parseQueue, &report.MissingReferences, builtinRoot, &report.AssetSources);
         }
+
+        // The alias manifest belongs to the project root, not the engine
+        // fallback root used for shared built-ins.
+        TryAddAsset(projectRoot, "assets/gameplay/content_manifest.yaml", {}, &assets, &parseQueue, &report.MissingReferences, builtinRoot, &report.AssetSources);
 
         if (options.IncludeBuiltinAssets)
         {

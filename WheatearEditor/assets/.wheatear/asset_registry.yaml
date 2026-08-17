@@ -615,21 +615,6 @@ Assets:
       - "assets/scenes/VisualNovelMainMenu.wt"
     Import:
       {}
-  - ID: 1202913455537832390
-    Path: "assets/events/vertical_slice_flow_sample.wts"
-    Type: "EventScript"
-    DisplayName: "vertical_slice_flow_sample.wts"
-    SizeBytes: 411
-    LastWriteTime: 134308564593652834
-    Tags:
-      []
-    References:
-      - "assets/scenes/VerticalSliceHub.wt"
-      - "assets/scenes/VerticalSliceSkillTree.wt"
-    ReferencedBy:
-      []
-    Import:
-      {}
   - ID: 9386126340546571483
     Path: "assets/fonts/NotoSansSC-VF.ttf"
     Type: "Unknown"
@@ -1212,7 +1197,6 @@ Assets:
       - "assets/vertical_slice/side_combat/ui/sidecombat_ui_sheet.png"
     ReferencedBy:
       - "assets/events/vertical_slice_flow.wts"
-      - "assets/vertical_slice/data/vertical_slice_manifest.json"
     Import:
       {}
   - ID: 4204407748789840128
@@ -1234,7 +1218,6 @@ Assets:
       - "assets/vn/vertical_slice_chapter3_preview.vn"
     ReferencedBy:
       - "assets/events/vertical_slice_flow.wts"
-      - "assets/vertical_slice/data/vertical_slice_manifest.json"
     Import:
       {}
   - ID: 13018109862882504321
@@ -1253,7 +1236,6 @@ Assets:
       - "assets/vertical_slice/vn/backgrounds/bg_forest_camp_night.png"
     ReferencedBy:
       - "assets/events/vertical_slice_flow.wts"
-      - "assets/vertical_slice/data/vertical_slice_manifest.json"
     Import:
       {}
   - ID: 8351412071674515071
@@ -1278,7 +1260,6 @@ Assets:
       - "assets/vertical_slice/vn/backgrounds/bg_forest_camp_night.png"
     ReferencedBy:
       - "assets/events/vertical_slice_flow.wts"
-      - "assets/vertical_slice/data/vertical_slice_manifest.json"
     Import:
       {}
   - ID: 10269395542957411725
@@ -1307,9 +1288,7 @@ Assets:
       - "assets/vertical_slice/vn/portraits/mentor_slight_smile.png"
     ReferencedBy:
       - "assets/events/vertical_slice_flow.wts"
-      - "assets/events/vertical_slice_flow_sample.wts"
       - "assets/scenes/VerticalSliceSkillTree.wt"
-      - "assets/vertical_slice/data/vertical_slice_manifest.json"
     Import:
       {}
   - ID: 8661847557201219662
@@ -1332,7 +1311,6 @@ Assets:
     ReferencedBy:
       - "assets/events/vertical_slice_flow.wts"
       - "assets/gameplay/content_manifest.yaml"
-      - "assets/vertical_slice/data/vertical_slice_manifest.json"
     Import:
       {}
   - ID: 1334806487237327338
@@ -1354,7 +1332,6 @@ Assets:
       - "assets/vn/vertical_slice_post_fake.vn"
     ReferencedBy:
       - "assets/events/vertical_slice_flow.wts"
-      - "assets/vertical_slice/data/vertical_slice_manifest.json"
     Import:
       {}
   - ID: 1144032693910431455
@@ -1373,7 +1350,6 @@ Assets:
       - "assets/vertical_slice/vn/backgrounds/bg_forest_camp_night.png"
     ReferencedBy:
       - "assets/events/vertical_slice_flow.wts"
-      - "assets/vertical_slice/data/vertical_slice_manifest.json"
     Import:
       {}
   - ID: 37934714227659947
@@ -1397,7 +1373,6 @@ Assets:
       - "assets/vertical_slice/vn/portraits/mentor_slight_smile.png"
     ReferencedBy:
       - "assets/events/vertical_slice_flow.wts"
-      - "assets/vertical_slice/data/vertical_slice_manifest.json"
     Import:
       {}
   - ID: 17256879131897507259
@@ -1415,7 +1390,6 @@ Assets:
       - "assets/vertical_slice/vn/backgrounds/bg_forest_camp_night.png"
     ReferencedBy:
       - "assets/gameplay/content_manifest.yaml"
-      - "assets/vertical_slice/data/vertical_slice_manifest.json"
     Import:
       {}
   - ID: 6897933586061286950
@@ -1433,7 +1407,6 @@ Assets:
       - "assets/vertical_slice/vn/backgrounds/bg_forest_camp_night.png"
     ReferencedBy:
       - "assets/events/vertical_slice_flow.wts"
-      - "assets/vertical_slice/data/vertical_slice_manifest.json"
     Import:
       {}
   - ID: 4230051387688074459
@@ -1456,8 +1429,6 @@ Assets:
       - "assets/vertical_slice/vn/backgrounds/bg_forest_camp_night.png"
     ReferencedBy:
       - "assets/events/vertical_slice_flow.wts"
-      - "assets/events/vertical_slice_flow_sample.wts"
-      - "assets/vertical_slice/data/vertical_slice_manifest.json"
     Import:
       {}
   - ID: 2510793109085503496
@@ -1476,7 +1447,6 @@ Assets:
       - "assets/vertical_slice/vn/backgrounds/bg_forest_camp_night.png"
     ReferencedBy:
       - "assets/events/vertical_slice_flow.wts"
-      - "assets/vertical_slice/data/vertical_slice_manifest.json"
     Import:
       {}
   - ID: 4222763128103600682
@@ -1590,7 +1560,6 @@ Assets:
       - "assets/vertical_slice/turn_combat/ui/panels/panel_turn_order.png"
     ReferencedBy:
       - "assets/events/vertical_slice_flow.wts"
-      - "assets/vertical_slice/data/vertical_slice_manifest.json"
     Import:
       {}
   - ID: 7289081974371921910
@@ -1612,7 +1581,6 @@ Assets:
       - "assets/vertical_slice/arcade_combat/ui/ui_arcade_danger_bar.png"
     ReferencedBy:
       - "assets/events/vertical_slice_flow.wts"
-      - "assets/vertical_slice/data/vertical_slice_manifest.json"
     Import:
       {}
   - ID: 17140327401158168800
@@ -1631,7 +1599,6 @@ Assets:
       - "assets/vertical_slice/vn/portraits/mentor_slight_smile.png"
     ReferencedBy:
       - "assets/events/vertical_slice_flow.wts"
-      - "assets/vertical_slice/data/vertical_slice_manifest.json"
     Import:
       {}
   - ID: 57570504450098567
@@ -2199,7 +2166,6 @@ Assets:
       []
     ReferencedBy:
       - "assets/scenes/VisualNovelBattle.wt"
-      - "assets/vertical_slice/data/vertical_slice_manifest.json"
     Import:
       Texture:
         Filter: "Linear"
@@ -2222,7 +2188,6 @@ Assets:
       []
     ReferencedBy:
       - "assets/scenes/VisualNovelBattle.wt"
-      - "assets/vertical_slice/data/vertical_slice_manifest.json"
     Import:
       Texture:
         Filter: "Linear"
@@ -2245,7 +2210,6 @@ Assets:
       []
     ReferencedBy:
       - "assets/scenes/VisualNovelBattle.wt"
-      - "assets/vertical_slice/data/vertical_slice_manifest.json"
     Import:
       Texture:
         Filter: "Linear"
@@ -2268,7 +2232,6 @@ Assets:
       []
     ReferencedBy:
       - "assets/scenes/VisualNovelBattle.wt"
-      - "assets/vertical_slice/data/vertical_slice_manifest.json"
     Import:
       Texture:
         Filter: "Linear"
@@ -2291,7 +2254,6 @@ Assets:
       []
     ReferencedBy:
       - "assets/gameplay/content_manifest.yaml"
-      - "assets/vertical_slice/data/vertical_slice_manifest.json"
     Import:
       Texture:
         Filter: "Linear"
@@ -2314,7 +2276,6 @@ Assets:
       []
     ReferencedBy:
       - "assets/gameplay/content_manifest.yaml"
-      - "assets/vertical_slice/data/vertical_slice_manifest.json"
     Import:
       Texture:
         Filter: "Linear"
@@ -2337,7 +2298,6 @@ Assets:
       []
     ReferencedBy:
       - "assets/gameplay/content_manifest.yaml"
-      - "assets/vertical_slice/data/vertical_slice_manifest.json"
     Import:
       Texture:
         Filter: "Linear"
@@ -2382,7 +2342,6 @@ Assets:
       []
     ReferencedBy:
       - "assets/gameplay/content_manifest.yaml"
-      - "assets/vertical_slice/data/vertical_slice_manifest.json"
     Import:
       Texture:
         Filter: "Linear"
@@ -2405,7 +2364,6 @@ Assets:
       []
     ReferencedBy:
       - "assets/scenes/VisualNovelBattle.wt"
-      - "assets/vertical_slice/data/vertical_slice_manifest.json"
     Import:
       Texture:
         Filter: "Linear"
@@ -2619,128 +2577,6 @@ Assets:
     ReferencedBy:
       - "assets/gameplay/content_manifest.yaml"
       - "assets/scenes/SideCombatBeastPath.wt"
-      - "assets/vertical_slice/data/vertical_slice_manifest.json"
-    Import:
-      {}
-  - ID: 8427068096943346028
-    Path: "assets/vertical_slice/data/vertical_slice_manifest.json"
-    Type: "Data"
-    DisplayName: "vertical_slice_manifest.json"
-    SizeBytes: 10381
-    LastWriteTime: 134309129026114101
-    Tags:
-      []
-    References:
-      - "assets/scenes/SideCombatBeastPath.wt"
-      - "assets/scenes/VerticalSliceChapter3Preview.wt"
-      - "assets/scenes/VerticalSliceDungeonSelect.wt"
-      - "assets/scenes/VerticalSliceEquipment.wt"
-      - "assets/scenes/VerticalSliceHub.wt"
-      - "assets/scenes/VerticalSliceIntro.wt"
-      - "assets/scenes/VerticalSlicePostFake.wt"
-      - "assets/scenes/VerticalSliceRelationship.wt"
-      - "assets/scenes/VerticalSliceResult.wt"
-      - "assets/scenes/VerticalSliceSaveLoad.wt"
-      - "assets/scenes/VerticalSliceSettings.wt"
-      - "assets/scenes/VerticalSliceSkillTree.wt"
-      - "assets/scenes/VerticalSliceSupport.wt"
-      - "assets/scenes/VerticalSliceTurnCombat.wt"
-      - "assets/scenes/VisualNovelBattle.wt"
-      - "assets/scenes/VisualNovelMainMenu.wt"
-      - "assets/vertical_slice/arcade_combat/backgrounds/bg_arcade_arena_grid.png"
-      - "assets/vertical_slice/arcade_combat/characters/boss_arcade_mage.png"
-      - "assets/vertical_slice/arcade_combat/characters/protag_arcade_mage.png"
-      - "assets/vertical_slice/arcade_combat/props/prop_arcade_cover_block.png"
-      - "assets/vertical_slice/arcade_combat/sheets/runtime_effects/arcade_projectile_vfx_sheet.png"
-      - "assets/vertical_slice/arcade_combat/sheets/static_effects/proj_arcade_boss_orb_sheet.png"
-      - "assets/vertical_slice/arcade_combat/sheets/static_effects/proj_arcade_player_bolt_sheet.png"
-      - "assets/vertical_slice/arcade_combat/sheets/static_effects/vfx_arcade_katana_slash_sheet.png"
-      - "assets/vertical_slice/arcade_combat/ui/ui_arcade_danger_bar.png"
-      - "assets/vertical_slice/data/side_combat_tuning.yaml"
-      - "assets/vertical_slice/side_combat/backgrounds/bg_black_forest_stage.png"
-      - "assets/vertical_slice/side_combat/sheets/runtime_characters/protag_idle_sheet.png"
-      - "assets/vertical_slice/side_combat/sheets/runtime_enemies/boss_bear_husband_idle_sheet.png"
-      - "assets/vertical_slice/side_combat/ui/blob_shadow_soft.png"
-      - "assets/vertical_slice/side_combat/ui/icon_drop_beast_claw.png"
-      - "assets/vertical_slice/side_combat/ui/icon_drop_beast_sinew.png"
-      - "assets/vertical_slice/side_combat/ui/icon_drop_magic_core.png"
-      - "assets/vertical_slice/side_combat/ui/icon_skill_ally_support.png"
-      - "assets/vertical_slice/side_combat/ui/icon_skill_basic_slash.png"
-      - "assets/vertical_slice/side_combat/ui/icon_skill_break_limit.png"
-      - "assets/vertical_slice/side_combat/ui/icon_skill_launcher_slash.png"
-      - "assets/vertical_slice/side_combat/ui/icon_skill_magic_bolt.png"
-      - "assets/vertical_slice/side_combat/ui/icon_skill_uppercut.png"
-      - "assets/vertical_slice/side_combat/vfx_sheets/runtime_effects/vfx_ally_support_sheet.png"
-      - "assets/vertical_slice/side_combat/vfx_sheets/runtime_effects/vfx_basic_slash_sheet.png"
-      - "assets/vertical_slice/side_combat/vfx_sheets/runtime_effects/vfx_boss_bear_charge_sheet.png"
-      - "assets/vertical_slice/side_combat/vfx_sheets/runtime_effects/vfx_boss_bear_shockwave_sheet.png"
-      - "assets/vertical_slice/side_combat/vfx_sheets/runtime_effects/vfx_enemy_claw_sheet.png"
-      - "assets/vertical_slice/side_combat/vfx_sheets/runtime_effects/vfx_launcher_slash_sheet.png"
-      - "assets/vertical_slice/side_combat/vfx_sheets/runtime_effects/vfx_magic_bolt_sheet.png"
-      - "assets/vertical_slice/turn_combat/audio/turn_battle_bgm.wav"
-      - "assets/vertical_slice/turn_combat/backgrounds/bg_turn_ruins_arena.png"
-      - "assets/vertical_slice/turn_combat/sheets/characters/ally_guardian_idle_sheet.png"
-      - "assets/vertical_slice/turn_combat/sheets/characters/ally_white_mage_idle_sheet.png"
-      - "assets/vertical_slice/turn_combat/sheets/characters/en_apprentice_mage_idle_sheet.png"
-      - "assets/vertical_slice/turn_combat/sheets/characters/en_bearling_idle_sheet.png"
-      - "assets/vertical_slice/turn_combat/sheets/characters/en_wolf_idle_sheet.png"
-      - "assets/vertical_slice/turn_combat/sheets/characters/protag_magic_swordsman_idle_sheet.png"
-      - "assets/vertical_slice/turn_combat/sheets/effects/vfx_turn_claw_sheet.png"
-      - "assets/vertical_slice/turn_combat/sheets/effects/vfx_turn_dark_sheet.png"
-      - "assets/vertical_slice/turn_combat/sheets/effects/vfx_turn_focus_sheet.png"
-      - "assets/vertical_slice/turn_combat/sheets/effects/vfx_turn_guard_sheet.png"
-      - "assets/vertical_slice/turn_combat/sheets/effects/vfx_turn_heal_sheet.png"
-      - "assets/vertical_slice/turn_combat/sheets/effects/vfx_turn_magic_sword_sheet.png"
-      - "assets/vertical_slice/turn_combat/sheets/effects/vfx_turn_slash_sheet.png"
-      - "assets/vertical_slice/turn_combat/ui/icons/cmd_attack.png"
-      - "assets/vertical_slice/turn_combat/ui/icons/cmd_dark.png"
-      - "assets/vertical_slice/turn_combat/ui/icons/cmd_enemy_claw.png"
-      - "assets/vertical_slice/turn_combat/ui/icons/cmd_enemy_orb.png"
-      - "assets/vertical_slice/turn_combat/ui/icons/cmd_guard.png"
-      - "assets/vertical_slice/turn_combat/ui/icons/cmd_heal.png"
-      - "assets/vertical_slice/turn_combat/ui/icons/cmd_magic_sword.png"
-      - "assets/vertical_slice/turn_combat/ui/icons/cmd_wait.png"
-      - "assets/vertical_slice/turn_combat/ui/icons/target_marker.png"
-      - "assets/vertical_slice/turn_combat/ui/panels/panel_turn_command.png"
-      - "assets/vertical_slice/turn_combat/ui/panels/panel_turn_order.png"
-      - "assets/vertical_slice/ui/icons/icon_armor.png"
-      - "assets/vertical_slice/ui/icons/icon_dungeon.png"
-      - "assets/vertical_slice/ui/icons/icon_equipment_angel_feather.png"
-      - "assets/vertical_slice/ui/icons/icon_equipment_beast_tooth.png"
-      - "assets/vertical_slice/ui/icons/icon_equipment_black_forest_armor.png"
-      - "assets/vertical_slice/ui/icons/icon_equipment_magic_ring.png"
-      - "assets/vertical_slice/ui/icons/icon_equipment_training_blade.png"
-      - "assets/vertical_slice/ui/icons/icon_equipment_traveler_armor.png"
-      - "assets/vertical_slice/ui/icons/icon_equipment_ward_charm.png"
-      - "assets/vertical_slice/ui/icons/icon_equipment_wind_boots.png"
-      - "assets/vertical_slice/ui/icons/icon_relationship.png"
-      - "assets/vertical_slice/ui/icons/icon_result.png"
-      - "assets/vertical_slice/ui/icons/icon_save.png"
-      - "assets/vertical_slice/ui/icons/icon_settings.png"
-      - "assets/vertical_slice/ui/icons/icon_skill_slash.png"
-      - "assets/vertical_slice/ui/icons/icon_skill_tree.png"
-      - "assets/vertical_slice/ui/icons/icon_support.png"
-      - "assets/vertical_slice/ui/panels/panel_dark.png"
-      - "assets/vertical_slice/ui/panels/panel_dungeon.png"
-      - "assets/vertical_slice/ui/panels/panel_hub.png"
-      - "assets/vertical_slice/ui/panels/panel_relationship.png"
-      - "assets/vertical_slice/ui/panels/panel_result.png"
-      - "assets/vertical_slice/ui/panels/panel_settings.png"
-      - "assets/vertical_slice/ui/panels/panel_support.png"
-      - "assets/vertical_slice/ui/skill_tree/skill_fu.png"
-      - "assets/vertical_slice/ui/skill_tree/skill_li.png"
-      - "assets/vertical_slice/ui/skill_tree/skill_ma.png"
-      - "assets/vertical_slice/ui/skill_tree/skill_magic_sword_core.png"
-      - "assets/vertical_slice/ui/skill_tree/skill_me.png"
-      - "assets/vertical_slice/ui/skill_tree/skill_mo.png"
-      - "assets/vertical_slice/vn/portraits/aoba_{expression}.png"
-      - "assets/vertical_slice/vn/portraits/mentor_{expression}.png"
-      - "assets/vertical_slice/vn/portraits/protag_school_{expression}.png"
-      - "assets/vn/vertical_slice_chapter3_preview.vn"
-      - "assets/vn/vertical_slice_intro.vn"
-      - "assets/vn/vertical_slice_post_fake.vn"
-    ReferencedBy:
-      []
     Import:
       {}
   - ID: 17575004813462614315
@@ -3108,7 +2944,6 @@ Assets:
       []
     ReferencedBy:
       - "assets/scenes/SideCombatBeastPath.wt"
-      - "assets/vertical_slice/data/vertical_slice_manifest.json"
     Import:
       Texture:
         Filter: "Linear"
@@ -3374,7 +3209,6 @@ Assets:
     ReferencedBy:
       - "assets/scenes/SideCombatBeastPath.wt"
       - "assets/vertical_slice/data/side_combat_tuning.yaml"
-      - "assets/vertical_slice/data/vertical_slice_manifest.json"
     Import:
       Texture:
         Filter: "Linear"
@@ -3596,7 +3430,6 @@ Assets:
     ReferencedBy:
       - "assets/scenes/SideCombatBeastPath.wt"
       - "assets/vertical_slice/data/side_combat_tuning.yaml"
-      - "assets/vertical_slice/data/vertical_slice_manifest.json"
     Import:
       Texture:
         Filter: "Linear"
@@ -3798,7 +3631,6 @@ Assets:
     ReferencedBy:
       - "assets/gameplay/content_manifest.yaml"
       - "assets/scenes/SideCombatBeastPath.wt"
-      - "assets/vertical_slice/data/vertical_slice_manifest.json"
     Import:
       Texture:
         Filter: "Linear"
@@ -3845,7 +3677,6 @@ Assets:
     ReferencedBy:
       - "assets/gameplay/content_manifest.yaml"
       - "assets/scenes/VerticalSliceResult.wt"
-      - "assets/vertical_slice/data/vertical_slice_manifest.json"
     Import:
       Texture:
         Filter: "Linear"
@@ -3869,7 +3700,6 @@ Assets:
     ReferencedBy:
       - "assets/gameplay/content_manifest.yaml"
       - "assets/scenes/VerticalSliceResult.wt"
-      - "assets/vertical_slice/data/vertical_slice_manifest.json"
     Import:
       Texture:
         Filter: "Linear"
@@ -3893,7 +3723,6 @@ Assets:
     ReferencedBy:
       - "assets/gameplay/content_manifest.yaml"
       - "assets/scenes/VerticalSliceResult.wt"
-      - "assets/vertical_slice/data/vertical_slice_manifest.json"
     Import:
       Texture:
         Filter: "Linear"
@@ -3916,7 +3745,6 @@ Assets:
       []
     ReferencedBy:
       - "assets/gameplay/content_manifest.yaml"
-      - "assets/vertical_slice/data/vertical_slice_manifest.json"
     Import:
       Texture:
         Filter: "Linear"
@@ -3939,7 +3767,6 @@ Assets:
       []
     ReferencedBy:
       - "assets/gameplay/content_manifest.yaml"
-      - "assets/vertical_slice/data/vertical_slice_manifest.json"
     Import:
       Texture:
         Filter: "Linear"
@@ -3963,7 +3790,6 @@ Assets:
     ReferencedBy:
       - "assets/gameplay/content_manifest.yaml"
       - "assets/scenes/SideCombatBeastPath.wt"
-      - "assets/vertical_slice/data/vertical_slice_manifest.json"
     Import:
       Texture:
         Filter: "Linear"
@@ -3986,7 +3812,6 @@ Assets:
       []
     ReferencedBy:
       - "assets/gameplay/content_manifest.yaml"
-      - "assets/vertical_slice/data/vertical_slice_manifest.json"
     Import:
       Texture:
         Filter: "Linear"
@@ -4009,7 +3834,6 @@ Assets:
       []
     ReferencedBy:
       - "assets/gameplay/content_manifest.yaml"
-      - "assets/vertical_slice/data/vertical_slice_manifest.json"
     Import:
       Texture:
         Filter: "Linear"
@@ -4032,7 +3856,6 @@ Assets:
       []
     ReferencedBy:
       - "assets/gameplay/content_manifest.yaml"
-      - "assets/vertical_slice/data/vertical_slice_manifest.json"
     Import:
       Texture:
         Filter: "Linear"
@@ -4145,7 +3968,6 @@ Assets:
     ReferencedBy:
       - "assets/gameplay/content_manifest.yaml"
       - "assets/vertical_slice/data/side_combat_tuning.yaml"
-      - "assets/vertical_slice/data/vertical_slice_manifest.json"
     Import:
       Texture:
         Filter: "Linear"
@@ -4169,7 +3991,6 @@ Assets:
     ReferencedBy:
       - "assets/gameplay/content_manifest.yaml"
       - "assets/vertical_slice/data/side_combat_tuning.yaml"
-      - "assets/vertical_slice/data/vertical_slice_manifest.json"
     Import:
       Texture:
         Filter: "Linear"
@@ -4192,7 +4013,6 @@ Assets:
       []
     ReferencedBy:
       - "assets/vertical_slice/data/side_combat_tuning.yaml"
-      - "assets/vertical_slice/data/vertical_slice_manifest.json"
     Import:
       Texture:
         Filter: "Linear"
@@ -4215,7 +4035,6 @@ Assets:
       []
     ReferencedBy:
       - "assets/vertical_slice/data/side_combat_tuning.yaml"
-      - "assets/vertical_slice/data/vertical_slice_manifest.json"
     Import:
       Texture:
         Filter: "Linear"
@@ -4239,7 +4058,6 @@ Assets:
     ReferencedBy:
       - "assets/gameplay/content_manifest.yaml"
       - "assets/vertical_slice/data/side_combat_tuning.yaml"
-      - "assets/vertical_slice/data/vertical_slice_manifest.json"
     Import:
       Texture:
         Filter: "Linear"
@@ -4263,7 +4081,6 @@ Assets:
     ReferencedBy:
       - "assets/gameplay/content_manifest.yaml"
       - "assets/vertical_slice/data/side_combat_tuning.yaml"
-      - "assets/vertical_slice/data/vertical_slice_manifest.json"
     Import:
       Texture:
         Filter: "Linear"
@@ -4287,7 +4104,6 @@ Assets:
     ReferencedBy:
       - "assets/gameplay/content_manifest.yaml"
       - "assets/vertical_slice/data/side_combat_tuning.yaml"
-      - "assets/vertical_slice/data/vertical_slice_manifest.json"
     Import:
       Texture:
         Filter: "Linear"
@@ -5482,7 +5298,6 @@ Assets:
       []
     ReferencedBy:
       - "assets/scenes/VerticalSliceTurnCombat.wt"
-      - "assets/vertical_slice/data/vertical_slice_manifest.json"
     Import:
       Audio:
         Usage: "SFX"
@@ -5675,7 +5490,6 @@ Assets:
       []
     ReferencedBy:
       - "assets/scenes/VerticalSliceTurnCombat.wt"
-      - "assets/vertical_slice/data/vertical_slice_manifest.json"
     Import:
       Texture:
         Filter: "Linear"
@@ -5764,7 +5578,6 @@ Assets:
       []
     ReferencedBy:
       - "assets/scenes/VerticalSliceTurnCombat.wt"
-      - "assets/vertical_slice/data/vertical_slice_manifest.json"
     Import:
       Texture:
         Filter: "Linear"
@@ -5853,7 +5666,6 @@ Assets:
       []
     ReferencedBy:
       - "assets/scenes/VerticalSliceTurnCombat.wt"
-      - "assets/vertical_slice/data/vertical_slice_manifest.json"
     Import:
       Texture:
         Filter: "Linear"
@@ -5942,7 +5754,6 @@ Assets:
       []
     ReferencedBy:
       - "assets/scenes/VerticalSliceTurnCombat.wt"
-      - "assets/vertical_slice/data/vertical_slice_manifest.json"
     Import:
       Texture:
         Filter: "Linear"
@@ -6031,7 +5842,6 @@ Assets:
       []
     ReferencedBy:
       - "assets/scenes/VerticalSliceTurnCombat.wt"
-      - "assets/vertical_slice/data/vertical_slice_manifest.json"
     Import:
       Texture:
         Filter: "Linear"
@@ -6120,7 +5930,6 @@ Assets:
       []
     ReferencedBy:
       - "assets/scenes/VerticalSliceTurnCombat.wt"
-      - "assets/vertical_slice/data/vertical_slice_manifest.json"
     Import:
       Texture:
         Filter: "Linear"
@@ -6209,7 +6018,6 @@ Assets:
       []
     ReferencedBy:
       - "assets/scenes/VerticalSliceTurnCombat.wt"
-      - "assets/vertical_slice/data/vertical_slice_manifest.json"
     Import:
       Texture:
         Filter: "Linear"
@@ -6233,7 +6041,6 @@ Assets:
     ReferencedBy:
       - "assets/gameplay/content_manifest.yaml"
       - "assets/scenes/VerticalSliceTurnCombat.wt"
-      - "assets/vertical_slice/data/vertical_slice_manifest.json"
     Import:
       Texture:
         Filter: "Linear"
@@ -6257,7 +6064,6 @@ Assets:
     ReferencedBy:
       - "assets/gameplay/content_manifest.yaml"
       - "assets/scenes/VerticalSliceTurnCombat.wt"
-      - "assets/vertical_slice/data/vertical_slice_manifest.json"
     Import:
       Texture:
         Filter: "Linear"
@@ -6281,7 +6087,6 @@ Assets:
     ReferencedBy:
       - "assets/gameplay/content_manifest.yaml"
       - "assets/scenes/VerticalSliceTurnCombat.wt"
-      - "assets/vertical_slice/data/vertical_slice_manifest.json"
     Import:
       Texture:
         Filter: "Linear"
@@ -6305,7 +6110,6 @@ Assets:
     ReferencedBy:
       - "assets/gameplay/content_manifest.yaml"
       - "assets/scenes/VerticalSliceTurnCombat.wt"
-      - "assets/vertical_slice/data/vertical_slice_manifest.json"
     Import:
       Texture:
         Filter: "Linear"
@@ -6329,7 +6133,6 @@ Assets:
     ReferencedBy:
       - "assets/gameplay/content_manifest.yaml"
       - "assets/scenes/VerticalSliceTurnCombat.wt"
-      - "assets/vertical_slice/data/vertical_slice_manifest.json"
     Import:
       Texture:
         Filter: "Linear"
@@ -6353,7 +6156,6 @@ Assets:
     ReferencedBy:
       - "assets/gameplay/content_manifest.yaml"
       - "assets/scenes/VerticalSliceTurnCombat.wt"
-      - "assets/vertical_slice/data/vertical_slice_manifest.json"
     Import:
       Texture:
         Filter: "Linear"
@@ -6377,7 +6179,6 @@ Assets:
     ReferencedBy:
       - "assets/gameplay/content_manifest.yaml"
       - "assets/scenes/VerticalSliceTurnCombat.wt"
-      - "assets/vertical_slice/data/vertical_slice_manifest.json"
     Import:
       Texture:
         Filter: "Linear"
@@ -6401,7 +6202,6 @@ Assets:
     ReferencedBy:
       - "assets/gameplay/content_manifest.yaml"
       - "assets/scenes/VerticalSliceTurnCombat.wt"
-      - "assets/vertical_slice/data/vertical_slice_manifest.json"
     Import:
       Texture:
         Filter: "Linear"
@@ -6446,7 +6246,6 @@ Assets:
       []
     ReferencedBy:
       - "assets/gameplay/content_manifest.yaml"
-      - "assets/vertical_slice/data/vertical_slice_manifest.json"
     Import:
       Texture:
         Filter: "Linear"
@@ -6469,7 +6268,6 @@ Assets:
       []
     ReferencedBy:
       - "assets/gameplay/content_manifest.yaml"
-      - "assets/vertical_slice/data/vertical_slice_manifest.json"
     Import:
       Texture:
         Filter: "Linear"
@@ -6492,7 +6290,6 @@ Assets:
       []
     ReferencedBy:
       - "assets/gameplay/content_manifest.yaml"
-      - "assets/vertical_slice/data/vertical_slice_manifest.json"
     Import:
       Texture:
         Filter: "Linear"
@@ -6516,7 +6313,6 @@ Assets:
     ReferencedBy:
       - "assets/gameplay/content_manifest.yaml"
       - "assets/scenes/VerticalSliceTurnCombat.wt"
-      - "assets/vertical_slice/data/vertical_slice_manifest.json"
     Import:
       Texture:
         Filter: "Linear"
@@ -6540,7 +6336,6 @@ Assets:
     ReferencedBy:
       - "assets/gameplay/content_manifest.yaml"
       - "assets/scenes/VerticalSliceTurnCombat.wt"
-      - "assets/vertical_slice/data/vertical_slice_manifest.json"
     Import:
       Texture:
         Filter: "Linear"
@@ -6608,7 +6403,6 @@ Assets:
     ReferencedBy:
       - "assets/gameplay/content_manifest.yaml"
       - "assets/scenes/VerticalSliceTurnCombat.wt"
-      - "assets/vertical_slice/data/vertical_slice_manifest.json"
     Import:
       Texture:
         Filter: "Linear"
@@ -6632,7 +6426,6 @@ Assets:
     ReferencedBy:
       - "assets/gameplay/content_manifest.yaml"
       - "assets/scenes/VerticalSliceTurnCombat.wt"
-      - "assets/vertical_slice/data/vertical_slice_manifest.json"
     Import:
       Texture:
         Filter: "Linear"
@@ -6655,7 +6448,6 @@ Assets:
       []
     ReferencedBy:
       - "assets/scenes/VerticalSliceTurnCombat.wt"
-      - "assets/vertical_slice/data/vertical_slice_manifest.json"
     Import:
       Texture:
         Filter: "Linear"
@@ -6678,7 +6470,6 @@ Assets:
       []
     ReferencedBy:
       - "assets/scenes/VerticalSliceTurnCombat.wt"
-      - "assets/vertical_slice/data/vertical_slice_manifest.json"
     Import:
       Texture:
         Filter: "Linear"
@@ -6701,7 +6492,6 @@ Assets:
       []
     ReferencedBy:
       - "assets/scenes/VerticalSliceTurnCombat.wt"
-      - "assets/vertical_slice/data/vertical_slice_manifest.json"
     Import:
       Texture:
         Filter: "Linear"
@@ -6764,7 +6554,6 @@ Assets:
       []
     ReferencedBy:
       - "assets/scenes/VerticalSliceHub.wt"
-      - "assets/vertical_slice/data/vertical_slice_manifest.json"
     Import:
       Texture:
         Filter: "Linear"
@@ -6788,7 +6577,6 @@ Assets:
     ReferencedBy:
       - "assets/scenes/VerticalSliceDungeonSelect.wt"
       - "assets/scenes/VerticalSliceHub.wt"
-      - "assets/vertical_slice/data/vertical_slice_manifest.json"
     Import:
       Texture:
         Filter: "Linear"
@@ -6812,7 +6600,6 @@ Assets:
     ReferencedBy:
       - "assets/gameplay/content_manifest.yaml"
       - "assets/scenes/VerticalSliceEquipment.wt"
-      - "assets/vertical_slice/data/vertical_slice_manifest.json"
     Import:
       Texture:
         Filter: "Linear"
@@ -6836,7 +6623,6 @@ Assets:
     ReferencedBy:
       - "assets/gameplay/content_manifest.yaml"
       - "assets/scenes/VerticalSliceEquipment.wt"
-      - "assets/vertical_slice/data/vertical_slice_manifest.json"
     Import:
       Texture:
         Filter: "Linear"
@@ -6860,7 +6646,6 @@ Assets:
     ReferencedBy:
       - "assets/gameplay/content_manifest.yaml"
       - "assets/scenes/VerticalSliceEquipment.wt"
-      - "assets/vertical_slice/data/vertical_slice_manifest.json"
     Import:
       Texture:
         Filter: "Linear"
@@ -6884,7 +6669,6 @@ Assets:
     ReferencedBy:
       - "assets/gameplay/content_manifest.yaml"
       - "assets/scenes/VerticalSliceEquipment.wt"
-      - "assets/vertical_slice/data/vertical_slice_manifest.json"
     Import:
       Texture:
         Filter: "Linear"
@@ -6908,7 +6692,6 @@ Assets:
     ReferencedBy:
       - "assets/gameplay/content_manifest.yaml"
       - "assets/scenes/VerticalSliceEquipment.wt"
-      - "assets/vertical_slice/data/vertical_slice_manifest.json"
     Import:
       Texture:
         Filter: "Linear"
@@ -6932,7 +6715,6 @@ Assets:
     ReferencedBy:
       - "assets/gameplay/content_manifest.yaml"
       - "assets/scenes/VerticalSliceEquipment.wt"
-      - "assets/vertical_slice/data/vertical_slice_manifest.json"
     Import:
       Texture:
         Filter: "Linear"
@@ -6956,7 +6738,6 @@ Assets:
     ReferencedBy:
       - "assets/gameplay/content_manifest.yaml"
       - "assets/scenes/VerticalSliceEquipment.wt"
-      - "assets/vertical_slice/data/vertical_slice_manifest.json"
     Import:
       Texture:
         Filter: "Linear"
@@ -6980,7 +6761,6 @@ Assets:
     ReferencedBy:
       - "assets/gameplay/content_manifest.yaml"
       - "assets/scenes/VerticalSliceEquipment.wt"
-      - "assets/vertical_slice/data/vertical_slice_manifest.json"
     Import:
       Texture:
         Filter: "Linear"
@@ -7004,7 +6784,6 @@ Assets:
     ReferencedBy:
       - "assets/scenes/VerticalSliceHub.wt"
       - "assets/scenes/VerticalSliceRelationship.wt"
-      - "assets/vertical_slice/data/vertical_slice_manifest.json"
     Import:
       Texture:
         Filter: "Linear"
@@ -7028,7 +6807,6 @@ Assets:
     ReferencedBy:
       - "assets/scenes/VerticalSliceHub.wt"
       - "assets/scenes/VerticalSliceResult.wt"
-      - "assets/vertical_slice/data/vertical_slice_manifest.json"
     Import:
       Texture:
         Filter: "Linear"
@@ -7056,7 +6834,6 @@ Assets:
       - "assets/scenes/VerticalSliceIntro.wt"
       - "assets/scenes/VerticalSlicePostFake.wt"
       - "assets/scenes/VerticalSliceSaveLoad.wt"
-      - "assets/vertical_slice/data/vertical_slice_manifest.json"
     Import:
       Texture:
         Filter: "Linear"
@@ -7079,7 +6856,6 @@ Assets:
       []
     ReferencedBy:
       - "assets/scenes/VerticalSliceHub.wt"
-      - "assets/vertical_slice/data/vertical_slice_manifest.json"
     Import:
       Texture:
         Filter: "Linear"
@@ -7102,7 +6878,6 @@ Assets:
       []
     ReferencedBy:
       - "assets/gameplay/content_manifest.yaml"
-      - "assets/vertical_slice/data/vertical_slice_manifest.json"
     Import:
       Texture:
         Filter: "Linear"
@@ -7125,7 +6900,6 @@ Assets:
       []
     ReferencedBy:
       - "assets/scenes/VerticalSliceHub.wt"
-      - "assets/vertical_slice/data/vertical_slice_manifest.json"
     Import:
       Texture:
         Filter: "Linear"
@@ -7149,7 +6923,6 @@ Assets:
     ReferencedBy:
       - "assets/scenes/VerticalSliceHub.wt"
       - "assets/scenes/VerticalSliceSupport.wt"
-      - "assets/vertical_slice/data/vertical_slice_manifest.json"
     Import:
       Texture:
         Filter: "Linear"
@@ -7173,7 +6946,6 @@ Assets:
     ReferencedBy:
       - "assets/scenes/VerticalSliceHub.wt"
       - "assets/scenes/VerticalSliceResult.wt"
-      - "assets/vertical_slice/data/vertical_slice_manifest.json"
     Import:
       Texture:
         Filter: "Linear"
@@ -7196,7 +6968,6 @@ Assets:
       []
     ReferencedBy:
       - "assets/scenes/VerticalSliceDungeonSelect.wt"
-      - "assets/vertical_slice/data/vertical_slice_manifest.json"
     Import:
       Texture:
         Filter: "Linear"
@@ -7220,7 +6991,6 @@ Assets:
     ReferencedBy:
       - "assets/scenes/VerticalSliceHub.wt"
       - "assets/scenes/VisualNovelMainMenu.wt"
-      - "assets/vertical_slice/data/vertical_slice_manifest.json"
     Import:
       Texture:
         Filter: "Linear"
@@ -7243,7 +7013,6 @@ Assets:
       []
     ReferencedBy:
       - "assets/scenes/VerticalSliceRelationship.wt"
-      - "assets/vertical_slice/data/vertical_slice_manifest.json"
     Import:
       Texture:
         Filter: "Linear"
@@ -7266,7 +7035,6 @@ Assets:
       []
     ReferencedBy:
       - "assets/scenes/VerticalSliceResult.wt"
-      - "assets/vertical_slice/data/vertical_slice_manifest.json"
     Import:
       Texture:
         Filter: "Linear"
@@ -7289,7 +7057,6 @@ Assets:
       []
     ReferencedBy:
       - "assets/scenes/VerticalSliceSettings.wt"
-      - "assets/vertical_slice/data/vertical_slice_manifest.json"
     Import:
       Texture:
         Filter: "Linear"
@@ -7312,7 +7079,6 @@ Assets:
       []
     ReferencedBy:
       - "assets/scenes/VerticalSliceSupport.wt"
-      - "assets/vertical_slice/data/vertical_slice_manifest.json"
     Import:
       Texture:
         Filter: "Linear"
@@ -7335,7 +7101,6 @@ Assets:
       []
     ReferencedBy:
       - "assets/scenes/VerticalSliceSkillTree.wt"
-      - "assets/vertical_slice/data/vertical_slice_manifest.json"
     Import:
       Texture:
         Filter: "Linear"
@@ -7358,7 +7123,6 @@ Assets:
       []
     ReferencedBy:
       - "assets/scenes/VerticalSliceSkillTree.wt"
-      - "assets/vertical_slice/data/vertical_slice_manifest.json"
     Import:
       Texture:
         Filter: "Linear"
@@ -7403,7 +7167,6 @@ Assets:
       []
     ReferencedBy:
       - "assets/scenes/VerticalSliceSkillTree.wt"
-      - "assets/vertical_slice/data/vertical_slice_manifest.json"
     Import:
       Texture:
         Filter: "Linear"
@@ -7427,7 +7190,6 @@ Assets:
     ReferencedBy:
       - "assets/gameplay/content_manifest.yaml"
       - "assets/scenes/VerticalSliceSkillTree.wt"
-      - "assets/vertical_slice/data/vertical_slice_manifest.json"
     Import:
       Texture:
         Filter: "Linear"
@@ -7450,7 +7212,6 @@ Assets:
       []
     ReferencedBy:
       - "assets/scenes/VerticalSliceSkillTree.wt"
-      - "assets/vertical_slice/data/vertical_slice_manifest.json"
     Import:
       Texture:
         Filter: "Linear"
@@ -7473,7 +7234,6 @@ Assets:
       []
     ReferencedBy:
       - "assets/scenes/VerticalSliceSkillTree.wt"
-      - "assets/vertical_slice/data/vertical_slice_manifest.json"
     Import:
       Texture:
         Filter: "Linear"
@@ -7998,7 +7758,6 @@ Assets:
       - "assets/vertical_slice/vn/portraits/protag_school_{expression}.png"
     ReferencedBy:
       - "assets/scenes/VerticalSliceChapter3Preview.wt"
-      - "assets/vertical_slice/data/vertical_slice_manifest.json"
     Import:
       {}
   - ID: 10175890649004464685
@@ -8022,7 +7781,6 @@ Assets:
       - "assets/vertical_slice/vn/portraits/protag_school_{expression}.png"
     ReferencedBy:
       - "assets/scenes/VerticalSliceIntro.wt"
-      - "assets/vertical_slice/data/vertical_slice_manifest.json"
     Import:
       {}
   - ID: 16897100030501751
@@ -8041,6 +7799,5 @@ Assets:
       - "assets/vertical_slice/vn/portraits/protag_school_{expression}.png"
     ReferencedBy:
       - "assets/scenes/VerticalSlicePostFake.wt"
-      - "assets/vertical_slice/data/vertical_slice_manifest.json"
     Import:
       {}

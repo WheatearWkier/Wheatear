@@ -4,6 +4,7 @@
 #include "GameProgress.h"
 #include "ProgressionContent.h"
 #include "Wheatear/Assets/AssetAliasRegistry.h"
+#include "Wheatear/Gameplay/SystemBindingRegistry.h"
 #include "Wheatear/Scene/Components.h"
 #include "Wheatear/Scene/Entity.h"
 #include "Wheatear/Scene/SceneQueries.h"
@@ -274,7 +275,7 @@ namespace Wheatear::ProgressionSkillTreePageService {
 
     bool SyncView(Scene* scene)
     {
-        Entity treeEntity = FindEntityByName(scene, "SkillTree_View");
+        Entity treeEntity = FindEntityByName(scene, SystemBindings::Progression::SkillTreeView);
         if (!treeEntity || !treeEntity.HasComponent<UIWidgetComponent>())
             return false;
 

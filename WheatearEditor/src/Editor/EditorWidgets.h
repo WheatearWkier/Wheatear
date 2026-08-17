@@ -70,6 +70,10 @@ namespace Wheatear::EditorWidgets {
     bool ReadFileText(const std::filesystem::path& path, std::string& text);
     bool WriteFileText(const std::filesystem::path& path, const std::string& text);
     std::filesystem::path ResolveProjectAsset(const std::string& relativePath);
+    // Write destination for game content: always lands under the project root,
+    // never the engine root. Ensures edits to gameplay data (WAO recipes,
+    // progression content, content manifest, tunings) stay in the project.
+    std::filesystem::path ResolveWritableProjectAsset(const std::string& relativePath);
     bool ProjectAssetExists(const std::string& relativePath);
     void CopyProjectAssetPath(const std::string& relativePath);
     void OpenProjectAssetFolder(const std::string& relativePath);

@@ -4,6 +4,7 @@
 #include "SideCombatPickupService.h"
 #include "SideCombatResultService.h"
 #include "SideCombatTuningService.h"
+#include "Wheatear/Gameplay/SystemBindingRegistry.h"
 #include "Wheatear/Gameplay/Services/GameplayFlowService.h"
 #include "Wheatear/Modules/Progression/GameProgress.h"
 #include "Wheatear/Scene/Components.h"
@@ -59,9 +60,9 @@ namespace Wheatear::SideCombatOutcomeService {
             if (registry.all_of<TagComponent>(entity))
             {
                 const auto& tag = registry.get<TagComponent>(entity);
-                if (HasTagPrefix(tag, "SC_Wave2_"))
+                if (HasTagPrefix(tag, SystemBindings::Side::Wave2Prefix))
                     return 1;
-                if (HasTagPrefix(tag, "SC_Wave1_"))
+                if (HasTagPrefix(tag, SystemBindings::Side::Wave1Prefix))
                     return 0;
             }
 

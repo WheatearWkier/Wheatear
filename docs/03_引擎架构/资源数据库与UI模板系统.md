@@ -37,7 +37,7 @@ Wheatear 采用中央资源数据库作为唯一真相源：
 - 中央 Registry 和 sidecar 同时存在时，会出现两个数据源谁覆盖谁的问题。
 - 打包器还要额外过滤这些编辑器文件，规则复杂度上升。
 
-现在的方案是：编辑器启动只读取中央 Registry；只有手动 `Rescan Assets` 时才扫描文件系统。扫描时会根据路径、文件大小和最后写入时间复用已有引用结果，避免每次都重新解析所有文本资源。
+现在的方案是：编辑器启动只读取中央 Registry；只有手动 `Rescan Asset Registry` 时才扫描文件系统。扫描时会根据路径、文件大小和最后写入时间复用已有引用结果，避免每次都重新解析所有文本资源。
 
 ## 3. 文件类型规则
 
@@ -64,7 +64,7 @@ WheatearEditor.exe --refresh-assets
 编辑器内刷新：
 
 ```text
-Content Browser -> Rescan Assets
+Content Browser -> Rescan Asset Registry
 ```
 
 刷新流程：

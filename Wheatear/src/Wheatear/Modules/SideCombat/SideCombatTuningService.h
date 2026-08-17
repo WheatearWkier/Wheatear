@@ -4,8 +4,10 @@
 #include "Wheatear/Core/Core.h"
 #include "Wheatear/Gameplay/Services/GameplayVisualService.h"
 
+#include <filesystem>
 #include <string>
 #include <unordered_map>
+#include <string_view>
 #include <vector>
 
 #include <glm/glm.hpp>
@@ -324,6 +326,8 @@ namespace Wheatear::SideCombatTuningService {
         std::unordered_map<std::string, EnemyTypeDefinition> EnemyTypes;
     };
 
+    WHEATEAR_API std::filesystem::path TuningSourcePath(const SideCombatLevelComponent& level);
+    WHEATEAR_API bool IsFieldManagedByTuning(std::string_view fieldId);
     WHEATEAR_API float CalculateSortZ(float groundY, const SideCombatTuning& tuning);
     WHEATEAR_API const SideCombatTuning& GetTuning(const SideCombatLevelComponent& level);
     WHEATEAR_API const SideAttackTuning& GetAttack(const SideCombatTuning& tuning, const std::string& id);

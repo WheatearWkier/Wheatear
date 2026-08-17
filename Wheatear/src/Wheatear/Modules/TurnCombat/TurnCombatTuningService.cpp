@@ -85,6 +85,20 @@ namespace Wheatear::TurnCombatTuningService {
 
     } // namespace
 
+    std::filesystem::path TuningSourcePath(const TurnCombatLevelComponent& level)
+    {
+        return ResolveTuningPath(level.TuningPath);
+    }
+
+    bool IsFieldManagedByTuning(std::string_view fieldId)
+    {
+        return fieldId == "StartFadeDuration"
+            || fieldId == "IntroDuration"
+            || fieldId == "ActionDuration"
+            || fieldId == "VictoryReturnDelay"
+            || fieldId == "DefeatReturnDelay";
+    }
+
     const TurnCombatTuning& GetTuning(const TurnCombatLevelComponent& level)
     {
         static std::unordered_map<std::string, TurnCombatTuningCacheEntry> cache;

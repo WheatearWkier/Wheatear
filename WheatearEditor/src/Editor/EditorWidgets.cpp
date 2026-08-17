@@ -438,6 +438,23 @@ namespace Wheatear::EditorWidgets {
         return AssetPath::GetProjectRoot() / std::filesystem::path(AssetAliasRegistry::Resolve(relativePath));
     }
 
+    std::filesystem::path ResolveWritableProjectAsset(const std::string& relativePath)
+    {
+        if (relativePath.empty())
+            return {};
+
+        // Game content always saves under the project root. The engine root
+        // (or any other earlier Resolve candidate) is never a write target, so
+        // the project stays self-contained even when a template/fallback copy
+        // exists elsewhere.
+        const std::filesystem::path resolved = AssetPath::GetProjectRoot()
+            / std::filesystem::path(AssetAliasRegistry::Resolve(relativePath));
+        std::error_code error;
+        if (!resolved.parent_path().empty())
+            std::filesystem::create_directories(resolved.parent_path(), error);
+        return resolved;
+    }
+
     bool ProjectAssetExists(const std::string& relativePath)
     {
         const std::filesystem::path resolved = ResolveProjectAsset(relativePath);

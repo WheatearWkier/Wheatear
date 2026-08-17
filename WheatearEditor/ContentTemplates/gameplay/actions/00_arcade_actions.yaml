@@ -1,0 +1,56 @@
+actions:
+  - id: arcade.gun
+    displayName: Gun
+    description: Fast basic ranged shot for the fake arcade combat module.
+    icon: arcade.icon.gun
+    animation: arcade_gun
+    sound: arcade.audio.gun
+    cooldown: 0.16
+    duration: 0.16
+    tags: [Gameplay.Arcade, Gameplay.Combat, Weapon.Ranged, Tier.FakeMode]
+    effects:
+      - type: Damage
+        value: 8
+    signals: [arcade.projectile.spawn]
+
+  - id: arcade.cannon
+    displayName: Cannon
+    description: Slow heavy shot with stronger impact.
+    icon: arcade.icon.cannon
+    animation: arcade_cannon
+    sound: arcade.audio.cannon
+    cooldown: 0.75
+    duration: 0.75
+    tags: [Gameplay.Arcade, Gameplay.Combat, Weapon.Ranged, Impact.Heavy, Tier.FakeMode]
+    effects:
+      - type: Damage
+        value: 24
+    signals: [arcade.projectile.spawn]
+
+  - id: arcade.katana
+    displayName: Katana
+    description: Short melee slash used in the fake arcade combat module.
+    icon: arcade.icon.katana
+    animation: arcade_katana
+    sound: arcade.audio.katana
+    cooldown: 0.38
+    duration: 0.38
+    tags: [Gameplay.Arcade, Gameplay.Combat, Weapon.Melee, Tier.FakeMode]
+    effects:
+      - type: Damage
+        value: 18
+    signals: [arcade.projectile.spawn]
+
+  - id: arcade.boss_bullet
+    displayName: Boss Bullet
+    description: Standard projectile spawned by the fake arcade boss.
+    icon: arcade.icon.boss_bullet
+    animation: arcade_boss_bullet
+    sound: arcade.audio.boss_bullet
+    cooldown: 1.05
+    duration: 1.05
+    tags: [Gameplay.Arcade, Gameplay.Combat, Enemy.Boss, Projectile]
+    effects:
+      - type: Damage
+        value: 12
+    signals: [arcade.projectile.spawn]
