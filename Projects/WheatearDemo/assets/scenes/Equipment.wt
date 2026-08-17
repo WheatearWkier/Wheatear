@@ -15,8 +15,8 @@ Entities:
     UIWidgetComponent:
       Visible: true
       EditorVisible: true
-      Position: [0.0907544568, 0.770669222]
-      Size: [0.173196912, 0.0620000362]
+      Position: [0.406374753, 0.785446107]
+      Size: [0.17535156, 0.0620000362]
       Rotation: 0
       Anchor: 0
       SortOrder: 55
@@ -106,8 +106,8 @@ Entities:
     UIWidgetComponent:
       Visible: true
       EditorVisible: true
-      Position: [0.689999998, 0.569999993]
-      Size: [0.200000003, 0.125]
+      Position: [0.688737392, 0.541941583]
+      Size: [0.200000048, 0.125]
       Rotation: 0
       Anchor: 0
       SortOrder: 42
@@ -118,7 +118,7 @@ Entities:
       FontSize: 25
       FontPath: assets/fonts/wqy-microhei.ttc
       Padding: [-1, -1, -1, -1]
-      AutoFit: false
+      AutoFit: true
       HorizontalAlign: 0
       VerticalAlign: 0
       ShadowColor: [0.00999999978, 0.0149999997, 0.0179999992, 0.819999993]
@@ -135,8 +135,8 @@ Entities:
     UIWidgetComponent:
       Visible: true
       EditorVisible: true
-      Position: [0.689999998, 0.289999992]
-      Size: [0.200000003, 0.254999995]
+      Position: [0.690704942, 0.270920277]
+      Size: [0.196769834, 0.254999995]
       Rotation: 0
       Anchor: 0
       SortOrder: 42
@@ -147,7 +147,7 @@ Entities:
       FontSize: 25
       FontPath: assets/fonts/wqy-microhei.ttc
       Padding: [-1, -1, -1, -1]
-      AutoFit: false
+      AutoFit: true
       HorizontalAlign: 0
       VerticalAlign: 0
       ShadowColor: [0.00999999978, 0.0149999997, 0.0179999992, 0.819999993]
@@ -479,8 +479,8 @@ Entities:
     UIWidgetComponent:
       Visible: true
       EditorVisible: true
-      Position: [0.370000005, 0.584999979]
-      Size: [0.279999971, 0.0700000525]
+      Position: [0.355933458, 0.680481732]
+      Size: [0.278721303, 0.0711366534]
       Rotation: 0
       Anchor: 0
       SortOrder: 42
@@ -492,8 +492,8 @@ Entities:
       FontPath: assets/fonts/wqy-microhei.ttc
       Padding: [-1, -1, -1, -1]
       AutoFit: false
-      HorizontalAlign: 0
-      VerticalAlign: 0
+      HorizontalAlign: 1
+      VerticalAlign: 1
       ShadowColor: [0.00999999978, 0.0149999997, 0.0179999992, 0.819999993]
       ShadowOffset: [1.60000002, 1.60000002]
       OutlineColor: [0, 0, 0, 0.860000014]
@@ -508,8 +508,8 @@ Entities:
     UIWidgetComponent:
       Visible: true
       EditorVisible: true
-      Position: [0.0894756764, 0.754999995]
-      Size: [0.251327395, 0.095000006]
+      Position: [0.0859296918, 0.750453293]
+      Size: [0.239528149, 0.0779497623]
       Rotation: 0
       Anchor: 0
       SortOrder: 42
@@ -520,7 +520,7 @@ Entities:
       FontSize: 25
       FontPath: assets/fonts/wqy-microhei.ttc
       Padding: [-1, -1, -1, -1]
-      AutoFit: false
+      AutoFit: true
       HorizontalAlign: 0
       VerticalAlign: 0
       ShadowColor: [0.00999999978, 0.0149999997, 0.0179999992, 0.819999993]
@@ -1082,7 +1082,7 @@ Entities:
       Visible: true
       EditorVisible: true
       Position: [0.350000024, 0.25]
-      Size: [0.299999952, 0.493870497]
+      Size: [0.299999952, 0.521993041]
       Rotation: 0
       Anchor: 0
       SortOrder: 18
@@ -1105,8 +1105,8 @@ Entities:
     UIWidgetComponent:
       Visible: true
       EditorVisible: true
-      Position: [0.082499966, 0.25]
-      Size: [0.262499988, 0.607000053]
+      Position: [0.0849999934, 0.25]
+      Size: [0.244294181, 0.602453351]
       Rotation: 0
       Anchor: 0
       SortOrder: 18
