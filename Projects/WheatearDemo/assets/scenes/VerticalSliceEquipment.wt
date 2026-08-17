@@ -1,39 +1,13 @@
-﻿Scene: VerticalSliceEquipment
+Scene: Untitled
+SavePolicy:
+  CanSave: true
+  CanLoad: true
+  SaveDirectory: assets/saves
+  AutoLoadSlot: 0
 Entities:
-  - Entity: 980000210
+  - Entity: 980000039
     TagComponent:
-      Tag: FlowController
-    TransformComponent:
-      Translation: [0, 0, 0]
-      Rotation: [0, 0, 0]
-      Scale: [1, 1, 1]
-    EventScriptComponent:
-      ScriptPath: "assets/events/vertical_slice_flow.wts"
-      StartEvent: "on_start"
-      RunOnStart: false
-      RunOnce: false
-      Enabled: true
-  - Entity: 980000209
-    TagComponent:
-      Tag: WT_UI_Canvas
-    TransformComponent:
-      Translation: [0, 0, 0]
-      Rotation: [0, 0, 0]
-      Scale: [1, 1, 1]
-    UICanvasComponent:
-      Visible: true
-      ReferenceWidth: 1920
-      ReferenceHeight: 1080
-    UIWidgetComponent:
-      Visible: true
-      Position: [0, 0]
-      Size: [1, 1]
-      Rotation: 0
-      Anchor: 0
-      SortOrder: 0
-  - Entity: 980009001
-    TagComponent:
-      Tag: Equipment_HeaderGroup
+      Tag: Equipment_Button_Back
     TransformComponent:
       Translation: [0, 0, 0]
       Rotation: [0, 0, 0]
@@ -41,15 +15,34 @@ Entities:
     UIWidgetComponent:
       Visible: true
       EditorVisible: true
-      Position: [0, 0]
-      Size: [1, 1]
+      Position: [0.0907544568, 0.770669222]
+      Size: [0.173196912, 0.0620000362]
       Rotation: 0
       Anchor: 0
-      SortOrder: 1
-      ParentEntity: 980000209
-  - Entity: 980009002
+      SortOrder: 55
+      ParentEntity: 980009004
+    UITextComponent:
+      Text: "返回据点"
+      Color: [0.899999976, 0.959999979, 0.939999998, 1]
+      FontSize: 25
+      FontPath: assets/fonts/wqy-microhei.ttc
+      Padding: [-1, -1, -1, -1]
+      AutoFit: false
+      HorizontalAlign: 0
+      VerticalAlign: 0
+      ShadowColor: [0.00999999978, 0.0149999997, 0.0179999992, 0.779999971]
+      ShadowOffset: [1.60000002, 1.60000002]
+      OutlineColor: [0, 0, 0, 0.860000014]
+      OutlineThickness: 1.20000005
+    UIButtonComponent:
+      NormalColor: [0.100000001, 0.119999997, 0.140000001, 0.899999976]
+      HoverColor: [0.200000003, 0.239999995, 0.280000001, 0.959999979]
+      PressedColor: [0.0700000003, 0.0799999982, 0.100000001, 0.959999979]
+      OnClickFunction: "event:go_hub"
+      TooltipText: ""
+  - Entity: 980000038
     TagComponent:
-      Tag: Equipment_SlotsGroup
+      Tag: Equipment_Button_UpgradeArmor
     TransformComponent:
       Translation: [0, 0, 0]
       Rotation: [0, 0, 0]
@@ -57,15 +50,1000 @@ Entities:
     UIWidgetComponent:
       Visible: true
       EditorVisible: true
-      Position: [0, 0]
-      Size: [1, 1]
+      Position: [0.680000007, 0.707719505]
+      Size: [0.215000033, 0.0620000362]
       Rotation: 0
       Anchor: 0
-      SortOrder: 1
-      ParentEntity: 980000209
-  - Entity: 980009003
+      SortOrder: 55
+      ParentEntity: 980009004
+    UITextComponent:
+      Text: "强化旅人护衣 +1"
+      Color: [1, 0.939999998, 0.779999971, 1]
+      FontSize: 25
+      FontPath: assets/fonts/wqy-microhei.ttc
+      Padding: [-1, -1, -1, -1]
+      AutoFit: false
+      HorizontalAlign: 0
+      VerticalAlign: 0
+      ShadowColor: [0.00999999978, 0.0149999997, 0.0179999992, 0.779999971]
+      ShadowOffset: [1.60000002, 1.60000002]
+      OutlineColor: [0, 0, 0, 0.860000014]
+      OutlineThickness: 1.20000005
+    UIButtonComponent:
+      NormalColor: [0.74000001, 0.519999981, 0.200000003, 0.939999998]
+      HoverColor: [0.920000017, 0.720000029, 0.300000012, 0.959999979]
+      PressedColor: [0.519999981, 0.349999994, 0.140000001, 0.959999979]
+      OnClickFunction: "progression:upgrade_traveler_armor"
+      TooltipText: ""
+  - Entity: 980000037
     TagComponent:
-      Tag: Equipment_BagGroup
+      Tag: Equipment_ArmorBar
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    UIWidgetComponent:
+      Visible: true
+      EditorVisible: true
+      Position: [0.689999998, 0.704999983]
+      Size: [0.180000007, 0.0179999992]
+      Rotation: 0
+      Anchor: 0
+      SortOrder: 44
+      ParentEntity: 980009004
+    UIProgressBarComponent:
+      Value: 0
+      MaxValue: 1
+      ForegroundColor: [0.839999974, 0.620000005, 0.300000012, 1]
+      BackgroundColor: [0.0599999987, 0.0500000007, 0.0500000007, 0.899999976]
+  - Entity: 980000036
+    TagComponent:
+      Tag: Equipment_Materials
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    UIWidgetComponent:
+      Visible: true
+      EditorVisible: true
+      Position: [0.689999998, 0.569999993]
+      Size: [0.200000003, 0.125]
+      Rotation: 0
+      Anchor: 0
+      SortOrder: 42
+      ParentEntity: 980009004
+    UITextComponent:
+      Text: "材料"
+      Color: [1, 0.899999976, 0.680000007, 1]
+      FontSize: 25
+      FontPath: assets/fonts/wqy-microhei.ttc
+      Padding: [-1, -1, -1, -1]
+      AutoFit: false
+      HorizontalAlign: 0
+      VerticalAlign: 0
+      ShadowColor: [0.00999999978, 0.0149999997, 0.0179999992, 0.819999993]
+      ShadowOffset: [1.60000002, 1.60000002]
+      OutlineColor: [0, 0, 0, 0.860000014]
+      OutlineThickness: 1.10000002
+  - Entity: 980000035
+    TagComponent:
+      Tag: Equipment_Details
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    UIWidgetComponent:
+      Visible: true
+      EditorVisible: true
+      Position: [0.689999998, 0.289999992]
+      Size: [0.200000003, 0.254999995]
+      Rotation: 0
+      Anchor: 0
+      SortOrder: 42
+      ParentEntity: 980009004
+    UITextComponent:
+      Text: "旅人护衣"
+      Color: [0.980000019, 0.949999988, 0.860000014, 1]
+      FontSize: 25
+      FontPath: assets/fonts/wqy-microhei.ttc
+      Padding: [-1, -1, -1, -1]
+      AutoFit: false
+      HorizontalAlign: 0
+      VerticalAlign: 0
+      ShadowColor: [0.00999999978, 0.0149999997, 0.0179999992, 0.819999993]
+      ShadowOffset: [1.60000002, 1.60000002]
+      OutlineColor: [0, 0, 0, 0.860000014]
+      OutlineThickness: 1.10000002
+  - Entity: 980000034
+    TagComponent:
+      Tag: Equipment_Button_PageNext
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    UIWidgetComponent:
+      Visible: true
+      EditorVisible: true
+      Position: [0.594999969, 0.639999986]
+      Size: [0.0449999571, 0.0349999666]
+      Rotation: 0
+      Anchor: 0
+      SortOrder: 55
+      ParentEntity: 980009003
+    UITextComponent:
+      Text: ">"
+      Color: [0.899999976, 0.959999979, 0.939999998, 1]
+      FontSize: 25
+      FontPath: assets/fonts/wqy-microhei.ttc
+      Padding: [-1, -1, -1, -1]
+      AutoFit: false
+      HorizontalAlign: 1
+      VerticalAlign: 1
+      ShadowColor: [0.00999999978, 0.0149999997, 0.0179999992, 0.779999971]
+      ShadowOffset: [1.60000002, 1.60000002]
+      OutlineColor: [0, 0, 0, 0.860000014]
+      OutlineThickness: 1.20000005
+    UIButtonComponent:
+      NormalColor: [0.100000001, 0.119999997, 0.140000001, 0.899999976]
+      HoverColor: [0.200000003, 0.239999995, 0.280000001, 0.959999979]
+      PressedColor: [0.0700000003, 0.0799999982, 0.100000001, 0.959999979]
+      OnClickFunction: "progression:equipment_page_next"
+      TooltipText: ""
+  - Entity: 980000046
+    TagComponent:
+      Tag: Equipment_TooltipText
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    UIWidgetComponent:
+      Visible: false
+      EditorVisible: true
+      Position: [0.532000005, 0.349999994]
+      Size: [0.240999997, 0.100000001]
+      Rotation: 0
+      Anchor: 0
+      SortOrder: 86
+      ParentEntity: 980009005
+    UITextComponent:
+      Text: "装备属性"
+      Color: [0.959999979, 0.930000007, 0.819999993, 1]
+      FontSize: 20
+      FontPath: assets/fonts/wqy-microhei.ttc
+      Padding: [-1, -1, -1, -1]
+      AutoFit: false
+      HorizontalAlign: 0
+      VerticalAlign: 0
+      ShadowColor: [0.00999999978, 0.0149999997, 0.0179999992, 0.779999971]
+      ShadowOffset: [1.20000005, 1.20000005]
+      OutlineColor: [0, 0, 0, 0.720000029]
+      OutlineThickness: 0.899999976
+  - Entity: 980000045
+    TagComponent:
+      Tag: Equipment_TooltipPanel
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    UIWidgetComponent:
+      Visible: false
+      EditorVisible: true
+      Position: [0.519999981, 0.340000004]
+      Size: [0.264999986, 0.119999997]
+      Rotation: 0
+      Anchor: 0
+      SortOrder: 85
+      ParentEntity: 980009005
+    UIPanelComponent:
+      BackgroundColor: [0.0250000004, 0.0280000009, 0.0320000015, 0.939999998]
+      BorderColor: [0.920000017, 0.75999999, 0.360000014, 0.879999995]
+      BorderThickness: 1.5
+      ClipChildren: false
+      Draggable: false
+      ConstrainDragToParent: true
+      DragHandleHeight: 0.119999997
+  - Entity: 980000044
+    TagComponent:
+      Tag: Equipment_SlotBoots_Button
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    UIWidgetComponent:
+      Visible: true
+      EditorVisible: true
+      Position: [0.204999998, 0.469999999]
+      Size: [0.075000003, 0.0979999974]
+      Rotation: 0
+      Anchor: 0
+      SortOrder: 60
+      ParentEntity: 980009002
+    UIButtonComponent:
+      NormalColor: [0, 0, 0, 0]
+      HoverColor: [1, 0.850000024, 0.319999993, 0.119999997]
+      PressedColor: [1, 0.720000029, 0.200000003, 0.200000003]
+      OnClickFunction: "progression:select_equipment_slot:boots"
+      TooltipText: ""
+  - Entity: 980000043
+    TagComponent:
+      Tag: Equipment_SlotCharm_Button
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    UIWidgetComponent:
+      Visible: true
+      EditorVisible: true
+      Position: [0.104999997, 0.469999999]
+      Size: [0.075000003, 0.0979999974]
+      Rotation: 0
+      Anchor: 0
+      SortOrder: 60
+      ParentEntity: 980009002
+    UIButtonComponent:
+      NormalColor: [0, 0, 0, 0]
+      HoverColor: [1, 0.850000024, 0.319999993, 0.119999997]
+      PressedColor: [1, 0.720000029, 0.200000003, 0.200000003]
+      OnClickFunction: "progression:select_equipment_slot:charm"
+      TooltipText: ""
+  - Entity: 980000042
+    TagComponent:
+      Tag: Equipment_SlotRing_Button
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    UIWidgetComponent:
+      Visible: true
+      EditorVisible: true
+      Position: [0.204999998, 0.335000008]
+      Size: [0.075000003, 0.0979999974]
+      Rotation: 0
+      Anchor: 0
+      SortOrder: 60
+      ParentEntity: 980009002
+    UIButtonComponent:
+      NormalColor: [0, 0, 0, 0]
+      HoverColor: [1, 0.850000024, 0.319999993, 0.119999997]
+      PressedColor: [1, 0.720000029, 0.200000003, 0.200000003]
+      OnClickFunction: "progression:select_equipment_slot:ring"
+      TooltipText: ""
+  - Entity: 980000041
+    TagComponent:
+      Tag: Equipment_SlotArmor_Button
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    UIWidgetComponent:
+      Visible: true
+      EditorVisible: true
+      Position: [0.104999997, 0.335000008]
+      Size: [0.075000003, 0.0979999974]
+      Rotation: 0
+      Anchor: 0
+      SortOrder: 60
+      ParentEntity: 980009002
+    UIButtonComponent:
+      NormalColor: [0, 0, 0, 0]
+      HoverColor: [1, 0.850000024, 0.319999993, 0.119999997]
+      PressedColor: [1, 0.720000029, 0.200000003, 0.200000003]
+      OnClickFunction: "progression:select_equipment_slot:armor"
+      TooltipText: ""
+  - Entity: 980000040
+    TagComponent:
+      Tag: Equipment_Button_Toggle
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    UIWidgetComponent:
+      Visible: true
+      EditorVisible: true
+      Position: [0.680000007, 0.782719493]
+      Size: [0.215000033, 0.0620000362]
+      Rotation: 0
+      Anchor: 0
+      SortOrder: 55
+      ParentEntity: 980009004
+    UITextComponent:
+      Text: "装备 / 脱下"
+      Color: [0.899999976, 1, 0.920000017, 1]
+      FontSize: 25
+      FontPath: assets/fonts/wqy-microhei.ttc
+      Padding: [-1, -1, -1, -1]
+      AutoFit: false
+      HorizontalAlign: 0
+      VerticalAlign: 0
+      ShadowColor: [0.00999999978, 0.0149999997, 0.0179999992, 0.779999971]
+      ShadowOffset: [1.60000002, 1.60000002]
+      OutlineColor: [0, 0, 0, 0.860000014]
+      OutlineThickness: 1.20000005
+    UIButtonComponent:
+      NormalColor: [0.319999993, 0.439999998, 0.419999987, 0.939999998]
+      HoverColor: [0.439999998, 0.660000026, 0.600000024, 0.959999979]
+      PressedColor: [0.200000003, 0.300000012, 0.300000012, 0.959999979]
+      OnClickFunction: "progression:toggle_selected_equipment"
+      TooltipText: ""
+  - Entity: 980000033
+    TagComponent:
+      Tag: Equipment_Button_PagePrev
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    UIWidgetComponent:
+      Visible: true
+      EditorVisible: true
+      Position: [0.360000014, 0.639999986]
+      Size: [0.0449999571, 0.0349999666]
+      Rotation: 0
+      Anchor: 0
+      SortOrder: 55
+      ParentEntity: 980009003
+    UITextComponent:
+      Text: "<"
+      Color: [1, 0.939999998, 0.779999971, 1]
+      FontSize: 25
+      FontPath: assets/fonts/wqy-microhei.ttc
+      Padding: [-1, -1, -1, -1]
+      AutoFit: false
+      HorizontalAlign: 1
+      VerticalAlign: 1
+      ShadowColor: [0.00999999978, 0.0149999997, 0.0179999992, 0.779999971]
+      ShadowOffset: [1.60000002, 1.60000002]
+      OutlineColor: [0, 0, 0, 0.860000014]
+      OutlineThickness: 1.20000005
+    UIButtonComponent:
+      NormalColor: [0.74000001, 0.519999981, 0.200000003, 0.939999998]
+      HoverColor: [0.920000017, 0.720000029, 0.300000012, 0.959999979]
+      PressedColor: [0.519999981, 0.349999994, 0.140000001, 0.959999979]
+      OnClickFunction: "progression:equipment_page_prev"
+      TooltipText: ""
+  - Entity: 980000032
+    TagComponent:
+      Tag: Equipment_PageSlider
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    UIWidgetComponent:
+      Visible: true
+      EditorVisible: true
+      Position: [0.414999992, 0.639999986]
+      Size: [0.169999957, 0.0349999666]
+      Rotation: 0
+      Anchor: 0
+      SortOrder: 44
+      ParentEntity: 980009003
+    UISliderComponent:
+      Value: 1
+      MinValue: 1
+      MaxValue: 1
+      TrackColor: [0.0799999982, 0.100000001, 0.119999997, 0.920000017]
+      FillColor: [0.300000012, 0.779999971, 0.720000029, 0.959999979]
+      HandleColor: [0.920000017, 0.980000019, 0.920000017, 1]
+      HoverColor: [1, 0.920000017, 0.5, 1]
+      OnValueChangedFunction: "progression:equipment_page_slider"
+  - Entity: 980000031
+    TagComponent:
+      Tag: Equipment_PageText
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    UIWidgetComponent:
+      Visible: true
+      EditorVisible: true
+      Position: [0.370000005, 0.584999979]
+      Size: [0.279999971, 0.0700000525]
+      Rotation: 0
+      Anchor: 0
+      SortOrder: 42
+      ParentEntity: 980009003
+    UITextComponent:
+      Text: "第 1 页"
+      Color: [0.939999998, 0.899999976, 0.800000012, 1]
+      FontSize: 25
+      FontPath: assets/fonts/wqy-microhei.ttc
+      Padding: [-1, -1, -1, -1]
+      AutoFit: false
+      HorizontalAlign: 0
+      VerticalAlign: 0
+      ShadowColor: [0.00999999978, 0.0149999997, 0.0179999992, 0.819999993]
+      ShadowOffset: [1.60000002, 1.60000002]
+      OutlineColor: [0, 0, 0, 0.860000014]
+      OutlineThickness: 1.10000002
+  - Entity: 980000030
+    TagComponent:
+      Tag: Equipment_Status
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    UIWidgetComponent:
+      Visible: true
+      EditorVisible: true
+      Position: [0.0894756764, 0.6070503]
+      Size: [0.251327395, 0.129999995]
+      Rotation: 0
+      Anchor: 0
+      SortOrder: 42
+      ParentEntity: 980009002
+    UITextComponent:
+      Text: "装备页 1 / 2"
+      Color: [0.959999979, 0.920000017, 0.819999993, 1]
+      FontSize: 25
+      FontPath: assets/fonts/wqy-microhei.ttc
+      Padding: [-1, -1, -1, -1]
+      AutoFit: false
+      HorizontalAlign: 0
+      VerticalAlign: 0
+      ShadowColor: [0.00999999978, 0.0149999997, 0.0179999992, 0.819999993]
+      ShadowOffset: [1.60000002, 1.60000002]
+      OutlineColor: [0, 0, 0, 0.860000014]
+      OutlineThickness: 1.10000002
+  - Entity: 980000123
+    TagComponent:
+      Tag: Equipment_SlotBoots_Label
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    UIWidgetComponent:
+      Visible: true
+      EditorVisible: true
+      Position: [0.204999998, 0.574999988]
+      Size: [0.0900000036, 0.0350000001]
+      Rotation: 0
+      Anchor: 0
+      SortOrder: 42
+      ParentEntity: 980009002
+    UITextComponent:
+      Text: "足部"
+      Color: [0.899999976, 0.860000014, 0.75999999, 1]
+      FontSize: 25
+      FontPath: assets/fonts/wqy-microhei.ttc
+      Padding: [-1, -1, -1, -1]
+      AutoFit: false
+      HorizontalAlign: 0
+      VerticalAlign: 0
+      ShadowColor: [0.00999999978, 0.0149999997, 0.0179999992, 0.819999993]
+      ShadowOffset: [1.60000002, 1.60000002]
+      OutlineColor: [0, 0, 0, 0.860000014]
+      OutlineThickness: 1.10000002
+  - Entity: 980000113
+    TagComponent:
+      Tag: Equipment_SlotBoots
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    UIWidgetComponent:
+      Visible: true
+      EditorVisible: true
+      Position: [0.215000004, 0.481000006]
+      Size: [0.0549999997, 0.075000003]
+      Rotation: 0
+      Anchor: 0
+      SortOrder: 34
+      ParentEntity: 980009002
+    UIImageComponent:
+      Color: [1, 1, 1, 1]
+      TexturePath: assets/vertical_slice/ui/icons/icon_equipment_wind_boots.png
+      UVMin: [0, 0]
+      UVMax: [1, 1]
+      SpriteSheet: ""
+      CellIndex: -1
+      SubRect: ""
+  - Entity: 980000103
+    TagComponent:
+      Tag: Equipment_SlotBoots_Frame
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    UIWidgetComponent:
+      Visible: true
+      EditorVisible: true
+      Position: [0.204999998, 0.469999999]
+      Size: [0.075000003, 0.100000001]
+      Rotation: 0
+      Anchor: 0
+      SortOrder: 25
+      ParentEntity: 980009002
+    UIPanelComponent:
+      BackgroundColor: [0.0250000004, 0.0299999993, 0.0350000001, 0.779999971]
+      BorderColor: [0.680000007, 0.579999983, 0.379999995, 0.819999993]
+      BorderThickness: 2
+      ClipChildren: false
+      Draggable: false
+      ConstrainDragToParent: true
+      DragHandleHeight: 0.119999997
+  - Entity: 980000122
+    TagComponent:
+      Tag: Equipment_SlotCharm_Label
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    UIWidgetComponent:
+      Visible: true
+      EditorVisible: true
+      Position: [0.104999997, 0.574999988]
+      Size: [0.0900000036, 0.0350000001]
+      Rotation: 0
+      Anchor: 0
+      SortOrder: 42
+      ParentEntity: 980009002
+    UITextComponent:
+      Text: "护符"
+      Color: [0.899999976, 0.860000014, 0.75999999, 1]
+      FontSize: 25
+      FontPath: assets/fonts/wqy-microhei.ttc
+      Padding: [-1, -1, -1, -1]
+      AutoFit: false
+      HorizontalAlign: 0
+      VerticalAlign: 0
+      ShadowColor: [0.00999999978, 0.0149999997, 0.0179999992, 0.819999993]
+      ShadowOffset: [1.60000002, 1.60000002]
+      OutlineColor: [0, 0, 0, 0.860000014]
+      OutlineThickness: 1.10000002
+  - Entity: 980000112
+    TagComponent:
+      Tag: Equipment_SlotCharm
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    UIWidgetComponent:
+      Visible: true
+      EditorVisible: true
+      Position: [0.115000002, 0.481000006]
+      Size: [0.0549999997, 0.075000003]
+      Rotation: 0
+      Anchor: 0
+      SortOrder: 34
+      ParentEntity: 980009002
+    UIImageComponent:
+      Color: [1, 1, 1, 1]
+      TexturePath: assets/vertical_slice/ui/icons/icon_equipment_beast_tooth.png
+      UVMin: [0, 0]
+      UVMax: [1, 1]
+      SpriteSheet: ""
+      CellIndex: -1
+      SubRect: ""
+  - Entity: 980000102
+    TagComponent:
+      Tag: Equipment_SlotCharm_Frame
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    UIWidgetComponent:
+      Visible: true
+      EditorVisible: true
+      Position: [0.104999997, 0.469999999]
+      Size: [0.075000003, 0.100000001]
+      Rotation: 0
+      Anchor: 0
+      SortOrder: 25
+      ParentEntity: 980009002
+    UIPanelComponent:
+      BackgroundColor: [0.0250000004, 0.0299999993, 0.0350000001, 0.779999971]
+      BorderColor: [0.680000007, 0.579999983, 0.379999995, 0.819999993]
+      BorderThickness: 2
+      ClipChildren: false
+      Draggable: false
+      ConstrainDragToParent: true
+      DragHandleHeight: 0.119999997
+  - Entity: 980000121
+    TagComponent:
+      Tag: Equipment_SlotRing_Label
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    UIWidgetComponent:
+      Visible: true
+      EditorVisible: true
+      Position: [0.204999998, 0.439999998]
+      Size: [0.0900000036, 0.0350000001]
+      Rotation: 0
+      Anchor: 0
+      SortOrder: 42
+      ParentEntity: 980009002
+    UITextComponent:
+      Text: "饰品"
+      Color: [0.899999976, 0.860000014, 0.75999999, 1]
+      FontSize: 25
+      FontPath: assets/fonts/wqy-microhei.ttc
+      Padding: [-1, -1, -1, -1]
+      AutoFit: false
+      HorizontalAlign: 0
+      VerticalAlign: 0
+      ShadowColor: [0.00999999978, 0.0149999997, 0.0179999992, 0.819999993]
+      ShadowOffset: [1.60000002, 1.60000002]
+      OutlineColor: [0, 0, 0, 0.860000014]
+      OutlineThickness: 1.10000002
+  - Entity: 980000111
+    TagComponent:
+      Tag: Equipment_SlotRing
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    UIWidgetComponent:
+      Visible: true
+      EditorVisible: true
+      Position: [0.215000004, 0.345999986]
+      Size: [0.0549999997, 0.075000003]
+      Rotation: 0
+      Anchor: 0
+      SortOrder: 34
+      ParentEntity: 980009002
+    UIImageComponent:
+      Color: [1, 1, 1, 1]
+      TexturePath: assets/vertical_slice/ui/icons/icon_equipment_magic_ring.png
+      UVMin: [0, 0]
+      UVMax: [1, 1]
+      SpriteSheet: ""
+      CellIndex: -1
+      SubRect: ""
+  - Entity: 980000101
+    TagComponent:
+      Tag: Equipment_SlotRing_Frame
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    UIWidgetComponent:
+      Visible: true
+      EditorVisible: true
+      Position: [0.204999998, 0.335000008]
+      Size: [0.075000003, 0.100000001]
+      Rotation: 0
+      Anchor: 0
+      SortOrder: 25
+      ParentEntity: 980009002
+    UIPanelComponent:
+      BackgroundColor: [0.0250000004, 0.0299999993, 0.0350000001, 0.779999971]
+      BorderColor: [0.680000007, 0.579999983, 0.379999995, 0.819999993]
+      BorderThickness: 2
+      ClipChildren: false
+      Draggable: false
+      ConstrainDragToParent: true
+      DragHandleHeight: 0.119999997
+  - Entity: 980000120
+    TagComponent:
+      Tag: Equipment_SlotArmor_Label
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    UIWidgetComponent:
+      Visible: true
+      EditorVisible: true
+      Position: [0.104999997, 0.439999998]
+      Size: [0.0900000036, 0.0350000001]
+      Rotation: 0
+      Anchor: 0
+      SortOrder: 42
+      ParentEntity: 980009002
+    UITextComponent:
+      Text: "防具"
+      Color: [0.899999976, 0.860000014, 0.75999999, 1]
+      FontSize: 25
+      FontPath: assets/fonts/wqy-microhei.ttc
+      Padding: [-1, -1, -1, -1]
+      AutoFit: false
+      HorizontalAlign: 0
+      VerticalAlign: 0
+      ShadowColor: [0.00999999978, 0.0149999997, 0.0179999992, 0.819999993]
+      ShadowOffset: [1.60000002, 1.60000002]
+      OutlineColor: [0, 0, 0, 0.860000014]
+      OutlineThickness: 1.10000002
+  - Entity: 980000110
+    TagComponent:
+      Tag: Equipment_SlotArmor
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    UIWidgetComponent:
+      Visible: true
+      EditorVisible: true
+      Position: [0.115000002, 0.345999986]
+      Size: [0.0549999997, 0.075000003]
+      Rotation: 0
+      Anchor: 0
+      SortOrder: 34
+      ParentEntity: 980009002
+    UIImageComponent:
+      Color: [1, 1, 1, 1]
+      TexturePath: assets/vertical_slice/ui/icons/icon_equipment_traveler_armor.png
+      UVMin: [0, 0]
+      UVMax: [1, 1]
+      SpriteSheet: ""
+      CellIndex: -1
+      SubRect: ""
+  - Entity: 980000100
+    TagComponent:
+      Tag: Equipment_SlotArmor_Frame
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    UIWidgetComponent:
+      Visible: true
+      EditorVisible: true
+      Position: [0.104999997, 0.335000008]
+      Size: [0.075000003, 0.100000001]
+      Rotation: 0
+      Anchor: 0
+      SortOrder: 25
+      ParentEntity: 980009002
+    UIPanelComponent:
+      BackgroundColor: [0.0250000004, 0.0299999993, 0.0350000001, 0.779999971]
+      BorderColor: [0.680000007, 0.579999983, 0.379999995, 0.819999993]
+      BorderThickness: 2
+      ClipChildren: false
+      Draggable: false
+      ConstrainDragToParent: true
+      DragHandleHeight: 0.119999997
+  - Entity: 980000017
+    TagComponent:
+      Tag: Equipment_BagTitle
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    UIWidgetComponent:
+      Visible: true
+      EditorVisible: true
+      Position: [0.370000005, 0.275000006]
+      Size: [0.219999999, 0.0500000007]
+      Rotation: 0
+      Anchor: 0
+      SortOrder: 42
+      ParentEntity: 980009003
+    UITextComponent:
+      Text: "背包分页"
+      Color: [1, 0.920000017, 0.74000001, 1]
+      FontSize: 25
+      FontPath: assets/fonts/wqy-microhei.ttc
+      Padding: [-1, -1, -1, -1]
+      AutoFit: false
+      HorizontalAlign: 0
+      VerticalAlign: 0
+      ShadowColor: [0.00999999978, 0.0149999997, 0.0179999992, 0.819999993]
+      ShadowOffset: [1.60000002, 1.60000002]
+      OutlineColor: [0, 0, 0, 0.860000014]
+      OutlineThickness: 1.10000002
+  - Entity: 980000016
+    TagComponent:
+      Tag: Equipment_SlotTitle
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    UIWidgetComponent:
+      Visible: true
+      EditorVisible: true
+      Position: [0.100000001, 0.275000006]
+      Size: [0.200000003, 0.0500000007]
+      Rotation: 0
+      Anchor: 0
+      SortOrder: 42
+      ParentEntity: 980009002
+    UITextComponent:
+      Text: "当前装备"
+      Color: [1, 0.920000017, 0.74000001, 1]
+      FontSize: 25
+      FontPath: assets/fonts/wqy-microhei.ttc
+      Padding: [-1, -1, -1, -1]
+      AutoFit: false
+      HorizontalAlign: 0
+      VerticalAlign: 0
+      ShadowColor: [0.00999999978, 0.0149999997, 0.0179999992, 0.819999993]
+      ShadowOffset: [1.60000002, 1.60000002]
+      OutlineColor: [0, 0, 0, 0.860000014]
+      OutlineThickness: 1.10000002
+  - Entity: 980000015
+    TagComponent:
+      Tag: Equipment_DetailPanel
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    UIWidgetComponent:
+      Visible: true
+      EditorVisible: true
+      Position: [0.670000017, 0.25]
+      Size: [0.230000019, 0.42795676]
+      Rotation: 0
+      Anchor: 0
+      SortOrder: 18
+      ParentEntity: 980009004
+    UIPanelComponent:
+      BackgroundColor: [0.0500000007, 0.0500000007, 0.0599999987, 0.75999999]
+      BorderColor: [0.819999993, 0.620000005, 0.319999993, 0.860000014]
+      BorderThickness: 2
+      ClipChildren: false
+      Draggable: false
+      ConstrainDragToParent: true
+      DragHandleHeight: 0.119999997
+  - Entity: 980000014
+    TagComponent:
+      Tag: Equipment_BagPanel
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    UIWidgetComponent:
+      Visible: true
+      EditorVisible: true
+      Position: [0.350000024, 0.25]
+      Size: [0.299999952, 0.493870497]
+      Rotation: 0
+      Anchor: 0
+      SortOrder: 18
+      ParentEntity: 980009003
+    UIPanelComponent:
+      BackgroundColor: [0.0700000003, 0.0599999987, 0.0500000007, 0.620000005]
+      BorderColor: [0.699999988, 0.579999983, 0.340000004, 0.839999974]
+      BorderThickness: 2
+      ClipChildren: false
+      Draggable: false
+      ConstrainDragToParent: true
+      DragHandleHeight: 0.119999997
+  - Entity: 980000013
+    TagComponent:
+      Tag: Equipment_SlotsPanel
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    UIWidgetComponent:
+      Visible: true
+      EditorVisible: true
+      Position: [0.082499966, 0.25]
+      Size: [0.262499988, 0.492733836]
+      Rotation: 0
+      Anchor: 0
+      SortOrder: 18
+      ParentEntity: 980009002
+    UIPanelComponent:
+      BackgroundColor: [0.0599999987, 0.0500000007, 0.0500000007, 0.639999986]
+      BorderColor: [0.720000029, 0.540000021, 0.280000001, 0.860000014]
+      BorderThickness: 2
+      ClipChildren: false
+      Draggable: false
+      ConstrainDragToParent: true
+      DragHandleHeight: 0.119999997
+  - Entity: 980000012
+    TagComponent:
+      Tag: Equipment_Subtitle
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    UIWidgetComponent:
+      Visible: true
+      EditorVisible: true
+      Position: [0.0850000009, 0.175999999]
+      Size: [0.720000029, 0.0350000001]
+      Rotation: 0
+      Anchor: 0
+      SortOrder: 42
+      ParentEntity: 980009001
+    UITextComponent:
+      Text: "第 2 章 / 魔剑 Lv1 / 主角 Lv1"
+      Color: [0.899999976, 0.819999993, 0.680000007, 1]
+      FontSize: 18
+      FontPath: assets/fonts/wqy-microhei.ttc
+      Padding: [-1, -1, -1, -1]
+      AutoFit: true
+      HorizontalAlign: 0
+      VerticalAlign: 0
+      ShadowColor: [0.00999999978, 0.0149999997, 0.0179999992, 0.819999993]
+      ShadowOffset: [1.60000002, 1.60000002]
+      OutlineColor: [0, 0, 0, 0.860000014]
+      OutlineThickness: 1.10000002
+  - Entity: 980000011
+    TagComponent:
+      Tag: Equipment_Title
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    UIWidgetComponent:
+      Visible: true
+      EditorVisible: true
+      Position: [0.0850000009, 0.109999999]
+      Size: [0.419999987, 0.0599999987]
+      Rotation: 0
+      Anchor: 0
+      SortOrder: 42
+      ParentEntity: 980009001
+    UITextComponent:
+      Text: "装备与背包"
+      Color: [1, 0.939999998, 0.779999971, 1]
+      FontSize: 42
+      FontPath: assets/fonts/wqy-microhei.ttc
+      Padding: [-1, -1, -1, -1]
+      AutoFit: true
+      HorizontalAlign: 0
+      VerticalAlign: 0
+      ShadowColor: [0.00999999978, 0.0149999997, 0.0179999992, 0.899999976]
+      ShadowOffset: [2.4000001, 2.4000001]
+      OutlineColor: [0, 0, 0, 0.939999998]
+      OutlineThickness: 1.79999995
+  - Entity: 980000010
+    TagComponent:
+      Tag: Equipment_MainPanel
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    UIWidgetComponent:
+      Visible: true
+      EditorVisible: true
+      Position: [0.0500000119, 0.0799999833]
+      Size: [0.899999976, 0.779999971]
+      Rotation: 0
+      Anchor: 0
+      SortOrder: 10
+      ParentEntity: 980009001
+    UIPanelComponent:
+      BackgroundColor: [0.0599999987, 0.0520000011, 0.0450000018, 0.879999995]
+      BorderColor: [0.819999993, 0.620000005, 0.319999993, 0.899999976]
+      BorderThickness: 2
+      ClipChildren: false
+      Draggable: false
+      ConstrainDragToParent: true
+      DragHandleHeight: 0.119999997
+  - Entity: 980000002
+    TagComponent:
+      Tag: Equipment_Background
+    TransformComponent:
+      Translation: [0, 0.349999994, -0.800000012]
+      Rotation: [0, 0, 0]
+      Scale: [20, 11.25, 1]
+    SpriteRendererComponent:
+      Color: [0.819999993, 0.800000012, 0.699999988, 1]
+      Texture: assets/vertical_slice/vn/backgrounds/bg_forest_camp_night.png
+      TilingFactor: 1
+      UVMin: [0, 0]
+      UVMax: [1, 1]
+      FlipX: false
+      DrawOffset: [0, 0]
+      DrawScale: [1, 1]
+      PixelsPerUnit: 0
+      SpriteSheet: ""
+      CellIndex: -1
+      SubRect: ""
+  - Entity: 980000001
+    TagComponent:
+      Tag: Equipment_Camera
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    CameraComponent:
+      Camera:
+        ProjectionType: 1
+        PerspectiveFOV: 0.785398185
+        PerspectiveNear: 0.00999999978
+        PerspectiveFar: 1000
+        OrthographicSize: 10
+        OrthographicNear: -1
+        OrthographicFar: 1
+      Primary: true
+      FixedAspectRatio: false
+  - Entity: 980009005
+    TagComponent:
+      Tag: Equipment_TooltipGroup
     TransformComponent:
       Translation: [0, 0, 0]
       Rotation: [0, 0, 0]
@@ -95,9 +1073,9 @@ Entities:
       Anchor: 0
       SortOrder: 1
       ParentEntity: 980000209
-  - Entity: 980009005
+  - Entity: 980009003
     TagComponent:
-      Tag: Equipment_TooltipGroup
+      Tag: Equipment_BagGroup
     TransformComponent:
       Translation: [0, 0, 0]
       Rotation: [0, 0, 0]
@@ -111,1312 +1089,68 @@ Entities:
       Anchor: 0
       SortOrder: 1
       ParentEntity: 980000209
-  - Entity: 980000001
+  - Entity: 980009002
     TagComponent:
-      Tag: Equipment_Camera
-    TransformComponent:
-      Translation: [0, 0, 0]
-      Rotation: [0, 0, 0]
-      Scale: [1, 1, 1]
-    CameraComponent:
-      Camera:
-        ProjectionType: 1
-        PerspectiveFOV: 0.785398185
-        PerspectiveNear: 0.00999999978
-        PerspectiveFar: 1000
-        OrthographicSize: 10
-        OrthographicNear: -1
-        OrthographicFar: 1
-      Primary: true
-      FixedAspectRatio: false
-  - Entity: 980000002
-    TagComponent:
-      Tag: Equipment_Background
-    TransformComponent:
-      Translation: [0, 0.35, -0.8]
-      Rotation: [0, 0, 0]
-      Scale: [20, 11.25, 1]
-    SpriteRendererComponent:
-      Color: [0.82, 0.8, 0.7, 1]
-      Texture: assets/vertical_slice/vn/backgrounds/bg_forest_camp_night.png
-      TilingFactor: 1
-  - Entity: 980000010
-    TagComponent:
-      Tag: Equipment_MainPanel
+      Tag: Equipment_SlotsGroup
     TransformComponent:
       Translation: [0, 0, 0]
       Rotation: [0, 0, 0]
       Scale: [1, 1, 1]
     UIWidgetComponent:
       Visible: true
-      Position: [0.05, 0.08]
-      Size: [0.9, 0.78]
-      Rotation: 0.0
+      EditorVisible: true
+      Position: [0, 0]
+      Size: [1, 1]
+      Rotation: 0
       Anchor: 0
-      SortOrder: 10
-      ParentEntity: 980009001
-    UIPanelComponent:
-      BackgroundColor: [0.06, 0.052, 0.045, 0.88]
-      BorderColor: [0.82, 0.62, 0.32, 0.9]
-      BorderThickness: 2.0
-  - Entity: 980000011
+      SortOrder: 1
+      ParentEntity: 980000209
+  - Entity: 980009001
     TagComponent:
-      Tag: Equipment_Title
+      Tag: Equipment_HeaderGroup
     TransformComponent:
       Translation: [0, 0, 0]
       Rotation: [0, 0, 0]
       Scale: [1, 1, 1]
     UIWidgetComponent:
       Visible: true
-      Position: [0.085, 0.11]
-      Size: [0.42, 0.06]
-      Rotation: 0.0
+      EditorVisible: true
+      Position: [0, 0]
+      Size: [1, 1]
+      Rotation: 0
       Anchor: 0
-      SortOrder: 42
-      ParentEntity: 980009001
-    UITextComponent:
-      Text: "装备与背包"
-      Color: [1.0, 0.94, 0.78, 1]
-      FontSize: 42
-      FontPath: assets/fonts/wqy-microhei.ttc
-      ShadowColor: [0.01, 0.015, 0.018, 0.9]
-      ShadowOffset: [2.4, 2.4]
-      OutlineColor: [0.0, 0.0, 0.0, 0.94]
-      OutlineThickness: 1.8
-  - Entity: 980000012
+      SortOrder: 1
+      ParentEntity: 980000209
+  - Entity: 980000209
     TagComponent:
-      Tag: Equipment_Subtitle
+      Tag: WT_UI_Canvas
     TransformComponent:
       Translation: [0, 0, 0]
       Rotation: [0, 0, 0]
       Scale: [1, 1, 1]
+    UICanvasComponent:
+      Visible: true
+      ReferenceWidth: 1920
+      ReferenceHeight: 1080
     UIWidgetComponent:
       Visible: true
-      Position: [0.085, 0.176]
-      Size: [0.72, 0.035]
-      Rotation: 0.0
+      EditorVisible: true
+      Position: [0, 0]
+      Size: [1, 1]
+      Rotation: 0
       Anchor: 0
-      SortOrder: 42
-      ParentEntity: 980009001
-    UITextComponent:
-      Text: "第 2 章 / 魔剑 Lv1 / 主角 Lv1"
-      Color: [0.9, 0.82, 0.68, 1]
-      FontSize: 18
-      FontPath: assets/fonts/wqy-microhei.ttc
-      ShadowColor: [0.01, 0.015, 0.018, 0.82]
-      ShadowOffset: [1.6, 1.6]
-      OutlineColor: [0.0, 0.0, 0.0, 0.86]
-      OutlineThickness: 1.1
-  - Entity: 980000013
+      SortOrder: 0
+      ParentEntity: 0
+  - Entity: 980000210
     TagComponent:
-      Tag: Equipment_SlotsPanel
+      Tag: FlowController
     TransformComponent:
       Translation: [0, 0, 0]
       Rotation: [0, 0, 0]
       Scale: [1, 1, 1]
-    UIWidgetComponent:
-      Visible: true
-      Position: [0.08, 0.25]
-      Size: [0.24, 0.42]
-      Rotation: 0.0
-      Anchor: 0
-      SortOrder: 18
-      ParentEntity: 980009002
-    UIPanelComponent:
-      BackgroundColor: [0.06, 0.05, 0.05, 0.64]
-      BorderColor: [0.72, 0.54, 0.28, 0.86]
-      BorderThickness: 2.0
-  - Entity: 980000014
-    TagComponent:
-      Tag: Equipment_BagPanel
-    TransformComponent:
-      Translation: [0, 0, 0]
-      Rotation: [0, 0, 0]
-      Scale: [1, 1, 1]
-    UIWidgetComponent:
-      Visible: true
-      Position: [0.35, 0.25]
-      Size: [0.28, 0.42]
-      Rotation: 0.0
-      Anchor: 0
-      SortOrder: 18
-      ParentEntity: 980009003
-    UIPanelComponent:
-      BackgroundColor: [0.07, 0.06, 0.05, 0.62]
-      BorderColor: [0.7, 0.58, 0.34, 0.84]
-      BorderThickness: 2.0
-  - Entity: 980000015
-    TagComponent:
-      Tag: Equipment_DetailPanel
-    TransformComponent:
-      Translation: [0, 0, 0]
-      Rotation: [0, 0, 0]
-      Scale: [1, 1, 1]
-    UIWidgetComponent:
-      Visible: true
-      Position: [0.67, 0.25]
-      Size: [0.23, 0.42]
-      Rotation: 0.0
-      Anchor: 0
-      SortOrder: 18
-      ParentEntity: 980009004
-    UIPanelComponent:
-      BackgroundColor: [0.05, 0.05, 0.06, 0.76]
-      BorderColor: [0.82, 0.62, 0.32, 0.86]
-      BorderThickness: 2.0
-  - Entity: 980000016
-    TagComponent:
-      Tag: Equipment_SlotTitle
-    TransformComponent:
-      Translation: [0, 0, 0]
-      Rotation: [0, 0, 0]
-      Scale: [1, 1, 1]
-    UIWidgetComponent:
-      Visible: true
-      Position: [0.1, 0.275]
-      Size: [0.18, 0.035]
-      Rotation: 0.0
-      Anchor: 0
-      SortOrder: 42
-      ParentEntity: 980009002
-    UITextComponent:
-      Text: "当前装备"
-      Color: [1.0, 0.92, 0.74, 1]
-      FontSize: 20
-      FontPath: assets/fonts/wqy-microhei.ttc
-      ShadowColor: [0.01, 0.015, 0.018, 0.82]
-      ShadowOffset: [1.6, 1.6]
-      OutlineColor: [0.0, 0.0, 0.0, 0.86]
-      OutlineThickness: 1.1
-  - Entity: 980000017
-    TagComponent:
-      Tag: Equipment_BagTitle
-    TransformComponent:
-      Translation: [0, 0, 0]
-      Rotation: [0, 0, 0]
-      Scale: [1, 1, 1]
-    UIWidgetComponent:
-      Visible: true
-      Position: [0.37, 0.275]
-      Size: [0.2, 0.035]
-      Rotation: 0.0
-      Anchor: 0
-      SortOrder: 42
-      ParentEntity: 980009003
-    UITextComponent:
-      Text: "背包分页"
-      Color: [1.0, 0.92, 0.74, 1]
-      FontSize: 20
-      FontPath: assets/fonts/wqy-microhei.ttc
-      ShadowColor: [0.01, 0.015, 0.018, 0.82]
-      ShadowOffset: [1.6, 1.6]
-      OutlineColor: [0.0, 0.0, 0.0, 0.86]
-      OutlineThickness: 1.1
-  - Entity: 980000100
-    TagComponent:
-      Tag: Equipment_SlotArmor_Frame
-    TransformComponent:
-      Translation: [0, 0, 0]
-      Rotation: [0, 0, 0]
-      Scale: [1, 1, 1]
-    UIWidgetComponent:
-      Visible: true
-      Position: [0.105, 0.335]
-      Size: [0.075, 0.1]
-      Rotation: 0.0
-      Anchor: 0
-      SortOrder: 25
-      ParentEntity: 980009002
-    UIPanelComponent:
-      BackgroundColor: [0.025, 0.03, 0.035, 0.78]
-      BorderColor: [0.68, 0.58, 0.38, 0.82]
-      BorderThickness: 2.0
-  - Entity: 980000110
-    TagComponent:
-      Tag: Equipment_SlotArmor
-    TransformComponent:
-      Translation: [0, 0, 0]
-      Rotation: [0, 0, 0]
-      Scale: [1, 1, 1]
-    UIWidgetComponent:
-      Visible: true
-      Position: [0.11499999999999999, 0.34600000000000003]
-      Size: [0.055, 0.075]
-      Rotation: 0.0
-      Anchor: 0
-      SortOrder: 34
-      ParentEntity: 980009002
-    UIImageComponent:
-      Color: [1, 1, 1, 1.0]
-      TexturePath: assets/vertical_slice/ui/icons/icon_equipment_traveler_armor.png
-  - Entity: 980000120
-    TagComponent:
-      Tag: Equipment_SlotArmor_Label
-    TransformComponent:
-      Translation: [0, 0, 0]
-      Rotation: [0, 0, 0]
-      Scale: [1, 1, 1]
-    UIWidgetComponent:
-      Visible: true
-      Position: [0.105, 0.44]
-      Size: [0.075, 0.026]
-      Rotation: 0.0
-      Anchor: 0
-      SortOrder: 42
-      ParentEntity: 980009002
-    UITextComponent:
-      Text: "防具"
-      Color: [0.9, 0.86, 0.76, 1]
-      FontSize: 14
-      FontPath: assets/fonts/wqy-microhei.ttc
-      ShadowColor: [0.01, 0.015, 0.018, 0.82]
-      ShadowOffset: [1.6, 1.6]
-      OutlineColor: [0.0, 0.0, 0.0, 0.86]
-      OutlineThickness: 1.1
-  - Entity: 980000101
-    TagComponent:
-      Tag: Equipment_SlotRing_Frame
-    TransformComponent:
-      Translation: [0, 0, 0]
-      Rotation: [0, 0, 0]
-      Scale: [1, 1, 1]
-    UIWidgetComponent:
-      Visible: true
-      Position: [0.20500000000000002, 0.335]
-      Size: [0.075, 0.1]
-      Rotation: 0.0
-      Anchor: 0
-      SortOrder: 25
-      ParentEntity: 980009002
-    UIPanelComponent:
-      BackgroundColor: [0.025, 0.03, 0.035, 0.78]
-      BorderColor: [0.68, 0.58, 0.38, 0.82]
-      BorderThickness: 2.0
-  - Entity: 980000111
-    TagComponent:
-      Tag: Equipment_SlotRing
-    TransformComponent:
-      Translation: [0, 0, 0]
-      Rotation: [0, 0, 0]
-      Scale: [1, 1, 1]
-    UIWidgetComponent:
-      Visible: true
-      Position: [0.21500000000000002, 0.34600000000000003]
-      Size: [0.055, 0.075]
-      Rotation: 0.0
-      Anchor: 0
-      SortOrder: 34
-      ParentEntity: 980009002
-    UIImageComponent:
-      Color: [1, 1, 1, 1.0]
-      TexturePath: assets/vertical_slice/ui/icons/icon_equipment_magic_ring.png
-  - Entity: 980000121
-    TagComponent:
-      Tag: Equipment_SlotRing_Label
-    TransformComponent:
-      Translation: [0, 0, 0]
-      Rotation: [0, 0, 0]
-      Scale: [1, 1, 1]
-    UIWidgetComponent:
-      Visible: true
-      Position: [0.20500000000000002, 0.44]
-      Size: [0.075, 0.026]
-      Rotation: 0.0
-      Anchor: 0
-      SortOrder: 42
-      ParentEntity: 980009002
-    UITextComponent:
-      Text: "饰品"
-      Color: [0.9, 0.86, 0.76, 1]
-      FontSize: 14
-      FontPath: assets/fonts/wqy-microhei.ttc
-      ShadowColor: [0.01, 0.015, 0.018, 0.82]
-      ShadowOffset: [1.6, 1.6]
-      OutlineColor: [0.0, 0.0, 0.0, 0.86]
-      OutlineThickness: 1.1
-  - Entity: 980000102
-    TagComponent:
-      Tag: Equipment_SlotCharm_Frame
-    TransformComponent:
-      Translation: [0, 0, 0]
-      Rotation: [0, 0, 0]
-      Scale: [1, 1, 1]
-    UIWidgetComponent:
-      Visible: true
-      Position: [0.105, 0.47000000000000003]
-      Size: [0.075, 0.1]
-      Rotation: 0.0
-      Anchor: 0
-      SortOrder: 25
-      ParentEntity: 980009002
-    UIPanelComponent:
-      BackgroundColor: [0.025, 0.03, 0.035, 0.78]
-      BorderColor: [0.68, 0.58, 0.38, 0.82]
-      BorderThickness: 2.0
-  - Entity: 980000112
-    TagComponent:
-      Tag: Equipment_SlotCharm
-    TransformComponent:
-      Translation: [0, 0, 0]
-      Rotation: [0, 0, 0]
-      Scale: [1, 1, 1]
-    UIWidgetComponent:
-      Visible: true
-      Position: [0.11499999999999999, 0.48100000000000004]
-      Size: [0.055, 0.075]
-      Rotation: 0.0
-      Anchor: 0
-      SortOrder: 34
-      ParentEntity: 980009002
-    UIImageComponent:
-      Color: [1, 1, 1, 1.0]
-      TexturePath: assets/vertical_slice/ui/icons/icon_equipment_beast_tooth.png
-  - Entity: 980000122
-    TagComponent:
-      Tag: Equipment_SlotCharm_Label
-    TransformComponent:
-      Translation: [0, 0, 0]
-      Rotation: [0, 0, 0]
-      Scale: [1, 1, 1]
-    UIWidgetComponent:
-      Visible: true
-      Position: [0.105, 0.5750000000000001]
-      Size: [0.075, 0.026]
-      Rotation: 0.0
-      Anchor: 0
-      SortOrder: 42
-      ParentEntity: 980009002
-    UITextComponent:
-      Text: "护符"
-      Color: [0.9, 0.86, 0.76, 1]
-      FontSize: 14
-      FontPath: assets/fonts/wqy-microhei.ttc
-      ShadowColor: [0.01, 0.015, 0.018, 0.82]
-      ShadowOffset: [1.6, 1.6]
-      OutlineColor: [0.0, 0.0, 0.0, 0.86]
-      OutlineThickness: 1.1
-  - Entity: 980000103
-    TagComponent:
-      Tag: Equipment_SlotBoots_Frame
-    TransformComponent:
-      Translation: [0, 0, 0]
-      Rotation: [0, 0, 0]
-      Scale: [1, 1, 1]
-    UIWidgetComponent:
-      Visible: true
-      Position: [0.20500000000000002, 0.47000000000000003]
-      Size: [0.075, 0.1]
-      Rotation: 0.0
-      Anchor: 0
-      SortOrder: 25
-      ParentEntity: 980009002
-    UIPanelComponent:
-      BackgroundColor: [0.025, 0.03, 0.035, 0.78]
-      BorderColor: [0.68, 0.58, 0.38, 0.82]
-      BorderThickness: 2.0
-  - Entity: 980000113
-    TagComponent:
-      Tag: Equipment_SlotBoots
-    TransformComponent:
-      Translation: [0, 0, 0]
-      Rotation: [0, 0, 0]
-      Scale: [1, 1, 1]
-    UIWidgetComponent:
-      Visible: true
-      Position: [0.21500000000000002, 0.48100000000000004]
-      Size: [0.055, 0.075]
-      Rotation: 0.0
-      Anchor: 0
-      SortOrder: 34
-      ParentEntity: 980009002
-    UIImageComponent:
-      Color: [1, 1, 1, 1.0]
-      TexturePath: assets/vertical_slice/ui/icons/icon_equipment_wind_boots.png
-  - Entity: 980000123
-    TagComponent:
-      Tag: Equipment_SlotBoots_Label
-    TransformComponent:
-      Translation: [0, 0, 0]
-      Rotation: [0, 0, 0]
-      Scale: [1, 1, 1]
-    UIWidgetComponent:
-      Visible: true
-      Position: [0.20500000000000002, 0.5750000000000001]
-      Size: [0.075, 0.026]
-      Rotation: 0.0
-      Anchor: 0
-      SortOrder: 42
-      ParentEntity: 980009002
-    UITextComponent:
-      Text: "足部"
-      Color: [0.9, 0.86, 0.76, 1]
-      FontSize: 14
-      FontPath: assets/fonts/wqy-microhei.ttc
-      ShadowColor: [0.01, 0.015, 0.018, 0.82]
-      ShadowOffset: [1.6, 1.6]
-      OutlineColor: [0.0, 0.0, 0.0, 0.86]
-      OutlineThickness: 1.1
-  - Entity: 980000161
-    TagComponent:
-      Tag: Equipment_Item_1_Frame
-    TransformComponent:
-      Translation: [0, 0, 0]
-      Rotation: [0, 0, 0]
-      Scale: [1, 1, 1]
-    UIWidgetComponent:
-      Visible: true
-      Position: [0.385, 0.335]
-      Size: [0.075, 0.098]
-      Rotation: 0.0
-      Anchor: 0
-      SortOrder: 25
-      ParentEntity: 980009003
-    UIPanelComponent:
-      BackgroundColor: [0.025, 0.03, 0.035, 0.78]
-      BorderColor: [0.58, 0.48, 0.31, 0.78]
-      BorderThickness: 2.0
-  - Entity: 980000181
-    TagComponent:
-      Tag: Equipment_Item_1
-    TransformComponent:
-      Translation: [0, 0, 0]
-      Rotation: [0, 0, 0]
-      Scale: [1, 1, 1]
-    UIWidgetComponent:
-      Visible: true
-      Position: [0.395, 0.34600000000000003]
-      Size: [0.055, 0.075]
-      Rotation: 0.0
-      Anchor: 0
-      SortOrder: 34
-      ParentEntity: 980009003
-    UIImageComponent:
-      Color: [1, 1, 1, 1.0]
-      TexturePath: assets/vertical_slice/ui/icons/icon_equipment_traveler_armor.png
-  - Entity: 980000201
-    TagComponent:
-      Tag: Equipment_Item_1_Button
-    TransformComponent:
-      Translation: [0, 0, 0]
-      Rotation: [0, 0, 0]
-      Scale: [1, 1, 1]
-    UIWidgetComponent:
-      Visible: true
-      Position: [0.385, 0.335]
-      Size: [0.075, 0.098]
-      Rotation: 0.0
-      Anchor: 0
-      SortOrder: 58
-      ParentEntity: 980009003
-    UIButtonComponent:
-      NormalColor: [0, 0, 0, 0]
-      HoverColor: [0.95, 1, 0.82, 0.14]
-      PressedColor: [1, 0.90, 0.45, 0.24]
-      OnClickFunction: "progression:select_equipment_traveler_armor"
-  - Entity: 980000162
-    TagComponent:
-      Tag: Equipment_Item_2_Frame
-    TransformComponent:
-      Translation: [0, 0, 0]
-      Rotation: [0, 0, 0]
-      Scale: [1, 1, 1]
-    UIWidgetComponent:
-      Visible: true
-      Position: [0.49, 0.335]
-      Size: [0.075, 0.098]
-      Rotation: 0.0
-      Anchor: 0
-      SortOrder: 25
-      ParentEntity: 980009003
-    UIPanelComponent:
-      BackgroundColor: [0.025, 0.03, 0.035, 0.78]
-      BorderColor: [0.58, 0.48, 0.31, 0.78]
-      BorderThickness: 2.0
-  - Entity: 980000182
-    TagComponent:
-      Tag: Equipment_Item_2
-    TransformComponent:
-      Translation: [0, 0, 0]
-      Rotation: [0, 0, 0]
-      Scale: [1, 1, 1]
-    UIWidgetComponent:
-      Visible: true
-      Position: [0.5, 0.34600000000000003]
-      Size: [0.055, 0.075]
-      Rotation: 0.0
-      Anchor: 0
-      SortOrder: 34
-      ParentEntity: 980009003
-    UIImageComponent:
-      Color: [1, 1, 1, 1.0]
-      TexturePath: assets/vertical_slice/ui/icons/icon_equipment_black_forest_armor.png
-  - Entity: 980000202
-    TagComponent:
-      Tag: Equipment_Item_2_Button
-    TransformComponent:
-      Translation: [0, 0, 0]
-      Rotation: [0, 0, 0]
-      Scale: [1, 1, 1]
-    UIWidgetComponent:
-      Visible: true
-      Position: [0.49, 0.335]
-      Size: [0.075, 0.098]
-      Rotation: 0.0
-      Anchor: 0
-      SortOrder: 58
-      ParentEntity: 980009003
-    UIButtonComponent:
-      NormalColor: [0, 0, 0, 0]
-      HoverColor: [0.95, 1, 0.82, 0.14]
-      PressedColor: [1, 0.90, 0.45, 0.24]
-      OnClickFunction: "progression:select_equipment_black_forest_armor"
-  - Entity: 980000163
-    TagComponent:
-      Tag: Equipment_Item_3_Frame
-    TransformComponent:
-      Translation: [0, 0, 0]
-      Rotation: [0, 0, 0]
-      Scale: [1, 1, 1]
-    UIWidgetComponent:
-      Visible: true
-      Position: [0.385, 0.47000000000000003]
-      Size: [0.075, 0.098]
-      Rotation: 0.0
-      Anchor: 0
-      SortOrder: 25
-      ParentEntity: 980009003
-    UIPanelComponent:
-      BackgroundColor: [0.025, 0.03, 0.035, 0.78]
-      BorderColor: [0.58, 0.48, 0.31, 0.78]
-      BorderThickness: 2.0
-  - Entity: 980000183
-    TagComponent:
-      Tag: Equipment_Item_3
-    TransformComponent:
-      Translation: [0, 0, 0]
-      Rotation: [0, 0, 0]
-      Scale: [1, 1, 1]
-    UIWidgetComponent:
-      Visible: true
-      Position: [0.395, 0.48100000000000004]
-      Size: [0.055, 0.075]
-      Rotation: 0.0
-      Anchor: 0
-      SortOrder: 34
-      ParentEntity: 980009003
-    UIImageComponent:
-      Color: [1, 1, 1, 1.0]
-      TexturePath: assets/vertical_slice/ui/icons/icon_equipment_beast_tooth.png
-  - Entity: 980000203
-    TagComponent:
-      Tag: Equipment_Item_3_Button
-    TransformComponent:
-      Translation: [0, 0, 0]
-      Rotation: [0, 0, 0]
-      Scale: [1, 1, 1]
-    UIWidgetComponent:
-      Visible: true
-      Position: [0.385, 0.47000000000000003]
-      Size: [0.075, 0.098]
-      Rotation: 0.0
-      Anchor: 0
-      SortOrder: 58
-      ParentEntity: 980009003
-    UIButtonComponent:
-      NormalColor: [0, 0, 0, 0]
-      HoverColor: [0.95, 1, 0.82, 0.14]
-      PressedColor: [1, 0.90, 0.45, 0.24]
-      OnClickFunction: "progression:select_equipment_beast_tooth_pendant"
-  - Entity: 980000164
-    TagComponent:
-      Tag: Equipment_Item_4_Frame
-    TransformComponent:
-      Translation: [0, 0, 0]
-      Rotation: [0, 0, 0]
-      Scale: [1, 1, 1]
-    UIWidgetComponent:
-      Visible: true
-      Position: [0.49, 0.47000000000000003]
-      Size: [0.075, 0.098]
-      Rotation: 0.0
-      Anchor: 0
-      SortOrder: 25
-      ParentEntity: 980009003
-    UIPanelComponent:
-      BackgroundColor: [0.025, 0.03, 0.035, 0.78]
-      BorderColor: [0.58, 0.48, 0.31, 0.78]
-      BorderThickness: 2.0
-  - Entity: 980000184
-    TagComponent:
-      Tag: Equipment_Item_4
-    TransformComponent:
-      Translation: [0, 0, 0]
-      Rotation: [0, 0, 0]
-      Scale: [1, 1, 1]
-    UIWidgetComponent:
-      Visible: true
-      Position: [0.5, 0.48100000000000004]
-      Size: [0.055, 0.075]
-      Rotation: 0.0
-      Anchor: 0
-      SortOrder: 34
-      ParentEntity: 980009003
-    UIImageComponent:
-      Color: [1, 1, 1, 1.0]
-      TexturePath: assets/vertical_slice/ui/icons/icon_equipment_magic_ring.png
-  - Entity: 980000204
-    TagComponent:
-      Tag: Equipment_Item_4_Button
-    TransformComponent:
-      Translation: [0, 0, 0]
-      Rotation: [0, 0, 0]
-      Scale: [1, 1, 1]
-    UIWidgetComponent:
-      Visible: true
-      Position: [0.49, 0.47000000000000003]
-      Size: [0.075, 0.098]
-      Rotation: 0.0
-      Anchor: 0
-      SortOrder: 58
-      ParentEntity: 980009003
-    UIButtonComponent:
-      NormalColor: [0, 0, 0, 0]
-      HoverColor: [0.95, 1, 0.82, 0.14]
-      PressedColor: [1, 0.90, 0.45, 0.24]
-      OnClickFunction: "progression:select_equipment_novice_magic_ring"
-  - Entity: 980000165
-    TagComponent:
-      Tag: Equipment_Item_5_Frame
-    TransformComponent:
-      Translation: [0, 0, 0]
-      Rotation: [0, 0, 0]
-      Scale: [1, 1, 1]
-    UIWidgetComponent:
-      Visible: true
-      Position: [0.385, 0.335]
-      Size: [0.075, 0.098]
-      Rotation: 0.0
-      Anchor: 0
-      SortOrder: 25
-      ParentEntity: 980009003
-    UIPanelComponent:
-      BackgroundColor: [0.025, 0.03, 0.035, 0.78]
-      BorderColor: [0.58, 0.48, 0.31, 0.78]
-      BorderThickness: 2.0
-  - Entity: 980000185
-    TagComponent:
-      Tag: Equipment_Item_5
-    TransformComponent:
-      Translation: [0, 0, 0]
-      Rotation: [0, 0, 0]
-      Scale: [1, 1, 1]
-    UIWidgetComponent:
-      Visible: true
-      Position: [0.395, 0.34600000000000003]
-      Size: [0.055, 0.075]
-      Rotation: 0.0
-      Anchor: 0
-      SortOrder: 34
-      ParentEntity: 980009003
-    UIImageComponent:
-      Color: [1, 1, 1, 1.0]
-      TexturePath: assets/vertical_slice/ui/icons/icon_equipment_wind_boots.png
-  - Entity: 980000205
-    TagComponent:
-      Tag: Equipment_Item_5_Button
-    TransformComponent:
-      Translation: [0, 0, 0]
-      Rotation: [0, 0, 0]
-      Scale: [1, 1, 1]
-    UIWidgetComponent:
-      Visible: true
-      Position: [0.385, 0.335]
-      Size: [0.075, 0.098]
-      Rotation: 0.0
-      Anchor: 0
-      SortOrder: 58
-      ParentEntity: 980009003
-    UIButtonComponent:
-      NormalColor: [0, 0, 0, 0]
-      HoverColor: [0.95, 1, 0.82, 0.14]
-      PressedColor: [1, 0.90, 0.45, 0.24]
-      OnClickFunction: "progression:select_equipment_wind_boots"
-  - Entity: 980000166
-    TagComponent:
-      Tag: Equipment_Item_6_Frame
-    TransformComponent:
-      Translation: [0, 0, 0]
-      Rotation: [0, 0, 0]
-      Scale: [1, 1, 1]
-    UIWidgetComponent:
-      Visible: true
-      Position: [0.49, 0.335]
-      Size: [0.075, 0.098]
-      Rotation: 0.0
-      Anchor: 0
-      SortOrder: 25
-      ParentEntity: 980009003
-    UIPanelComponent:
-      BackgroundColor: [0.025, 0.03, 0.035, 0.78]
-      BorderColor: [0.58, 0.48, 0.31, 0.78]
-      BorderThickness: 2.0
-  - Entity: 980000186
-    TagComponent:
-      Tag: Equipment_Item_6
-    TransformComponent:
-      Translation: [0, 0, 0]
-      Rotation: [0, 0, 0]
-      Scale: [1, 1, 1]
-    UIWidgetComponent:
-      Visible: true
-      Position: [0.5, 0.34600000000000003]
-      Size: [0.055, 0.075]
-      Rotation: 0.0
-      Anchor: 0
-      SortOrder: 34
-      ParentEntity: 980009003
-    UIImageComponent:
-      Color: [1, 1, 1, 1.0]
-      TexturePath: assets/vertical_slice/ui/icons/icon_equipment_ward_charm.png
-  - Entity: 980000206
-    TagComponent:
-      Tag: Equipment_Item_6_Button
-    TransformComponent:
-      Translation: [0, 0, 0]
-      Rotation: [0, 0, 0]
-      Scale: [1, 1, 1]
-    UIWidgetComponent:
-      Visible: true
-      Position: [0.49, 0.335]
-      Size: [0.075, 0.098]
-      Rotation: 0.0
-      Anchor: 0
-      SortOrder: 58
-      ParentEntity: 980009003
-    UIButtonComponent:
-      NormalColor: [0, 0, 0, 0]
-      HoverColor: [0.95, 1, 0.82, 0.14]
-      PressedColor: [1, 0.90, 0.45, 0.24]
-      OnClickFunction: "progression:select_equipment_old_ward_charm"
-  - Entity: 980000167
-    TagComponent:
-      Tag: Equipment_Item_7_Frame
-    TransformComponent:
-      Translation: [0, 0, 0]
-      Rotation: [0, 0, 0]
-      Scale: [1, 1, 1]
-    UIWidgetComponent:
-      Visible: true
-      Position: [0.385, 0.47000000000000003]
-      Size: [0.075, 0.098]
-      Rotation: 0.0
-      Anchor: 0
-      SortOrder: 25
-      ParentEntity: 980009003
-    UIPanelComponent:
-      BackgroundColor: [0.025, 0.03, 0.035, 0.78]
-      BorderColor: [0.58, 0.48, 0.31, 0.78]
-      BorderThickness: 2.0
-  - Entity: 980000187
-    TagComponent:
-      Tag: Equipment_Item_7
-    TransformComponent:
-      Translation: [0, 0, 0]
-      Rotation: [0, 0, 0]
-      Scale: [1, 1, 1]
-    UIWidgetComponent:
-      Visible: true
-      Position: [0.395, 0.48100000000000004]
-      Size: [0.055, 0.075]
-      Rotation: 0.0
-      Anchor: 0
-      SortOrder: 34
-      ParentEntity: 980009003
-    UIImageComponent:
-      Color: [1, 1, 1, 1.0]
-      TexturePath: assets/vertical_slice/ui/icons/icon_equipment_training_blade.png
-  - Entity: 980000207
-    TagComponent:
-      Tag: Equipment_Item_7_Button
-    TransformComponent:
-      Translation: [0, 0, 0]
-      Rotation: [0, 0, 0]
-      Scale: [1, 1, 1]
-    UIWidgetComponent:
-      Visible: true
-      Position: [0.385, 0.47000000000000003]
-      Size: [0.075, 0.098]
-      Rotation: 0.0
-      Anchor: 0
-      SortOrder: 58
-      ParentEntity: 980009003
-    UIButtonComponent:
-      NormalColor: [0, 0, 0, 0]
-      HoverColor: [0.95, 1, 0.82, 0.14]
-      PressedColor: [1, 0.90, 0.45, 0.24]
-      OnClickFunction: "progression:select_equipment_training_blade"
-  - Entity: 980000168
-    TagComponent:
-      Tag: Equipment_Item_8_Frame
-    TransformComponent:
-      Translation: [0, 0, 0]
-      Rotation: [0, 0, 0]
-      Scale: [1, 1, 1]
-    UIWidgetComponent:
-      Visible: true
-      Position: [0.49, 0.47000000000000003]
-      Size: [0.075, 0.098]
-      Rotation: 0.0
-      Anchor: 0
-      SortOrder: 25
-      ParentEntity: 980009003
-    UIPanelComponent:
-      BackgroundColor: [0.025, 0.03, 0.035, 0.78]
-      BorderColor: [0.58, 0.48, 0.31, 0.78]
-      BorderThickness: 2.0
-  - Entity: 980000188
-    TagComponent:
-      Tag: Equipment_Item_8
-    TransformComponent:
-      Translation: [0, 0, 0]
-      Rotation: [0, 0, 0]
-      Scale: [1, 1, 1]
-    UIWidgetComponent:
-      Visible: true
-      Position: [0.5, 0.48100000000000004]
-      Size: [0.055, 0.075]
-      Rotation: 0.0
-      Anchor: 0
-      SortOrder: 34
-      ParentEntity: 980009003
-    UIImageComponent:
-      Color: [1, 1, 1, 1.0]
-      TexturePath: assets/vertical_slice/ui/icons/icon_equipment_angel_feather.png
-  - Entity: 980000208
-    TagComponent:
-      Tag: Equipment_Item_8_Button
-    TransformComponent:
-      Translation: [0, 0, 0]
-      Rotation: [0, 0, 0]
-      Scale: [1, 1, 1]
-    UIWidgetComponent:
-      Visible: true
-      Position: [0.49, 0.47000000000000003]
-      Size: [0.075, 0.098]
-      Rotation: 0.0
-      Anchor: 0
-      SortOrder: 58
-      ParentEntity: 980009003
-    UIButtonComponent:
-      NormalColor: [0, 0, 0, 0]
-      HoverColor: [0.95, 1, 0.82, 0.14]
-      PressedColor: [1, 0.90, 0.45, 0.24]
-      OnClickFunction: "progression:select_equipment_angel_feather"
-  - Entity: 980000030
-    TagComponent:
-      Tag: Equipment_Status
-    TransformComponent:
-      Translation: [0, 0, 0]
-      Rotation: [0, 0, 0]
-      Scale: [1, 1, 1]
-    UIWidgetComponent:
-      Visible: true
-      Position: [0.1, 0.61]
-      Size: [0.22, 0.09]
-      Rotation: 0.0
-      Anchor: 0
-      SortOrder: 42
-      ParentEntity: 980009002
-    UITextComponent:
-      Text: "装备页 1 / 2"
-      Color: [0.96, 0.92, 0.82, 1]
-      FontSize: 17
-      FontPath: assets/fonts/wqy-microhei.ttc
-      ShadowColor: [0.01, 0.015, 0.018, 0.82]
-      ShadowOffset: [1.6, 1.6]
-      OutlineColor: [0.0, 0.0, 0.0, 0.86]
-      OutlineThickness: 1.1
-  - Entity: 980000031
-    TagComponent:
-      Tag: Equipment_PageText
-    TransformComponent:
-      Translation: [0, 0, 0]
-      Rotation: [0, 0, 0]
-      Scale: [1, 1, 1]
-    UIWidgetComponent:
-      Visible: true
-      Position: [0.37, 0.6]
-      Size: [0.24, 0.042]
-      Rotation: 0.0
-      Anchor: 0
-      SortOrder: 42
-      ParentEntity: 980009003
-    UITextComponent:
-      Text: "第 1 页"
-      Color: [0.94, 0.9, 0.8, 1]
-      FontSize: 16
-      FontPath: assets/fonts/wqy-microhei.ttc
-      ShadowColor: [0.01, 0.015, 0.018, 0.82]
-      ShadowOffset: [1.6, 1.6]
-      OutlineColor: [0.0, 0.0, 0.0, 0.86]
-      OutlineThickness: 1.1
-  - Entity: 980000032
-    TagComponent:
-      Tag: Equipment_PageSlider
-    TransformComponent:
-      Translation: [0, 0, 0]
-      Rotation: [0, 0, 0]
-      Scale: [1, 1, 1]
-    UIWidgetComponent:
-      Visible: true
-      Position: [0.37, 0.64]
-      Size: [0.22, 0.035]
-      Rotation: 0.0
-      Anchor: 0
-      SortOrder: 44
-      ParentEntity: 980009003
-    UISliderComponent:
-      Value: 1
-      MinValue: 1
-      MaxValue: 2
-      TrackColor: [0.08, 0.10, 0.12, 0.92]
-      FillColor: [0.30, 0.78, 0.72, 0.96]
-      HandleColor: [0.92, 0.98, 0.92, 1]
-      HoverColor: [1, 0.92, 0.50, 1]
-      OnValueChangedFunction: "progression:equipment_page_slider"
-  - Entity: 980000033
-    TagComponent:
-      Tag: Equipment_Button_Page1
-    TransformComponent:
-      Translation: [0, 0, 0]
-      Rotation: [0, 0, 0]
-      Scale: [1, 1, 1]
-    UIWidgetComponent:
-      Visible: true
-      Position: [0.37, 0.7]
-      Size: [0.07, 0.045]
-      Rotation: 0.0
-      Anchor: 0
-      SortOrder: 55
-      ParentEntity: 980009003
-    UIButtonComponent:
-      NormalColor: [0.74, 0.52, 0.2, 0.94]
-      HoverColor: [0.92, 0.72, 0.3, 0.96]
-      PressedColor: [0.52, 0.35, 0.14, 0.96]
-      OnClickFunction: "progression:equipment_page_1"
-    UITextComponent:
-      Text: "1"
-      Color: [1.0, 0.94, 0.78, 1]
-      FontSize: 18
-      FontPath: assets/fonts/wqy-microhei.ttc
-      ShadowColor: [0.01, 0.015, 0.018, 0.78]
-      ShadowOffset: [1.6, 1.6]
-      OutlineColor: [0.0, 0.0, 0.0, 0.86]
-      OutlineThickness: 1.2
-  - Entity: 980000040
-    TagComponent:
-      Tag: Equipment_Button_Toggle
-    TransformComponent:
-      Translation: [0, 0, 0]
-      Rotation: [0, 0, 0]
-      Scale: [1, 1, 1]
-    UIWidgetComponent:
-      Visible: true
-      Position: [0.69, 0.805]
-      Size: [0.18, 0.052]
-      Rotation: 0.0
-      Anchor: 0
-      SortOrder: 55
-      ParentEntity: 980009004
-    UIButtonComponent:
-      NormalColor: [0.32, 0.44, 0.42, 0.94]
-      HoverColor: [0.44, 0.66, 0.60, 0.96]
-      PressedColor: [0.20, 0.30, 0.30, 0.96]
-      OnClickFunction: "progression:toggle_selected_equipment"
-    UITextComponent:
-      Text: "装备 / 脱下"
-      Color: [0.9, 1.0, 0.92, 1]
-      FontSize: 18
-      FontPath: assets/fonts/wqy-microhei.ttc
-      ShadowColor: [0.01, 0.015, 0.018, 0.78]
-      ShadowOffset: [1.6, 1.6]
-      OutlineColor: [0.0, 0.0, 0.0, 0.86]
-      OutlineThickness: 1.2
-  - Entity: 980000041
-    TagComponent:
-      Tag: Equipment_SlotArmor_Button
-    TransformComponent:
-      Translation: [0, 0, 0]
-      Rotation: [0, 0, 0]
-      Scale: [1, 1, 1]
-    UIWidgetComponent:
-      Visible: true
-      Position: [0.105, 0.335]
-      Size: [0.075, 0.098]
-      Rotation: 0.0
-      Anchor: 0
-      SortOrder: 60
-      ParentEntity: 980009002
-    UIButtonComponent:
-      NormalColor: [0, 0, 0, 0]
-      HoverColor: [1.0, 0.85, 0.32, 0.12]
-      PressedColor: [1.0, 0.72, 0.20, 0.20]
-      OnClickFunction: "progression:select_equipment_slot:armor"
-  - Entity: 980000042
-    TagComponent:
-      Tag: Equipment_SlotRing_Button
-    TransformComponent:
-      Translation: [0, 0, 0]
-      Rotation: [0, 0, 0]
-      Scale: [1, 1, 1]
-    UIWidgetComponent:
-      Visible: true
-      Position: [0.205, 0.335]
-      Size: [0.075, 0.098]
-      Rotation: 0.0
-      Anchor: 0
-      SortOrder: 60
-      ParentEntity: 980009002
-    UIButtonComponent:
-      NormalColor: [0, 0, 0, 0]
-      HoverColor: [1.0, 0.85, 0.32, 0.12]
-      PressedColor: [1.0, 0.72, 0.20, 0.20]
-      OnClickFunction: "progression:select_equipment_slot:ring"
-  - Entity: 980000043
-    TagComponent:
-      Tag: Equipment_SlotCharm_Button
-    TransformComponent:
-      Translation: [0, 0, 0]
-      Rotation: [0, 0, 0]
-      Scale: [1, 1, 1]
-    UIWidgetComponent:
-      Visible: true
-      Position: [0.105, 0.47]
-      Size: [0.075, 0.098]
-      Rotation: 0.0
-      Anchor: 0
-      SortOrder: 60
-      ParentEntity: 980009002
-    UIButtonComponent:
-      NormalColor: [0, 0, 0, 0]
-      HoverColor: [1.0, 0.85, 0.32, 0.12]
-      PressedColor: [1.0, 0.72, 0.20, 0.20]
-      OnClickFunction: "progression:select_equipment_slot:charm"
-  - Entity: 980000044
-    TagComponent:
-      Tag: Equipment_SlotBoots_Button
-    TransformComponent:
-      Translation: [0, 0, 0]
-      Rotation: [0, 0, 0]
-      Scale: [1, 1, 1]
-    UIWidgetComponent:
-      Visible: true
-      Position: [0.205, 0.47]
-      Size: [0.075, 0.098]
-      Rotation: 0.0
-      Anchor: 0
-      SortOrder: 60
-      ParentEntity: 980009002
-    UIButtonComponent:
-      NormalColor: [0, 0, 0, 0]
-      HoverColor: [1.0, 0.85, 0.32, 0.12]
-      PressedColor: [1.0, 0.72, 0.20, 0.20]
-      OnClickFunction: "progression:select_equipment_slot:boots"
-  - Entity: 980000045
-    TagComponent:
-      Tag: Equipment_TooltipPanel
-    TransformComponent:
-      Translation: [0, 0, 0]
-      Rotation: [0, 0, 0]
-      Scale: [1, 1, 1]
-    UIWidgetComponent:
-      Visible: false
-      Position: [0.52, 0.34]
-      Size: [0.235, 0.112]
-      Rotation: 0.0
-      Anchor: 0
-      SortOrder: 85
-      ParentEntity: 980009005
-    UIPanelComponent:
-      BackgroundColor: [0.025, 0.028, 0.032, 0.94]
-      BorderColor: [0.92, 0.76, 0.36, 0.88]
-      BorderThickness: 1.5
-  - Entity: 980000046
-    TagComponent:
-      Tag: Equipment_TooltipText
-    TransformComponent:
-      Translation: [0, 0, 0]
-      Rotation: [0, 0, 0]
-      Scale: [1, 1, 1]
-    UIWidgetComponent:
-      Visible: false
-      Position: [0.532, 0.35]
-      Size: [0.211, 0.092]
-      Rotation: 0.0
-      Anchor: 0
-      SortOrder: 86
-      ParentEntity: 980009005
-    UITextComponent:
-      Text: "装备属性"
-      Color: [0.96, 0.93, 0.82, 1]
-      FontSize: 14
-      FontPath: assets/fonts/wqy-microhei.ttc
-      ShadowColor: [0.01, 0.015, 0.018, 0.78]
-      ShadowOffset: [1.2, 1.2]
-      OutlineColor: [0.0, 0.0, 0.0, 0.72]
-      OutlineThickness: 0.9
-  - Entity: 980000034
-    TagComponent:
-      Tag: Equipment_Button_Page2
-    TransformComponent:
-      Translation: [0, 0, 0]
-      Rotation: [0, 0, 0]
-      Scale: [1, 1, 1]
-    UIWidgetComponent:
-      Visible: true
-      Position: [0.455, 0.7]
-      Size: [0.07, 0.045]
-      Rotation: 0.0
-      Anchor: 0
-      SortOrder: 55
-      ParentEntity: 980009003
-    UIButtonComponent:
-      NormalColor: [0.1, 0.12, 0.14, 0.9]
-      HoverColor: [0.2, 0.24, 0.28, 0.96]
-      PressedColor: [0.07, 0.08, 0.1, 0.96]
-      OnClickFunction: "progression:equipment_page_2"
-    UITextComponent:
-      Text: "2"
-      Color: [0.9, 0.96, 0.94, 1]
-      FontSize: 18
-      FontPath: assets/fonts/wqy-microhei.ttc
-      ShadowColor: [0.01, 0.015, 0.018, 0.78]
-      ShadowOffset: [1.6, 1.6]
-      OutlineColor: [0.0, 0.0, 0.0, 0.86]
-      OutlineThickness: 1.2
-  - Entity: 980000035
-    TagComponent:
-      Tag: Equipment_Details
-    TransformComponent:
-      Translation: [0, 0, 0]
-      Rotation: [0, 0, 0]
-      Scale: [1, 1, 1]
-    UIWidgetComponent:
-      Visible: true
-      Position: [0.69, 0.29]
-      Size: [0.18, 0.25]
-      Rotation: 0.0
-      Anchor: 0
-      SortOrder: 42
-      ParentEntity: 980009004
-    UITextComponent:
-      Text: "旅人护衣"
-      Color: [0.98, 0.95, 0.86, 1]
-      FontSize: 19
-      FontPath: assets/fonts/wqy-microhei.ttc
-      ShadowColor: [0.01, 0.015, 0.018, 0.82]
-      ShadowOffset: [1.6, 1.6]
-      OutlineColor: [0.0, 0.0, 0.0, 0.86]
-      OutlineThickness: 1.1
-  - Entity: 980000036
-    TagComponent:
-      Tag: Equipment_Materials
-    TransformComponent:
-      Translation: [0, 0, 0]
-      Rotation: [0, 0, 0]
-      Scale: [1, 1, 1]
-    UIWidgetComponent:
-      Visible: true
-      Position: [0.69, 0.57]
-      Size: [0.18, 0.12]
-      Rotation: 0.0
-      Anchor: 0
-      SortOrder: 42
-      ParentEntity: 980009004
-    UITextComponent:
-      Text: "材料"
-      Color: [1.0, 0.9, 0.68, 1]
-      FontSize: 16
-      FontPath: assets/fonts/wqy-microhei.ttc
-      ShadowColor: [0.01, 0.015, 0.018, 0.82]
-      ShadowOffset: [1.6, 1.6]
-      OutlineColor: [0.0, 0.0, 0.0, 0.86]
-      OutlineThickness: 1.1
-  - Entity: 980000037
-    TagComponent:
-      Tag: Equipment_ArmorBar
-    TransformComponent:
-      Translation: [0, 0, 0]
-      Rotation: [0, 0, 0]
-      Scale: [1, 1, 1]
-    UIWidgetComponent:
-      Visible: true
-      Position: [0.69, 0.705]
-      Size: [0.18, 0.018]
-      Rotation: 0.0
-      Anchor: 0
-      SortOrder: 44
-      ParentEntity: 980009004
-    UIProgressBarComponent:
-      Value: 0
-      MaxValue: 1
-      ForegroundColor: [0.84, 0.62, 0.3, 1]
-      BackgroundColor: [0.06, 0.05, 0.05, 0.9]
-  - Entity: 980000038
-    TagComponent:
-      Tag: Equipment_Button_UpgradeArmor
-    TransformComponent:
-      Translation: [0, 0, 0]
-      Rotation: [0, 0, 0]
-      Scale: [1, 1, 1]
-    UIWidgetComponent:
-      Visible: true
-      Position: [0.69, 0.745]
-      Size: [0.18, 0.052]
-      Rotation: 0.0
-      Anchor: 0
-      SortOrder: 55
-      ParentEntity: 980009004
-    UIButtonComponent:
-      NormalColor: [0.74, 0.52, 0.2, 0.94]
-      HoverColor: [0.92, 0.72, 0.3, 0.96]
-      PressedColor: [0.52, 0.35, 0.14, 0.96]
-      OnClickFunction: "progression:upgrade_traveler_armor"
-    UITextComponent:
-      Text: "强化旅人护衣 +1"
-      Color: [1.0, 0.94, 0.78, 1]
-      FontSize: 18
-      FontPath: assets/fonts/wqy-microhei.ttc
-      ShadowColor: [0.01, 0.015, 0.018, 0.78]
-      ShadowOffset: [1.6, 1.6]
-      OutlineColor: [0.0, 0.0, 0.0, 0.86]
-      OutlineThickness: 1.2
-  - Entity: 980000039
-    TagComponent:
-      Tag: Equipment_Button_Back
-    TransformComponent:
-      Translation: [0, 0, 0]
-      Rotation: [0, 0, 0]
-      Scale: [1, 1, 1]
-    UIWidgetComponent:
-      Visible: true
-      Position: [0.085, 0.815]
-      Size: [0.15, 0.05]
-      Rotation: 0.0
-      Anchor: 0
-      SortOrder: 55
-      ParentEntity: 980009004
-    UIButtonComponent:
-      NormalColor: [0.1, 0.12, 0.14, 0.9]
-      HoverColor: [0.2, 0.24, 0.28, 0.96]
-      PressedColor: [0.07, 0.08, 0.1, 0.96]
-      OnClickFunction: "event:go_hub"
-    UITextComponent:
-      Text: "返回据点"
-      Color: [0.9, 0.96, 0.94, 1]
-      FontSize: 18
-      FontPath: assets/fonts/wqy-microhei.ttc
-      ShadowColor: [0.01, 0.015, 0.018, 0.78]
-      ShadowOffset: [1.6, 1.6]
-      OutlineColor: [0.0, 0.0, 0.0, 0.86]
-      OutlineThickness: 1.2
+    EventScriptComponent:
+      ScriptPath: "assets/events/vertical_slice_flow.wts"
+      StartEvent: "on_start"
+      RunOnStart: false
+      RunOnce: false
+      Enabled: true

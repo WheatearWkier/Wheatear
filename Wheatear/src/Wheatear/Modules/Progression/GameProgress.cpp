@@ -10,6 +10,7 @@
 
 #include <algorithm>
 #include <cctype>
+#include <cmath>
 #include <filesystem>
 #include <fstream>
 #include <iomanip>
@@ -29,6 +30,7 @@ namespace Wheatear::GameProgress {
 
         static constexpr int kMaxSaveSlots = 20;
         static constexpr int kCurrentSaveVersion = 3;
+        static constexpr int kEquipmentItemsPerPage = 4;
         static constexpr const char* kDefaultLoadSceneAlias = "progression.scene.default_load";
         static constexpr const char* kSaveLoadSceneAlias = "progression.scene.save_load";
         static constexpr const char* kFallbackDefaultLoadScenePath = "assets/scenes/VerticalSliceIntro.wt";
@@ -612,10 +614,23 @@ namespace Wheatear::GameProgress {
             return result;
         }
 
+        static int GetEquipmentBagPageCount(const State& state)
+        {
+            const size_t itemCount = BuildVisibleBagEquipment(state).size();
+            return std::max(1, static_cast<int>((itemCount + kEquipmentItemsPerPage - 1) / kEquipmentItemsPerPage));
+        }
+
+        static int ClampEquipmentPage(State& state)
+        {
+            state.EquipmentPage = std::clamp(state.EquipmentPage, 1, GetEquipmentBagPageCount(state));
+            return state.EquipmentPage;
+        }
+
         static void SelectFirstVisibleEquipmentOnPage(State& state)
         {
             const std::vector<std::string> bagEquipment = BuildVisibleBagEquipment(state);
-            const size_t start = static_cast<size_t>(std::max(0, state.EquipmentPage - 1)) * 4;
+            ClampEquipmentPage(state);
+            const size_t start = static_cast<size_t>(std::max(0, state.EquipmentPage - 1)) * kEquipmentItemsPerPage;
             if (start < bagEquipment.size())
                 state.SelectedEquipmentId = bagEquipment[start];
         }
@@ -1347,16 +1362,30 @@ namespace Wheatear::GameProgress {
         {
             State& state = GetState();
             const float pageValue = ParseFloat(action.substr(22), static_cast<float>(state.EquipmentPage));
-            state.EquipmentPage = pageValue >= 1.5f ? 2 : 1;
+            state.EquipmentPage = static_cast<int>(std::floor(pageValue + 0.5f));
+            ClampEquipmentPage(state);
             SelectFirstVisibleEquipmentOnPage(state);
             state.LastResultMessage = "装备背包切换到第 " + std::to_string(state.EquipmentPage) + " 页。";
             result.Changed = true;
             result.Success = true;
         }
-        else if (action == "equipment_page_1" || action == "equipment_page_2")
+        else if (action == "equipment_page_prev" || action == "equipment_page_next")
         {
             State& state = GetState();
-            state.EquipmentPage = action == "equipment_page_2" ? 2 : 1;
+            const int oldPage = state.EquipmentPage;
+            state.EquipmentPage += action == "equipment_page_next" ? 1 : -1;
+            ClampEquipmentPage(state);
+            if (state.EquipmentPage != oldPage)
+                SelectFirstVisibleEquipmentOnPage(state);
+            state.LastResultMessage = "装备背包切换到第 " + std::to_string(state.EquipmentPage) + " 页。";
+            result.Changed = state.EquipmentPage != oldPage;
+            result.Success = true;
+        }
+        else if (action.rfind("equipment_page:", 0) == 0)
+        {
+            State& state = GetState();
+            state.EquipmentPage = ParseInt(action.substr(15), state.EquipmentPage);
+            ClampEquipmentPage(state);
             SelectFirstVisibleEquipmentOnPage(state);
             state.LastResultMessage = "装备背包切换到第 " + std::to_string(state.EquipmentPage) + " 页。";
             result.Changed = true;
@@ -1799,9 +1828,11 @@ namespace Wheatear::GameProgress {
 
     std::string BuildEquipmentStatus()
     {
-        const State& state = GetState();
+        State& state = GetState();
+        ClampEquipmentPage(state);
+        const int pageCount = GetEquipmentBagPageCount(state);
         std::ostringstream stream;
-        stream << "背包 " << state.EquipmentPage << " / 2\n";
+        stream << "背包 " << state.EquipmentPage << " / " << pageCount << "\n";
         stream << "能力  HP " << state.Attributes.HP
                << " / 攻击 " << state.Attributes.ATK
                << " / 防御 " << state.Attributes.DEF
@@ -1843,12 +1874,19 @@ namespace Wheatear::GameProgress {
 
     std::string BuildEquipmentPageText()
     {
-        const State& state = GetState();
+        State& state = GetState();
+        ClampEquipmentPage(state);
+        const int pageCount = GetEquipmentBagPageCount(state);
+        const std::vector<std::string> bagEquipment = BuildVisibleBagEquipment(state);
+        const size_t start = static_cast<size_t>(state.EquipmentPage - 1) * kEquipmentItemsPerPage;
+        const size_t end = std::min(start + kEquipmentItemsPerPage, bagEquipment.size());
+
         std::ostringstream stream;
-        if (state.EquipmentPage == 1)
-            stream << "第 1 页: 防具 / 饰品 / 初期刷本装备";
+        if (bagEquipment.empty())
+            stream << "第 1 / 1 页: 背包为空";
         else
-            stream << "第 2 页: 后续章节装备 / 特殊道具";
+            stream << "第 " << state.EquipmentPage << " / " << pageCount
+                   << " 页: " << (start + 1) << " - " << end;
         return stream.str();
     }
 

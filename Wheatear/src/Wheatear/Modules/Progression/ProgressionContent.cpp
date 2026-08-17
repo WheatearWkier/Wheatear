@@ -141,7 +141,16 @@ namespace Wheatear::ProgressionContent {
                 "air_chase",
                 "magic_sword_core"
             };
-            content.InitialOwnedEquipment = { "traveler_armor" };
+            content.InitialOwnedEquipment = {
+                "traveler_armor",
+                "black_forest_armor",
+                "beast_tooth_pendant",
+                "novice_magic_ring",
+                "wind_boots",
+                "old_ward_charm",
+                "training_blade",
+                "angel_feather"
+            };
             content.InitialEquippedItemsBySlot["armor"] = "traveler_armor";
             content.InitialSelectedEquipmentId = "traveler_armor";
             content.TravelerArmorUpgradeEquipmentId = "traveler_armor";

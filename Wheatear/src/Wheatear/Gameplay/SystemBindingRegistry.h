@@ -274,14 +274,12 @@ namespace Wheatear::SystemBindings {
         inline constexpr const char* EquipmentMaterials = "Equipment_Materials";
         inline constexpr const char* EquipmentUpgradeArmorButton = "Equipment_Button_UpgradeArmor";
         inline constexpr const char* EquipmentArmorBar = "Equipment_ArmorBar";
-        inline constexpr const char* EquipmentPager = "Equipment_Pager";
-        inline constexpr const char* EquipmentButtonPage1 = "Equipment_Button_Page1";
-        inline constexpr const char* EquipmentButtonPage2 = "Equipment_Button_Page2";
+        inline constexpr const char* EquipmentButtonPagePrev = "Equipment_Button_PagePrev";
+        inline constexpr const char* EquipmentButtonPageNext = "Equipment_Button_PageNext";
         inline constexpr const char* EquipmentPageSlider = "Equipment_PageSlider";
         inline constexpr const char* EquipmentToggleButton = "Equipment_Button_Toggle";
         inline constexpr const char* EquipmentTooltipPanel = "Equipment_TooltipPanel";
         inline constexpr const char* EquipmentTooltipText = "Equipment_TooltipText";
-        inline constexpr const char* EquipmentItemPrefix = "Equipment_Item_";
         inline constexpr const char* EquipmentSlotArmor = "Equipment_SlotArmor";
         inline constexpr const char* EquipmentSlotArmorButton = "Equipment_SlotArmor_Button";
         inline constexpr const char* EquipmentSlotRing = "Equipment_SlotRing";
@@ -395,12 +393,11 @@ namespace Wheatear::SystemBindings {
             Exact("equipment.materials", "Progression", Progression::EquipmentStatus, Progression::EquipmentMaterials, "Equipment materials"),
             Exact("equipment.upgrade", "Progression", Progression::EquipmentStatus, Progression::EquipmentUpgradeArmorButton, "Equipment upgrade button"),
             Exact("equipment.armor_bar", "Progression", Progression::EquipmentStatus, Progression::EquipmentArmorBar, "Equipment armor bar"),
-            Exact("equipment.pager", "Progression", Progression::EquipmentStatus, Progression::EquipmentPager, "Equipment pager", false),
+            Exact("equipment.page_prev", "Progression", Progression::EquipmentStatus, Progression::EquipmentButtonPagePrev, "Equipment previous page button", false),
+            Exact("equipment.page_next", "Progression", Progression::EquipmentStatus, Progression::EquipmentButtonPageNext, "Equipment next page button", false),
+            Exact("equipment.page_slider", "Progression", Progression::EquipmentStatus, Progression::EquipmentPageSlider, "Equipment page slider", false),
             Exact("equipment.tooltip_panel", "Progression", Progression::EquipmentStatus, Progression::EquipmentTooltipPanel, "Equipment tooltip panel", false),
             Exact("equipment.tooltip_text", "Progression", Progression::EquipmentStatus, Progression::EquipmentTooltipText, "Equipment tooltip text", false),
-            IndexedParts("equipment.item", "Progression", Progression::EquipmentStatus, Progression::EquipmentItemPrefix, 1, 8,
-                { "", "_Frame", "_Button", {} }, 3,
-                "Equipment inventory item widgets", false),
 
             Exact("dungeon.subtitle", "Progression", Progression::DungeonStatus, Progression::DungeonSubtitle, "Dungeon select subtitle"),
             Exact("dungeon.status", "Progression", Progression::DungeonStatus, Progression::DungeonStatus, "Dungeon select status"),

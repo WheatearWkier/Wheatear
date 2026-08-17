@@ -19,8 +19,13 @@ defaults:
     - 'MO-02'
   initialOwnedEquipment:
     - 'traveler_armor'
+    - 'black_forest_armor'
     - 'beast_tooth_pendant'
+    - 'novice_magic_ring'
+    - 'wind_boots'
     - 'old_ward_charm'
+    - 'training_blade'
+    - 'angel_feather'
   initialEquippedItems:
     armor: 'traveler_armor'
   initialSelectedEquipment: 'traveler_armor'

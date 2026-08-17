@@ -433,7 +433,7 @@ namespace Wheatear::SideCombatVisualService {
         shadowTransform.Translation = {
             combatant.RuntimeGroundPosition.x + tuning.ShadowOffset.x,
             combatant.RuntimeGroundPosition.y + tuning.ShadowOffset.y,
-            SideCombatTuningService::CalculateSortZ(combatant.RuntimeGroundPosition.y, tuning) - 0.02f
+            SideCombatTuningService::CalculateSortZ(tuning.LaneMaxY, tuning) - 0.06f
         };
 
         if (entity.HasComponent<SideEnemyAIComponent>() &&

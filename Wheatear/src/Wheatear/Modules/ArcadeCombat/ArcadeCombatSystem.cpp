@@ -56,6 +56,7 @@ namespace Wheatear {
         if (!scene)
             return;
 
+        ArcadeCombatHudService::ResetTouchControls();
         ArcadeCombatLifecycleService::ResetCombatants(scene);
 
         auto& registry = scene->GetRegistry();
@@ -129,7 +130,7 @@ namespace Wheatear {
                 ArcadeCombatOutcomeService::UpdateResultTransition(scene, level, player, boss, dt);
             }
 
-            ArcadeCombatHudService::UpdateHUD(scene, level, player, boss);
+            ArcadeCombatHudService::UpdateHUD(scene, level, player, boss, dt);
         }
     }
 

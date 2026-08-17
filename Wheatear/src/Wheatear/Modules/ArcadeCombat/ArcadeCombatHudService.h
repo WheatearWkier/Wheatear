@@ -13,10 +13,12 @@ namespace Wheatear {
 namespace Wheatear::ArcadeCombatHudService {
 
     WHEATEAR_API const char* WeaponName(ArcadeWeaponType weapon);
+    WHEATEAR_API void ResetTouchControls();
     WHEATEAR_API void UpdateHUD(Scene* scene,
         ArcadeCombatLevelComponent& level,
         Entity player,
-        Entity boss);
+        Entity boss,
+        float deltaSeconds);
 
     // On-screen touch controls (joystick / attack / weapon buttons). Movement
     // follows the UI convention (up = -1); {0,0} while untouched so callers
@@ -26,4 +28,3 @@ namespace Wheatear::ArcadeCombatHudService {
     WHEATEAR_API bool GetTouchAttackHeld();
     WHEATEAR_API int GetTouchWeaponPressed();
 } // namespace Wheatear::ArcadeCombatHudService
-

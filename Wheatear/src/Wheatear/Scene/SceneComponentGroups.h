@@ -38,6 +38,7 @@ namespace Wheatear {
         UIAnimatorComponent,
         UIImageComponent,
         UIRadialCooldownComponent,
+        UICircleComponent,
         UIPanelComponent,
         UITextComponent,
         UIButtonComponent,

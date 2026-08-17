@@ -102,12 +102,20 @@ namespace Wheatear {
         RenderCommand::DisableDepthTest();
         auto& registry = scene->GetRegistry();
 
-        // Sort sprites back-to-front by Z translation before drawing.
+        // Sort sprites back-to-front by Z translation before drawing. When two
+        // sprites share a Z layer, draw higher world-Y first so side-view lane
+        // characters overlap consistently, then fall back to entity id for a
+        // stable order.
         auto group = registry.group<TransformComponent>(entt::get<SpriteRendererComponent>);
         m_SpriteSortBuffer.assign(group.begin(), group.end());
-        std::sort(m_SpriteSortBuffer.begin(), m_SpriteSortBuffer.end(), [&](entt::entity a, entt::entity b) {
-            return group.get<TransformComponent>(a).Translation.z
-                < group.get<TransformComponent>(b).Translation.z;
+        std::stable_sort(m_SpriteSortBuffer.begin(), m_SpriteSortBuffer.end(), [&](entt::entity a, entt::entity b) {
+            const auto& ta = group.get<TransformComponent>(a);
+            const auto& tb = group.get<TransformComponent>(b);
+            if (ta.Translation.z != tb.Translation.z)
+                return ta.Translation.z < tb.Translation.z;
+            if (ta.Translation.y != tb.Translation.y)
+                return ta.Translation.y > tb.Translation.y;
+            return static_cast<uint32_t>(a) < static_cast<uint32_t>(b);
             });
 
         for (auto e : m_SpriteSortBuffer)

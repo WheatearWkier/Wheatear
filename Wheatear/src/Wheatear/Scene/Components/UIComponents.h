@@ -114,6 +114,16 @@ namespace Wheatear {
         UIRadialCooldownComponent(const UIRadialCooldownComponent&) = default;
     };
 
+    struct UICircleComponent
+    {
+        glm::vec4 Color = { 1.0f, 1.0f, 1.0f, 1.0f };
+        float     Thickness = 1.0f;
+        float     Fade = 0.005f;
+
+        UICircleComponent() = default;
+        UICircleComponent(const UICircleComponent&) = default;
+    };
+
     // -- UIPanel: screen-space UI background/window panel.
     struct UIPanelComponent
     {

@@ -243,7 +243,11 @@ namespace Wheatear::SideCombatLifecycleService {
                 // "{tag}_Shadow" convention.
                 Entity shadow = scene->CreateEntity(tag + "_Shadow");
                 auto& shadowTransform = shadow.GetComponent<TransformComponent>();
-                shadowTransform.Translation = { x, groundY, -0.07f };
+                shadowTransform.Translation = {
+                    x,
+                    groundY,
+                    SideCombatTuningService::CalculateSortZ(tuning.LaneMaxY, tuning) - 0.06f
+                };
                 shadowTransform.Scale = type.ShadowScale;
                 auto& shadowSprite = shadow.AddComponent<SpriteRendererComponent>();
                 shadowSprite.Texture = GameplayVisualService::LoadTextureCached(

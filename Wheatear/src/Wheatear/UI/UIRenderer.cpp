@@ -446,6 +446,22 @@ namespace Wheatear {
             entityID);
     }
 
+    void UIRenderer::DrawUICircle(
+        const UIWidgetComponent& widget,
+        const UICircleComponent& circle,
+        int entityID)
+    {
+        if (!widget.Visible)
+            return;
+
+        Renderer2D::DrawCircle(
+            WidgetToTransform(widget, s_ViewportWidth, s_ViewportHeight),
+            circle.Color,
+            circle.Thickness,
+            circle.Fade,
+            entityID);
+    }
+
     void UIRenderer::DrawUIPanel(
         const UIWidgetComponent& widget,
         const UIPanelComponent& panel,

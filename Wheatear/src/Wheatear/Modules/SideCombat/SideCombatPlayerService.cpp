@@ -466,7 +466,7 @@ namespace Wheatear::SideCombatPlayerService {
             BeginPlayerAction(controller, attack, attackId, recipeId, "Side_PlayerSlash", SideAttackKind::Basic);
         }
 
-        static void CreatePlayerLauncher(Scene*,
+        static bool CreatePlayerLauncher(Scene*,
             SideCombatLevelComponent& level,
             Entity,
             SideCombatantComponent& combatant,
@@ -475,11 +475,11 @@ namespace Wheatear::SideCombatPlayerService {
             const auto& tuning = GetTuning(level);
             const bool airborne = !combatant.RuntimeOnGround;
             if (!IsSkillUnlocked(level, tuning, airborne ? "air_chase" : "launcher"))
-                return;
+                return false;
             if (airborne && controller.RuntimeAirActionsRemaining <= 0)
-                return;
+                return false;
             if (!SpendMana(controller, controller.LauncherManaCost))
-                return;
+                return false;
 
             controller.RuntimeAttackChainTimer = tuning.Player.LauncherChainWindow;
 
@@ -501,6 +501,7 @@ namespace Wheatear::SideCombatPlayerService {
                 recipeId,
                 airborne ? "Side_PlayerAirChase" : "Side_PlayerLauncher",
                 SideAttackKind::Launcher);
+            return true;
         }
 
         static void CreatePlayerDash(Scene*,
@@ -795,6 +796,17 @@ namespace Wheatear::SideCombatPlayerService {
         // slot's kind selects the runtime behaviour. Slots keep the legacy
         // priority semantics: at most one skill starts per frame.
         bool skillStarted = false;
+        const bool downBasicComboPressed = InputBindingService::IsActionDown("move.down")
+            && InputBindingService::IsActionDown("side.basic")
+            && (InputBindingService::IsActionPressed("move.down")
+                || InputBindingService::IsActionPressed("side.basic"));
+        if (downBasicComboPressed
+            && controller.RuntimeLauncherCooldown <= 0.0f
+            && canStartAction)
+        {
+            skillStarted = CreatePlayerLauncher(scene, level, player, combatant, controller);
+        }
+
         for (const auto& skillSlot : tuning.SkillSlots)
         {
             if (skillStarted)
@@ -836,20 +848,8 @@ namespace Wheatear::SideCombatPlayerService {
                 }
                 break;
             case SideCombatTuningService::SideSkillSlotKind::Launcher:
-                // Down + basic is the classic launcher shortcut; keep it
-                // working only for the default launcher slot.
-                if (skillSlot.SlotId == "launcher"
-                    && InputBindingService::IsActionDown("move.down")
-                    && InputBindingService::IsActionPressed("side.basic"))
-                {
-                    CreatePlayerLauncher(scene, level, player, combatant, controller);
-                    skillStarted = true;
-                }
-                else if (canStartAction)
-                {
-                    CreatePlayerLauncher(scene, level, player, combatant, controller);
-                    skillStarted = true;
-                }
+                if (controller.RuntimeLauncherCooldown <= 0.0f && canStartAction)
+                    skillStarted = CreatePlayerLauncher(scene, level, player, combatant, controller);
                 break;
             case SideCombatTuningService::SideSkillSlotKind::Custom:
             {

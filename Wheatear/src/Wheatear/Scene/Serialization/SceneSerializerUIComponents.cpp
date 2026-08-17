@@ -114,6 +114,23 @@ namespace Wheatear {
             c.Color = n["Color"].as<glm::vec4>(c.Color);
         }
     };
+
+    template<> struct ComponentSerializer<UICircleComponent> {
+        static constexpr const char* Key = "UICircleComponent";
+        static void Serialize(YAML::Emitter& o, const UICircleComponent& c) {
+            o << YAML::Key << Key << YAML::BeginMap;
+            o << YAML::Key << "Color" << YAML::Value << c.Color;
+            o << YAML::Key << "Thickness" << YAML::Value << c.Thickness;
+            o << YAML::Key << "Fade" << YAML::Value << c.Fade;
+            o << YAML::EndMap;
+        }
+        static void Deserialize(const YAML::Node& n, UICircleComponent& c) {
+            c.Color = n["Color"].as<glm::vec4>(c.Color);
+            c.Thickness = n["Thickness"].as<float>(c.Thickness);
+            c.Fade = n["Fade"].as<float>(c.Fade);
+        }
+    };
+
     template<> struct ComponentSerializer<UIPanelComponent> {
         static constexpr const char* Key = "UIPanelComponent";
         static void Serialize(YAML::Emitter& o, const UIPanelComponent& c) {
@@ -459,6 +476,7 @@ namespace Wheatear {
         UIAnimatorComponent,
         UIImageComponent,
         UIRadialCooldownComponent,
+        UICircleComponent,
         UIPanelComponent,
         UITextComponent,
         UIButtonComponent,

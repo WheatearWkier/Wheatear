@@ -475,6 +475,8 @@ namespace Wheatear {
                 UIRenderer::DrawUIProgressBar(resolvedWidget, *pb, id);
             if (auto* btn = registry.try_get<UIButtonComponent>(e))
                 UIRenderer::DrawUIButton(resolvedWidget, *btn, id);
+            if (auto* circle = registry.try_get<UICircleComponent>(e))
+                UIRenderer::DrawUICircle(resolvedWidget, *circle, id);
             if (auto* slider = registry.try_get<UISliderComponent>(e))
                 UIRenderer::DrawUISlider(resolvedWidget, *slider, id);
             if (auto* scrollView = registry.try_get<UIScrollViewComponent>(e))

@@ -57,7 +57,7 @@ namespace Wheatear {
             while (std::getline(stream, item, ','))
             {
                 const int key = ParseInt(item, -1);
-                if (key >= 0)
+                if (key >= -1)
                     keys.push_back(key);
             }
             return keys;
@@ -85,8 +85,23 @@ namespace Wheatear {
             const UserSettingsData defaults = UserSettings::Defaults();
             for (const auto& [actionId, keys] : defaults.KeyBindings)
             {
-                if (settings.KeyBindings.find(actionId) == settings.KeyBindings.end())
+                auto it = settings.KeyBindings.find(actionId);
+                if (it == settings.KeyBindings.end())
+                {
                     settings.KeyBindings[actionId] = keys;
+                    continue;
+                }
+
+                // Older settings files dropped the -1 mouse sentinel during
+                // parse/save. Reinsert default mouse bindings in memory so
+                // mouse/touch-adjacent actions keep working for existing saves.
+                for (int key : keys)
+                {
+                    if (key >= 0)
+                        continue;
+                    if (std::find(it->second.begin(), it->second.end(), key) == it->second.end())
+                        it->second.push_back(key);
+                }
             }
         }
 

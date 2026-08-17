@@ -1270,20 +1270,16 @@ Assets:
     Path: "assets/scenes/VerticalSliceEquipment.wt"
     Type: "Scene"
     DisplayName: "VerticalSliceEquipment.wt"
-    SizeBytes: 40558
-    LastWriteTime: 134311469081813486
+    SizeBytes: 35497
+    LastWriteTime: 134314364059915572
     Tags:
       []
     References:
       - "assets/events/vertical_slice_flow.wts"
       - "assets/fonts/wqy-microhei.ttc"
-      - "assets/vertical_slice/ui/icons/icon_equipment_angel_feather.png"
       - "assets/vertical_slice/ui/icons/icon_equipment_beast_tooth.png"
-      - "assets/vertical_slice/ui/icons/icon_equipment_black_forest_armor.png"
       - "assets/vertical_slice/ui/icons/icon_equipment_magic_ring.png"
-      - "assets/vertical_slice/ui/icons/icon_equipment_training_blade.png"
       - "assets/vertical_slice/ui/icons/icon_equipment_traveler_armor.png"
-      - "assets/vertical_slice/ui/icons/icon_equipment_ward_charm.png"
       - "assets/vertical_slice/ui/icons/icon_equipment_wind_boots.png"
       - "assets/vertical_slice/vn/backgrounds/bg_forest_camp_night.png"
     ReferencedBy:
@@ -1596,8 +1592,8 @@ Assets:
     Path: "assets/scenes/VisualNovelBattle.wt"
     Type: "Scene"
     DisplayName: "VisualNovelBattle.wt"
-    SizeBytes: 17360
-    LastWriteTime: 134314287959752222
+    SizeBytes: 17283
+    LastWriteTime: 134314301185685178
     Tags:
       []
     References:
@@ -7181,7 +7177,6 @@ Assets:
       []
     ReferencedBy:
       - "assets/gameplay/content_manifest.yaml"
-      - "assets/scenes/VerticalSliceEquipment.wt"
     Import:
       Texture:
         Filter: "Linear"
@@ -7227,7 +7222,6 @@ Assets:
       []
     ReferencedBy:
       - "assets/gameplay/content_manifest.yaml"
-      - "assets/scenes/VerticalSliceEquipment.wt"
     Import:
       Texture:
         Filter: "Linear"
@@ -7273,7 +7267,6 @@ Assets:
       []
     ReferencedBy:
       - "assets/gameplay/content_manifest.yaml"
-      - "assets/scenes/VerticalSliceEquipment.wt"
     Import:
       Texture:
         Filter: "Linear"
@@ -7319,7 +7312,6 @@ Assets:
       []
     ReferencedBy:
       - "assets/gameplay/content_manifest.yaml"
-      - "assets/scenes/VerticalSliceEquipment.wt"
     Import:
       Texture:
         Filter: "Linear"

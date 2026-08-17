@@ -9,6 +9,7 @@
 #include "Wheatear/Input/InputBindingService.h"
 #include "Wheatear/Input/MouseButtonCodes.h"
 #include "Wheatear/Scene/Components.h"
+#include "Wheatear/Scene/Scene.h"
 #include "Wheatear/Scene/SceneQueries.h"
 #include "Wheatear/UI/UIRuntimeTools.h"
 
@@ -16,6 +17,7 @@
 #include <cmath>
 
 #include <string>
+#include <unordered_map>
 
 namespace Wheatear::ArcadeCombatHudService {
 
@@ -61,6 +63,15 @@ namespace Wheatear::ArcadeCombatHudService {
         int g_TouchWeaponPressed = -1;
         bool g_WeaponButtonLastHeld[3] = { false, false, false };
 
+        struct TouchWidgetBase
+        {
+            glm::vec2 Position = { 0.0f, 0.0f };
+            glm::vec2 Size = { 0.0f, 0.0f };
+            float VisualScale = 1.0f;
+        };
+
+        std::unordered_map<uint64_t, TouchWidgetBase> g_AttackButtonBases;
+
         static glm::vec2 TouchWindowSize()
         {
             Window& window = Application::Get().GetWindow();
@@ -85,7 +96,135 @@ namespace Wheatear::ArcadeCombatHudService {
                 && mousePx.y >= minPx.y && mousePx.y <= maxPx.y;
         }
 
-        static void UpdateTouchControls(Scene* scene)
+        static bool PointInTouchRect(const TouchWidgetBase& base,
+            const glm::vec2& mousePx,
+            const glm::vec2& windowSize)
+        {
+            const glm::vec2 minPx = base.Position * windowSize;
+            const glm::vec2 maxPx = (base.Position + base.Size) * windowSize;
+            return mousePx.x >= minPx.x && mousePx.x <= maxPx.x
+                && mousePx.y >= minPx.y && mousePx.y <= maxPx.y;
+        }
+
+        static bool UpdateAttackButtonVisual(Scene* scene,
+            bool leftDown,
+            const glm::vec2& mousePx,
+            const glm::vec2& windowSize,
+            float deltaSeconds)
+        {
+            Entity attack = SceneQueries::FindEntityByName(scene, SystemBindings::Arcade::AttackButton);
+            if (!attack || !attack.HasComponent<UIWidgetComponent>())
+                return false;
+
+            auto& widget = attack.GetComponent<UIWidgetComponent>();
+            const uint64_t key = static_cast<uint64_t>(attack.GetUUID());
+            TouchWidgetBase& base = g_AttackButtonBases[key];
+            if (base.Size.x <= 0.0f || base.Size.y <= 0.0f)
+                base = { widget.Position, widget.Size, 1.0f };
+
+            const bool pointerHeld = leftDown && PointInTouchRect(base, mousePx, windowSize);
+            const bool visualHeld = pointerHeld || InputBindingService::IsActionDown("arcade.attack");
+            const float targetScale = visualHeld ? 0.88f : 1.0f;
+            const float clampedDt = std::clamp(deltaSeconds, 0.0f, 0.05f);
+            const float t = 1.0f - std::exp(-(visualHeld ? 22.0f : 16.0f) * clampedDt);
+            base.VisualScale += (targetScale - base.VisualScale) * t;
+
+            widget.Size = base.Size * base.VisualScale;
+            widget.Position = base.Position + (base.Size - widget.Size) * 0.5f;
+            return pointerHeld;
+        }
+
+        static glm::vec2 ExpandedOutlinePosition(const UIWidgetComponent& widget, const glm::vec2& margin)
+        {
+            glm::vec2 position = widget.Position;
+            switch (widget.Anchor)
+            {
+            case UIAnchor::TopLeft:
+            case UIAnchor::MiddleLeft:
+            case UIAnchor::BottomLeft:
+                position.x -= margin.x * 0.5f;
+                break;
+            case UIAnchor::TopRight:
+            case UIAnchor::MiddleRight:
+            case UIAnchor::BottomRight:
+                position.x += margin.x * 0.5f;
+                break;
+            default:
+                break;
+            }
+
+            switch (widget.Anchor)
+            {
+            case UIAnchor::TopLeft:
+            case UIAnchor::TopCenter:
+            case UIAnchor::TopRight:
+                position.y -= margin.y * 0.5f;
+                break;
+            case UIAnchor::BottomLeft:
+            case UIAnchor::BottomCenter:
+            case UIAnchor::BottomRight:
+                position.y += margin.y * 0.5f;
+                break;
+            default:
+                break;
+            }
+            return position;
+        }
+
+        static Entity EnsureWeaponSlotOutline(Scene* scene, int slotIndex)
+        {
+            const std::string name = std::string("AR_Weapon_SelectedOutline_") + std::to_string(slotIndex + 1);
+            Entity outline = SceneQueries::FindEntityByName(scene, name);
+            if (outline)
+                return outline;
+
+            return scene ? scene->CreateEntity(name) : Entity{};
+        }
+
+        static void UpdateWeaponSlotSelectionVisual(Scene* scene, ArcadeWeaponType currentWeapon)
+        {
+            if (!scene)
+                return;
+
+            const int selectedIndex = std::clamp(static_cast<int>(currentWeapon), 0, 2);
+            for (int i = 0; i < 3; ++i)
+            {
+                const std::string name =
+                    SystemBindings::IndexedName(SystemBindings::Arcade::WeaponPrefix, i + 1);
+                Entity slot = SceneQueries::FindEntityByName(scene, name);
+                if (!slot || !slot.HasComponent<UIWidgetComponent>())
+                    continue;
+
+                const auto& slotWidget = slot.GetComponent<UIWidgetComponent>();
+                Entity outline = EnsureWeaponSlotOutline(scene, i);
+                if (!outline)
+                    continue;
+
+                auto& outlineWidget = outline.HasComponent<UIWidgetComponent>()
+                    ? outline.GetComponent<UIWidgetComponent>()
+                    : outline.AddComponent<UIWidgetComponent>();
+                auto& outlinePanel = outline.HasComponent<UIPanelComponent>()
+                    ? outline.GetComponent<UIPanelComponent>()
+                    : outline.AddComponent<UIPanelComponent>();
+
+                const glm::vec2 margin = { 0.010f, 0.010f };
+                outlineWidget.Visible = i == selectedIndex && slotWidget.Visible;
+                outlineWidget.EditorVisible = false;
+                outlineWidget.Position = ExpandedOutlinePosition(slotWidget, margin);
+                outlineWidget.Size = slotWidget.Size + margin;
+                outlineWidget.Rotation = slotWidget.Rotation;
+                outlineWidget.Anchor = slotWidget.Anchor;
+                outlineWidget.SortOrder = slotWidget.SortOrder + 4;
+                outlineWidget.ParentEntity = slotWidget.ParentEntity;
+
+                outlinePanel.BackgroundColor = { 0.0f, 0.0f, 0.0f, 0.0f };
+                outlinePanel.BorderColor = { 1.0f, 0.05f, 0.03f, 1.0f };
+                outlinePanel.BorderThickness = 0.009f;
+                outlinePanel.ClipChildren = false;
+            }
+        }
+
+        static void UpdateTouchControls(Scene* scene, float deltaSeconds)
         {
             const glm::vec2 windowSize = TouchWindowSize();
             const glm::vec2 mousePx = { Input::GetMouseX(), Input::GetMouseY() };
@@ -162,9 +301,10 @@ namespace Wheatear::ArcadeCombatHudService {
                 }
             }
 
-            // Attack button: held while pressed inside its area.
-            g_TouchAttackHeld = leftDown
-                && PointInTouchWidget(scene, SystemBindings::Arcade::AttackButton, mousePx, windowSize);
+            // Attack button: held while pressed inside its authored area. The
+            // visual scale eases separately so the shrunken frame does not
+            // cause hit-test flicker at the edge.
+            g_TouchAttackHeld = UpdateAttackButtonVisual(scene, leftDown, mousePx, windowSize, deltaSeconds);
 
             // Weapon buttons: edge-triggered on press.
             g_TouchWeaponPressed = -1;
@@ -181,12 +321,23 @@ namespace Wheatear::ArcadeCombatHudService {
 
     } // namespace
 
+    void ResetTouchControls()
+    {
+        g_TouchDragging = false;
+        g_TouchMove = { 0.0f, 0.0f };
+        g_TouchAttackHeld = false;
+        g_TouchWeaponPressed = -1;
+        std::fill(std::begin(g_WeaponButtonLastHeld), std::end(g_WeaponButtonLastHeld), false);
+        g_AttackButtonBases.clear();
+    }
+
     void UpdateHUD(Scene* scene,
         ArcadeCombatLevelComponent& level,
         Entity player,
-        Entity boss)
+        Entity boss,
+        float deltaSeconds)
     {
-        UpdateTouchControls(scene);
+        UpdateTouchControls(scene, deltaSeconds);
 
         const ArcadeCombatantComponent* playerCombatant =
             player && player.HasComponent<ArcadeCombatantComponent>()
@@ -224,6 +375,7 @@ namespace Wheatear::ArcadeCombatHudService {
         if (player && player.HasComponent<ArcadePlayerControllerComponent>())
         {
             const auto& controller = player.GetComponent<ArcadePlayerControllerComponent>();
+            UpdateWeaponSlotSelectionVisual(scene, controller.CurrentWeapon);
             UIRuntimeTools::SetText(scene, level.WeaponTextEntityName,
                 std::string("武器: ") + WeaponName(controller.CurrentWeapon));
         }

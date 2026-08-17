@@ -450,7 +450,7 @@ namespace Wheatear {
 
         static bool IsLooseRuntimeDataAsset(const std::filesystem::path& relativePath)
         {
-            const std::string extension = relativePath.extension().generic_string();
+            const std::string extension = StringUtils::ToLower(relativePath.extension().generic_string());
             if (extension == ".yaml" || extension == ".yml" || extension == ".json" ||
                 extension == ".wt" || extension == ".wts" || extension == ".vn" ||
                 extension == ".glsl" || extension == ".vert" || extension == ".frag" ||
@@ -458,6 +458,9 @@ namespace Wheatear {
             {
                 return true;
             }
+
+            if (extension == ".wav" || extension == ".mp3" || extension == ".ogg")
+                return true;
 
             if (extension == ".config" && relativePath.generic_string().find("assets/game/") == 0)
                 return true;
@@ -706,7 +709,7 @@ namespace Wheatear {
             output << "Configuration: " << options.Configuration << "\n";
             output << "Runtime Executable: WheatearSandbox.exe\n";
             output << "Editor Package: " << editorOutputDirectory.generic_string() << "\n";
-            output << "Loose Runtime Data: text configs, scenes, scripts and shaders\n";
+            output << "Loose Runtime Data: text configs, scenes, scripts, shaders and audio\n";
             output << "Packed Assets: " << report.IncludedAssets.size() << "\n";
             output << "Source Asset Bytes: " << report.IncludedBytes << "\n";
             output << "Asset Pack Bytes: " << (error ? 0 : packBytes) << "\n";
