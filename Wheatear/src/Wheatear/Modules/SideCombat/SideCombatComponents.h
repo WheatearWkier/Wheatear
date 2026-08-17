@@ -203,7 +203,7 @@ namespace Wheatear {
         float       VictoryReturnDelay = 4.0f;
         float       DefeatReturnDelay = 2.5f;
         float       ResultSceneFadeDuration = 0.65f;
-        std::string VictorySceneCommand = "scene:assets/scenes/VerticalSliceHub.wt";
+        std::string VictorySceneCommand = "scene:assets/scenes/Hub.wt";
         std::string DefeatSceneCommand = "scene:assets/scenes/SideCombatBeastPath.wt";
 
         float       ComboDropDelay = 1.15f;

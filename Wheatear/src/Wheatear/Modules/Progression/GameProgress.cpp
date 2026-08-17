@@ -1,4 +1,4 @@
-﻿#include "wtpch.h"
+#include "wtpch.h"
 #include "GameProgress.h"
 
 #include "ProgressionContent.h"
@@ -33,8 +33,8 @@ namespace Wheatear::GameProgress {
         static constexpr int kEquipmentItemsPerPage = 4;
         static constexpr const char* kDefaultLoadSceneAlias = "progression.scene.default_load";
         static constexpr const char* kSaveLoadSceneAlias = "progression.scene.save_load";
-        static constexpr const char* kFallbackDefaultLoadScenePath = "assets/scenes/VerticalSliceIntro.wt";
-        static constexpr const char* kFallbackSaveLoadScenePath = "assets/scenes/VerticalSliceSaveLoad.wt";
+        static constexpr const char* kFallbackDefaultLoadScenePath = "assets/scenes/Intro.wt";
+        static constexpr const char* kFallbackSaveLoadScenePath = "assets/scenes/SaveLoad.wt";
 
         static int ClampSaveSlot(int slot)
         {
@@ -169,12 +169,12 @@ namespace Wheatear::GameProgress {
         static std::string ScenePathFromVNScriptPath(const std::string& scriptPath)
         {
             const std::string normalized = ToLower(NormalizeAssetLikePath(scriptPath));
-            if (normalized.find("vertical_slice_chapter3_preview.vn") != std::string::npos)
-                return "assets/scenes/VerticalSliceChapter3Preview.wt";
-            if (normalized.find("vertical_slice_post_fake.vn") != std::string::npos)
-                return "assets/scenes/VerticalSlicePostFake.wt";
-            if (normalized.find("vertical_slice_intro.vn") != std::string::npos)
-                return "assets/scenes/VerticalSliceIntro.wt";
+            if (normalized.find("chapter3_preview.vn") != std::string::npos)
+                return "assets/scenes/Chapter3Preview.wt";
+            if (normalized.find("post_fake.vn") != std::string::npos)
+                return "assets/scenes/PostFake.wt";
+            if (normalized.find("intro.vn") != std::string::npos)
+                return "assets/scenes/Intro.wt";
             return {};
         }
 

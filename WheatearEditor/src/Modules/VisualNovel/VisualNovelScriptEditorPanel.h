@@ -75,7 +75,7 @@ enum class RowKind
         bool m_Loaded = false;
         bool m_Dirty = false;
         int m_SelectedRow = -1;
-        std::string m_SourcePath = "assets/vn/vertical_slice_intro.vn";
+        std::string m_SourcePath = "assets/vn/intro.vn";
         std::filesystem::path m_ResolvedPath;
         std::string m_Status;
         std::vector<Row> m_Rows;

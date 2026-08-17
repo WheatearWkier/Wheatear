@@ -162,7 +162,7 @@ namespace Wheatear::VisualNovelSystemInternal {
 
         inline std::string VNUiAtlasAsset()
         {
-            return VNUiAsset("atlas", "assets/vertical_slice/ui/atlases/vn_ui_atlas.png");
+            return VNUiAsset("atlas", "assets/sandbox/ui/atlases/vn_ui_atlas.png");
         }
 
         inline glm::vec2 VNUiAtlasUVMin(const VNUiAtlasRegion& region)
@@ -219,7 +219,7 @@ namespace Wheatear::VisualNovelSystemInternal {
             constexpr auto kProbeInterval = std::chrono::milliseconds(500);
 
             const std::string paramsPath = VNUiAsset("atlas_params",
-                "assets/vertical_slice/ui/atlases/ui_atlas_params.yaml");
+                "assets/sandbox/ui/atlases/ui_atlas_params.yaml");
             const std::filesystem::path resolvedPath = AssetPath::ResolveRuntimeData(paramsPath);
 
             std::error_code error;

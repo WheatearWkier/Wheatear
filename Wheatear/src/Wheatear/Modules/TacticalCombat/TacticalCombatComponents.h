@@ -57,7 +57,7 @@ namespace Wheatear {
         // Global tuning data file (data-driven flow / board / colors).
         // Empty = the default project path. Edited from the editor's
         // "Tactical Combat Tuning Editor".
-        std::string TuningPath = "assets/vertical_slice/data/tactical_combat_tuning.yaml";
+        std::string TuningPath = "assets/sandbox/data/tactical_combat_tuning.yaml";
 
         float StartFadeDuration = 0.45f;
         float IntroDuration = 0.65f;

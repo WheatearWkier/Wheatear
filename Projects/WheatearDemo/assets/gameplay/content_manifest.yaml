@@ -3,161 +3,161 @@ aliases:
     action_sets: assets/gameplay/actions/action_sets.yaml
     action_directory: assets/gameplay/actions/
   side:
-    tuning: assets/vertical_slice/data/side_combat_tuning.yaml
+    tuning: assets/sandbox/data/side_combat_tuning.yaml
     path:
-      characters: assets/vertical_slice/side_combat/characters/
-      enemies: assets/vertical_slice/side_combat/enemies/
-      audio: assets/vertical_slice/side_combat/audio/
+      characters: assets/sandbox/side_combat/characters/
+      enemies: assets/sandbox/side_combat/enemies/
+      audio: assets/sandbox/side_combat/audio/
     ui:
-      shadow: assets/vertical_slice/side_combat/ui/blob_shadow_soft.png
-      sheet: assets/vertical_slice/side_combat/ui/sidecombat_ui_sheet.png
-      combo_font: assets/vertical_slice/side_combat/ui/font/sidecombat_combo_font.png
+      shadow: assets/sandbox/side_combat/ui/blob_shadow_soft.png
+      sheet: assets/sandbox/side_combat/ui/sidecombat_ui_sheet.png
+      combo_font: assets/sandbox/side_combat/ui/font/sidecombat_combo_font.png
     enemy:
-      idle: assets/vertical_slice/side_combat/sheets/runtime_enemies/en_claw_beast_idle_sheet.png
+      idle: assets/sandbox/side_combat/sheets/runtime_enemies/en_claw_beast_idle_sheet.png
     skill:
       icon:
-        basic: assets/vertical_slice/side_combat/ui/icon_skill_basic_slash.png
-        launcher: assets/vertical_slice/side_combat/ui/icon_skill_launcher_slash.png
-        magic: assets/vertical_slice/side_combat/ui/icon_skill_magic_bolt.png
-        support: assets/vertical_slice/side_combat/ui/icon_skill_ally_support.png
-        dash: assets/vertical_slice/side_combat/ui/icon_skill_uppercut.png
-        break_limit: assets/vertical_slice/side_combat/ui/icon_skill_break_limit.png
-        enemy_shockwave: assets/vertical_slice/side_combat/vfx_sheets/static_effects/vfx_enemy_projectile_sheet.png
-        enemy_claw: assets/vertical_slice/side_combat/vfx_sheets/static_effects/vfx_enemy_claw_sheet.png
-        heal_potion: assets/vertical_slice/side_combat/ui/items/icon_item_heal_potion.png
-        focus_vial: assets/vertical_slice/side_combat/ui/items/icon_item_focus_vial.png
-        burst_bomb: assets/vertical_slice/side_combat/ui/items/icon_item_burst_bomb.png
+        basic: assets/sandbox/side_combat/ui/icon_skill_basic_slash.png
+        launcher: assets/sandbox/side_combat/ui/icon_skill_launcher_slash.png
+        magic: assets/sandbox/side_combat/ui/icon_skill_magic_bolt.png
+        support: assets/sandbox/side_combat/ui/icon_skill_ally_support.png
+        dash: assets/sandbox/side_combat/ui/icon_skill_uppercut.png
+        break_limit: assets/sandbox/side_combat/ui/icon_skill_break_limit.png
+        enemy_shockwave: assets/sandbox/side_combat/vfx_sheets/static_effects/vfx_enemy_projectile_sheet.png
+        enemy_claw: assets/sandbox/side_combat/vfx_sheets/static_effects/vfx_enemy_claw_sheet.png
+        heal_potion: assets/sandbox/side_combat/ui/items/icon_item_heal_potion.png
+        focus_vial: assets/sandbox/side_combat/ui/items/icon_item_focus_vial.png
+        burst_bomb: assets/sandbox/side_combat/ui/items/icon_item_burst_bomb.png
     drop:
-      magic_core: assets/vertical_slice/side_combat/ui/icon_drop_magic_core.png
-      beast_sinew: assets/vertical_slice/side_combat/ui/icon_drop_beast_sinew.png
-      beast_claw: assets/vertical_slice/side_combat/ui/icon_drop_beast_claw.png
+      magic_core: assets/sandbox/side_combat/ui/icon_drop_magic_core.png
+      beast_sinew: assets/sandbox/side_combat/ui/icon_drop_beast_sinew.png
+      beast_claw: assets/sandbox/side_combat/ui/icon_drop_beast_claw.png
     vfx:
-      enemy_projectile: assets/vertical_slice/side_combat/vfx_sheets/static_effects/vfx_enemy_projectile_sheet.png
-      enemy_claw: assets/vertical_slice/side_combat/vfx_sheets/runtime_effects/vfx_enemy_claw_sheet.png
-      launcher_slash: assets/vertical_slice/side_combat/vfx_sheets/runtime_effects/vfx_launcher_slash_sheet.png
-      magic_bolt: assets/vertical_slice/side_combat/vfx_sheets/runtime_effects/vfx_magic_bolt_sheet.png
-      ally_support: assets/vertical_slice/side_combat/vfx_sheets/runtime_effects/vfx_ally_support_sheet.png
-      basic_slash: assets/vertical_slice/side_combat/vfx_sheets/runtime_effects/vfx_basic_slash_sheet.png
+      enemy_projectile: assets/sandbox/side_combat/vfx_sheets/static_effects/vfx_enemy_projectile_sheet.png
+      enemy_claw: assets/sandbox/side_combat/vfx_sheets/runtime_effects/vfx_enemy_claw_sheet.png
+      launcher_slash: assets/sandbox/side_combat/vfx_sheets/runtime_effects/vfx_launcher_slash_sheet.png
+      magic_bolt: assets/sandbox/side_combat/vfx_sheets/runtime_effects/vfx_magic_bolt_sheet.png
+      ally_support: assets/sandbox/side_combat/vfx_sheets/runtime_effects/vfx_ally_support_sheet.png
+      basic_slash: assets/sandbox/side_combat/vfx_sheets/runtime_effects/vfx_basic_slash_sheet.png
     audio:
-      jump: assets/vertical_slice/side_combat/audio/jump.wav
-      land: assets/vertical_slice/side_combat/audio/land.wav
-      battle_bgm: assets/vertical_slice/side_combat/audio/side_battle_bgm.wav
+      jump: assets/sandbox/side_combat/audio/jump.wav
+      land: assets/sandbox/side_combat/audio/land.wav
+      battle_bgm: assets/sandbox/side_combat/audio/side_battle_bgm.wav
   turn:
     icon:
-      attack: assets/vertical_slice/turn_combat/ui/icons/cmd_attack.png
-      guard: assets/vertical_slice/turn_combat/ui/icons/cmd_guard.png
-      magic_sword: assets/vertical_slice/turn_combat/ui/icons/cmd_magic_sword.png
-      item_potion: assets/vertical_slice/turn_combat/ui/icons/cmd_item_potion.png
-      item_empty: assets/vertical_slice/turn_combat/ui/icons/cmd_item_empty.png
-      cancel: assets/vertical_slice/turn_combat/ui/icons/cmd_cancel.png
-      wait: assets/vertical_slice/turn_combat/ui/icons/cmd_wait.png
-      heal: assets/vertical_slice/turn_combat/ui/icons/cmd_heal.png
-      dark: assets/vertical_slice/turn_combat/ui/icons/cmd_dark.png
-      enemy_claw: assets/vertical_slice/turn_combat/ui/icons/cmd_enemy_claw.png
-      enemy_orb: assets/vertical_slice/turn_combat/ui/icons/cmd_enemy_orb.png
+      attack: assets/sandbox/turn_combat/ui/icons/cmd_attack.png
+      guard: assets/sandbox/turn_combat/ui/icons/cmd_guard.png
+      magic_sword: assets/sandbox/turn_combat/ui/icons/cmd_magic_sword.png
+      item_potion: assets/sandbox/turn_combat/ui/icons/cmd_item_potion.png
+      item_empty: assets/sandbox/turn_combat/ui/icons/cmd_item_empty.png
+      cancel: assets/sandbox/turn_combat/ui/icons/cmd_cancel.png
+      wait: assets/sandbox/turn_combat/ui/icons/cmd_wait.png
+      heal: assets/sandbox/turn_combat/ui/icons/cmd_heal.png
+      dark: assets/sandbox/turn_combat/ui/icons/cmd_dark.png
+      enemy_claw: assets/sandbox/turn_combat/ui/icons/cmd_enemy_claw.png
+      enemy_orb: assets/sandbox/turn_combat/ui/icons/cmd_enemy_orb.png
     audio:
-      slash: assets/vertical_slice/turn_combat/audio/turn_slash.wav
-      magic: assets/vertical_slice/turn_combat/audio/turn_magic.wav
-      heal: assets/vertical_slice/turn_combat/audio/turn_heal.wav
-      guard: assets/vertical_slice/turn_combat/audio/turn_guard.wav
-      hit: assets/vertical_slice/turn_combat/audio/turn_hit.wav
-      select: assets/vertical_slice/turn_combat/audio/turn_select.wav
-      denied: assets/vertical_slice/turn_combat/audio/turn_denied.wav
-      enemy_claw: assets/vertical_slice/turn_combat/audio/turn_enemy_claw.wav
-      enemy_pounce: assets/vertical_slice/turn_combat/audio/turn_enemy_pounce.wav
-      enemy_dark: assets/vertical_slice/turn_combat/audio/turn_enemy_dark.wav
+      slash: assets/sandbox/turn_combat/audio/turn_slash.wav
+      magic: assets/sandbox/turn_combat/audio/turn_magic.wav
+      heal: assets/sandbox/turn_combat/audio/turn_heal.wav
+      guard: assets/sandbox/turn_combat/audio/turn_guard.wav
+      hit: assets/sandbox/turn_combat/audio/turn_hit.wav
+      select: assets/sandbox/turn_combat/audio/turn_select.wav
+      denied: assets/sandbox/turn_combat/audio/turn_denied.wav
+      enemy_claw: assets/sandbox/turn_combat/audio/turn_enemy_claw.wav
+      enemy_pounce: assets/sandbox/turn_combat/audio/turn_enemy_pounce.wav
+      enemy_dark: assets/sandbox/turn_combat/audio/turn_enemy_dark.wav
     vfx:
-      slash: assets/vertical_slice/turn_combat/sheets/effects/vfx_turn_slash_sheet.png
-      magic_sword: assets/vertical_slice/turn_combat/sheets/effects/vfx_turn_magic_sword_sheet.png
-      heal: assets/vertical_slice/turn_combat/sheets/effects/vfx_turn_heal_sheet.png
-      guard: assets/vertical_slice/turn_combat/sheets/effects/vfx_turn_guard_sheet.png
-      dark: assets/vertical_slice/turn_combat/sheets/effects/vfx_turn_dark_sheet.png
-      focus: assets/vertical_slice/turn_combat/sheets/effects/vfx_turn_focus_sheet.png
-      claw: assets/vertical_slice/turn_combat/sheets/effects/vfx_turn_claw_sheet.png
+      slash: assets/sandbox/turn_combat/sheets/effects/vfx_turn_slash_sheet.png
+      magic_sword: assets/sandbox/turn_combat/sheets/effects/vfx_turn_magic_sword_sheet.png
+      heal: assets/sandbox/turn_combat/sheets/effects/vfx_turn_heal_sheet.png
+      guard: assets/sandbox/turn_combat/sheets/effects/vfx_turn_guard_sheet.png
+      dark: assets/sandbox/turn_combat/sheets/effects/vfx_turn_dark_sheet.png
+      focus: assets/sandbox/turn_combat/sheets/effects/vfx_turn_focus_sheet.png
+      claw: assets/sandbox/turn_combat/sheets/effects/vfx_turn_claw_sheet.png
   tactical:
     icon:
-      move: assets/vertical_slice/tactical_combat/ui/icons/cmd_tac_move.png
-      attack: assets/vertical_slice/tactical_combat/ui/icons/cmd_tac_attack.png
-      magic: assets/vertical_slice/tactical_combat/ui/icons/cmd_tac_magic.png
-      heal: assets/vertical_slice/tactical_combat/ui/icons/cmd_tac_heal.png
-      guard: assets/vertical_slice/tactical_combat/ui/icons/cmd_tac_guard.png
-      item: assets/vertical_slice/turn_combat/ui/icons/cmd_item_potion.png
-      enemy: assets/vertical_slice/tactical_combat/ui/icons/cmd_tac_enemy.png
-      enemy_magic: assets/vertical_slice/tactical_combat/ui/icons/cmd_tac_enemy_magic.png
-      empty: assets/vertical_slice/turn_combat/ui/icons/cmd_item_empty.png
-      cancel: assets/vertical_slice/turn_combat/ui/icons/cmd_cancel.png
+      move: assets/sandbox/tactical_combat/ui/icons/cmd_tac_move.png
+      attack: assets/sandbox/tactical_combat/ui/icons/cmd_tac_attack.png
+      magic: assets/sandbox/tactical_combat/ui/icons/cmd_tac_magic.png
+      heal: assets/sandbox/tactical_combat/ui/icons/cmd_tac_heal.png
+      guard: assets/sandbox/tactical_combat/ui/icons/cmd_tac_guard.png
+      item: assets/sandbox/turn_combat/ui/icons/cmd_item_potion.png
+      enemy: assets/sandbox/tactical_combat/ui/icons/cmd_tac_enemy.png
+      enemy_magic: assets/sandbox/tactical_combat/ui/icons/cmd_tac_enemy_magic.png
+      empty: assets/sandbox/turn_combat/ui/icons/cmd_item_empty.png
+      cancel: assets/sandbox/turn_combat/ui/icons/cmd_cancel.png
     panel:
-      button: assets/vertical_slice/tactical_combat/ui/panels/panel_tactical_button.png
+      button: assets/sandbox/tactical_combat/ui/panels/panel_tactical_button.png
     audio:
-      slash: assets/vertical_slice/tactical_combat/audio/tac_slash.wav
-      magic: assets/vertical_slice/tactical_combat/audio/tac_magic.wav
-      heal: assets/vertical_slice/tactical_combat/audio/tac_heal.wav
-      guard: assets/vertical_slice/tactical_combat/audio/tac_guard.wav
-      hit: assets/vertical_slice/tactical_combat/audio/tac_hit.wav
-      move: assets/vertical_slice/tactical_combat/audio/tac_move.wav
-      select: assets/vertical_slice/tactical_combat/audio/tac_select.wav
-      victory: assets/vertical_slice/tactical_combat/audio/tac_victory.wav
+      slash: assets/sandbox/tactical_combat/audio/tac_slash.wav
+      magic: assets/sandbox/tactical_combat/audio/tac_magic.wav
+      heal: assets/sandbox/tactical_combat/audio/tac_heal.wav
+      guard: assets/sandbox/tactical_combat/audio/tac_guard.wav
+      hit: assets/sandbox/tactical_combat/audio/tac_hit.wav
+      move: assets/sandbox/tactical_combat/audio/tac_move.wav
+      select: assets/sandbox/tactical_combat/audio/tac_select.wav
+      victory: assets/sandbox/tactical_combat/audio/tac_victory.wav
     vfx:
-      slash: assets/vertical_slice/tactical_combat/sheets/effects/vfx_tac_slash_sheet.png
-      magic: assets/vertical_slice/tactical_combat/sheets/effects/vfx_tac_magic_sheet.png
-      heal: assets/vertical_slice/tactical_combat/sheets/effects/vfx_tac_heal_sheet.png
-      guard: assets/vertical_slice/tactical_combat/sheets/effects/vfx_tac_guard_sheet.png
-      dark: assets/vertical_slice/tactical_combat/sheets/effects/vfx_tac_dark_sheet.png
+      slash: assets/sandbox/tactical_combat/sheets/effects/vfx_tac_slash_sheet.png
+      magic: assets/sandbox/tactical_combat/sheets/effects/vfx_tac_magic_sheet.png
+      heal: assets/sandbox/tactical_combat/sheets/effects/vfx_tac_heal_sheet.png
+      guard: assets/sandbox/tactical_combat/sheets/effects/vfx_tac_guard_sheet.png
+      dark: assets/sandbox/tactical_combat/sheets/effects/vfx_tac_dark_sheet.png
   progression:
     scene:
-      default_load: assets/scenes/VerticalSliceIntro.wt
-      save_load: assets/scenes/VerticalSliceSaveLoad.wt
+      default_load: assets/scenes/Intro.wt
+      save_load: assets/scenes/SaveLoad.wt
     equipment:
-      traveler_armor: assets/vertical_slice/ui/icons/icon_equipment_traveler_armor.png
-      black_forest_armor: assets/vertical_slice/ui/icons/icon_equipment_black_forest_armor.png
-      beast_tooth_pendant: assets/vertical_slice/ui/icons/icon_equipment_beast_tooth.png
-      novice_magic_ring: assets/vertical_slice/ui/icons/icon_equipment_magic_ring.png
-      wind_boots: assets/vertical_slice/ui/icons/icon_equipment_wind_boots.png
-      old_ward_charm: assets/vertical_slice/ui/icons/icon_equipment_ward_charm.png
-      training_blade: assets/vertical_slice/ui/icons/icon_equipment_training_blade.png
-      angel_feather: assets/vertical_slice/ui/icons/icon_equipment_angel_feather.png
+      traveler_armor: assets/sandbox/ui/icons/icon_equipment_traveler_armor.png
+      black_forest_armor: assets/sandbox/ui/icons/icon_equipment_black_forest_armor.png
+      beast_tooth_pendant: assets/sandbox/ui/icons/icon_equipment_beast_tooth.png
+      novice_magic_ring: assets/sandbox/ui/icons/icon_equipment_magic_ring.png
+      wind_boots: assets/sandbox/ui/icons/icon_equipment_wind_boots.png
+      old_ward_charm: assets/sandbox/ui/icons/icon_equipment_ward_charm.png
+      training_blade: assets/sandbox/ui/icons/icon_equipment_training_blade.png
+      angel_feather: assets/sandbox/ui/icons/icon_equipment_angel_feather.png
     skill_tree:
-      magic_sword_core: assets/vertical_slice/ui/skill_tree/skill_magic_sword_core.png
-      root: assets/vertical_slice/ui/skill_tree/
+      magic_sword_core: assets/sandbox/ui/skill_tree/skill_magic_sword_core.png
+      root: assets/sandbox/ui/skill_tree/
   ui:
     template:
-      skill_slash: assets/vertical_slice/ui/icons/icon_skill_slash.png
-      equipment_training_blade: assets/vertical_slice/ui/icons/icon_equipment_training_blade.png
-      save_slot: assets/vertical_slice/ui/icons/icon_save.png
-      skill_tree_core: assets/vertical_slice/ui/skill_tree/skill_magic_sword_core.png
-      combat_launcher_slash: assets/vertical_slice/side_combat/ui/icon_skill_launcher_slash.png
+      skill_slash: assets/sandbox/ui/icons/icon_skill_slash.png
+      equipment_training_blade: assets/sandbox/ui/icons/icon_equipment_training_blade.png
+      save_slot: assets/sandbox/ui/icons/icon_save.png
+      skill_tree_core: assets/sandbox/ui/skill_tree/skill_magic_sword_core.png
+      combat_launcher_slash: assets/sandbox/side_combat/ui/icon_skill_launcher_slash.png
   arcade:
     icon:
-      gun: assets/vertical_slice/arcade_combat/sheets/static_effects/proj_arcade_player_bolt_sheet.png
-      cannon: assets/vertical_slice/arcade_combat/sheets/static_effects/vfx_arcade_cannon_blast_sheet.png
-      katana: assets/vertical_slice/arcade_combat/sheets/static_effects/vfx_arcade_katana_slash_sheet.png
-      boss_bullet: assets/vertical_slice/arcade_combat/sheets/static_effects/proj_arcade_boss_orb_sheet.png
+      gun: assets/sandbox/arcade_combat/sheets/static_effects/proj_arcade_player_bolt_sheet.png
+      cannon: assets/sandbox/arcade_combat/sheets/static_effects/vfx_arcade_cannon_blast_sheet.png
+      katana: assets/sandbox/arcade_combat/sheets/static_effects/vfx_arcade_katana_slash_sheet.png
+      boss_bullet: assets/sandbox/arcade_combat/sheets/static_effects/proj_arcade_boss_orb_sheet.png
     audio:
-      gun: assets/vertical_slice/arcade_combat/audio/arcade_gun.wav
-      cannon: assets/vertical_slice/arcade_combat/audio/arcade_cannon.wav
-      katana: assets/vertical_slice/arcade_combat/audio/arcade_katana.wav
-      boss_bullet: assets/vertical_slice/arcade_combat/audio/arcade_boss_bullet.wav
-      hit: assets/vertical_slice/arcade_combat/audio/arcade_hit.wav
-      cover_hit: assets/vertical_slice/arcade_combat/audio/arcade_cover_hit.wav
-      battle_bgm: assets/vertical_slice/arcade_combat/audio/arcade_battle_bgm.wav
+      gun: assets/sandbox/arcade_combat/audio/arcade_gun.wav
+      cannon: assets/sandbox/arcade_combat/audio/arcade_cannon.wav
+      katana: assets/sandbox/arcade_combat/audio/arcade_katana.wav
+      boss_bullet: assets/sandbox/arcade_combat/audio/arcade_boss_bullet.wav
+      hit: assets/sandbox/arcade_combat/audio/arcade_hit.wav
+      cover_hit: assets/sandbox/arcade_combat/audio/arcade_cover_hit.wav
+      battle_bgm: assets/sandbox/arcade_combat/audio/arcade_battle_bgm.wav
     projectile:
-      player_bolt: assets/vertical_slice/arcade_combat/sheets/static_effects/proj_arcade_player_bolt_sheet.png
-      boss_orb: assets/vertical_slice/arcade_combat/sheets/static_effects/proj_arcade_boss_orb_sheet.png
+      player_bolt: assets/sandbox/arcade_combat/sheets/static_effects/proj_arcade_player_bolt_sheet.png
+      boss_orb: assets/sandbox/arcade_combat/sheets/static_effects/proj_arcade_boss_orb_sheet.png
     vfx:
-      cannon_blast: assets/vertical_slice/arcade_combat/sheets/static_effects/vfx_arcade_cannon_blast_sheet.png
-      katana_slash: assets/vertical_slice/arcade_combat/sheets/static_effects/vfx_arcade_katana_slash_sheet.png
+      cannon_blast: assets/sandbox/arcade_combat/sheets/static_effects/vfx_arcade_cannon_blast_sheet.png
+      katana_slash: assets/sandbox/arcade_combat/sheets/static_effects/vfx_arcade_katana_slash_sheet.png
     runtime:
-      projectile_vfx: assets/vertical_slice/arcade_combat/sheets/runtime_effects/arcade_projectile_vfx_sheet.png
+      projectile_vfx: assets/sandbox/arcade_combat/sheets/runtime_effects/arcade_projectile_vfx_sheet.png
   vn:
     path:
-      bgm: assets/vertical_slice/audio/bgm
+      bgm: assets/sandbox/audio/bgm
     ui:
-      atlas: assets/vertical_slice/ui/atlases/vn_ui_atlas.png
-      atlas_params: assets/vertical_slice/ui/atlases/ui_atlas_params.yaml
+      atlas: assets/sandbox/ui/atlases/vn_ui_atlas.png
+      atlas_params: assets/sandbox/ui/atlases/ui_atlas_params.yaml
     default:
-      background: assets/vertical_slice/vn/backgrounds/bg_otherworld_forest_wake.png
-      bgm: assets/vertical_slice/audio/bgm/vn_school_morning.wav
-      portrait_pattern: assets/vertical_slice/vn/portraits/protag_school_{expression}.png
+      background: assets/sandbox/vn/backgrounds/bg_otherworld_forest_wake.png
+      bgm: assets/sandbox/audio/bgm/vn_school_morning.wav
+      portrait_pattern: assets/sandbox/vn/portraits/protag_school_{expression}.png
   font:
     ui_default: assets/fonts/wqy-microhei.ttc
     ui_fallback_sc: assets/fonts/NotoSansSC-VF.ttf

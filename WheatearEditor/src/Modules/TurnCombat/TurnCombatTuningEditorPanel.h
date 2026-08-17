@@ -18,7 +18,7 @@ namespace Wheatear {
         bool ConsumeOpenTuningRequest(std::string& sourcePath);
     }
 
-    // Structured editor for assets/vertical_slice/data/turn_combat_tuning.yaml
+    // Structured editor for assets/sandbox/data/turn_combat_tuning.yaml
     // (flow timings + damage formula). Follows the SideCombat tuning panel
     // pattern: typed tabs over a YAML tree, raw preview fallback, dirty save.
     class TurnCombatTuningEditorPanel
@@ -49,7 +49,7 @@ namespace Wheatear {
         bool m_Loaded = false;
         bool m_ParseValid = false;
         bool m_Dirty = false;
-        std::string m_SourcePath = "assets/vertical_slice/data/turn_combat_tuning.yaml";
+        std::string m_SourcePath = "assets/sandbox/data/turn_combat_tuning.yaml";
         std::filesystem::path m_ResolvedPath;
         std::string m_Status;
         std::string m_RawPreview;

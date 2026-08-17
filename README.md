@@ -1,4 +1,4 @@
-﻿# Wheatear
+# Wheatear
 
 自研 C++ 游戏引擎 + 编辑器项目，当前重点是一个可玩的 2D 竖切演示。
 
@@ -112,7 +112,7 @@ VN 负责序章、章节推进、角色对话和轻量分支。它的目标不�
 
 ```text
 event open_skill_tree:
-    scene:assets/scenes/VerticalSliceSkillTree.wt
+    scene:assets/scenes/SkillTree.wt
 end
 ```
 

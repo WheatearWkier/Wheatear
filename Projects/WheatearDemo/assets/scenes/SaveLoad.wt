@@ -1,0 +1,1258 @@
+Scene: SaveLoad
+Entities:
+  - Entity: 850000024
+    TagComponent:
+      Tag: FlowController
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    EventScriptComponent:
+      ScriptPath: "assets/events/sandbox_flow.wts"
+      StartEvent: "on_start"
+      RunOnStart: false
+      RunOnce: false
+      Enabled: true
+  - Entity: 850000023
+    TagComponent:
+      Tag: WT_UI_Canvas
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    UICanvasComponent:
+      Visible: true
+      ReferenceWidth: 1920
+      ReferenceHeight: 1080
+    UIWidgetComponent:
+      Visible: true
+      Position: [0, 0]
+      Size: [1, 1]
+      Rotation: 0
+      Anchor: 0
+      SortOrder: 0
+  - Entity: 850009001
+    TagComponent:
+      Tag: SaveLoad_HeaderGroup
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    UIWidgetComponent:
+      Visible: true
+      EditorVisible: true
+      Position: [0, 0]
+      Size: [1, 1]
+      Rotation: 0
+      Anchor: 0
+      SortOrder: 1
+      ParentEntity: 850000023
+  - Entity: 850009002
+    TagComponent:
+      Tag: SaveLoad_SlotsGroup
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    UIWidgetComponent:
+      Visible: true
+      EditorVisible: true
+      Position: [0, 0]
+      Size: [1, 1]
+      Rotation: 0
+      Anchor: 0
+      SortOrder: 1
+      ParentEntity: 850000023
+  - Entity: 850009003
+    TagComponent:
+      Tag: SaveLoad_ActionsGroup
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    UIWidgetComponent:
+      Visible: true
+      EditorVisible: true
+      Position: [0, 0]
+      Size: [1, 1]
+      Rotation: 0
+      Anchor: 0
+      SortOrder: 1
+      ParentEntity: 850000023
+  - Entity: 850000001
+    TagComponent:
+      Tag: SaveLoad_Camera
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    CameraComponent:
+      Camera:
+        ProjectionType: 1
+        PerspectiveFOV: 0.785398185
+        PerspectiveNear: 0.00999999978
+        PerspectiveFar: 1000
+        OrthographicSize: 10
+        OrthographicNear: -1
+        OrthographicFar: 1
+      Primary: true
+      FixedAspectRatio: false
+  - Entity: 850000002
+    TagComponent:
+      Tag: SaveLoad_Background
+    TransformComponent:
+      Translation: [0, 0.35, -0.8]
+      Rotation: [0, 0, 0]
+      Scale: [20, 11.25, 1]
+    SpriteRendererComponent:
+      Color: [0.86, 0.8, 0.7, 1]
+      Texture: assets/sandbox/vn/backgrounds/bg_forest_camp_night.png
+      TilingFactor: 1
+  - Entity: 850000010
+    TagComponent:
+      Tag: SaveLoad_MainPanel
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    UIWidgetComponent:
+      Visible: true
+      EditorVisible: false
+      Position: [0.180000007, 0.150000006]
+      Size: [0.639999986, 0.560000062]
+      Rotation: 0
+      Anchor: 0
+      SortOrder: 80
+      ParentEntity: 850009001
+    UIPanelComponent:
+      BackgroundColor: [0.0399999991, 0.0450000018, 0.0549999997, 0.879999995]
+      BorderColor: [0.800000012, 0.639999986, 0.360000014, 0.899999976]
+      BorderThickness: 2
+      ClipChildren: false
+      Draggable: false
+      ConstrainDragToParent: true
+      DragHandleHeight: 0.119999997
+  - Entity: 850000011
+    TagComponent:
+      Tag: SaveLoad_Icon
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    UIWidgetComponent:
+      Visible: true
+      EditorVisible: true
+      Position: [0.0625, 0.0240000002]
+      Size: [0.116999999, 0.1875]
+      Rotation: 0
+      Anchor: 0
+      SortOrder: 86
+      ParentEntity: 850000010
+    UIImageComponent:
+      Color: [1, 1, 1, 1]
+      TexturePath: assets/sandbox/ui/icons/icon_save.png
+      UVMin: [0, 0]
+      UVMax: [1, 1]
+  - Entity: 850000012
+    TagComponent:
+      Tag: SaveLoad_Title
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    UIWidgetComponent:
+      Visible: true
+      EditorVisible: true
+      Position: [0.203125, 0.0279999971]
+      Size: [0.59375, 0.142857015]
+      Rotation: 0
+      Anchor: 0
+      SortOrder: 86
+      ParentEntity: 850000010
+    UITextComponent:
+      Text: "保存"
+      Color: [1, 0.939999998, 0.779999971, 1]
+      FontSize: 40
+      FontPath: assets/fonts/wqy-microhei.ttc
+      Padding: [-1, -1, -1, -1]
+      HorizontalAlign: 0
+      VerticalAlign: 0
+      ShadowColor: [0.00999999978, 0.0149999997, 0.0179999992, 0.879999995]
+      ShadowOffset: [2.4000001, 2.4000001]
+      OutlineColor: [0, 0, 0, 0.939999998]
+      OutlineThickness: 1.79999995
+  - Entity: 850000013
+    TagComponent:
+      Tag: SaveLoad_Close
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    UIWidgetComponent:
+      Visible: true
+      EditorVisible: true
+      Position: [0.808000028, 0.0299999993]
+      Size: [0.159999967, 0.0988964289]
+      Rotation: 0
+      Anchor: 0
+      SortOrder: 86
+      ParentEntity: 850000010
+    UIAnimatorComponent:
+      Preset: "hover_pulse"
+      PlayOnStart: true
+      Loop: false
+      Delay: 0
+      Duration: 0.159999996
+      Amplitude: 0.0350000001
+      Speed: 1
+      FromOffset: [0, 0.0299999993]
+    UITextComponent:
+      Text: "关闭"
+      Color: [0.899999976, 0.959999979, 0.920000017, 1]
+      FontSize: 30
+      FontPath: assets/fonts/wqy-microhei.ttc
+      Padding: [-1, -1, -1, -1]
+      HorizontalAlign: 0
+      VerticalAlign: 0
+      ShadowColor: [0.00999999978, 0.0149999997, 0.0179999992, 0.75999999]
+      ShadowOffset: [1.60000002, 1.60000002]
+      OutlineColor: [0, 0, 0, 0.819999993]
+      OutlineThickness: 1.10000002
+    UIButtonComponent:
+      NormalColor: [0.0799999982, 0.100000001, 0.119999997, 0.699999988]
+      HoverColor: [0.159999996, 0.219999999, 0.25, 0.920000017]
+      PressedColor: [0.0399999991, 0.0500000007, 0.0599999987, 0.920000017]
+      OnClickFunction: "gamesave:close"
+      TooltipText: ""
+  - Entity: 850000014
+    TagComponent:
+      Tag: SaveLoad_SlotScroll
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    UIWidgetComponent:
+      Visible: true
+      EditorVisible: true
+      Position: [0.0550000072, 0.324999958]
+      Size: [0.889999986, 0.585000038]
+      Rotation: 0
+      Anchor: 0
+      SortOrder: 100
+      ParentEntity: 850000010
+    UIPanelComponent:
+      BackgroundColor: [0.0120000001, 0.0140000004, 0.0179999992, 0.340000004]
+      BorderColor: [0.639999986, 0.519999981, 0.379999995, 0.340000004]
+      BorderThickness: 1
+      ClipChildren: true
+      Draggable: false
+      ConstrainDragToParent: true
+      DragHandleHeight: 0.119999997
+    UIScrollViewComponent:
+      OffsetY: 0
+      ContentHeight: 3.95000005
+      WheelStep: 0.100000001
+      ScrollbarWidth: 0.0179999992
+      EnableWheel: true
+      ShowScrollbar: true
+      DragScrollbar: true
+      ClampToContent: true
+  - Entity: 850010001
+    TagComponent:
+      Tag: SaveLoad_Slot_1
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    UIWidgetComponent:
+      Visible: true
+      EditorVisible: true
+      Position: [0.025, 0.025]
+      Size: [0.94, 0.18]
+      Rotation: 0
+      Anchor: 0
+      SortOrder: 121
+      ParentEntity: 850000014
+    UIAnimatorComponent:
+      Preset: "hover_pulse"
+      PlayOnStart: true
+      Loop: false
+      Delay: 0
+      Duration: 0.16
+      Amplitude: 0.025
+      Speed: 1
+      FromOffset: [0, 0.015]
+    UITextComponent:
+      Text: "Slot 01\nEmpty"
+      Color: [0.720000029, 0.779999971, 0.75999999, 1]
+      FontSize: 25
+      FontPath: assets/fonts/wqy-microhei.ttc
+      Padding: [-1, -1, -1, -1]
+      HorizontalAlign: 0
+      VerticalAlign: 0
+      ShadowColor: [0.01, 0.015, 0.018, 0.78]
+      ShadowOffset: [1.4, 1.4]
+      OutlineColor: [0, 0, 0, 0.86]
+      OutlineThickness: 1.05
+    UIButtonComponent:
+      NormalColor: [0.119999997, 0.180000007, 0.180000007, 0.779999971]
+      HoverColor: [0.219999999, 0.379999995, 0.340000004, 0.920000017]
+      PressedColor: [0.0799999982, 0.109999999, 0.119999997, 0.959999979]
+      OnClickFunction: "gamesave:slot_save_1"
+      TooltipText: ""
+  - Entity: 850010002
+    TagComponent:
+      Tag: SaveLoad_Slot_2
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    UIWidgetComponent:
+      Visible: true
+      EditorVisible: true
+      Position: [0.025, 0.22]
+      Size: [0.94, 0.18]
+      Rotation: 0
+      Anchor: 0
+      SortOrder: 122
+      ParentEntity: 850000014
+    UIAnimatorComponent:
+      Preset: "hover_pulse"
+      PlayOnStart: true
+      Loop: false
+      Delay: 0
+      Duration: 0.16
+      Amplitude: 0.025
+      Speed: 1
+      FromOffset: [0, 0.015]
+    UITextComponent:
+      Text: "Slot 02\nEmpty"
+      Color: [0.720000029, 0.779999971, 0.75999999, 1]
+      FontSize: 25
+      FontPath: assets/fonts/wqy-microhei.ttc
+      Padding: [-1, -1, -1, -1]
+      HorizontalAlign: 0
+      VerticalAlign: 0
+      ShadowColor: [0.01, 0.015, 0.018, 0.78]
+      ShadowOffset: [1.4, 1.4]
+      OutlineColor: [0, 0, 0, 0.86]
+      OutlineThickness: 1.05
+    UIButtonComponent:
+      NormalColor: [0.119999997, 0.180000007, 0.180000007, 0.779999971]
+      HoverColor: [0.219999999, 0.379999995, 0.340000004, 0.920000017]
+      PressedColor: [0.0799999982, 0.109999999, 0.119999997, 0.959999979]
+      OnClickFunction: "gamesave:slot_save_2"
+      TooltipText: ""
+  - Entity: 850010003
+    TagComponent:
+      Tag: SaveLoad_Slot_3
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    UIWidgetComponent:
+      Visible: true
+      EditorVisible: true
+      Position: [0.025, 0.415]
+      Size: [0.94, 0.18]
+      Rotation: 0
+      Anchor: 0
+      SortOrder: 123
+      ParentEntity: 850000014
+    UIAnimatorComponent:
+      Preset: "hover_pulse"
+      PlayOnStart: true
+      Loop: false
+      Delay: 0
+      Duration: 0.16
+      Amplitude: 0.025
+      Speed: 1
+      FromOffset: [0, 0.015]
+    UITextComponent:
+      Text: "Slot 03\nEmpty"
+      Color: [0.720000029, 0.779999971, 0.75999999, 1]
+      FontSize: 25
+      FontPath: assets/fonts/wqy-microhei.ttc
+      Padding: [-1, -1, -1, -1]
+      HorizontalAlign: 0
+      VerticalAlign: 0
+      ShadowColor: [0.01, 0.015, 0.018, 0.78]
+      ShadowOffset: [1.4, 1.4]
+      OutlineColor: [0, 0, 0, 0.86]
+      OutlineThickness: 1.05
+    UIButtonComponent:
+      NormalColor: [0.119999997, 0.180000007, 0.180000007, 0.779999971]
+      HoverColor: [0.219999999, 0.379999995, 0.340000004, 0.920000017]
+      PressedColor: [0.0799999982, 0.109999999, 0.119999997, 0.959999979]
+      OnClickFunction: "gamesave:slot_save_3"
+      TooltipText: ""
+  - Entity: 850010004
+    TagComponent:
+      Tag: SaveLoad_Slot_4
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    UIWidgetComponent:
+      Visible: true
+      EditorVisible: true
+      Position: [0.025, 0.61]
+      Size: [0.94, 0.18]
+      Rotation: 0
+      Anchor: 0
+      SortOrder: 124
+      ParentEntity: 850000014
+    UIAnimatorComponent:
+      Preset: "hover_pulse"
+      PlayOnStart: true
+      Loop: false
+      Delay: 0
+      Duration: 0.16
+      Amplitude: 0.025
+      Speed: 1
+      FromOffset: [0, 0.015]
+    UITextComponent:
+      Text: "Slot 04\nEmpty"
+      Color: [0.720000029, 0.779999971, 0.75999999, 1]
+      FontSize: 25
+      FontPath: assets/fonts/wqy-microhei.ttc
+      Padding: [-1, -1, -1, -1]
+      HorizontalAlign: 0
+      VerticalAlign: 0
+      ShadowColor: [0.01, 0.015, 0.018, 0.78]
+      ShadowOffset: [1.4, 1.4]
+      OutlineColor: [0, 0, 0, 0.86]
+      OutlineThickness: 1.05
+    UIButtonComponent:
+      NormalColor: [0.119999997, 0.180000007, 0.180000007, 0.779999971]
+      HoverColor: [0.219999999, 0.379999995, 0.340000004, 0.920000017]
+      PressedColor: [0.0799999982, 0.109999999, 0.119999997, 0.959999979]
+      OnClickFunction: "gamesave:slot_save_4"
+      TooltipText: ""
+  - Entity: 850010005
+    TagComponent:
+      Tag: SaveLoad_Slot_5
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    UIWidgetComponent:
+      Visible: true
+      EditorVisible: true
+      Position: [0.025, 0.805]
+      Size: [0.94, 0.18]
+      Rotation: 0
+      Anchor: 0
+      SortOrder: 125
+      ParentEntity: 850000014
+    UIAnimatorComponent:
+      Preset: "hover_pulse"
+      PlayOnStart: true
+      Loop: false
+      Delay: 0
+      Duration: 0.16
+      Amplitude: 0.025
+      Speed: 1
+      FromOffset: [0, 0.015]
+    UITextComponent:
+      Text: "Slot 05\nEmpty"
+      Color: [0.720000029, 0.779999971, 0.75999999, 1]
+      FontSize: 25
+      FontPath: assets/fonts/wqy-microhei.ttc
+      Padding: [-1, -1, -1, -1]
+      HorizontalAlign: 0
+      VerticalAlign: 0
+      ShadowColor: [0.01, 0.015, 0.018, 0.78]
+      ShadowOffset: [1.4, 1.4]
+      OutlineColor: [0, 0, 0, 0.86]
+      OutlineThickness: 1.05
+    UIButtonComponent:
+      NormalColor: [0.119999997, 0.180000007, 0.180000007, 0.779999971]
+      HoverColor: [0.219999999, 0.379999995, 0.340000004, 0.920000017]
+      PressedColor: [0.0799999982, 0.109999999, 0.119999997, 0.959999979]
+      OnClickFunction: "gamesave:slot_save_5"
+      TooltipText: ""
+  - Entity: 850010006
+    TagComponent:
+      Tag: SaveLoad_Slot_6
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    UIWidgetComponent:
+      Visible: true
+      EditorVisible: true
+      Position: [0.025, 1]
+      Size: [0.94, 0.18]
+      Rotation: 0
+      Anchor: 0
+      SortOrder: 126
+      ParentEntity: 850000014
+    UIAnimatorComponent:
+      Preset: "hover_pulse"
+      PlayOnStart: true
+      Loop: false
+      Delay: 0
+      Duration: 0.16
+      Amplitude: 0.025
+      Speed: 1
+      FromOffset: [0, 0.015]
+    UITextComponent:
+      Text: "Slot 06\nEmpty"
+      Color: [0.720000029, 0.779999971, 0.75999999, 1]
+      FontSize: 25
+      FontPath: assets/fonts/wqy-microhei.ttc
+      Padding: [-1, -1, -1, -1]
+      HorizontalAlign: 0
+      VerticalAlign: 0
+      ShadowColor: [0.01, 0.015, 0.018, 0.78]
+      ShadowOffset: [1.4, 1.4]
+      OutlineColor: [0, 0, 0, 0.86]
+      OutlineThickness: 1.05
+    UIButtonComponent:
+      NormalColor: [0.119999997, 0.180000007, 0.180000007, 0.779999971]
+      HoverColor: [0.219999999, 0.379999995, 0.340000004, 0.920000017]
+      PressedColor: [0.0799999982, 0.109999999, 0.119999997, 0.959999979]
+      OnClickFunction: "gamesave:slot_save_6"
+      TooltipText: ""
+  - Entity: 850010007
+    TagComponent:
+      Tag: SaveLoad_Slot_7
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    UIWidgetComponent:
+      Visible: true
+      EditorVisible: true
+      Position: [0.025, 1.195]
+      Size: [0.94, 0.18]
+      Rotation: 0
+      Anchor: 0
+      SortOrder: 127
+      ParentEntity: 850000014
+    UIAnimatorComponent:
+      Preset: "hover_pulse"
+      PlayOnStart: true
+      Loop: false
+      Delay: 0
+      Duration: 0.16
+      Amplitude: 0.025
+      Speed: 1
+      FromOffset: [0, 0.015]
+    UITextComponent:
+      Text: "Slot 07\nEmpty"
+      Color: [0.720000029, 0.779999971, 0.75999999, 1]
+      FontSize: 25
+      FontPath: assets/fonts/wqy-microhei.ttc
+      Padding: [-1, -1, -1, -1]
+      HorizontalAlign: 0
+      VerticalAlign: 0
+      ShadowColor: [0.01, 0.015, 0.018, 0.78]
+      ShadowOffset: [1.4, 1.4]
+      OutlineColor: [0, 0, 0, 0.86]
+      OutlineThickness: 1.05
+    UIButtonComponent:
+      NormalColor: [0.119999997, 0.180000007, 0.180000007, 0.779999971]
+      HoverColor: [0.219999999, 0.379999995, 0.340000004, 0.920000017]
+      PressedColor: [0.0799999982, 0.109999999, 0.119999997, 0.959999979]
+      OnClickFunction: "gamesave:slot_save_7"
+      TooltipText: ""
+  - Entity: 850010008
+    TagComponent:
+      Tag: SaveLoad_Slot_8
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    UIWidgetComponent:
+      Visible: true
+      EditorVisible: true
+      Position: [0.025, 1.39]
+      Size: [0.94, 0.18]
+      Rotation: 0
+      Anchor: 0
+      SortOrder: 128
+      ParentEntity: 850000014
+    UIAnimatorComponent:
+      Preset: "hover_pulse"
+      PlayOnStart: true
+      Loop: false
+      Delay: 0
+      Duration: 0.16
+      Amplitude: 0.025
+      Speed: 1
+      FromOffset: [0, 0.015]
+    UITextComponent:
+      Text: "Slot 08\nEmpty"
+      Color: [0.720000029, 0.779999971, 0.75999999, 1]
+      FontSize: 25
+      FontPath: assets/fonts/wqy-microhei.ttc
+      Padding: [-1, -1, -1, -1]
+      HorizontalAlign: 0
+      VerticalAlign: 0
+      ShadowColor: [0.01, 0.015, 0.018, 0.78]
+      ShadowOffset: [1.4, 1.4]
+      OutlineColor: [0, 0, 0, 0.86]
+      OutlineThickness: 1.05
+    UIButtonComponent:
+      NormalColor: [0.119999997, 0.180000007, 0.180000007, 0.779999971]
+      HoverColor: [0.219999999, 0.379999995, 0.340000004, 0.920000017]
+      PressedColor: [0.0799999982, 0.109999999, 0.119999997, 0.959999979]
+      OnClickFunction: "gamesave:slot_save_8"
+      TooltipText: ""
+  - Entity: 850010009
+    TagComponent:
+      Tag: SaveLoad_Slot_9
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    UIWidgetComponent:
+      Visible: true
+      EditorVisible: true
+      Position: [0.025, 1.585]
+      Size: [0.94, 0.18]
+      Rotation: 0
+      Anchor: 0
+      SortOrder: 129
+      ParentEntity: 850000014
+    UIAnimatorComponent:
+      Preset: "hover_pulse"
+      PlayOnStart: true
+      Loop: false
+      Delay: 0
+      Duration: 0.16
+      Amplitude: 0.025
+      Speed: 1
+      FromOffset: [0, 0.015]
+    UITextComponent:
+      Text: "Slot 09\nEmpty"
+      Color: [0.720000029, 0.779999971, 0.75999999, 1]
+      FontSize: 25
+      FontPath: assets/fonts/wqy-microhei.ttc
+      Padding: [-1, -1, -1, -1]
+      HorizontalAlign: 0
+      VerticalAlign: 0
+      ShadowColor: [0.01, 0.015, 0.018, 0.78]
+      ShadowOffset: [1.4, 1.4]
+      OutlineColor: [0, 0, 0, 0.86]
+      OutlineThickness: 1.05
+    UIButtonComponent:
+      NormalColor: [0.119999997, 0.180000007, 0.180000007, 0.779999971]
+      HoverColor: [0.219999999, 0.379999995, 0.340000004, 0.920000017]
+      PressedColor: [0.0799999982, 0.109999999, 0.119999997, 0.959999979]
+      OnClickFunction: "gamesave:slot_save_9"
+      TooltipText: ""
+  - Entity: 850010010
+    TagComponent:
+      Tag: SaveLoad_Slot_10
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    UIWidgetComponent:
+      Visible: true
+      EditorVisible: true
+      Position: [0.025, 1.78]
+      Size: [0.94, 0.18]
+      Rotation: 0
+      Anchor: 0
+      SortOrder: 130
+      ParentEntity: 850000014
+    UIAnimatorComponent:
+      Preset: "hover_pulse"
+      PlayOnStart: true
+      Loop: false
+      Delay: 0
+      Duration: 0.16
+      Amplitude: 0.025
+      Speed: 1
+      FromOffset: [0, 0.015]
+    UITextComponent:
+      Text: "Slot 10\nEmpty"
+      Color: [0.720000029, 0.779999971, 0.75999999, 1]
+      FontSize: 25
+      FontPath: assets/fonts/wqy-microhei.ttc
+      Padding: [-1, -1, -1, -1]
+      HorizontalAlign: 0
+      VerticalAlign: 0
+      ShadowColor: [0.01, 0.015, 0.018, 0.78]
+      ShadowOffset: [1.4, 1.4]
+      OutlineColor: [0, 0, 0, 0.86]
+      OutlineThickness: 1.05
+    UIButtonComponent:
+      NormalColor: [0.119999997, 0.180000007, 0.180000007, 0.779999971]
+      HoverColor: [0.219999999, 0.379999995, 0.340000004, 0.920000017]
+      PressedColor: [0.0799999982, 0.109999999, 0.119999997, 0.959999979]
+      OnClickFunction: "gamesave:slot_save_10"
+      TooltipText: ""
+  - Entity: 850010011
+    TagComponent:
+      Tag: SaveLoad_Slot_11
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    UIWidgetComponent:
+      Visible: true
+      EditorVisible: true
+      Position: [0.025, 1.975]
+      Size: [0.94, 0.18]
+      Rotation: 0
+      Anchor: 0
+      SortOrder: 131
+      ParentEntity: 850000014
+    UIAnimatorComponent:
+      Preset: "hover_pulse"
+      PlayOnStart: true
+      Loop: false
+      Delay: 0
+      Duration: 0.16
+      Amplitude: 0.025
+      Speed: 1
+      FromOffset: [0, 0.015]
+    UITextComponent:
+      Text: "Slot 11\nEmpty"
+      Color: [0.720000029, 0.779999971, 0.75999999, 1]
+      FontSize: 25
+      FontPath: assets/fonts/wqy-microhei.ttc
+      Padding: [-1, -1, -1, -1]
+      HorizontalAlign: 0
+      VerticalAlign: 0
+      ShadowColor: [0.01, 0.015, 0.018, 0.78]
+      ShadowOffset: [1.4, 1.4]
+      OutlineColor: [0, 0, 0, 0.86]
+      OutlineThickness: 1.05
+    UIButtonComponent:
+      NormalColor: [0.119999997, 0.180000007, 0.180000007, 0.779999971]
+      HoverColor: [0.219999999, 0.379999995, 0.340000004, 0.920000017]
+      PressedColor: [0.0799999982, 0.109999999, 0.119999997, 0.959999979]
+      OnClickFunction: "gamesave:slot_save_11"
+      TooltipText: ""
+  - Entity: 850010012
+    TagComponent:
+      Tag: SaveLoad_Slot_12
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    UIWidgetComponent:
+      Visible: true
+      EditorVisible: true
+      Position: [0.025, 2.17]
+      Size: [0.94, 0.18]
+      Rotation: 0
+      Anchor: 0
+      SortOrder: 132
+      ParentEntity: 850000014
+    UIAnimatorComponent:
+      Preset: "hover_pulse"
+      PlayOnStart: true
+      Loop: false
+      Delay: 0
+      Duration: 0.16
+      Amplitude: 0.025
+      Speed: 1
+      FromOffset: [0, 0.015]
+    UITextComponent:
+      Text: "Slot 12\nEmpty"
+      Color: [0.720000029, 0.779999971, 0.75999999, 1]
+      FontSize: 25
+      FontPath: assets/fonts/wqy-microhei.ttc
+      Padding: [-1, -1, -1, -1]
+      HorizontalAlign: 0
+      VerticalAlign: 0
+      ShadowColor: [0.01, 0.015, 0.018, 0.78]
+      ShadowOffset: [1.4, 1.4]
+      OutlineColor: [0, 0, 0, 0.86]
+      OutlineThickness: 1.05
+    UIButtonComponent:
+      NormalColor: [0.119999997, 0.180000007, 0.180000007, 0.779999971]
+      HoverColor: [0.219999999, 0.379999995, 0.340000004, 0.920000017]
+      PressedColor: [0.0799999982, 0.109999999, 0.119999997, 0.959999979]
+      OnClickFunction: "gamesave:slot_save_12"
+      TooltipText: ""
+  - Entity: 850010013
+    TagComponent:
+      Tag: SaveLoad_Slot_13
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    UIWidgetComponent:
+      Visible: true
+      EditorVisible: true
+      Position: [0.025, 2.365]
+      Size: [0.94, 0.18]
+      Rotation: 0
+      Anchor: 0
+      SortOrder: 133
+      ParentEntity: 850000014
+    UIAnimatorComponent:
+      Preset: "hover_pulse"
+      PlayOnStart: true
+      Loop: false
+      Delay: 0
+      Duration: 0.16
+      Amplitude: 0.025
+      Speed: 1
+      FromOffset: [0, 0.015]
+    UITextComponent:
+      Text: "Slot 13\nEmpty"
+      Color: [0.720000029, 0.779999971, 0.75999999, 1]
+      FontSize: 25
+      FontPath: assets/fonts/wqy-microhei.ttc
+      Padding: [-1, -1, -1, -1]
+      HorizontalAlign: 0
+      VerticalAlign: 0
+      ShadowColor: [0.01, 0.015, 0.018, 0.78]
+      ShadowOffset: [1.4, 1.4]
+      OutlineColor: [0, 0, 0, 0.86]
+      OutlineThickness: 1.05
+    UIButtonComponent:
+      NormalColor: [0.119999997, 0.180000007, 0.180000007, 0.779999971]
+      HoverColor: [0.219999999, 0.379999995, 0.340000004, 0.920000017]
+      PressedColor: [0.0799999982, 0.109999999, 0.119999997, 0.959999979]
+      OnClickFunction: "gamesave:slot_save_13"
+      TooltipText: ""
+  - Entity: 850010014
+    TagComponent:
+      Tag: SaveLoad_Slot_14
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    UIWidgetComponent:
+      Visible: true
+      EditorVisible: true
+      Position: [0.025, 2.56]
+      Size: [0.94, 0.18]
+      Rotation: 0
+      Anchor: 0
+      SortOrder: 134
+      ParentEntity: 850000014
+    UIAnimatorComponent:
+      Preset: "hover_pulse"
+      PlayOnStart: true
+      Loop: false
+      Delay: 0
+      Duration: 0.16
+      Amplitude: 0.025
+      Speed: 1
+      FromOffset: [0, 0.015]
+    UITextComponent:
+      Text: "Slot 14\nEmpty"
+      Color: [0.720000029, 0.779999971, 0.75999999, 1]
+      FontSize: 25
+      FontPath: assets/fonts/wqy-microhei.ttc
+      Padding: [-1, -1, -1, -1]
+      HorizontalAlign: 0
+      VerticalAlign: 0
+      ShadowColor: [0.01, 0.015, 0.018, 0.78]
+      ShadowOffset: [1.4, 1.4]
+      OutlineColor: [0, 0, 0, 0.86]
+      OutlineThickness: 1.05
+    UIButtonComponent:
+      NormalColor: [0.119999997, 0.180000007, 0.180000007, 0.779999971]
+      HoverColor: [0.219999999, 0.379999995, 0.340000004, 0.920000017]
+      PressedColor: [0.0799999982, 0.109999999, 0.119999997, 0.959999979]
+      OnClickFunction: "gamesave:slot_save_14"
+      TooltipText: ""
+  - Entity: 850010015
+    TagComponent:
+      Tag: SaveLoad_Slot_15
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    UIWidgetComponent:
+      Visible: true
+      EditorVisible: true
+      Position: [0.025, 2.755]
+      Size: [0.94, 0.18]
+      Rotation: 0
+      Anchor: 0
+      SortOrder: 135
+      ParentEntity: 850000014
+    UIAnimatorComponent:
+      Preset: "hover_pulse"
+      PlayOnStart: true
+      Loop: false
+      Delay: 0
+      Duration: 0.16
+      Amplitude: 0.025
+      Speed: 1
+      FromOffset: [0, 0.015]
+    UITextComponent:
+      Text: "Slot 15\nEmpty"
+      Color: [0.720000029, 0.779999971, 0.75999999, 1]
+      FontSize: 25
+      FontPath: assets/fonts/wqy-microhei.ttc
+      Padding: [-1, -1, -1, -1]
+      HorizontalAlign: 0
+      VerticalAlign: 0
+      ShadowColor: [0.01, 0.015, 0.018, 0.78]
+      ShadowOffset: [1.4, 1.4]
+      OutlineColor: [0, 0, 0, 0.86]
+      OutlineThickness: 1.05
+    UIButtonComponent:
+      NormalColor: [0.119999997, 0.180000007, 0.180000007, 0.779999971]
+      HoverColor: [0.219999999, 0.379999995, 0.340000004, 0.920000017]
+      PressedColor: [0.0799999982, 0.109999999, 0.119999997, 0.959999979]
+      OnClickFunction: "gamesave:slot_save_15"
+      TooltipText: ""
+  - Entity: 850010016
+    TagComponent:
+      Tag: SaveLoad_Slot_16
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    UIWidgetComponent:
+      Visible: true
+      EditorVisible: true
+      Position: [0.025, 2.95]
+      Size: [0.94, 0.18]
+      Rotation: 0
+      Anchor: 0
+      SortOrder: 136
+      ParentEntity: 850000014
+    UIAnimatorComponent:
+      Preset: "hover_pulse"
+      PlayOnStart: true
+      Loop: false
+      Delay: 0
+      Duration: 0.16
+      Amplitude: 0.025
+      Speed: 1
+      FromOffset: [0, 0.015]
+    UITextComponent:
+      Text: "Slot 16\nEmpty"
+      Color: [0.720000029, 0.779999971, 0.75999999, 1]
+      FontSize: 25
+      FontPath: assets/fonts/wqy-microhei.ttc
+      Padding: [-1, -1, -1, -1]
+      HorizontalAlign: 0
+      VerticalAlign: 0
+      ShadowColor: [0.01, 0.015, 0.018, 0.78]
+      ShadowOffset: [1.4, 1.4]
+      OutlineColor: [0, 0, 0, 0.86]
+      OutlineThickness: 1.05
+    UIButtonComponent:
+      NormalColor: [0.119999997, 0.180000007, 0.180000007, 0.779999971]
+      HoverColor: [0.219999999, 0.379999995, 0.340000004, 0.920000017]
+      PressedColor: [0.0799999982, 0.109999999, 0.119999997, 0.959999979]
+      OnClickFunction: "gamesave:slot_save_16"
+      TooltipText: ""
+  - Entity: 850010017
+    TagComponent:
+      Tag: SaveLoad_Slot_17
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    UIWidgetComponent:
+      Visible: true
+      EditorVisible: true
+      Position: [0.025, 3.145]
+      Size: [0.94, 0.18]
+      Rotation: 0
+      Anchor: 0
+      SortOrder: 137
+      ParentEntity: 850000014
+    UIAnimatorComponent:
+      Preset: "hover_pulse"
+      PlayOnStart: true
+      Loop: false
+      Delay: 0
+      Duration: 0.16
+      Amplitude: 0.025
+      Speed: 1
+      FromOffset: [0, 0.015]
+    UITextComponent:
+      Text: "Slot 17\nEmpty"
+      Color: [0.720000029, 0.779999971, 0.75999999, 1]
+      FontSize: 25
+      FontPath: assets/fonts/wqy-microhei.ttc
+      Padding: [-1, -1, -1, -1]
+      HorizontalAlign: 0
+      VerticalAlign: 0
+      ShadowColor: [0.01, 0.015, 0.018, 0.78]
+      ShadowOffset: [1.4, 1.4]
+      OutlineColor: [0, 0, 0, 0.86]
+      OutlineThickness: 1.05
+    UIButtonComponent:
+      NormalColor: [0.119999997, 0.180000007, 0.180000007, 0.779999971]
+      HoverColor: [0.219999999, 0.379999995, 0.340000004, 0.920000017]
+      PressedColor: [0.0799999982, 0.109999999, 0.119999997, 0.959999979]
+      OnClickFunction: "gamesave:slot_save_17"
+      TooltipText: ""
+  - Entity: 850010018
+    TagComponent:
+      Tag: SaveLoad_Slot_18
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    UIWidgetComponent:
+      Visible: true
+      EditorVisible: true
+      Position: [0.025, 3.34]
+      Size: [0.94, 0.18]
+      Rotation: 0
+      Anchor: 0
+      SortOrder: 138
+      ParentEntity: 850000014
+    UIAnimatorComponent:
+      Preset: "hover_pulse"
+      PlayOnStart: true
+      Loop: false
+      Delay: 0
+      Duration: 0.16
+      Amplitude: 0.025
+      Speed: 1
+      FromOffset: [0, 0.015]
+    UITextComponent:
+      Text: "Slot 18\nEmpty"
+      Color: [0.720000029, 0.779999971, 0.75999999, 1]
+      FontSize: 25
+      FontPath: assets/fonts/wqy-microhei.ttc
+      Padding: [-1, -1, -1, -1]
+      HorizontalAlign: 0
+      VerticalAlign: 0
+      ShadowColor: [0.01, 0.015, 0.018, 0.78]
+      ShadowOffset: [1.4, 1.4]
+      OutlineColor: [0, 0, 0, 0.86]
+      OutlineThickness: 1.05
+    UIButtonComponent:
+      NormalColor: [0.119999997, 0.180000007, 0.180000007, 0.779999971]
+      HoverColor: [0.219999999, 0.379999995, 0.340000004, 0.920000017]
+      PressedColor: [0.0799999982, 0.109999999, 0.119999997, 0.959999979]
+      OnClickFunction: "gamesave:slot_save_18"
+      TooltipText: ""
+  - Entity: 850010019
+    TagComponent:
+      Tag: SaveLoad_Slot_19
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    UIWidgetComponent:
+      Visible: true
+      EditorVisible: true
+      Position: [0.025, 3.535]
+      Size: [0.94, 0.18]
+      Rotation: 0
+      Anchor: 0
+      SortOrder: 139
+      ParentEntity: 850000014
+    UIAnimatorComponent:
+      Preset: "hover_pulse"
+      PlayOnStart: true
+      Loop: false
+      Delay: 0
+      Duration: 0.16
+      Amplitude: 0.025
+      Speed: 1
+      FromOffset: [0, 0.015]
+    UITextComponent:
+      Text: "Slot 19\nEmpty"
+      Color: [0.720000029, 0.779999971, 0.75999999, 1]
+      FontSize: 25
+      FontPath: assets/fonts/wqy-microhei.ttc
+      Padding: [-1, -1, -1, -1]
+      HorizontalAlign: 0
+      VerticalAlign: 0
+      ShadowColor: [0.01, 0.015, 0.018, 0.78]
+      ShadowOffset: [1.4, 1.4]
+      OutlineColor: [0, 0, 0, 0.86]
+      OutlineThickness: 1.05
+    UIButtonComponent:
+      NormalColor: [0.119999997, 0.180000007, 0.180000007, 0.779999971]
+      HoverColor: [0.219999999, 0.379999995, 0.340000004, 0.920000017]
+      PressedColor: [0.0799999982, 0.109999999, 0.119999997, 0.959999979]
+      OnClickFunction: "gamesave:slot_save_19"
+      TooltipText: ""
+  - Entity: 850010020
+    TagComponent:
+      Tag: SaveLoad_Slot_20
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    UIWidgetComponent:
+      Visible: true
+      EditorVisible: true
+      Position: [0.025, 3.73]
+      Size: [0.94, 0.18]
+      Rotation: 0
+      Anchor: 0
+      SortOrder: 140
+      ParentEntity: 850000014
+    UIAnimatorComponent:
+      Preset: "hover_pulse"
+      PlayOnStart: true
+      Loop: false
+      Delay: 0
+      Duration: 0.16
+      Amplitude: 0.025
+      Speed: 1
+      FromOffset: [0, 0.015]
+    UITextComponent:
+      Text: "Slot 20\nEmpty"
+      Color: [0.720000029, 0.779999971, 0.75999999, 1]
+      FontSize: 25
+      FontPath: assets/fonts/wqy-microhei.ttc
+      Padding: [-1, -1, -1, -1]
+      HorizontalAlign: 0
+      VerticalAlign: 0
+      ShadowColor: [0.01, 0.015, 0.018, 0.78]
+      ShadowOffset: [1.4, 1.4]
+      OutlineColor: [0, 0, 0, 0.86]
+      OutlineThickness: 1.05
+    UIButtonComponent:
+      NormalColor: [0.119999997, 0.180000007, 0.180000007, 0.779999971]
+      HoverColor: [0.219999999, 0.379999995, 0.340000004, 0.920000017]
+      PressedColor: [0.0799999982, 0.109999999, 0.119999997, 0.959999979]
+      OnClickFunction: "gamesave:slot_save_20"
+      TooltipText: ""
+
+  - Entity: 850010101
+    TagComponent:
+      Tag: SaveLoad_ConfirmPanel
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    UIWidgetComponent:
+      Visible: false
+      EditorVisible: true
+      Position: [0.200000003, 0.376517236]
+      Size: [0.549746275, 0.334275246]
+      Rotation: 0
+      Anchor: 0
+      SortOrder: 260
+      ParentEntity: 850000010
+    UIPanelComponent:
+      BackgroundColor: [0.0179999992, 0.0199999996, 0.0240000002, 0.959999979]
+      BorderColor: [0.860000014, 0.660000026, 0.340000004, 0.959999979]
+      BorderThickness: 2
+      ClipChildren: true
+      Draggable: false
+      ConstrainDragToParent: true
+      DragHandleHeight: 0.119999997
+  - Entity: 850010102
+    TagComponent:
+      Tag: SaveLoad_ConfirmText
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    UIWidgetComponent:
+      Visible: false
+      EditorVisible: true
+      Position: [0.156628162, 0.0833284259]
+      Size: [0.670705438, 0.426116705]
+      Rotation: 0
+      Anchor: 0
+      SortOrder: 261
+      ParentEntity: 850010101
+    UITextComponent:
+      Text: "该槽位已有存档。\n是否覆盖 1 号槽？"
+      Color: [0.980000019, 0.939999998, 0.819999993, 1]
+      FontSize: 26.8069572
+      FontPath: assets/fonts/wqy-microhei.ttc
+      Padding: [-1, -1, -1, -1]
+      HorizontalAlign: 0
+      VerticalAlign: 0
+      ShadowColor: [0.0199999996, 0.0250000004, 0.0299999993, 0.779999971]
+      ShadowOffset: [1.39999998, 1.39999998]
+      OutlineColor: [0, 0, 0, 0.860000014]
+      OutlineThickness: 1.04999995
+  - Entity: 850010103
+    TagComponent:
+      Tag: SaveLoad_ConfirmYes
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    UIWidgetComponent:
+      Visible: false
+      EditorVisible: true
+      Position: [0.159999996, 0.639999986]
+      Size: [0.25, 0.24000001]
+      Rotation: 0
+      Anchor: 0
+      SortOrder: 262
+      ParentEntity: 850010101
+    UIAnimatorComponent:
+      Preset: "hover_pulse"
+      PlayOnStart: true
+      Loop: false
+      Delay: 0
+      Duration: 0.159999996
+      Amplitude: 0.0250000004
+      Speed: 1
+      FromOffset: [0, 0.0149999997]
+    UITextComponent:
+      Text: "覆盖"
+      Color: [0.980000019, 0.939999998, 0.819999993, 1]
+      FontSize: 30
+      FontPath: assets/fonts/wqy-microhei.ttc
+      Padding: [-1, -1, -1, -1]
+      HorizontalAlign: 0
+      VerticalAlign: 0
+      ShadowColor: [0.0199999996, 0.0250000004, 0.0299999993, 0.779999971]
+      ShadowOffset: [1.39999998, 1.39999998]
+      OutlineColor: [0, 0, 0, 0.860000014]
+      OutlineThickness: 1.04999995
+    UIButtonComponent:
+      NormalColor: [0.119999997, 0.180000007, 0.180000007, 0.779999971]
+      HoverColor: [0.219999999, 0.379999995, 0.340000004, 0.920000017]
+      PressedColor: [0.0799999982, 0.109999999, 0.119999997, 0.959999979]
+      OnClickFunction: "gamesave:confirm_overwrite"
+      TooltipText: ""
+  - Entity: 850010104
+    TagComponent:
+      Tag: SaveLoad_ConfirmNo
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    UIWidgetComponent:
+      Visible: false
+      EditorVisible: true
+      Position: [0.579999983, 0.639999986]
+      Size: [0.25, 0.24000001]
+      Rotation: 0
+      Anchor: 0
+      SortOrder: 262
+      ParentEntity: 850010101
+    UIAnimatorComponent:
+      Preset: "hover_pulse"
+      PlayOnStart: true
+      Loop: false
+      Delay: 0
+      Duration: 0.159999996
+      Amplitude: 0.0250000004
+      Speed: 1
+      FromOffset: [0, 0.0149999997]
+    UITextComponent:
+      Text: "取消"
+      Color: [0.980000019, 0.939999998, 0.819999993, 1]
+      FontSize: 30
+      FontPath: assets/fonts/wqy-microhei.ttc
+      Padding: [-1, -1, -1, -1]
+      HorizontalAlign: 0
+      VerticalAlign: 0
+      ShadowColor: [0.0199999996, 0.0250000004, 0.0299999993, 0.779999971]
+      ShadowOffset: [1.39999998, 1.39999998]
+      OutlineColor: [0, 0, 0, 0.860000014]
+      OutlineThickness: 1.04999995
+    UIButtonComponent:
+      NormalColor: [0.119999997, 0.180000007, 0.180000007, 0.779999971]
+      HoverColor: [0.219999999, 0.379999995, 0.340000004, 0.920000017]
+      PressedColor: [0.0799999982, 0.109999999, 0.119999997, 0.959999979]
+      OnClickFunction: "gamesave:cancel_overwrite"
+      TooltipText: ""

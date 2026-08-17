@@ -36,7 +36,7 @@ removal later when you want stronger character consistency or true alpha masks.
    ```powershell
    python tools/comfy/run_comfy_batch.py `
      --workflow tools/comfy/workflows/api/sdxl_game_asset_basic.json `
-     --manifest tools/comfy/prompts/wheatear_vertical_slice_prompts.json `
+     --manifest tools/comfy/prompts/wheatear_sandbox_prompts.json `
      --group vn_backgrounds `
      --ckpt "sd_xl_base_1.0.safetensors"
    ```

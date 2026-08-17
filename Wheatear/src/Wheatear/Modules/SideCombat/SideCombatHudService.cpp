@@ -1,4 +1,4 @@
-﻿#include "wtpch.h"
+#include "wtpch.h"
 #include "SideCombatHudService.h"
 
 #include "SideCombatTuningService.h"
@@ -193,19 +193,19 @@ namespace Wheatear::SideCombatHudService {
         static std::string SideUISheetPath()
         {
             return AssetAliasRegistry::Path("side.ui.sheet",
-                "assets/vertical_slice/side_combat/ui/sidecombat_ui_sheet.png");
+                "assets/sandbox/side_combat/ui/sidecombat_ui_sheet.png");
         }
 
         static std::string ComboFontSheetPath()
         {
             return AssetAliasRegistry::Path("side.ui.combo_font",
-                "assets/vertical_slice/side_combat/ui/font/sidecombat_combo_font.png");
+                "assets/sandbox/side_combat/ui/font/sidecombat_combo_font.png");
         }
 
         static std::string BreakLimitIconPath()
         {
             return AssetAliasRegistry::Path("side.skill.icon.break_limit",
-                "assets/vertical_slice/side_combat/ui/icon_skill_break_limit.png");
+                "assets/sandbox/side_combat/ui/icon_skill_break_limit.png");
         }
 
         static std::string ResolveHudTexturePath(const std::string& pathOrAlias, const std::string& fallback)

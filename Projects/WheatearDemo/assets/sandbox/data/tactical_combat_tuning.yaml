@@ -1,0 +1,172 @@
+schema: wheatear.tactical_combat.tuning.v1
+version: 0.1.0
+
+# 战棋战斗全局调参（数据驱动）。
+# - 由场景实体的 TacticalCombatLevelComponent.TuningPath 引用；
+#   运行时启动时覆盖组件里的流程时长、棋盘布局与地块配色
+#   （组件字段作为场景级回退）。
+# - 编辑器：「Gameplay ▸ Tactical Combat Tuning Editor」编辑此文件。
+
+# 关卡流程 / 棋盘（时长单位：秒）
+level:
+  startFadeDuration: 0.45
+  introDuration: 0.65
+  actionDuration: 0.62
+  enemyStepDuration: 0.42
+  victoryReturnDelay: 1.75
+  defeatReturnDelay: 1.35
+
+  # 棋盘
+  gridWidth: 8
+  gridHeight: 6
+  boardOrigin: [0.275, 0.115]
+  cellSize: [0.0625, 0.0875]
+
+  # 地块配色 [R, G, B, A]
+  tileNormalColor: [1, 1, 1, 0.92]
+  tileMoveColor: [0.32, 0.78, 1, 0.88]
+  tileAttackColor: [1, 0.36, 0.28, 0.92]
+  tileSelectedColor: [1, 0.88, 0.32, 1]
+
+# 伤害公式系数
+formula:
+  magicDefenseMultiplier: 0.45
+  minDamage: 6.0
+
+# 战棋单位数据表（权威数据源）。
+# - 运行时启动时按实体 Tag "TK_Unit_<tag>" 匹配，用本表覆盖场景单位的
+#   TacticalUnitComponent 字段；表中没有的 tag 保持场景组件值（回退）。
+# - 新增单位：在表里加一条，再在场景里放一个 Tag 为 "TK_Unit_<tag>" 的实体
+#   （数值全部以本表为准）。
+units:
+  - tag: Hero
+    team: 1
+    slot: 0
+    grid: [1, 3]
+    name: "主角"
+    class: "魔剑士"
+    maxHealth: 160
+    attackFrames: 31
+    magic: 24
+    defense: 12
+    move: 3
+    range: 1
+    controllable: true
+    basic: "sword_slash"
+    skill1: "aether_lance"
+    skill2: "white_pulse"
+    idleFrames: { sheet: "assets/sandbox/tactical_combat/sheets/characters/unit_protag_magic_swordsman_idle_sheet.png", cellWidth: 96, cellHeight: 112, columns: 4, startFrame: 0, count: 4 }
+    attackFrames: { sheet: "assets/sandbox/tactical_combat/sheets/characters/unit_protag_magic_swordsman_attack_sheet.png", cellWidth: 96, cellHeight: 112, columns: 5, startFrame: 0, count: 5 }
+    hitFrames: { sheet: "assets/sandbox/tactical_combat/sheets/characters/unit_protag_magic_swordsman_hit_sheet.png", cellWidth: 96, cellHeight: 112, columns: 3, startFrame: 0, count: 3 }
+    downFrames: { sheet: "assets/sandbox/tactical_combat/sheets/characters/unit_protag_magic_swordsman_down_sheet.png", cellWidth: 96, cellHeight: 112, columns: 3, startFrame: 0, count: 3 }
+    frameRate: 8
+
+  - tag: WhiteMage
+    team: 1
+    slot: 1
+    grid: [0, 4]
+    name: "白魔队友"
+    class: "白魔法"
+    maxHealth: 112
+    attackFrames: 14
+    magic: 28
+    defense: 8
+    move: 3
+    range: 1
+    controllable: true
+    basic: "sword_slash"
+    skill1: "white_pulse"
+    skill2: "guard_wait"
+    idleFrames: { sheet: "assets/sandbox/tactical_combat/sheets/characters/unit_white_mage_idle_sheet.png", cellWidth: 96, cellHeight: 112, columns: 4, startFrame: 0, count: 4 }
+    attackFrames: { sheet: "assets/sandbox/tactical_combat/sheets/characters/unit_white_mage_attack_sheet.png", cellWidth: 96, cellHeight: 112, columns: 5, startFrame: 0, count: 5 }
+    hitFrames: { sheet: "assets/sandbox/tactical_combat/sheets/characters/unit_white_mage_hit_sheet.png", cellWidth: 96, cellHeight: 112, columns: 3, startFrame: 0, count: 3 }
+    downFrames: { sheet: "assets/sandbox/tactical_combat/sheets/characters/unit_white_mage_down_sheet.png", cellWidth: 96, cellHeight: 112, columns: 3, startFrame: 0, count: 3 }
+    frameRate: 8
+
+  - tag: Guardian
+    team: 1
+    slot: 2
+    grid: [1, 5]
+    name: "护卫队友"
+    class: "剑盾"
+    maxHealth: 190
+    attackFrames: 24
+    magic: 10
+    defense: 18
+    move: 2
+    range: 1
+    controllable: true
+    basic: "sword_slash"
+    skill1: "guard_wait"
+    skill2: ""
+    idleFrames: { sheet: "assets/sandbox/tactical_combat/sheets/characters/unit_guardian_idle_sheet.png", cellWidth: 96, cellHeight: 112, columns: 4, startFrame: 0, count: 4 }
+    attackFrames: { sheet: "assets/sandbox/tactical_combat/sheets/characters/unit_guardian_attack_sheet.png", cellWidth: 96, cellHeight: 112, columns: 5, startFrame: 0, count: 5 }
+    hitFrames: { sheet: "assets/sandbox/tactical_combat/sheets/characters/unit_guardian_hit_sheet.png", cellWidth: 96, cellHeight: 112, columns: 3, startFrame: 0, count: 3 }
+    downFrames: { sheet: "assets/sandbox/tactical_combat/sheets/characters/unit_guardian_down_sheet.png", cellWidth: 96, cellHeight: 112, columns: 3, startFrame: 0, count: 3 }
+    frameRate: 8
+
+  - tag: Spear
+    team: 2
+    slot: 0
+    grid: [6, 2]
+    name: "敌方枪兵"
+    class: "近战"
+    maxHealth: 110
+    attackFrames: 24
+    magic: 8
+    defense: 9
+    move: 2
+    range: 1
+    controllable: false
+    basic: "enemy_strike"
+    skill1: "enemy_strike"
+    skill2: ""
+    idleFrames: { sheet: "assets/sandbox/tactical_combat/sheets/characters/unit_en_spear_soldier_idle_sheet.png", cellWidth: 96, cellHeight: 112, columns: 4, startFrame: 0, count: 4 }
+    attackFrames: { sheet: "assets/sandbox/tactical_combat/sheets/characters/unit_en_spear_soldier_attack_sheet.png", cellWidth: 96, cellHeight: 112, columns: 5, startFrame: 0, count: 5 }
+    hitFrames: { sheet: "assets/sandbox/tactical_combat/sheets/characters/unit_en_spear_soldier_hit_sheet.png", cellWidth: 96, cellHeight: 112, columns: 3, startFrame: 0, count: 3 }
+    downFrames: { sheet: "assets/sandbox/tactical_combat/sheets/characters/unit_en_spear_soldier_down_sheet.png", cellWidth: 96, cellHeight: 112, columns: 3, startFrame: 0, count: 3 }
+    frameRate: 8
+
+  - tag: DarkMage
+    team: 2
+    slot: 1
+    grid: [7, 3]
+    name: "敌方法师"
+    class: "黑魔法"
+    maxHealth: 92
+    attackFrames: 12
+    magic: 30
+    defense: 6
+    move: 2
+    range: 3
+    controllable: false
+    basic: "enemy_dark"
+    skill1: "enemy_dark"
+    skill2: ""
+    idleFrames: { sheet: "assets/sandbox/tactical_combat/sheets/characters/unit_en_dark_mage_idle_sheet.png", cellWidth: 96, cellHeight: 112, columns: 4, startFrame: 0, count: 4 }
+    attackFrames: { sheet: "assets/sandbox/tactical_combat/sheets/characters/unit_en_dark_mage_attack_sheet.png", cellWidth: 96, cellHeight: 112, columns: 5, startFrame: 0, count: 5 }
+    hitFrames: { sheet: "assets/sandbox/tactical_combat/sheets/characters/unit_en_dark_mage_hit_sheet.png", cellWidth: 96, cellHeight: 112, columns: 3, startFrame: 0, count: 3 }
+    downFrames: { sheet: "assets/sandbox/tactical_combat/sheets/characters/unit_en_dark_mage_down_sheet.png", cellWidth: 96, cellHeight: 112, columns: 3, startFrame: 0, count: 3 }
+    frameRate: 8
+
+  - tag: Beast
+    team: 2
+    slot: 2
+    grid: [6, 5]
+    name: "敌方兽兵"
+    class: "魔物"
+    maxHealth: 128
+    attackFrames: 27
+    magic: 6
+    defense: 10
+    move: 3
+    range: 1
+    controllable: false
+    basic: "enemy_strike"
+    skill1: "enemy_strike"
+    skill2: ""
+    idleFrames: { sheet: "assets/sandbox/tactical_combat/sheets/characters/unit_en_beast_idle_sheet.png", cellWidth: 96, cellHeight: 112, columns: 4, startFrame: 0, count: 4 }
+    attackFrames: { sheet: "assets/sandbox/tactical_combat/sheets/characters/unit_en_beast_attack_sheet.png", cellWidth: 96, cellHeight: 112, columns: 5, startFrame: 0, count: 5 }
+    hitFrames: { sheet: "assets/sandbox/tactical_combat/sheets/characters/unit_en_beast_hit_sheet.png", cellWidth: 96, cellHeight: 112, columns: 3, startFrame: 0, count: 3 }
+    downFrames: { sheet: "assets/sandbox/tactical_combat/sheets/characters/unit_en_beast_down_sheet.png", cellWidth: 96, cellHeight: 112, columns: 3, startFrame: 0, count: 3 }
+    frameRate: 8

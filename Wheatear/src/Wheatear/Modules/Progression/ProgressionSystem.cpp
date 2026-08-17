@@ -38,7 +38,7 @@ namespace Wheatear {
         using Wheatear::StringUtils::Trim;
 
         static constexpr const char* kSaveLoadSceneAlias = "progression.scene.save_load";
-        static constexpr const char* kFallbackSaveLoadScenePath = "assets/scenes/VerticalSliceSaveLoad.wt";
+        static constexpr const char* kFallbackSaveLoadScenePath = "assets/scenes/SaveLoad.wt";
 
         static bool s_SaveLoadSaveMode = true;
         static int s_PendingOverwriteSlot = 0;
@@ -57,7 +57,7 @@ namespace Wheatear {
         {
             const std::string normalized = ToLower(scenePath);
             return normalized == ToLower(AssetAliasRegistry::Path(kSaveLoadSceneAlias, kFallbackSaveLoadScenePath))
-                || normalized.find("verticalslicesaveload.wt") != std::string::npos;
+                || normalized.find("saveload.wt") != std::string::npos;
         }
 
         static std::string GetSaveLoadScenePath()
@@ -72,7 +72,7 @@ namespace Wheatear {
                 return state.PreviousScenePath;
             if (!state.CurrentScenePath.empty() && !IsSaveLoadScenePath(state.CurrentScenePath))
                 return state.CurrentScenePath;
-            return "assets/scenes/VerticalSliceIntro.wt";
+            return "assets/scenes/Intro.wt";
         }
 
         static std::optional<int> ParseTrailingSlot(const std::string& action, const std::string& prefix)

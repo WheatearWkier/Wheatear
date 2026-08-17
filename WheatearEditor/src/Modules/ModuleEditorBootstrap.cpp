@@ -1,4 +1,4 @@
-﻿#include "wepch.h"
+#include "wepch.h"
 #include "ModuleEditorBootstrap.h"
 
 #include "Editor/EditorComponentRegistry.h"
@@ -127,7 +127,7 @@ namespace Wheatear {
                 EditorToolCategory::Gameplay,
                 [](const EditorToolContext& context)
                 {
-                    std::string scriptPath = "assets/events/vertical_slice_flow.wts";
+                    std::string scriptPath = "assets/events/sandbox_flow.wts";
                     std::string eventName;
                     if (context.SelectedEntity && context.SelectedEntity.HasComponent<EventScriptComponent>())
                     {
@@ -189,7 +189,7 @@ namespace Wheatear {
                 EditorToolCategory::Gameplay,
                 [](const EditorToolContext& context)
                 {
-                    std::string scriptPath = "assets/vn/vertical_slice_intro.vn";
+                    std::string scriptPath = "assets/vn/intro.vn";
                     if (context.SelectedEntity && context.SelectedEntity.HasComponent<VisualNovelComponent>())
                         scriptPath = context.SelectedEntity.GetComponent<VisualNovelComponent>().ScriptPath;
 
@@ -223,7 +223,7 @@ namespace Wheatear {
                 EditorToolCategory::Gameplay,
                 [](const EditorToolContext& context)
                 {
-                    std::string tuningPath = "assets/vertical_slice/data/turn_combat_tuning.yaml";
+                    std::string tuningPath = "assets/sandbox/data/turn_combat_tuning.yaml";
                     if (context.SelectedEntity && context.SelectedEntity.HasComponent<TurnCombatLevelComponent>())
                         tuningPath = context.SelectedEntity.GetComponent<TurnCombatLevelComponent>().TuningPath;
 
@@ -240,7 +240,7 @@ namespace Wheatear {
                 EditorToolCategory::Gameplay,
                 [](const EditorToolContext& context)
                 {
-                    std::string tuningPath = "assets/vertical_slice/data/arcade_combat_tuning.yaml";
+                    std::string tuningPath = "assets/sandbox/data/arcade_combat_tuning.yaml";
                     if (context.SelectedEntity && context.SelectedEntity.HasComponent<ArcadeCombatLevelComponent>())
                         tuningPath = context.SelectedEntity.GetComponent<ArcadeCombatLevelComponent>().TuningPath;
 
@@ -257,7 +257,7 @@ namespace Wheatear {
                 EditorToolCategory::Gameplay,
                 [](const EditorToolContext& context)
                 {
-                    std::string tuningPath = "assets/vertical_slice/data/tactical_combat_tuning.yaml";
+                    std::string tuningPath = "assets/sandbox/data/tactical_combat_tuning.yaml";
                     if (context.SelectedEntity && context.SelectedEntity.HasComponent<TacticalCombatLevelComponent>())
                         tuningPath = context.SelectedEntity.GetComponent<TacticalCombatLevelComponent>().TuningPath;
 

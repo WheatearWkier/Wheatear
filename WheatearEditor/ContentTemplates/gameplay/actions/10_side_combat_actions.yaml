@@ -4,7 +4,7 @@ actions:
     description: First ground-chain slash.
     icon: side.skill.icon.basic
     animation: side_basic1
-    sound: assets/vertical_slice/side_combat/audio/swing_light.wav
+    sound: assets/sandbox/side_combat/audio/swing_light.wav
     effect: side.vfx.basic_slash
     cooldown: 0.19
     duration: 0.31
@@ -22,7 +22,7 @@ actions:
     description: Second ground-chain slash.
     icon: side.skill.icon.basic
     animation: side_basic2
-    sound: assets/vertical_slice/side_combat/audio/swing_light.wav
+    sound: assets/sandbox/side_combat/audio/swing_light.wav
     effect: side.vfx.basic_slash
     cooldown: 0.19
     duration: 0.34
@@ -40,7 +40,7 @@ actions:
     description: Ground-chain finisher with stronger lift.
     icon: side.skill.icon.basic
     animation: side_basic3
-    sound: assets/vertical_slice/side_combat/audio/swing_heavy.wav
+    sound: assets/sandbox/side_combat/audio/swing_heavy.wav
     effect: side.vfx.basic_slash
     cooldown: 0.27
     duration: 0.44
@@ -58,7 +58,7 @@ actions:
     description: Air combo filler with hang-time support.
     icon: side.skill.icon.basic
     animation: side_air_basic
-    sound: assets/vertical_slice/side_combat/audio/swing_air.wav
+    sound: assets/sandbox/side_combat/audio/swing_air.wav
     effect: side.vfx.basic_slash
     cooldown: 0.16
     duration: 0.28
@@ -76,7 +76,7 @@ actions:
     description: Ground opener that sends targets upward.
     icon: side.skill.icon.launcher
     animation: side_launcher
-    sound: assets/vertical_slice/side_combat/audio/swing_upper.wav
+    sound: assets/sandbox/side_combat/audio/swing_upper.wav
     effect: side.vfx.launcher_slash
     cooldown: 0.42
     duration: 0.53
@@ -94,7 +94,7 @@ actions:
     description: Air relaunch tool for combo extension.
     icon: side.skill.icon.launcher
     animation: side_air_chase
-    sound: assets/vertical_slice/side_combat/audio/swing_air.wav
+    sound: assets/sandbox/side_combat/audio/swing_air.wav
     effect: side.vfx.launcher_slash
     cooldown: 0.36
     duration: 0.39
@@ -112,7 +112,7 @@ actions:
     description: Ranged magic hit used inside combo routes.
     icon: side.skill.icon.magic
     animation: side_magic_bolt
-    sound: assets/vertical_slice/side_combat/audio/magic_cast.wav
+    sound: assets/sandbox/side_combat/audio/magic_cast.wav
     effect: side.vfx.magic_bolt
     cooldown: 0.64
     duration: 0.50
@@ -130,7 +130,7 @@ actions:
     description: Partner assist hit with high control value.
     icon: side.skill.icon.support
     animation: side_ally_support
-    sound: assets/vertical_slice/side_combat/audio/support_cast.wav
+    sound: assets/sandbox/side_combat/audio/support_cast.wav
     effect: side.vfx.ally_support
     cooldown: 4.20
     duration: 0.76
@@ -148,7 +148,7 @@ actions:
     description: Brief invulnerable dash attack.
     icon: side.skill.icon.dash
     animation: side_dash
-    sound: assets/vertical_slice/side_combat/audio/swing_air.wav
+    sound: assets/sandbox/side_combat/audio/swing_air.wav
     effect: side.vfx.launcher_slash
     cooldown: 1.00
     duration: 0.32
@@ -168,7 +168,7 @@ actions:
     description: Clears boss protection during super armor.
     icon: side.skill.icon.break_limit
     animation: side_break_limit
-    sound: assets/vertical_slice/side_combat/audio/break_limit.wav
+    sound: assets/sandbox/side_combat/audio/break_limit.wav
     effect: side.vfx.launcher_slash
     cooldown: 3.00
     duration: 0.32
@@ -188,7 +188,7 @@ actions:
     description: Grunt and boss melee slash.
     icon: side.skill.icon.enemy_claw
     animation: enemy_claw
-    sound: assets/vertical_slice/side_combat/audio/enemy_swing.wav
+    sound: assets/sandbox/side_combat/audio/enemy_swing.wav
     effect: side.vfx.enemy_claw
     duration: 0.93
     startup: 0.32
@@ -205,7 +205,7 @@ actions:
     description: Boss charge attack.
     icon: side.skill.icon.enemy_claw
     animation: bear_charge
-    sound: assets/vertical_slice/side_combat/audio/bear_charge.wav
+    sound: assets/sandbox/side_combat/audio/bear_charge.wav
     effect: side.vfx.enemy_claw
     duration: 1.50
     startup: 0.48
@@ -222,7 +222,7 @@ actions:
     description: Boss shockwave burst.
     icon: side.skill.icon.enemy_shockwave
     animation: bear_shockwave
-    sound: assets/vertical_slice/side_combat/audio/shockwave_cast.wav
+    sound: assets/sandbox/side_combat/audio/shockwave_cast.wav
     effect: side.vfx.enemy_projectile
     duration: 1.15
     startup: 0.52

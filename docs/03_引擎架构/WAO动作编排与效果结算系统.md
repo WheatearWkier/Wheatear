@@ -330,7 +330,7 @@ struct ActionIntent
 ```yaml
 id: side.launcher
 displayName: 上挑
-icon: assets/vertical_slice/side_combat/ui/icons/skill_launcher.png
+icon: assets/sandbox/side_combat/ui/icons/skill_launcher.png
 
 activation:
   input: launcher
@@ -918,9 +918,9 @@ actions:
   - id: side.launcher
     displayName: Rising Cut
     description: Ground launcher that starts aerial combo.
-    icon: assets/vertical_slice/side_combat/ui/icons/skill_launcher.png
-    sound: assets/vertical_slice/side_combat/audio/side_launcher.wav
-    effect: assets/vertical_slice/side_combat/effects/vfx_launcher_slash.png
+    icon: assets/sandbox/side_combat/ui/icons/skill_launcher.png
+    sound: assets/sandbox/side_combat/audio/side_launcher.wav
+    effect: assets/sandbox/side_combat/effects/vfx_launcher_slash.png
     cooldown: 1.2
     startup: 0.10
     hitTime: 0.18

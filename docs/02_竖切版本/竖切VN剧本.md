@@ -640,7 +640,7 @@ SCN_MainMenu
 
 | Speaker | 系统 |
 | Text | 竖切版本结束。下一章将遇到第一位正式支援队友：白魔法队友。 |
-| Next | `EndVerticalSlice` |
+| Next | `EndSandbox` |
 
 ## 14. 选项与变量
 

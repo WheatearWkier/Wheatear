@@ -18,7 +18,7 @@ namespace Wheatear {
         bool ConsumeOpenTuningRequest(std::string& sourcePath);
     }
 
-    // Structured editor for assets/vertical_slice/data/arcade_combat_tuning.yaml
+    // Structured editor for assets/sandbox/data/arcade_combat_tuning.yaml
     // (level flow timings + boss behaviour + player feel).
     class ArcadeCombatTuningEditorPanel
     {
@@ -49,7 +49,7 @@ namespace Wheatear {
         bool m_Loaded = false;
         bool m_ParseValid = false;
         bool m_Dirty = false;
-        std::string m_SourcePath = "assets/vertical_slice/data/arcade_combat_tuning.yaml";
+        std::string m_SourcePath = "assets/sandbox/data/arcade_combat_tuning.yaml";
         std::filesystem::path m_ResolvedPath;
         std::string m_Status;
         std::string m_RawPreview;

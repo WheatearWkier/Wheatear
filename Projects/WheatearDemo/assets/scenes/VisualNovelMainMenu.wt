@@ -1,4 +1,4 @@
-﻿Scene: Untitled
+Scene: Untitled
 SavePolicy:
   CanSave: false
   CanLoad: true
@@ -13,7 +13,7 @@ Entities:
       Rotation: [0, 0, 0]
       Scale: [1, 1, 1]
     EventScriptComponent:
-      ScriptPath: "assets/events/vertical_slice_flow.wts"
+      ScriptPath: "assets/events/sandbox_flow.wts"
       StartEvent: "on_start"
       RunOnStart: false
       RunOnce: false
@@ -111,7 +111,7 @@ Entities:
       FromOffset: [0, 0.0350000001]
     UIImageComponent:
       Color: [1, 1, 1, 0.920000017]
-      TexturePath: assets/vertical_slice/ui/panels/panel_hub.png
+      TexturePath: assets/sandbox/ui/panels/panel_hub.png
       UVMin: [0, 0]
       UVMax: [1, 1]
   - Entity: 920000010
@@ -327,7 +327,7 @@ Entities:
       Scale: [3.76999998, 5.74884748, 3.76999998]
     SpriteRendererComponent:
       Color: [1, 1, 1, 1]
-      Texture: assets/vertical_slice/vn/portraits/mentor_slight_smile.png
+      Texture: assets/sandbox/vn/portraits/mentor_slight_smile.png
       TilingFactor: 1
       UVMin: [0, 0]
       UVMax: [1, 1]
@@ -359,7 +359,7 @@ Entities:
       Scale: [20, 11, 1]
     SpriteRendererComponent:
       Color: [1, 1, 1, 1]
-      Texture: assets/vertical_slice/vn/backgrounds/bg_forest_camp_night.png
+      Texture: assets/sandbox/vn/backgrounds/bg_forest_camp_night.png
       TilingFactor: 1
       UVMin: [0, 0]
       UVMax: [1, 1]

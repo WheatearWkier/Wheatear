@@ -60,7 +60,7 @@ namespace Wheatear {
         // Global tuning data file (data-driven flow timings / formulas).
         // Empty = the default project path. Edited from the editor's
         // "Turn Combat Tuning Editor".
-        std::string TuningPath = "assets/vertical_slice/data/turn_combat_tuning.yaml";
+        std::string TuningPath = "assets/sandbox/data/turn_combat_tuning.yaml";
 
         float StartFadeDuration = 0.55f;
         float IntroDuration = 0.80f;

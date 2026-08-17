@@ -1,0 +1,833 @@
+schema: wheatear.side_combat.tuning.v1
+version: 0.8.0
+
+# 战斗手感总原则：
+# - 横版纵深动作不依赖通用物理引擎自动驱动跳跃/浮空。
+# - X/Y 地面移动、RuntimeAirHeight、重力、滞空、受击硬直、击飞全部由本表和战斗状态机控制。
+# - 跳跃高度主要看 jumpImpulse；下落速度主要看 gravity；空中连击滞空主要看 attackerAirImpulse / targetAirFallStep / hitStun。
+player:
+  moveSpeed: 5.55
+  maxJumps: 1
+  jumpImpulse: 8.8
+  gravity: 23.0
+  airControl: 15.0
+  jumpBufferTime: 0.16
+  coyoteTime: 0.10
+  laneSpeedScale: 0.72
+  laneAcceleration: 32.0
+  groundAcceleration: 44.0
+  groundFriction: 20.0
+  basicCooldown: 0.17
+  basicFinisherExtraCooldown: 0.07
+  launcherCooldown: 0.38
+  magicBoltCooldown: 0.62
+  allySupportCooldown: 4.0
+  dashCooldown: 1.00
+  healItemCooldown: 5.0
+  manaItemCooldown: 5.0
+  attackBuffItemCooldown: 10.0
+  dashManaCost: 16.0
+  dashSpeed: 10.5
+  dashInvulnerableTime: 0.18
+  basicChainWindow: 0.76
+  launcherChainWindow: 0.86
+  magicChainWindow: 0.82
+  supportChainWindow: 1.0
+
+combat:
+  comboDropDelay: 1.20
+  hitInvulnerableTime: 0.035
+  defenseBase: 100.0
+  minDamage: 1.0
+
+feedback:
+  hitPauseTimeScale: 0.10
+  breakLimitCinematicDuration: 3.0
+  breakLimitCinematicTimeScale: 0.12
+  breakLimitCameraZoom: 1.30
+  breakLimitCameraOffset: [0.0, 0.25]
+  jumpSound: assets/sandbox/side_combat/audio/jump.wav
+  landSound: assets/sandbox/side_combat/audio/land.wav
+  jumpSoundVolume: 0.38
+  landSoundVolume: 0.40
+
+# 空中普攻是基础连击核心：每次命中都会给玩家一点上抬和滞空，但双方仍会慢慢下降。
+# 断限追击后续作为高手机制开放，用来重置空中行动并再次抬高连击高度。
+airCombo:
+  airActionLimit: 3
+  airActionLimitAfterBreak: 3
+  breakLimitEnabled: false
+  breakLimitDebugKeyEnabled: false
+  showBreakLimitHint: false
+  airBasicCooldown: 0.14
+  airChaseCooldown: 0.32
+  breakLimitCooldown: 3.0
+  breakLimitMinCombo: 4
+  breakLimitGaugeCost: 1.5
+  magicSwordGaugeMax: 3.0
+  gaugeGainGroundHit: 0.10
+  gaugeGainAirHit: 0.16
+  breakLimitMaxHeight: 3.00
+  breakLimitFallingVelocity: 2.3
+  breakLimitHangImpulse: 3.1
+  breakLimitHeightBoost: 0.36
+  groundThreatHeight: 1.25
+  highAirSafetyHeight: 2.45
+
+protection:
+  bossProtectionMax: 100.0
+  bossProtectionDecayPerSecond: 36.0
+  bossProtectionLimitTime: 1.15
+  bossProtectionForceFallVelocity: -6.0
+  bossProtectionBreakLimitThreshold: 0.0
+  breakLimitProtectionReduce: 100.0
+  groundResetDelay: 0.20
+  showBossProtectionHud: false
+  showCombatStateHud: false
+
+enemy:
+  initialAttackDelay: 0.24
+  attackRangePadding: 0.60
+  laneAttackPadding: 0.36
+  bossPreferredRangeBonus: 0.18
+  gruntMoveSpeedScale: 0.88
+  bossMoveSpeedScale: 0.72
+  gruntLaneSpeedScale: 0.68
+  bossLaneSpeedScale: 0.54
+  xApproachAcceleration: 24.0
+  xBrakeAcceleration: 20.0
+  laneApproachAcceleration: 18.0
+  laneBrakeAcceleration: 16.0
+  bearBoss:
+    moveSpeed: 3.75
+    aggroRange: 14.0
+    attackRange: 1.72
+    preferredRange: 1.08
+    attackInterval: 0.82
+    laneTolerance: 0.66
+    midHealthThreshold: 0.74
+    lowHealthThreshold: 0.44
+    midAttackInterval: 0.66
+    lowAttackInterval: 0.52
+    chargeDistance: 2.15
+    shockwaveDistance: 2.35
+    chargeSpeed: 7.20
+
+pickup:
+  pickupRadius: 0.45
+  attractRadius: 2.25
+  attractSpeed: 6.0
+
+movement:
+  laneMinY: -3.55
+  laneMaxY: 0.25
+  laneSpeedScale: 1.0
+  laneAcceleration: 30.0
+  sortScale: 0.015
+
+visuals:
+  shadowColor: [0.0, 0.0, 0.0, 1.0]
+  shadowMinAlpha: 0.34
+  shadowMaxAlpha: 0.68
+  shadowAirFadeHeight: 3.8
+  shadowOffset: [0.0, -0.04]
+  playerAnimations:
+    idle: { pattern: "", atlas: { sheet: "assets/sandbox/side_combat/sheets/runtime_characters/protag_idle_sheet.png", cellWidth: 512, cellHeight: 512, columns: 8, startFrame: 0 }, frameCount: 8, frameRate: 8.0, loop: true, renderScale: [1.0, 1.0], renderOffset: [0.0, 0.3398] }
+    run: { pattern: "", atlas: { sheet: "assets/sandbox/side_combat/sheets/runtime_characters/protag_run_sheet.png", cellWidth: 512, cellHeight: 512, columns: 4, startFrame: 0 }, frameCount: 4, frameRate: 8.0, loop: true, renderScale: [1.0, 1.0], renderOffset: [0.0, 0.3398] }
+    jump: { pattern: "", atlas: { sheet: "assets/sandbox/side_combat/sheets/runtime_characters/protag_jump_sheet.png", cellWidth: 512, cellHeight: 512, columns: 1, startFrame: 0 }, frameCount: 1, frameRate: 18.0, loop: false, renderScale: [1.0, 1.0], renderOffset: [0.0, 0.3398] }
+    fall: { pattern: "", atlas: { sheet: "assets/sandbox/side_combat/sheets/runtime_characters/protag_fall_sheet.png", cellWidth: 512, cellHeight: 512, columns: 1, startFrame: 0 }, frameCount: 1, frameRate: 12.0, loop: true, renderScale: [1.0, 1.0], renderOffset: [0.0, 0.3398] }
+    hit: { pattern: "", atlas: { sheet: "assets/sandbox/side_combat/sheets/runtime_characters/protag_hit_sheet.png", cellWidth: 512, cellHeight: 512, columns: 4, startFrame: 0 }, frameCount: 4, frameRate: 14.0, loop: false, renderScale: [1.0, 1.0], renderOffset: [0.0, 0.3398] }
+    dead: { pattern: "", atlas: { sheet: "assets/sandbox/side_combat/sheets/runtime_characters/protag_dead_sheet.png", cellWidth: 1024, cellHeight: 512, columns: 8, startFrame: 0 }, frameCount: 8, frameRate: 12.0, loop: false, renderScale: [2.0, 1.0], renderOffset: [0.0, 0.3398] }
+    basic1: { pattern: "", atlas: { sheet: "assets/sandbox/side_combat/sheets/runtime_characters/protag_basic1_sheet.png", cellWidth: 512, cellHeight: 512, columns: 4, startFrame: 0 }, frameCount: 4, frameRate: 14.0, loop: false, renderScale: [1.0, 1.0], renderOffset: [0.0, 0.3398] }
+    basic2: { pattern: "", atlas: { sheet: "assets/sandbox/side_combat/sheets/runtime_characters/protag_basic2_sheet.png", cellWidth: 512, cellHeight: 512, columns: 4, startFrame: 0 }, frameCount: 4, frameRate: 12.0, loop: false, renderScale: [1.0, 1.0], renderOffset: [0.0, 0.3398] }
+    basic3: { pattern: "", atlas: { sheet: "assets/sandbox/side_combat/sheets/runtime_characters/protag_basic3_sheet.png", cellWidth: 512, cellHeight: 512, columns: 4, startFrame: 0 }, frameCount: 4, frameRate: 10.0, loop: false, renderScale: [1.0, 1.0], renderOffset: [0.0, 0.3398] }
+    air_basic: { pattern: "", atlas: { sheet: "assets/sandbox/side_combat/sheets/runtime_characters/protag_air_basic_sheet.png", cellWidth: 512, cellHeight: 512, columns: 4, startFrame: 0 }, frameCount: 4, frameRate: 14.0, loop: false, renderScale: [1.15, 1.15], renderOffset: [0.0, 0.3398] }
+    launcher: { pattern: "", atlas: { sheet: "assets/sandbox/side_combat/sheets/runtime_characters/protag_launcher_sheet.png", cellWidth: 512, cellHeight: 512, columns: 2, startFrame: 0 }, frameCount: 2, frameRate: 10.0, loop: false, renderScale: [1.0, 1.0], renderOffset: [0.0, 0.3398] }
+    air_chase: { pattern: "", atlas: { sheet: "assets/sandbox/side_combat/sheets/runtime_characters/protag_air_chase_sheet.png", cellWidth: 768, cellHeight: 640, columns: 8, startFrame: 0 }, frameCount: 8, frameRate: 24.0, loop: false, renderScale: [1.5, 1.25], renderOffset: [0.0, 0.4453] }
+    dash: { pattern: "", atlas: { sheet: "assets/sandbox/side_combat/sheets/runtime_characters/protag_dash_sheet.png", cellWidth: 512, cellHeight: 512, columns: 1, startFrame: 0 }, frameCount: 1, frameRate: 8.0, loop: false, renderScale: [1.60, 1.60], renderOffset: [0.0, 0.4453] }
+    magic_bolt: { pattern: "", atlas: { sheet: "assets/sandbox/side_combat/sheets/runtime_characters/protag_magic_bolt_sheet.png", cellWidth: 512, cellHeight: 512, columns: 9, startFrame: 0 }, frameCount: 9, frameRate: 20.0, loop: false, renderScale: [1.0, 1.0], renderOffset: [0.0, 0.3398] }
+    ally_support: { pattern: "", atlas: { sheet: "assets/sandbox/side_combat/sheets/runtime_characters/protag_ally_support_sheet.png", cellWidth: 640, cellHeight: 512, columns: 8, startFrame: 0 }, frameCount: 8, frameRate: 18.0, loop: false, renderScale: [1.25, 1.0], renderOffset: [0.0, 0.3398] }
+    break_limit: { pattern: "", atlas: { sheet: "assets/sandbox/side_combat/sheets/runtime_characters/protag_break_limit_sheet.png", cellWidth: 512, cellHeight: 512, columns: 2, startFrame: 0 }, frameCount: 2, frameRate: 8.0, loop: false, renderScale: [1.25, 1.25], renderOffset: [0.0, 0.3398] }
+  gruntAnimations:
+    idle: { pattern: "", atlas: { sheet: "assets/sandbox/side_combat/sheets/runtime_enemies/en_claw_beast_idle_sheet.png", cellWidth: 512, cellHeight: 384, columns: 4, startFrame: 0 }, frameCount: 4, frameRate: 7.0, loop: true, renderScale: [1.0, 1.0], renderOffset: [0.0, 0.2969] }
+    run: { pattern: "", atlas: { sheet: "assets/sandbox/side_combat/sheets/runtime_enemies/en_claw_beast_run_sheet.png", cellWidth: 512, cellHeight: 384, columns: 5, startFrame: 0 }, frameCount: 5, frameRate: 11.0, loop: true, renderScale: [1.0, 1.0], renderOffset: [0.0, 0.2969] }
+    hit: { pattern: "", atlas: { sheet: "assets/sandbox/side_combat/sheets/runtime_enemies/en_claw_beast_hit_sheet.png", cellWidth: 768, cellHeight: 384, columns: 3, startFrame: 0 }, frameCount: 3, frameRate: 12.0, loop: false, renderScale: [1.5, 1.0], renderOffset: [0.0, 0.2969] }
+    fall: { pattern: "", atlas: { sheet: "assets/sandbox/side_combat/sheets/runtime_enemies/en_claw_beast_fall_sheet.png", cellWidth: 768, cellHeight: 512, columns: 3, startFrame: 0 }, frameCount: 3, frameRate: 9.0, loop: true, renderScale: [1.5, 1.3333], renderOffset: [0.0, 0.3516] }
+    dead: { pattern: "", atlas: { sheet: "assets/sandbox/side_combat/sheets/runtime_enemies/en_claw_beast_dead_sheet.png", cellWidth: 768, cellHeight: 384, columns: 4, startFrame: 0 }, frameCount: 4, frameRate: 7.0, loop: false, renderScale: [1.5, 1.0], renderOffset: [0.0, 0.2969] }
+    enemy_claw: { pattern: "", atlas: { sheet: "assets/sandbox/side_combat/sheets/runtime_enemies/en_claw_beast_attack_sheet.png", cellWidth: 768, cellHeight: 384, columns: 4, startFrame: 0 }, frameCount: 4, frameRate: 14.0, loop: false, renderScale: [1.5, 1.0], renderOffset: [0.0, 0.2969] }
+  bossAnimations:
+    idle: { pattern: "", atlas: { sheet: "assets/sandbox/side_combat/sheets/runtime_enemies/boss_bear_husband_idle_sheet.png", cellWidth: 512, cellHeight: 512, columns: 4, startFrame: 0 }, frameCount: 4, frameRate: 6.0, loop: true, renderScale: [1.0, 1.0], renderOffset: [0.0, 0.3151] }
+    run: { pattern: "", atlas: { sheet: "assets/sandbox/side_combat/sheets/runtime_enemies/boss_bear_husband_walk_sheet.png", cellWidth: 512, cellHeight: 512, columns: 4, startFrame: 0 }, frameCount: 4, frameRate: 8.0, loop: true, renderScale: [1.0, 1.0], renderOffset: [0.0, 0.3151] }
+    hit: { pattern: "", atlas: { sheet: "assets/sandbox/side_combat/sheets/runtime_enemies/boss_bear_husband_hit_sheet.png", cellWidth: 512, cellHeight: 512, columns: 4, startFrame: 0 }, frameCount: 4, frameRate: 10.0, loop: false, renderScale: [1.30, 1.30], renderOffset: [0.0, 0.4351] }
+    fall: { pattern: "", atlas: { sheet: "assets/sandbox/side_combat/sheets/runtime_enemies/boss_bear_husband_hit_sheet.png", cellWidth: 512, cellHeight: 512, columns: 4, startFrame: 0 }, frameCount: 4, frameRate: 10.0, loop: false, renderScale: [1.30, 1.30], renderOffset: [0.0, 0.4351] }
+    dead: { pattern: "", atlas: { sheet: "assets/sandbox/side_combat/sheets/runtime_enemies/boss_bear_husband_dead_sheet.png", cellWidth: 1280, cellHeight: 768, columns: 4, startFrame: 0 }, frameCount: 4, frameRate: 7.0, loop: false, renderScale: [1.25, 1.0], renderOffset: [0.0, 0.3151] }
+    enemy_claw: { pattern: "", atlas: { sheet: "assets/sandbox/side_combat/sheets/runtime_enemies/boss_bear_husband_attack_claw_sheet.png", cellWidth: 512, cellHeight: 512, columns: 3, startFrame: 0 }, frameCount: 3, frameRate: 5.0, loop: false, renderScale: [1.85, 1.85], renderOffset: [0.0, 0.3151] }
+    bear_charge: { pattern: "", atlas: { sheet: "assets/sandbox/side_combat/sheets/runtime_enemies/boss_bear_husband_charge_sheet.png", cellWidth: 512, cellHeight: 512, columns: 4, startFrame: 0 }, frameCount: 4, frameRate: 12.0, loop: true, renderScale: [1.0, 1.0], renderOffset: [0.0, 0.3151] }
+    bear_charge_windup: { pattern: "", atlas: { sheet: "assets/sandbox/side_combat/sheets/runtime_enemies/boss_bear_husband_charge_windup_sheet.png", cellWidth: 512, cellHeight: 512, columns: 6, startFrame: 0 }, frameCount: 6, frameRate: 12.0, loop: false, renderScale: [1.0, 1.0], renderOffset: [0.0, 0.3151] }
+    bear_shockwave: { pattern: "", atlas: { sheet: "assets/sandbox/side_combat/sheets/runtime_enemies/boss_bear_husband_shockwave_sheet.png", cellWidth: 512, cellHeight: 512, columns: 4, startFrame: 0 }, frameCount: 4, frameRate: 12.0, loop: false, renderScale: [1.16, 0.96], renderOffset: [0.0, 0.3151] }
+
+reactions:
+  bossLaunchBonus: 1.46
+
+skills:
+  basic_attack:
+    displayName: "三段斩"
+    input: "J"
+    comboRole: "地面起手 / 基础续连"
+    attackIds: [basic1, basic2, basic3]
+    unlockChapter: 2
+    coreMove: true
+  air_basic:
+    displayName: "跳斩"
+    input: "空中 J"
+    comboRole: "前期默认空中续连"
+    attackIds: [air_basic]
+    unlockChapter: 2
+    coreMove: true
+  launcher:
+    displayName: "裂空上挑"
+    input: "S+J"
+    comboRole: "地面浮空起手"
+    attackIds: [launcher]
+    unlockChapter: 2
+    coreMove: true
+  air_chase:
+    displayName: "空中追斩"
+    input: "空中 S+J"
+    comboRole: "空中续连 / 低空补救"
+    attackIds: [air_chase]
+    unlockChapter: 2
+    coreMove: true
+  dash:
+    displayName: "冲刺"
+    input: "I"
+    comboRole: "短暂无敌位移"
+    attackIds: [dash]
+    unlockChapter: 2
+    coreMove: true
+  magic_bolt:
+    displayName: "火球术"
+    input: "U"
+    comboRole: "远程补 hit / 空中魔法续连"
+    attackIds: [magic_bolt]
+    unlockChapter: 2
+    coreMove: true
+  ally_support:
+    displayName: "真青梅支援"
+    input: "H"
+    comboRole: "支援浮空 / 新手容错"
+    attackIds: [ally_support]
+    unlockChapter: 2
+    coreMove: true
+  break_limit:
+    displayName: "断限追击"
+    input: "L"
+    comboRole: "首领保护临界时刷新空中行动"
+    attackIds: [break_limit]
+    unlockChapter: 7
+    coreMove: false
+
+progression:
+  defaultProfile: CH02_MAIN_BearAwakening
+  profiles:
+    CH02_MAIN_BearAwakening:
+      displayName: "第二章：魔剑觉醒"
+      chapter: 2
+      unlockedSkills: [basic_attack, air_basic, launcher, air_chase, dash, magic_bolt, ally_support]
+      debugSkills: [break_limit]
+      visibleSystems:
+        bossProtectionHud: false
+        combatStateHud: false
+        breakLimitHint: false
+    CH02_MAT_BeastPath:
+      displayName: "第二章：黑林兽道"
+      chapter: 2
+      unlockedSkills: [basic_attack, air_basic, launcher, air_chase, dash, magic_bolt, ally_support]
+      debugSkills: [break_limit]
+      visibleSystems:
+        bossProtectionHud: false
+        combatStateHud: false
+        breakLimitHint: false
+    CH06_MAIN_MageLair:
+      displayName: "第六章：魔法师老巢"
+      chapter: 6
+      unlockedSkills: [basic_attack, air_basic, launcher, air_chase, dash, magic_bolt, ally_support]
+      debugSkills: []
+      visibleSystems:
+        bossProtectionHud: true
+        combatStateHud: false
+        breakLimitHint: false
+    CH07_MAIN_PalaceAssault:
+      displayName: "第七章：进攻王宫"
+      chapter: 7
+      unlockedSkills: [basic_attack, air_basic, launcher, air_chase, dash, magic_bolt, ally_support, break_limit]
+      debugSkills: []
+      visibleSystems:
+        bossProtectionHud: true
+        combatStateHud: false
+        breakLimitHint: true
+
+attacks:
+  basic1:
+    size: [1.36, 0.74]
+    offset: [0.88, 0.0]
+    velocity: [0.0, 0.0]
+    launchVelocity: [1.25, 1.9]
+    airHeight: 0.58
+    airRange: 1.14
+    damageScale: 0.70
+    damageFlat: 10.0
+    lifetime: 0.15
+    startup: 0.055
+    recovery: 0.09
+    cancelWindowStart: 0.11
+    cancelWindowEnd: 0.25
+    movementScale: 0.60
+    hitStun: 0.31
+    attackerAirImpulse: 0.0
+    protectionGain: 9.0
+    destroyOnHit: true
+    textureFramePattern: ""
+    textureAtlas:
+      sheet: assets/sandbox/side_combat/vfx_sheets/runtime_effects/vfx_basic_slash_sheet.png
+      cellWidth: 320
+      cellHeight: 192
+      columns: 4
+      startFrame: 0
+    textureFrameCount: 4
+    textureFrameRate: 26.0
+    swingSound: assets/sandbox/side_combat/audio/swing_light.wav
+    hitSound: assets/sandbox/side_combat/audio/hit_light.wav
+    soundVolume: 0.44
+    hitPause: 0.035
+    cameraShake: 0.016
+    cameraShakeDuration: 0.060
+
+  basic2:
+    size: [1.48, 0.78]
+    offset: [0.95, 0.02]
+    velocity: [0.0, 0.0]
+    launchVelocity: [1.45, 2.5]
+    airHeight: 0.62
+    airRange: 1.22
+    damageScale: 0.78
+    damageFlat: 11.0
+    lifetime: 0.16
+    startup: 0.065
+    recovery: 0.105
+    cancelWindowStart: 0.12
+    cancelWindowEnd: 0.29
+    movementScale: 0.54
+    hitStun: 0.34
+    attackerAirImpulse: 0.0
+    protectionGain: 11.0
+    destroyOnHit: true
+    textureFramePattern: ""
+    textureAtlas:
+      sheet: assets/sandbox/side_combat/vfx_sheets/runtime_effects/vfx_basic_slash_sheet.png
+      cellWidth: 320
+      cellHeight: 192
+      columns: 4
+      startFrame: 0
+    textureFrameCount: 4
+    textureFrameRate: 26.0
+    swingSound: assets/sandbox/side_combat/audio/swing_light.wav
+    hitSound: assets/sandbox/side_combat/audio/hit_light.wav
+    soundVolume: 0.45
+    hitPause: 0.040
+    cameraShake: 0.018
+    cameraShakeDuration: 0.065
+
+  basic3:
+    size: [1.64, 0.88]
+    offset: [1.02, 0.02]
+    velocity: [0.0, 0.0]
+    launchVelocity: [2.25, 5.4]
+    airHeight: 0.75
+    airRange: 1.42
+    damageScale: 0.96
+    damageFlat: 13.0
+    lifetime: 0.18
+    startup: 0.085
+    recovery: 0.16
+    cancelWindowStart: 0.18
+    cancelWindowEnd: 0.37
+    movementScale: 0.38
+    hitStun: 0.40
+    attackerAirImpulse: 0.0
+    protectionGain: 16.0
+    destroyOnHit: true
+    textureFramePattern: ""
+    textureAtlas:
+      sheet: assets/sandbox/side_combat/vfx_sheets/runtime_effects/vfx_basic_slash_sheet.png
+      cellWidth: 320
+      cellHeight: 192
+      columns: 4
+      startFrame: 0
+    textureFrameCount: 4
+    textureFrameRate: 26.0
+    swingSound: assets/sandbox/side_combat/audio/swing_heavy.wav
+    hitSound: assets/sandbox/side_combat/audio/hit_heavy.wav
+    soundVolume: 0.52
+    hitPause: 0.055
+    cameraShake: 0.028
+    cameraShakeDuration: 0.085
+
+  air_basic:
+    size: [1.64, 0.62]
+    offset: [0.94, 0.0]
+    velocity: [0.0, 0.0]
+    launchVelocity: [0.90, 3.05]
+    airHeight: 0.38
+    airRange: 0.98
+    damageScale: 0.42
+    damageFlat: 7.0
+    lifetime: 0.14
+    startup: 0.035
+    recovery: 0.08
+    cancelWindowStart: 0.075
+    cancelWindowEnd: 0.22
+    movementScale: 0.92
+    hitStun: 0.48
+    attackerAirImpulse: 0.85
+    attackerAirFallStep: 0.04
+    targetAirFallStep: 0.025
+    protectionGain: 14.0
+    destroyOnHit: true
+    textureFramePattern: ""
+    textureAtlas:
+      sheet: assets/sandbox/side_combat/vfx_sheets/runtime_effects/vfx_basic_slash_sheet.png
+      cellWidth: 320
+      cellHeight: 192
+      columns: 4
+      startFrame: 0
+    textureFrameCount: 4
+    textureFrameRate: 28.0
+    swingSound: assets/sandbox/side_combat/audio/swing_air.wav
+    hitSound: assets/sandbox/side_combat/audio/hit_air.wav
+    soundVolume: 0.42
+    hitPause: 0.032
+    cameraShake: 0.014
+    cameraShakeDuration: 0.052
+
+  launcher:
+    size: [1.12, 0.92]
+    offset: [0.66, 0.02]
+    velocity: [0.0, 0.0]
+    launchVelocity: [0.95, 12.4]
+    airHeight: 1.02
+    airRange: 2.18
+    damageScale: 0.74
+    damageFlat: 12.0
+    lifetime: 0.23
+    startup: 0.10
+    recovery: 0.18
+    cancelWindowStart: 0.19
+    cancelWindowEnd: 0.42
+    movementScale: 0.35
+    hitStun: 0.70
+    attackerAirImpulse: 0.0
+    protectionGain: 22.0
+    destroyOnHit: true
+    textureFramePattern: ""
+    textureAtlas:
+      sheet: assets/sandbox/side_combat/vfx_sheets/runtime_effects/vfx_launcher_slash_sheet.png
+      cellWidth: 240
+      cellHeight: 320
+      columns: 5
+      startFrame: 0
+    textureFrameCount: 5
+    textureFrameRate: 26.0
+    swingSound: assets/sandbox/side_combat/audio/swing_upper.wav
+    hitSound: assets/sandbox/side_combat/audio/hit_launcher.wav
+    soundVolume: 0.54
+    hitPause: 0.065
+    cameraShake: 0.034
+    cameraShakeDuration: 0.095
+
+  air_chase:
+    size: [1.42, 0.96]
+    offset: [0.84, 0.02]
+    velocity: [0.0, 0.0]
+    launchVelocity: [0.80, 5.10]
+    airHeight: 0.16
+    airRange: 2.02
+    damageScale: 0.58
+    damageFlat: 10.0
+    lifetime: 0.19
+    startup: 0.055
+    recovery: 0.12
+    cancelWindowStart: 0.10
+    cancelWindowEnd: 0.30
+    movementScale: 0.88
+    hitStun: 0.60
+    attackerAirImpulse: 2.35
+    attackerAirFallStep: 0.045
+    targetAirFallStep: 0.02
+    protectionGain: 18.0
+    destroyOnHit: true
+    textureFramePattern: ""
+    textureAtlas:
+      sheet: assets/sandbox/side_combat/vfx_sheets/runtime_effects/vfx_launcher_slash_sheet.png
+      cellWidth: 240
+      cellHeight: 320
+      columns: 5
+      startFrame: 0
+    textureFrameCount: 5
+    textureFrameRate: 26.0
+    swingSound: assets/sandbox/side_combat/audio/swing_air.wav
+    hitSound: assets/sandbox/side_combat/audio/hit_air.wav
+    soundVolume: 0.48
+    hitPause: 0.046
+    cameraShake: 0.024
+    cameraShakeDuration: 0.075
+
+  dash:
+    size: [1.26, 0.74]
+    offset: [0.88, 0.0]
+    velocity: [10.5, 0.0]
+    launchVelocity: [1.35, 1.80]
+    airHeight: 0.56
+    airRange: 1.02
+    damageScale: 0.60
+    damageFlat: 6.0
+    lifetime: 0.24
+    startup: 0.05
+    recovery: 0.08
+    cancelWindowStart: 0.14
+    cancelWindowEnd: 0.30
+    movementScale: 0.0
+    hitStun: 0.34
+    attackerAirImpulse: 0.0
+    protectionGain: 10.0
+    destroyOnHit: true
+    textureFramePattern: ""
+    textureAtlas:
+      sheet: assets/sandbox/side_combat/vfx_sheets/runtime_effects/vfx_launcher_slash_sheet.png
+      cellWidth: 240
+      cellHeight: 320
+      columns: 5
+      startFrame: 0
+    textureFrameCount: 5
+    textureFrameRate: 26.0
+    swingSound: assets/sandbox/side_combat/audio/swing_air.wav
+    hitSound: assets/sandbox/side_combat/audio/hit_launcher.wav
+    soundVolume: 0.50
+    hitPause: 0.040
+    cameraShake: 0.020
+    cameraShakeDuration: 0.070
+
+  magic_bolt:
+    size: [0.92, 0.58]
+    offset: [0.86, 0.0]
+    velocity: [9.2, 0.0]
+    launchVelocity: [1.20, 3.8]
+    airHeight: 0.74
+    airRange: 1.04
+    damageScale: 0.70
+    damageFlat: 11.0
+    lifetime: 1.15
+    startup: 0.09
+    recovery: 0.18
+    cancelWindowStart: 0.16
+    cancelWindowEnd: 0.38
+    movementScale: 0.72
+    hitStun: 0.42
+    attackerAirImpulse: 0.0
+    attackerAirFallStep: 0.02
+    targetAirFallStep: 0.02
+    protectionGain: 12.0
+    destroyOnHit: true
+    textureFramePattern: ""
+    textureAtlas:
+      sheet: assets/sandbox/side_combat/vfx_sheets/runtime_effects/vfx_magic_bolt_sheet.png
+      cellWidth: 288
+      cellHeight: 160
+      columns: 4
+      startFrame: 0
+    textureFrameCount: 4
+    textureFrameRate: 18.0
+    swingSound: assets/sandbox/side_combat/audio/magic_cast.wav
+    hitSound: assets/sandbox/side_combat/audio/magic_hit.wav
+    soundVolume: 0.50
+    hitPause: 0.040
+    cameraShake: 0.018
+    cameraShakeDuration: 0.070
+
+  ally_support:
+    size: [1.42, 1.08]
+    offset: [0.0, 0.0]
+    velocity: [0.0, 0.0]
+    launchVelocity: [0.0, 9.2]
+    airHeight: 1.02
+    airRange: 2.30
+    damageScale: 0.55
+    damageFlat: 9.0
+    lifetime: 0.36
+    startup: 0.16
+    recovery: 0.22
+    cancelWindowStart: 0.26
+    cancelWindowEnd: 0.58
+    movementScale: 0.72
+    hitStun: 0.72
+    attackerAirImpulse: 1.10
+    attackerAirFallStep: 0.015
+    targetAirFallStep: 0.0
+    protectionGain: 20.0
+    destroyOnHit: false
+    textureFramePattern: ""
+    textureAtlas:
+      sheet: assets/sandbox/side_combat/vfx_sheets/runtime_effects/vfx_ally_support_sheet.png
+      cellWidth: 256
+      cellHeight: 320
+      columns: 5
+      startFrame: 0
+    textureFrameCount: 5
+    textureFrameRate: 18.0
+    swingSound: assets/sandbox/side_combat/audio/support_cast.wav
+    hitSound: assets/sandbox/side_combat/audio/support_hit.wav
+    soundVolume: 0.50
+    hitPause: 0.052
+    cameraShake: 0.026
+    cameraShakeDuration: 0.085
+
+  break_limit:
+    size: [1.72, 1.30]
+    offset: [0.62, 0.0]
+    velocity: [0.0, 0.0]
+    launchVelocity: [0.0, 0.0]
+    airHeight: 0.05
+    airRange: 1.82
+    damageScale: 0.34
+    damageFlat: 6.0
+    lifetime: 0.24
+    startup: 0.035
+    recovery: 0.10
+    cancelWindowStart: 0.09
+    cancelWindowEnd: 0.24
+    movementScale: 0.70
+    hitStun: 0.22
+    attackerAirImpulse: 0.0
+    attackerAirFallStep: 0.0
+    targetAirFallStep: 0.0
+    protectionGain: 0.0
+    destroyOnHit: false
+    textureFramePattern: ""
+    textureAtlas:
+      sheet: assets/sandbox/side_combat/vfx_sheets/runtime_effects/vfx_ally_support_sheet.png
+      cellWidth: 256
+      cellHeight: 320
+      columns: 5
+      startFrame: 0
+    textureFrameCount: 5
+    textureFrameRate: 22.0
+    swingSound: assets/sandbox/side_combat/audio/break_limit.wav
+    hitSound: assets/sandbox/side_combat/audio/hit_launcher.wav
+    soundVolume: 0.56
+    hitPause: 0.070
+    cameraShake: 0.040
+    cameraShakeDuration: 0.120
+
+  enemy_claw:
+    size: [1.24, 0.86]
+    offset: [0.80, 0.0]
+    velocity: [0.0, 0.0]
+    launchVelocity: [3.0, 2.0]
+    airHeight: 0.62
+    airRange: 1.20
+    damageScale: 0.64
+    damageFlat: 8.0
+    lifetime: 0.20
+    startup: 0.32
+    recovery: 0.42
+    cancelWindowStart: 0.0
+    cancelWindowEnd: 0.0
+    movementScale: 0.12
+    hitStun: 0.34
+    destroyOnHit: true
+    textureFramePattern: ""
+    textureAtlas:
+      sheet: assets/sandbox/side_combat/vfx_sheets/runtime_effects/vfx_enemy_claw_sheet.png
+      cellWidth: 256
+      cellHeight: 192
+      columns: 3
+      startFrame: 0
+    textureFrameCount: 3
+    textureFrameRate: 18.0
+    swingSound: assets/sandbox/side_combat/audio/enemy_swing.wav
+    hitSound: assets/sandbox/side_combat/audio/player_hit.wav
+    soundVolume: 0.42
+    hitPause: 0.030
+    cameraShake: 0.016
+    cameraShakeDuration: 0.060
+
+  bear_charge:
+    size: [1.88, 0.94]
+    offset: [1.06, 0.0]
+    velocity: [7.2, 0.0]
+    launchVelocity: [4.5, 2.5]
+    airHeight: 0.58
+    airRange: 1.18
+    damageScale: 0.82
+    damageFlat: 12.0
+    lifetime: 0.88
+    startup: 0.50
+    recovery: 0.26
+    cancelWindowStart: 0.0
+    cancelWindowEnd: 0.0
+    movementScale: 1.0
+    hitStun: 0.46
+    destroyOnHit: false
+    textureFramePattern: ""
+    textureAtlas:
+      sheet: assets/sandbox/side_combat/vfx_sheets/runtime_effects/vfx_boss_bear_charge_sheet.png
+      cellWidth: 320
+      cellHeight: 192
+      columns: 3
+      startFrame: 0
+    textureFrameCount: 3
+    textureFrameRate: 16.0
+    swingSound: assets/sandbox/side_combat/audio/bear_charge.wav
+    hitSound: assets/sandbox/side_combat/audio/player_hit.wav
+    soundVolume: 0.50
+    hitPause: 0.045
+    cameraShake: 0.026
+    cameraShakeDuration: 0.085
+
+  bear_shockwave:
+    size: [1.02, 0.66]
+    offset: [1.10, 0.0]
+    velocity: [5.4, 0.0]
+    launchVelocity: [2.6, 1.6]
+    airHeight: 0.30
+    airRange: 0.80
+    damageScale: 0.56
+    damageFlat: 8.0
+    lifetime: 1.50
+    startup: 0.52
+    recovery: 0.20
+    cancelWindowStart: 0.0
+    cancelWindowEnd: 0.0
+    movementScale: 0.05
+    hitStun: 0.30
+    destroyOnHit: true
+    textureFramePattern: ""
+    textureAtlas:
+      sheet: assets/sandbox/side_combat/vfx_sheets/runtime_effects/vfx_boss_bear_shockwave_sheet.png
+      cellWidth: 384
+      cellHeight: 192
+      columns: 4
+      startFrame: 0
+    textureFrameCount: 4
+    textureFrameRate: 16.0
+    swingSound: assets/sandbox/side_combat/audio/shockwave_cast.wav
+    hitSound: assets/sandbox/side_combat/audio/player_hit.wav
+    soundVolume: 0.46
+    hitPause: 0.035
+    cameraShake: 0.020
+    cameraShakeDuration: 0.070
+
+# 消耗品道具槽（数据驱动，可在编辑器自由增删）。
+# - slot: 槽位编号（HUD 命令 side:item:<slot> 触发）
+# - actionId: 对应输入动作（在「输入绑定」面板新增动作并绑定按键）
+# - kind: heal=回血 / mana=回蓝 / attack_buff=攻击增益（数值取自场景玩家组件）
+# - cooldown: 该槽冷却（秒）
+# 加一个道具 = 在此加一行 + 输入绑定面板新增动作绑键 + HUD 预设加槽位图标。
+itemSlots:
+  - slot: 1
+    actionId: side.item1
+    kind: heal
+    cooldown: 5.0
+  - slot: 2
+    actionId: side.item2
+    kind: mana
+    cooldown: 5.0
+  - slot: 3
+    actionId: side.item3
+    kind: attack_buff
+    cooldown: 10.0
+
+# 技能槽触发表（数据驱动）。
+# - slot: 槽位 ID（稳定标识，如 basic / launcher）
+# - actionId: 输入动作（在「输入绑定」面板重映射或新增）
+# - kind: 行为类型（basic / launcher / magic_bolt / dash / ally_support / break_limit）
+# - enabled: 是否启用
+# 说明：行为类型是运行时行为（C++），本表只决定「哪个动作触发哪种行为」；
+# 给现有技能加第二个热键 = 加一行；新行为类型需要 C++（与新增组件同级）。
+skillSlots:
+  - slot: basic
+    actionId: side.basic
+    kind: basic
+    enabled: true
+  - slot: launcher
+    actionId: side.launcher
+    kind: launcher
+    enabled: true
+  - slot: magic
+    actionId: side.magic
+    kind: magic_bolt
+    enabled: true
+  - slot: dash
+    actionId: side.dash
+    kind: dash
+    enabled: true
+  - slot: support
+    actionId: side.support
+    kind: ally_support
+    enabled: true
+  - slot: break_limit
+    actionId: side.break_limit
+    kind: break_limit
+    enabled: true
+
+# 敌人种类模板（数据驱动波次表 SideCombatLevelComponent.WaveSpawns 引用）。
+# 每行 = 一种 SideEnemyKind 的生成参数；数值默认值 = 场景内置小兵（claw beast）。
+# 新种类 = 在 SideCombatTuningService 的 kind 枚举/生成器外增加处理（当前 Grunt/Thrower/Pouncer）。
+enemyTypes:
+  grunt:
+    maxHealth: 260
+    attack: 28
+    defense: 8
+    moveSpeed: 3.9
+    collisionSize: [0.86, 0.48]
+    collisionHeight: 1.05
+    knockbackResistance: 0.04
+    aggroRange: 8.0
+    attackRange: 1.18
+    preferredRange: 0.95
+    attackInterval: 1.25
+    laneTolerance: 0.42
+    renderScale: [1.72, 1.72, 1.0]
+    shadowScale: [1.22, 0.4, 1.0]
+  thrower:
+    # 远程掷弹手：血低攻高、射程远、移速慢
+    maxHealth: 190
+    attack: 34
+    defense: 6
+    moveSpeed: 3.2
+    collisionSize: [0.86, 0.48]
+    collisionHeight: 1.05
+    knockbackResistance: 0.04
+    aggroRange: 10.0
+    attackRange: 2.2
+    preferredRange: 1.8
+    attackInterval: 1.6
+    laneTolerance: 0.42
+    renderScale: [1.72, 1.72, 1.0]
+    shadowScale: [1.22, 0.4, 1.0]
+  pouncer:
+    # 突袭者：攻快脆皮、移速快
+    maxHealth: 170
+    attack: 26
+    defense: 5
+    moveSpeed: 4.6
+    collisionSize: [0.86, 0.48]
+    collisionHeight: 1.05
+    knockbackResistance: 0.02
+    aggroRange: 9.0
+    attackRange: 1.05
+    preferredRange: 0.8
+    attackInterval: 0.9
+    laneTolerance: 0.42
+    renderScale: [1.72, 1.72, 1.0]
+    shadowScale: [1.22, 0.4, 1.0]

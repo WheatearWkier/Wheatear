@@ -44,7 +44,7 @@ namespace Wheatear {
     private:
         bool m_Open = false;
         bool m_Loaded = false;
-        std::string m_SourcePath = "assets/events/vertical_slice_flow.wts";
+        std::string m_SourcePath = "assets/events/sandbox_flow.wts";
         std::string m_SelectedEvent;
         std::string m_Status;
         std::array<char, 512> m_SourcePathInput{};

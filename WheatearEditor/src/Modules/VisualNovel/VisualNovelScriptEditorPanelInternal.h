@@ -396,7 +396,7 @@ static void ExtractChoiceRequiredCondition(std::string& target,
         {
             auto& choices = PortraitStyleChoicesCache();
             choices = { AssetAliasRegistry::Path("vn.default.portrait_pattern") };
-            const std::filesystem::path portraitRoot = AssetPath::Resolve("assets/vertical_slice/vn/portraits");
+            const std::filesystem::path portraitRoot = AssetPath::Resolve("assets/sandbox/vn/portraits");
             if (std::filesystem::is_directory(portraitRoot))
             {
                 std::error_code error;

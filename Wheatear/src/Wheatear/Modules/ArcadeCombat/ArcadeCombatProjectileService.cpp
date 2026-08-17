@@ -52,7 +52,7 @@ namespace Wheatear::ArcadeCombatProjectileService {
         {
             const std::string projectileAtlasPath = AssetAliasRegistry::Path(
                 "arcade.runtime.projectile_vfx",
-                "assets/vertical_slice/arcade_combat/sheets/runtime_effects/arcade_projectile_vfx_sheet.png");
+                "assets/sandbox/arcade_combat/sheets/runtime_effects/arcade_projectile_vfx_sheet.png");
 
             if (melee)
             {

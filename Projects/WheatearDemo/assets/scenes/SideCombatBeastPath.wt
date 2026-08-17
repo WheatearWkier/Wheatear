@@ -22,7 +22,7 @@ Entities:
     - 1
     - 1
   EventScriptComponent:
-    ScriptPath: assets/events/vertical_slice_flow.wts
+    ScriptPath: assets/events/sandbox_flow.wts
     StartEvent: on_start
     RunOnStart: false
     RunOnce: false
@@ -312,7 +312,7 @@ Entities:
     - 1
     - 1
     - 1
-    Texture: assets/vertical_slice/side_combat/backgrounds/bg_black_forest_stage.png
+    Texture: assets/sandbox/side_combat/backgrounds/bg_black_forest_stage.png
     TilingFactor: 1
     UVMin:
     - 0
@@ -344,7 +344,7 @@ Entities:
     - 1
     - 1
   AudioSourceComponent:
-    AudioFilePath: assets/vertical_slice/side_combat/audio/side_battle_bgm.wav
+    AudioFilePath: assets/sandbox/side_combat/audio/side_battle_bgm.wav
     Volume: 0.34
     Loop: true
     PlayOnStart: true
@@ -370,7 +370,7 @@ Entities:
     - 0
     - 0
     - 0.560000002
-    Texture: assets/vertical_slice/side_combat/ui/blob_shadow_soft.png
+    Texture: assets/sandbox/side_combat/ui/blob_shadow_soft.png
     TilingFactor: 1
     UVMin:
     - 0
@@ -407,7 +407,7 @@ Entities:
     - 0
     - 0
     - 0.620000005
-    Texture: assets/vertical_slice/side_combat/ui/blob_shadow_soft.png
+    Texture: assets/sandbox/side_combat/ui/blob_shadow_soft.png
     TilingFactor: 1
     UVMin:
     - 0
@@ -444,7 +444,7 @@ Entities:
     - 1
     - 1
     - 1
-    Texture: assets/vertical_slice/side_combat/sheets/runtime_characters/protag_idle_sheet.png
+    Texture: assets/sandbox/side_combat/sheets/runtime_characters/protag_idle_sheet.png
     TilingFactor: 1
     UVMin:
     - 0
@@ -521,7 +521,7 @@ Entities:
     - 1
     - 1
     - 1
-    Texture: assets/vertical_slice/side_combat/sheets/runtime_enemies/boss_bear_husband_idle_sheet.png
+    Texture: assets/sandbox/side_combat/sheets/runtime_enemies/boss_bear_husband_idle_sheet.png
     TilingFactor: 1
     UVMin:
     - 0
@@ -579,7 +579,7 @@ Entities:
   SideCombatLevelComponent:
     PlayOnStart: true
     LevelId: CH02_MAT_BeastPath
-    TuningPath: assets/vertical_slice/data/side_combat_tuning.yaml
+    TuningPath: assets/sandbox/data/side_combat_tuning.yaml
     ArenaMin:
     - -8.80000019
     - -3.75
@@ -1168,8 +1168,8 @@ Entities:
     - 1
     - 1
     - 1
-    TexturePath: assets/vertical_slice/side_combat/ui/sidecombat_ui_sheet.png
-    SpriteSheet: assets/vertical_slice/side_combat/ui/sidecombat_ui_sheet.wtsheet
+    TexturePath: assets/sandbox/side_combat/ui/sidecombat_ui_sheet.png
+    SpriteSheet: assets/sandbox/side_combat/ui/sidecombat_ui_sheet.wtsheet
     SubRect: SC_TopPanel
     UVMin:
     - 0.100391001
@@ -1223,8 +1223,8 @@ Entities:
     - 1
     - 1
     - 1
-    TexturePath: assets/vertical_slice/side_combat/ui/sidecombat_ui_sheet.png
-    SpriteSheet: assets/vertical_slice/side_combat/ui/sidecombat_ui_sheet.wtsheet
+    TexturePath: assets/sandbox/side_combat/ui/sidecombat_ui_sheet.png
+    SpriteSheet: assets/sandbox/side_combat/ui/sidecombat_ui_sheet.wtsheet
     SubRect: SC_ComboPanel
     UVMin:
     - 0.443749994
@@ -1267,8 +1267,8 @@ Entities:
     - 1
     - 1
     - 1
-    TexturePath: assets/vertical_slice/side_combat/ui/sidecombat_ui_sheet.png
-    SpriteSheet: assets/vertical_slice/side_combat/ui/sidecombat_ui_sheet.wtsheet
+    TexturePath: assets/sandbox/side_combat/ui/sidecombat_ui_sheet.png
+    SpriteSheet: assets/sandbox/side_combat/ui/sidecombat_ui_sheet.wtsheet
     SubRect: SC_PlayerHealth
     UVMin:
     - 0.642578006
@@ -1384,8 +1384,8 @@ Entities:
     - 1
     - 1
     - 1
-    TexturePath: assets/vertical_slice/side_combat/ui/sidecombat_ui_sheet.png
-    SpriteSheet: assets/vertical_slice/side_combat/ui/sidecombat_ui_sheet.wtsheet
+    TexturePath: assets/sandbox/side_combat/ui/sidecombat_ui_sheet.png
+    SpriteSheet: assets/sandbox/side_combat/ui/sidecombat_ui_sheet.wtsheet
     SubRect: SC_PlayerMana
     UVMin:
     - 0.642578006
@@ -1428,8 +1428,8 @@ Entities:
     - 1
     - 1
     - 0.920000017
-    TexturePath: assets/vertical_slice/side_combat/ui/sidecombat_ui_sheet.png
-    SpriteSheet: assets/vertical_slice/side_combat/ui/sidecombat_ui_sheet.wtsheet
+    TexturePath: assets/sandbox/side_combat/ui/sidecombat_ui_sheet.png
+    SpriteSheet: assets/sandbox/side_combat/ui/sidecombat_ui_sheet.wtsheet
     SubRect: SC_PlayerUltimateMask
     UVMin:
     - 0.170702994
@@ -1472,8 +1472,8 @@ Entities:
     - 1
     - 1
     - 1
-    TexturePath: assets/vertical_slice/side_combat/ui/sidecombat_ui_sheet.png
-    SpriteSheet: assets/vertical_slice/side_combat/ui/sidecombat_ui_sheet.wtsheet
+    TexturePath: assets/sandbox/side_combat/ui/sidecombat_ui_sheet.png
+    SpriteSheet: assets/sandbox/side_combat/ui/sidecombat_ui_sheet.wtsheet
     SubRect: SC_BossHealth
     UVMin:
     - 0.642578006
@@ -1589,8 +1589,8 @@ Entities:
     - 1
     - 1
     - 1
-    TexturePath: assets/vertical_slice/side_combat/ui/sidecombat_ui_sheet.png
-    SpriteSheet: assets/vertical_slice/side_combat/ui/sidecombat_ui_sheet.wtsheet
+    TexturePath: assets/sandbox/side_combat/ui/sidecombat_ui_sheet.png
+    SpriteSheet: assets/sandbox/side_combat/ui/sidecombat_ui_sheet.wtsheet
     SubRect: SC_BossProtection
     UVMin:
     - 0.642578006
@@ -1633,8 +1633,8 @@ Entities:
     - 1
     - 1
     - 1
-    TexturePath: assets/vertical_slice/side_combat/ui/sidecombat_ui_sheet.png
-    SpriteSheet: assets/vertical_slice/side_combat/ui/sidecombat_ui_sheet.wtsheet
+    TexturePath: assets/sandbox/side_combat/ui/sidecombat_ui_sheet.png
+    SpriteSheet: assets/sandbox/side_combat/ui/sidecombat_ui_sheet.wtsheet
     SubRect: SC_PlayerStatus_Buff_0
     UVMin:
     - 0.615234017
@@ -1677,8 +1677,8 @@ Entities:
     - 1
     - 1
     - 1
-    TexturePath: assets/vertical_slice/side_combat/ui/sidecombat_ui_sheet.png
-    SpriteSheet: assets/vertical_slice/side_combat/ui/sidecombat_ui_sheet.wtsheet
+    TexturePath: assets/sandbox/side_combat/ui/sidecombat_ui_sheet.png
+    SpriteSheet: assets/sandbox/side_combat/ui/sidecombat_ui_sheet.wtsheet
     SubRect: SC_PlayerStatus_Buff_1
     UVMin:
     - 0.690234005
@@ -1721,8 +1721,8 @@ Entities:
     - 1
     - 1
     - 1
-    TexturePath: assets/vertical_slice/side_combat/ui/sidecombat_ui_sheet.png
-    SpriteSheet: assets/vertical_slice/side_combat/ui/sidecombat_ui_sheet.wtsheet
+    TexturePath: assets/sandbox/side_combat/ui/sidecombat_ui_sheet.png
+    SpriteSheet: assets/sandbox/side_combat/ui/sidecombat_ui_sheet.wtsheet
     SubRect: SC_PlayerStatus_Debuff_0
     UVMin:
     - 0.754297018
@@ -1765,8 +1765,8 @@ Entities:
     - 1
     - 1
     - 1
-    TexturePath: assets/vertical_slice/side_combat/ui/sidecombat_ui_sheet.png
-    SpriteSheet: assets/vertical_slice/side_combat/ui/sidecombat_ui_sheet.wtsheet
+    TexturePath: assets/sandbox/side_combat/ui/sidecombat_ui_sheet.png
+    SpriteSheet: assets/sandbox/side_combat/ui/sidecombat_ui_sheet.wtsheet
     SubRect: SC_PlayerStatus_Debuff_1
     UVMin:
     - 0.830078006
@@ -1809,8 +1809,8 @@ Entities:
     - 1
     - 1
     - 1
-    TexturePath: assets/vertical_slice/side_combat/ui/sidecombat_ui_sheet.png
-    SpriteSheet: assets/vertical_slice/side_combat/ui/sidecombat_ui_sheet.wtsheet
+    TexturePath: assets/sandbox/side_combat/ui/sidecombat_ui_sheet.png
+    SpriteSheet: assets/sandbox/side_combat/ui/sidecombat_ui_sheet.wtsheet
     SubRect: SC_PlayerStatus_Buff_0
     UVMin:
     - 0.615234017
@@ -1853,8 +1853,8 @@ Entities:
     - 1
     - 1
     - 1
-    TexturePath: assets/vertical_slice/side_combat/ui/sidecombat_ui_sheet.png
-    SpriteSheet: assets/vertical_slice/side_combat/ui/sidecombat_ui_sheet.wtsheet
+    TexturePath: assets/sandbox/side_combat/ui/sidecombat_ui_sheet.png
+    SpriteSheet: assets/sandbox/side_combat/ui/sidecombat_ui_sheet.wtsheet
     SubRect: SC_PlayerStatus_Buff_1
     UVMin:
     - 0.690234005
@@ -1897,8 +1897,8 @@ Entities:
     - 1
     - 1
     - 1
-    TexturePath: assets/vertical_slice/side_combat/ui/sidecombat_ui_sheet.png
-    SpriteSheet: assets/vertical_slice/side_combat/ui/sidecombat_ui_sheet.wtsheet
+    TexturePath: assets/sandbox/side_combat/ui/sidecombat_ui_sheet.png
+    SpriteSheet: assets/sandbox/side_combat/ui/sidecombat_ui_sheet.wtsheet
     SubRect: SC_PlayerStatus_Debuff_0
     UVMin:
     - 0.754297018
@@ -1941,8 +1941,8 @@ Entities:
     - 1
     - 1
     - 1
-    TexturePath: assets/vertical_slice/side_combat/ui/sidecombat_ui_sheet.png
-    SpriteSheet: assets/vertical_slice/side_combat/ui/sidecombat_ui_sheet.wtsheet
+    TexturePath: assets/sandbox/side_combat/ui/sidecombat_ui_sheet.png
+    SpriteSheet: assets/sandbox/side_combat/ui/sidecombat_ui_sheet.wtsheet
     SubRect: SC_PlayerStatus_Debuff_1
     UVMin:
     - 0.830078006
@@ -2127,8 +2127,8 @@ Entities:
     - 1
     - 1
     - 0.939999998
-    TexturePath: assets/vertical_slice/side_combat/ui/sidecombat_ui_sheet.png
-    SpriteSheet: assets/vertical_slice/side_combat/ui/sidecombat_ui_sheet.wtsheet
+    TexturePath: assets/sandbox/side_combat/ui/sidecombat_ui_sheet.png
+    SpriteSheet: assets/sandbox/side_combat/ui/sidecombat_ui_sheet.wtsheet
     SubRect: SC_ComboFrame
     UVMin:
     - 0.496093988
@@ -2171,7 +2171,7 @@ Entities:
     - 1
     - 1
     - 1
-    TexturePath: assets/vertical_slice/side_combat/ui/font/sidecombat_combo_font.png
+    TexturePath: assets/sandbox/side_combat/ui/font/sidecombat_combo_font.png
     UVMin:
     - 0.65625
     - 0.600694001
@@ -2213,7 +2213,7 @@ Entities:
     - 1
     - 1
     - 1
-    TexturePath: assets/vertical_slice/side_combat/ui/font/sidecombat_combo_font.png
+    TexturePath: assets/sandbox/side_combat/ui/font/sidecombat_combo_font.png
     UVMin:
     - 0.8125
     - 0.0625
@@ -2255,7 +2255,7 @@ Entities:
     - 1
     - 1
     - 1
-    TexturePath: assets/vertical_slice/side_combat/ui/font/sidecombat_combo_font.png
+    TexturePath: assets/sandbox/side_combat/ui/font/sidecombat_combo_font.png
     UVMin:
     - 0.0957029983
     - 0.319444001
@@ -2297,7 +2297,7 @@ Entities:
     - 1
     - 1
     - 1
-    TexturePath: assets/vertical_slice/side_combat/ui/font/sidecombat_combo_font.png
+    TexturePath: assets/sandbox/side_combat/ui/font/sidecombat_combo_font.png
     UVMin:
     - 0.0957029983
     - 0.319444001
@@ -2339,7 +2339,7 @@ Entities:
     - 1
     - 1
     - 1
-    TexturePath: assets/vertical_slice/side_combat/ui/font/sidecombat_combo_font.png
+    TexturePath: assets/sandbox/side_combat/ui/font/sidecombat_combo_font.png
     UVMin:
     - 0.0957029983
     - 0.319444001
@@ -2381,7 +2381,7 @@ Entities:
     - 1
     - 1
     - 1
-    TexturePath: assets/vertical_slice/side_combat/ui/font/sidecombat_combo_font.png
+    TexturePath: assets/sandbox/side_combat/ui/font/sidecombat_combo_font.png
     UVMin:
     - 0.0957029983
     - 0.319444001
@@ -2423,7 +2423,7 @@ Entities:
     - 1
     - 1
     - 1
-    TexturePath: assets/vertical_slice/side_combat/ui/font/sidecombat_combo_font.png
+    TexturePath: assets/sandbox/side_combat/ui/font/sidecombat_combo_font.png
     UVMin:
     - 0.0957029983
     - 0.319444001
@@ -2465,7 +2465,7 @@ Entities:
     - 1
     - 1
     - 1
-    TexturePath: assets/vertical_slice/side_combat/ui/font/sidecombat_combo_font.png
+    TexturePath: assets/sandbox/side_combat/ui/font/sidecombat_combo_font.png
     UVMin:
     - 0.0957029983
     - 0.319444001
@@ -2783,8 +2783,8 @@ Entities:
     - 1
     - 1
     - 1
-    TexturePath: assets/vertical_slice/side_combat/ui/sidecombat_ui_sheet.png
-    SpriteSheet: assets/vertical_slice/side_combat/ui/sidecombat_ui_sheet.wtsheet
+    TexturePath: assets/sandbox/side_combat/ui/sidecombat_ui_sheet.png
+    SpriteSheet: assets/sandbox/side_combat/ui/sidecombat_ui_sheet.wtsheet
     SubRect: SC_SkillIcon_J
     UVMin:
     - 0.112891003
@@ -2845,8 +2845,8 @@ Entities:
     - 0
     - 0
     - 0.540000021
-    TexturePath: assets/vertical_slice/side_combat/ui/sidecombat_ui_sheet.png
-    SpriteSheet: assets/vertical_slice/side_combat/ui/sidecombat_ui_sheet.wtsheet
+    TexturePath: assets/sandbox/side_combat/ui/sidecombat_ui_sheet.png
+    SpriteSheet: assets/sandbox/side_combat/ui/sidecombat_ui_sheet.wtsheet
     SubRect: SC_SkillIcon_J
     UVMin:
     - 0.112891003
@@ -3064,8 +3064,8 @@ Entities:
     - 1
     - 1
     - 1
-    TexturePath: assets/vertical_slice/side_combat/ui/sidecombat_ui_sheet.png
-    SpriteSheet: assets/vertical_slice/side_combat/ui/sidecombat_ui_sheet.wtsheet
+    TexturePath: assets/sandbox/side_combat/ui/sidecombat_ui_sheet.png
+    SpriteSheet: assets/sandbox/side_combat/ui/sidecombat_ui_sheet.wtsheet
     SubRect: SC_SkillIcon_SJ
     UVMin:
     - 0.198827997
@@ -3126,8 +3126,8 @@ Entities:
     - 0
     - 0
     - 0.540000021
-    TexturePath: assets/vertical_slice/side_combat/ui/sidecombat_ui_sheet.png
-    SpriteSheet: assets/vertical_slice/side_combat/ui/sidecombat_ui_sheet.wtsheet
+    TexturePath: assets/sandbox/side_combat/ui/sidecombat_ui_sheet.png
+    SpriteSheet: assets/sandbox/side_combat/ui/sidecombat_ui_sheet.wtsheet
     SubRect: SC_SkillIcon_SJ
     UVMin:
     - 0.198827997
@@ -3360,8 +3360,8 @@ Entities:
     - 1
     - 1
     - 1
-    TexturePath: assets/vertical_slice/side_combat/ui/sidecombat_ui_sheet.png
-    SpriteSheet: assets/vertical_slice/side_combat/ui/sidecombat_ui_sheet.wtsheet
+    TexturePath: assets/sandbox/side_combat/ui/sidecombat_ui_sheet.png
+    SpriteSheet: assets/sandbox/side_combat/ui/sidecombat_ui_sheet.wtsheet
     SubRect: SC_SkillIcon_S2
     UVMin:
     - 0.446483999
@@ -3422,8 +3422,8 @@ Entities:
     - 0
     - 0
     - 0.540000021
-    TexturePath: assets/vertical_slice/side_combat/ui/sidecombat_ui_sheet.png
-    SpriteSheet: assets/vertical_slice/side_combat/ui/sidecombat_ui_sheet.wtsheet
+    TexturePath: assets/sandbox/side_combat/ui/sidecombat_ui_sheet.png
+    SpriteSheet: assets/sandbox/side_combat/ui/sidecombat_ui_sheet.wtsheet
     SubRect: SC_SkillIcon_S2
     UVMin:
     - 0.446483999
@@ -3643,8 +3643,8 @@ Entities:
     - 1
     - 1
     - 1
-    TexturePath: assets/vertical_slice/side_combat/ui/sidecombat_ui_sheet.png
-    SpriteSheet: assets/vertical_slice/side_combat/ui/sidecombat_ui_sheet.wtsheet
+    TexturePath: assets/sandbox/side_combat/ui/sidecombat_ui_sheet.png
+    SpriteSheet: assets/sandbox/side_combat/ui/sidecombat_ui_sheet.wtsheet
     SubRect: SC_SkillIcon_S3
     UVMin:
     - 0.364843994
@@ -3705,8 +3705,8 @@ Entities:
     - 0
     - 0
     - 0.540000021
-    TexturePath: assets/vertical_slice/side_combat/ui/sidecombat_ui_sheet.png
-    SpriteSheet: assets/vertical_slice/side_combat/ui/sidecombat_ui_sheet.wtsheet
+    TexturePath: assets/sandbox/side_combat/ui/sidecombat_ui_sheet.png
+    SpriteSheet: assets/sandbox/side_combat/ui/sidecombat_ui_sheet.wtsheet
     SubRect: SC_SkillIcon_S3
     UVMin:
     - 0.364843994
@@ -3924,8 +3924,8 @@ Entities:
     - 1
     - 1
     - 1
-    TexturePath: assets/vertical_slice/side_combat/ui/sidecombat_ui_sheet.png
-    SpriteSheet: assets/vertical_slice/side_combat/ui/sidecombat_ui_sheet.wtsheet
+    TexturePath: assets/sandbox/side_combat/ui/sidecombat_ui_sheet.png
+    SpriteSheet: assets/sandbox/side_combat/ui/sidecombat_ui_sheet.wtsheet
     SubRect: SC_SkillIcon_U
     UVMin:
     - 0.283594012
@@ -3986,8 +3986,8 @@ Entities:
     - 0
     - 0
     - 0.540000021
-    TexturePath: assets/vertical_slice/side_combat/ui/sidecombat_ui_sheet.png
-    SpriteSheet: assets/vertical_slice/side_combat/ui/sidecombat_ui_sheet.wtsheet
+    TexturePath: assets/sandbox/side_combat/ui/sidecombat_ui_sheet.png
+    SpriteSheet: assets/sandbox/side_combat/ui/sidecombat_ui_sheet.wtsheet
     SubRect: SC_SkillIcon_U
     UVMin:
     - 0.283594012
@@ -4218,8 +4218,8 @@ Entities:
     - 1
     - 1
     - 1
-    TexturePath: assets/vertical_slice/side_combat/ui/sidecombat_ui_sheet.png
-    SpriteSheet: assets/vertical_slice/side_combat/ui/sidecombat_ui_sheet.wtsheet
+    TexturePath: assets/sandbox/side_combat/ui/sidecombat_ui_sheet.png
+    SpriteSheet: assets/sandbox/side_combat/ui/sidecombat_ui_sheet.wtsheet
     SubRect: SC_SkillIcon_I
     UVMin:
     - 0.528905988
@@ -4280,8 +4280,8 @@ Entities:
     - 0
     - 0
     - 0.540000021
-    TexturePath: assets/vertical_slice/side_combat/ui/sidecombat_ui_sheet.png
-    SpriteSheet: assets/vertical_slice/side_combat/ui/sidecombat_ui_sheet.wtsheet
+    TexturePath: assets/sandbox/side_combat/ui/sidecombat_ui_sheet.png
+    SpriteSheet: assets/sandbox/side_combat/ui/sidecombat_ui_sheet.wtsheet
     SubRect: SC_SkillIcon_I
     UVMin:
     - 0.528905988
@@ -4512,7 +4512,7 @@ Entities:
     - 1
     - 1
     - 1
-    TexturePath: assets/vertical_slice/side_combat/ui/icon_skill_break_limit.png
+    TexturePath: assets/sandbox/side_combat/ui/icon_skill_break_limit.png
     UVMin:
     - 0
     - 0
@@ -4572,7 +4572,7 @@ Entities:
     - 0
     - 0
     - 0.540000021
-    TexturePath: assets/vertical_slice/side_combat/ui/icon_skill_break_limit.png
+    TexturePath: assets/sandbox/side_combat/ui/icon_skill_break_limit.png
     UVMin:
     - 0
     - 0
@@ -4862,8 +4862,8 @@ Entities:
     - 1
     - 1
     - 1
-    TexturePath: assets/vertical_slice/side_combat/ui/sidecombat_ui_sheet.png
-    SpriteSheet: assets/vertical_slice/side_combat/ui/sidecombat_ui_sheet.wtsheet
+    TexturePath: assets/sandbox/side_combat/ui/sidecombat_ui_sheet.png
+    SpriteSheet: assets/sandbox/side_combat/ui/sidecombat_ui_sheet.wtsheet
     SubRect: SC_ItemSlot_1_Frame
     UVMin:
     - 0.116406001
@@ -4922,8 +4922,8 @@ Entities:
     - 1
     - 1
     - 1
-    TexturePath: assets/vertical_slice/side_combat/ui/sidecombat_ui_sheet.png
-    SpriteSheet: assets/vertical_slice/side_combat/ui/sidecombat_ui_sheet.wtsheet
+    TexturePath: assets/sandbox/side_combat/ui/sidecombat_ui_sheet.png
+    SpriteSheet: assets/sandbox/side_combat/ui/sidecombat_ui_sheet.wtsheet
     SubRect: SC_ItemSlot_1_Icon
     UVMin:
     - 0.116016001
@@ -5013,8 +5013,8 @@ Entities:
     - 0
     - 0
     - 0
-    TexturePath: assets/vertical_slice/side_combat/ui/sidecombat_ui_sheet.png
-    SpriteSheet: assets/vertical_slice/side_combat/ui/sidecombat_ui_sheet.wtsheet
+    TexturePath: assets/sandbox/side_combat/ui/sidecombat_ui_sheet.png
+    SpriteSheet: assets/sandbox/side_combat/ui/sidecombat_ui_sheet.wtsheet
     SubRect: SC_ItemSlot_1_Icon
     UVMin:
     - 0.116016001
@@ -5187,8 +5187,8 @@ Entities:
     - 1
     - 1
     - 1
-    TexturePath: assets/vertical_slice/side_combat/ui/sidecombat_ui_sheet.png
-    SpriteSheet: assets/vertical_slice/side_combat/ui/sidecombat_ui_sheet.wtsheet
+    TexturePath: assets/sandbox/side_combat/ui/sidecombat_ui_sheet.png
+    SpriteSheet: assets/sandbox/side_combat/ui/sidecombat_ui_sheet.wtsheet
     SubRect: SC_ItemSlot_1_Frame
     UVMin:
     - 0.116406001
@@ -5247,8 +5247,8 @@ Entities:
     - 1
     - 1
     - 1
-    TexturePath: assets/vertical_slice/side_combat/ui/sidecombat_ui_sheet.png
-    SpriteSheet: assets/vertical_slice/side_combat/ui/sidecombat_ui_sheet.wtsheet
+    TexturePath: assets/sandbox/side_combat/ui/sidecombat_ui_sheet.png
+    SpriteSheet: assets/sandbox/side_combat/ui/sidecombat_ui_sheet.wtsheet
     SubRect: SC_ItemSlot_2_Icon
     UVMin:
     - 0.180078
@@ -5338,8 +5338,8 @@ Entities:
     - 0
     - 0
     - 0
-    TexturePath: assets/vertical_slice/side_combat/ui/sidecombat_ui_sheet.png
-    SpriteSheet: assets/vertical_slice/side_combat/ui/sidecombat_ui_sheet.wtsheet
+    TexturePath: assets/sandbox/side_combat/ui/sidecombat_ui_sheet.png
+    SpriteSheet: assets/sandbox/side_combat/ui/sidecombat_ui_sheet.wtsheet
     SubRect: SC_ItemSlot_2_Icon
     UVMin:
     - 0.180078
@@ -5512,8 +5512,8 @@ Entities:
     - 1
     - 1
     - 1
-    TexturePath: assets/vertical_slice/side_combat/ui/sidecombat_ui_sheet.png
-    SpriteSheet: assets/vertical_slice/side_combat/ui/sidecombat_ui_sheet.wtsheet
+    TexturePath: assets/sandbox/side_combat/ui/sidecombat_ui_sheet.png
+    SpriteSheet: assets/sandbox/side_combat/ui/sidecombat_ui_sheet.wtsheet
     SubRect: SC_ItemSlot_1_Frame
     UVMin:
     - 0.116406001
@@ -5572,8 +5572,8 @@ Entities:
     - 1
     - 1
     - 1
-    TexturePath: assets/vertical_slice/side_combat/ui/sidecombat_ui_sheet.png
-    SpriteSheet: assets/vertical_slice/side_combat/ui/sidecombat_ui_sheet.wtsheet
+    TexturePath: assets/sandbox/side_combat/ui/sidecombat_ui_sheet.png
+    SpriteSheet: assets/sandbox/side_combat/ui/sidecombat_ui_sheet.wtsheet
     SubRect: SC_ItemSlot_3_Icon
     UVMin:
     - 0.234375
@@ -5663,8 +5663,8 @@ Entities:
     - 0
     - 0
     - 0
-    TexturePath: assets/vertical_slice/side_combat/ui/sidecombat_ui_sheet.png
-    SpriteSheet: assets/vertical_slice/side_combat/ui/sidecombat_ui_sheet.wtsheet
+    TexturePath: assets/sandbox/side_combat/ui/sidecombat_ui_sheet.png
+    SpriteSheet: assets/sandbox/side_combat/ui/sidecombat_ui_sheet.wtsheet
     SubRect: SC_ItemSlot_3_Icon
     UVMin:
     - 0.234375
@@ -5837,8 +5837,8 @@ Entities:
     - 1
     - 1
     - 0.860000014
-    TexturePath: assets/vertical_slice/side_combat/ui/sidecombat_ui_sheet.png
-    SpriteSheet: assets/vertical_slice/side_combat/ui/sidecombat_ui_sheet.wtsheet
+    TexturePath: assets/sandbox/side_combat/ui/sidecombat_ui_sheet.png
+    SpriteSheet: assets/sandbox/side_combat/ui/sidecombat_ui_sheet.wtsheet
     SubRect: SC_JoystickBase
     UVMin:
     - 0.192187995
@@ -5881,8 +5881,8 @@ Entities:
     - 0.800000012
     - 0.839999974
     - 0.519999981
-    TexturePath: assets/vertical_slice/side_combat/ui/sidecombat_ui_sheet.png
-    SpriteSheet: assets/vertical_slice/side_combat/ui/sidecombat_ui_sheet.wtsheet
+    TexturePath: assets/sandbox/side_combat/ui/sidecombat_ui_sheet.png
+    SpriteSheet: assets/sandbox/side_combat/ui/sidecombat_ui_sheet.wtsheet
     SubRect: SC_JoystickBase
     UVMin:
     - 0.192187995

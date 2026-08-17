@@ -129,7 +129,7 @@ namespace Wheatear::SideCombatLifecycleService {
             auto it = tuning.GruntAnimations.Clips.find("idle");
             if (it != tuning.GruntAnimations.Clips.end() && !it->second.Atlas.SheetPath.empty())
                 return it->second.Atlas.SheetPath;
-            return "assets/vertical_slice/side_combat/sheets/runtime_enemies/en_claw_beast_idle_sheet.png";
+            return "assets/sandbox/side_combat/sheets/runtime_enemies/en_claw_beast_idle_sheet.png";
         }
 
     } // namespace
@@ -251,7 +251,7 @@ namespace Wheatear::SideCombatLifecycleService {
                 shadowTransform.Scale = type.ShadowScale;
                 auto& shadowSprite = shadow.AddComponent<SpriteRendererComponent>();
                 shadowSprite.Texture = GameplayVisualService::LoadTextureCached(
-                    "assets/vertical_slice/side_combat/ui/blob_shadow_soft.png");
+                    "assets/sandbox/side_combat/ui/blob_shadow_soft.png");
                 shadowSprite.Color = { 0.0f, 0.0f, 0.0f, 0.54f };
 
                 ++spawnCounter;

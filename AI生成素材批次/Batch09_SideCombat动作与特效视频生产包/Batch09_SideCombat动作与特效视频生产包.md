@@ -168,9 +168,9 @@ no reframing, no crop, no cut, no transition, no camera shake
 角色动作视频至少使用一张稳定的角色参考图。优先使用：
 
 ```text
-WheatearEditor/assets/vertical_slice/vn/portraits/protag_school_neutral.png
-WheatearEditor/assets/vertical_slice/vn/portraits/protag_school_alert.png
-WheatearEditor/assets/vertical_slice/side_combat/characters/protag_magic_swordsman.png
+WheatearEditor/assets/sandbox/vn/portraits/protag_school_neutral.png
+WheatearEditor/assets/sandbox/vn/portraits/protag_school_alert.png
+WheatearEditor/assets/sandbox/side_combat/characters/protag_magic_swordsman.png
 ```
 
 敌人和 Boss 使用各自的正式立绘、静态战斗图或已经验收的动作关键帧。已有单帧素材可以作为视频参考图，不要求把它们重新加工成整段动画。
@@ -300,7 +300,7 @@ WheatearEditor/assets/vertical_slice/side_combat/characters/protag_magic_swordsm
 ### 4.3.1 当前 Sandbox 运行时替换清单（2026-08-03）
 
 这张表是下一轮生成和后续替换的唯一执行清单，来自当前
-`WheatearEditor/assets/vertical_slice/data/side_combat_tuning.yaml`、
+`WheatearEditor/assets/sandbox/data/side_combat_tuning.yaml`、
 `10_side_combat_actions.yaml` 以及 Batch03/Batch04 的 `sheet_params.yaml`。
 
 - `runtime key` 是引擎真正读取的动作名；不要把旧设计名直接当成运行时文件名。
@@ -622,9 +622,9 @@ Batch09_SideCombat动作与特效视频生产包/
 运行时正式资源仍迁移到：
 
 ```text
-WheatearEditor/assets/vertical_slice/source_frames/
-WheatearEditor/assets/vertical_slice/side_combat/sheets/
-WheatearEditor/assets/vertical_slice/side_combat/vfx_sheets/
+WheatearEditor/assets/sandbox/source_frames/
+WheatearEditor/assets/sandbox/side_combat/sheets/
+WheatearEditor/assets/sandbox/side_combat/vfx_sheets/
 ```
 
 `AI生成素材批次/` 只保存视频源、参考图、中间帧、最终交付副本和参数记录，不作为游戏运行时引用路径。

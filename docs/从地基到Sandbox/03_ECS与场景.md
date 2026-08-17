@@ -1,4 +1,4 @@
-﻿# Part 3 · ECS 与场景：实体、组件、序列化与双系统集
+# Part 3 · ECS 与场景：实体、组件、序列化与双系统集
 
 > 目标：理解实体组件系统（ECS）的组织方式、YAML 场景序列化机制，
 > 以及"编辑器与运行时共用一份场景数据、两套系统行为"的核心设计。
@@ -167,8 +167,8 @@ using CoreSceneComponents = ComponentGroup<
     SortOrder: 64
     ParentEntity: 946209004
   UIImageComponent:
-    TexturePath: assets/vertical_slice/side_combat/ui/sidecombat_ui_sheet.png
-    SpriteSheet: assets/vertical_slice/side_combat/ui/sidecombat_ui_sheet.wtsheet
+    TexturePath: assets/sandbox/side_combat/ui/sidecombat_ui_sheet.png
+    SpriteSheet: assets/sandbox/side_combat/ui/sidecombat_ui_sheet.wtsheet
     SubRect: SC_SkillIcon_J
     UVMin: [0.112891, 0.170833]
   UIButtonComponent:

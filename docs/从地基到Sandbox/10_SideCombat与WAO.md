@@ -6,7 +6,7 @@
 
 ## 10.1 数据表驱动：一切参数都是资产
 
-战斗的**所有参数**都在数据表里（`assets/vertical_slice/data/side_combat_tuning.yaml`），
+战斗的**所有参数**都在数据表里（`assets/sandbox/data/side_combat_tuning.yaml`），
 不是硬编码：
 
 ```yaml
@@ -128,7 +128,7 @@ struct ActionRecipe      // 一个动作的完整定义（资产！）
   displayName: Basic Slash I
   icon: side.skill.icon.basic
   animation: side_basic1
-  sound: assets/vertical_slice/side_combat/audio/swing_light.wav
+  sound: assets/sandbox/side_combat/audio/swing_light.wav
   effect: side.vfx.basic_slash
   cooldown: 0.19
   duration: 0.31

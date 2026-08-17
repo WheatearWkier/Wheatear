@@ -22,7 +22,7 @@ Entities:
     - 1
     - 1
   EventScriptComponent:
-    ScriptPath: assets/events/vertical_slice_flow.wts
+    ScriptPath: assets/events/sandbox_flow.wts
     StartEvent: on_start
     RunOnStart: false
     RunOnce: false
@@ -194,7 +194,7 @@ Entities:
     - 1
     - 1
     - 1
-    Texture: assets/vertical_slice/arcade_combat/backgrounds/bg_arcade_arena_grid.png
+    Texture: assets/sandbox/arcade_combat/backgrounds/bg_arcade_arena_grid.png
     TilingFactor: 1
 - Entity: 930000030
   TagComponent:
@@ -213,7 +213,7 @@ Entities:
     - 1
     - 1
   AudioSourceComponent:
-    AudioFilePath: assets/vertical_slice/arcade_combat/audio/arcade_battle_bgm.wav
+    AudioFilePath: assets/sandbox/arcade_combat/audio/arcade_battle_bgm.wav
     Volume: 0.34
     Loop: true
     PlayOnStart: true
@@ -263,7 +263,7 @@ Entities:
     - 1
     - 1
     - 1
-    Texture: assets/vertical_slice/arcade_combat/ui/ui_arcade_danger_bar.png
+    Texture: assets/sandbox/arcade_combat/ui/ui_arcade_danger_bar.png
     TilingFactor: 1
 - Entity: 930000005
   TagComponent:
@@ -315,7 +315,7 @@ Entities:
     - 1
     - 1
     - 1
-    Texture: assets/vertical_slice/arcade_combat/characters/protag_arcade_mage.png
+    Texture: assets/sandbox/arcade_combat/characters/protag_arcade_mage.png
     TilingFactor: 1
   ArcadeCombatantComponent:
     Team: 1
@@ -349,7 +349,7 @@ Entities:
     - 1
     - 1
     - 0
-    Texture: assets/vertical_slice/arcade_combat/characters/boss_arcade_mage.png
+    Texture: assets/sandbox/arcade_combat/characters/boss_arcade_mage.png
     TilingFactor: 1
   ArcadeCombatantComponent:
     Team: 2
@@ -394,7 +394,7 @@ Entities:
     - 1
     - 1
     - 0.96
-    Texture: assets/vertical_slice/arcade_combat/props/prop_arcade_cover_block.png
+    Texture: assets/sandbox/arcade_combat/props/prop_arcade_cover_block.png
     TilingFactor: 1
   ArcadeCoverComponent:
     Radius: 0.78
@@ -423,7 +423,7 @@ Entities:
     - 1
     - 1
     - 0.96
-    Texture: assets/vertical_slice/arcade_combat/props/prop_arcade_cover_block.png
+    Texture: assets/sandbox/arcade_combat/props/prop_arcade_cover_block.png
     TilingFactor: 1
   ArcadeCoverComponent:
     Radius: 0.82
@@ -452,7 +452,7 @@ Entities:
     - 1
     - 1
     - 0.88
-    Texture: assets/vertical_slice/arcade_combat/props/prop_arcade_cover_block.png
+    Texture: assets/sandbox/arcade_combat/props/prop_arcade_cover_block.png
     TilingFactor: 1
   ArcadeCoverComponent:
     Radius: 0.68
@@ -939,7 +939,7 @@ Entities:
     - 1
     - 1
     - 0.52
-    TexturePath: assets/vertical_slice/arcade_combat/sheets/static_effects/proj_arcade_player_bolt_sheet.png
+    TexturePath: assets/sandbox/arcade_combat/sheets/static_effects/proj_arcade_player_bolt_sheet.png
   UITextComponent:
     Text: "1 手枪"
     Color: &id001
@@ -998,7 +998,7 @@ Entities:
     - 1
     - 1
     - 0.52
-    TexturePath: assets/vertical_slice/arcade_combat/sheets/static_effects/vfx_arcade_cannon_blast_sheet.png
+    TexturePath: assets/sandbox/arcade_combat/sheets/static_effects/vfx_arcade_cannon_blast_sheet.png
   UITextComponent:
     Text: "2 重炮"
     Color: *id001
@@ -1053,7 +1053,7 @@ Entities:
     - 1
     - 1
     - 0.52
-    TexturePath: assets/vertical_slice/arcade_combat/sheets/static_effects/vfx_arcade_katana_slash_sheet.png
+    TexturePath: assets/sandbox/arcade_combat/sheets/static_effects/vfx_arcade_katana_slash_sheet.png
   UITextComponent:
     Text: "3 太刀"
     Color: *id001
