@@ -249,7 +249,7 @@ namespace Wheatear::ProgressionEquipmentPageService {
             {
                 slider.GetComponent<UIWidgetComponent>().Visible = true;
                 auto& sliderComponent = slider.GetComponent<UISliderComponent>();
-                sliderComponent.MinValue = 1.0f;
+                sliderComponent.MinValue = 0.0f;
                 sliderComponent.MaxValue = static_cast<float>(std::max(pageCount, 1));
                 if (!sliderComponent.IsDragging)
                     sliderComponent.Value = static_cast<float>(clampedPage);
@@ -257,11 +257,13 @@ namespace Wheatear::ProgressionEquipmentPageService {
             }
         }
 
-        static constexpr std::array<EquipmentSlotView, 4> kSlots = {
+        static constexpr std::array<EquipmentSlotView, 6> kSlots = {
             EquipmentSlotView{ "armor", SystemBindings::Progression::EquipmentSlotArmor, SystemBindings::Progression::EquipmentSlotArmorButton, { 0.105f, 0.335f } },
             EquipmentSlotView{ "ring", SystemBindings::Progression::EquipmentSlotRing, SystemBindings::Progression::EquipmentSlotRingButton, { 0.205f, 0.335f } },
             EquipmentSlotView{ "charm", SystemBindings::Progression::EquipmentSlotCharm, SystemBindings::Progression::EquipmentSlotCharmButton, { 0.105f, 0.470f } },
-            EquipmentSlotView{ "boots", SystemBindings::Progression::EquipmentSlotBoots, SystemBindings::Progression::EquipmentSlotBootsButton, { 0.205f, 0.470f } }
+            EquipmentSlotView{ "boots", SystemBindings::Progression::EquipmentSlotBoots, SystemBindings::Progression::EquipmentSlotBootsButton, { 0.205f, 0.470f } },
+            EquipmentSlotView{ "weapon", SystemBindings::Progression::EquipmentSlotWeapon, SystemBindings::Progression::EquipmentSlotWeaponButton, { 0.105f, 0.605f } },
+            EquipmentSlotView{ "special", SystemBindings::Progression::EquipmentSlotSpecial, SystemBindings::Progression::EquipmentSlotSpecialButton, { 0.205f, 0.605f } }
         };
 
     } // namespace

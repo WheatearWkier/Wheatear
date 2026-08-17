@@ -1015,8 +1015,8 @@ Assets:
     Path: "assets/gameplay/progression/equipment/equipment.yaml"
     Type: "Data"
     DisplayName: "equipment.yaml"
-    SizeBytes: 2815
-    LastWriteTime: 134301328269430374
+    SizeBytes: 2809
+    LastWriteTime: 134314407330375377
     Tags:
       []
     References:
@@ -1029,8 +1029,8 @@ Assets:
     Path: "assets/gameplay/progression/equipment/equipment_slots.yaml"
     Type: "Data"
     DisplayName: "equipment_slots.yaml"
-    SizeBytes: 244
-    LastWriteTime: 134301328269430374
+    SizeBytes: 238
+    LastWriteTime: 134314415910528945
     Tags:
       []
     References:
@@ -6511,6 +6511,7 @@ Assets:
       []
     ReferencedBy:
       - "assets/gameplay/content_manifest.yaml"
+      - "assets/scenes/Equipment.wt"
     Import:
       Texture:
         Filter: "Linear"
@@ -6601,6 +6602,7 @@ Assets:
       []
     ReferencedBy:
       - "assets/gameplay/content_manifest.yaml"
+      - "assets/scenes/Equipment.wt"
     Import:
       Texture:
         Filter: "Linear"
@@ -7695,15 +7697,17 @@ Assets:
     Path: "assets/scenes/Equipment.wt"
     Type: "Scene"
     DisplayName: "Equipment.wt"
-    SizeBytes: 35455
-    LastWriteTime: 134314386395793964
+    SizeBytes: 41281
+    LastWriteTime: 134314410099247310
     Tags:
       []
     References:
       - "assets/events/sandbox_flow.wts"
       - "assets/fonts/wqy-microhei.ttc"
+      - "assets/sandbox/ui/icons/icon_equipment_angel_feather.png"
       - "assets/sandbox/ui/icons/icon_equipment_beast_tooth.png"
       - "assets/sandbox/ui/icons/icon_equipment_magic_ring.png"
+      - "assets/sandbox/ui/icons/icon_equipment_training_blade.png"
       - "assets/sandbox/ui/icons/icon_equipment_traveler_armor.png"
       - "assets/sandbox/ui/icons/icon_equipment_wind_boots.png"
       - "assets/sandbox/vn/backgrounds/bg_forest_camp_night.png"

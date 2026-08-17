@@ -1362,7 +1362,7 @@ namespace Wheatear::GameProgress {
         {
             State& state = GetState();
             const float pageValue = ParseFloat(action.substr(22), static_cast<float>(state.EquipmentPage));
-            state.EquipmentPage = static_cast<int>(std::floor(pageValue + 0.5f));
+            state.EquipmentPage = static_cast<int>(std::ceil(pageValue - 0.0001f));
             ClampEquipmentPage(state);
             SelectFirstVisibleEquipmentOnPage(state);
             state.LastResultMessage = "装备背包切换到第 " + std::to_string(state.EquipmentPage) + " 页。";

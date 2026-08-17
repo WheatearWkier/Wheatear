@@ -61,7 +61,7 @@ equipment:
     icon: 'progression.equipment.old_ward_charm'
   - id: 'training_blade'
     name: '练习短剑'
-    slot: '副武器'
+    slot: '武器'
     page: 2
     status: '后续章节'
     stats: '取消窗口 +0.03s'

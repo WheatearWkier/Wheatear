@@ -288,6 +288,10 @@ namespace Wheatear::SystemBindings {
         inline constexpr const char* EquipmentSlotCharmButton = "Equipment_SlotCharm_Button";
         inline constexpr const char* EquipmentSlotBoots = "Equipment_SlotBoots";
         inline constexpr const char* EquipmentSlotBootsButton = "Equipment_SlotBoots_Button";
+        inline constexpr const char* EquipmentSlotWeapon = "Equipment_SlotWeapon";
+        inline constexpr const char* EquipmentSlotWeaponButton = "Equipment_SlotWeapon_Button";
+        inline constexpr const char* EquipmentSlotSpecial = "Equipment_SlotSpecial";
+        inline constexpr const char* EquipmentSlotSpecialButton = "Equipment_SlotSpecial_Button";
 
         inline constexpr const char* DungeonStatus = "Dungeon_Status";
         inline constexpr const char* DungeonSubtitle = "Dungeon_Subtitle";

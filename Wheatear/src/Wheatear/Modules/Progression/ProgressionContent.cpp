@@ -252,7 +252,7 @@ namespace Wheatear::ProgressionContent {
                 }
             };
             content.EquipmentSlots = {
-                { "weapon", "副武器" },
+                { "weapon", "武器" },
                 { "armor", "防具" },
                 { "ring", "戒指" },
                 { "charm", "护符" },
