@@ -722,7 +722,7 @@ Entities:
     SortOrder: 29
     ParentEntity: 930009002
   UITextComponent:
-    Text: "武器: 手枪  [1 手枪] [2 重炮] [3 太刀]"
+    Text: "武器: 手枪"
     Color:
     - 1
     - 0.96
@@ -937,15 +937,24 @@ Entities:
     - 0.9
     - 0.4
     BorderThickness: 0.003
+  UIImageComponent:
+    Color:
+    - 1
+    - 1
+    - 1
+    - 0.52
+    TexturePath: assets/vertical_slice/arcade_combat/sheets/static_effects/proj_arcade_player_bolt_sheet.png
   UITextComponent:
-    Text: 手枪
+    Text: "1 手枪"
     Color: &id001
     - 1
     - 1
     - 1
     - 1
-    FontSize: 0.026
+    FontSize: 14
     FontPath: assets/fonts/wqy-microhei.ttc
+    HorizontalAlign: 1
+    VerticalAlign: 1
 - Entity: 930000111
   TagComponent:
     Tag: AR_Weapon_2
@@ -987,11 +996,20 @@ Entities:
     - 0.9
     - 0.4
     BorderThickness: 0.003
+  UIImageComponent:
+    Color:
+    - 1
+    - 1
+    - 1
+    - 0.52
+    TexturePath: assets/vertical_slice/arcade_combat/sheets/static_effects/vfx_arcade_cannon_blast_sheet.png
   UITextComponent:
-    Text: 重炮
+    Text: "2 重炮"
     Color: *id001
-    FontSize: 0.026
+    FontSize: 14
     FontPath: assets/fonts/wqy-microhei.ttc
+    HorizontalAlign: 1
+    VerticalAlign: 1
 - Entity: 930000112
   TagComponent:
     Tag: AR_Weapon_3
@@ -1033,11 +1051,20 @@ Entities:
     - 0.9
     - 0.4
     BorderThickness: 0.003
+  UIImageComponent:
+    Color:
+    - 1
+    - 1
+    - 1
+    - 0.52
+    TexturePath: assets/vertical_slice/arcade_combat/sheets/static_effects/vfx_arcade_katana_slash_sheet.png
   UITextComponent:
-    Text: 太刀
+    Text: "3 太刀"
     Color: *id001
-    FontSize: 0.026
+    FontSize: 14
     FontPath: assets/fonts/wqy-microhei.ttc
+    HorizontalAlign: 1
+    VerticalAlign: 1
 - Entity: 930000120
   TagComponent:
     Tag: AR_Attack

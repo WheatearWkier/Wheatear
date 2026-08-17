@@ -332,6 +332,16 @@ namespace Wheatear {
             TryAddAsset(projectRoot, AssetAliasRegistry::Path("font.ui_fallback_sc", "assets/fonts/NotoSansSC-VF.ttf"), {}, assets, nullptr, nullptr, {}, assetSources);
         }
 
+        static void AddProjectGameplayAssets(const std::filesystem::path& projectRoot,
+            std::set<std::string>* assets,
+            std::queue<std::string>* parseQueue,
+            std::vector<AssetReferenceRecord>* missingReferences,
+            AssetSourceMap* assetSources)
+        {
+            AddDirectoryFiles(projectRoot, "assets/gameplay/actions", assets, parseQueue, missingReferences, assetSources);
+            AddDirectoryFiles(projectRoot, "assets/gameplay/progression", assets, parseQueue, missingReferences, assetSources);
+        }
+
         static void SortAndUnique(std::vector<std::filesystem::path>* paths)
         {
             if (!paths)
@@ -424,6 +434,7 @@ namespace Wheatear {
         // The alias manifest belongs to the project root, not the engine
         // fallback root used for shared built-ins.
         TryAddAsset(projectRoot, "assets/gameplay/content_manifest.yaml", {}, &assets, &parseQueue, &report.MissingReferences, builtinRoot, &report.AssetSources);
+        AddProjectGameplayAssets(projectRoot, &assets, &parseQueue, &report.MissingReferences, &report.AssetSources);
 
         if (options.IncludeBuiltinAssets)
         {

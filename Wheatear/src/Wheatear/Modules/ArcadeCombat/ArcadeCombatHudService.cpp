@@ -6,6 +6,7 @@
 #include "Wheatear/Gameplay/Services/GameplayUIService.h"
 #include "Wheatear/Gameplay/SystemBindingRegistry.h"
 #include "Wheatear/Input/Input.h"
+#include "Wheatear/Input/InputBindingService.h"
 #include "Wheatear/Input/MouseButtonCodes.h"
 #include "Wheatear/Scene/Components.h"
 #include "Wheatear/Scene/SceneQueries.h"
@@ -134,6 +135,31 @@ namespace Wheatear::ArcadeCombatHudService {
                     auto& thumbWidget = thumb.GetComponent<UIWidgetComponent>();
                     thumbWidget.Position = stickPosition - thumbWidget.Size * 0.5f;
                 }
+
+                if (!g_TouchDragging)
+                {
+                    g_TouchMove = { 0.0f, 0.0f };
+                    if (thumb && thumb.HasComponent<UIWidgetComponent>())
+                    {
+                        const glm::vec2 keyboardMove = {
+                            (InputBindingService::IsActionDown("move.right") ? 1.0f : 0.0f) -
+                            (InputBindingService::IsActionDown("move.left") ? 1.0f : 0.0f),
+                            (InputBindingService::IsActionDown("move.down") ? 1.0f : 0.0f) -
+                            (InputBindingService::IsActionDown("move.up") ? 1.0f : 0.0f)
+                        };
+                        if (keyboardMove.x != 0.0f || keyboardMove.y != 0.0f)
+                        {
+                            glm::vec2 normalized = keyboardMove;
+                            const float length = glm::length(normalized);
+                            if (length > 1.0f)
+                                normalized /= length;
+                            auto& thumbWidget = thumb.GetComponent<UIWidgetComponent>();
+                            thumbWidget.Position = baseWidget.Position + baseWidget.Size * 0.5f
+                                + normalized * (baseWidget.Size * 0.30f)
+                                - thumbWidget.Size * 0.5f;
+                        }
+                    }
+                }
             }
 
             // Attack button: held while pressed inside its area.
@@ -199,8 +225,7 @@ namespace Wheatear::ArcadeCombatHudService {
         {
             const auto& controller = player.GetComponent<ArcadePlayerControllerComponent>();
             UIRuntimeTools::SetText(scene, level.WeaponTextEntityName,
-                std::string("武器: ") + WeaponName(controller.CurrentWeapon) +
-                "  [1 手枪] [2 重炮] [3 太刀]");
+                std::string("武器: ") + WeaponName(controller.CurrentWeapon));
         }
 
         UIRuntimeTools::SetWidgetVisible(scene, level.PausePanelEntityName, level.RuntimePaused);

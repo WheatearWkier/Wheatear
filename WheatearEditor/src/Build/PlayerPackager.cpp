@@ -167,14 +167,11 @@ namespace Wheatear {
         }
 #endif
 
-        // Removes a package directory while keeping the runtime extract cache
-        // (.wheatear_cache) and player saves so repacks do not force a full
-        // re-extraction or wipe player progress.
+        // Package output is a distributable artifact. Runtime extraction
+        // caches and player saves must not leak from a previous local run into
+        // the next package, otherwise stale data can mask packaging fixes.
         static bool CleanPackageDirectory(const std::filesystem::path& directory, std::string* errorMessage)
         {
-            constexpr const char* kRuntimeCacheDirectory = ".wheatear_cache";
-            constexpr const char* kPlayerSaveDirectory = "saves";
-
             std::error_code error;
             if (!std::filesystem::exists(directory, error))
             {
@@ -194,17 +191,7 @@ namespace Wheatear {
                 return false;
             }
 
-            for (const auto& entry : std::filesystem::directory_iterator(directory, error))
-            {
-                if (error)
-                    break;
-                const std::string name = entry.path().filename().generic_string();
-                if (name == kRuntimeCacheDirectory || name == kPlayerSaveDirectory)
-                    continue;
-                std::filesystem::remove_all(entry.path(), error);
-                if (error)
-                    break;
-            }
+            std::filesystem::remove_all(directory, error);
             if (error)
             {
                 if (errorMessage)

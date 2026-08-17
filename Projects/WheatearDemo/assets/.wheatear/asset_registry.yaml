@@ -1596,8 +1596,8 @@ Assets:
     Path: "assets/scenes/VisualNovelBattle.wt"
     Type: "Scene"
     DisplayName: "VisualNovelBattle.wt"
-    SizeBytes: 16734
-    LastWriteTime: 134314220540583664
+    SizeBytes: 17360
+    LastWriteTime: 134314287959752222
     Tags:
       []
     References:
@@ -1608,6 +1608,9 @@ Assets:
       - "assets/vertical_slice/arcade_combat/characters/boss_arcade_mage.png"
       - "assets/vertical_slice/arcade_combat/characters/protag_arcade_mage.png"
       - "assets/vertical_slice/arcade_combat/props/prop_arcade_cover_block.png"
+      - "assets/vertical_slice/arcade_combat/sheets/static_effects/proj_arcade_player_bolt_sheet.png"
+      - "assets/vertical_slice/arcade_combat/sheets/static_effects/vfx_arcade_cannon_blast_sheet.png"
+      - "assets/vertical_slice/arcade_combat/sheets/static_effects/vfx_arcade_katana_slash_sheet.png"
       - "assets/vertical_slice/arcade_combat/ui/ui_arcade_danger_bar.png"
     ReferencedBy:
       - "assets/events/vertical_slice_flow.wts"
@@ -2062,6 +2065,7 @@ Assets:
       []
     ReferencedBy:
       - "assets/gameplay/content_manifest.yaml"
+      - "assets/scenes/VisualNovelBattle.wt"
     Import:
       Texture:
         Filter: "Linear"
@@ -2084,6 +2088,7 @@ Assets:
       []
     ReferencedBy:
       - "assets/gameplay/content_manifest.yaml"
+      - "assets/scenes/VisualNovelBattle.wt"
     Import:
       Texture:
         Filter: "Linear"
@@ -2106,6 +2111,7 @@ Assets:
       []
     ReferencedBy:
       - "assets/gameplay/content_manifest.yaml"
+      - "assets/scenes/VisualNovelBattle.wt"
     Import:
       Texture:
         Filter: "Linear"
