@@ -4,7 +4,9 @@
 
 Wheatear 不是单纯的引擎样例，而是把剧情、战斗、成长、UI、脚本、渲染和打包串成一条完整链路，方便展示与方便快速说明“做了什么、为什么这样做”。
 
-（有声版演示请移步：https://www.bilibili.com/video/BV1tGue6vEAt/?share_source=copy_web&vd_source=da98153b23f4943d9fa70056f1fb1ae8）
+有声版演示请移步：https://www.bilibili.com/video/BV1tGue6vEAt/?share_source=copy_web&vd_source=da98153b23f4943d9fa70056f1fb1ae8
+
+（注意，该readme已过时，静待更新）
 
 **编辑器演示**
 
@@ -133,7 +135,7 @@ ActionIntent -> ActionRecipe -> RuleResolver -> EffectBundle -> EffectLedger -> 
 - 横板、回合制、战棋、弹幕可以复用一部分动作数据
 - 编辑器里可以查看、修改和追踪动作结果
 
-面试里可以把它理解成：**一个更适合单机 2D、多玩法项目的轻量技能 / 动作组织层**。
+可以把它理解成：**一个更适合单机 2D、多玩法项目的轻量技能 / 动作组织层**。
 
 ## 渲染
 
