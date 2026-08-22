@@ -286,6 +286,7 @@ ActionIntent
 - `ActionSignalRouter`：向音效、特效、UI 或玩法模块发送结构化表现信号。
 
 WAO 的设计受到 UE GAS 的能力激活、属性、Gameplay Effect 和表现 Cue 等思想影响，但没有直接复制 `AbilitySystemComponent` 的整体结构。
+可以把它理解成：**一个更适合单机 2D、多玩法项目的轻量技能 / 动作组织层**。
 
 Wheatear 当前是单机、2D、多玩法项目，因此 WAO 没有实现：
 
