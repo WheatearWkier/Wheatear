@@ -169,6 +169,7 @@ namespace Wheatear {
         RegisterEditorComponent<UIAnimatorComponent>("UI", EditorLocale::Text("UI Animator", "UI 动画器"), DrawUIAnimatorComponent, true);
         RegisterEditorComponent<UIImageComponent>("UI", EditorLocale::Text("UI Image", "UI 图片"), DrawUIImageComponent, true);
         RegisterEditorComponent<UIRadialCooldownComponent>("UI", EditorLocale::Text("UI Radial Cooldown", "UI 径向冷却"), DrawUIRadialCooldownComponent, true);
+        RegisterEditorComponent<UICircleComponent>("UI", EditorLocale::Text("UI Circle", "UI 圆形"), DrawUICircleComponent, true);
         RegisterEditorComponent<UIPanelComponent>("UI", EditorLocale::Text("UI Panel", "UI 面板"), DrawUIPanelComponent, true);
         RegisterEditorComponent<UITextComponent>("UI", EditorLocale::Text("UI Text", "UI 文本"), DrawUITextComponent, true);
         RegisterEditorComponent<UIButtonComponent>("UI", EditorLocale::Text("UI Button", "UI 按钮"), DrawUIButtonComponent, true);

@@ -247,6 +247,17 @@ namespace Wheatear {
                 e.AddComponent<UIImageComponent>();
             });
         }
+        if (ImGui::MenuItem(EditorLocale::Text("Circle", "圆形")))
+        {
+            CreateEntityWithUndo("UI Circle", [parentID](Entity e)
+            {
+                auto& widget = e.AddComponent<UIWidgetComponent>();
+                widget.Size = { 0.12f, 0.12f };
+                widget.SortOrder = 25;
+                widget.ParentEntity = parentID;
+                e.AddComponent<UICircleComponent>();
+            });
+        }
         if (ImGui::MenuItem("Text"))
         {
             CreateEntityWithUndo("UI Text", [parentID](Entity e)

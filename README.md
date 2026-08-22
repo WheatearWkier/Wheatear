@@ -1,231 +1,638 @@
 # Wheatear
 
-自研 C++ 游戏引擎 + 编辑器项目，当前重点是一个可玩的 2D 竖切演示。
+Wheatear 是一个基于 C++20 开发的自研 2D 游戏引擎与编辑器项目。
 
-Wheatear 不是单纯的引擎样例，而是把剧情、战斗、成长、UI、脚本、渲染和打包串成一条完整链路，方便展示与方便快速说明“做了什么、为什么这样做”。
+项目以 2D 游戏内容生产为主要目标，同时包含基础 3D 渲染能力。当前仓库已经完成一套可运行的竖切演示，用于验证场景系统、资源管线、编辑器工具、事件脚本、战斗模块和运行时打包之间的协作。
 
-（有声版演示请移步：https://www.bilibili.com/video/BV1tGue6vEAt/?share_source=copy_web&vd_source=da98153b23f4943d9fa70056f1fb1ae8）
+Wheatear 的重点不是实现一个“大而全”的通用引擎，而是围绕视觉小说、横版战斗、弹幕玩法、回合制战斗和战棋等类型化玩法，建立一套结构清晰、可调试、可扩展的内容生产流程。
 
-**编辑器演示**
+## 演示
 
-https://github.com/user-attachments/assets/2d08f3e8-6c46-4bae-82af-4a9c0884c037
+- [编辑器演示视频](docs/readme-media/editor_demo.mp4)
+- [Sandbox 演示视频](docs/readme-media/sandbox_demo.mp4)
+- [有声版演示](https://www.bilibili.com/video/BV1tGue6vEAt/)
 
-**Sandbox 演示**
+<p align="center">
+  <img src="docs/readme-media/editor_overview.png" width="49%" alt="Wheatear 编辑器" />
+  <img src="docs/readme-media/game_start.png" width="49%" alt="游戏开始界面" />
+</p>
 
-https://github.com/user-attachments/assets/594114a5-ba8b-4847-9f34-6be1f15181f7
+<p align="center">
+  <img src="docs/readme-media/visual_novel.png" width="49%" alt="视觉小说演示" />
+  <img src="docs/readme-media/story_branching.png" width="49%" alt="剧情分支演示" />
+</p>
 
-## 一眼看完
+<p align="center">
+  <img src="docs/readme-media/side_combat_1.png" width="49%" alt="横版战斗演示" />
+  <img src="docs/readme-media/side_combat_2.png" width="49%" alt="横版战斗演示" />
+</p>
 
-- 主线是 2D：视觉小说、横板战斗、弹幕玩法、回合制 / 战棋试验、据点成长、结算和存读档。
-- 当前竖切流程已经覆盖：主菜单 -> VN 剧情 -> 假玩法 -> 正式横板战斗 -> Boss -> 结算 -> 据点 -> 成长 -> 继续剧情。
-- 重点能力包括 `Gameplay`、`.wts` 事件脚本、WAO 动作系统、2D 渲染和编辑器工作流。
-- 3D 渲染保留了基础能力展示，但不是当前项目的主线。
+## 项目定位
 
-## 引擎架构
+Wheatear 由三个主要部分组成：
 
+- `Wheatear`：引擎运行时静态库。
+- `WheatearEditor`：场景编辑器与内容生产工具。
+- `WheatearSandbox`：独立运行器，用于运行编辑器制作的项目和打包后的玩家内容。
+
+当前 Demo 的主要流程为：
+
+```text
+主菜单
+  -> 视觉小说剧情
+  -> 弹幕式假玩法
+  -> 回合制战斗过渡
+  -> 横版战斗
+  -> Boss 战
+  -> 战斗结算
+  -> 据点
+  -> 技能树、装备、关系与存档
+  -> 后续剧情
 ```
-┌──────────────────────────── 引擎运行时 Wheatear/ ────────────────────────────┐
-│                                                                              │
-│  Renderer(2D批渲染/3D)   Physics(Box2D)   Input(动作层)   Audio(miniaudio)   │
-│  Scene+ECS(entt)         Animation        Assets(资产/热重载)  Serialization  │
-│  Gameplay模块: SideCombat / TurnCombat / Tactical / VN / WAO动作编排          │
-└──────────────────────────────────┬───────────────────────────────────────────┘
-                                   │ 静态库 + 数据资产
-┌──────────────────────────────────┴───────────────────────────────────────────┐
-│  编辑器 WheatearEditor/：ImGui 面板体系（场景/层级/资源/动画/事件/WAO/打包）   │
-│  Sandbox：独立运行器（编辑器产出的数据资产直接驱动）                            │
-└──────────────────────────────────────────────────────────────────────────────┘
+
+回合制、战棋和弹幕玩法目前既作为独立演示场景存在，也用于验证多玩法共享引擎基础设施的可行性。
+
+## 架构概览
+
+```text
+Application
+├── Wheatear Runtime
+│   ├── Core / Platform
+│   ├── Renderer
+│   ├── Scene + ECS
+│   ├── Animation / Physics / Audio / UI
+│   ├── Asset / Serialization
+│   ├── CommandBus / EventScript
+│   └── Gameplay Modules
+│       ├── VisualNovel
+│       ├── ArcadeCombat
+│       ├── SideCombat
+│       ├── TurnCombat
+│       ├── TacticalCombat
+│       └── Progression
+│
+├── WheatearEditor
+│   ├── Scene Hierarchy
+│   ├── Inspector
+│   ├── Content Browser
+│   ├── Animation Editor
+│   ├── UI Canvas Editor
+│   ├── VN Script Editor
+│   ├── Event Script Editor
+│   ├── Combat Tuning Editors
+│   ├── WAO Action Editor
+│   ├── Project Health
+│   └── Player Packager
+│
+└── WheatearSandbox
+    └── Loose Assets / content.wtpack
 ```
 
-| 模块 | 一句话说明 |
+运行时使用 `Scene` 管理实体、组件和系统。系统通过 `ISystem` 统一生命周期，编辑器模式和运行模式分别注册不同的系统集合。
+
+玩法模块通过 `SceneSystemRegistry` 注册，不直接写入场景核心流程。这样编辑器、Sandbox 和未来的其他运行时宿主可以复用同一套引擎模块。
+
+## 核心系统
+
+### Scene 与 ECS
+
+场景系统基于 `entt` 实现实体组件模型：
+
+- 实体由 UUID 标识。
+- 组件按功能拆分为 Core、Rendering、Physics、Animation、UI 和 Gameplay 等类别。
+- 场景文件使用 `.wt` 格式保存，并通过 YAML 序列化。
+- Prefab 使用 `.wtprefab` 格式，支持多实体层级和实例化时的 UUID 重映射。
+- 编辑器进入 Play 模式时使用运行时场景副本，运行时修改不会直接污染编辑场景。
+- 实体引用优先使用 `@UUID`，实体重命名后不会破坏场景绑定。
+
+与 Unity 的 `GameObject + MonoBehaviour` 或 UE 的 `Actor + Component` 相比，Wheatear 更强调组件数据与系统逻辑的分离。
+
+这种设计有利于：
+
+- 降低场景序列化复杂度。
+- 让不同玩法共享同一套实体和组件基础设施。
+- 方便编辑器统一绘制 Inspector。
+- 控制运行时系统与编辑器代码之间的依赖。
+
+代价是它没有成熟商业引擎中完善的反射、蓝图和行为组件生态，复杂行为仍然需要通过 C++ 系统或服务实现。
+
+### 2D 渲染
+
+2D 渲染使用 OpenGL 后端，并通过批处理降低绘制开销。
+
+当前支持：
+
+- Quad、Circle、Line 和 Polyline 绘制。
+- Sprite、Sprite Sheet 和 Atlas 子图。
+- SDF 文本和描边文本。
+- UI Canvas、进度条、路径和战斗 HUD。
+- 编辑器实体拾取使用 `EntityID` 写入渲染顶点。
+- 纹理槽管理和批次 Flush。
+- 纹理缓存与重复资源复用。
+
+`Renderer2D` 将不同绘制对象组织到 Quad、Text、Circle 和 Line 等批次中，在纹理槽或顶点缓冲区达到上限时提交当前批次。
+
+### 3D 渲染
+
+3D 渲染主要用于基础能力验证、编辑器预览和技术测试，目前不是 Demo 的主要方向。
+
+已实现内容包括：
+
+- Mesh 与 Material。
+- OBJ 模型加载。
+- 天空盒。
+- 方向光和点光源。
+- 阴影。
+- IBL。
+- SSAO。
+- 3D 编辑器相机和场景预览。
+
+当前渲染后端主要为 OpenGL。构建工程时仍需要 Vulkan SDK，主要用于 ShaderC 和 SPIR-V Cross 等 shader 工具链依赖，而不是表示当前已经实现 Vulkan 渲染后端。
+
+<p align="center">
+  <img src="docs/readme-media/render_3d_skybox.png" width="49%" alt="3D 天空盒渲染" />
+  <img src="docs/readme-media/render_3d_shadow.png" width="49%" alt="3D 阴影渲染" />
+</p>
+
+### 物理、输入与音频
+
+- 2D 物理使用 Box2D。
+- 物理体和 Fixture 由 ECS 组件描述，运行时创建对应的 Box2D 对象。
+- 支持 Sprite Sheet 每帧碰撞框驱动。
+- 输入系统分为底层按键事件、输入状态查询和 Action Binding 三层。
+- `InputBindingService` 允许玩法使用 `side.jump`、`arcade.attack`、`vn.advance` 等动作名，而不是直接依赖具体键盘码。
+- 用户设置与游戏进度分离，音量、全屏、文字速度和按键绑定保存到 `UserSettings`。
+- 音频系统基于 miniaudio，支持 BGM、SFX 和运行时音量控制。
+
+## Sprite Sheet 与动画管线
+
+Sprite Sheet 是 Wheatear 目前较完整的一条资产工作流。
+
+`.wtsheet` 文件保存：
+
+- 纹理路径。
+- 行列划分。
+- 每格内容裁切区域。
+- 每格碰撞框。
+- 不规则命名矩形。
+
+实体和动画帧保存图集引用与格子编号，运行时统一解析为纹理和 UV。
+
+因此，修改 `.wtsheet` 的网格、裁切或碰撞框后，所有引用该图集的实体和动画都可以自动获得更新。
+
+动画系统基于 `AnimationClip`，支持：
+
+- 序列帧。
+- 循环播放。
+- Sprite Sheet 引用。
+- 属性轨道。
+- 颜色、透明度、位置和缩放动画。
+- 动画事件。
+- 动画事件触发 `CommandBus` 命令。
+- `.wtanim` 动画资产复用。
+- PPU 真实尺寸计算。
+- 动画帧驱动碰撞盒。
+
+动画系统只负责时间采样和事件派发，不直接实现战斗规则。攻击命中、音效、特效或场景跳转由命令系统和对应玩法模块处理。
+
+## 内容驱动管线
+
+Wheatear 将不同类型的数据分别交给不同格式管理：
+
+| 文件格式 | 用途 |
 | --- | --- |
-| Scene + ECS | entt 驱动的组件系统，主题化组件头文件 + 模板序列化器（YAML） |
-| Renderer | 2D 合批渲染（quad/circle/line/text/UI），3D 基础管线（阴影/IBL/SSAO） |
-| Physics | Box2D 2D 物理，fixture 与组件数据解耦，支持动画驱动的碰撞盒 |
-| Input | 底层事件 + 动作绑定层（可重映射、边沿检测、命令注入） |
-| Animation | AnimationClip 资产 + 时间线编辑器 + 动画事件 + 属性轨道 |
-| SpriteSheet | `.wtsheet` 可复用图集资产：网格/逐格裁切/碰撞框，全链路热更新 |
-| Assets | 资产注册表、`.wtsheet/.wtanim/.wtpack` 打包、运行时 loose/pack 双路径 |
-| Gameplay | 数据表驱动的战斗/成长/剧情模块，运行时服务 + 编辑器调参面板 |
-| WAO | 动作编排系统：`ActionIntent -> ActionRecipe -> RuleResolver -> EffectBundle` |
-| Scripting | `.wts` 事件脚本 + 事件图编辑器（原生轻量事件序列器） |
+| `.wt` | 场景与实体组件 |
+| `.wtprefab` | 多实体 Prefab |
+| `.wtmaterial` | 材质数据 |
+| `.wtsheet` | Sprite Sheet 与 Atlas 定义 |
+| `.wtanim` | 可复用动画 Clip |
+| `.vn` | 视觉小说剧本、角色、台词、选项与跳转 |
+| `.wts` | 低频流程编排 |
+| `.yaml / .json` | 战斗调参、动作配方、成长内容和配置数据 |
+| `.wtuit` | 编辑器 UI 模板描述 |
+| `.wtpack` | 玩家运行时资源包 |
 
-### Sprite Sheet 工作流（2D 资产核心）
+内容生产的基本分工是：
 
-图集从「图片」变成「可复用资产」：`.wtsheet` 只存引用（纹理路径 + 网格 + 可选逐格裁切/碰撞框），实体和动画帧也存引用（sheet + 格子号），运行时统一解析——**改网格、改裁切，所有实体和动画下一帧自动更新**。
+```text
+数据表负责“是什么”
+CommandBus 负责“执行什么”
+.wts 负责“什么时候执行”
+C++ Gameplay Module 负责“如何运行”
+```
 
-- 分割器自动检测每格内容边界（alpha 包围盒），动画帧自动对齐，无留白不跳动
-- `Pixels Per Unit` 按真实内容尺寸渲染，动画每帧尺寸跟随（站姿/躺姿自动适配）
-- 格子碰撞框 + `Follow Animation` 开关：物理碰撞盒跟随动画帧
-- 资源浏览器 ▸ 展开格子直接拖到视口创建精灵
+### 事件脚本与 CommandBus
 
-## 玩法展示
+`.wts` 是 Wheatear 自定义的轻量事件脚本格式，不是通用编程语言。
 
-### 剧情和分支
+它主要用于：
 
-<p align="center">
-  <a href="https://github.com/user-attachments/assets/8f44f7e8-6d2d-4ffd-b467-301e4dd0911c"><img src="https://github.com/user-attachments/assets/8f44f7e8-6d2d-4ffd-b467-301e4dd0911c" width="49%" alt="Wheatear 游戏开始界面" /></a>
-  <a href="https://github.com/user-attachments/assets/6142e531-143e-4349-92ae-79fd42b39280"><img src="https://github.com/user-attachments/assets/6142e531-143e-4349-92ae-79fd42b39280" width="49%" alt="视觉小说界面" /></a>
-</p>
-
-<p align="center">
-  <a href="https://github.com/user-attachments/assets/c594f9ee-1472-4b32-8694-d25082232801"><img src="https://github.com/user-attachments/assets/c594f9ee-1472-4b32-8694-d25082232801" width="49%" alt="剧情分支选项" /></a>
-  <a href="https://github.com/user-attachments/assets/5eb35f07-469a-4cff-9517-4926327411a0"><img src="https://github.com/user-attachments/assets/5eb35f07-469a-4cff-9517-4926327411a0" width="49%" alt="剧情历史记录" /></a>
-</p>
-
-VN 负责序章、章节推进、角色对话和轻量分支。它的目标不是把剧情做得很重，而是把“剧情怎么接战斗、战斗怎么回到成长”这条链路跑顺。
-
-### 战斗和成长
-
-<p align="center">
-  <a href="https://github.com/user-attachments/assets/e9bbcf58-05ef-413f-bc7a-f8772f93bdec"><img src="https://github.com/user-attachments/assets/e9bbcf58-05ef-413f-bc7a-f8772f93bdec" width="49%" alt="2D 横板战斗" /></a>
-  <a href="https://github.com/user-attachments/assets/8c51dbee-8b5c-4618-9ed7-d10548ad8e10"><img src="https://github.com/user-attachments/assets/8c51dbee-8b5c-4618-9ed7-d10548ad8e10" width="49%" alt="2D 横板战斗技能与反馈" /></a>
-</p>
-
-<p align="center">
-  <a href="https://github.com/user-attachments/assets/4318ce15-1140-44bf-a003-7f7afd2388b4"><img src="https://github.com/user-attachments/assets/4318ce15-1140-44bf-a003-7f7afd2388b4" width="32%" alt="弹幕玩法" /></a>
-  <a href="https://github.com/user-attachments/assets/ef228f74-7bf0-4738-8e82-8f9417eca908"><img src="https://github.com/user-attachments/assets/ef228f74-7bf0-4738-8e82-8f9417eca908" width="32%" alt="回合制玩法" /></a>
-  <a href="https://github.com/user-attachments/assets/bcb6f328-18f2-465f-9f8e-163160b775d0"><img src="https://github.com/user-attachments/assets/bcb6f328-18f2-465f-9f8e-163160b775d0" width="32%" alt="战斗结算" /></a>
-</p>
-
-<p align="center">
-  <a href="https://github.com/user-attachments/assets/615b1f66-ed21-4310-b2ac-3c4f26f36071"><img src="https://github.com/user-attachments/assets/615b1f66-ed21-4310-b2ac-3c4f26f36071" width="32%" alt="据点页面" /></a>
-  <a href="https://github.com/user-attachments/assets/4a9c4fbc-12a0-4064-b91c-44f7a86ab796"><img src="https://github.com/user-attachments/assets/4a9c4fbc-12a0-4064-b91c-44f7a86ab796" width="32%" alt="技能树界面" /></a>
-  <a href="https://github.com/user-attachments/assets/0f8d6367-3582-455e-92be-b64c5c39b05b"><img src="https://github.com/user-attachments/assets/0f8d6367-3582-455e-92be-b64c5c39b05b" width="32%" alt="装备界面" /></a>
-</p>
-
-横板战斗是当前最核心的展示点；弹幕、回合制和战棋则用来验证多玩法架构。战后会回到据点，在结算、技能树、装备、关系和存档之间形成可玩的循环。
-
-## 脚本系统
-
-项目里很多流程不是硬写死在 C++ 里，而是走 `CommandBus + 数据表 + .wts`。
-
-`.wts` 是一套轻量事件脚本，用来串联：
-
-- 场景切换
-- 剧情节点和剧情标记
-- UI 按钮和分页
-- 保存读取
-- 战斗胜负后的流程
+- 场景切换。
+- 新游戏和读档。
+- 剧情旗标。
+- UI 分页。
+- 战斗结算。
+- 低频流程等待。
+- 简单条件分支。
 
 示例：
 
 ```text
+event on_start:
+    wait 0.15
+    progression:set_flag:FLAG_DEMO_STARTED
+end
+
 event open_skill_tree:
     scene:assets/scenes/SkillTree.wt
 end
 ```
 
-VN 使用数据化脚本记录台词、角色、表情、背景、音乐、选项和跳转；`.wts` 更适合安排“什么时候做什么”。这样剧情、UI 和玩法流程都能在编辑器和文本资源里直接调整。
+脚本解析器支持 `event`、`wait`、`if`、`endif` 和 CommandBus 命令。未知行会保留，编辑器在 Graph 与 Raw 两种模式之间切换时不会静默丢失原始内容。
+
+这种方式参考了传统关卡工具和事件表的流程组织方式，但没有引入 C# 或 Lua 运行时。
+
+与 Unity 中使用 C#、UE 中使用 Blueprint 或 Gameplay Task 相比，`.wts` 的优点是：
+
+- 没有托管运行时和脚本绑定层。
+- 打包结构简单。
+- 流程资源可直接被编辑器和版本控制系统检查。
+- 场景切换和存档流程更加集中。
+
+限制是它不适合每帧逻辑、AI、复杂数值公式和战斗状态机。此类逻辑仍然由 C++ 服务和玩法系统实现。
 
 ## WAO 动作系统
 
-WAO 是 **Wheatear Action Orchestration**，定位是统一动作语义层，思路上参考了 GAS，但没有照搬 GAS 的整体结构。
+WAO 是 `Wheatear Action Orchestration` 的缩写，用于统一动作语义、效果处理和调试入口。
+
+当前核心流程为：
 
 ```text
-ActionIntent -> ActionRecipe -> RuleResolver -> EffectBundle -> EffectLedger -> SignalRouter
+ActionIntent
+    -> ActionRecipe
+    -> ActionResolver
+    -> EffectBundle
+    -> EffectLedger
+    -> ActionSignalRouter
 ```
 
-它主要解决：
+各部分职责：
 
-- 输入、AI、脚本都能进入同一套动作入口
-- 技能、冷却、资源、效果和表现分开
-- 横板、回合制、战棋、弹幕可以复用一部分动作数据
-- 编辑器里可以查看、修改和追踪动作结果
+- `ActionIntent`：描述输入、AI、脚本或编辑器调试产生的动作意图。
+- `ActionRecipe`：保存动作名称、资源、冷却、时序、标签、效果和信号。
+- `ActionResolver`：将动作配方交给具体玩法解析。
+- `EffectBundle`：描述一次动作产生的效果集合。
+- `EffectLedger`：记录效果是否应用、作用对象和结果。
+- `ActionSignalRouter`：向音效、特效、UI 或玩法模块发送结构化表现信号。
 
-面试里可以把它理解成：**一个更适合单机 2D、多玩法项目的轻量技能 / 动作组织层**。
+WAO 的设计受到 UE GAS 的能力激活、属性、Gameplay Effect 和表现 Cue 等思想影响，但没有直接复制 `AbilitySystemComponent` 的整体结构。
 
-## 渲染
+Wheatear 当前是单机、2D、多玩法项目，因此 WAO 没有实现：
 
-### 2D 渲染
+- 网络复制。
+- 网络预测。
+- 服务器权威同步。
+- UObject 反射对象树。
+- 统一覆盖所有玩法规则的巨型能力组件。
 
-2D 是项目的主力。当前渲染主要围绕这些内容展开：
+横板战斗的动作帧、命中框、浮空和断限，弹幕玩法的投射物和遮挡，回合制的行动队列，以及战棋的格子规则，仍然保留在各自的玩法服务中。
 
-- 批量绘制 Quad、Circle、Line 和 Text
-- Sprite、spritesheet、atlas 和 UV 子图（含逐格裁切、PPU 真实尺寸）
-- UI Canvas、按钮、分页、进度条和路径绘制
-- SDF 文本、技能图标和战斗 HUD
-- 序列帧动画和动画事件
+WAO 负责公共语义和调试，玩法模块负责具体规则。这种取舍避免了为了抽象而强行统一完全不同的战斗结构。
 
-Sprite、UI 和特效共用同一套图集与动画工作流，角色动作、技能特效、VN 表情和界面动画都可以使用 `AnimationClip` 与动画事件。
+当前 WAO 已用于：
 
-### 3D 渲染
-
-3D 主要用于基础能力验证和编辑器预览，包含：
-
-- Mesh / Material
-- 天空盒、方向光、点光源
-- 阴影
-- IBL / SSAO
+- 弹幕武器和 Boss 投射物。
+- 横板战斗玩家与敌人动作。
+- 回合制与战棋动作配方。
+- 公共状态效果。
+- 动作资源加载与热重载。
+- 动作账本调试。
+- Action Editor 沙盒执行。
 
 <p align="center">
-  <a href="https://github.com/user-attachments/assets/5ee8ff00-50bd-4f69-87a2-b80730bc6c85"><img src="https://github.com/user-attachments/assets/5ee8ff00-50bd-4f69-87a2-b80730bc6c85" width="49%" alt="3D 天空盒渲染" /></a>
-  <a href="https://github.com/user-attachments/assets/1611b0b9-04c0-49aa-9939-332014c540ea"><img src="https://github.com/user-attachments/assets/1611b0b9-04c0-49aa-9939-332014c540ea" width="49%" alt="3D 阴影渲染" /></a>
+  <img src="docs/readme-media/wao_action_debugger.png" width="49%" alt="WAO 动作调试器" />
+  <img src="docs/readme-media/side_combat_tuning_editor.png" width="49%" alt="横版战斗调参编辑器" />
+</p>
+
+## Gameplay 模块
+
+### Visual Novel
+
+视觉小说模块支持：
+
+- 角色与立绘。
+- 台词和打字效果。
+- 背景切换。
+- BGM。
+- 表情差分。
+- 选项与标签跳转。
+- 条件选项。
+- 历史记录。
+- 自动播放和跳过。
+- 存档与读档。
+
+<p align="center">
+  <img src="docs/readme-media/vn_script_editor.png" width="49%" alt="VN 剧本编辑器" />
+  <img src="docs/readme-media/history.png" width="49%" alt="剧情历史记录" />
+</p>
+
+### SideCombat
+
+横版战斗是当前 Demo 的主要玩法，包含：
+
+- 横向移动和纵深移动。
+- 跳跃、冲刺和空中动作。
+- 普通攻击和连段。
+- 上挑、空中追击和断限追击。
+- Hitbox 与受击判定。
+- Boss 保护条。
+- Hit Pause、屏幕震动和音效反馈。
+- 敌人 AI。
+- 波次生成。
+- 掉落和战斗结算。
+- 技能槽、道具槽和状态图标。
+- 键盘与鼠标摇杆控制。
+
+### ArcadeCombat
+
+弹幕式假玩法包含：
+
+- 多种武器。
+- 投射物生成与生命周期。
+- Boss 发弹。
+- 掩体碰撞。
+- 武器切换。
+- 触摸式摇杆与攻击按钮。
+- 独立的弹幕调参面板。
+
+<p align="center">
+  <img src="docs/readme-media/arcade_combat.png" width="49%" alt="弹幕式假玩法" />
+  <img src="docs/readme-media/turn_combat.png" width="49%" alt="回合制战斗" />
+</p>
+
+### TurnCombat
+
+回合制模块包含：
+
+- 回合顺序。
+- 目标选择。
+- 技能与资源消耗。
+- 伤害、治疗和状态效果。
+- AI 行动。
+- 技能演出和战斗 UI。
+
+### TacticalCombat
+
+战棋模块包含：
+
+- 格子坐标。
+- 单位占位。
+- 移动范围。
+- 目标选择。
+- 技能范围。
+- 敌方 AI。
+- 回合行动与战斗结算。
+
+四种玩法共用引擎的场景、UI、输入、音频、动画、资源和部分 WAO 能力，但不强行共用玩法规则。
+
+### Progression 与 UI
+
+竖切 Demo 还包含据点、技能树、装备、关系、存档和战斗结算等页面，用于验证玩法模块与通用 UI、存档和成长数据之间的衔接。
+
+<p align="center">
+  <img src="docs/readme-media/hub.png" width="49%" alt="据点界面" />
+  <img src="docs/readme-media/skill_tree.png" width="49%" alt="技能树界面" />
+</p>
+
+<p align="center">
+  <img src="docs/readme-media/equipment.png" width="49%" alt="装备界面" />
+  <img src="docs/readme-media/result.png" width="49%" alt="战斗结算界面" />
 </p>
 
 ## 编辑器
 
-<p align="center">
-  <a href="https://github.com/user-attachments/assets/d4d3ce10-222f-4d1e-9c0d-584c67f6003d"><img src="https://github.com/user-attachments/assets/d4d3ce10-222f-4d1e-9c0d-584c67f6003d" width="49%" alt="Wheatear 编辑器总览" /></a>
-  <a href="https://github.com/user-attachments/assets/e10d6915-ef1c-4401-9717-33e0ecfbb5dd"><img src="https://github.com/user-attachments/assets/e10d6915-ef1c-4401-9717-33e0ecfbb5dd" width="49%" alt="视觉小说脚本编辑器" /></a>
-</p>
+WheatearEditor 使用 ImGui 构建，采用面板式工具结构，并支持 Docking。
+
+当前主要工具包括：
+
+- Scene Hierarchy：场景实体层级与筛选。
+- Inspector：组件属性编辑。
+- Content Browser：资源浏览、筛选、拖拽和定位。
+- UI Canvas Editor：UI 控件拖拽、缩放、吸附、对齐与分布。
+- Animation Editor：动画时间线、属性轨道与事件。
+- Sprite Sheet Picker：图集切分与连续帧生成。
+- VN Script Editor：视觉小说时间线编辑。
+- Event Script Editor：`.wts` 事件图与 Raw 编辑。
+- Side Combat Tuning Editor：横版战斗调参。
+- Turn Combat Tuning Editor：回合制调参。
+- Arcade Combat Tuning Editor：弹幕玩法调参。
+- Tactical Combat Tuning Editor：战棋调参。
+- Progression Content Editor：技能树、装备、材料、副本与关系数据。
+- WAO Action Editor：动作配方编辑、验证和沙盒测试。
+- Data File Editor：YAML、JSON、`.wtsettings` 和 `.wtanim` 等数据文件编辑。
+- Input Bindings：输入动作和按键绑定。
+- Project Health：缺失引用、场景跳转、资源注册、打包依赖和源码同步检查。
+- Player Packager：构建运行版并生成资源包。
 
 <p align="center">
-  <a href="https://github.com/user-attachments/assets/8322c832-2b47-400c-a794-8b9389ebc47d"><img src="https://github.com/user-attachments/assets/8322c832-2b47-400c-a794-8b9389ebc47d" width="49%" alt="横板战斗参数编辑器" /></a>
-  <a href="https://github.com/user-attachments/assets/244b9731-6880-49f3-8ef0-dd3549f387ab"><img src="https://github.com/user-attachments/assets/244b9731-6880-49f3-8ef0-dd3549f387ab" width="49%" alt="WAO Action Debugger" /></a>
+  <img src="docs/readme-media/editor_overview.png" width="49%" alt="编辑器总览" />
+  <img src="docs/readme-media/vn_script_editor.png" width="49%" alt="VN Script Editor" />
 </p>
 
-编辑器围绕内容生产效率设计，当前重点工具包括：
+Content Browser 的设计参考了 UE Content Browser 的资源组织方式，但实现范围更集中于 Wheatear 的文件格式和工作流。
 
-- VN Script Editor：编辑剧情、选项、角色、背景和音乐（行式可视化编辑 + 源文件跳转）
-- Event Script：查看和组织 `.wts` 流程（事件图编辑器，源码预览只读防手写）
-- Side Combat Tuning：编辑横板战斗参数（类型化 tab + 全字段 Advanced 树）
-- WAO Action Debugger：查看动作配方、效果和运行记录
-- Animation Editor / Sprite Sheet Picker：序列帧、图集、逐格裁切、碰撞框、命名矩形（rects 可视化编辑 + 画布叠加）
-- Content Browser：UE 风格资源浏览器（Sources 文件夹树、类型筛选勾选菜单、可拖拽分割条、滚轮缩放缩略图、资产定位高亮）
-- Data File Editor：通用数据文件编辑器——任何 `.yaml/.json/.wtsettings/.wtanim` 双击即可结构化树编辑 + 校验 + 原始文本兜底，`rect: [x,y,w,h]` 字段可直接在画布上拖拽
-- 资产引用定位：Inspector / 数据编辑器里的资源字段旁有 `Locate` 按钮，一键在资源浏览器中定位并高亮该资产
-- Input Bindings：输入动作重映射
-- 内置 Help 手册：编辑器操作文档，含完整 sheet 工作流示例
+与直接使用商业引擎相比，自研编辑器的优势是：
 
-## 素材说明
+- 编辑器行为与运行时数据结构完全一致。
+- 可以针对项目中的 VN、战斗和成长系统设计专用面板。
+- 不需要依赖通用引擎中大量与项目无关的功能。
+- 便于观察和调试底层数据。
 
-- 部分图标、动作帧序列和 VFX 使用程序化生成
-- 立绘、背景和部分 UI sheet 使用 GPT-Image-2 辅助生成
-- 部分动作帧序列使用豆包生成后进行抠图和整理
-- 这些素材主要用于个人项目展示和竖切验证
+相应的限制是编辑器生态、插件系统和通用工具数量仍然远少于 UE、Unity 等成熟引擎。
 
-## 技术栈
+## 资源管理与打包
 
-- C++17，静态库 + 两个主可执行工程（Editor / Sandbox）
-- OpenGL / GLFW / ImGui / ImGuizmo
-- entt / glm / yaml-cpp / Box2D / spdlog / miniaudio
-- 预编译头（glm/entt/imgui）增量编译单文件约 3 秒
-- Git LFS 管理图片、视频和其他二进制资源
+编辑器使用中央资源注册表：
 
-## 构建与运行
+```text
+assets/.wheatear/asset_registry.yaml
+```
+
+注册表记录：
+
+- 资源 UUID。
+- 项目相对路径。
+- 资源类型。
+- 导入设置。
+- 资源引用关系。
+- 反向引用关系。
+
+当前不再将每个资源的 `.wtmeta` 文件作为正式工作流。
+
+打包时，`AssetDependencyScanner` 从启动场景出发扫描：
+
+- 场景引用。
+- Prefab 引用。
+- VN 和 WTS 脚本引用。
+- YAML 和 JSON 数据引用。
+- 动画与图集引用。
+- 场景跳转引用。
+- 内置 gameplay 资源。
+
+最终生成 `content.wtpack`。Sandbox 支持两种运行方式：
+
+```text
+Loose Assets
+    直接读取项目 assets 目录
+
+Packed Assets
+    读取 content.wtpack
+    启动时解包到运行时缓存
+```
+
+编辑器、开发模式 Sandbox 和打包后的玩家版本共用 `AssetPath` 资源解析逻辑。
+
+## 构建
+
+### 环境要求
+
+当前主要验证环境为：
+
+- Windows
+- Visual Studio 2022
+- MSBuild
+- Vulkan SDK
+- Git LFS（用于仓库中的图片、视频等二进制资源）
+
+项目使用 C++20。
+
+### 生成 Visual Studio 工程
 
 ```powershell
 vendor\bin\premake\premake5.exe vs2022
-powershell -NoProfile -ExecutionPolicy Bypass -File scripts\Build-WheatearEditor.ps1
 ```
 
-常用入口：
+生成前需要设置 `VULKAN_SDK` 环境变量。
 
-- `WheatearEditor.exe`：启动器（选择 2D/3D 模式 + 项目目录 / 新建项目）
-- `WheatearEditor.exe --project <目录>`：直接打开指定项目
-- `WheatearSandbox.exe`：独立运行器（打包目录双击运行）
-- `WheatearSandbox.exe --project <目录>`：从引擎仓库直接跑任意项目（loose 资产）
+### 构建引擎与编辑器
 
-项目 = 一个含 `assets/` 的目录（启动器里可新建，自动生成模板场景）；
-引擎内置资源（shaders/字体）按引擎根解析，项目无需复制。
+```powershell
+powershell -NoProfile -ExecutionPolicy Bypass `
+    -File scripts\Build-Windows.ps1 `
+    -ProjectPath Wheatear.sln `
+    -Configuration Debug `
+    -Platform x64
+```
 
-## 代码结构
+也可以使用编辑器专用脚本：
 
-- `Wheatear/`：运行时引擎（渲染/ECS/资产/动画/输入/物理/玩法模块）
-- `WheatearEditor/`：编辑器和内容生产工具（含引擎内置资源 assets/shaders、fonts、gameplay）
-- `WheatearSandbox/`：独立运行器
-- `Projects/`：用户项目目录（`WheatearDemo/` 是 Sandbox 演示项目，含场景/图集/数据表）
-- `docs/`：设计文档、系统说明和竖切记录
-- `Builds/Windows/Player/<打包名>/`：打包产物（固定 Release，目录名取项目 `player.config` 的 `PackageName`，如 `Demo`；exe + content.wtpack + 解包缓存）
-- `Builds/Windows/Editor/`：编辑器打包产物（工具本体，无工程嵌套）
+```powershell
+powershell -NoProfile -ExecutionPolicy Bypass `
+    -File scripts\Build-WheatearEditor.ps1
+```
+
+### 启动 Demo
+
+```powershell
+bin\Release-windows-x86_64\WheatearEditor\WheatearEditor.exe `
+    --project Projects\WheatearDemo
+```
+
+```powershell
+bin\Release-windows-x86_64\WheatearSandbox\WheatearSandbox.exe `
+    --project Projects\WheatearDemo
+```
+
+### 打包玩家版本
+
+编辑器界面支持选择启动场景并打包。
+
+也可以使用命令行：
+
+```powershell
+Builds\Windows\Editor\WheatearEditor.exe `
+    --package-player `
+    --project Projects\WheatearDemo
+```
+
+默认玩家包输出到：
+
+```text
+Builds/Windows/Player/<PackageName>/
+```
+
+GUI 打包默认使用 Release 配置。命令行可以通过 `--configuration Debug|Release` 指定配置。
+
+## 技术栈
+
+- C++20
+- Premake
+- OpenGL
+- GLFW
+- GLAD
+- ImGui
+- ImGuizmo
+- entt
+- glm
+- yaml-cpp
+- Box2D
+- spdlog
+- miniaudio
+- ShaderC
+- SPIR-V Cross
+
+## 目录结构
+
+```text
+Wheatear/
+    引擎运行时静态库
+
+WheatearEditor/
+    编辑器、资源工具、玩法调参工具和打包器
+
+WheatearSandbox/
+    独立运行器
+
+Projects/
+    项目目录
+    WheatearDemo/ 为当前 Demo
+
+docs/
+    架构说明、玩法设计、编辑器手册和开发记录
+
+Builds/
+    编辑器与玩家打包产物
+
+scripts/
+    构建、检查和工程辅助脚本
+
+vendor/
+    第三方依赖
+```
+
+## 当前边界
+
+Wheatear 目前仍是面向学习、验证和作品展示的自研引擎项目，主要边界包括：
+
+- 当前主要验证平台为 Windows。
+- 当前主要渲染后端为 OpenGL。
+- 3D 功能以基础管线和编辑器预览为主。
+- `.wts` 适合流程编排，不是通用脚本语言。
+- 新增复杂玩法行为仍可能需要注册 C++ 服务或处理器。
+- 当前未实现完整的网络同步、多人联机和商业引擎级插件生态。
+- 部分编辑器工具仍在持续完善，项目优先保证 2D Demo 的内容生产闭环。
+
+## 文档
+
+详细设计文档位于 [`docs/`](docs/)：
+
+- [引擎架构说明](docs/03_引擎架构/引擎架构说明.md)
+- [编辑器操作手册](docs/03_引擎架构/编辑器操作手册.md)
+- [命令、数据表与事件脚本](docs/03_引擎架构/命令数据表与事件脚本.md)
+- [WAO 动作编排与效果结算系统](docs/03_引擎架构/WAO动作编排与效果结算系统.md)
+- [资源数据库与 UI 模板系统](docs/03_引擎架构/资源数据库与UI模板系统.md)
+- [从地基到 Sandbox 系列文档](docs/从地基到Sandbox/00_总纲.md)
+
+## 素材说明
+
+Demo 中部分立绘、背景、UI 和动作帧使用程序化生成或图像生成工具辅助制作，主要用于验证引擎功能、编辑器流程和竖切版本表现，不代表最终商业项目美术资产。

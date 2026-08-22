@@ -1,8 +1,9 @@
 # Part 10 · SideCombat 与 WAO：数据表战斗、动作编排与 HUD
 
 > 目标：理解横板战斗模块的分层结构——数据表驱动、运行时服务集、
-> WAO 动作编排、AI 与 HUD。结尾用"一次 basic 攻击"的完整链路
-> 把本 Part 与 Part 2/6/7 全部串起来。
+> WAO 动作编排、AI 与 HUD。战斗胜负只发 `event:` 命令，具体结算跳转
+> 交给 Part 9.5 的 `.wts` 流程。结尾用"一次 basic 攻击"的完整链路
+> 把本 Part 与 Part 2/6/7/9.5 全部串起来。
 
 ## 10.1 数据表驱动：一切参数都是资产
 
@@ -45,6 +46,25 @@ skills:                    # 技能显示/输入/招式绑定/解锁章节
 `SideCombatTuningService` 加载这些表（500ms 热重载，Part 4 降频表），
 各服务只读表、不写死参数。**调手感 = 改 YAML，不重编**——
 这是整个模块的第一原则。
+
+编辑器对应的是 `Side Combat Tuning Editor`
+（`WheatearEditor/src/Modules/SideCombat/SideCombatTuningEditorPanel.cpp`）。
+当前结构化页签是：
+
+| 页签 | 主要维护内容 |
+| --- | --- |
+| `Feel` | 移动、跳跃、冲刺、空中连段、断限追击等高频手感 |
+| `Rules` | 战斗规则、Boss 保护、敌人数值、拾取、纵深、视觉和反馈 |
+| `Attacks` | hitbox、伤害、帧数据、取消窗口、击飞、VFX/SFX |
+| `Animations` | Player / Grunt / Boss 三组图集动画 |
+| `Skills` | 技能显示、输入、招式绑定、解锁章节 |
+| `Item Slots` / `Skill Slots` | 道具槽、技能槽、命令和 HUD 槽位协作 |
+| `Enemy Types` | 波次生成使用的敌人模板 |
+| `Progression` | profile、解锁技能、Boss Protection HUD、Combat State HUD 等显示开关 |
+| `Advanced` / `Advanced Raw` | 完整结构树与原始 YAML 兜底编辑 |
+
+这张表也是"为什么编辑器能做 sandbox"的直接证据：战斗的主要内容资产已经不需要
+改 C++，只要面板能覆盖 YAML 中的字段，运行时服务就会读到同一份数据。
 
 ## 10.2 服务分层：系统薄，服务厚
 
@@ -166,6 +186,21 @@ AI 产生动作也是 `ActionIntent`——**AI 与玩家共用动作入口**
 - **HUD**：`SideCombatHudService` 每帧把战斗状态（血量/冷却/连击数）
   写进场景里的 HUD 实体（Part 2 的 UIImage + SubRect 体系）——
   HUD 是"数据驱动渲染"的日常形态。
+
+编辑器里 HUD 的入口不是独立预设资产，而是 `SideCombatLevelComponent`
+自己的字段（Drawer 在 `SideCombatDrawer.cpp`）：
+
+- `Scene Bindings`：Player、Boss、Camera、HealthBar、ComboText、SkillBar、
+  Joystick、Mana、Ultimate、BossProtection 等场景实体名。
+- `HUD Layout`：Top Panel、Player/Boss 面板、血条、魔力、断限、保护条、
+  Combo、Skill Tooltip、Joystick 等 0~1 归一化矩形。
+- `Skill HUD Slots` / `Combat Item HUD Slots`：每个槽的 Key、Command、Icon、
+  Tooltip 和 Rect。
+- `HUD Text`：锁定、不可用、魔力不足、冷却、胜利、失败和奖励提示文案。
+
+所以 HUD 的职责被拆成两半：**场景组件决定绑定和布局**，
+**tuning YAML 决定显示规则和战斗状态**，`SideCombatHudService`
+负责把运行时数据写进这些 UI 组件。
 
 ## 10.7 实例：一次 basic 攻击的完整链路
 

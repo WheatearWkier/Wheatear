@@ -382,6 +382,7 @@ namespace Wheatear {
                 && !entity.HasComponent<UIButtonComponent>()
                 && !entity.HasComponent<UIProgressBarComponent>()
                 && !entity.HasComponent<UISliderComponent>()
+                && !entity.HasComponent<UICircleComponent>()
                 && !entity.HasComponent<UICheckboxComponent>();
         }
 
@@ -1137,6 +1138,22 @@ namespace Wheatear {
                     drawList->AddRectFilled(rectMin, rectMax, ColorToImU32(bar.BackgroundColor), 2.0f);
                     const float fillRight = rectMin.x + (rectMax.x - rectMin.x) * bar.GetNormalized();
                     drawList->AddRectFilled(rectMin, { fillRight, rectMax.y }, ColorToImU32(bar.ForegroundColor), 2.0f);
+                }
+                if (entity.HasComponent<UICircleComponent>())
+                {
+                    const auto& circle = entity.GetComponent<UICircleComponent>();
+                    const ImVec2 center = { (rectMin.x + rectMax.x) * 0.5f, (rectMin.y + rectMax.y) * 0.5f };
+                    const ImVec2 radius = {
+                        std::max((rectMax.x - rectMin.x) * 0.5f, 0.0f),
+                        std::max((rectMax.y - rectMin.y) * 0.5f, 0.0f)
+                    };
+                    const ImU32 color = ColorToImU32(circle.Color);
+                    const float thickness = std::clamp(circle.Thickness, 0.0f, 1.0f);
+                    if (thickness >= 0.99f)
+                        drawList->AddEllipseFilled(center, radius, color, 0.0f, 48);
+                    else if (thickness > 0.0f)
+                        drawList->AddEllipse(center, radius, color, 0.0f, 48,
+                            std::max(std::min(radius.x, radius.y) * thickness, 1.0f));
                 }
                 if (entity.HasComponent<UIImageComponent>())
                 {

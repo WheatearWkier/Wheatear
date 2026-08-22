@@ -558,6 +558,16 @@ namespace Wheatear {
             });
     }
 
+    void DrawUICircleComponent(Entity entity)
+    {
+        DrawComponent<UICircleComponent>("UI Circle", entity, [](auto& circle)
+            {
+                ImGui::ColorEdit4(EditorLocale::Text("Color", "颜色"), glm::value_ptr(circle.Color));
+                ImGui::DragFloat(EditorLocale::Text("Thickness", "厚度"), &circle.Thickness, 0.025f, 0.0f, 1.0f);
+                ImGui::DragFloat(EditorLocale::Text("Fade", "淡出"), &circle.Fade, 0.00025f, 0.0f, 1.0f);
+            });
+    }
+
     // -- UIPanel -----------------------------------------------------------
     void DrawUIPanelComponent(Entity entity)
     {

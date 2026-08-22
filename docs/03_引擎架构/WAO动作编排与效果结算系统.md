@@ -1139,8 +1139,12 @@ Wheatear/src/Wheatear/Gameplay/Action/ActionResolver.cpp
 新增 YAML action 数据目录：
 
 ```text
-WheatearEditor/assets/gameplay/actions/
+assets/gameplay/actions/
 ```
+
+默认 Demo 的实际目录是 `Projects/WheatearDemo/assets/gameplay/actions/`。
+新项目可从 `WheatearEditor/ContentTemplates/gameplay/actions/` 同步初始 action 表；
+运行时和编辑器都通过项目根解析 `assets/gameplay/actions`。
 
 当前文件：
 
@@ -1203,4 +1207,3 @@ assets/saves/user_settings.wtsettings
 - VN：推进、自动、历史、保存、读取。
 
 后续编辑器可以在这层之上做“改键面板”和“玩法默认键位模板”，不会再侵入各个玩法系统。
-

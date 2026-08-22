@@ -114,7 +114,7 @@ namespace Wheatear {
             }
 
             const std::string lower = ToLower(line);
-            if (StartsWith(lower, "event "))
+            if (!current && StartsWith(lower, "event "))
             {
                 const std::string eventName = StripEventName(line.substr(6));
                 if (eventName.empty())
@@ -140,7 +140,7 @@ namespace Wheatear {
                 continue;
             }
 
-            if (StartsWith(lower, "event:"))
+            if (!current && StartsWith(lower, "event:"))
             {
                 const std::string eventName = StripEventName(line.substr(6));
                 if (eventName.empty())

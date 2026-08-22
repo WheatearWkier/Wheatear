@@ -1,6 +1,6 @@
 # 资源数据库与 UI 模板系统
 
-更新日期：2026-08-02
+更新日期：2026-08-17
 
 本文记录 Wheatear 当前资源管理和 UI 模板的正式方案。目标是让资源替换、图集切片、打包依赖、Prefab 和 UI 模板都走同一套工程化流程，避免“每个资源旁边一个元数据文件”和“代码里硬编码 UI 页面”造成的维护负担。
 
@@ -70,7 +70,7 @@ Content Browser -> Rescan Asset Registry
 刷新流程：
 
 1. 读取已有 `asset_registry.yaml`。
-2. 扫描 `WheatearEditor/assets` 下的真实资源文件。
+2. 扫描当前项目根的 `assets/` 下的真实资源文件（默认项目是 `Projects/WheatearDemo/assets`）。
 3. 跳过 `.wheatear`、`cache`、`saves`、`.wtmeta`。
 4. 通过路径复用旧 UUID 和导入设置。
 5. 如果文件大小和最后写入时间没有变化，复用旧引用关系。
@@ -88,8 +88,10 @@ UI 模板由两层组成：
 - `UITemplateFactory`：真正创建实体、组件和父子关系的工厂。
 
 内置模板由 `UITemplateFactory` 在刷新/打包时写入**项目根**的
-`assets/ui_templates`（默认项目即 `Projects/WheatearDemo/assets/ui_templates`，
-`WheatearEditor/assets` 本身只放引擎内置的 shader/字体/action 数据）。
+`assets/ui_templates`（默认项目即 `Projects/WheatearDemo/assets/ui_templates`）。
+项目创建/同步时，`WheatearEditor/ContentTemplates` 会把字体、WAO action、
+Progression 内容和输入绑定模板复制到当前项目；`WheatearEditor/assets`
+本身只保留引擎内置 shader。
 
 当前模板包括：
 
