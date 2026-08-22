@@ -8,9 +8,17 @@ Wheatear 的重点不是实现一个“大而全”的通用引擎，而是围�
 
 ## 演示
 
-- [编辑器演示视频](docs/readme-media/editor_demo.mp4)
-- [Sandbox 演示视频](docs/readme-media/sandbox_demo.mp4)
-- [有声版演示](https://www.bilibili.com/video/BV1tGue6vEAt/)
+**编辑器演示**
+
+https://github.com/user-attachments/assets/2d08f3e8-6c46-4bae-82af-4a9c0884c037
+
+**Sandbox 演示**
+
+https://github.com/user-attachments/assets/594114a5-ba8b-4847-9f34-6be1f15181f7
+
+有声版演示： https://www.bilibili.com/video/BV1tGue6vEAt/?share_source=copy_web&vd_source=da98153b23f4943d9fa70056f1fb1ae8
+
+（以下图片为 Wheatear 旧版界面，新版展示图片待上传。）
 
 <p align="center">
   <img src="docs/readme-media/editor_overview.png" width="49%" alt="Wheatear 编辑器" />
