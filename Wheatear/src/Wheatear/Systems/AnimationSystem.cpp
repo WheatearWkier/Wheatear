@@ -4,6 +4,7 @@
 #include "Wheatear/Scene/Scene.h"
 #include "Wheatear/Scene/Components.h"
 #include "Wheatear/Scene/Entity.h"
+#include "Wheatear/Renderer/Model.h"
 #include "Wheatear/Animation/AnimationClip.h"
 #include "Wheatear/Animation/AnimationClipSerializer.h"
 #include "Wheatear/Assets/AssetPath.h"
@@ -15,6 +16,7 @@
 
 #include <algorithm>
 #include <cmath>
+#include <functional>
 #include <string>
 
 namespace Wheatear {
@@ -76,6 +78,141 @@ namespace Wheatear {
             if (includeStart && eventTime >= from && eventTime <= to)
                 return true;
             return eventTime > from && eventTime <= to;
+        }
+
+        // ---------------------------------------------------------------------
+        //  3D skeletal animation
+        // ---------------------------------------------------------------------
+
+        struct BonePose
+        {
+            std::vector<glm::vec3> Translations;
+            std::vector<glm::quat> Rotations;
+            std::vector<glm::vec3> Scales;
+        };
+
+        static glm::mat4 ComposeBone(const glm::vec3& translation,
+            const glm::quat& rotation,
+            const glm::vec3& scale)
+        {
+            return glm::translate(glm::mat4(1.0f), translation)
+                * glm::mat4_cast(rotation)
+                * glm::scale(glm::mat4(1.0f), scale);
+        }
+
+        static void SampleBonePose(const Model& model,
+            const ModelAnimation& animation,
+            float time,
+            BonePose& pose)
+        {
+            const auto& bones = model.GetBones();
+            pose.Translations.resize(bones.size());
+            pose.Rotations.resize(bones.size());
+            pose.Scales.resize(bones.size());
+
+            const float duration = std::max(animation.Duration, 0.0f);
+            const float localTime = duration > 0.0f
+                ? std::clamp(time, 0.0f, duration)
+                : 0.0f;
+
+            const float framePosition = localTime * animation.FramesPerSecond;
+            const size_t frame0 = std::min<size_t>(
+                static_cast<size_t>(std::max(0.0f, std::floor(framePosition))),
+                animation.FrameCount);
+            const size_t frame1 = std::min(frame0 + 1,
+                static_cast<size_t>(animation.FrameCount));
+            const float alpha = std::clamp(
+                framePosition - static_cast<float>(frame0), 0.0f, 1.0f);
+
+            for (size_t bone = 0; bone < bones.size(); ++bone)
+            {
+                const bool hasSamples = bone < animation.Translations.size()
+                    && frame1 < animation.Translations[bone].size();
+                if (!hasSamples)
+                {
+                    pose.Translations[bone] = bones[bone].BindTranslation;
+                    pose.Rotations[bone] = bones[bone].BindRotation;
+                    pose.Scales[bone] = bones[bone].BindScale;
+                    continue;
+                }
+
+                pose.Translations[bone] = glm::mix(
+                    animation.Translations[bone][frame0],
+                    animation.Translations[bone][frame1], alpha);
+                pose.Rotations[bone] = glm::normalize(glm::slerp(
+                    animation.Rotations[bone][frame0],
+                    animation.Rotations[bone][frame1], alpha));
+                pose.Scales[bone] = glm::mix(
+                    animation.Scales[bone][frame0],
+                    animation.Scales[bone][frame1], alpha);
+            }
+        }
+
+        static void BlendBonePose(BonePose& target,
+            const BonePose& other,
+            float alpha)
+        {
+            const size_t count = std::min(target.Translations.size(),
+                other.Translations.size());
+            for (size_t bone = 0; bone < count; ++bone)
+            {
+                target.Translations[bone] = glm::mix(
+                    target.Translations[bone], other.Translations[bone], alpha);
+                target.Rotations[bone] = glm::normalize(glm::slerp(
+                    target.Rotations[bone], other.Rotations[bone], alpha));
+                target.Scales[bone] = glm::mix(
+                    target.Scales[bone], other.Scales[bone], alpha);
+            }
+        }
+
+        static void BuildBonePalette(const Model& model,
+            const BonePose& pose,
+            std::vector<glm::mat4>& palette)
+        {
+            const auto& bones = model.GetBones();
+            const size_t count = bones.size();
+            std::vector<glm::mat4> local(count, glm::mat4(1.0f));
+            std::vector<glm::mat4> world(count, glm::mat4(1.0f));
+            std::vector<uint8_t> state(count, 0);
+
+            for (size_t bone = 0; bone < count; ++bone)
+            {
+                local[bone] = ComposeBone(
+                    pose.Translations[bone], pose.Rotations[bone], pose.Scales[bone]);
+            }
+
+            std::function<void(size_t)> evaluate = [&](size_t bone)
+            {
+                if (bone >= count || state[bone] == 2)
+                    return;
+                if (state[bone] == 1)
+                {
+                    // Malformed cycle: fall back to the bind local transform.
+                    world[bone] = local[bone];
+                    state[bone] = 2;
+                    return;
+                }
+
+                state[bone] = 1;
+                const int parent = bones[bone].Parent;
+                if (parent >= 0 && static_cast<size_t>(parent) < count)
+                {
+                    evaluate(static_cast<size_t>(parent));
+                    world[bone] = world[parent] * local[bone];
+                }
+                else
+                {
+                    world[bone] = local[bone];
+                }
+                state[bone] = 2;
+            };
+
+            palette.resize(count);
+            for (size_t bone = 0; bone < count; ++bone)
+            {
+                evaluate(bone);
+                palette[bone] = world[bone] * bones[bone].InverseBind;
+            }
         }
 
         static void FireAnimationEventsInRange(
@@ -348,6 +485,137 @@ namespace Wheatear {
         // references are live inside the iteration.
         for (const std::string& command : pendingCommands)
             CommandBus::Execute(scene, command);
+
+        // 3D skeletal animation. Palettes are computed once per frame and
+        // reused by the color and shadow passes.
+        for (auto e : registry.view<Animator3DComponent, MeshRendererComponent>())
+        {
+            auto& animator = registry.get<Animator3DComponent>(e);
+            auto& renderer = registry.get<MeshRendererComponent>(e);
+            if (!renderer.Model || !renderer.Model->HasSkin())
+                continue;
+
+            const Model& model = *renderer.Model;
+            const auto& animations = model.GetAnimations();
+            const auto& bones = model.GetBones();
+            animator.BonePalette.resize(bones.size(), glm::mat4(1.0f));
+
+            if (animations.empty())
+            {
+                // No clips: leave the palette empty so RenderSystem draws the
+                // mesh in its imported bind pose (u_Skinned = 0).
+                animator.BonePalette.clear();
+                continue;
+            }
+
+            if (animator.CurrentClipIndex < 0
+                || static_cast<size_t>(animator.CurrentClipIndex) >= animations.size())
+            {
+                int clipIndex = 0;
+                if (!animator.DefaultClip.empty())
+                {
+                    for (size_t i = 0; i < animations.size(); ++i)
+                    {
+                        if (animations[i].Name == animator.DefaultClip)
+                        {
+                            clipIndex = static_cast<int>(i);
+                            break;
+                        }
+                    }
+                }
+                animator.CurrentClipIndex = clipIndex;
+                animator.Time = 0.0f;
+                animator.IsPlaying = animator.PlayOnStart;
+                WT_CORE_INFO("Animator3D '{}': {} clip(s), playing '{}' ({})",
+                    Entity(e, scene).GetName(),
+                    animations.size(),
+                    animations[clipIndex].Name,
+                    animator.IsPlaying ? "yes" : "no");
+            }
+
+            if (animator.IsPlaying)
+            {
+                const float speed = std::max(0.0f, animator.PlaybackSpeed);
+                animator.Time += ts * speed;
+
+                const float duration = animations[animator.CurrentClipIndex].Duration;
+                if (duration > 0.0f)
+                {
+                    if (animator.Loop)
+                        animator.Time = std::fmod(animator.Time, duration);
+                    else if (animator.Time >= duration)
+                    {
+                        animator.Time = duration;
+                        animator.IsPlaying = false;
+                    }
+                }
+            }
+
+            const ModelAnimation& currentAnimation =
+                animations[animator.CurrentClipIndex];
+            if (currentAnimation.Precomputed)
+            {
+                const float duration = std::max(currentAnimation.Duration, 0.0f);
+                const float clampedTime = duration > 0.0f
+                    ? std::clamp(animator.Time, 0.0f, duration)
+                    : 0.0f;
+                size_t frame = static_cast<size_t>(
+                    std::llround(clampedTime * currentAnimation.FramesPerSecond));
+                frame = std::min(frame,
+                    static_cast<size_t>(currentAnimation.FrameCount));
+
+                for (size_t bone = 0; bone < currentAnimation.BoneMatrices.size(); ++bone)
+                {
+                    if (frame < currentAnimation.BoneMatrices[bone].size())
+                        animator.BonePalette[bone] =
+                            currentAnimation.BoneMatrices[bone][frame];
+                }
+
+                continue;
+            }
+
+            BonePose pose;
+            SampleBonePose(model, currentAnimation,
+                animator.Time, pose);
+
+            if (animator.NextClipIndex >= 0
+                && static_cast<size_t>(animator.NextClipIndex) < animations.size())
+            {
+                const float speed = std::max(0.0f, animator.PlaybackSpeed);
+                animator.NextTime += ts * speed;
+                animator.FadeElapsed += ts;
+
+                BonePose nextPose;
+                SampleBonePose(model, animations[animator.NextClipIndex],
+                    animator.NextTime, nextPose);
+
+                const float alpha = animator.FadeDuration > 0.0f
+                    ? std::clamp(animator.FadeElapsed / animator.FadeDuration, 0.0f, 1.0f)
+                    : 1.0f;
+                BlendBonePose(pose, nextPose, alpha);
+
+                if (alpha >= 1.0f)
+                {
+                    animator.CurrentClipIndex = animator.NextClipIndex;
+                    animator.Time = animator.NextTime;
+                    animator.NextClipIndex = -1;
+                    animator.FadeElapsed = 0.0f;
+                }
+            }
+
+            BuildBonePalette(model, pose, animator.BonePalette);
+
+            if (animator.Time < 0.05f)
+            {
+                float maxTranslation = 0.0f;
+                for (const glm::mat4& matrix : animator.BonePalette)
+                    maxTranslation = std::max(maxTranslation,
+                        glm::length(glm::vec3(matrix[3])));
+                WT_CORE_INFO("Animator3D '{}' palette {} bones, max bone translation {:.3f}",
+                    Entity(e, scene).GetName(), animator.BonePalette.size(),
+                    maxTranslation);
+            }
+        }
     }
 
 } // namespace Wheatear

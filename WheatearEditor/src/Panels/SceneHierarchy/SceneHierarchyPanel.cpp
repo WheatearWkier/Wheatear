@@ -1,8 +1,10 @@
 #include "wepch.h"
 #include "SceneHierarchyPanel.h"
 #include "Editor/EditorCommands.h"
+#include "Editor/EditorWorkspace.h"
 #include "Assets/UITemplateFactory.h"
 #include "Editor/EditorLocale.h"
+#include "Wheatear/Renderer/Mesh.h"
 
 #include <imgui/imgui.h>
 #include <algorithm>
@@ -432,13 +434,25 @@ namespace Wheatear {
                 }
             }
 
-            ImGui::SetNextItemWidth(-168.0f);
-            ImGui::InputTextWithHint("##HierarchySearch", "Search entity...", m_SearchBuffer, sizeof(m_SearchBuffer));
-            ImGui::SameLine();
-            ImGui::Checkbox("UI", &m_ShowOnlyUI);
+            ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x - 38.0f);
+            ImGui::InputTextWithHint("##HierarchySearch",
+                EditorLocale::Text("Search entities...", "搜索实体..."),
+                m_SearchBuffer, sizeof(m_SearchBuffer));
+            ImGui::SameLine(0.0f, 6.0f);
+            if (ImGui::Button("+", ImVec2(28.0f, 0.0f)))
+                ImGui::OpenPopup("##HierarchyCreate");
+            if (ImGui::IsItemHovered())
+                ImGui::SetTooltip("%s", EditorLocale::Text("Create entity or folder", "创建实体或文件夹"));
+            if (ImGui::BeginPopup("##HierarchyCreate"))
+            {
+                DrawCreateEntityPopupItems();
+                ImGui::EndPopup();
+            }
+
+            ImGui::Checkbox(EditorLocale::Text("UI Only", "仅 UI"), &m_ShowOnlyUI);
             ImGui::SameLine();
             ImGui::BeginDisabled(!HasHiddenEditorEntities());
-            if (ImGui::SmallButton("Show All"))
+            if (ImGui::SmallButton(EditorLocale::Text("Show All", "显示全部")))
                 ShowAllHiddenEditorEntities();
             if (ImGui::IsItemHovered(ImGuiHoveredFlags_AllowWhenDisabled))
                 ImGui::SetTooltip(EditorLocale::Text("Show all entities hidden in the editor", "显示所有在编辑器中隐藏的实体"));
@@ -498,10 +512,57 @@ namespace Wheatear {
             {
                 std::sort(children.begin(), children.end(), [](Entity a, Entity b)
                 {
-                    const auto& aw = a.GetComponent<UIWidgetComponent>();
-                    const auto& bw = b.GetComponent<UIWidgetComponent>();
-                    if (aw.SortOrder != bw.SortOrder)
-                        return aw.SortOrder < bw.SortOrder;
+                    const bool aIsUI = a.HasComponent<UIWidgetComponent>();
+                    const bool bIsUI = b.HasComponent<UIWidgetComponent>();
+                    if (aIsUI && bIsUI)
+                    {
+                        const auto& aw = a.GetComponent<UIWidgetComponent>();
+                        const auto& bw = b.GetComponent<UIWidgetComponent>();
+                        if (aw.SortOrder != bw.SortOrder)
+                            return aw.SortOrder < bw.SortOrder;
+                    }
+                    return a.GetName() < b.GetName();
+                });
+            }
+
+            // Generic Transform hierarchy: non-UI entities (3D props, prefab
+            // children, gameplay sub-objects) nest under their Parent UUID.
+            // UI entities keep their widget parent so layout stays authoritative.
+            for (auto entityID : registry.view<IDComponent, TransformComponent>())
+            {
+                Entity child{ entityID, m_Context.get() };
+                if (child.HasComponent<UIWidgetComponent>()
+                    || child.HasComponent<EditorFolderComponent>())
+                {
+                    continue;
+                }
+
+                const UUID parentUUID =
+                    child.GetComponent<TransformComponent>().Parent;
+                if (static_cast<uint64_t>(parentUUID) == 0)
+                    continue;
+
+                Entity parent = m_Context->FindEntityByUUID(parentUUID);
+                if (!parent || parent == child)
+                    continue;
+
+                uiChildren[EntityKey(parent)].push_back(child);
+                uiChildKeys.insert(EntityKey(child));
+            }
+
+            for (auto& [parentKey, children] : uiChildren)
+            {
+                std::sort(children.begin(), children.end(), [](Entity a, Entity b)
+                {
+                    const bool aIsUI = a.HasComponent<UIWidgetComponent>();
+                    const bool bIsUI = b.HasComponent<UIWidgetComponent>();
+                    if (aIsUI && bIsUI)
+                    {
+                        const auto& aw = a.GetComponent<UIWidgetComponent>();
+                        const auto& bw = b.GetComponent<UIWidgetComponent>();
+                        if (aw.SortOrder != bw.SortOrder)
+                            return aw.SortOrder < bw.SortOrder;
+                    }
                     return a.GetName() < b.GetName();
                 });
             }
@@ -604,17 +665,37 @@ namespace Wheatear {
         ImGui::End();
 
         ImGui::Begin("Properties");
+        if (ImGui::BeginPopupContextWindow("##PropertiesContext",
+                ImGuiPopupFlags_MouseButtonRight))
+        {
+            if (m_SelectionContext)
+            {
+                if (ImGui::MenuItem(EditorLocale::Text("Add Component...", "添加组件...")))
+                {
+                    m_AddComponentPopupRequested = true;
+                    m_AddComponentPopupJustOpened = true;
+                }
+            }
+            else
+            {
+                ImGui::TextDisabled("%s", EditorLocale::Text(
+                    "Select an entity to add components",
+                    "选择一个实体以添加组件"));
+            }
+            ImGui::EndPopup();
+        }
         if (m_RuntimeMode)
         {
             ImGui::TextColored(ImGui::GetStyleColorVec4(ImGuiCol_CheckMark),
                 "%s", EditorLocale::Text(
-                    "Play (runtime copy) - edits are discarded on stop",
-                    "播放（运行副本）- 停止后修改将丢弃"));
+                    "Play mode: edits are discarded on stop",
+                    "播放模式：停止后修改将丢弃"));
+            ImGui::Separator();
         }
-        if (m_Context)
-            DrawSceneSettings();
         if (m_SelectionContext)
             DrawComponents(m_SelectionContext);
+        else if (m_Context)
+            DrawSceneSettings();
         ImGui::End();
     }
 
@@ -633,23 +714,50 @@ namespace Wheatear {
 
         ImGui::Separator();
 
-        if (ImGui::BeginMenu("2D Object"))
+        if (EditorWorkspaceContext::GetCurrentDomain() == EditorDomain::TwoD)
         {
-            if (ImGui::MenuItem(EditorLocale::Text("Sprite", "精灵")))
+            if (ImGui::BeginMenu(EditorLocale::Text("2D Object", "2D 对象")))
             {
-                CreateEntityWithUndo("Sprite", [](Entity e)
+                if (ImGui::MenuItem(EditorLocale::Text("Sprite", "精灵")))
                 {
-                    e.AddComponent<SpriteRendererComponent>();
-                });
+                    CreateEntityWithUndo("Sprite", [](Entity e)
+                    {
+                        e.AddComponent<SpriteRendererComponent>();
+                    });
+                }
+                if (ImGui::MenuItem(EditorLocale::Text("Circle", "圆形")))
+                {
+                    CreateEntityWithUndo("Circle", [](Entity e)
+                    {
+                        e.AddComponent<CircleRendererComponent>();
+                    });
+                }
+                ImGui::EndMenu();
             }
-            if (ImGui::MenuItem(EditorLocale::Text("Circle", "圆形")))
+        }
+
+        if (EditorWorkspaceContext::GetCurrentDomain() == EditorDomain::ThreeD)
+        {
+            if (ImGui::BeginMenu(EditorLocale::Text("3D Object", "3D 对象")))
             {
-                CreateEntityWithUndo("Circle", [](Entity e)
+                if (ImGui::MenuItem(EditorLocale::Text("Cube", "立方体")))
                 {
-                    e.AddComponent<CircleRendererComponent>();
-                });
+                    CreateEntityWithUndo("Cube", [](Entity e)
+                    {
+                        auto& renderer = e.AddComponent<MeshRendererComponent>();
+                        renderer.Mesh = Mesh::CreateCube();
+                    });
+                }
+                if (ImGui::MenuItem(EditorLocale::Text("Terrain", "地形")))
+                {
+                    CreateEntityWithUndo("Terrain", [](Entity e)
+                    {
+                        auto& terrain = e.AddComponent<TerrainComponent>();
+                        terrain.GenerateProcedural();
+                    });
+                }
+                ImGui::EndMenu();
             }
-            ImGui::EndMenu();
         }
 
         if (ImGui::BeginMenu(EditorLocale::Text("Camera", "相机")))

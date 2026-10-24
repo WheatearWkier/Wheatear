@@ -146,10 +146,14 @@
     </ProjectReference>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="src\RTSGameLayer.h" />
     <ClInclude Include="src\RuntimeSceneLayer.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="src\LogicSelfTests.cpp" />
+    <ClCompile Include="src\RTSGameLayer.cpp" />
     <ClCompile Include="src\RuntimeSceneLayer.cpp" />
+    <ClCompile Include="src\WAOSelfTests.cpp" />
     <ClCompile Include="src\WheatearSandboxApp.cpp" />
   </ItemGroup>
   <ItemGroup>

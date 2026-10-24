@@ -34,6 +34,23 @@ namespace Wheatear {
 
     struct Renderer2DData
     {
+        enum class BatchKind
+        {
+            Quad = 0,
+            Circle,
+            Line,
+            Text
+        };
+
+        struct DrawCommand
+        {
+            BatchKind Kind = BatchKind::Quad;
+            uint32_t VertexOffset = 0;
+            uint32_t VertexCount = 0;
+            uint32_t IndexOffset = 0;
+            uint32_t IndexCount = 0;
+        };
+
         std::array<Ref<Texture2D>, k_MaxTexSlots> TextureSlots;
         uint32_t TextureSlotIndex = 1;
         Ref<Texture2D> WhiteTexture;
@@ -43,6 +60,11 @@ namespace Wheatear {
         Scope<RenderBatch<LineVertex>>   LineBatch;
         Scope<RenderBatch<TextVertex>>   TextBatch;
 
+        // Submission-order queue. Flush() replays this list so UI text,
+        // panels, circles and sprites can interleave by SortOrder instead of
+        // being forced into Quad -> Text -> Circle -> Line order.
+        std::vector<DrawCommand> Commands;
+
         struct CameraData { glm::mat4 ViewProjection; };
         CameraData         CameraBuffer;
         Ref<UniformBuffer> CameraUniformBuffer;
@@ -51,6 +73,38 @@ namespace Wheatear {
     };
 
     static Renderer2DData s_Data;
+
+    static void AppendDrawCommand(Renderer2DData::BatchKind kind,
+        uint32_t vertexOffset, uint32_t vertexCount,
+        uint32_t indexOffset, uint32_t indexCount)
+    {
+        if (vertexCount == 0 && indexCount == 0)
+            return;
+
+        // Coalesce adjacent primitives of the same batch when their ranges are
+        // contiguous. All texture slots are bound for each range, so a texture
+        // change inside the merged range is safe.
+        if (!s_Data.Commands.empty())
+        {
+            Renderer2DData::DrawCommand& last = s_Data.Commands.back();
+            if (last.Kind == kind
+                && last.VertexOffset + last.VertexCount == vertexOffset
+                && last.IndexOffset + last.IndexCount == indexOffset)
+            {
+                last.VertexCount += vertexCount;
+                last.IndexCount += indexCount;
+                return;
+            }
+        }
+
+        s_Data.Commands.push_back({
+            kind,
+            vertexOffset,
+            vertexCount,
+            indexOffset,
+            indexCount
+        });
+    }
 
 
     void Renderer2D::Init()
@@ -162,6 +216,8 @@ namespace Wheatear {
         s_Data.CircleBatch.reset();
         s_Data.LineBatch.reset();
         s_Data.TextBatch.reset();
+        s_Data.WhiteTexture.reset();
+        s_Data.CameraUniformBuffer.reset();
     }
 
 
@@ -175,6 +231,7 @@ namespace Wheatear {
         s_Data.CircleBatch->Reset();
         s_Data.LineBatch->Reset();
         s_Data.TextBatch->Reset();
+        s_Data.Commands.clear();
         s_Data.TextureSlotIndex = 1;
     }
 
@@ -208,14 +265,44 @@ namespace Wheatear {
     void Renderer2D::Flush()
     {
         WT_PROFILE_FUNCTION();
-        s_Data.QuadBatch->Flush(s_Data.Stats);
-        s_Data.TextBatch->Flush(s_Data.Stats);
-        s_Data.CircleBatch->Flush(s_Data.Stats);
-        s_Data.LineBatch->Flush(s_Data.Stats);
+
+        if (!s_Data.Commands.empty())
+        {
+            s_Data.QuadBatch->Upload();
+            s_Data.CircleBatch->Upload();
+            s_Data.LineBatch->Upload();
+            s_Data.TextBatch->Upload();
+
+            for (const Renderer2DData::DrawCommand& command : s_Data.Commands)
+            {
+                switch (command.Kind)
+                {
+                case Renderer2DData::BatchKind::Quad:
+                    s_Data.QuadBatch->DrawRange(command.VertexOffset,
+                        command.VertexCount, command.IndexOffset, command.IndexCount);
+                    break;
+                case Renderer2DData::BatchKind::Circle:
+                    s_Data.CircleBatch->DrawRange(command.VertexOffset,
+                        command.VertexCount, command.IndexOffset, command.IndexCount);
+                    break;
+                case Renderer2DData::BatchKind::Line:
+                    s_Data.LineBatch->DrawRange(command.VertexOffset,
+                        command.VertexCount, command.IndexOffset, command.IndexCount);
+                    break;
+                case Renderer2DData::BatchKind::Text:
+                    s_Data.TextBatch->DrawRange(command.VertexOffset,
+                        command.VertexCount, command.IndexOffset, command.IndexCount);
+                    break;
+                }
+                s_Data.Stats.DrawCalls++;
+            }
+        }
+
         s_Data.QuadBatch->Reset();
         s_Data.CircleBatch->Reset();
         s_Data.LineBatch->Reset();
         s_Data.TextBatch->Reset();
+        s_Data.Commands.clear();
         s_Data.TextureSlotIndex = 1;
     }
 
@@ -251,12 +338,19 @@ namespace Wheatear {
         const glm::mat4& transform,
         const glm::vec4& color,
         const glm::vec2  uvs[4],
-        float texIndex,
+        const Ref<Texture2D>& texture,
         float tilingFactor,
         int   entityID)
     {
         if (s_Data.QuadBatch->IsFull(4))
             FlushAndReset();
+
+        const float texIndex = texture
+            ? GetOrAllocTextureSlot(texture)
+            : 0.0f;
+
+        const uint32_t vertexOffset = s_Data.QuadBatch->GetVertexCount();
+        const uint32_t indexOffset = s_Data.QuadBatch->GetIndexCount();
 
         for (int i = 0; i < 4; i++)
         {
@@ -270,6 +364,8 @@ namespace Wheatear {
         }
         s_Data.QuadBatch->AddIndexCount(6);
         s_Data.Stats.QuadCount++;
+        AppendDrawCommand(Renderer2DData::BatchKind::Quad,
+            vertexOffset, 4, indexOffset, 6);
     }
 
     //  DrawQuad
@@ -278,7 +374,7 @@ namespace Wheatear {
         const glm::vec4& color, int entityID)
     {
         WT_PROFILE_FUNCTION();
-        SubmitQuadVertices(transform, color, k_DefaultUV, 0.0f, 1.0f, entityID);
+        SubmitQuadVertices(transform, color, k_DefaultUV, nullptr, 1.0f, entityID);
     }
 
     void Renderer2D::DrawQuad(const glm::mat4& transform,
@@ -287,9 +383,8 @@ namespace Wheatear {
         int entityID)
     {
         WT_PROFILE_FUNCTION();
-        const float texIndex = GetOrAllocTextureSlot(texture);
         SubmitQuadVertices(transform, tintColor, k_DefaultUV,
-            texIndex, tilingFactor, entityID);
+            texture, tilingFactor, entityID);
     }
 
     void Renderer2D::DrawCircle(const glm::mat4& transform,
@@ -313,6 +408,9 @@ namespace Wheatear {
         if (s_Data.CircleBatch->IsFull(4))
             FlushAndReset();
 
+        const uint32_t vertexOffset = s_Data.CircleBatch->GetVertexCount();
+        const uint32_t indexOffset = s_Data.CircleBatch->GetIndexCount();
+
         progress = glm::clamp(progress, -1.0f, 1.0f);
         for (int i = 0; i < 4; i++)
         {
@@ -328,6 +426,8 @@ namespace Wheatear {
         }
         s_Data.CircleBatch->AddIndexCount(6);
         s_Data.Stats.QuadCount++;
+        AppendDrawCommand(Renderer2DData::BatchKind::Circle,
+            vertexOffset, 4, indexOffset, 6);
     }
 
     //  DrawSprite / DrawAnimationFrame
@@ -384,8 +484,7 @@ namespace Wheatear {
             { uR, uvMax.y }, { uL, uvMax.y },
         };
 
-        const float texIndex = GetOrAllocTextureSlot(texture);
-        SubmitQuadVertices(transform, tintColor, uvs, texIndex, 1.0f, entityID);
+        SubmitQuadVertices(transform, tintColor, uvs, texture, 1.0f, entityID);
     }
 
     void Renderer2D::DrawTextGlyph(const glm::mat4& transform,
@@ -404,6 +503,9 @@ namespace Wheatear {
             FlushAndReset();
 
         const float texIndex = GetOrAllocTextureSlot(texture);
+        const uint32_t vertexOffset = s_Data.TextBatch->GetVertexCount();
+        const uint32_t indexOffset = s_Data.TextBatch->GetIndexCount();
+
         const glm::vec2 uvs[4] = {
             { uvMin.x, uvMin.y },
             { uvMax.x, uvMin.y },
@@ -425,6 +527,8 @@ namespace Wheatear {
         }
         s_Data.TextBatch->AddIndexCount(6);
         s_Data.Stats.QuadCount++;
+        AppendDrawCommand(Renderer2DData::BatchKind::Text,
+            vertexOffset, 4, indexOffset, 6);
     }
 
 
@@ -434,6 +538,8 @@ namespace Wheatear {
         if (s_Data.LineBatch->IsFull(2))
             FlushAndReset();
 
+        const uint32_t vertexOffset = s_Data.LineBatch->GetVertexCount();
+
         auto* v0 = s_Data.LineBatch->AllocVertex();
         v0->Position = p0; v0->Color = color; v0->EntityID = entityID;
 
@@ -441,6 +547,8 @@ namespace Wheatear {
         v1->Position = p1; v1->Color = color; v1->EntityID = entityID;
 
         s_Data.LineBatch->AddVertexCount(2);
+        AppendDrawCommand(Renderer2DData::BatchKind::Line,
+            vertexOffset, 2, 0, 0);
     }
 
     void Renderer2D::DrawPolyline(const std::vector<glm::vec3>& points,

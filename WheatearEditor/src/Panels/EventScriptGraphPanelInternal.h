@@ -27,6 +27,7 @@ namespace Wheatear::EventScriptGraphPanelInternal {
         static bool s_HasPendingOpen = false;
         static std::string s_PendingOpenPath;
         static std::string s_PendingOpenEvent;
+        static int s_PendingOpenLine = 0;
 
         constexpr size_t SourceEditorCapacity = 512 * 1024;
 
@@ -224,6 +225,10 @@ namespace Wheatear::EventScriptGraphPanelInternal {
                         case ConditionKind::Material: body = "material "; break;
                         case ConditionKind::Raw: body = {}; break;
                         }
+                        condition = (negate && !body.empty())
+                            ? "not (" + body + ")"
+                            : body;
+                        words = SplitWords(body);
                         changed = true;
                     }
                     if (selected)
@@ -237,6 +242,8 @@ namespace Wheatear::EventScriptGraphPanelInternal {
                 if (ImGui::Checkbox("Negate (not)", &neg))
                 {
                     negate = neg;
+                    if (!body.empty())
+                        condition = neg ? "not (" + body + ")" : body;
                     changed = true;
                 }
             }

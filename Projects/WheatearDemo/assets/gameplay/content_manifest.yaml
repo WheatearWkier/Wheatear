@@ -2,6 +2,7 @@ aliases:
   wao:
     action_sets: assets/gameplay/actions/action_sets.yaml
     action_directory: assets/gameplay/actions/
+    behavior_directory: assets/gameplay/behaviors/
   side:
     tuning: assets/sandbox/data/side_combat_tuning.yaml
     path:

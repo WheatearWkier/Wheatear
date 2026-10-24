@@ -99,10 +99,19 @@
     <ClInclude Include="src\Editor\EditorRequests.h">
       <Filter>Editor</Filter>
     </ClInclude>
+    <ClInclude Include="src\Editor\EditorSourceNavigation.h">
+      <Filter>Editor</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Editor\EditorTemplates.h">
+      <Filter>Editor</Filter>
+    </ClInclude>
     <ClInclude Include="src\Editor\EditorToolRegistry.h">
       <Filter>Editor</Filter>
     </ClInclude>
     <ClInclude Include="src\Editor\EditorWidgets.h">
+      <Filter>Editor</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Editor\EditorWorkspace.h">
       <Filter>Editor</Filter>
     </ClInclude>
     <ClInclude Include="src\Editor\GameplayEditorShell.h">
@@ -171,6 +180,9 @@
     <ClInclude Include="src\Panels\AssetAliasManifestEditorPanel.h">
       <Filter>Panels</Filter>
     </ClInclude>
+    <ClInclude Include="src\Panels\BehaviorGraphPanel.h">
+      <Filter>Panels</Filter>
+    </ClInclude>
     <ClInclude Include="src\Panels\ConsolePanel.h">
       <Filter>Panels</Filter>
     </ClInclude>
@@ -193,6 +205,9 @@
       <Filter>Panels</Filter>
     </ClInclude>
     <ClInclude Include="src\Panels\InputBindingsPanel.h">
+      <Filter>Panels</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Panels\LogicDiagnosticsPanel.h">
       <Filter>Panels</Filter>
     </ClInclude>
     <ClInclude Include="src\Panels\ProjectHealthPanel.h">
@@ -306,6 +321,9 @@
     <ClCompile Include="src\Editor\EditorPlatform.cpp">
       <Filter>Editor</Filter>
     </ClCompile>
+    <ClCompile Include="src\Editor\EditorSourceNavigation.cpp">
+      <Filter>Editor</Filter>
+    </ClCompile>
     <ClCompile Include="src\Editor\EditorWidgets.cpp">
       <Filter>Editor</Filter>
     </ClCompile>
@@ -369,6 +387,9 @@
     <ClCompile Include="src\Panels\AssetAliasManifestEditorPanel.cpp">
       <Filter>Panels</Filter>
     </ClCompile>
+    <ClCompile Include="src\Panels\BehaviorGraphPanel.cpp">
+      <Filter>Panels</Filter>
+    </ClCompile>
     <ClCompile Include="src\Panels\ConsolePanel.cpp">
       <Filter>Panels</Filter>
     </ClCompile>
@@ -388,6 +409,9 @@
       <Filter>Panels</Filter>
     </ClCompile>
     <ClCompile Include="src\Panels\InputBindingsPanel.cpp">
+      <Filter>Panels</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Panels\LogicDiagnosticsPanel.cpp">
       <Filter>Panels</Filter>
     </ClCompile>
     <ClCompile Include="src\Panels\ProjectHealthPanel.cpp">

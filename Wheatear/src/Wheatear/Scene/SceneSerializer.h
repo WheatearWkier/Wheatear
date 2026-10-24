@@ -12,7 +12,7 @@ namespace Wheatear {
     public:
         explicit SceneSerializer(const Ref<Scene>& scene);
 
-        void SerializeYaml(const std::filesystem::path& filepath);
+        bool SerializeYaml(const std::filesystem::path& filepath);
 
         bool DeserializeYaml(const std::filesystem::path& filepath);
 

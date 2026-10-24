@@ -6,6 +6,7 @@
 #include "Wheatear/Scene/Serialization/SceneSerializerComponentGroups.h"
 
 #include "Wheatear/Assets/AssetPath.h"
+#include "Wheatear/Core/Log.h"
 
 #include <yaml-cpp/yaml.h>
 #include <charconv>
@@ -129,14 +130,29 @@ namespace Wheatear {
                 childrenByParent[parentID].push_back(child);
         }
 
+        // Generic transform hierarchy children (non-UI prefabs, 3D subtrees).
+        for (auto entityID : registry.view<IDComponent, TransformComponent>())
+        {
+            Entity child{ entityID, scene };
+            const auto& transform = child.GetComponent<TransformComponent>();
+            const uint64_t parentID = static_cast<uint64_t>(transform.Parent);
+            if (parentID != 0)
+                childrenByParent[parentID].push_back(child);
+        }
+
         for (auto& [parentID, children] : childrenByParent)
         {
             std::sort(children.begin(), children.end(), [](Entity a, Entity b)
             {
-                const auto& aw = a.GetComponent<UIWidgetComponent>();
-                const auto& bw = b.GetComponent<UIWidgetComponent>();
-                if (aw.SortOrder != bw.SortOrder)
-                    return aw.SortOrder < bw.SortOrder;
+                const bool aIsUI = a.HasComponent<UIWidgetComponent>();
+                const bool bIsUI = b.HasComponent<UIWidgetComponent>();
+                if (aIsUI && bIsUI)
+                {
+                    const auto& aw = a.GetComponent<UIWidgetComponent>();
+                    const auto& bw = b.GetComponent<UIWidgetComponent>();
+                    if (aw.SortOrder != bw.SortOrder)
+                        return aw.SortOrder < bw.SortOrder;
+                }
                 return a.GetName() < b.GetName();
             });
         }
@@ -167,9 +183,6 @@ namespace Wheatear {
             return;
 
         entities.push_back(root);
-
-        if (!root.HasComponent<UIWidgetComponent>())
-            return;
 
         const UUID rootID = root.GetUUID();
         auto childrenIt = childrenByParent.find(static_cast<uint64_t>(rootID));
@@ -294,6 +307,12 @@ namespace Wheatear {
         {
             if (!entity)
                 continue;
+
+            if (entity.HasComponent<TransformComponent>())
+            {
+                auto& transform = entity.GetComponent<TransformComponent>();
+                transform.Parent = RemapUUID(transform.Parent, idRemap);
+            }
 
             if (entity.HasComponent<UIWidgetComponent>())
             {
@@ -426,25 +445,82 @@ namespace Wheatear {
     {
     }
 
-    void SceneSerializer::SerializeYaml(const std::filesystem::path& filepath)
+    bool SceneSerializer::SerializeYaml(const std::filesystem::path& filepath)
     {
         YAML::Emitter out;
         out << YAML::BeginMap;
         out << YAML::Key << "Scene" << YAML::Value << "Untitled";
+        out << YAML::Key << "Version" << YAML::Value << 1;
         SerializeSavePolicy(out, m_Scene->GetSavePolicy());
         out << YAML::Key << "Entities" << YAML::Value << YAML::BeginSeq;
         for (auto id : m_Scene->m_Registry.view<IDComponent>())
             SerializeEntity(out, { id, m_Scene.get() });
         out << YAML::EndSeq << YAML::EndMap;
 
+        if (!out.good())
+        {
+            WT_CORE_ERROR("Scene serialization failed.");
+            return false;
+        }
+
         const std::filesystem::path resolvedPath = AssetPath::Resolve(filepath);
         const std::filesystem::path parentPath = resolvedPath.parent_path();
         if (!parentPath.empty())
-            std::filesystem::create_directories(parentPath);
+        {
+            std::error_code directoryError;
+            std::filesystem::create_directories(parentPath, directoryError);
+            if (directoryError)
+            {
+                WT_CORE_ERROR("Failed to create scene directory '{}': {}",
+                    parentPath.string(), directoryError.message());
+                return false;
+            }
+        }
 
-        std::ofstream file(resolvedPath);
-        WT_CORE_ASSERT(file.is_open(), "Failed to open file for serialization");
-        file << out.c_str();
+        const std::filesystem::path tempPath = resolvedPath.string() + ".tmp";
+        {
+            std::ofstream file(tempPath, std::ios::binary | std::ios::trunc);
+            if (!file.is_open())
+            {
+                WT_CORE_ERROR("Failed to open temporary scene file '{}'",
+                    tempPath.string());
+                return false;
+            }
+
+            file << out.c_str();
+            file.flush();
+            if (!file.good())
+            {
+                WT_CORE_ERROR("Failed to write temporary scene file '{}'",
+                    tempPath.string());
+                file.close();
+                std::error_code removeError;
+                std::filesystem::remove(tempPath, removeError);
+                return false;
+            }
+        }
+
+        std::error_code renameError;
+        std::filesystem::rename(tempPath, resolvedPath, renameError);
+        if (renameError)
+        {
+            // Windows cannot rename over an existing file. Keep the old file
+            // until the last possible moment, then retry after removing it.
+            std::error_code removeError;
+            std::filesystem::remove(resolvedPath, removeError);
+            renameError.clear();
+            std::filesystem::rename(tempPath, resolvedPath, renameError);
+            if (renameError)
+            {
+                WT_CORE_ERROR("Failed to replace scene '{}': {}",
+                    resolvedPath.string(), renameError.message());
+                std::error_code cleanupError;
+                std::filesystem::remove(tempPath, cleanupError);
+                return false;
+            }
+        }
+
+        return true;
     }
 
     bool SceneSerializer::DeserializeYaml(const std::filesystem::path& filepath)
@@ -465,6 +541,15 @@ namespace Wheatear {
         {
             if (!data["Scene"])
                 return false;
+
+            const int sceneVersion = data["Version"]
+                ? data["Version"].as<int>(1)
+                : 1;
+            if (sceneVersion > 1)
+            {
+                WT_CORE_WARN("Scene '{}' uses format version {}; this build supports version 1. Unknown fields are ignored.",
+                    filepath.string(), sceneVersion);
+            }
 
             if (auto savePolicy = data["SavePolicy"])
             {

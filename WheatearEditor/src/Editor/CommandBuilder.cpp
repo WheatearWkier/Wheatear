@@ -4,11 +4,13 @@
 #include "Editor/EditorContentPickers.h"
 #include "Editor/EditorLocale.h"
 #include "Editor/EditorWidgets.h"
+#include "Wheatear/Logic/LogicCommandRegistry.h"
 
 #include <imgui/imgui.h>
 
 #include <algorithm>
 #include <iomanip>
+#include <set>
 #include <sstream>
 
 namespace Wheatear::EditorCommandBuilder {
@@ -863,6 +865,42 @@ namespace Wheatear::EditorCommandBuilder {
                 if (selected)
                     ImGui::SetItemDefaultFocus();
             }
+
+            // Prefixes registered by gameplay modules at runtime are not part
+            // of the fixed enum above; surface them here so custom commands are
+            // authorable without hand-writing the raw string.
+            static const std::set<std::string> builtins = {
+                "quit", "scene", "newgame", "loadgame", "progression", "anim",
+                "ui", "event", "gamesave", "vn", "turn", "tactic", "side"
+            };
+            bool customHeader = false;
+            for (const Logic::CommandDescriptor& descriptor
+                : Logic::CommandRegistry::Snapshot())
+            {
+                if (builtins.count(descriptor.Name) > 0)
+                    continue;
+                if (!customHeader)
+                {
+                    ImGui::Separator();
+                    ImGui::TextDisabled("%s",
+                        EditorLocale::Text("Custom Registered", "自定义已注册"));
+                    customHeader = true;
+                }
+                const std::string label = descriptor.Name
+                    + (descriptor.ArgumentHint.empty()
+                        ? std::string()
+                        : "  (" + descriptor.ArgumentHint + ")");
+                if (ImGui::Selectable(label.c_str()))
+                {
+                    command = descriptor.Name == "quit"
+                        ? descriptor.Name
+                        : descriptor.Name + ":";
+                    spec = CommandSpec{};
+                    spec.Kind = CommandKind::Raw;
+                    spec.Raw = command;
+                    changed = true;
+                }
+            }
             ImGui::EndCombo();
         }
 
@@ -1036,9 +1074,10 @@ namespace Wheatear::EditorCommandBuilder {
                 command = BuildCommand(spec);
                 changed = true;
             }
-            if (EditorWidgets::InputString("Skill Id (optional)", spec.Raw, 128))
+            std::string skillId = spec.Primary;
+            if (EditorWidgets::InputString("Skill Id (optional)", skillId, 128))
             {
-                spec.Primary = spec.Raw.empty() ? spec.Primary : spec.Raw;
+                spec.Primary = skillId;
                 command = BuildCommand(spec);
                 changed = true;
             }
@@ -1095,9 +1134,10 @@ namespace Wheatear::EditorCommandBuilder {
                 command = BuildCommand(spec);
                 changed = true;
             }
-            if (EditorWidgets::InputString("Skill Id (optional)", spec.Raw, 128))
+            std::string skillId = spec.Primary;
+            if (EditorWidgets::InputString("Skill Id (optional)", skillId, 128))
             {
-                spec.Primary = spec.Raw.empty() ? spec.Primary : spec.Raw;
+                spec.Primary = skillId;
                 command = BuildCommand(spec);
                 changed = true;
             }

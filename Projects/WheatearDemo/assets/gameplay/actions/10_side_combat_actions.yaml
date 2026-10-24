@@ -183,6 +183,18 @@ actions:
     tags: [Gameplay.SideCombat, Gameplay.Combat, Attack.BreakLimit, Boss.Protection]
     signals: [side.action.start, side.action.hit, side.break_limit.flash]
 
+  - id: side.guard
+    displayName: Guard
+    description: Opens a short guard window; the early frames can parry.
+    cooldown: 0.16
+    duration: 0.24
+    behaviorId: side.guard
+    behaviorFile: assets/gameplay/behaviors/demo_combat.wtb
+    behaviorEntry: side.guard
+    behaviorVersion: 1
+    tags: [Gameplay.SideCombat, Gameplay.Combat, Defense.Guard, Defense.Parry]
+    signals: [side.guard.start]
+
   - id: side.enemy_claw
     displayName: Enemy Claw
     description: Grunt and boss melee slash.

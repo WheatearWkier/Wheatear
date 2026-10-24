@@ -33,6 +33,7 @@
 #include "Wheatear/UI/UIWidgetLayout.h"
 #include "Wheatear/Math/Math.h"
 #include "Assets/UITemplateFactory.h"
+#include "GLFW/deps/stb_image_write.h"
 #include "Editor/EditorCanvasTools.h"
 #include "Panels/AnimationEditorPanel.h"
 #include "Panels/InputBindingsPanel.h"
@@ -84,6 +85,9 @@ namespace Wheatear {
         m_ActiveScene     = newScene;
         m_EditorScenePath = scenePath;
         m_SceneDirty      = false;
+        m_RequestViewportFocus = true;
+        if (!m_EditorScenePath.empty())
+            m_ProjectThumbnailPending = true;
 
         if (m_ViewportSize.x > 0.0f && m_ViewportSize.y > 0.0f)
         {
@@ -510,10 +514,20 @@ namespace Wheatear {
 
     void EditorLayerBase::SaveScene()
     {
+        if (m_SceneState != SceneState::Edit)
+        {
+            WT_CORE_WARN("Saving is disabled while Play mode is running.");
+            return;
+        }
+
         if (!m_EditorScenePath.empty())
         {
-            SerializeScene(m_ActiveScene, m_EditorScenePath);
-            m_SceneDirty = false;
+            if (SerializeScene(m_ActiveScene, m_EditorScenePath))
+            {
+                m_SceneDirty = false;
+                m_ProjectThumbnailPending = true;
+                CaptureProjectThumbnail();
+            }
         }
         else
             SaveSceneAs();
@@ -521,19 +535,94 @@ namespace Wheatear {
 
     void EditorLayerBase::SaveSceneAs()
     {
-        const std::string filepath = FileDialogs::SaveFile(AssetFileType::SceneDialogFilter);
-        if (!filepath.empty())
+        if (m_SceneState != SceneState::Edit)
         {
-            SerializeScene(m_ActiveScene, filepath);
+            WT_CORE_WARN("Saving is disabled while Play mode is running.");
+            return;
+        }
+
+        const std::string filepath = FileDialogs::SaveFile(AssetFileType::SceneDialogFilter);
+        if (!filepath.empty() && SerializeScene(m_ActiveScene, filepath))
+        {
             m_EditorScenePath = filepath;
             m_SceneDirty = false;
+            m_ProjectThumbnailPending = true;
+            CaptureProjectThumbnail();
         }
     }
 
-    void EditorLayerBase::SerializeScene(Ref<Scene> scene, const std::filesystem::path& path)
+    void EditorLayerBase::CaptureProjectThumbnail()
+    {
+        if (!m_Framebuffer || m_SceneState != SceneState::Edit)
+            return;
+        if (m_EditorScenePath.empty())
+            return;
+
+        const auto& spec = m_Framebuffer->GetSpecification();
+        if (spec.Width < 2 || spec.Height < 2)
+            return;
+
+        std::vector<uint8_t> source(
+            static_cast<size_t>(spec.Width) * spec.Height * 4);
+        const uint32_t previousFramebuffer = Framebuffer::GetBoundFramebufferID();
+        m_Framebuffer->Bind();
+        m_Framebuffer->ReadPixelsRGBA(source.data());
+        Framebuffer::BindFramebufferID(previousFramebuffer);
+
+        // Keep the launcher thumbnail small; nearest-neighbour is enough for
+        // a 42 px tile and avoids pulling in a resampling dependency.
+        constexpr uint32_t maxWidth = 480;
+        constexpr uint32_t maxHeight = 270;
+        const float scale = std::min(
+            { 1.0f,
+              static_cast<float>(maxWidth) / static_cast<float>(spec.Width),
+              static_cast<float>(maxHeight) / static_cast<float>(spec.Height) });
+        const uint32_t targetWidth =
+            std::max(1u, static_cast<uint32_t>(spec.Width * scale));
+        const uint32_t targetHeight =
+            std::max(1u, static_cast<uint32_t>(spec.Height * scale));
+
+        std::vector<uint8_t> thumbnail(
+            static_cast<size_t>(targetWidth) * targetHeight * 4);
+        for (uint32_t y = 0; y < targetHeight; ++y)
+        {
+            // OpenGL readback is bottom-up; PNG rows are top-down.
+            const uint32_t sourceY = spec.Height - 1
+                - std::min(spec.Height - 1,
+                    static_cast<uint32_t>((static_cast<uint64_t>(y) * spec.Height) / targetHeight));
+            for (uint32_t x = 0; x < targetWidth; ++x)
+            {
+                const uint32_t sourceX = std::min(spec.Width - 1,
+                    static_cast<uint32_t>((static_cast<uint64_t>(x) * spec.Width) / targetWidth));
+                const size_t sourceIndex =
+                    (static_cast<size_t>(sourceY) * spec.Width + sourceX) * 4;
+                const size_t targetIndex =
+                    (static_cast<size_t>(y) * targetWidth + x) * 4;
+                thumbnail[targetIndex + 0] = source[sourceIndex + 0];
+                thumbnail[targetIndex + 1] = source[sourceIndex + 1];
+                thumbnail[targetIndex + 2] = source[sourceIndex + 2];
+                thumbnail[targetIndex + 3] = 255;
+            }
+        }
+
+        std::error_code error;
+        const std::filesystem::path thumbnailDirectory =
+            AssetPath::GetProjectRoot() / "Saved" / "Thumbnails";
+        std::filesystem::create_directories(thumbnailDirectory, error);
+        if (error)
+            return;
+
+        const std::filesystem::path thumbnailPath =
+            thumbnailDirectory / "project_thumbnail.png";
+        stbi_write_png(thumbnailPath.string().c_str(),
+            static_cast<int>(targetWidth), static_cast<int>(targetHeight), 4,
+            thumbnail.data(), static_cast<int>(targetWidth * 4));
+    }
+
+    bool EditorLayerBase::SerializeScene(Ref<Scene> scene, const std::filesystem::path& path)
     {
         SceneSerializer serializer(scene);
-        serializer.SerializeYaml(path);
+        return serializer.SerializeYaml(path);
     }
 
     // =========================================================================
@@ -583,9 +672,12 @@ namespace Wheatear {
 
             if (ImGui::Button(EditorLocale::Text("Save and Continue", "保存并继续"), ImVec2(150.0f, 0.0f)))
             {
-                m_SceneDirty = false;
                 SaveScene();
-                ExecutePendingSceneAction();
+                if (!m_SceneDirty)
+                {
+                    m_ShowUnsavedModal = false;
+                    ExecutePendingSceneAction();
+                }
             }
             ImGui::SameLine();
             if (ImGui::Button(EditorLocale::Text("Discard", "不保存"), ImVec2(120.0f, 0.0f)))
@@ -716,8 +808,8 @@ namespace Wheatear {
         // Default the startup scene to the project-level config when the
         // project has one; otherwise keep the currently open scene.
         const std::filesystem::path projectConfig =
-            AssetPath::GetProjectRoot() / "assets" / "game" / "player.config";
-        if (std::filesystem::exists(projectConfig))
+            FindRuntimePlayerConfigPath(AssetPath::GetProjectRoot());
+        if (!projectConfig.empty())
         {
             const RuntimePlayerConfig config = LoadRuntimePlayerConfig(projectConfig);
             m_PackageScenePath = config.StartupScene.generic_string();
@@ -740,7 +832,7 @@ namespace Wheatear {
         // Packaging is the final-product flow: always Release.
         options.Configuration = "Release";
         options.IncludeDebugSymbols = false;
-        m_PlayerBuildStatus = "Packaging player and editor...";
+        m_PlayerBuildStatus = "Packaging game and editor...";
             
             
         m_PlayerBuildRunning = true;

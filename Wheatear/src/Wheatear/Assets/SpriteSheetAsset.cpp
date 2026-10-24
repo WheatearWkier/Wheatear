@@ -355,6 +355,11 @@ namespace Wheatear {
             return true;
         }
 
+        void ClearCache()
+        {
+            SheetCache().clear();
+        }
+
     } // namespace SpriteSheetAsset
 
 } // namespace Wheatear

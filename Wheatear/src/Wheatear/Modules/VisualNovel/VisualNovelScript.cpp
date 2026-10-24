@@ -3,20 +3,38 @@
 
 #include "Wheatear/Assets/AssetPath.h"
 #include "Wheatear/Core/Log.h"
+#include "Wheatear/Logic/LogicExpression.h"
 #include "Wheatear/Utils/StringUtils.h"
 
 #include <algorithm>
 #include <cctype>
+#include <cmath>
 #include <fstream>
 #include <initializer_list>
 #include <limits>
 #include <sstream>
+#include <stdexcept>
 
 namespace Wheatear {
 
     using Wheatear::StringUtils::StartsWith;
     using Wheatear::StringUtils::ToLower;
     using Wheatear::StringUtils::Trim;
+
+    namespace {
+
+        uint64_t HashSource(const std::string& text)
+        {
+            uint64_t hash = 1469598103934665603ull;
+            for (unsigned char c : text)
+            {
+                hash ^= c;
+                hash *= 1099511628211ull;
+            }
+            return hash;
+        }
+
+    } // namespace
 
     static std::string StripQuotes(const std::string& value)
     {
@@ -26,9 +44,117 @@ namespace Wheatear {
             const char first = result.front();
             const char last = result.back();
             if ((first == '"' && last == '"') || (first == '\'' && last == '\''))
-                return result.substr(1, result.size() - 2);
+            {
+                const char quote = first;
+                std::string unescaped;
+                unescaped.reserve(result.size() - 2);
+                for (size_t i = 1; i + 1 < result.size(); ++i)
+                {
+                    if (result[i] == '\\' && i + 2 < result.size())
+                    {
+                        const char escaped = result[i + 1];
+                        if (escaped == '\\' || escaped == '"' || escaped == '\'')
+                        {
+                            unescaped.push_back(escaped);
+                            ++i;
+                            continue;
+                        }
+                        if (escaped == 'n')
+                        {
+                            unescaped.push_back('\n');
+                            ++i;
+                            continue;
+                        }
+                    }
+                    unescaped.push_back(result[i]);
+                }
+                (void)quote;
+                return unescaped;
+            }
         }
         return result;
+    }
+
+    static bool IsQuoteOpener(const std::string& text, size_t index, char c)
+    {
+        if (c == '"')
+            return true;
+        if (c != '\'')
+            return false;
+        // Treat a single quote as an opener only at a token boundary so
+        // ordinary apostrophes ("Don't", "what's") do not swallow the line.
+        if (index == 0)
+            return true;
+        const char previous = text[index - 1];
+        return std::isspace(static_cast<unsigned char>(previous))
+            || previous == '|' || previous == '>' || previous == '('
+            || previous == '[' || previous == '{' || previous == '='
+            || previous == ':' || previous == ',';
+    }
+
+    static std::vector<std::string> SplitOutsideQuotes(const std::string& text,
+        char separator)
+    {
+        std::vector<std::string> parts;
+        std::string current;
+        char quote = '\0';
+        for (size_t i = 0; i < text.size(); ++i)
+        {
+            const char c = text[i];
+            if (quote != '\0')
+            {
+                current.push_back(c);
+                if (c == '\\' && i + 1 < text.size())
+                    current.push_back(text[++i]);
+                else if (c == quote)
+                    quote = '\0';
+                continue;
+            }
+            if (IsQuoteOpener(text, i, c))
+            {
+                quote = c;
+                current.push_back(c);
+                continue;
+            }
+            if (c == separator)
+            {
+                parts.push_back(Trim(current));
+                current.clear();
+                continue;
+            }
+            current.push_back(c);
+        }
+        parts.push_back(Trim(current));
+        return parts;
+    }
+
+    static size_t FindOutsideQuotes(const std::string& text,
+        const std::string& needle)
+    {
+        char quote = '\0';
+        for (size_t i = 0; i < text.size(); ++i)
+        {
+            const char c = text[i];
+            if (quote != '\0')
+            {
+                if (c == '\\')
+                {
+                    ++i;
+                    continue;
+                }
+                if (c == quote)
+                    quote = '\0';
+                continue;
+            }
+            if (IsQuoteOpener(text, i, c))
+            {
+                quote = c;
+                continue;
+            }
+            if (text.compare(i, needle.size(), needle) == 0)
+                return i;
+        }
+        return std::string::npos;
     }
 
     static std::vector<std::string> SplitWords(const std::string& text)
@@ -38,6 +164,32 @@ namespace Wheatear {
         std::string token;
         while (stream >> token)
             result.push_back(token);
+        return result;
+    }
+
+    static std::string UnescapeInlineText(const std::string& text)
+    {
+        std::string result;
+        result.reserve(text.size());
+        for (size_t i = 0; i < text.size(); ++i)
+        {
+            if (text[i] == '\\' && i + 1 < text.size())
+            {
+                if (text[i + 1] == 'n')
+                {
+                    result.push_back('\n');
+                    ++i;
+                    continue;
+                }
+                if (text[i + 1] == '\\')
+                {
+                    result.push_back('\\');
+                    ++i;
+                    continue;
+                }
+            }
+            result.push_back(text[i]);
+        }
         return result;
     }
 
@@ -114,11 +266,11 @@ namespace Wheatear {
         return false;
     }
 
-    // Splits a trailing " if flag <id>" / "if flag:<id>" gate off a TargetLabel.
-    // Returns the label without the gate; writes the flag id into outFlag (empty if
-    // no well-formed gate). The whole-token "if flag" form requires three words
-    // after "->", so label text containing "if" is only matched when it forms a
-    // standalone clause.
+    // Splits a trailing " if <condition>" gate off a TargetLabel. The last
+    // standalone "if" token wins so conditions may contain any number of
+    // tokens, e.g. "-> ending if gold >= 5 and flag:CH02". The legacy
+    // "if flag <id>" form is kept in RequiredFlag for save compatibility;
+    // everything else goes to RequiredCondition.
     static std::string ExtractRequiredCondition(std::string target,
         std::string& outFlag,
         std::string& outCondition)
@@ -127,25 +279,22 @@ namespace Wheatear {
         if (target.empty())
             return target;
 
-        // The gate is the trailing clause after a standalone " if " token
-        // (whitespace-delimited; token-aware so "if" inside a word never matches).
-        //   -> label if flag <id>   : progression flag gate (backward compatible)
-        //   -> label if <expr>      : full VN condition (variables / comparisons)
         const std::vector<std::string> words = SplitWords(target);
         if (words.size() < 3)
             return target;
 
-        size_t ifIndex = 0;
-        bool foundIf = false;
-        if (words.size() >= 3 && words[words.size() - 3] == "if")
+        size_t ifIndex = std::string::npos;
+        for (size_t i = words.size() - 1; i > 0; --i)
         {
-            ifIndex = words.size() - 3;
-            foundIf = true;
+            if (words[i - 1] == "if")
+            {
+                ifIndex = i - 1;
+                break;
+            }
         }
-        if (!foundIf)
+        if (ifIndex == std::string::npos || ifIndex + 1 >= words.size())
             return target;
 
-        // Reconstruct the label as words[0..ifIndex-1] joined.
         std::string label;
         for (size_t i = 0; i < ifIndex; ++i)
         {
@@ -163,35 +312,36 @@ namespace Wheatear {
         }
         clause = Trim(clause);
 
+        // Backward-compatible flag-only gate.
         if (words.size() == ifIndex + 3 && words[ifIndex + 1] == "flag")
         {
             std::string flagId = words[ifIndex + 2];
-            // Normalize "flag:X" -> "X" if authors used the colon form.
             if (flagId.rfind("flag:", 0) == 0 && flagId.size() > 5)
                 flagId = flagId.substr(5);
             outFlag = Trim(flagId);
+        }
+        else if (clause.rfind("flag:", 0) == 0)
+        {
+            outFlag = Trim(clause.substr(5));
         }
         else
         {
             outCondition = clause;
         }
 
-        return Trim(label);
+        return StripQuotes(Trim(label));
     }
 
     static std::vector<VisualNovelChoice> ParseChoices(const std::string& payload)
     {
         std::vector<VisualNovelChoice> choices;
-        std::stringstream stream(payload);
-        std::string segment;
-
-        while (std::getline(stream, segment, '|'))
+        for (std::string segment : SplitOutsideQuotes(payload, '|'))
         {
             segment = Trim(segment);
             if (segment.empty())
                 continue;
 
-            const size_t arrow = segment.find("->");
+            const size_t arrow = FindOutsideQuotes(segment, "->");
             if (arrow == std::string::npos)
             {
                 choices.push_back({ StripQuotes(segment), {}, {}, {} });
@@ -293,10 +443,18 @@ namespace Wheatear {
 
     void VisualNovelScript::Parse(const std::string& text)
     {
+        m_SourceHash = HashSource(text);
         m_DefaultBackground = "studio";
         m_Characters.clear();
         m_Lines.clear();
+        m_Issues.clear();
         m_Labels.clear();
+
+        int sourceLine = 0;
+        const auto report = [this](int line, bool error, const std::string& message)
+        {
+            m_Issues.push_back({ line, error, message });
+        };
 
         std::string currentBackground = m_DefaultBackground;
         std::string currentMusic;
@@ -319,7 +477,10 @@ namespace Wheatear {
         std::string rawLine;
         while (std::getline(stream, rawLine))
         {
+            ++sourceLine;
             std::string line = Trim(rawLine);
+            if (sourceLine == 1 && StartsWith(line, "\xEF\xBB\xBF"))
+                line = Trim(line.substr(3));
             if (line.empty())
                 continue;
 
@@ -330,7 +491,9 @@ namespace Wheatear {
             if (ReadAnyCommandPayload(line, { "background" }, payload))
             {
                 currentBackground = StripQuotes(payload);
-                if (!currentBackground.empty())
+                if (currentBackground.empty())
+                    report(sourceLine, true, "background directive requires a texture path");
+                else
                     m_DefaultBackground = currentBackground;
                 continue;
             }
@@ -354,11 +517,19 @@ namespace Wheatear {
             {
                 try
                 {
-                    currentSpeed = std::max(1.0f, std::stof(payload));
+                    size_t consumed = 0;
+                    const float parsed = std::stof(payload, &consumed);
+                    if (consumed != payload.size())
+                        throw std::invalid_argument("trailing characters");
+                    if (!std::isfinite(parsed) || parsed <= 0.0f)
+                        throw std::invalid_argument("speed must be positive");
+                    currentSpeed = std::max(1.0f, parsed);
                 }
                 catch (...)
                 {
                     WT_CORE_WARN("VisualNovelScript: invalid speed '{0}'", payload);
+                    report(sourceLine, true,
+                        "invalid speed '" + payload + "' (expected a positive number)");
                 }
                 continue;
             }
@@ -366,8 +537,14 @@ namespace Wheatear {
             if (ReadAnyCommandPayload(line, { "label" }, payload))
             {
                 payload = StripQuotes(payload);
-                if (!payload.empty())
-                    m_Labels[payload] = m_Lines.size();
+                if (payload.empty())
+                {
+                    report(sourceLine, true, "label directive requires a name");
+                    continue;
+                }
+                if (m_Labels.count(payload) > 0)
+                    report(sourceLine, true, "duplicate label '" + payload + "'");
+                m_Labels[payload] = m_Lines.size();
                 continue;
             }
 
@@ -375,7 +552,10 @@ namespace Wheatear {
             {
                 VisualNovelLine jump;
                 jump.Type = VisualNovelLineType::Goto;
+                jump.SourceLine = sourceLine;
                 jump.TargetLabel = StripQuotes(payload);
+                if (jump.TargetLabel.empty())
+                    report(sourceLine, true, "goto directive requires a label");
                 applyState(jump);
                 m_Lines.push_back(std::move(jump));
                 continue;
@@ -385,6 +565,7 @@ namespace Wheatear {
             {
                 VisualNovelLine end;
                 end.Type = VisualNovelLineType::End;
+                end.SourceLine = sourceLine;
                 applyState(end);
                 m_Lines.push_back(std::move(end));
                 continue;
@@ -394,22 +575,29 @@ namespace Wheatear {
             {
                 VisualNovelLine choice;
                 choice.Type = VisualNovelLineType::Choice;
+                choice.SourceLine = sourceLine;
                 choice.Text = "选择一个答案。";
                 // Optional prompt prefix: "@choice prompt:请选择 | opt1 -> l1 | ..."
                 std::string choicesPayload = payload;
                 if (choicesPayload.rfind("prompt:", 0) == 0)
                 {
-                    const size_t separator = choicesPayload.find('|');
-                    if (separator != std::string::npos)
+                    const size_t separator = FindOutsideQuotes(choicesPayload, "|");
+                    if (separator == std::string::npos)
                     {
-                        choice.Text = StripQuotes(Trim(choicesPayload.substr(7, separator - 7)));
-                        choicesPayload = choicesPayload.substr(separator + 1);
+                        report(sourceLine, true,
+                            "choice prompt requires a '|' before the options");
+                        continue;
                     }
+                    choice.Text = StripQuotes(Trim(choicesPayload.substr(7, separator - 7)));
+                    choicesPayload = choicesPayload.substr(separator + 1);
                 }
                 choice.Choices = ParseChoices(choicesPayload);
                 applyState(choice);
                 if (!choice.Choices.empty())
                     m_Lines.push_back(std::move(choice));
+                else
+                    report(sourceLine, true,
+                        "choice directive has no options (expected 'text -> label | ...')");
                 continue;
             }
 
@@ -526,9 +714,23 @@ namespace Wheatear {
                     remaining = Trim(remaining.substr(1));
                 std::string value = StripQuotes(remaining);
                 if (name.empty())
+                {
+                    report(sourceLine, true, "set directive requires a variable name");
                     continue;
+                }
+                if (value.empty())
+                {
+                    report(sourceLine, true,
+                        "set directive for '" + name + "' requires a value");
+                    continue;
+                }
+                std::string expressionError;
+                if (!Logic::Validate(value, &expressionError))
+                    report(sourceLine, true,
+                        "invalid set expression for '" + name + "': " + expressionError);
                 VisualNovelLine setLine;
                 setLine.Type = VisualNovelLineType::Set;
+                setLine.SourceLine = sourceLine;
                 setLine.VariableName = name;
                 setLine.VariableValue = value;
                 applyState(setLine);
@@ -555,21 +757,28 @@ namespace Wheatear {
                         split = gotoPos;
                 }
                 if (split == std::string::npos)
+                {
+                    report(sourceLine, true,
+                        "if directive requires '-> label' or 'goto label'");
                     continue;
+                }
 
                 std::string condition = Trim(remaining.substr(0, split));
                 std::string labelPart = Trim(remaining.substr(split + (arrow != std::string::npos ? 2 : 4)));
-                // goto <label> form keeps the label after "goto"
-                if (arrow == std::string::npos)
-                {
-                    const size_t afterGoto = labelPart.find("goto");
-                    if (afterGoto != std::string::npos)
-                        labelPart = Trim(labelPart.substr(afterGoto + 4));
-                }
                 if (condition.empty())
+                {
+                    report(sourceLine, true, "if directive requires a condition");
                     continue;
+                }
+                if (labelPart.empty())
+                    report(sourceLine, true, "if directive requires a target label");
+                std::string conditionError;
+                if (!Logic::Validate(Logic::NormalizeCondition(condition), &conditionError))
+                    report(sourceLine, true,
+                        "invalid if condition '" + condition + "': " + conditionError);
                 VisualNovelLine ifLine;
                 ifLine.Type = VisualNovelLineType::If;
+                ifLine.SourceLine = sourceLine;
                 ifLine.Condition = condition;
                 ifLine.TargetLabel = StripQuotes(labelPart);
                 applyState(ifLine);
@@ -579,14 +788,73 @@ namespace Wheatear {
 
             const size_t colon = line.find(':');
             if (colon == std::string::npos)
+            {
+                report(sourceLine, false,
+                    "unrecognized line (expected 'Speaker: text' or '@directive')");
                 continue;
+            }
 
             VisualNovelLine dialogue;
             dialogue.Type = VisualNovelLineType::Dialogue;
+            dialogue.SourceLine = sourceLine;
             dialogue.Speaker = Trim(line.substr(0, colon));
-            dialogue.Text = Trim(line.substr(colon + 1));
+            dialogue.Text = UnescapeInlineText(Trim(line.substr(colon + 1)));
+            if (!dialogue.Speaker.empty() && dialogue.Speaker.front() == '@')
+                report(sourceLine, false,
+                    "unknown directive '" + dialogue.Speaker + "' (missing space after the directive name?)");
             applyState(dialogue);
             m_Lines.push_back(std::move(dialogue));
+        }
+
+        // Cross-reference validation runs after the whole file is parsed so
+        // forward labels are legal.
+        const auto isExternalTarget = [](const std::string& target)
+        {
+            return StartsWith(target, "scene:")
+                || StartsWith(target, "newgame:")
+                || StartsWith(target, "loadgame:")
+                || StartsWith(target, "event:");
+        };
+
+        for (const VisualNovelLine& line : m_Lines)
+        {
+            if (line.Type == VisualNovelLineType::Goto
+                || line.Type == VisualNovelLineType::If)
+            {
+                if (!line.TargetLabel.empty()
+                    && m_Labels.count(line.TargetLabel) == 0)
+                {
+                    report(line.SourceLine, true,
+                        "jump target '" + line.TargetLabel + "' does not exist");
+                }
+            }
+
+            if (line.Type == VisualNovelLineType::Choice)
+            {
+                for (const VisualNovelChoice& choice : line.Choices)
+                {
+                    if (choice.TargetLabel.empty())
+                        continue;
+                    if (!isExternalTarget(choice.TargetLabel)
+                        && m_Labels.count(choice.TargetLabel) == 0)
+                    {
+                        report(line.SourceLine, true,
+                            "choice target '" + choice.TargetLabel + "' does not exist");
+                    }
+
+                    if (!choice.RequiredCondition.empty())
+                    {
+                        std::string error;
+                        if (!Logic::Validate(
+                            Logic::NormalizeCondition(choice.RequiredCondition), &error))
+                        {
+                            report(line.SourceLine, true,
+                                "invalid choice condition '" + choice.RequiredCondition
+                                    + "': " + error);
+                        }
+                    }
+                }
+            }
         }
     }
 

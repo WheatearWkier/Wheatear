@@ -77,6 +77,7 @@ namespace Wheatear {
         // show named-rect dropdowns without per-frame file I/O. Returns
         // nullptr when the sheet cannot be loaded.
         const SpriteSheetData* GetCachedSheetData(const std::string& path);
+        void ClearCache();
 
         int CellCount(const SpriteSheetData& data);
         bool IsValidCell(const SpriteSheetData& data, int cellIndex);

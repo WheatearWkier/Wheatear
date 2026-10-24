@@ -3,6 +3,7 @@
 
 #include "Editor/EditorComponentRegistry.h"
 #include "Editor/EditorLocale.h"
+#include "Panels/BehaviorGraphPanel.h"
 #include "Panels/EventScriptGraphPanel.h"
 #include "Editor/EditorToolRegistry.h"
 #include "Editor/EditorCommands.h"
@@ -18,6 +19,7 @@
 #include "Modules/VisualNovel/VisualNovelDrawer.h"
 #include "Modules/VisualNovel/VisualNovelScriptEditorPanel.h"
 #include "Panels/ProjectHealthPanel.h"
+#include "Panels/LogicDiagnosticsPanel.h"
 #include "Panels/AssetAliasManifestEditorPanel.h"
 #include "Panels/WAOActionEditorPanel.h"
 #include "Wheatear/Modules/ArcadeCombat/ArcadeCombatComponents.h"
@@ -74,6 +76,12 @@ namespace Wheatear {
             return panel;
         }
 
+        static LogicDiagnosticsPanel& GetLogicDiagnosticsPanel()
+        {
+            static LogicDiagnosticsPanel panel;
+            return panel;
+        }
+
         static AssetAliasManifestEditorPanel& GetAssetAliasManifestEditorPanel()
         {
             static AssetAliasManifestEditorPanel panel;
@@ -83,6 +91,12 @@ namespace Wheatear {
         static WAOActionEditorPanel& GetWAOActionEditorPanel()
         {
             static WAOActionEditorPanel panel;
+            return panel;
+        }
+
+        static BehaviorGraphPanel& GetBehaviorGraphPanel()
+        {
+            static BehaviorGraphPanel panel;
             return panel;
         }
 
@@ -159,6 +173,19 @@ namespace Wheatear {
             });
 
             EditorToolRegistry::Register({
+                "Logic Diagnostics",
+                EditorToolCategory::Diagnostics,
+                [](const EditorToolContext& context)
+                {
+                    GetLogicDiagnosticsPanel().Open(context);
+                },
+                []()
+                {
+                    GetLogicDiagnosticsPanel().OnImGuiRender();
+                }
+            });
+
+            EditorToolRegistry::Register({
                 "Asset Alias / Manifest Editor",
                 EditorToolCategory::Gameplay,
                 [](const EditorToolContext& context)
@@ -181,6 +208,22 @@ namespace Wheatear {
                 []()
                 {
                     GetWAOActionEditorPanel().OnImGuiRender();
+                }
+            });
+
+            EditorToolRegistry::Register({
+                "WAO Behavior Graph",
+                EditorToolCategory::Gameplay,
+                [](const EditorToolContext& context)
+                {
+                    GetBehaviorGraphPanel().Open(
+                        "assets/gameplay/behaviors/demo_combat.wtb",
+                        {},
+                        context.ActiveScene);
+                },
+                []()
+                {
+                    GetBehaviorGraphPanel().OnImGuiRender();
                 }
             });
 

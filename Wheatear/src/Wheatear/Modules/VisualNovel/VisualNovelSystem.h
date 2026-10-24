@@ -30,6 +30,9 @@ namespace Wheatear {
             std::filesystem::file_time_type LastScriptWriteTime{};
             float LastScriptCheckTime = 0.0f;
             bool Loaded = false;
+            // Set by PlayOnStart or vn:start; prevents an unstarted component
+            // from auto-loading its script every frame.
+            bool StartRequested = false;
             bool PreviousAdvancePressed = false;
             bool PreviousAutoPressed = false;
             bool PreviousHistoryPressed = false;

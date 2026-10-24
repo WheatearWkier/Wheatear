@@ -70,6 +70,17 @@ namespace Wheatear {
         void OnImGuiRender() override;
         void OnEvent(Event& event) override;
 
+        virtual const char* GetWorkspaceLabel() const { return "EDITOR"; }
+        virtual bool Is3DWorkspace() const { return false; }
+
+        static constexpr float kTitleBarHeight = 40.0f;
+        // Fixed action bar below the menu bar. It is part of the editor
+        // chrome, never floats over the viewport, so scene tabs and the
+        // viewport stay fully clickable.
+        static constexpr float kToolbarHeight = 44.0f;
+        static constexpr float kStatusBarHeight = 30.0f;
+        static constexpr int kLayoutVersion = 8;
+
     protected:
         virtual void OnBeginRender() {}
         virtual void OnOverlayRender() {}
@@ -91,7 +102,10 @@ namespace Wheatear {
         void OpenScene(const std::filesystem::path& path);
         void SaveScene();
         void SaveSceneAs();
-        void SerializeScene(Ref<Scene> scene, const std::filesystem::path& path);
+        bool SerializeScene(Ref<Scene> scene, const std::filesystem::path& path);
+        // Saves the last rendered editor frame into the project so the
+        // launcher can show a real project thumbnail instead of a glyph.
+        void CaptureProjectThumbnail();
         void InstantiatePrefab(const std::filesystem::path& path);
         void InstantiateUITemplate(const std::filesystem::path& path);
         void OnDuplicateEntity();
@@ -114,10 +128,12 @@ namespace Wheatear {
         bool OnMouseButtonReleased(MouseButtonReleasedEvent& e);
         bool OnMouseScrolled(MouseScrolledEvent& e);
 
+        void UI_TitleBar();
         void UI_MenuBar();
         void UI_Toolbar();
         void UI_Viewport();
         void UI_CanvasEditor();
+        void UI_StatusBar();
         void UI_DrawCanvasSceneReference(const glm::vec2& regionMin,
             const glm::vec2& regionSize);
         void UI_DrawCanvasOverlay(const glm::vec2& regionMin,
@@ -186,7 +202,7 @@ namespace Wheatear {
         void AlignSceneSelection(UISelectionAction action);
 
         // Copy / paste a single entity with its widget subtree through an
-        // internal Prefab v2 clipboard file (assets/cache/clipboard.wtprefab).
+        // internal Prefab v2 clipboard file (Intermediate/Clipboard.wtprefab).
         void CopySelectedEntity();
         void PasteClipboardEntity();
         bool HasClipboardEntity() const { return m_HasClipboardEntity; }
@@ -235,7 +251,8 @@ namespace Wheatear {
 
         bool m_ShowPhysicsColliders = false;
         bool m_ShowUIOutlines = true;
-        bool m_UIEditorOpen = true;
+        bool m_UIEditorOpen = false;
+        bool m_AnimationEditorOpen = false;
 
         // UI canvas editor alignment helpers.
         bool m_UISnapEnabled = true;   // edge/center snapping while dragging
@@ -247,6 +264,9 @@ namespace Wheatear {
         // the scene-hierarchy selection stays the alignment anchor.
         std::vector<UUID> m_UIMultiSelect;
         bool m_ShowStats = true;
+        bool m_ToolbarVisible = true;
+        bool m_ProjectThumbnailPending = false;
+        bool m_RequestViewportFocus = true;
         bool m_ContentDrawerOpen = false;
         bool m_RequestDefaultDockspaceLayout = false;
         bool m_DefaultDockspaceLayoutBuilt = false;
@@ -270,6 +290,7 @@ namespace Wheatear {
         Ref<Texture2D> m_IconHealth;
         Ref<Texture2D> m_IconUICanvas;
         Ref<Texture2D> m_IconSpriteSheet;
+        Ref<Texture2D> m_IconFilm;
         Ref<Texture2D> m_IconEventGraph;
         Ref<Texture2D> m_IconFocus;
         Ref<Texture2D> m_IconResetLayout;

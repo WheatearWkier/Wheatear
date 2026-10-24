@@ -2,6 +2,7 @@
 #include "SideCombatPhysicsService.h"
 
 #include "SideCombatFeedbackService.h"
+#include "SideCombatGuardService.h"
 #include "SideCombatHitResolutionService.h"
 #include "SideCombatTuningService.h"
 #include "SideCombatVisualService.h"
@@ -50,6 +51,7 @@ namespace Wheatear::SideCombatPhysicsService {
             combatant.RuntimeHitStun = std::max(0.0f, combatant.RuntimeHitStun - dt);
             combatant.RuntimeInvulnerableTimer = std::max(0.0f, combatant.RuntimeInvulnerableTimer - dt);
             combatant.RuntimeStateTimer = std::max(0.0f, combatant.RuntimeStateTimer - dt);
+            SideCombatGuardService::UpdateGuardWindow(combatant, dt);
 
             if (!combatant.Alive)
             {

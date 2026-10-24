@@ -3,6 +3,7 @@
 #include "Wheatear/Core/Core.h"
 #include "Wheatear/Core/UUID.h"
 
+#include <cstdint>
 #include <string>
 #include <unordered_map>
 #include <vector>
@@ -34,6 +35,16 @@ namespace Wheatear::WAO {
         Infinite
     };
 
+    // Selects which ActionRuntime an effect is applied to. Explicit UUIDs in
+    // EffectSpec::Source/Target are kept for ledger/debug purposes; the
+    // selector decides the runtime that actually receives the effect.
+    enum class EffectTargetSelector
+    {
+        Actor = 0,
+        Target,
+        Source
+    };
+
     struct ActionIntent
     {
         UUID Actor = 0;
@@ -62,14 +73,20 @@ namespace Wheatear::WAO {
         float Power = 0.0f;
         int StackCount = 1;
         bool Harmful = false;
+        bool Infinite = false;
         UUID Source = 0;
     };
 
     struct EffectSpec
     {
+        // Editor-only identity used to keep unknown YAML fields attached to the
+        // right effect across reorder/duplicate/delete. Never serialized.
+        uint64_t EditorId = 0;
         EffectType Type = EffectType::None;
         UUID Source = 0;
         UUID Target = 0;
+        EffectTargetSelector TargetSelector = EffectTargetSelector::Actor;
+        EffectTargetSelector SourceSelector = EffectTargetSelector::Actor;
         std::string AttributeId;
         std::string StateId;
         std::string SignalId;
@@ -117,6 +134,13 @@ namespace Wheatear::WAO {
         std::vector<std::string> BlockedTags;
         std::vector<EffectSpec> Effects;
         std::vector<std::string> Signals;
+
+        // Optional behavior entry. When populated, the action orchestrator
+        // starts this stable entry in the Behavior VM.
+        std::string BehaviorId;
+        std::string BehaviorFile;
+        std::string BehaviorEntry;
+        uint32_t BehaviorVersion = 0;
     };
 
     struct EffectBundle

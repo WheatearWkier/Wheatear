@@ -6,6 +6,10 @@
 
 #include <string>
 
+namespace Wheatear {
+    class Scene;
+}
+
 namespace Wheatear::SideCombatActionService {
 
     WHEATEAR_API float GetActionDuration(const SideCombatTuningService::SideAttackTuning& attack);
@@ -19,7 +23,9 @@ namespace Wheatear::SideCombatActionService {
         const std::string& attackId,
         const std::string& recipeId,
         const std::string& entityName,
-        SideAttackKind kind);
+        SideAttackKind kind,
+        Scene* scene = nullptr,
+        UUID actor = 0);
 
     WHEATEAR_API bool IsEnemyActionActive(const SideEnemyAIComponent& ai);
     WHEATEAR_API void ClearEnemyAction(SideEnemyAIComponent& ai);
@@ -29,6 +35,8 @@ namespace Wheatear::SideCombatActionService {
         const std::string& recipeId,
         const std::string& entityName,
         SideAttackKind kind,
-        float facing);
+        float facing,
+        Scene* scene = nullptr,
+        UUID actor = 0);
 
 } // namespace Wheatear::SideCombatActionService

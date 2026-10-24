@@ -15,15 +15,27 @@ namespace Wheatear {
 
         static ImU32 LevelColor(spdlog::level::level_enum level)
         {
+            const bool darkTheme =
+                ImGui::GetStyleColorVec4(ImGuiCol_WindowBg).x < 0.5f;
             switch (level)
             {
-            case spdlog::level::trace:  return IM_COL32(140, 140, 140, 255);
-            case spdlog::level::info:   return IM_COL32(200, 220, 235, 255);
-            case spdlog::level::warn:   return IM_COL32(235, 200, 110, 255);
+            case spdlog::level::trace:
+                return darkTheme ? IM_COL32(140, 140, 140, 255)
+                                 : IM_COL32(105, 105, 105, 255);
+            case spdlog::level::info:
+                return darkTheme ? IM_COL32(200, 220, 235, 255)
+                                 : IM_COL32(52, 70, 88, 255);
+            case spdlog::level::warn:
+                return darkTheme ? IM_COL32(235, 200, 110, 255)
+                                 : IM_COL32(150, 100, 15, 255);
             case spdlog::level::err:
             case spdlog::level::critical:
-            case spdlog::level::off:    return IM_COL32(235, 110, 110, 255);
-            default:                    return IM_COL32(200, 200, 200, 255);
+            case spdlog::level::off:
+                return darkTheme ? IM_COL32(235, 110, 110, 255)
+                                 : IM_COL32(170, 45, 45, 255);
+            default:
+                return darkTheme ? IM_COL32(200, 200, 200, 255)
+                                 : IM_COL32(55, 55, 55, 255);
             }
         }
 

@@ -1,8 +1,11 @@
 #include "wepch.h"
 #include "EditorLayerBase.h"
 #include "Editor/EditorLocale.h"
+#include "Editor/EditorWorkspace.h"
 
+#include "Wheatear/Config/PlayerConfig.h"
 #include "Wheatear/Core/Application.h"
+#include "Wheatear/Core/Window.h"
 #include "Wheatear/Assets/AssetPath.h"
 #include "Wheatear/Core/EngineInfo.h"
 #include "Wheatear/Input/Input.h"
@@ -40,6 +43,8 @@
 #include <algorithm>
 #include <chrono>
 #include <cmath>
+#include <cstdlib>
+#include <fstream>
 #include <limits>
 #include <memory>
 #include <system_error>
@@ -98,6 +103,19 @@ namespace Wheatear {
     {
         WT_PROFILE_FUNCTION();
 
+        // The editor draws its own caption and resize border. Start maximized
+        // so the right-hand inspector and bottom dock never fall outside the
+        // monitor work area on high-DPI displays.
+        Application::Get().GetWindow().SetDecorated(false);
+        Application::Get().GetWindow().MaximizeWindow();
+        EditorWorkspaceContext::SetCurrentDomain(
+            Is3DWorkspace() ? EditorDomain::ThreeD : EditorDomain::TwoD);
+
+        // The launcher may have applied a resolution-derived transient scale;
+        // restore the editor's persisted preference.
+        if (ImGuiLayer* guiLayer = Application::Get().GetImGuiLayer())
+            guiLayer->RestoreSavedUiScale();
+
         // Restore the persisted editor language (falls back to the OS language
         // when the user has never pinned a choice).
         EditorLocale::ApplyFromSettings();
@@ -120,6 +138,7 @@ namespace Wheatear {
         m_IconHealth = Texture2D::Create("Resources/Icons/Editor/health.png");
         m_IconUICanvas = Texture2D::Create("Resources/Icons/Editor/ui_canvas.png");
         m_IconSpriteSheet = Texture2D::Create("Resources/Icons/Editor/sprite_sheet.png");
+        m_IconFilm = Texture2D::Create("Resources/Icons/Editor/film.png");
         m_IconEventGraph = Texture2D::Create("Resources/Icons/Editor/event_graph.png");
         m_IconFocus = Texture2D::Create("Resources/Icons/Editor/focus.png");
         m_IconResetLayout = Texture2D::Create("Resources/Icons/Editor/reset_layout.png");
@@ -174,31 +193,89 @@ namespace Wheatear {
         m_EditorCamera = EditorCamera(30.0f, 1.778f, 0.1f, 1000.0f);
         Input::SetCursorMode(CursorMode::Normal);
 
-        if (const char* iniPath = ImGui::GetIO().IniFilename)
+        // The layout version forces a one-time rebuild whenever the editor
+        // shell changes. Older ImGui ini files contained localized window
+        // names (e.g. "资源浏览器" next to "Content Browser") and stale
+        // "##Floating" duplicates; those windows came back as orphan floating
+        // panels after the language or panel set changed.
+        constexpr int kEditorLayoutVersion = kLayoutVersion;
+        const ImGuiLayer* guiLayer = Application::Get().GetImGuiLayer();
+        const std::string iniPath = guiLayer ? guiLayer->GetIniPath() : std::string();
+        if (!iniPath.empty())
         {
             std::error_code error;
-            const std::filesystem::path path = iniPath;
-            m_RequestDefaultDockspaceLayout =
-                !std::filesystem::exists(path, error)
-                || std::filesystem::file_size(path, error) == 0;
+            const std::filesystem::path ini = iniPath;
+            const std::filesystem::path versionPath =
+                ini.parent_path() / "editor_layout_version.txt";
+            int storedVersion = 1;
+            if (std::ifstream input(versionPath); input.is_open())
+                input >> storedVersion;
+
+            const bool versionChanged = storedVersion != kEditorLayoutVersion
+                || std::getenv("WHEATEAR_RESET_LAYOUT") != nullptr;
+            if (versionChanged)
+                std::filesystem::remove(ini, error);
+
+            const bool iniMissing = !std::filesystem::exists(ini, error)
+                || std::filesystem::file_size(ini, error) == 0;
+            m_RequestDefaultDockspaceLayout = iniMissing || versionChanged;
+
+            std::ofstream output(versionPath, std::ios::trunc);
+            if (output.is_open())
+                output << kEditorLayoutVersion << "\n";
         }
         else
         {
             m_RequestDefaultDockspaceLayout = true;
         }
 
-        // Load the initial scene from command line, or create an empty scene.
+        // Load the initial scene from a positional command-line path, an
+        // explicit --startup, or the project's player.config. This keeps
+        // "--project <dir> --3d" from trying to open "--project" as a scene
+        // and makes launcher-created projects open their Start.wt directly.
         Ref<Scene> startScene = CreateRef<Scene>();
         std::filesystem::path startPath;
 
         auto args = Application::Get().GetCommandLineArgs();
-        if (args.Count > 1)
+        for (int i = 1; i < args.Count; ++i)
         {
-            startPath = AssetPath::Resolve(args[1]);
+            const std::string argument = args[i];
+            if (argument == "--startup" || argument == "--startup-scene")
+            {
+                if (i + 1 < args.Count && args[i + 1][0] != '-')
+                    startPath = AssetPath::Resolve(args[i + 1]);
+                ++i;
+                continue;
+            }
+            if (argument == "--project")
+            {
+                if (i + 1 < args.Count && args[i + 1][0] != '\0'
+                    && args[i + 1][0] != '-')
+                    ++i;
+                continue;
+            }
+            if (!argument.empty() && argument[0] == '-')
+                continue;
+            startPath = AssetPath::Resolve(argument);
+            break;
+        }
+
+        if (startPath.empty())
+        {
+            const auto& projectRoot = AssetPath::GetProjectRoot();
+            const std::filesystem::path startup =
+                LoadRuntimePlayerConfig(FindRuntimePlayerConfigPath(projectRoot))
+                    .StartupScene;
+            if (!startup.empty())
+                startPath = AssetPath::Resolve(startup);
+        }
+
+        if (!startPath.empty())
+        {
             SceneSerializer serializer(startScene);
             if (!serializer.DeserializeYaml(startPath))
             {
-                WT_CORE_WARN("Failed to load command-line scene: {}", startPath.string());
+                WT_CORE_WARN("Failed to load startup scene: {}", startPath.string());
                 startScene = CreateRef<Scene>();
                 startPath.clear();
             }
@@ -210,6 +287,8 @@ namespace Wheatear {
     void EditorLayerBase::OnDetach()
     {
         WT_PROFILE_FUNCTION();
+        Application::Get().GetWindow().SetDecorated(true);
+        EditorWorkspaceContext::SetCurrentDomain(EditorDomain::Any);
         s_ActiveEditorLayer = nullptr;
         Input::ClearMouseInputBounds();
         if (m_SceneState == SceneState::Play)
@@ -230,7 +309,10 @@ namespace Wheatear {
         // Hot-reload WAO action recipes while playing (editor tuning applies
         // without restarting play).
         if (m_SceneState == SceneState::Play)
+        {
             UpdateActionHotReload();
+            UpdateBehaviorHotReload();
+        }
 
         {
             const auto& spec = m_Framebuffer->GetSpecification();
@@ -268,6 +350,13 @@ namespace Wheatear {
                 || Input::IsMouseButtonPressed(WT_MOUSE_BUTTON_RIGHT);
             if (!anyEditorCameraButtonDown)
                 m_EditorCameraViewportMouseDown = false;
+            else if (mouseInViewport)
+            {
+                // Polling fallback: if an ImGui popup or widget swallowed the
+                // mouse-down event, keep camera drag alive while the button is
+                // physically held over the viewport.
+                m_EditorCameraViewportMouseDown = true;
+            }
 
             if ((mouseInViewport && !anyEditorCameraButtonDown)
                 || m_EditorCameraViewportMouseDown
@@ -395,6 +484,16 @@ namespace Wheatear {
         OnOverlayRender();
 
         m_Framebuffer->Unbind();
+
+        // Capture after a full scene render (skybox/IBL included), so a newly
+        // loaded or saved scene produces a representative project thumbnail.
+        if (m_ProjectThumbnailPending && m_SceneState == SceneState::Edit
+            && m_ViewportSize.x > 0.0f && m_ViewportSize.y > 0.0f)
+        {
+            CaptureProjectThumbnail();
+            m_ProjectThumbnailPending = false;
+        }
+
         m_LastTimestep = ts;
     }
 

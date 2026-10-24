@@ -2,6 +2,7 @@
 #include "Wheatear/Utils/PlatformUtils.h"
 
 #include <commdlg.h>
+#include <shlobj.h>
 #include <GLFW/glfw3.h>
 #define GLFW_EXPOSE_NATIVE_WIN32
 #include <GLFW/glfw3native.h>
@@ -10,7 +11,11 @@
 #include "Wheatear/Core/Window.h"
 
 #include <filesystem>
+#include <cstring>
 #include <vector>
+
+#pragma comment(lib, "shell32.lib")
+#pragma comment(lib, "ole32.lib")
 
 namespace Wheatear {
 
@@ -99,6 +104,52 @@ namespace Wheatear {
 			cursor += name.size() + 1;
 		}
 		return result;
+	}
+
+	std::string FileDialogs::OpenFolder(const char* title)
+	{
+		const HRESULT comResult = CoInitializeEx(nullptr, COINIT_APARTMENTTHREADED);
+		const bool uninitializeCom = SUCCEEDED(comResult);
+
+		HWND owner = glfwGetWin32Window(
+			(GLFWwindow*)Application::Get().GetWindow().GetNativeWindow());
+
+		std::wstring titleWide;
+		if (title)
+			titleWide.assign(title, title + std::strlen(title));
+
+		wchar_t pathBuffer[MAX_PATH] = {};
+		BROWSEINFOW browse{};
+		browse.hwndOwner = owner;
+		browse.lpszTitle = titleWide.empty()
+			? L"Select a Wheatear project folder"
+			: titleWide.c_str();
+		browse.ulFlags = BIF_RETURNONLYFSDIRS | BIF_NEWDIALOGSTYLE | BIF_USENEWUI;
+
+		PIDLIST_ABSOLUTE item = SHBrowseForFolderW(&browse);
+		if (!item)
+		{
+			if (uninitializeCom)
+				CoUninitialize();
+			return {};
+		}
+
+		const bool resolved = SHGetPathFromIDListW(item, pathBuffer) == TRUE;
+		CoTaskMemFree(item);
+		if (!resolved)
+			return {};
+
+		const int required = WideCharToMultiByte(CP_UTF8, 0, pathBuffer, -1,
+			nullptr, 0, nullptr, nullptr);
+		if (required <= 1)
+			return {};
+
+		std::string utf8(static_cast<size_t>(required - 1), '\0');
+		WideCharToMultiByte(CP_UTF8, 0, pathBuffer, -1,
+			utf8.data(), required, nullptr, nullptr);
+		if (uninitializeCom)
+			CoUninitialize();
+		return utf8;
 	}
 
 }

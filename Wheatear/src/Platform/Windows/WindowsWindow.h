@@ -28,6 +28,14 @@ namespace Wheatear {
         void SetFullscreen(bool enabled) override;
         bool IsFullscreen() const override { return m_Data.Fullscreen; }
 
+        void SetDecorated(bool decorated) override;
+        void BeginWindowDrag() override;
+        void MinimizeWindow() override;
+        void MaximizeWindow() override;
+        void ToggleMaximizeWindow() override;
+        bool IsWindowMaximized() const override;
+        void CloseWindow() override;
+
         void* GetNativeWindow() const override { return m_Window; }
 
     private:

@@ -323,6 +323,7 @@ namespace Wheatear {
         {
             AddDirectoryFiles(projectRoot, "assets/shaders", assets, nullptr, nullptr, assetSources);
             AddDirectoryFiles(projectRoot, "assets/gameplay/actions", assets, parseQueue, missingReferences, assetSources);
+            AddDirectoryFiles(projectRoot, "assets/gameplay/behaviors", assets, parseQueue, missingReferences, assetSources);
             AddDirectoryFiles(projectRoot, "assets/gameplay/progression", assets, parseQueue, missingReferences, assetSources);
             TryAddAsset(projectRoot, AssetAliasRegistry::Path("font.ui_default", "assets/fonts/wqy-microhei.ttc"), {}, assets, nullptr, nullptr, {}, assetSources);
             TryAddAsset(projectRoot, "assets/fonts/licenses/WenQuanYiMicroHei/LICENSE_Apache2.txt", {}, assets, nullptr, nullptr, {}, assetSources);
@@ -339,6 +340,7 @@ namespace Wheatear {
             AssetSourceMap* assetSources)
         {
             AddDirectoryFiles(projectRoot, "assets/gameplay/actions", assets, parseQueue, missingReferences, assetSources);
+            AddDirectoryFiles(projectRoot, "assets/gameplay/behaviors", assets, parseQueue, missingReferences, assetSources);
             AddDirectoryFiles(projectRoot, "assets/gameplay/progression", assets, parseQueue, missingReferences, assetSources);
         }
 
@@ -592,6 +594,7 @@ namespace Wheatear {
             || extension == AssetFileType::MaterialExtension
             || extension == AssetFileType::AnimationClipExtension
             || extension == AssetFileType::SheetExtension
+            || extension == ".wtb"
             || extension == ".vn"
             || extension == ".wts"
             || extension == ".yaml"

@@ -345,6 +345,10 @@ namespace Wheatear::SideCombatLifecycleService {
             combatant.RuntimeAirVelocity = 0.0f;
             combatant.RuntimeHitStun = 0.0f;
             combatant.RuntimeInvulnerableTimer = 0.0f;
+            combatant.RuntimeGuardActive = false;
+            combatant.RuntimeGuardTimer = 0.0f;
+            combatant.RuntimeParryTimer = 0.0f;
+            combatant.RuntimeGuardDamageMultiplier = 0.25f;
             combatant.RuntimeProtection = 0.0f;
             combatant.RuntimeProtectionMax = registry.all_of<SideEnemyAIComponent>(e) &&
                 registry.get<SideEnemyAIComponent>(e).Kind == SideEnemyKind::BearBoss

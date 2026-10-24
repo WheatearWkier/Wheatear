@@ -64,11 +64,20 @@ namespace Wheatear {
         float     Near = 0.1f;
     };
 
-    struct TransformUBOData   // binding=2, 192 bytes
+    struct TransformUBOData   // binding=2, 256 bytes (std140)
     {
         glm::mat4 Model;
         glm::mat4 NormalMatrix;
         glm::mat4 LightSpaceMatrix;
+        int       Instanced = 0;
+        int       _pad[15] = {};
+    };
+
+    struct BoneUBOData        // binding=15, 16448 bytes (std140)
+    {
+        glm::mat4 Bones[k_MaxBones];
+        int       Skinned = 0;
+        int       _pad[15] = {};
     };
 
     struct MaterialUBOData    // binding=3, 48 bytes
@@ -130,6 +139,9 @@ namespace Wheatear {
 
         MaterialUBOData    MaterialBuffer;
         Ref<UniformBuffer> MaterialUBO;         // binding=3
+
+        BoneUBOData        BoneBuffer;
+        Ref<UniformBuffer> BoneUBO;             // binding=15
 
         LightUBOData       LightBuffer;
         Ref<UniformBuffer> LightUBO;            // binding=5
@@ -206,6 +218,10 @@ namespace Wheatear {
         s_Data.LightUBO         = UniformBuffer::Create(sizeof(LightUBOData),       5);
         s_Data.IBLUBO           = UniformBuffer::Create(sizeof(IBLDataUBO),        10);
         s_Data.SkyboxGradientUBO= UniformBuffer::Create(sizeof(SkyboxGradientUBO), 14);
+        s_Data.BoneUBO          = UniformBuffer::Create(sizeof(BoneUBOData),       15);
+        for (glm::mat4& bone : s_Data.BoneBuffer.Bones)
+            bone = glm::mat4(1.0f);
+        s_Data.BoneUBO->SetData(&s_Data.BoneBuffer, sizeof(BoneUBOData));
 
         // Shaders
         s_Data.MeshShader        = Shader::Create("assets/shaders/Renderer3D_Mesh_PBR.glsl");
@@ -560,17 +576,31 @@ namespace Wheatear {
 
     void Renderer3D::EndShadowPass() {}
 
-    void Renderer3D::DrawMeshShadow(const glm::mat4& transform, const Ref<Mesh>& mesh)
+    void Renderer3D::DrawMeshShadow(const glm::mat4& transform, const Ref<Mesh>& mesh,
+        const std::vector<glm::mat4>* bonePalette)
     {
         if (!mesh) return;
         s_Data.TransformBuffer.Model            = transform;
         s_Data.TransformBuffer.LightSpaceMatrix = s_Data.LightSpaceMatrix;
+        s_Data.TransformBuffer.Instanced        = 0;
         s_Data.TransformUBO->SetData(&s_Data.TransformBuffer, sizeof(TransformUBOData));
+
+        s_Data.BoneBuffer.Skinned = bonePalette && !bonePalette->empty() ? 1 : 0;
+        if (s_Data.BoneBuffer.Skinned)
+        {
+            const size_t count = std::min(bonePalette->size(),
+                static_cast<size_t>(k_MaxBones));
+            for (size_t i = 0; i < count; ++i)
+                s_Data.BoneBuffer.Bones[i] = (*bonePalette)[i];
+        }
+        s_Data.BoneUBO->SetData(&s_Data.BoneBuffer, sizeof(BoneUBOData));
+
         RenderCommand::DrawIndexed(mesh->GetVertexArray(), mesh->GetIndexCount());
     }
 
     uint32_t          Renderer3D::GetShadowMapID()      { return s_Data.ShadowMapFB->GetDepthAttachmentRendererID(); }
     const glm::mat4&  Renderer3D::GetLightSpaceMatrix() { return s_Data.LightSpaceMatrix; }
+    const glm::mat4&  Renderer3D::GetViewProjection()   { return s_Data.CameraBuffer.ViewProjection; }
     Ref<Framebuffer>& Renderer3D::GetShadowMapFB()      { return s_Data.ShadowMapFB; }
 
     // =========================================================================
@@ -580,15 +610,27 @@ namespace Wheatear {
     void Renderer3D::DrawMesh(const glm::mat4& transform,
                               const Ref<Mesh>& mesh,
                               const Ref<Material>& material,
-                              int entityID)
+                              int entityID,
+                              const std::vector<glm::mat4>* bonePalette)
     {
         if (!mesh) return;
         if (s_Data.LightsDirty) FlushLights();
+
+        s_Data.BoneBuffer.Skinned = bonePalette && !bonePalette->empty() ? 1 : 0;
+        if (s_Data.BoneBuffer.Skinned)
+        {
+            const size_t count = std::min(bonePalette->size(),
+                static_cast<size_t>(k_MaxBones));
+            for (size_t i = 0; i < count; ++i)
+                s_Data.BoneBuffer.Bones[i] = (*bonePalette)[i];
+        }
+        s_Data.BoneUBO->SetData(&s_Data.BoneBuffer, sizeof(BoneUBOData));
 
         // Transform UBO
         s_Data.TransformBuffer.Model           = transform;
         s_Data.TransformBuffer.NormalMatrix    = glm::transpose(glm::inverse(transform));
         s_Data.TransformBuffer.LightSpaceMatrix= s_Data.LightSpaceMatrix;
+        s_Data.TransformBuffer.Instanced       = 0;
         s_Data.TransformUBO->SetData(&s_Data.TransformBuffer, sizeof(TransformUBOData));
 
         // Material UBO
@@ -627,6 +669,62 @@ namespace Wheatear {
         RenderCommand::DrawIndexed(mesh->GetVertexArray(), mesh->GetIndexCount());
         s_Data.Stats.DrawCalls++;
         s_Data.Stats.MeshCount++;
+    }
+
+    void Renderer3D::DrawMeshInstanced(const std::vector<glm::mat4>& transforms,
+                                       const Ref<Mesh>& mesh,
+                                       const Ref<Material>& material,
+                                       int entityID)
+    {
+        if (!mesh || transforms.empty())
+            return;
+        if (s_Data.LightsDirty) FlushLights();
+
+        s_Data.TransformBuffer.Model            = glm::mat4(1.0f);
+        s_Data.TransformBuffer.NormalMatrix     = glm::mat4(1.0f);
+        s_Data.TransformBuffer.LightSpaceMatrix = s_Data.LightSpaceMatrix;
+        s_Data.TransformBuffer.Instanced        = 1;
+        s_Data.TransformUBO->SetData(&s_Data.TransformBuffer, sizeof(TransformUBOData));
+
+        s_Data.BoneBuffer.Skinned = 0;
+        s_Data.BoneUBO->SetData(&s_Data.BoneBuffer, sizeof(BoneUBOData));
+
+        static Ref<Material> s_DefaultMaterial = Material::Create();
+        const Material& mat = material ? *material : *s_DefaultMaterial;
+        s_Data.MaterialBuffer.Albedo          = mat.Albedo;
+        s_Data.MaterialBuffer.Metallic        = mat.Metallic;
+        s_Data.MaterialBuffer.Roughness       = mat.Roughness;
+        s_Data.MaterialBuffer.EntityID        = entityID;
+        s_Data.MaterialBuffer.FlipNormals     = mat.FlipNormals ? 1 : 0;
+        s_Data.MaterialBuffer.HasNormalMap    = mat.NormalMap    ? 1 : 0;
+        s_Data.MaterialBuffer.HasRoughnessMap = mat.RoughnessMap ? 1 : 0;
+        s_Data.MaterialBuffer.HasMetallicMap  = mat.MetallicMap  ? 1 : 0;
+        s_Data.MaterialBuffer.HasShadowMap    = 1;
+        s_Data.MaterialUBO->SetData(&s_Data.MaterialBuffer, sizeof(MaterialUBOData));
+
+        (mat.AlbedoMap    ? mat.AlbedoMap    : s_Data.WhiteTexture)->Bind(4);
+        (mat.NormalMap    ? mat.NormalMap    : s_Data.WhiteTexture)->Bind(6);
+        (mat.RoughnessMap ? mat.RoughnessMap : s_Data.WhiteTexture)->Bind(7);
+        (mat.MetallicMap  ? mat.MetallicMap  : s_Data.WhiteTexture)->Bind(8);
+        s_Data.ShadowMapFB->BindDepthAttachment(9);
+
+        if (s_Data.CurrentIBL && s_Data.CurrentIBL->IsValid())
+        {
+            RenderCommand::BindTextureUnit(11, s_Data.CurrentIBL->IrradianceMap);
+            RenderCommand::BindTextureUnit(12, s_Data.CurrentIBL->PrefilterMap);
+            RenderCommand::BindTextureUnit(13, s_Data.CurrentIBL->BrdfLUT);
+        }
+        BindSSAOResult();
+
+        Ref<VertexArray> instanceVAO = mesh->CreateInstancedVAO(transforms);
+        if (!instanceVAO)
+            return;
+
+        s_Data.MeshShader->Bind();
+        RenderCommand::DrawIndexedInstanced(instanceVAO,
+            mesh->GetIndexCount(), static_cast<uint32_t>(transforms.size()));
+        s_Data.Stats.DrawCalls++;
+        s_Data.Stats.MeshCount += static_cast<uint32_t>(transforms.size());
     }
 
     // =========================================================================

@@ -97,6 +97,11 @@ namespace Wheatear {
         std::size_t GetSavePolicyOverrideDepth() const { return m_SavePolicyOverrides.size(); }
 
         Entity GetPrimaryCameraEntity();
+        glm::mat4 GetWorldTransform(Entity entity);
+        glm::vec3 GetWorldTranslation(Entity entity);
+        bool SetParent(Entity child, Entity parent);
+        void ClearParent(Entity child);
+        std::vector<Entity> CollectSubtree(Entity root);
         Entity FindEntityByUUID(UUID uuid);
         Entity GetEntityByUUID(UUID uuid);
         Entity GetEntityByName(const std::string& name);

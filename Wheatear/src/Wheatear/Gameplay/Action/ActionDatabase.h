@@ -14,6 +14,8 @@ namespace Wheatear::WAO {
     {
     public:
         static void Register(const ActionRecipe& recipe);
+        static bool Replace(const std::vector<ActionRecipe>& recipes,
+            std::string* error = nullptr);
         static const ActionRecipe* Find(const std::string& id);
         static bool Has(const std::string& id);
         static std::vector<ActionRecipe> All();

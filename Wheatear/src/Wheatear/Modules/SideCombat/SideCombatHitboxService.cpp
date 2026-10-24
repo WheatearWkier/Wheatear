@@ -245,10 +245,16 @@ namespace Wheatear::SideCombatHitboxService {
                     targetEntity,
                     target,
                     hitbox);
-                SideCombatComboService::ApplyPlayerAirHitReward(scene, level, hitbox, target);
-                SideCombatComboService::AwardMagicSwordGauge(scene, level, hitbox, target);
+                if (!hitResult.Blocked && !hitResult.Parried)
+                {
+                    SideCombatComboService::ApplyPlayerAirHitReward(scene, level, hitbox, target);
+                    SideCombatComboService::AwardMagicSwordGauge(scene, level, hitbox, target);
+                }
 
-                if (hitbox.Team == (int)SideCombatTeam::Player && !hitResult.BossProtectionTriggered)
+                if (hitbox.Team == (int)SideCombatTeam::Player &&
+                    !hitResult.BossProtectionTriggered &&
+                    !hitResult.Blocked &&
+                    !hitResult.Parried)
                     SideCombatComboService::RegisterPlayerHit(level);
                 else
                     SideCombatComboService::ResetCombo(level);

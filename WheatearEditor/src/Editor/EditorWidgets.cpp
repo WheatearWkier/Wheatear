@@ -7,6 +7,8 @@
 #include "Panels/ContentBrowserRequests.h"
 #include "Wheatear/Assets/AssetAliasRegistry.h"
 #include "Wheatear/Assets/AssetPath.h"
+#include "Wheatear/Core/Application.h"
+#include "Wheatear/ImGui/ImGuiLayer.h"
 #include "Wheatear/Renderer/Texture.h"
 
 #include <algorithm>
@@ -68,7 +70,7 @@ namespace Wheatear::EditorWidgets {
             case AssetReferenceKind::AnimationClip:
                 return extension == ".wtanim";
             case AssetReferenceKind::Data:
-                return extension == ".yaml" || extension == ".yml" || extension == ".json" || extension == ".txt" || extension == ".wts" || extension == ".wtuit";
+                return extension == ".yaml" || extension == ".yml" || extension == ".json" || extension == ".txt" || extension == ".wts" || extension == ".wtuit" || extension == ".wtb";
             case AssetReferenceKind::Any:
             default:
                 return true;
@@ -136,12 +138,12 @@ namespace Wheatear::EditorWidgets {
         {
             switch (kind)
             {
-            case StatusKind::Info: return { 0.10f, 0.52f, 0.58f, 1.0f };
-            case StatusKind::Success: return { 0.18f, 0.56f, 0.38f, 1.0f };
-            case StatusKind::Warning: return { 0.70f, 0.45f, 0.12f, 1.0f };
-            case StatusKind::Error: return { 0.78f, 0.24f, 0.18f, 1.0f };
+            case StatusKind::Info: return { 0.55f, 0.82f, 0.92f, 1.0f };
+            case StatusKind::Success: return { 0.52f, 0.86f, 0.64f, 1.0f };
+            case StatusKind::Warning: return { 0.95f, 0.78f, 0.45f, 1.0f };
+            case StatusKind::Error: return { 0.96f, 0.55f, 0.50f, 1.0f };
             case StatusKind::Neutral:
-            default: return { 0.30f, 0.40f, 0.42f, 1.0f };
+            default: return { 0.72f, 0.76f, 0.83f, 1.0f };
             }
         }
 
@@ -149,12 +151,12 @@ namespace Wheatear::EditorWidgets {
         {
             switch (kind)
             {
-            case StatusKind::Info: return { 0.76f, 0.86f, 0.86f, 1.0f };
-            case StatusKind::Success: return { 0.77f, 0.86f, 0.81f, 1.0f };
-            case StatusKind::Warning: return { 0.90f, 0.83f, 0.66f, 1.0f };
-            case StatusKind::Error: return { 0.91f, 0.73f, 0.69f, 1.0f };
+            case StatusKind::Info: return { 0.10f, 0.20f, 0.26f, 1.0f };
+            case StatusKind::Success: return { 0.10f, 0.22f, 0.16f, 1.0f };
+            case StatusKind::Warning: return { 0.26f, 0.20f, 0.10f, 1.0f };
+            case StatusKind::Error: return { 0.28f, 0.12f, 0.12f, 1.0f };
             case StatusKind::Neutral:
-            default: return { 0.80f, 0.84f, 0.83f, 1.0f };
+            default: return { 0.14f, 0.16f, 0.20f, 1.0f };
             }
         }
 
@@ -187,10 +189,145 @@ namespace Wheatear::EditorWidgets {
 
     } // namespace
 
+    void DrawCodePreview(const std::string& text,
+        const char* id,
+        CodeLanguage language,
+        const std::vector<int>& errorLines,
+        const ImVec2& size)
+    {
+        const ImVec4 keywordColor(0.95f, 0.72f, 0.30f, 1.0f);
+        const ImVec4 identifierColor(0.55f, 0.78f, 0.95f, 1.0f);
+        const ImVec4 numberColor(0.72f, 0.62f, 0.95f, 1.0f);
+        const ImVec4 commentColor(0.45f, 0.55f, 0.45f, 1.0f);
+        const ImVec4 errorColor(0.92f, 0.35f, 0.35f, 1.0f);
+
+        const auto isErrorLine = [&errorLines](int line)
+        {
+            return std::find(errorLines.begin(), errorLines.end(), line)
+                != errorLines.end();
+        };
+
+        const auto drawSplit = [](const ImVec4& color,
+            const std::string& prefix, const std::string& rest)
+        {
+            if (!prefix.empty())
+            {
+                ImGui::TextColored(color, "%s", prefix.c_str());
+                if (!rest.empty())
+                {
+                    ImGui::SameLine(0.0f, 0.0f);
+                    ImGui::TextUnformatted(rest.c_str());
+                    return;
+                }
+            }
+            else if (!rest.empty())
+            {
+                ImGui::TextUnformatted(rest.c_str());
+                return;
+            }
+            ImGui::TextUnformatted("");
+        };
+
+        ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(0.0f, 1.0f));
+        if (ImGui::BeginChild(id ? id : "##CodePreview", size, true,
+            ImGuiWindowFlags_HorizontalScrollbar))
+        {
+            std::istringstream stream(text);
+            std::string line;
+            int lineNumber = 0;
+            while (std::getline(stream, line))
+            {
+                ++lineNumber;
+                if (isErrorLine(lineNumber))
+                    ImGui::TextColored(errorColor, "%4d!", lineNumber);
+                else
+                    ImGui::TextDisabled("%4d ", lineNumber);
+                ImGui::SameLine(0.0f, 0.0f);
+
+                const size_t first = line.find_first_not_of(" \t");
+                if (first == std::string::npos)
+                {
+                    ImGui::TextUnformatted("");
+                    continue;
+                }
+
+                const std::string trimmed = line.substr(first);
+                const std::string indent = line.substr(0, first);
+                if (trimmed.rfind("#", 0) == 0 || trimmed.rfind("//", 0) == 0
+                    || trimmed.rfind(";", 0) == 0)
+                {
+                    ImGui::TextColored(commentColor, "%s", line.c_str());
+                    continue;
+                }
+
+                if (language == CodeLanguage::VisualNovel
+                    && trimmed.front() == '@')
+                {
+                    const size_t space = trimmed.find_first_of(" \t");
+                    const std::string directive = space == std::string::npos
+                        ? trimmed : trimmed.substr(0, space);
+                    drawSplit(keywordColor, indent + directive,
+                        space == std::string::npos ? "" : trimmed.substr(space));
+                    continue;
+                }
+
+                if (language == CodeLanguage::EventScript)
+                {
+                    const size_t space = trimmed.find_first_of(" \t");
+                    const std::string firstWord = space == std::string::npos
+                        ? trimmed : trimmed.substr(0, space);
+                    static const std::set<std::string> keywords = {
+                        "event", "end", "endevent", "wait", "if", "else",
+                        "endif", "command", "cmd"
+                    };
+                    if (keywords.count(StringUtils::ToLower(firstWord)) > 0)
+                    {
+                        drawSplit(keywordColor, indent + firstWord,
+                            space == std::string::npos ? "" : trimmed.substr(space));
+                        continue;
+                    }
+                }
+
+                const size_t colon = trimmed.find(':');
+                if (colon != std::string::npos && colon > 0 && colon < 64)
+                {
+                    const std::string head = indent + trimmed.substr(0, colon + 1);
+                    drawSplit(identifierColor, head, trimmed.substr(colon + 1));
+                    continue;
+                }
+
+                if (std::isdigit(static_cast<unsigned char>(trimmed.front()))
+                    || (trimmed.front() == '-' && trimmed.size() > 1
+                        && std::isdigit(static_cast<unsigned char>(trimmed[1]))))
+                {
+                    ImGui::TextColored(numberColor, "%s", line.c_str());
+                }
+                else
+                {
+                    ImGui::TextUnformatted(line.c_str());
+                }
+            }
+            if (lineNumber == 0)
+                ImGui::TextDisabled(EditorLocale::Text("(empty)", "(空)"));
+        }
+        ImGui::EndChild();
+        ImGui::PopStyleVar();
+    }
+
     bool InputString(const char* label, std::string& value, size_t capacity)
     {
         std::vector<char> buffer(std::max<size_t>(capacity, value.size() + 32), 0);
         strncpy_s(buffer.data(), buffer.size(), value.c_str(), _TRUNCATE);
+        if (label && label[0] != '\0' && label[0] != '#')
+        {
+            const float labelWidth = ImGui::CalcTextSize(label).x;
+            const float available = ImGui::GetContentRegionAvail().x;
+            if (available > labelWidth + 48.0f)
+            {
+                ImGui::SetNextItemWidth(available - labelWidth
+                    - ImGui::GetStyle().ItemInnerSpacing.x);
+            }
+        }
         if (ImGui::InputText(label, buffer.data(), buffer.size()))
         {
             value = buffer.data();
@@ -221,23 +358,152 @@ namespace Wheatear::EditorWidgets {
             ImGui::SetTooltip("%s", text);
     }
 
+    void BrandMark(const ImVec2& center, float size, bool glow)
+    {
+        (void)glow;
+        ImDrawList* drawList = ImGui::GetWindowDrawList();
+        const float half = size * 0.5f;
+
+        // Prefer the authored transparent wheat PNG when available; the
+        // procedural version below is only a fallback for stripped builds.
+        // Intentionally leaked so the GL texture is not destroyed after the
+        // context has already shut down.
+        static Ref<Texture2D>* logoHolder = nullptr;
+        if (!logoHolder)
+        {
+            logoHolder = new Ref<Texture2D>(
+                Texture2D::Create("Resources/Icons/icon.png"));
+        }
+        if (logoHolder && *logoHolder && (*logoHolder)->IsLoaded())
+        {
+            const Ref<Texture2D>& logoTexture = *logoHolder;
+            drawList->AddImage(
+                static_cast<ImTextureID>(
+                    static_cast<uintptr_t>(logoTexture->GetRendererID())),
+                ImVec2(center.x - half, center.y - half),
+                ImVec2(center.x + half, center.y + half),
+                ImVec2(0.0f, 1.0f), ImVec2(1.0f, 0.0f),
+                IM_COL32_WHITE);
+            return;
+        }
+
+        const ImU32 wheat = IM_COL32(217, 170, 95, 255);
+        const ImU32 wheatHot = IM_COL32(246, 205, 132, 255);
+        const float stemTop = center.y - half * 0.58f;
+        const float stemBottom = center.y + half * 0.58f;
+        const float thickness = std::max(1.4f, size * 0.055f);
+        drawList->AddLine(
+            ImVec2(center.x, stemTop), ImVec2(center.x, stemBottom),
+            wheat, thickness);
+
+        const float grainY[3] = { 0.26f, 0.50f, 0.73f };
+        for (int i = 0; i < 3; ++i)
+        {
+            const float y = glm::mix(stemTop, stemBottom, grainY[i]);
+            const float spread = half * (0.34f - i * 0.02f);
+            const float length = half * (0.30f - i * 0.025f);
+            const ImU32 color = i == 0 ? wheatHot : wheat;
+
+            drawList->AddEllipseFilled(
+                ImVec2(center.x - spread * 0.62f, y - half * 0.08f),
+                ImVec2(length, half * 0.095f), color, -0.62f, 20);
+            drawList->AddEllipseFilled(
+                ImVec2(center.x + spread * 0.62f, y - half * 0.08f),
+                ImVec2(length, half * 0.095f), color, 0.62f, 20);
+        }
+
+        drawList->AddEllipseFilled(
+            ImVec2(center.x, stemTop - half * 0.10f),
+            ImVec2(half * 0.24f, half * 0.085f), wheatHot, -1.5708f, 20);
+    }
+
+    void BrandHeader(float markSize)
+    {
+        const ImVec2 cursor = ImGui::GetCursorScreenPos();
+        const float lineHeight = ImGui::GetTextLineHeight();
+        const float size = std::max(markSize, lineHeight);
+        BrandMark(
+            ImVec2(cursor.x + size * 0.5f, cursor.y + size * 0.5f), size, true);
+        ImGui::Dummy(ImVec2(size, size));
+        ImGui::SameLine();
+
+        ImGuiLayer* layer = Application::Get().GetImGuiLayer();
+        ImFont* heading = layer ? layer->GetHeadingFont() : nullptr;
+        if (heading)
+            ImGui::PushFont(heading);
+        ImGui::TextUnformatted("Wheatear");
+        if (heading)
+            ImGui::PopFont();
+
+        ImGui::SameLine();
+        ImFont* small = layer ? layer->GetSmallFont() : nullptr;
+        if (small)
+            ImGui::PushFont(small);
+        ImGui::PushStyleColor(ImGuiCol_Text,
+            ImGui::GetStyleColorVec4(ImGuiCol_CheckMark));
+        ImGui::TextUnformatted("STUDIO");
+        ImGui::PopStyleColor();
+        if (small)
+            ImGui::PopFont();
+    }
+
+    void WorkspaceBadge(const char* label, bool threeD)
+    {
+        if (!label || label[0] == '\0')
+            return;
+
+        const ImVec2 textSize = ImGui::CalcTextSize(label);
+        const float s = ImGui::GetIO().FontGlobalScale;
+        const ImVec2 pos = ImGui::GetCursorScreenPos();
+        const ImVec2 size(textSize.x + 18.0f * s, textSize.y + 6.0f * s);
+        ImGui::Dummy(size);
+
+        const ImVec4 accent = threeD
+            ? ImVec4(0.400f, 0.760f, 0.560f, 1.0f)
+            : ImVec4(0.420f, 0.650f, 0.900f, 1.0f);
+        ImU32 fill = ImGui::GetColorU32(ImVec4(accent.x, accent.y, accent.z, 0.16f));
+        ImU32 border = ImGui::GetColorU32(ImVec4(accent.x, accent.y, accent.z, 0.60f));
+
+        ImDrawList* drawList = ImGui::GetWindowDrawList();
+        drawList->AddRectFilled(pos, ImVec2(pos.x + size.x, pos.y + size.y),
+            fill, size.y * 0.5f);
+        drawList->AddRect(pos, ImVec2(pos.x + size.x, pos.y + size.y),
+            border, size.y * 0.5f, 0, 1.0f);
+        drawList->AddText(
+            ImVec2(pos.x + 9.0f * s,
+                pos.y + (size.y - textSize.y) * 0.5f),
+            ImGui::GetColorU32(accent), label);
+    }
+
     void PanelHeader(const char* title, const char* subtitle)
     {
-        // Teal accent bar on the left keeps the header readable in the dark
-        // theme without hard-coded text colors.
         const float barWidth = 3.0f;
-        const float indentX = barWidth + 6.0f;
+        const float indentX = barWidth + 8.0f;
         const ImVec2 cursor = ImGui::GetCursorScreenPos();
         ImGui::GetWindowDrawList()->AddRectFilled(
             cursor,
-            ImVec2(cursor.x + barWidth, cursor.y + ImGui::GetTextLineHeight()),
-            ImGui::GetColorU32(ImGuiCol_CheckMark));
+            ImVec2(cursor.x + barWidth,
+                cursor.y + ImGui::GetTextLineHeight() * 1.2f),
+            ImGui::GetColorU32(ImGuiCol_CheckMark), 1.5f);
         ImGui::SetCursorPosX(ImGui::GetCursorPosX() + indentX);
+
+        ImGuiLayer* layer = Application::Get().GetImGuiLayer();
+        ImFont* heading = layer ? layer->GetHeadingFont() : nullptr;
+        if (heading)
+            ImGui::PushFont(heading);
         ImGui::TextUnformatted(title ? title : "");
+        if (heading)
+            ImGui::PopFont();
+
         if (subtitle && subtitle[0] != '\0')
         {
             ImGui::SetCursorPosX(ImGui::GetCursorPosX() + indentX);
+            ImFont* small = layer ? layer->GetSmallFont() : nullptr;
+            if (small)
+                ImGui::PushFont(small);
             ImGui::TextDisabled("%s", subtitle);
+            if (small)
+                ImGui::PopFont();
         }
         ImGui::Separator();
     }
@@ -259,9 +525,12 @@ namespace Wheatear::EditorWidgets {
         ImGui::PushStyleColor(ImGuiCol_ButtonHovered, bg);
         ImGui::PushStyleColor(ImGuiCol_ButtonActive, bg);
         ImGui::PushStyleColor(ImGuiCol_Text, fg);
+        ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, 999.0f);
+        ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(8.0f, 2.0f));
         ImGui::PushItemFlag(ImGuiItemFlags_AllowDuplicateId, true);
         ImGui::SmallButton(label ? label : "");
         ImGui::PopItemFlag();
+        ImGui::PopStyleVar(2);
         ImGui::PopStyleColor(4);
     }
 
@@ -306,13 +575,17 @@ namespace Wheatear::EditorWidgets {
         if (!enabled)
             ImGui::PushStyleVar(ImGuiStyleVar_Alpha, 0.35f);
 
-        ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(5.0f, 5.0f));
+        const float s = ImGui::GetIO().FontGlobalScale;
+        ImGui::PushStyleVar(ImGuiStyleVar_FramePadding,
+            ImVec2(5.0f * s, 5.0f * s));
         clicked = ImGui::ImageButton(
             id,
             static_cast<ImTextureID>(static_cast<uintptr_t>(icon->GetRendererID())),
             size,
-            ImVec2(0.0f, 0.0f),
-            ImVec2(1.0f, 1.0f),
+            // Texture2D uploads PNGs with stb's vertical flip, while ImGui's
+            // default UV origin is the top-left. Flip V so icons are upright.
+            ImVec2(0.0f, 1.0f),
+            ImVec2(1.0f, 0.0f),
             ImVec4(0.0f, 0.0f, 0.0f, 0.0f),
             ImVec4(1.0f, 1.0f, 1.0f, enabled ? 1.0f : 0.55f));
         ImGui::PopStyleVar();

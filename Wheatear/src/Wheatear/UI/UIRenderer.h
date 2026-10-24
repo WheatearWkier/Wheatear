@@ -100,6 +100,8 @@ namespace Wheatear {
             uint32_t viewportWidth,
             uint32_t viewportHeight);
 
+        static void Shutdown();
+
     private:
         static uint32_t s_ViewportWidth;
         static uint32_t s_ViewportHeight;

@@ -4,6 +4,7 @@
 
 #include "AssetDependencyScanner.h"
 #include "Wheatear/Assets/AssetPath.h"
+#include "Wheatear/Assets/ContentValidation.h"
 #include "Wheatear/Core/EngineInfo.h"
 #include "Wheatear/Assets/FileSystem.h"
 #include "Wheatear/Core/Log.h"
@@ -295,32 +296,31 @@ namespace Wheatear {
             return std::filesystem::path(basename + "-" + fingerprint);
         }
 
-        // The player package directory is the release name: the project's
-        // player.config PackageName (e.g. "Demo") when set, otherwise the
-        // short project key. Layout: Builds/Windows/Player/<release name>.
+        // Commercial-style output: Builds/Win64/<GameName>. The directory is
+        // self-contained (exe, Content/Paks, Config, Saved) and can be zipped
+        // or copied to another machine without the editor.
         static std::filesystem::path DefaultPlayerPackageDirectory(const std::filesystem::path& repositoryRoot,
             const std::filesystem::path& projectRoot)
         {
             const RuntimePlayerConfig projectConfig =
-                LoadRuntimePlayerConfig(projectRoot / "assets" / "game" / "player.config");
+                LoadRuntimePlayerConfig(FindRuntimePlayerConfigPath(projectRoot));
             const std::string packageName = SanitizePathComponent(
                 projectConfig.PackageName.empty()
                     ? BuildProjectPackageKey(repositoryRoot, projectRoot).generic_string()
                     : projectConfig.PackageName);
             return repositoryRoot
                 / "Builds"
-                / "Windows"
-                / "Player"
+                / "Win64"
                 / packageName;
         }
 
-        // The editor package is the tool itself: no per-project nesting.
-        // Layout: Builds/Windows/Editor.
+        // The editor package is the portable tool: no per-project nesting.
+        // Layout: Builds/Win64/Editor.
         static std::filesystem::path DefaultEditorPackageDirectory(const std::filesystem::path& repositoryRoot)
         {
             return repositoryRoot
                 / "Builds"
-                / "Windows"
+                / "Win64"
                 / "Editor";
         }
 
@@ -453,6 +453,7 @@ namespace Wheatear {
             const std::string extension = StringUtils::ToLower(relativePath.extension().generic_string());
             if (extension == ".yaml" || extension == ".yml" || extension == ".json" ||
                 extension == ".wt" || extension == ".wts" || extension == ".vn" ||
+                extension == ".wtb" ||
                 extension == ".glsl" || extension == ".vert" || extension == ".frag" ||
                 extension == ".geom" || extension == ".comp" || extension == ".hlsl")
             {
@@ -690,6 +691,7 @@ namespace Wheatear {
             const std::filesystem::path& reportPath,
             const std::filesystem::path& assetPackPath,
             const std::filesystem::path& editorOutputDirectory,
+            const std::string& gameExecutableName,
             std::string* errorMessage)
         {
             std::ofstream output(reportPath, std::ios::binary | std::ios::trunc);
@@ -707,9 +709,9 @@ namespace Wheatear {
             output << "================================\n\n";
             output << "Startup Scene: " << options.StartupScene.generic_string() << "\n";
             output << "Configuration: " << options.Configuration << "\n";
-            output << "Runtime Executable: WheatearSandbox.exe\n";
+            output << "Runtime Executable: " << gameExecutableName << "\n";
             output << "Editor Package: " << editorOutputDirectory.generic_string() << "\n";
-            output << "Loose Runtime Data: text configs, scenes, scripts, shaders and audio\n";
+            output << "Content Pack: Content/Paks/content.wtpack\n";
             output << "Packed Assets: " << report.IncludedAssets.size() << "\n";
             output << "Source Asset Bytes: " << report.IncludedBytes << "\n";
             output << "Asset Pack Bytes: " << (error ? 0 : packBytes) << "\n";
@@ -785,6 +787,35 @@ namespace Wheatear {
             return Fail("Startup scene is not saved or does not exist.");
 
         const std::filesystem::path projectRoot = AssetPath::GetProjectRoot();
+
+        // Never ship content that the engine itself considers invalid.
+        const ContentValidationReport contentReport =
+            ContentValidator::ValidateDirectory(AssetPath::GetAssetRoot());
+        if (contentReport.HasErrors())
+        {
+            std::string message = "Content validation failed with "
+                + std::to_string(contentReport.ErrorCount())
+                + " error(s). Fix them in Project Health -> Content Validation.";
+            for (const ContentIssue& issue : contentReport.Issues)
+            {
+                if (issue.Severity != ContentIssueSeverity::Error)
+                    continue;
+                message += "\n" + issue.Asset.generic_string();
+                if (issue.SourceLine > 0)
+                    message += ":" + std::to_string(issue.SourceLine);
+                message += ": " + issue.Message;
+            }
+            return Fail(message, projectRoot);
+        }
+
+        const RuntimePlayerConfig sourceConfig = LoadRuntimePlayerConfig(
+            FindRuntimePlayerConfigPath(projectRoot));
+        const std::string projectName = SanitizePathComponent(
+            sourceConfig.ProjectName.empty()
+                ? projectRoot.filename().generic_string()
+                : sourceConfig.ProjectName);
+        const std::string gameName = SanitizePathComponent(
+            sourceConfig.PackageName.empty() ? projectName : sourceConfig.PackageName);
         const std::filesystem::path outputDirectory = options.OutputDirectory.empty()
             ? DefaultPlayerPackageDirectory(repositoryRoot, projectRoot)
             : options.OutputDirectory;
@@ -916,11 +947,61 @@ namespace Wheatear {
             return Fail("Failed to copy editor binaries: " + errorMessage, editorOutputDirectory);
         }
 
+        // The developer runtime host becomes the game's own executable name.
+        const std::filesystem::path sandboxExecutable = outputDirectory / "WheatearSandbox.exe";
+        const std::filesystem::path gameExecutable = outputDirectory / (gameName + ".exe");
+        if (!std::filesystem::exists(sandboxExecutable))
+            return Fail("WheatearSandbox.exe was not copied into the package.", outputDirectory);
+        if (FileSystem::Normalize(sandboxExecutable) != FileSystem::Normalize(gameExecutable))
+        {
+            std::filesystem::rename(sandboxExecutable, gameExecutable, error);
+            if (error)
+                return Fail("Failed to rename runtime executable: " + error.message(), outputDirectory);
+        }
+        const std::filesystem::path sandboxPdb = outputDirectory / "WheatearSandbox.pdb";
+        if (std::filesystem::exists(sandboxPdb))
+            std::filesystem::rename(sandboxPdb,
+                outputDirectory / (gameName + ".pdb"), error);
+
         const std::filesystem::path editorResources = repositoryRoot / "WheatearEditor" / "Resources";
         if (std::filesystem::exists(editorResources) &&
             !FileSystem::CopyDirectoryRecursive(editorResources, editorOutputDirectory / "Resources", {}, &errorMessage))
         {
             return Fail("Failed to copy editor resources: " + errorMessage, editorOutputDirectory);
+        }
+
+        // The editor is portable: shaders/scripts and content templates live
+        // beside the executable so it can run outside the repository.
+        const std::filesystem::path editorAssets = repositoryRoot / "WheatearEditor" / "assets";
+        if (std::filesystem::exists(editorAssets))
+        {
+            const std::filesystem::path editorAssetRoot = editorOutputDirectory / "assets";
+            if (!FileSystem::CopyDirectoryRecursive(editorAssets, editorAssetRoot,
+                [](const std::filesystem::path& relative, bool)
+                {
+                    for (const auto& part : relative)
+                    {
+                        const std::string name = part.generic_string();
+                        if (name == ".wheatear" || name == "cache")
+                            return true;
+                    }
+                    return false;
+                },
+                &errorMessage))
+            {
+                return Fail("Failed to copy editor shaders/scripts: " + errorMessage,
+                    editorOutputDirectory);
+            }
+        }
+
+        const std::filesystem::path contentTemplates =
+            repositoryRoot / "WheatearEditor" / "ContentTemplates";
+        if (std::filesystem::exists(contentTemplates) &&
+            !FileSystem::CopyDirectoryRecursive(contentTemplates,
+                editorOutputDirectory / "ContentTemplates", {}, &errorMessage))
+        {
+            return Fail("Failed to copy project content templates: " + errorMessage,
+                editorOutputDirectory);
         }
 
         std::filesystem::path startupSceneSource;
@@ -944,6 +1025,7 @@ namespace Wheatear {
                 preflightReportPath,
                 {},
                 editorOutputDirectory,
+                gameName + ".exe",
                 &errorMessage);
 
             return Fail("Package preflight failed: " +
@@ -952,39 +1034,66 @@ namespace Wheatear {
                 outputDirectory);
         }
 
-        const std::vector<std::filesystem::path>& packageAssets = dependencyReport.IncludedAssets;
+        std::vector<std::filesystem::path> packageAssets = dependencyReport.IncludedAssets;
         if (packageAssets.empty())
             return Fail("No assets were collected for the package.", outputDirectory);
 
-        const std::filesystem::path assetPackPath = outputDirectory / kAssetPackFilename;
+
+        const std::filesystem::path assetPackPath =
+            outputDirectory / "Content" / "Paks" / kAssetPackFilename;
+        std::filesystem::create_directories(assetPackPath.parent_path(), error);
         const auto writePackStarted = std::chrono::steady_clock::now();
         if (!WriteAssetPack(AssetPath::GetProjectRoot(), engineRoot, packageAssets, &dependencyReport.AssetSources, assetPackPath, &errorMessage))
             return Fail("Failed to write asset pack: " + errorMessage, outputDirectory);
         LogTimedStep("Asset pack write", writePackStarted);
 
-        const auto copyLooseStarted = std::chrono::steady_clock::now();
-        if (!CopyLooseRuntimeDataAssets(AssetPath::GetProjectRoot(), engineRoot, packageAssets, &dependencyReport.AssetSources, outputDirectory, &errorMessage))
-            return Fail("Failed to copy loose runtime data assets: " + errorMessage, outputDirectory);
-        LogTimedStep("Loose runtime data copy", copyLooseStarted);
-
         const std::filesystem::path reportPath = outputDirectory / "package_report.txt";
         const auto reportStarted = std::chrono::steady_clock::now();
-        if (!WritePackageReport(options, dependencyReport, reportPath, assetPackPath, editorOutputDirectory, &errorMessage))
+        if (!WritePackageReport(options, dependencyReport, reportPath, assetPackPath,
+            editorOutputDirectory, gameName + ".exe", &errorMessage))
             return Fail("Failed to write package report: " + errorMessage, outputDirectory);
         LogTimedStep("Package report write", reportStarted);
 
         RuntimePlayerConfig playerConfig;
+        playerConfig.ProjectName = projectName;
+        playerConfig.ProjectVersion = sourceConfig.ProjectVersion;
+        playerConfig.Description = sourceConfig.Description;
+        playerConfig.Workspace = sourceConfig.Workspace;
+        playerConfig.PackageName = gameName;
         playerConfig.StartupScene = startupScene;
         const auto configStarted = std::chrono::steady_clock::now();
-        if (!SaveRuntimePlayerConfig(outputDirectory / "assets" / "game" / "player.config",
-            playerConfig,
-            EngineInfo::EditorName))
+        if (!SaveProjectConfig(outputDirectory, playerConfig, EngineInfo::EditorName))
         {
-            return Fail("Failed to write player.config.", outputDirectory);
+            return Fail("Failed to write project config.", outputDirectory);
+        }
+        std::filesystem::create_directories(outputDirectory / "Saved" / "Logs", error);
+        std::filesystem::create_directories(outputDirectory / "Saved" / "Config", error);
+        const std::filesystem::path sourceRegistry =
+            projectRoot / "Intermediate" / "AssetRegistry.yaml";
+        if (std::filesystem::exists(sourceRegistry))
+        {
+            std::filesystem::create_directories(outputDirectory / "Intermediate", error);
+            std::filesystem::copy_file(sourceRegistry,
+                outputDirectory / "Intermediate" / "AssetRegistry.yaml",
+                std::filesystem::copy_options::overwrite_existing, error);
         }
         LogTimedStep("Player config write", configStarted);
 
-        const std::filesystem::path executablePath = outputDirectory / "WheatearSandbox.exe";
+        {
+            std::ofstream readme(outputDirectory / "README.txt", std::ios::trunc);
+            readme << gameName << "\n"
+                << "================================\n\n"
+                << "This is a packaged Wheatear game. Launch " << gameName << ".exe.\n"
+                << "Game content: Content/Paks/" << kAssetPackFilename << "\n"
+                << "Settings: Config/DefaultGame.ini\n"
+                << "Saves/logs: Saved/\n";
+        }
+
+        // Remove the transient legacy asset staging folder if a preflight or
+        // external startup scene created one. All runtime data is in the pack.
+        std::filesystem::remove_all(outputDirectory / "assets", error);
+
+        const std::filesystem::path executablePath = gameExecutable;
         const std::filesystem::path editorExecutablePath = editorOutputDirectory / "WheatearEditor.exe";
         WT_CORE_INFO("PlayerPackager: package completed '{}' with {} packed assets",
             outputDirectory.string(),
@@ -995,8 +1104,8 @@ namespace Wheatear {
         result.Success = true;
         result.Message = "Package completed: Player=" + outputDirectory.string() +
                 ", Editor=" + editorOutputDirectory.string() +
-                " (Sandbox uses " + kAssetPackFilename +
-                ", Editor uses WheatearEditor/assets)";
+                " (Game exe: " + executablePath.filename().generic_string() +
+                ", Content pack: Content/Paks/" + kAssetPackFilename + ")";
         result.PackageDirectory = outputDirectory;
         result.EditorPackageDirectory = editorOutputDirectory;
         result.ExecutablePath = executablePath;

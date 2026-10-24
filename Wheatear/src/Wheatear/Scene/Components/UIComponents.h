@@ -88,6 +88,7 @@ namespace Wheatear {
     {
         glm::vec4      Color = { 1.0f, 1.0f, 1.0f, 1.0f };
         Ref<Texture2D> Texture = nullptr;
+        UUID           TextureAsset = UUID(0);
         glm::vec2      UVMin = { 0.0f, 0.0f };
         glm::vec2      UVMax = { 1.0f, 1.0f };
 

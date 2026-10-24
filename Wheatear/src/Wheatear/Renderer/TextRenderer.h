@@ -45,6 +45,7 @@ namespace Wheatear {
 
         static Ref<Font> GetDefaultFont();
         static void SetDefaultFont(const Ref<Font>& font);
+        static void Shutdown();
 
     private:
         static Ref<Font> s_DefaultFont;

@@ -27,7 +27,16 @@ namespace Wheatear {
     class WHEATEAR_API CommandBus
     {
     public:
-        static void RegisterGameplayCommandPrefix(const std::string& prefix);
+        static void RegisterGameplayCommandPrefix(const std::string& prefix,
+            const std::string& category = {},
+            const std::string& description = {});
+
+        // Unified command catalog / validation used by .wts, WAO, the editor
+        // and future scripting hosts. Execution still lives in the owning
+        // module; this only answers "is the command known and who owns it?".
+        static bool ValidateCommand(const std::string& command,
+            std::string* error = nullptr);
+        static std::vector<std::string> DescribeCommandPrefixes();
 
         static bool IsNativeCommand(const std::string& command);
         static CommandResult Execute(Scene* scene, const std::string& command);

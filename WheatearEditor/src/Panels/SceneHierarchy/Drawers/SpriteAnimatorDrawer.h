@@ -20,5 +20,6 @@ namespace Wheatear {
     };
 
     void DrawSpriteAnimatorComponent(Entity entity);
+    void DrawAnimator3DComponent(Entity entity);
 
 } // namespace Wheatear

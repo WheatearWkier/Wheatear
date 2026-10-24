@@ -28,6 +28,8 @@ namespace Wheatear {
             c.RuntimeEventName.clear();
             c.RuntimeInstructionIndex = 0;
             c.RuntimeWaitRemaining = 0.0f;
+            c.RuntimeEventResult = 0.0;
+            c.RuntimeFrames.clear();
         }
     };
 

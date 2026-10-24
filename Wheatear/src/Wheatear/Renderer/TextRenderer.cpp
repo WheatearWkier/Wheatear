@@ -51,6 +51,11 @@ namespace Wheatear {
         s_DefaultFont = font;
     }
 
+    void TextRenderer::Shutdown()
+    {
+        s_DefaultFont.reset();
+    }
+
     Ref<Font> TextRenderer::GetDefaultFont()
     {
         if (s_DefaultFont && s_DefaultFont->IsLoaded())

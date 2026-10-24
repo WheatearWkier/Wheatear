@@ -47,6 +47,10 @@ namespace Wheatear {
         EditorWidgets::InputString(EditorLocale::Text("Save Directory", "存档目录"), policy.SaveDirectory);
 
         int autoLoadSlot = policy.AutoLoadSlot;
+        ImGui::SetNextItemWidth(std::max(90.0f,
+            ImGui::GetContentRegionAvail().x
+            - ImGui::CalcTextSize(EditorLocale::Text("Auto Load Slot", "自动读取槽位")).x
+            - ImGui::GetStyle().ItemInnerSpacing.x));
         if (ImGui::DragInt(EditorLocale::Text("Auto Load Slot", "自动读取槽位"),
             &autoLoadSlot,
             1.0f,
@@ -87,6 +91,8 @@ namespace Wheatear {
 
     void SceneHierarchyPanel::DrawComponents(Entity entity)
     {
+        const float textScale = ImGui::GetFontSize() / 16.0f;
+        const float addButtonWidth = 132.0f * textScale;
         if (entity.HasComponent<TagComponent>())
         {
             auto& tag = entity.GetComponent<TagComponent>().Tag;
@@ -100,6 +106,9 @@ namespace Wheatear {
                 m_RenameRequested = false;
             }
 
+            ImGui::SetNextItemWidth(std::max(80.0f,
+                ImGui::GetContentRegionAvail().x - addButtonWidth
+                - ImGui::GetStyle().ItemSpacing.x));
             if (ImGui::InputText("##Tag", buffer, sizeof(buffer)))
             {
                 tag = buffer;
@@ -109,20 +118,35 @@ namespace Wheatear {
         }
 
         ImGui::SameLine();
-        ImGui::PushItemWidth(-1);
 
         // Structural edits (add/remove/reset components) are disabled while
         // playing: the runtime copy is ephemeral and such edits would be
         // silently discarded on stop.
         ImGui::BeginDisabled(m_RuntimeMode);
-        if (ImGui::Button(EditorLocale::Text("Add Component", "添加组件")))
-            ImGui::OpenPopup("AddComponent");
+        if (ImGui::Button(EditorLocale::Text("+ Add Component", "+ 添加组件"),
+                ImVec2(addButtonWidth, 0.0f)))
+        {
+            m_AddComponentPopupRequested = true;
+            m_AddComponentPopupJustOpened = true;
+        }
         ImGui::EndDisabled();
+
+        if (m_AddComponentPopupRequested
+            && !ImGui::IsPopupOpen("##PropertiesContext"))
+        {
+            ImGui::OpenPopup("AddComponent");
+            m_AddComponentPopupRequested = false;
+        }
 
         if (ImGui::BeginPopup("AddComponent"))
         {
-            ImGui::SetNextItemWidth(240.0f);
-            ImGui::SetKeyboardFocusHere();
+            if (m_AddComponentPopupJustOpened)
+            {
+                m_AddComponentSearch[0] = '\0';
+                ImGui::SetKeyboardFocusHere();
+                m_AddComponentPopupJustOpened = false;
+            }
+            ImGui::SetNextItemWidth(280.0f * textScale);
             ImGui::InputTextWithHint("##AddComponentSearch",
                 EditorLocale::Text("Search components...", "搜索组件..."),
                 m_AddComponentSearch, sizeof(m_AddComponentSearch));
@@ -130,6 +154,9 @@ namespace Wheatear {
 
             const std::string query = StringUtils::ToLower(m_AddComponentSearch);
 
+            ImGui::BeginChild("##AddComponentList",
+                ImVec2(320.0f * textScale, 360.0f * textScale),
+                false, ImGuiWindowFlags_AlwaysVerticalScrollbar);
             std::string currentCategory;
             EditorComponentRegistry::ForEach([&](const EditorComponentDescriptor& descriptor)
             {
@@ -149,21 +176,26 @@ namespace Wheatear {
                     ImGui::TextDisabled("%s", currentCategory.c_str());
                 }
 
-                if (ImGui::MenuItem(label.c_str()))
+                if (ImGui::Selectable(label.c_str()))
                 {
                     descriptor.Add(m_SelectionContext);
                     m_AddComponentSearch[0] = '\0';
                     ImGui::CloseCurrentPopup();
                 }
             });
+            ImGui::EndChild();
+
+            ImGui::Separator();
+            if (ImGui::Button(EditorLocale::Text("Cancel", "取消"),
+                    ImVec2(110.0f * textScale, 0.0f)))
+            {
+                ImGui::CloseCurrentPopup();
+            }
+            ImGui::SameLine();
+            ImGui::TextDisabled("%s", EditorLocale::Text(
+                "Type to filter; Esc closes", "输入以筛选；Esc 关闭"));
             ImGui::EndPopup();
         }
-
-        ImGui::PopItemWidth();
-
-        bool hiddenInEditor = IsEntityHiddenInEditor(entity);
-        if (ImGui::Checkbox(EditorLocale::Text("Hidden in Editor", "编辑器中隐藏"), &hiddenInEditor))
-            SetEntityHiddenInEditor(entity, hiddenInEditor);
 
         EditorComponentRegistry::ForEach([entity](const EditorComponentDescriptor& descriptor)
         {

@@ -2,6 +2,8 @@
 #include "VisualNovelRuntime.h"
 
 #include "Wheatear/Core/Log.h"
+#include "Wheatear/Logic/LogicDiagnostics.h"
+#include "Wheatear/Logic/LogicExpression.h"
 #include "Wheatear/Modules/Progression/GameProgress.h"
 #include "Wheatear/Utils/StringUtils.h"
 
@@ -166,27 +168,6 @@ namespace Wheatear {
             return index;
         }
 
-        static std::vector<std::string> SplitWords(const std::string& value)
-        {
-            std::vector<std::string> words;
-            std::istringstream stream(value);
-            std::string word;
-            while (stream >> word)
-                words.push_back(word);
-            return words;
-        }
-
-        static bool CompareFloat(float left, const std::string& op, float right)
-        {
-            if (op == "==" || op == "=") return left == right;
-            if (op == "!=") return left != right;
-            if (op == ">") return left > right;
-            if (op == ">=") return left >= right;
-            if (op == "<") return left < right;
-            if (op == "<=") return left <= right;
-            return false;
-        }
-
         static bool TryParseFloat(const std::string& value, float& result)
         {
             if (value.empty())
@@ -211,61 +192,23 @@ namespace Wheatear {
     bool EvaluateVNExpression(const std::string& expression,
         const std::unordered_map<std::string, float>& variables)
     {
-        std::vector<std::string> words = SplitWords(expression);
-        if (words.empty())
-            return false;
+        const std::string normalized = Logic::NormalizeCondition(expression);
+        Logic::VariableScope scope;
+        for (const auto& [name, value] : variables)
+            scope.SetLocal(name, static_cast<double>(value));
+        const Logic::EvalContext context = scope.MakeContext();
 
-        bool negate = false;
-        if (ToLower(words.front()) == "not")
-        {
-            negate = true;
-            words.erase(words.begin());
-        }
-        if (words.empty())
-            return false;
-
-        const std::string kind = ToLower(words[0]);
         bool value = false;
-
-        if (kind == "always")
+        std::string error;
+        if (!Logic::EvaluateBool(normalized, context, &value, &error))
         {
-            value = true;
+            WT_CORE_WARN("VisualNovel: invalid condition '{}' ({})",
+                expression, error);
+            Logic::Diagnostics::Warn("visual-novel",
+                "Invalid condition '" + expression + "': " + error);
+            return false;
         }
-        else if (kind == "never")
-        {
-            value = false;
-        }
-        else if (kind == "flag" && words.size() >= 2)
-        {
-            // Progression story flags stay authoritative for cross-system
-            // conditions (set via progression:set_flag / dungeon clears).
-            value = GameProgress::GetState().StoryFlags.count(words[1]) > 0;
-        }
-        else if (words.size() >= 3)
-        {
-            // <operand> OP <operand>  — left may be a variable or number.
-            float left = 0.0f;
-            if (!TryParseFloat(words[0], left))
-            {
-                const auto it = variables.find(words[0]);
-                if (it != variables.end())
-                    left = it->second;
-                else
-                    return negate ? true : false; // unknown variable -> false
-            }
-            float right = 0.0f;
-            if (!TryParseFloat(words[2], right))
-            {
-                const auto it = variables.find(words[2]);
-                if (it != variables.end())
-                    right = it->second;
-                else
-                    return negate ? true : false; // unknown variable -> false
-            }
-            value = CompareFloat(left, words[1], right);
-        }
-
-        return negate ? !value : value;
+        return value;
     }
 
     bool VisualNovelRuntime::LoadScript(const std::filesystem::path& filepath)
@@ -277,7 +220,90 @@ namespace Wheatear {
     void VisualNovelRuntime::SetScript(const VisualNovelScript& script)
     {
         m_Script = script;
+        const std::string source = m_Script.GetSourcePath().empty()
+            ? std::string("<inline>")
+            : m_Script.GetSourcePath().generic_string();
+        for (const VisualNovelIssue& issue : m_Script.GetIssues())
+        {
+            const std::string location = source + ":" + std::to_string(issue.SourceLine);
+            if (issue.Error)
+            {
+                WT_CORE_ERROR("VisualNovel {}: {}", location, issue.Message);
+                Logic::Diagnostics::Error("visual-novel",
+                    location + ": " + issue.Message);
+            }
+            else
+            {
+                WT_CORE_WARN("VisualNovel {}: {}", location, issue.Message);
+                Logic::Diagnostics::Warn("visual-novel",
+                    location + ": " + issue.Message);
+            }
+        }
         Restart();
+    }
+
+    void VisualNovelRuntime::SetScriptPreservingPosition(const VisualNovelScript& script)
+    {
+        if (m_Script.IsEmpty() || script.IsEmpty())
+        {
+            SetScript(script);
+            return;
+        }
+
+        // Find the label governing the current position. Resuming at the
+        // nearest label is stable across line insertions/removals, unlike a
+        // raw vector index.
+        std::string nearestLabel;
+        size_t nearestIndex = std::numeric_limits<size_t>::max();
+        for (const auto& [label, index] : m_Script.GetLabels())
+        {
+            if (index <= m_CurrentLineIndex
+                && (nearestIndex == std::numeric_limits<size_t>::max()
+                    || index >= nearestIndex))
+            {
+                nearestIndex = index;
+                nearestLabel = label;
+            }
+        }
+
+        const size_t previousIndex = m_CurrentLineIndex;
+        const size_t labelOffset = nearestLabel.empty()
+            ? 0
+            : previousIndex - nearestIndex;
+        const auto variables = m_Variables;
+        const auto history = m_History;
+        const bool autoPlay = m_AutoPlay;
+
+        SetScript(script);
+
+        m_Variables = variables;
+        m_History = history;
+        m_AutoPlay = autoPlay;
+
+        size_t target = std::numeric_limits<size_t>::max();
+        if (!nearestLabel.empty())
+            target = script.FindLabel(nearestLabel);
+        if (target != std::numeric_limits<size_t>::max())
+        {
+            const size_t maxIndex = script.GetLines().empty()
+                ? 0
+                : script.GetLines().size() - 1;
+            target = labelOffset <= maxIndex - std::min(target, maxIndex)
+                ? target + labelOffset
+                : maxIndex;
+            target = std::min(target, maxIndex);
+        }
+        else if (!script.GetLines().empty())
+        {
+            target = std::min(previousIndex, script.GetLines().size() - 1);
+            m_VisibleCharacters = 0.0f;
+        }
+        if (target != std::numeric_limits<size_t>::max())
+        {
+            m_CurrentLineIndex = target;
+            m_Finished = false;
+            NormalizeCurrentNode();
+        }
     }
 
     void VisualNovelRuntime::Restart()
@@ -514,6 +540,18 @@ namespace Wheatear {
         return line && line->Type == VisualNovelLineType::Choice;
     }
 
+    bool VisualNovelRuntime::SkipWaitingChoice()
+    {
+        if (!IsWaitingForChoice())
+            return false;
+
+        ++m_CurrentLineIndex;
+        m_VisibleCharacters = 0.0f;
+        m_Finished = false;
+        NormalizeCurrentNode();
+        return true;
+    }
+
     std::string VisualNovelRuntime::GetVisibleText() const
     {
         const VisualNovelLine* line = GetCurrentLine();
@@ -554,7 +592,16 @@ namespace Wheatear {
     {
         const std::filesystem::path parent = filepath.parent_path();
         if (!parent.empty())
-            std::filesystem::create_directories(parent);
+        {
+            std::error_code directoryError;
+            std::filesystem::create_directories(parent, directoryError);
+            if (directoryError)
+            {
+                WT_CORE_WARN("VisualNovelRuntime: cannot create save directory '{}'",
+                    parent.string());
+                return false;
+            }
+        }
 
         std::ofstream file(filepath, std::ios::trunc);
         if (!file.is_open())
@@ -563,8 +610,30 @@ namespace Wheatear {
             return false;
         }
 
-        file << "VNSTATE 1\n";
+        file << "VNSTATE 2\n";
         file << "SOURCE " << EscapeField(m_Script.GetSourcePath().string()) << "\n";
+        file << "HASH " << m_Script.GetSourceHash() << "\n";
+
+        // Remember the nearest preceding label so a script edit that inserts or
+        // removes lines can still resume at a meaningful node.
+        std::string nearestLabel;
+        size_t nearestIndex = std::numeric_limits<size_t>::max();
+        for (const auto& [label, index] : m_Script.GetLabels())
+        {
+            if (index <= m_CurrentLineIndex
+                && (nearestIndex == std::numeric_limits<size_t>::max()
+                    || index >= nearestIndex))
+            {
+                nearestIndex = index;
+                nearestLabel = label;
+            }
+        }
+        file << "LABEL " << EscapeField(nearestLabel) << "\n";
+        file << "OFFSET "
+             << (nearestLabel.empty() || nearestIndex == std::numeric_limits<size_t>::max()
+                    ? 0
+                    : m_CurrentLineIndex - nearestIndex)
+             << "\n";
         file << "INDEX " << m_CurrentLineIndex << "\n";
         file << "VISIBLE " << m_VisibleCharacters << "\n";
         file << "FINISHED " << (m_Finished ? 1 : 0) << "\n";
@@ -599,6 +668,10 @@ namespace Wheatear {
 
 std::string line;
         std::filesystem::path savedSource;
+        uint64_t savedHash = 0;
+        bool hasSavedHash = false;
+        std::string savedLabel;
+        size_t savedOffset = 0;
         size_t savedIndex = 0;
         float savedVisibleCharacters = 0.0f;
         bool savedFinished = false;
@@ -614,6 +687,30 @@ std::string line;
             if (StartsWith(line, "SOURCE "))
             {
                 savedSource = UnescapeField(PayloadAfter(line, "SOURCE "));
+                continue;
+            }
+
+            if (StartsWith(line, "HASH "))
+            {
+                try
+                {
+                    savedHash = std::stoull(PayloadAfter(line, "HASH "));
+                    hasSavedHash = true;
+                }
+                catch (...) { hasSavedHash = false; }
+                continue;
+            }
+
+            if (StartsWith(line, "LABEL "))
+            {
+                savedLabel = UnescapeField(PayloadAfter(line, "LABEL "));
+                continue;
+            }
+
+            if (StartsWith(line, "OFFSET "))
+            {
+                try { savedOffset = static_cast<size_t>(std::stoull(PayloadAfter(line, "OFFSET "))); }
+                catch (...) { savedOffset = 0; }
                 continue;
             }
 
@@ -677,12 +774,45 @@ std::string line;
         }
 
         if (!savedSource.empty() && savedSource != m_Script.GetSourcePath())
-            LoadScript(savedSource);
+        {
+            // Load into a temporary first: a save from another machine or a
+            // renamed asset must not wipe the live runtime.
+            const VisualNovelScript candidate = VisualNovelScript::FromFile(savedSource);
+            if (!candidate.IsEmpty())
+                m_Script = candidate;
+            else
+                WT_CORE_WARN("VisualNovelRuntime: saved source '{}' is missing or empty; "
+                    "keeping the current script.", savedSource.string());
+        }
 
         if (m_Script.IsEmpty())
             return false;
 
-        m_CurrentLineIndex = savedIndex;
+        const bool hashMatches = hasSavedHash
+            && savedHash == m_Script.GetSourceHash();
+        const bool scriptChanged = hasSavedHash && !hashMatches;
+        size_t resolvedIndex = savedIndex;
+        if (!hashMatches && !savedLabel.empty())
+        {
+            const size_t labelIndex = m_Script.FindLabel(savedLabel);
+            const size_t maxIndex = m_Script.GetLines().empty()
+                ? 0
+                : m_Script.GetLines().size() - 1;
+            if (labelIndex != std::numeric_limits<size_t>::max())
+            {
+                const size_t remaining = labelIndex <= maxIndex
+                    ? maxIndex - labelIndex
+                    : 0;
+                resolvedIndex = labelIndex + std::min(savedOffset, remaining);
+            }
+            else if (scriptChanged)
+            {
+                WT_CORE_WARN("VisualNovelRuntime: save label '{}' no longer exists; "
+                    "falling back to line index.", savedLabel);
+            }
+        }
+
+        m_CurrentLineIndex = resolvedIndex;
         if (m_CurrentLineIndex >= m_Script.GetLines().size())
         {
             m_CurrentLineIndex = m_Script.GetLines().empty()
@@ -745,15 +875,22 @@ std::string line;
 
             if (line.Type == VisualNovelLineType::Set)
             {
-                // Assign a literal number or copy another variable, then advance.
-                float value = 0.0f;
-                if (!TryParseFloat(line.VariableValue, value))
+                // @set accepts the shared expression language, so authors can
+                // write "@set gold = gold + 5" or "@set hp = maxhp - damage".
+                Logic::VariableScope scope;
+                for (const auto& [name, value] : m_Variables)
+                    scope.SetLocal(name, static_cast<double>(value));
+                double value = 0.0;
+                std::string error;
+                if (!Logic::Evaluate(line.VariableValue, scope.MakeContext(), &value, &error))
                 {
-                    const auto it = m_Variables.find(line.VariableValue);
-                    if (it != m_Variables.end())
-                        value = it->second;
+                    WT_CORE_WARN("VisualNovel: invalid set expression '{}' for '{}' ({})",
+                        line.VariableValue, line.VariableName, error);
+                    Logic::Diagnostics::Warn("visual-novel",
+                        "Invalid set expression '" + line.VariableValue + "' for '"
+                            + line.VariableName + "': " + error);
                 }
-                m_Variables[line.VariableName] = value;
+                m_Variables[line.VariableName] = static_cast<float>(value);
                 ++m_CurrentLineIndex;
                 continue;
             }

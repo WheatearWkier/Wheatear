@@ -12,6 +12,7 @@
 #include "Wheatear/Core/Core.h"
 
 #include <cstdint>
+#include <vector>
 #include <glm/glm.hpp>
 
 namespace Wheatear {
@@ -24,6 +25,7 @@ namespace Wheatear {
     struct IBLResult;
 
     static constexpr uint32_t k_MaxPointLights = 8;
+    static constexpr uint32_t k_MaxBones = 256;
 
     class Renderer3D
     {
@@ -48,16 +50,25 @@ namespace Wheatear {
 
         static void BeginShadowPass(const glm::mat4& lightSpaceMatrix);
         static void EndShadowPass();
-        static void DrawMeshShadow(const glm::mat4& transform, const Ref<Mesh>& mesh);
+        static void DrawMeshShadow(const glm::mat4& transform, const Ref<Mesh>& mesh,
+                                   const std::vector<glm::mat4>* bonePalette = nullptr);
 
         static uint32_t          GetShadowMapID();
         static const glm::mat4&  GetLightSpaceMatrix();
+        static const glm::mat4&  GetViewProjection();
         static Ref<Framebuffer>& GetShadowMapFB();
 
         static void DrawMesh(const glm::mat4& transform,
                              const Ref<Mesh>& mesh,
                              const Ref<Material>& material,
-                             int entityID = -1);
+                             int entityID = -1,
+                             const std::vector<glm::mat4>* bonePalette = nullptr);
+
+        // One draw call for N static instances of the same mesh/material.
+        static void DrawMeshInstanced(const std::vector<glm::mat4>& transforms,
+                                      const Ref<Mesh>& mesh,
+                                      const Ref<Material>& material,
+                                      int entityID = -1);
 
         // Load a precomputed IBL set (call IBLPrecompute::Compute() first).
         // Binds textures to slots 11, 12, 13 and flips u_HasIBL = 1.

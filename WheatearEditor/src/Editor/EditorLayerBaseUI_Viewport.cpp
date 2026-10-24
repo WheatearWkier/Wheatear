@@ -120,8 +120,76 @@ namespace Wheatear {
 
     void EditorLayerBase::UI_Viewport()
     {
+        if (m_RequestViewportFocus)
+        {
+            // Select the Viewport tab inside its dock node. FocusWindow() does
+            // not change the selected tab, so click the tab through the
+            // internal tab bar state once the window exists.
+            if (ImGuiWindow* viewportWindow = ImGui::FindWindowByName("Viewport"))
+            {
+                if (viewportWindow->DockNode && viewportWindow->DockNode->TabBar)
+                {
+                    viewportWindow->DockNode->TabBar->NextSelectedTabId =
+                        viewportWindow->TabId;
+                    m_RequestViewportFocus = false;
+                }
+            }
+        }
         ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2{ 0, 0 });
         ImGui::Begin("Viewport");
+
+        // Compact in-viewport tool strip. It is part of the panel, not a
+        // floating overlay, so it never covers scene tabs or the status bar.
+        const float uiScale = Application::Get().GetImGuiLayer()
+            ? Application::Get().GetImGuiLayer()->GetUiScale()
+            : 1.0f;
+        ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding,
+            ImVec2(8.0f * uiScale, 4.0f * uiScale));
+        ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing,
+            ImVec2(4.0f * uiScale, 4.0f * uiScale));
+        ImGui::PushStyleColor(ImGuiCol_ChildBg,
+            ImGui::GetStyleColorVec4(ImGuiCol_MenuBarBg));
+        ImGui::BeginChild("##ViewportToolStrip",
+            ImVec2(0.0f, 40.0f * uiScale),
+            false, ImGuiWindowFlags_NoScrollbar |
+                   ImGuiWindowFlags_NoScrollWithMouse);
+        auto gizmoTool = [&](const char* label, int operation)
+        {
+            const bool active = m_GizmoType == operation;
+            if (active)
+            {
+                ImVec4 accent = ImGui::GetStyleColorVec4(ImGuiCol_CheckMark);
+                accent.w = 0.22f;
+                ImGui::PushStyleColor(ImGuiCol_Button, accent);
+            }
+            if (ImGui::SmallButton(label))
+                m_GizmoType = operation;
+            if (active)
+                ImGui::PopStyleColor();
+            ImGui::SameLine();
+        };
+        gizmoTool(EditorLocale::Text("Select (Q)", "选择 (Q)"), -1);
+        gizmoTool(EditorLocale::Text("Move (W)", "移动 (W)"), ImGuizmo::OPERATION::TRANSLATE);
+        gizmoTool(EditorLocale::Text("Rotate (E)", "旋转 (E)"), ImGuizmo::OPERATION::ROTATE);
+        gizmoTool(EditorLocale::Text("Scale (R)", "缩放 (R)"), ImGuizmo::OPERATION::SCALE);
+        ImGui::SeparatorEx(ImGuiSeparatorFlags_Vertical,
+            18.0f * uiScale);
+        ImGui::SameLine();
+        if (ImGui::SmallButton(EditorLocale::Text("Frame (F)", "聚焦 (F)")))
+        {
+            if (Entity selected = m_SceneHierarchyPanel->GetSelectedEntity())
+                ActivateHierarchyEntity(selected);
+            else
+                FrameEditorCameraOnScene();
+        }
+        ImGui::SameLine();
+        ImGui::TextDisabled("%s",
+            m_SceneState == SceneState::Play
+                ? EditorLocale::Text("Play mode", "播放模式")
+                : EditorLocale::Text("Edit mode", "编辑模式"));
+        ImGui::EndChild();
+        ImGui::PopStyleColor();
+        ImGui::PopStyleVar(2);
 
         const ImVec2 viewportOffset = ImGui::GetCursorPos();
         m_ViewportFocused = ImGui::IsWindowFocused();
@@ -139,44 +207,11 @@ namespace Wheatear {
         m_ViewportBounds[0] = { minBound.x, minBound.y };
         m_ViewportBounds[1] = { minBound.x + m_ViewportSize.x, minBound.y + m_ViewportSize.y };
 
-        const auto w = static_cast<uint32_t>(std::max(m_ViewportSize.x, 0.0f));
-        const auto h = static_cast<uint32_t>(std::max(m_ViewportSize.y, 0.0f));
-        if (m_Framebuffer && m_ActiveScene && w > 0 && h > 0)
-        {
-            const auto& spec = m_Framebuffer->GetSpecification();
-            if (spec.Width != w || spec.Height != h)
-            {
-                m_Framebuffer->Resize(w, h);
-                m_EditorCamera.SetViewportSize(m_ViewportSize.x, m_ViewportSize.y);
-                m_ActiveScene->OnViewportResize(w, h);
-                m_ActiveScene->SetViewportOffset(m_ViewportBounds[0].x, m_ViewportBounds[0].y);
-
-                m_Framebuffer->Bind();
-                RenderCommand::SetClearColor({ 0.07f, 0.08f, 0.10f, 1.0f });
-                RenderCommand::Clear();
-                m_Framebuffer->ClearAttachment(2, -1);
-
-                if (m_SceneState == SceneState::Play)
-                {
-                    Entity cameraEntity = m_ActiveScene->GetPrimaryCameraEntity();
-                    if (cameraEntity
-                        && cameraEntity.HasComponent<CameraComponent>()
-                        && cameraEntity.HasComponent<TransformComponent>())
-                    {
-                        m_ActiveScene->RenderWithSceneCamera(
-                            cameraEntity.GetComponent<CameraComponent>().Camera,
-                            cameraEntity.GetComponent<TransformComponent>().GetTransform(),
-                            true);
-                    }
-                }
-                else
-                {
-                    m_ActiveScene->OnUpdateEditor(Timestep(0.0f), m_EditorCamera);
-                }
-
-                m_Framebuffer->Unbind();
-            }
-        }
+        // Framebuffer resizing is deferred to OnUpdate, before the scene is
+        // rendered. Resizing and rendering here produced a clear frame with
+        // no 3D scene pass (OnBeginRender/skybox were skipped), which showed
+        // up as a black flash between two sky frames while dragging a splitter.
+        // The old texture is stretched for this one UI frame instead.
 
         const uint64_t texID = m_Framebuffer->GetColorAttachmentRendererID();
         // OpenGL and ImGui use opposite vertical UV directions.
@@ -188,31 +223,9 @@ namespace Wheatear {
         );
         m_ViewportImageHovered = ImGui::IsItemHovered(ImGuiHoveredFlags_RectOnly);
 
-        // Right-click over the viewport surface: create entities without
-        // leaving the view (Alt+right-click keeps rotating the camera).
-        if (m_SceneState == SceneState::Edit && m_ViewportImageHovered)
-        {
-            if (ImGui::IsMouseClicked(ImGuiMouseButton_Right)
-                && !Input::IsKeyPressed(WT_KEY_LEFT_ALT)
-                && !ImGui::IsPopupOpen("##ViewportCreateCtx"))
-            {
-                ImGui::OpenPopup("##ViewportCreateCtx");
-            }
-
-            if (ImGui::BeginPopup("##ViewportCreateCtx"))
-            {
-                m_SceneHierarchyPanel->DrawCreateEntityPopupItems();
-                ImGui::Separator();
-                if (ImGui::MenuItem(EditorLocale::Text("Frame Selection", "聚焦选中")))
-                {
-                    if (Entity selected = m_SceneHierarchyPanel->GetSelectedEntity())
-                        ActivateHierarchyEntity(selected);
-                    else
-                        FrameEditorCameraOnScene();
-                }
-                ImGui::EndPopup();
-            }
-        }
+        // Right-click is reserved for camera navigation (hold + drag). The old
+        // hierarchy create-entity popup was opened on right-click here, which
+        // interrupted orbiting and showed a menu that belongs to the hierarchy.
 
         if (m_SceneState == SceneState::Edit
             && m_ViewportHovered
@@ -327,36 +340,46 @@ namespace Wheatear {
     }
     void EditorLayerBase::UI_Toolbar()
     {
-        ImGuiViewport* viewport = ImGui::GetMainViewport();
-        ImGui::SetNextWindowPos(
-            ImVec2(viewport->WorkPos.x + viewport->WorkSize.x * 0.5f, viewport->WorkPos.y + 32.0f),
-            ImGuiCond_Always,
-            ImVec2(0.5f, 0.0f));
+        // Fixed chrome: the action bar lives between the menu bar and the
+        // dockspace, so it can never cover scene tabs or the viewport. It can
+        // be collapsed from the chevron on the right (or Window > Action
+        // Toolbar); the dockspace then reclaims the full height.
+        const ImGuiLayer* gui = Application::Get().GetImGuiLayer();
+        const float s = gui ? gui->GetUiScale() : 1.0f;
+        const float toolbarHeight = kToolbarHeight * s;
+        const bool darkTheme = !gui || gui->IsDarkTheme();
+        const ImVec4 barBg = darkTheme
+            ? ImVec4(0.062f, 0.070f, 0.088f, 1.0f)
+            : ImVec4(0.925f, 0.914f, 0.890f, 1.0f);
+        const ImVec4 barBorder = darkTheme
+            ? ImVec4(0.16f, 0.18f, 0.22f, 1.0f)
+            : ImVec4(0.78f, 0.76f, 0.72f, 1.0f);
 
-        ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(10.0f, 7.0f));
-        ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(6.0f, 0.0f));
-        ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 10.0f);
-        ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, 8.0f);
-        // Floating toolbar follows the theme; buttons keep the default themed
-        // colors and get their hover glow from EditorWidgets::IconButton.
-        ImGui::PushStyleColor(ImGuiCol_WindowBg, ImVec4(0.100f, 0.110f, 0.130f, 0.92f));
-        ImGui::PushStyleColor(ImGuiCol_Border, ImGui::GetStyleColorVec4(ImGuiCol_Border));
+        ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding,
+            ImVec2(12.0f * s, 0.0f));
+        ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing,
+            ImVec2(4.0f * s, 0.0f));
+        ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, 8.0f * s);
+        ImGui::PushStyleColor(ImGuiCol_ChildBg, barBg);
+        ImGui::BeginChild("##EditorActionBar",
+            ImVec2(0.0f, toolbarHeight),
+            false, ImGuiWindowFlags_NoScrollbar |
+                   ImGuiWindowFlags_NoScrollWithMouse |
+                   ImGuiWindowFlags_NoNav);
 
-        ImGui::Begin("##toolbar", nullptr,
-            ImGuiWindowFlags_NoDecoration |
-            ImGuiWindowFlags_AlwaysAutoResize |
-            ImGuiWindowFlags_NoSavedSettings |
-            ImGuiWindowFlags_NoScrollbar |
-            ImGuiWindowFlags_NoScrollWithMouse |
-            ImGuiWindowFlags_NoNav);
-
-        const ImVec2 iconSize(28.0f, 28.0f);
-        auto sameLine = []() { ImGui::SameLine(0.0f, 6.0f); };
-        auto groupGap = []()
+        const ImVec2 iconSize(22.0f * s, 22.0f * s);
+        const float buttonY = 5.0f * s;
+        auto sameLine = [s]() { ImGui::SameLine(0.0f, 4.0f * s); };
+        auto groupGap = [&barBorder, s]()
         {
-            ImGui::SameLine(0.0f, 10.0f);
-            ImGui::SeparatorEx(ImGuiSeparatorFlags_Vertical, 20.0f);
-            ImGui::SameLine(0.0f, 10.0f);
+            ImGui::SameLine(0.0f, 9.0f * s);
+            const ImVec2 p = ImGui::GetCursorScreenPos();
+            ImGui::GetWindowDrawList()->AddLine(
+                ImVec2(p.x, p.y + 7.0f * s),
+                ImVec2(p.x, p.y + 25.0f * s),
+                ImGui::ColorConvertFloat4ToU32(barBorder), 1.0f);
+            ImGui::Dummy(ImVec2(1.0f, 24.0f * s));
+            ImGui::SameLine(0.0f, 9.0f * s);
         };
         auto openToolByLabel = [&](const char* label)
         {
@@ -367,6 +390,8 @@ namespace Wheatear {
                     tool.Open(toolContext);
             });
         };
+
+        ImGui::SetCursorPosY(buttonY);
         if (EditorWidgets::IconButton("##ToolbarNewScene", m_IconNewScene, "New Scene (Ctrl+N)", iconSize))
             NewScene();
         sameLine();
@@ -378,9 +403,21 @@ namespace Wheatear {
 
         groupGap();
 
+        if (EditorWidgets::IconButton("##ToolbarUndo", m_IconUndo,
+                EditorLocale::Text("Undo (Ctrl+Z)", "撤销 (Ctrl+Z)"), iconSize,
+                CommandHistory::Get().CanUndo()))
+            CommandHistory::Get().Undo();
+        sameLine();
+        if (EditorWidgets::IconButton("##ToolbarRedo", m_IconRedo,
+                EditorLocale::Text("Redo (Ctrl+Y)", "重做 (Ctrl+Y)"), iconSize,
+                CommandHistory::Get().CanRedo()))
+            CommandHistory::Get().Redo();
+
+        groupGap();
+
         const Ref<Texture2D>& playStopIcon = (m_SceneState == SceneState::Edit) ? m_IconPlay : m_IconStop;
         const char* playStopTooltip = (m_SceneState == SceneState::Edit) ? "Play (Ctrl+Enter)" : "Stop (Ctrl+Enter)";
-        if (EditorWidgets::IconButton("##ToolbarPlayStop", playStopIcon, playStopTooltip, ImVec2(34.0f, 34.0f)))
+        if (EditorWidgets::IconButton("##ToolbarPlayStop", playStopIcon, playStopTooltip, ImVec2(28.0f * s, 28.0f * s)))
         {
             if (m_SceneState == SceneState::Edit)
                 TransitionToPlay();
@@ -425,9 +462,19 @@ namespace Wheatear {
             if (!m_UIEditingCanvas)
                 m_UIEditingCanvas = m_SceneHierarchyPanel->GetSelectedEntity();
         }
-        sameLine();
-        if (EditorWidgets::IconButton("##ToolbarSpriteSheet", m_IconSpriteSheet, "Sprite Sheet Picker", iconSize))
-            m_SpriteSheetPickerPanel->OpenForEntity(m_SceneHierarchyPanel->GetSelectedEntity());
+        if (!Is3DWorkspace())
+        {
+            sameLine();
+            if (EditorWidgets::IconButton("##ToolbarSpriteSheet", m_IconSpriteSheet, "Sprite Sheet Picker", iconSize))
+                m_SpriteSheetPickerPanel->OpenForEntity(m_SceneHierarchyPanel->GetSelectedEntity());
+            sameLine();
+            if (EditorWidgets::IconButton("##ToolbarAnimation", m_IconFilm,
+                    EditorLocale::Text("Animation Editor", "动画编辑器"), iconSize))
+            {
+                m_AnimationEditorOpen = true;
+                EditorFloatingWindow::Dock("Animation Editor");
+            }
+        }
         sameLine();
         if (EditorWidgets::IconButton("##ToolbarEventGraph", m_IconEventGraph, "Event Script Editor", iconSize))
             openToolByLabel("Event Script Editor");
@@ -437,7 +484,7 @@ namespace Wheatear {
         if (EditorWidgets::IconButton("##ToolbarHealth", m_IconHealth, "Project Health", iconSize))
             openToolByLabel("Project Health");
         sameLine();
-        if (EditorWidgets::IconButton("##ToolbarPackage", m_IconPackage, "Package Player + Editor", iconSize, !m_PlayerBuildRunning))
+        if (EditorWidgets::IconButton("##ToolbarPackage", m_IconPackage, "Package Game + Editor", iconSize, !m_PlayerBuildRunning))
             StartPlayerPackageBuild();
         sameLine();
         if (EditorWidgets::IconButton("##ToolbarResetLayout", m_IconResetLayout, "Reset Window Layout", iconSize))
@@ -454,8 +501,27 @@ namespace Wheatear {
             m_ContentBrowserPanel->SetDrawerMode(m_ContentDrawerOpen);
         }
 
-        ImGui::End();
-        ImGui::PopStyleColor(2);
-        ImGui::PopStyleVar(4);
+        // Right-aligned collapse chevron.
+        const ImVec2 barOrigin = ImGui::GetWindowPos();
+        const float barRight = barOrigin.x + ImGui::GetWindowWidth() - 14.0f * s;
+        ImGui::SetCursorScreenPos(
+            ImVec2(barRight - 24.0f * s, barOrigin.y + 8.0f * s));
+        if (ImGui::ArrowButton("##CollapseToolbar", ImGuiDir_Up))
+            m_ToolbarVisible = false;
+        if (ImGui::IsItemHovered())
+            ImGui::SetTooltip("%s", EditorLocale::Text(
+                "Hide toolbar (Window > Action Toolbar)",
+                "收起工具栏（窗口 > 操作工具栏）"));
+
+        ImDrawList* drawList = ImGui::GetWindowDrawList();
+        drawList->AddLine(
+            ImVec2(barOrigin.x, barOrigin.y + toolbarHeight - 1.0f),
+            ImVec2(barOrigin.x + ImGui::GetWindowWidth(),
+                barOrigin.y + toolbarHeight - 1.0f),
+            ImGui::ColorConvertFloat4ToU32(barBorder), 1.0f);
+
+        ImGui::EndChild();
+        ImGui::PopStyleColor();
+        ImGui::PopStyleVar(3);
     }
 } // namespace Wheatear

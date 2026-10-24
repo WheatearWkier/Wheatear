@@ -2,6 +2,7 @@
 
 #include "Wheatear/Core/Core.h"
 
+#include <cstdint>
 #include <filesystem>
 #include <string>
 #include <unordered_map>
@@ -45,9 +46,18 @@ namespace Wheatear {
         std::string RequiredCondition;
     };
 
+    struct VisualNovelIssue
+    {
+        int SourceLine = 0;
+        bool Error = false;
+        std::string Message;
+    };
+
     struct VisualNovelLine
     {
         VisualNovelLineType Type = VisualNovelLineType::Dialogue;
+        // 1-based physical source line for editor diagnostics.
+        int SourceLine = 0;
         std::string Speaker;
         std::string Text;
         std::string Background;
@@ -77,8 +87,11 @@ namespace Wheatear {
 
         const std::vector<VisualNovelCharacter>& GetCharacters() const { return m_Characters; }
         const std::vector<VisualNovelLine>& GetLines() const { return m_Lines; }
+        const std::vector<VisualNovelIssue>& GetIssues() const { return m_Issues; }
+        const std::unordered_map<std::string, size_t>& GetLabels() const { return m_Labels; }
         const std::string& GetBackground() const { return m_DefaultBackground; }
         const std::filesystem::path& GetSourcePath() const { return m_SourcePath; }
+        uint64_t GetSourceHash() const { return m_SourceHash; }
         size_t FindLabel(const std::string& label) const;
         bool IsEmpty() const { return m_Lines.empty(); }
 
@@ -88,9 +101,11 @@ namespace Wheatear {
 
     private:
         std::filesystem::path m_SourcePath;
+        uint64_t m_SourceHash = 0;
         std::string m_DefaultBackground = "studio";
         std::vector<VisualNovelCharacter> m_Characters;
         std::vector<VisualNovelLine> m_Lines;
+        std::vector<VisualNovelIssue> m_Issues;
         std::unordered_map<std::string, size_t> m_Labels;
     };
 

@@ -3,6 +3,7 @@
 
 #include "Wheatear/Gameplay/Action/ActionRecipeQueries.h"
 #include "Wheatear/Gameplay/Action/ActionResolver.h"
+#include "Wheatear/Gameplay/Action/ActionRuntimeStore.h"
 #include "Wheatear/Gameplay/Services/GameplayAudioService.h"
 
 #include <algorithm>
@@ -47,18 +48,49 @@ namespace Wheatear::SideCombatActionService {
             return recipe->MovementScale;
         }
 
-        static void ResolveRecipeAction(const WAO::ActionRecipe* recipe,
+        static bool ResolveRecipeAction(Scene* scene,
+            UUID actor,
+            SidePlayerControllerComponent* controller,
+            const WAO::ActionRecipe* recipe,
             const std::string& source,
             const std::string& detail)
         {
             if (!recipe)
-                return;
+                return true;
 
             WAO::ActionResolveContext context;
+            context.SceneContext = scene;
             context.Intent.ActionId = recipe->Id;
+            context.Intent.Actor = actor;
             context.Intent.Source = source;
             context.Detail = detail;
-            WAO::ActionOrchestrator::ExecuteWithRecipe(context, *recipe);
+            if (scene && actor != 0)
+            {
+                const std::shared_ptr<WAO::ActionRuntime> runtime =
+                    WAO::ActionRuntimeStore::Get(scene, actor);
+                if (controller)
+                {
+                    runtime->Resources["mana"] = controller->RuntimeMana;
+                    runtime->Resources["magic_sword"] =
+                        controller->RuntimeMagicSwordGauge;
+                }
+                context.Runtime = runtime.get();
+                const WAO::ActionResolveResult result =
+                    WAO::ActionOrchestrator::ExecuteWithRecipe(context, *recipe);
+                if (controller)
+                {
+                    controller->RuntimeMana = std::max(
+                        0.0f,
+                        runtime->Resources["mana"]);
+                    controller->RuntimeMagicSwordGauge = std::clamp(
+                        runtime->Resources["magic_sword"],
+                        0.0f,
+                        controller->RuntimeMagicSwordGaugeMax);
+                }
+                return result.Success;
+            }
+
+            return WAO::ActionOrchestrator::ExecuteWithRecipe(context, *recipe).Success;
         }
 
     } // namespace
@@ -112,7 +144,9 @@ namespace Wheatear::SideCombatActionService {
         const std::string& attackId,
         const std::string& recipeId,
         const std::string& entityName,
-        SideAttackKind kind)
+        SideAttackKind kind,
+        Scene* scene,
+        UUID actor)
     {
         const WAO::ActionRecipe* recipe = FindRecipe(recipeId);
         float duration = ResolveRecipeDuration(recipe, GetActionDuration(attack));
@@ -140,6 +174,17 @@ namespace Wheatear::SideCombatActionService {
             cancelEnd = duration;
         }
 
+        if (!ResolveRecipeAction(
+            scene,
+            actor,
+            &controller,
+            recipe,
+            "SideCombat.Player",
+            "start " + entityName))
+        {
+            return;
+        }
+
         controller.RuntimeActionAttackId = attackId;
         controller.RuntimeActionRecipeId = recipe ? recipe->Id : (recipeId.empty() ? attackId : recipeId);
         controller.RuntimeActionEntityName = entityName;
@@ -154,7 +199,6 @@ namespace Wheatear::SideCombatActionService {
         if (++controller.RuntimeActionSequence == 0)
             ++controller.RuntimeActionSequence;
         PlaySfx(recipe && !recipe->SoundPath.empty() ? recipe->SoundPath : attack.SwingSound, attack.SoundVolume);
-        ResolveRecipeAction(recipe, "SideCombat.Player", "start " + entityName);
     }
 
     bool IsEnemyActionActive(const SideEnemyAIComponent& ai)
@@ -183,9 +227,22 @@ namespace Wheatear::SideCombatActionService {
         const std::string& recipeId,
         const std::string& entityName,
         SideAttackKind kind,
-        float facing)
+        float facing,
+        Scene* scene,
+        UUID actor)
     {
         const WAO::ActionRecipe* recipe = FindRecipe(recipeId);
+        if (!ResolveRecipeAction(
+            scene,
+            actor,
+            nullptr,
+            recipe,
+            "SideCombat.Enemy",
+            "start " + entityName))
+        {
+            return;
+        }
+
         ai.RuntimeActionAttackId = attackId;
         ai.RuntimeActionRecipeId = recipe ? recipe->Id : (recipeId.empty() ? attackId : recipeId);
         ai.RuntimeActionEntityName = entityName;
@@ -199,7 +256,6 @@ namespace Wheatear::SideCombatActionService {
         if (++ai.RuntimeActionSequence == 0)
             ++ai.RuntimeActionSequence;
         PlaySfx(recipe && !recipe->SoundPath.empty() ? recipe->SoundPath : attack.SwingSound, attack.SoundVolume);
-        ResolveRecipeAction(recipe, "SideCombat.Enemy", "start " + entityName);
     }
 
 } // namespace Wheatear::SideCombatActionService

@@ -30,6 +30,9 @@ actions:
   - id: side.jump
     label: "横版-跳跃 / Jump"
     defaults: ["K", "Space"]
+  - id: side.guard
+    label: "横版-格挡 / Guard"
+    defaults: ["Q", "Mouse Right"]
   - id: side.basic
     label: "横版-普攻 / Basic Attack"
     defaults: ["J", "Mouse Left"]

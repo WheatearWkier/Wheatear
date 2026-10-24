@@ -27,6 +27,28 @@ SceneTransitionService / GameProgress / EventScriptSystem / 各玩法系统
 这也是为什么它放在 **游戏运行服务层** 而不是核心平台层：  
 核心平台层解决的是程序怎么跑起来；这里解决的是跑起来之后，游戏流程怎么被串起来。
 
+### 5.1.1 先把四个容易混淆的概念分开
+
+在阅读 `CommandBus`、`.wts` 和玩法代码时，最容易出现的误解是把所有“事件”都看成同一种东西。当前工程里至少要区分下面四层：
+
+| 对象 | 主要职责 | 当前工程中的例子 |
+| --- | --- | --- |
+| `EventBus` | 分发底层、强类型的应用或输入事件 | 窗口关闭、键盘按下、鼠标移动 |
+| `CommandBus` | 识别命令前缀，并把命令路由到正确的队列或服务 | `scene:...`、`event:...`、`side:basic` |
+| `EventScriptSystem` / `.wts` | 根据事件名找到脚本块，按顺序推进低频流程 | `event menu_new_game:` |
+| `WAO` / `ActionSignalRouter` | 解析动作意图、结算效果，并发出动作表现信号 | 攻击命中、受击、硬直、死亡 |
+
+因此，准确的说法不是“WTS 监听了按钮点击”，而是：
+
+```text
+UIInputSystem 发现点击
+    -> 读取 UIButtonComponent.OnClickFunction
+    -> 调用 CommandBus::Execute(...)
+    -> 只有命令是 event:... 时，才进入 EventScriptSystem
+```
+
+如果按钮直接写 `scene:`，它会走场景请求；如果写 `side:basic`，它会走玩法命令队列；这两种情况都不会经过 `.wts`。
+
 ## 5.2 本章要读的源码
 
 建议按这几份源码一起看：
@@ -56,6 +78,25 @@ Wheatear 里的 `CommandBus` 更准确地说是一个 **命令路由器 + 命令
 
 所以它既不是单纯的发布订阅，也不是纯文本解释器，而是两者的混合体。
 
+### 5.3.1 `CommandBus` 是路由器，不是事件监听器
+
+`CommandBus` 不会主动观察鼠标、键盘、角色碰撞或玩家状态。它只有在某个系统明确调用 `Execute()`、`QueueGameplayCommand()` 或 `QueueEventCommand()` 后，才会处理已经产生的请求。
+
+可以把职责分成两步：
+
+```text
+外部系统发现事实
+    例如：按钮被点击、VN 选项被选择、战斗已经胜利
+
+外部系统生成命令
+    例如：event:go_skill_tree、side:basic、event:side_combat_victory
+
+CommandBus 负责路由
+    决定进入事件队列、玩法队列、场景请求或其他服务
+```
+
+这也是 `event:` 和普通玩法命令的根本区别：`event:` 不是“监听某个事件”，而是“已经发生了某件事，现在请求启动一个同名事件脚本”。
+
 ## 5.4 `CommandResult`：命令执行后的返回值
 
 `CommandBus::Execute()` 的返回值不是一个布尔值，而是 `CommandResult`：
@@ -82,6 +123,8 @@ struct CommandResult
 1. 命令写错了。
 2. 命令识别了，但当前条件不允许。
 3. 命令执行了，并且真的改了状态。
+
+需要注意当前实现的一个边界：`EventScriptSystem::UpdateScript()` 调用 `CommandBus::Execute()` 时没有保存或检查返回的 `CommandResult`。因此，脚本中的命令即使没有被识别或执行失败，当前脚本也不会因为这个返回值自动中止；如果需要失败即停止，必须另外设计脚本错误策略。
 
 ## 5.5 `CommandBus` 的公开 API
 
@@ -178,6 +221,22 @@ event:@17382910492300000000:open_skill_tree
 
 前者是广播给当前场景里的事件脚本，后者是精确命中某个实体。
 
+`event:` 本身不包含“等待点击”的逻辑，也不会主动寻找点击来源。它只把目标实体和事件名放进 `EventCommandQueue`，稍后由 `EventScriptSystem` 消费。
+
+### 5.7.5 谁负责发现用户操作
+
+以 UI 为例，真正的调用链是：
+
+```text
+鼠标按下
+    -> UIInputSystem 做命中测试
+    -> UIInputSystem::FireOnClick()
+    -> 读取 UIButtonComponent.OnClickFunction
+    -> CommandBus::Execute(scene, "event:go_skill_tree")
+```
+
+所以 `UIButtonComponent.OnClickFunction` 更像一个“命令入口配置”，而不是 WTS 自己注册的回调。`UIInputSystem` 负责发现点击，`CommandBus` 负责接收字符串，`EventScriptSystem` 只处理其中的 `event:` 请求。
+
 ## 5.8 一个完整链路：主菜单“新游戏”
 
 这是最适合面试时讲的例子。
@@ -202,8 +261,10 @@ end
 
 ### 5.8.3 `CommandBus` 做了什么
 
-按钮点击后，`CommandBus` 先识别 `event:`，把请求塞进事件队列。  
-`EventScriptSystem` 再把 `menu_new_game` 这个事件取出来，执行脚本里的 `newgame:`。
+按钮点击不是 WTS 发现的，而是 `UIInputSystem` 先完成命中测试，再把 `OnClickFunction` 交给 `CommandBus`。
+
+`CommandBus` 识别到 `event:` 后，只把 `menu_new_game` 塞进事件队列。
+之后 `EventScriptSystem` 才把这个事件取出来，查找并执行脚本里的 `menu_new_game` 块。
 
 ### 5.8.4 真正切场景的是谁
 
@@ -217,6 +278,30 @@ CommandBus::Execute(...)
 ```
 
 也就是说，`CommandBus` 只负责把“要新游戏”这件事表达清楚，真正的场景切换由宿主层完成。
+
+### 5.8.5 如果按钮写的不是 `event:`
+
+并不是所有按钮都需要经过 WTS：
+
+```text
+OnClickFunction: event:go_skill_tree
+    -> CommandBus
+    -> EventCommandQueue
+    -> EventScriptSystem
+    -> .wts 中的 go_skill_tree
+
+OnClickFunction: scene:assets/scenes/Hub.wt
+    -> CommandBus
+    -> SceneTransitionService
+    -> RuntimeSceneLayer
+
+OnClickFunction: side:basic
+    -> CommandBus
+    -> GameplayCommandQueue
+    -> SideCombatSystem
+```
+
+这三条路径都可以由 UI 触发，但只有第一条是“UI 触发 WTS 事件”。
 
 ## 5.9 为什么要有队列
 
@@ -233,6 +318,16 @@ CommandBus::Execute(...)
 
 例如 `RuntimeSceneLayer` 会在自己的输入处理里统一消费运行时命令和场景切换请求，这样不会在按钮回调里直接乱切场景。
 
+`EventCommandQueue` 还带来一个容易忽略的时序：事件不是同步嵌套调用。假设当前 WTS 执行到：
+
+```text
+event route_after_result:
+    event:result_go_hub
+end
+```
+
+当前 `event:result_go_hub` 只会再次入队。`EventScriptSystem::OnUpdateRuntime()` 已经在本帧开头完成了事件队列的 `Drain`，所以这个新请求通常要等下一次更新时才会被取出并启动。它更接近“下一批次启动另一个事件”，而不是 C++ 函数栈上的同步递归调用。
+
 ## 5.10 `DrainGameplayCommands()` 为什么还带前缀
 
 `DrainGameplayCommands(prefix)` 会先把整批玩法命令取出来，再按前缀筛选。
@@ -247,6 +342,16 @@ CommandBus::Execute(...)
 
 如果一次把所有命令都拆给各系统，会反复扫描队列。  
 现在这种做法更像“先统一收口，再按模块分发”。
+
+例如横板战斗中可以有：
+
+```text
+side:basic
+side:launcher
+side:item:1
+```
+
+但这不代表玩家的每一次攻击、受击和喝药都要先写进 WTS。键盘输入通常由 `InputBindingService` 直接驱动玩法动作；只有 UI、脚本或其他系统明确生成 `side:` 命令时，才会经过 `CommandBus` 的玩法队列。
 
 ## 5.11 逐函数阅读 `CommandBus.cpp`
 
@@ -505,6 +610,37 @@ OnClickFunction: side:basic
 
 - UI 按钮和键盘输入最终进入同一条动作链
 - 玩法系统不需要区分命令是从哪来的
+
+但这里要把“动作入口”和“战斗结算”分开看：
+
+```text
+side:basic
+    -> GameplayCommandQueue
+    -> SideCombatSystem
+    -> InjectActionPress("side.basic")
+    -> SideCombatPlayerService
+    -> 生成攻击判定
+    -> SideCombatHitResolutionService
+    -> 伤害 / 命中 / 硬直 / 浮空 / 死亡
+```
+
+当前 tuning 中，物品命令也可以走同一入口，例如：
+
+```text
+side:item:1
+```
+
+`SideCombatSystem` 会根据战斗配置查找物品槽，再注入对应动作；当前示例配置里的第 1 格是治疗物品。这里的“喝药”是玩法系统执行的动作效果，不是 WTS 自动监听到的事件。
+
+键盘或手柄输入则通常直接经过 `InputBindingService` 和横板战斗玩家服务，不必先转换成 `side:` 命令。敌人 AI 的攻击也由 `SideCombatEnemyAIService` 直接驱动。当前受击结算会记录 `PlayerWasHit`、累计受击次数并写入效果记录，但不会自动向 WTS 投递 `on_player_hit`。
+
+如果未来确实需要“玩家每次受击都触发一段流程”，应在玩法层显式增加桥接，例如：
+
+```cpp
+CommandBus::QueueEventCommand({ flowEntity, "on_player_hit" });
+```
+
+这表示“受击结果已经被玩法系统确认，现在请求脚本处理后续流程”，而不是让 WTS 自己去轮询碰撞。
 
 ### `turn:` 和 `tactic:`
 
@@ -848,6 +984,20 @@ IsKnownCommandDomain()
 
 这个命名理解对以后阅读编辑器校验逻辑很有帮助。
 
+还要注意：`CommandBus::IsNativeCommand()` 和 `.wts` 解析器里的 `IsBareCommand()` 不是同一个判断。
+
+- `CommandBus::IsNativeCommand()` 能识别已注册的 `side:`、`turn:`、`tactic:`、`vn:` 等命令域。
+- 当前 `.wts` 解析器允许直接写成裸命令的范围更窄，主要是 `quit`、`scene:`、`newgame:`、`loadgame:`、`progression:`、`gamesave:`、`ui:`、`event:`。
+- 因此在 WTS 中使用 `side:`、`vn:`、`turn:`、`tactic:` 或某些 `anim:` 命令时，建议显式写成：
+
+```text
+command side:basic
+command vn:advance
+command anim:play:@17382910492300000000:idle
+```
+
+否则这些行可能被解析成 `RawLine`，在运行时保留但跳过执行。这里是“CommandBus 能不能识别”和“EventScript 解析器会不会把这一行识别成可执行指令”两个不同层次的问题。
+
 ## 5.21 设计好处和代价
 
 ### 好处
@@ -928,6 +1078,14 @@ progression: GameProgress
 - 当前玩法系统是否已经启动
 - 命令是否在场景切换前被清理
 
+如果问题和 WTS 有关，还要额外确认：
+
+- 触发来源是否真的调用了 `CommandBus::Execute()`
+- 命令是否以 `event:` 开头；如果是 `scene:` 或 `side:`，它本来就不会经过 WTS
+- `.wts` 中的目标事件名是否存在
+- 脚本中的玩法命令是否用了显式 `command` 前缀
+- 是否误认为 `wait` 会等待点击或受击；当前 `wait` 只等待时间
+
 ## 5.23 新人练习
 
 ### 练习一：给命令画分类表
@@ -1004,6 +1162,21 @@ camera:shake:0.25:3
 不应该。  
 `gameplay`、`event`、`scene transition` 这几类本来就有不同的消费时机。
 
+### 误区五：WTS 会自己知道玩家什么时候点击、攻击或喝药
+
+不会。
+点击由 `UIInputSystem` 发现，VN 的下一句由 `VisualNovelSystem` 处理，横板攻击和物品使用由输入服务与玩法系统处理。WTS 只有在外部系统把一个 `event:` 请求投递给 `CommandBus` 后，才会启动对应事件块。
+
+### 误区六：`wait` 可以等待用户输入
+
+当前不可以。
+`wait 0.5` 只会让脚本暂停 0.5 秒；它没有“等待按钮点击”“等待攻击命中”或“等待玩家选择”的语义。需要等待外部事实时，应由外部系统在事实发生后再次投递 `event:`。
+
+### 误区七：`event:` 是同步调用另一个事件
+
+当前也不是。
+`event:` 会进入 `EventCommandQueue`，由下一次 `EventScriptSystem::OnUpdateRuntime()` 消费。它是排队触发，不是同步函数调用。
+
 ## 5.25 和 Unity / UE 的对照
 
 Unity 里常见的做法是按钮回调、协程、ScriptableObject，或者自己再写一套流程管理器。  
@@ -1035,6 +1208,16 @@ Wheatear 的做法更轻：
 
 因为横板、回合制、战棋、VN 的消费模型不同。前缀让它们既共享入口，又不互相干扰。
 
+### 问题：WTS 怎么知道玩家什么时候点击了按钮？
+
+它不知道，也不需要知道。
+`UIInputSystem` 先完成命中测试，读取按钮上的 `OnClickFunction`，再调用 `CommandBus::Execute()`。只有当这个字符串是 `event:xxx` 时，事件队列才会把请求交给 `EventScriptSystem`。WTS 负责的是“事件被触发后按什么顺序做什么”，不是监听输入。
+
+### 问题：玩家攻击、受击、喝药是不是都应该写成 WTS 事件？
+
+通常不是。
+这些是高频玩法动作，应由输入服务、玩家服务、敌人 AI 和命中结算系统处理。WTS 更适合处理战斗结果、奖励、流程跳转等低频逻辑。如果需要在某个受击结果后触发剧情，再由命中结算代码显式投递一个命名事件。
+
 ## 5.27 本章小结
 
 这一章可以压缩成一句话：
@@ -1047,10 +1230,11 @@ CommandBus 是运行时命令枢纽，
 如果再压成一条链路，就是：
 
 ```text
-按钮 / 脚本 / 玩法输入
+外部系统发现操作或结果
+    -> 生成 command / event request
     -> CommandBus
-    -> 请求队列
-    -> 宿主层 / 事件脚本 / 玩法系统
+    -> EventScriptSystem（仅 event:）或玩法 / 宿主队列
+    -> 下游系统执行
 ```
 
 下一章就接着讲 **EventScript**。  

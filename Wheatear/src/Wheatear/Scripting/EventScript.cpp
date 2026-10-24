@@ -3,11 +3,17 @@
 
 #include "Wheatear/Assets/AssetPath.h"
 #include "Wheatear/Core/Log.h"
+#include "Wheatear/Logic/LogicCommandRegistry.h"
+#include "Wheatear/Logic/LogicExpression.h"
 #include "Wheatear/Utils/StringUtils.h"
 
 #include <algorithm>
+#include <cctype>
+#include <cmath>
 #include <fstream>
 #include <sstream>
+#include <stdexcept>
+#include <unordered_set>
 
 namespace Wheatear {
 
@@ -19,14 +25,21 @@ namespace Wheatear {
 
         static bool IsBareCommand(const std::string& line)
         {
-            return line == "quit"
-                || StartsWith(line, "scene:")
-                || StartsWith(line, "newgame:")
-                || StartsWith(line, "loadgame:")
-                || StartsWith(line, "progression:")
-                || StartsWith(line, "gamesave:")
-                || StartsWith(line, "ui:")
-                || StartsWith(line, "event:");
+            if (line == "quit")
+                return true;
+
+            // Any "prefix:payload" line is treated as a command so a typo
+            // reaches validation and the editor instead of becoming a silently
+            // ignored RawLine. .wts has no dialogue syntax that would collide.
+            const size_t colon = line.find(':');
+            if (colon == std::string::npos || colon == 0)
+                return false;
+            for (size_t i = 0; i < colon; ++i)
+            {
+                if (std::isspace(static_cast<unsigned char>(line[i])))
+                    return false;
+            }
+            return true;
         }
 
         static std::string StripEventName(std::string payload)
@@ -105,6 +118,8 @@ namespace Wheatear {
         {
             ++lineNumber;
             std::string line = Trim(rawLine);
+            if (lineNumber == 1 && StartsWith(line, "\xEF\xBB\xBF"))
+                line = Trim(line.substr(3));
             if (line.empty())
                 continue;
             if (StartsWith(line, "#") || StartsWith(line, "//"))
@@ -209,7 +224,14 @@ namespace Wheatear {
                 instruction.Type = EventScriptInstructionType::Wait;
                 try
                 {
-                    instruction.Seconds = std::max(0.0f, std::stof(Trim(line.substr(5))));
+                    const std::string payload = Trim(line.substr(5));
+                    size_t consumed = 0;
+                    const float seconds = std::stof(payload, &consumed);
+                    if (consumed != payload.size())
+                        throw std::invalid_argument("trailing characters");
+                    if (!std::isfinite(seconds))
+                        throw std::invalid_argument("wait must be finite");
+                    instruction.Seconds = std::max(0.0f, seconds);
                 }
                 catch (...)
                 {
@@ -251,6 +273,114 @@ namespace Wheatear {
             }
         }
         return count;
+    }
+
+    std::vector<EventScriptIssue> EventScript::Validate() const
+    {
+        std::vector<EventScriptIssue> issues;
+        const auto add = [&issues](int line, bool error, std::string message)
+        {
+            issues.push_back({ line, error, std::move(message) });
+        };
+
+        std::unordered_set<std::string> eventNames;
+        for (const EventScriptBlock& block : m_Events)
+        {
+            if (!eventNames.insert(block.Name).second)
+            {
+                add(block.SourceLine, true,
+                    "duplicate event '" + block.Name + "' (only the first is reachable)");
+            }
+
+            std::vector<int> openIfLines;
+            for (const EventScriptInstruction& instruction : block.Instructions)
+            {
+                switch (instruction.Type)
+                {
+                case EventScriptInstructionType::Command:
+                {
+                    const std::string text = Trim(instruction.Text);
+                    if (text.empty())
+                    {
+                        add(instruction.SourceLine, true, "empty command");
+                        break;
+                    }
+
+                    std::string error;
+                    if (!Logic::CommandRegistry::Validate(text, &error))
+                        add(instruction.SourceLine, true, error);
+
+                    if (text.rfind("event:", 0) == 0)
+                    {
+                        std::string payload = Trim(text.substr(6));
+                        if (!payload.empty() && payload.front() == '@')
+                        {
+                            const size_t separator = payload.find(':');
+                            payload = separator == std::string::npos
+                                ? std::string()
+                                : Trim(payload.substr(separator + 1));
+                        }
+                        if (payload.empty())
+                            add(instruction.SourceLine, true,
+                                "event command requires a non-empty event name");
+                    }
+                    break;
+                }
+                case EventScriptInstructionType::Wait:
+                    if (!std::isfinite(instruction.Seconds)
+                        || instruction.Seconds < 0.0f)
+                        add(instruction.SourceLine, true,
+                            "wait duration must be a finite non-negative number");
+                    else if (instruction.Seconds > 3600.0f)
+                        add(instruction.SourceLine, false,
+                            "wait duration is longer than one hour");
+                    break;
+                case EventScriptInstructionType::If:
+                {
+                    const std::string condition = Trim(instruction.Text);
+                    if (condition.empty())
+                    {
+                        add(instruction.SourceLine, true, "if requires a condition");
+                    }
+                    else
+                    {
+                        std::string error;
+                        if (!Logic::Validate(
+                            Logic::NormalizeCondition(condition), &error))
+                            add(instruction.SourceLine, true,
+                                "invalid condition '" + condition + "': " + error);
+                    }
+                    openIfLines.push_back(instruction.SourceLine);
+                    break;
+                }
+                case EventScriptInstructionType::EndIf:
+                    if (openIfLines.empty())
+                        add(instruction.SourceLine, true, "unmatched endif");
+                    else
+                        openIfLines.pop_back();
+                    break;
+                case EventScriptInstructionType::RawLine:
+                    add(instruction.SourceLine, false,
+                        "unrecognized line will be skipped: " + Trim(instruction.Text));
+                    break;
+                }
+            }
+
+            if (!openIfLines.empty())
+            {
+                add(openIfLines.back(), true,
+                    "if is missing a matching endif before end of event '"
+                        + block.Name + "'");
+            }
+        }
+
+        for (const EventScriptInstruction& orphan : m_OrphanLines)
+        {
+            add(orphan.SourceLine, false,
+                "line outside any event will not run: " + Trim(orphan.Text));
+        }
+
+        return issues;
     }
 
 } // namespace Wheatear

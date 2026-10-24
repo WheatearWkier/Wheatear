@@ -20,6 +20,8 @@ namespace Wheatear::SideCombatHitResolutionService {
         bool TargetDied = false;
         bool PlayerWasHit = false;
         bool BossProtectionTriggered = false;
+        bool Blocked = false;
+        bool Parried = false;
     };
 
     WHEATEAR_API float CalculateDamage(float rawDamage,

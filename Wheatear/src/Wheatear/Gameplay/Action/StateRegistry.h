@@ -46,6 +46,11 @@ namespace Wheatear::WAO {
         int turns,
         float power,
         UUID source = 0);
+    WHEATEAR_API RuntimeState MakeState(const std::string& id,
+        int turns,
+        float seconds,
+        float power,
+        UUID source = 0);
 
     WHEATEAR_API bool HasState(const std::vector<RuntimeState>& states, const std::string& id);
     WHEATEAR_API void ApplyState(std::vector<RuntimeState>& states, const RuntimeState& state);

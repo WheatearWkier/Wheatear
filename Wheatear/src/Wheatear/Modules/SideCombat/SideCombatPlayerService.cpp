@@ -11,6 +11,8 @@
 #include "Wheatear/Input/InputBindingService.h"
 #include "SideCombatTuningService.h"
 #include "Wheatear/Gameplay/Action/ActionRecipeQueries.h"
+#include "Wheatear/Gameplay/Action/ActionResolver.h"
+#include "Wheatear/Gameplay/Action/ActionRuntimeStore.h"
 #include "Wheatear/Gameplay/Action/EffectFormula.h"
 #include "Wheatear/Gameplay/Action/EffectRegistry.h"
 #include "Wheatear/Scene/Components.h"
@@ -45,6 +47,28 @@ namespace Wheatear::SideCombatPlayerService {
             return WAO::ComposeActionId("side", attackId);
         }
 
+        static bool StartGuardAction(Scene* scene,
+            Entity player)
+        {
+            if (!scene || !player)
+                return false;
+
+            const WAO::ActionRecipe* recipe =
+                WAO::FindRecipeOrWarn("side.guard", "SideCombat.Player");
+            if (!recipe)
+                return false;
+
+            WAO::ActionResolveContext context;
+            context.SceneContext = scene;
+            context.Intent.Actor = player.GetUUID();
+            context.Intent.ActionId = recipe->Id;
+            context.Intent.Source = "SideCombat.Player";
+            context.Detail = "start guard";
+            const WAO::ActionResolveResult result =
+                WAO::ActionOrchestrator::ExecuteWithRecipe(context, *recipe);
+            return result.Success;
+        }
+
         static bool HasMana(const SidePlayerControllerComponent& controller, float cost)
         {
             return controller.RuntimeMana + 0.001f >= std::max(0.0f, cost);
@@ -67,6 +91,14 @@ namespace Wheatear::SideCombatPlayerService {
             return recipe
                 ? std::max(0.0f, WAO::ResourceCost(*recipe, resourceId, fallback))
                 : std::max(0.0f, fallback);
+        }
+
+        static bool RecipeOwnsResourceCost(
+            const WAO::ActionRecipe* recipe,
+            const std::string& resourceId)
+        {
+            return recipe &&
+                WAO::ResourceCost(*recipe, resourceId, 0.0f) > 0.0f;
         }
 
         static float BreakLimitGaugeCost(const SideCombatTuningService::SideCombatTuning& tuning,
@@ -423,7 +455,7 @@ namespace Wheatear::SideCombatPlayerService {
 
         static void CreatePlayerBasic(Scene* scene,
             SideCombatLevelComponent& level,
-            Entity,
+            Entity player,
             SideCombatantComponent& combatant,
             SidePlayerControllerComponent& controller)
         {
@@ -444,7 +476,15 @@ namespace Wheatear::SideCombatPlayerService {
                 controller.RuntimeBasicCooldown = (recipe && recipe->Cooldown > 0.0f)
                     ? recipe->Cooldown
                     : tuning.AirCombo.AirBasicCooldown;
-                BeginPlayerAction(controller, attack, "air_basic", recipeId, "Side_PlayerAirSlash", SideAttackKind::Basic);
+                BeginPlayerAction(
+                    controller,
+                    attack,
+                    "air_basic",
+                    recipeId,
+                    "Side_PlayerAirSlash",
+                    SideAttackKind::Basic,
+                    scene,
+                    player.GetUUID());
                 return;
             }
 
@@ -463,12 +503,20 @@ namespace Wheatear::SideCombatPlayerService {
             controller.RuntimeBasicCooldown = (recipe && recipe->Cooldown > 0.0f)
                 ? recipe->Cooldown
                 : (chain == 3 ? controller.BasicCooldown + tuning.Player.BasicFinisherExtraCooldown : controller.BasicCooldown);
-            BeginPlayerAction(controller, attack, attackId, recipeId, "Side_PlayerSlash", SideAttackKind::Basic);
+            BeginPlayerAction(
+                controller,
+                attack,
+                attackId,
+                recipeId,
+                "Side_PlayerSlash",
+                SideAttackKind::Basic,
+                scene,
+                player.GetUUID());
         }
 
-        static bool CreatePlayerLauncher(Scene*,
+        static bool CreatePlayerLauncher(Scene* scene,
             SideCombatLevelComponent& level,
-            Entity,
+            Entity player,
             SideCombatantComponent& combatant,
             SidePlayerControllerComponent& controller)
         {
@@ -478,15 +526,16 @@ namespace Wheatear::SideCombatPlayerService {
                 return false;
             if (airborne && controller.RuntimeAirActionsRemaining <= 0)
                 return false;
-            if (!SpendMana(controller, controller.LauncherManaCost))
-                return false;
-
-            controller.RuntimeAttackChainTimer = tuning.Player.LauncherChainWindow;
-
             const std::string attackId = airborne ? "air_chase" : "launcher";
             const auto& attack = GetAttack(tuning, attackId);
             const std::string recipeId = ActionRecipeId(attackId);
             const WAO::ActionRecipe* recipe = WAO::FindRecipeOrWarn(recipeId, "SideCombat.Player");
+            if (!RecipeOwnsResourceCost(recipe, "mana") &&
+                !SpendMana(controller, controller.LauncherManaCost))
+                return false;
+
+            controller.RuntimeAttackChainTimer = tuning.Player.LauncherChainWindow;
+
             controller.RuntimeLauncherCooldown = (recipe && recipe->Cooldown > 0.0f)
                 ? recipe->Cooldown
                 : (airborne ? tuning.AirCombo.AirChaseCooldown : controller.LauncherCooldown);
@@ -500,13 +549,15 @@ namespace Wheatear::SideCombatPlayerService {
                 attackId,
                 recipeId,
                 airborne ? "Side_PlayerAirChase" : "Side_PlayerLauncher",
-                SideAttackKind::Launcher);
+                SideAttackKind::Launcher,
+                scene,
+                player.GetUUID());
             return true;
         }
 
-        static void CreatePlayerDash(Scene*,
+        static void CreatePlayerDash(Scene* scene,
             SideCombatLevelComponent& level,
-            Entity,
+            Entity player,
             SideCombatantComponent& combatant,
             SidePlayerControllerComponent& controller)
         {
@@ -518,7 +569,10 @@ namespace Wheatear::SideCombatPlayerService {
             const std::string recipeId = ActionRecipeId("dash");
             const WAO::ActionRecipe* recipe = WAO::FindRecipeOrWarn(recipeId, "SideCombat.Player");
             const float manaCost = RecipeResourceCost(recipe, "mana", controller.DashManaCost);
-            if (!SpendMana(controller, manaCost))
+            if (!HasMana(controller, manaCost))
+                return;
+            if (!RecipeOwnsResourceCost(recipe, "mana") &&
+                !SpendMana(controller, manaCost))
                 return;
 
             controller.RuntimeDashCooldown = (recipe && recipe->Cooldown > 0.0f)
@@ -527,7 +581,15 @@ namespace Wheatear::SideCombatPlayerService {
             combatant.RuntimeInvulnerableTimer = std::max(
                 combatant.RuntimeInvulnerableTimer,
                 controller.DashInvulnerableTime);
-            BeginPlayerAction(controller, attack, "dash", recipeId, "Side_PlayerDash", SideAttackKind::Dash);
+            BeginPlayerAction(
+                controller,
+                attack,
+                "dash",
+                recipeId,
+                "Side_PlayerDash",
+                SideAttackKind::Dash,
+                scene,
+                player.GetUUID());
         }
 
         static bool CanUseBreakLimit(Scene* scene,
@@ -576,8 +638,12 @@ namespace Wheatear::SideCombatPlayerService {
             controller.RuntimeBreakLimitCooldown = (recipe && recipe->Cooldown > 0.0f)
                 ? recipe->Cooldown
                 : tuning.AirCombo.BreakLimitCooldown;
-            controller.RuntimeMagicSwordGauge = std::max(0.0f,
-                controller.RuntimeMagicSwordGauge - BreakLimitGaugeCost(tuning, controller, recipe));
+            if (!RecipeOwnsResourceCost(recipe, "magic_sword"))
+            {
+                controller.RuntimeMagicSwordGauge = std::max(0.0f,
+                    controller.RuntimeMagicSwordGauge -
+                    BreakLimitGaugeCost(tuning, controller, recipe));
+            }
             controller.RuntimeAttackChainTimer = tuning.Player.LauncherChainWindow;
 
             if (target && target.HasComponent<SideCombatantComponent>())
@@ -586,7 +652,15 @@ namespace Wheatear::SideCombatPlayerService {
                 combatant.RuntimeFacing = SideCombatMath::SignNonZero(targetCombatant.RuntimeGroundPosition.x - combatant.RuntimeGroundPosition.x);
             }
 
-            BeginPlayerAction(controller, attack, "break_limit", recipeId, "Side_BreakLimit", SideAttackKind::BreakLimit);
+            BeginPlayerAction(
+                controller,
+                attack,
+                "break_limit",
+                recipeId,
+                "Side_BreakLimit",
+                SideAttackKind::BreakLimit,
+                scene,
+                player.GetUUID());
             SideCombatFeedbackService::TriggerCinematicFocus(
                 scene,
                 level,
@@ -597,50 +671,66 @@ namespace Wheatear::SideCombatPlayerService {
                 tuning.Feedback.BreakLimitCameraOffset);
         }
 
-        static void CreatePlayerMagicBolt(Scene*,
+        static void CreatePlayerMagicBolt(Scene* scene,
             SideCombatLevelComponent& level,
-            Entity,
+            Entity player,
             SideCombatantComponent&,
             SidePlayerControllerComponent& controller)
         {
             const auto& tuning = GetTuning(level);
             if (!IsSkillUnlocked(level, tuning, "magic_bolt"))
                 return;
-            if (!SpendMana(controller, controller.MagicBoltManaCost))
-                return;
-
-            controller.RuntimeAttackChainTimer = tuning.Player.MagicChainWindow;
-
             const auto& attack = GetAttack(tuning, "magic_bolt");
             const std::string recipeId = ActionRecipeId("magic_bolt");
             const WAO::ActionRecipe* recipe = WAO::FindRecipeOrWarn(recipeId, "SideCombat.Player");
+            if (!RecipeOwnsResourceCost(recipe, "mana") &&
+                !SpendMana(controller, controller.MagicBoltManaCost))
+                return;
+
+            controller.RuntimeAttackChainTimer = tuning.Player.MagicChainWindow;
             controller.RuntimeMagicBoltCooldown = (recipe && recipe->Cooldown > 0.0f)
                 ? recipe->Cooldown
                 : controller.MagicBoltCooldown;
-            BeginPlayerAction(controller, attack, "magic_bolt", recipeId, "Side_PlayerMagicBolt", SideAttackKind::MagicBolt);
+            BeginPlayerAction(
+                controller,
+                attack,
+                "magic_bolt",
+                recipeId,
+                "Side_PlayerMagicBolt",
+                SideAttackKind::MagicBolt,
+                scene,
+                player.GetUUID());
         }
 
-        static void CreateAllySupport(Scene*,
+        static void CreateAllySupport(Scene* scene,
             SideCombatLevelComponent& level,
-            Entity,
+            Entity player,
             SideCombatantComponent&,
             SidePlayerControllerComponent& controller)
         {
             const auto& tuning = GetTuning(level);
             if (!IsSkillUnlocked(level, tuning, "ally_support"))
                 return;
-            if (!SpendMana(controller, controller.AllySupportManaCost))
-                return;
-
-            controller.RuntimeAttackChainTimer = tuning.Player.SupportChainWindow;
-
             const auto& attack = GetAttack(tuning, "ally_support");
             const std::string recipeId = ActionRecipeId("ally_support");
             const WAO::ActionRecipe* recipe = WAO::FindRecipeOrWarn(recipeId, "SideCombat.Player");
+            if (!RecipeOwnsResourceCost(recipe, "mana") &&
+                !SpendMana(controller, controller.AllySupportManaCost))
+                return;
+
+            controller.RuntimeAttackChainTimer = tuning.Player.SupportChainWindow;
             controller.RuntimeAllySupportCooldown = (recipe && recipe->Cooldown > 0.0f)
                 ? recipe->Cooldown
                 : controller.AllySupportCooldown;
-            BeginPlayerAction(controller, attack, "ally_support", recipeId, "Side_AllySupport", SideAttackKind::AllySupport);
+            BeginPlayerAction(
+                controller,
+                attack,
+                "ally_support",
+                recipeId,
+                "Side_AllySupport",
+                SideAttackKind::AllySupport,
+                scene,
+                player.GetUUID());
         }
 
     } // namespace
@@ -658,6 +748,22 @@ namespace Wheatear::SideCombatPlayerService {
 
         auto& combatant = player.GetComponent<SideCombatantComponent>();
         auto& controller = player.GetComponent<SidePlayerControllerComponent>();
+        if (const std::shared_ptr<WAO::ActionRuntime> runtime =
+            WAO::ActionRuntimeStore::Find(scene, player.GetUUID()))
+        {
+            const auto manaIt = runtime->Resources.find("mana");
+            if (manaIt != runtime->Resources.end())
+                controller.RuntimeMana = std::clamp(
+                    manaIt->second,
+                    0.0f,
+                    std::max(1.0f, controller.MaxMana));
+            const auto gaugeIt = runtime->Resources.find("magic_sword");
+            if (gaugeIt != runtime->Resources.end())
+                controller.RuntimeMagicSwordGauge = std::clamp(
+                    gaugeIt->second,
+                    0.0f,
+                    controller.RuntimeMagicSwordGaugeMax);
+        }
         const auto& tuning = GetTuning(level);
         ApplyPlayerTuning(tuning, combatant, controller);
 
@@ -735,6 +841,17 @@ namespace Wheatear::SideCombatPlayerService {
         const float actionMovementScale = GetPlayerActionMovementScale(controller);
         const bool dashActive = IsPlayerActionActive(controller) &&
             controller.RuntimeActionKind == SideAttackKind::Dash;
+
+        if (!inputLockedByCinematic &&
+            InputBindingService::IsActionPressed("side.guard") &&
+            canStartAction)
+        {
+            StartGuardAction(scene, player);
+            if (player.HasComponent<SpriteRendererComponent>())
+                player.GetComponent<SpriteRendererComponent>().FlipX =
+                    combatant.RuntimeFacing < 0.0f;
+            return;
+        }
 
         if (!dashActive && input.Horizontal != 0.0f)
         {

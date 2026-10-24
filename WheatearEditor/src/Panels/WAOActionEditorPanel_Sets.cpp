@@ -21,6 +21,12 @@ namespace Wheatear {
 
     void WAOActionEditorPanel::CreateRecipeInSet(const std::string& setKey, const WAO::ActionRecipe* sourceRecipe)
     {
+        if (m_EditMode && m_EditDirty)
+        {
+            m_SaveStatus = "Save or cancel the current recipe before creating another.";
+            return;
+        }
+
         const ActionSetDefinition* set = FindActionSetByKey(setKey);
         if (!set)
         {
@@ -106,9 +112,7 @@ namespace Wheatear {
             return;
         }
 
-        const std::string targetSet = m_NewActionSetKey.empty()
-            ? ActionModuleKey(*recipe)
-            : m_NewActionSetKey;
+        const std::string targetSet = ActionModuleKey(*recipe);
         CreateRecipeInSet(targetSet, recipe);
     }
     bool WAOActionEditorPanel::DeleteSelectedRecipe()

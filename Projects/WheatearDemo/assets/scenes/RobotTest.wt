@@ -1,0 +1,60 @@
+Scene: RobotTest
+Version: 1
+Entities:
+  - Entity: 9400000000000000001
+    TagComponent:
+      Tag: Camera
+    TransformComponent:
+      Translation: [0, 1.6, 5.5]
+      Rotation: [-0.16, 0, 0]
+      Scale: [1, 1, 1]
+    CameraComponent:
+      Camera:
+        ProjectionType: 0
+        PerspectiveFOV: 0.785398185
+        PerspectiveNear: 0.1
+        PerspectiveFar: 1000
+        OrthographicSize: 10
+        OrthographicNear: -1
+        OrthographicFar: 1
+      Primary: true
+      FixedAspectRatio: false
+  - Entity: 9400000000000000002
+    TagComponent:
+      Tag: Sun
+    TransformComponent:
+      Translation: [0, 8, 0]
+      Rotation: [-0.785398, 0.785398, 0]
+      Scale: [1, 1, 1]
+    DirectionalLightComponent:
+      Color: [1, 1, 1]
+      Intensity: 1.5
+  - Entity: 9400000000000000003
+    TagComponent:
+      Tag: Ground
+    TransformComponent:
+      Translation: [0, -0.05, 0]
+      Rotation: [0, 0, 0]
+      Scale: [10, 0.1, 10]
+    MeshRendererComponent:
+      MeshPath: ""
+      MaterialPath: ""
+      ModelPath: ""
+  - Entity: 9400000000000000004
+    TagComponent:
+      Tag: Robot
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [0.1, 0.1, 0.1]
+    MeshRendererComponent:
+      MeshPath: ""
+      MaterialPath: ""
+      ModelPath: assets/models/RobotExpressive.glb
+      ModelAsset: 6486714808638235639
+    Animator3DComponent:
+      DefaultClip: ""
+      PlayOnStart: true
+      Loop: true
+      PlaybackSpeed: 1
+      FadeDuration: 0.2

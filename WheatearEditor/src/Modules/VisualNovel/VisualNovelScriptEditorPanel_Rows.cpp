@@ -67,6 +67,11 @@ namespace Wheatear {
             label = EditorWidgets::LabelWithId(label, "vn_row:" + std::to_string(i));
             if (ImGui::Selectable(label.c_str(), m_SelectedRow == i))
                 m_SelectedRow = i;
+            if (m_ScrollToSelected && m_SelectedRow == i)
+            {
+                ImGui::SetScrollHereY(0.35f);
+                m_ScrollToSelected = false;
+            }
         }
         ImGui::EndChild();
 
@@ -96,7 +101,8 @@ namespace Wheatear {
             ImGui::SameLine();
             if (ImGui::Button(EditorLocale::Text("Duplicate", "复制行")))
             {
-                m_Rows.insert(m_Rows.begin() + m_SelectedRow + 1, row);
+                const Row copy = m_Rows[m_SelectedRow];
+                m_Rows.insert(m_Rows.begin() + m_SelectedRow + 1, copy);
                 ++m_SelectedRow;
                 m_Dirty = true;
             }

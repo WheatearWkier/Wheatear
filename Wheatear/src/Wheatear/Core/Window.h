@@ -46,6 +46,16 @@ namespace Wheatear {
 		virtual void SetFullscreen(bool enabled) = 0;
 		virtual bool IsFullscreen() const = 0;
 
+		// Custom borderless caption support (Windows). Editors draw their own
+		// title bar and call BeginWindowDrag/toggle from ImGui.
+		virtual void SetDecorated(bool decorated) = 0;
+		virtual void BeginWindowDrag() = 0;
+		virtual void MinimizeWindow() = 0;
+		virtual void MaximizeWindow() = 0;
+		virtual void ToggleMaximizeWindow() = 0;
+		virtual bool IsWindowMaximized() const = 0;
+		virtual void CloseWindow() = 0;
+
 		virtual void* GetNativeWindow() const = 0;
 
 		static Window* Create(const WindowProps& props = WindowProps());

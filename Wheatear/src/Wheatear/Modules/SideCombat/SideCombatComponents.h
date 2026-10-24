@@ -318,6 +318,10 @@ namespace Wheatear {
         float     RuntimeFacing = 1.0f;
         float     RuntimeHitStun = 0.0f;
         float     RuntimeInvulnerableTimer = 0.0f;
+        bool      RuntimeGuardActive = false;
+        float     RuntimeGuardTimer = 0.0f;
+        float     RuntimeParryTimer = 0.0f;
+        float     RuntimeGuardDamageMultiplier = 0.25f;
         float     RuntimeProtection = 0.0f;
         float     RuntimeProtectionMax = 100.0f;
         glm::vec2 RuntimeVelocity = { 0.0f, 0.0f };

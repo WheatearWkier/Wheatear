@@ -13,6 +13,7 @@
 #include "Log.h"
 
 #include <GLFW/glfw3.h>
+#include <algorithm>
 #include <system_error>
 
 namespace Wheatear {
@@ -125,6 +126,7 @@ namespace Wheatear {
 		WT_PROFILE_FUNCTION();
 
 		PostUpdateLayers();
+		m_LastFrameTime = glfwGetTime();
 
 		while (m_Running)
 		{
@@ -140,7 +142,10 @@ namespace Wheatear {
 			// Timestep handed to layers; float accumulation of glfwGetTime() loses
 			// millisecond precision after ~77 s of runtime.
 			const double nowTime = glfwGetTime();
-			Timestep timestep = static_cast<float>(nowTime - m_LastFrameTime);
+			const double rawDelta = std::clamp(
+				nowTime - m_LastFrameTime,
+				0.0,
+				static_cast<double>(m_Specification.MaxFrameDelta));
 			m_LastFrameTime = nowTime;
 
 			if (!m_Minimized)
@@ -148,8 +153,36 @@ namespace Wheatear {
 				{
 					WT_PROFILE_SCOPE("LayerStack OnUpdate");
 
-					for (Layer* layer : m_LayerStack)
-						layer->OnUpdate(timestep);
+					if (m_Specification.UseFixedTimestep)
+					{
+						const double fixedDelta = 1.0 / std::max(
+							1.0f, m_Specification.FixedTimestepHz);
+						m_FixedTimeAccumulator += rawDelta;
+
+						int steps = 0;
+						while (m_FixedTimeAccumulator >= fixedDelta
+							&& steps < m_Specification.MaxFixedStepsPerFrame)
+						{
+							for (Layer* layer : m_LayerStack)
+								layer->OnUpdate(Timestep(static_cast<float>(fixedDelta)));
+							m_FixedTimeAccumulator -= fixedDelta;
+							++steps;
+						}
+
+						// If the simulation cannot keep up, drop the backlog
+						// instead of spiralling into an ever-growing catch-up
+						// loop.
+						if (steps >= m_Specification.MaxFixedStepsPerFrame
+							&& m_FixedTimeAccumulator >= fixedDelta)
+						{
+							m_FixedTimeAccumulator = 0.0;
+						}
+					}
+					else
+					{
+						for (Layer* layer : m_LayerStack)
+							layer->OnUpdate(Timestep(static_cast<float>(rawDelta)));
+					}
 				}
 
 				if (m_ImGuiLayer)

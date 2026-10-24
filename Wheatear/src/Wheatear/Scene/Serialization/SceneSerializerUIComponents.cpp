@@ -1,5 +1,6 @@
 ﻿#include "wtpch.h"
 #include "SceneSerializerComponentSupport.h"
+#include "Wheatear/Assets/AssetDatabase.h"
 
 namespace Wheatear {
 
@@ -77,6 +78,7 @@ namespace Wheatear {
             o << YAML::Key << Key << YAML::BeginMap;
             o << YAML::Key << "Color" << YAML::Value << c.Color;
             o << YAML::Key << "TexturePath" << YAML::Value << (c.Texture ? c.Texture->GetPath() : "");
+            o << YAML::Key << "TextureAsset" << YAML::Value << static_cast<uint64_t>(c.TextureAsset);
             o << YAML::Key << "UVMin" << YAML::Value << c.UVMin;
             o << YAML::Key << "UVMax" << YAML::Value << c.UVMax;
             o << YAML::Key << "SpriteSheet" << YAML::Value << c.SpriteSheet;
@@ -91,8 +93,15 @@ namespace Wheatear {
             c.SpriteSheet = n["SpriteSheet"].as<std::string>("");
             c.CellIndex = n["CellIndex"].as<int>(-1);
             c.SubRect = n["SubRect"].as<std::string>("");
-            if (auto p = n["TexturePath"].as<std::string>(""); !p.empty())
-                c.Texture = Texture2D::Create(p);
+            c.TextureAsset = UUID(n["TextureAsset"].as<uint64_t>(0));
+            std::string texturePath = n["TexturePath"].as<std::string>("");
+            if (const std::string resolved = AssetDatabase::Get().GetPath(c.TextureAsset);
+                !resolved.empty())
+            {
+                texturePath = resolved;
+            }
+            if (!texturePath.empty())
+                c.Texture = Texture2D::Create(texturePath);
         }
     };
     template<> struct ComponentSerializer<UIRadialCooldownComponent> {

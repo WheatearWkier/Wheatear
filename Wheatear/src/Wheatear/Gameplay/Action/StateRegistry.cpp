@@ -41,9 +41,16 @@ namespace Wheatear::WAO {
 
     RuntimeState MakeState(const std::string& id, int turns, float power, UUID source)
     {
+        return MakeState(id, turns, 0.0f, power, source);
+    }
+
+    RuntimeState MakeState(const std::string& id, int turns, float seconds,
+        float power, UUID source)
+    {
         RuntimeState state;
         state.Id = id;
         state.RemainingTurns = std::max(0, turns);
+        state.RemainingSeconds = std::max(0.0f, seconds);
         state.Power = power;
         state.Source = source;
 
@@ -68,7 +75,10 @@ namespace Wheatear::WAO {
             states.end(),
             [&](const RuntimeState& state)
             {
-                return state.Id == id && state.RemainingTurns > 0;
+                return state.Id == id
+                    && (state.Infinite
+                        || state.RemainingTurns > 0
+                        || state.RemainingSeconds > 0.0f);
             });
     }
 
@@ -76,14 +86,19 @@ namespace Wheatear::WAO {
     {
         if (state.Id.empty())
             return;
-        if (state.RemainingTurns <= 0 && state.RemainingSeconds <= 0.0f)
+        if (!state.Infinite
+            && state.RemainingTurns <= 0
+            && state.RemainingSeconds <= 0.0f)
+        {
             return;
+        }
 
         for (RuntimeState& current : states)
         {
             if (current.Id != state.Id)
                 continue;
 
+            current.Infinite = current.Infinite || state.Infinite;
             current.RemainingTurns = std::max(current.RemainingTurns, state.RemainingTurns);
             current.RemainingSeconds = std::max(current.RemainingSeconds, state.RemainingSeconds);
             current.Power = std::max(current.Power, state.Power);
@@ -113,13 +128,21 @@ namespace Wheatear::WAO {
         bool first = true;
         for (const RuntimeState& state : states)
         {
-            if (state.RemainingTurns <= 0 && state.RemainingSeconds <= 0.0f)
+            if (!state.Infinite
+                && state.RemainingTurns <= 0
+                && state.RemainingSeconds <= 0.0f)
+            {
                 continue;
+            }
             if (!first)
                 stream << " ";
             stream << (state.DisplayName.empty() ? state.Id : state.DisplayName);
-            if (state.RemainingTurns > 0)
+            if (state.Infinite)
+                stream << "inf";
+            else if (state.RemainingTurns > 0)
                 stream << state.RemainingTurns;
+            else if (state.RemainingSeconds > 0.0f)
+                stream << state.RemainingSeconds << "s";
             first = false;
         }
         return stream.str();
@@ -130,7 +153,10 @@ namespace Wheatear::WAO {
         float multiplier = 1.0f;
         for (const RuntimeState& state : states)
         {
-            if (state.Id == StateIds::DefenseDown && state.RemainingTurns > 0)
+            if (state.Id == StateIds::DefenseDown
+                && (state.Infinite
+                    || state.RemainingTurns > 0
+                    || state.RemainingSeconds > 0.0f))
                 multiplier *= std::max(0.15f, 1.0f - std::max(0.0f, state.Power));
         }
         return multiplier;
@@ -143,7 +169,10 @@ namespace Wheatear::WAO {
         float multiplier = guarding ? guardingMultiplier : 1.0f;
         for (const RuntimeState& state : states)
         {
-            if (state.Id == StateIds::Guard && state.RemainingTurns > 0)
+            if (state.Id == StateIds::Guard
+                && (state.Infinite
+                    || state.RemainingTurns > 0
+                    || state.RemainingSeconds > 0.0f))
             {
                 multiplier *= std::clamp(
                     state.Power > 0.0f ? state.Power : guardingMultiplier,
@@ -162,7 +191,7 @@ namespace Wheatear::WAO {
 
         for (RuntimeState& state : states)
         {
-            if (state.RemainingTurns <= 0)
+            if (!state.Infinite && state.RemainingTurns <= 0)
                 continue;
 
             if (state.Id == StateIds::Regeneration)
@@ -180,7 +209,8 @@ namespace Wheatear::WAO {
                 result.Events.push_back(StateTickEvent::Damage);
             }
 
-            --state.RemainingTurns;
+            if (!state.Infinite)
+                --state.RemainingTurns;
         }
 
         states.erase(
@@ -188,7 +218,9 @@ namespace Wheatear::WAO {
                 states.end(),
                 [](const RuntimeState& state)
                 {
-                    return state.RemainingTurns <= 0 && state.RemainingSeconds <= 0.0f;
+                    return !state.Infinite
+                        && state.RemainingTurns <= 0
+                        && state.RemainingSeconds <= 0.0f;
                 }),
             states.end());
 

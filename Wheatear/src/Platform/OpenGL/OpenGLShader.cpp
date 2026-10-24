@@ -80,11 +80,15 @@ namespace Wheatear {
                 {
                     const std::filesystem::path assetsDirectory = shaderDirectory.parent_path();
                     if (assetsDirectory.filename() == "assets")
-                        return assetsDirectory / "cache" / "shader" / "opengl";
+                    {
+                        return AssetPath::GetProjectRoot() / "Intermediate"
+                            / "Cache" / "Shader" / "opengl";
+                    }
                 }
             }
 
-            return AssetPath::ResolveAsset("cache/shader/opengl");
+            return AssetPath::GetProjectRoot() / "Intermediate"
+                / "Cache" / "Shader" / "opengl";
         }
 
         static void CreateCacheDirectoryIfNeeded(const std::filesystem::path& cacheDirectory)

@@ -4,7 +4,8 @@
 #   powershell -File scripts/Generate-EditorIcons.ps1
 #
 # Icons are fetched as SVG (https://api.iconify.design/lucide/<name>.svg),
-# rasterized at 96x96 with a distance-field stroke renderer embedded below
+# rasterized at 128x128 with a distance-field stroke renderer embedded below
+# (2.35px rounded strokes, tuned for 16-24px toolbar rendering)
 # (no external tools required), and written to WheatearEditor/Resources/Icons/Editor/.
 #
 # Icon source: Lucide icon library (ISC license), see
@@ -286,9 +287,8 @@ public static class SvgToPng
         }
         if (Environment.GetEnvironmentVariable("ICON_DEBUG") == "1")
             Console.WriteLine("[debug] segments=" + s_Segs.Count);
-        int radiusPx = (int)(s_StrokeW / 2.0 * (size / 24.0) + 0.5);
-        if (radiusPx < 1) radiusPx = 1;
         double scale = size / 24.0;
+        double radiusPx = Math.Max(1.0, s_StrokeW / 2.0 * scale);
         var color = ColorTranslator.FromHtml(colorHex);
         var bmp = new Bitmap(size, size, PixelFormat.Format32bppArgb);
         for (int y = 0; y < size; y++)
@@ -307,9 +307,10 @@ public static class SvgToPng
                     double d = Math.Sqrt(dx * dx + dy * dy);
                     if (d < dmin) dmin = d;
                 }
-                if (dmin <= radiusPx)
+                double dminPx = dmin * scale;
+                if (dminPx <= radiusPx)
                 {
-                    double a = Math.Min(1.0, radiusPx + 0.5 - dmin);
+                    double a = Math.Min(1.0, radiusPx + 0.5 - dminPx);
                     bmp.SetPixel(x, y, Color.FromArgb((int)(a * 255), color.R, color.G, color.B));
                 }
             }
@@ -329,52 +330,52 @@ public static class SvgToPng
 # --- Icon manifest: name -> (lucide name, color) -----------------------------
 # Functional toolbar icons (light stroke; run-state icons keep their colors).
 $icons = @{
-    "new_scene"     = @("file-plus",     "#E6EDF3")
-    "open_scene"    = @("folder-open",   "#E6EDF3")
-    "save_scene"    = @("save",          "#E6EDF3")
-    "play"          = @("play",          "#59D5AF")   # mint green (run)
-    "pause"         = @("pause",         "#59D5AF")
-    "stop"          = @("square",        "#FD8068")   # coral (stop)
-    "step"          = @("skip-forward",  "#59D5AF")
-    "focus"         = @("focus",         "#E6EDF3")
-    "ui_canvas"     = @("monitor-play",  "#E6EDF3")
-    "sprite_sheet"  = @("image",         "#E6EDF3")
-    "event_graph"   = @("network",       "#E6EDF3")
-    "health"        = @("heart-pulse",   "#E6EDF3")
-    "package"       = @("package",       "#E6EDF3")
-    "reset_layout"  = @("layout-dashboard", "#E6EDF3")
-    "check"         = @("badge-check",   "#E6EDF3")
-    "gameplay"      = @("gamepad-2",     "#E6EDF3")
-    "palette"       = @("palette",       "#E6EDF3")
-    "panel"         = @("panel-top",     "#E6EDF3")
-    "refresh"       = @("refresh-cw",    "#E6EDF3")
-    "search"        = @("search",        "#E6EDF3")
-    "settings"      = @("settings",      "#E6EDF3")
+    "new_scene"     = @("file-plus",     "#E8EAF0")
+    "open_scene"    = @("folder-open",   "#69A7E8")
+    "save_scene"    = @("save",          "#E8EAF0")
+    "play"          = @("play",          "#65C18C")   # mint green (run)
+    "pause"         = @("pause",         "#65C18C")
+    "stop"          = @("square",        "#E36A5E")   # coral (stop)
+    "step"          = @("skip-forward",  "#65C18C")
+    "focus"         = @("focus",         "#D9A95F")
+    "ui_canvas"     = @("monitor-play",  "#69A7E8")
+    "sprite_sheet"  = @("image",         "#69A7E8")
+    "event_graph"   = @("network",       "#B48CE8")
+    "health"        = @("heart-pulse",   "#E36A5E")
+    "package"       = @("package",       "#D9A95F")
+    "reset_layout"  = @("layout-dashboard", "#9AA4B2")
+    "check"         = @("badge-check",   "#65C18C")
+    "gameplay"      = @("gamepad-2",     "#65C18C")
+    "palette"       = @("palette",       "#E58FB8")
+    "panel"         = @("panel-top",     "#9AA4B2")
+    "refresh"       = @("refresh-cw",    "#69A7E8")
+    "search"        = @("search",        "#9AA4B2")
+    "settings"      = @("settings",      "#9AA4B2")
     # Menu / panel icons
-    "undo"          = @("undo-2",        "#E6EDF3")
-    "redo"          = @("redo-2",        "#E6EDF3")
-	   "close"         = @("x",             "#E6EDF3")
-	    "plus"          = @("plus",          "#E6EDF3")
-	   "pencil"        = @("pencil",        "#E6EDF3")
-	    "copy"          = @("copy",          "#E6EDF3")
-	    "eye"           = @("eye",           "#E6EDF3")
-	   "info"          = @("info",          "#E6EDF3")
-	    "language"      = @("languages",     "#E6EDF3")
-	    "logout"        = @("log-out",       "#E6EDF3")
-	    "bar_chart"     = @("bar-chart-3",   "#E6EDF3")
-	    "box"           = @("box",           "#E6EDF3")
-	   "branch"        = @("git-branch",    "#E6EDF3")
-	    "corner"        = @("corner-down-right", "#E6EDF3")
-	    "template"      = @("layout-template", "#E6EDF3")
-	    "sliders"       = @("sliders-horizontal", "#E6EDF3")
-	   "filter"        = @("filter-x",      "#E6EDF3")
-    "file_text"     = @("file-text",     "#E6EDF3")
-    "audio"         = @("audio-lines",   "#E6EDF3")
-    "script"        = @("scroll-text",   "#E6EDF3")
-    "folder"        = @("folder",        "#E6EDF3")
-    "save"          = @("save",          "#E6EDF3")
-    "film"          = @("film",          "#E6EDF3")
-    "code"          = @("code",          "#E6EDF3")
+    "undo"          = @("undo-2",        "#E8EAF0")
+    "redo"          = @("redo-2",        "#E8EAF0")
+	   "close"         = @("x",             "#9AA4B2")
+	    "plus"          = @("plus",          "#65C18C")
+	   "pencil"        = @("pencil",        "#D9A95F")
+	    "copy"          = @("copy",          "#9AA4B2")
+	    "eye"           = @("eye",           "#9AA4B2")
+	   "info"          = @("info",          "#69A7E8")
+	    "language"      = @("languages",     "#B48CE8")
+	    "logout"        = @("log-out",       "#E36A5E")
+	    "bar_chart"     = @("bar-chart-3",   "#65C18C")
+	    "box"           = @("box",           "#5FC7D6")
+	   "branch"        = @("git-branch",    "#B48CE8")
+	    "corner"        = @("corner-down-right", "#9AA4B2")
+	    "template"      = @("layout-template", "#D9A95F")
+	    "sliders"       = @("sliders-horizontal", "#9AA4B2")
+	   "filter"        = @("filter-x",      "#9AA4B2")
+    "file_text"     = @("file-text",     "#9AA4B2")
+    "audio"         = @("audio-lines",   "#65C18C")
+    "script"        = @("scroll-text",   "#E8B86A")
+    "folder"        = @("folder",        "#D9A95F")
+    "save"          = @("save",          "#E8EAF0")
+    "film"          = @("film",          "#E58F65")
+    "code"          = @("code",          "#B48CE8")
 }
 
 New-Item -ItemType Directory -Path $outputDir -Force | Out-Null
@@ -400,7 +401,8 @@ foreach ($entry in $icons.GetEnumerator() | Sort-Object Key)
         {
             throw "SVG download empty or unexpected: $svgUrl"
         }
-        [SvgToPng]::Convert($svg, $pngPath, 96, $color)
+        $svg = $svg -replace 'stroke-width="[0-9.]*"', 'stroke-width="2.35"'
+        [SvgToPng]::Convert($svg, $pngPath, 128, $color)
         Write-Host ("  ok   {0,-16} <- {1}" -f $name, $lucide)
         $ok++
     }

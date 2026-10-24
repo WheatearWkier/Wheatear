@@ -1,0 +1,55 @@
+Scene: ModelImportTest
+Version: 1
+Entities:
+  - Entity: 9100000000000000001
+    TagComponent:
+      Tag: Camera
+    TransformComponent:
+      Translation: [0, 2, 6]
+      Rotation: [-0.3, 0, 0]
+      Scale: [1, 1, 1]
+    CameraComponent:
+      Camera:
+        ProjectionType: 0
+        PerspectiveFOV: 0.785398185
+        PerspectiveNear: 0.1
+        PerspectiveFar: 1000
+        OrthographicSize: 10
+        OrthographicNear: -1
+        OrthographicFar: 1
+      Primary: true
+      FixedAspectRatio: false
+  - Entity: 9100000000000000002
+    TagComponent:
+      Tag: Sun
+    TransformComponent:
+      Translation: [0, 8, 0]
+      Rotation: [-0.785398, 0.785398, 0]
+      Scale: [1, 1, 1]
+    DirectionalLightComponent:
+      Color: [1, 1, 1]
+      Intensity: 1.5
+  - Entity: 9100000000000000003
+    TagComponent:
+      Tag: GLB Box
+    TransformComponent:
+      Translation: [-1.5, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    MeshRendererComponent:
+      MeshPath: ""
+      MaterialPath: ""
+      ModelPath: assets/models/Box.glb
+      ModelAsset: 15318867198082520195
+  - Entity: 9100000000000000004
+    TagComponent:
+      Tag: FBX Cube
+    TransformComponent:
+      Translation: [1.5, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    MeshRendererComponent:
+      MeshPath: ""
+      MaterialPath: ""
+      ModelPath: assets/models/BlenderCube.fbx
+      ModelAsset: 16967462938787949135

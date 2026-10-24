@@ -26,6 +26,30 @@ namespace Wheatear::EditorWidgets {
         Error
     };
 
+    // Wheat-ear monogram used by the menu bar and launcher. Drawn in code so
+    // it stays crisp at any DPI and needs no texture atlas entry.
+    void BrandMark(const ImVec2& center, float size, bool glow = false);
+    void BrandHeader(float markSize = 28.0f);
+    // Small pill used to make the active workspace (2D/3D) unmistakable.
+    void WorkspaceBadge(const char* label, bool threeD);
+
+    enum class CodeLanguage
+    {
+        Plain = 0,
+        EventScript,
+        VisualNovel,
+        Yaml
+    };
+
+    // Read-only line-numbered preview with lightweight syntax colouring and
+    // red error gutters. Used by the WTS/VN raw tabs so authors get feedback
+    // without leaving the engine.
+    void DrawCodePreview(const std::string& text,
+        const char* id,
+        CodeLanguage language,
+        const std::vector<int>& errorLines = {},
+        const ImVec2& size = ImVec2(0.0f, 0.0f));
+
     bool InputString(const char* label, std::string& value, size_t capacity = 512);
     bool InputMultilineString(const char* label,
         std::string& value,

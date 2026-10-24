@@ -134,6 +134,8 @@ namespace Wheatear {
                     InputBindingService::InjectActionPress("side.dash");
                 else if (command == "side:break_limit")
                     InputBindingService::InjectActionPress("side.break_limit");
+                else if (command == "side:guard")
+                    InputBindingService::InjectActionPress("side.guard");
             }
         }
 

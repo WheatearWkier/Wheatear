@@ -4,22 +4,28 @@
 #include "Wheatear/Scripting/EventScript.h"
 
 #include <array>
+#include <memory>
 #include <string>
 #include <vector>
 
 #include <imgui/imgui.h>
+#include "TextEditor.h"
 
 namespace Wheatear {
 
     namespace EventScriptGraphRequests {
-        void RequestOpenScript(const std::string& sourcePath, const std::string& eventName = {});
-        bool ConsumeOpenScriptRequest(std::string& sourcePath, std::string& eventName);
+        void RequestOpenScript(const std::string& sourcePath,
+            const std::string& eventName = {}, int sourceLine = 0);
+        bool ConsumeOpenScriptRequest(std::string& sourcePath,
+            std::string& eventName, int& sourceLine);
     }
 
     class EventScriptGraphPanel
     {
     public:
-        void Open(const std::string& sourcePath, const std::string& eventName = {});
+        ~EventScriptGraphPanel();
+        void Open(const std::string& sourcePath,
+            const std::string& eventName = {}, int sourceLine = 0);
         void OnImGuiRender();
 
     private:
@@ -37,9 +43,23 @@ namespace Wheatear {
         void AddEvent();
         void AddInstruction(EventScriptInstructionType type, const std::string& defaultText = {});
         void CommitRawTextToGraph();
+        void CaptureUndoSnapshot(const std::string& nextSource);
+        void Undo();
+        void Redo();
+        void ApplySnapshot(size_t index, bool redo);
 
         const EventScriptBlock* GetSelectedBlock() const;
         EventScriptBlock* GetSelectedBlockMutable();
+
+    private:
+        struct EditSnapshot
+        {
+            std::vector<EventScriptBlock> Events;
+            std::vector<EventScriptInstruction> Orphans;
+            std::string SelectedEvent;
+            int SelectedInstruction = -1;
+            std::string Source;
+        };
 
     private:
         bool m_Open = false;
@@ -61,6 +81,15 @@ namespace Wheatear {
         int m_SelectedInstruction = -1;
         ImVec2 m_GraphPan = { 18.0f, 18.0f };
         float m_Zoom = 1.0f;
+        float m_DetailsWidth = 300.0f;
+        std::vector<EditSnapshot> m_UndoStack;
+        std::vector<EditSnapshot> m_RedoStack;
+        std::string m_LastCommittedSource;
+        std::string m_SavedSource;
+        bool m_SuppressUndoCapture = false;
+        int m_PendingRevealLine = 0;
+        std::unique_ptr<TextEditor> m_RawEditor;
+        std::string m_RawEditorText;
     };
 
 } // namespace Wheatear

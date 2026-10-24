@@ -3,7 +3,9 @@
 
 #include "ActionDebugHistory.h"
 #include "ActionRecipeQueries.h"
+#include "ActionRuntimeStore.h"
 #include "ActionSignalRouter.h"
+#include "Wheatear/Gameplay/Behavior/BehaviorVM.h"
 #include "Wheatear/Utils/StringUtils.h"
 
 #include <algorithm>
@@ -63,7 +65,10 @@ namespace Wheatear::WAO {
         return resolvers;
     }
 
-    void ActionResolverRegistry::RegisterResolver(const std::string& actionPrefix, Resolver resolver)
+    void ActionResolverRegistry::RegisterResolver(
+        const std::string& actionPrefix,
+        Resolver resolver,
+        bool previewOnly)
     {
         if (!resolver)
             return;
@@ -78,10 +83,11 @@ namespace Wheatear::WAO {
         if (it != resolvers.end())
         {
             it->Callback = std::move(resolver);
+            it->PreviewOnly = previewOnly;
             return;
         }
 
-        resolvers.push_back({ actionPrefix, std::move(resolver) });
+        resolvers.push_back({ actionPrefix, std::move(resolver), previewOnly });
     }
 
     ActionResolveResult ActionResolverRegistry::Resolve(const ActionResolveContext& context,
@@ -90,6 +96,8 @@ namespace Wheatear::WAO {
         for (const ResolverEntry& entry : Resolvers())
         {
             if (!StartsWith(recipe.Id, entry.Prefix))
+                continue;
+            if (entry.PreviewOnly && context.Runtime)
                 continue;
 
             ActionResolveResult result = entry.Callback(context, recipe);
@@ -120,6 +128,66 @@ namespace Wheatear::WAO {
         ActionResolveContext resolvedContext = context;
         if (resolvedContext.Intent.ActionId.empty())
             resolvedContext.Intent.ActionId = recipe.Id;
+        if (!resolvedContext.Runtime &&
+            resolvedContext.SceneContext &&
+            resolvedContext.Intent.Actor != 0)
+        {
+            resolvedContext.Runtime = ActionRuntimeStore::Resolve(
+                resolvedContext.SceneContext,
+                resolvedContext.Intent.Actor);
+        }
+
+        ActionRuntime* targetRuntime = resolvedContext.Runtime;
+        if (resolvedContext.SceneContext
+            && resolvedContext.Intent.ExplicitTarget != 0)
+        {
+            targetRuntime = ActionRuntimeStore::Resolve(
+                resolvedContext.SceneContext,
+                resolvedContext.Intent.ExplicitTarget);
+        }
+
+        if (!recipe.BehaviorId.empty() ||
+            !recipe.BehaviorEntry.empty() ||
+            !recipe.BehaviorFile.empty())
+        {
+            BehaviorStartResult behavior = BehaviorVM::Start(
+                resolvedContext.SceneContext,
+                resolvedContext.Intent,
+                recipe,
+                resolvedContext.Runtime);
+
+            ActionResolveResult result;
+            result.Handled = true;
+            result.Success = behavior.Success;
+            result.Started = behavior.Started;
+            result.Completed = behavior.Completed;
+            result.Handle = behavior.Handle;
+            result.AppliedEffects = std::move(behavior.AppliedEffects);
+            result.Ledger = std::move(behavior.Ledger);
+            result.Detail = behavior.Detail;
+            if (!behavior.Started)
+            {
+                result.Success = false;
+                result.Detail = behavior.Detail.empty()
+                    ? "Behavior failed to start"
+                    : behavior.Detail;
+                if (result.Ledger.Entries().empty())
+                {
+                    result.Ledger.BeginAction(resolvedContext.Intent);
+                    result.Ledger.Record({
+                        resolvedContext.Intent.ActionId,
+                        EffectType::None,
+                        resolvedContext.Intent.Actor,
+                        resolvedContext.Intent.ExplicitTarget,
+                        result.Detail,
+                        0.0f,
+                        false
+                    });
+                }
+                ActionDebugHistory::Record(result.Ledger, false, result.Detail);
+            }
+            return result;
+        }
 
         ActionResolveResult resolved = ActionResolverRegistry::Resolve(resolvedContext, recipe);
         if (resolved.Handled)
@@ -135,10 +203,17 @@ namespace Wheatear::WAO {
 
         if (resolvedContext.Runtime)
         {
-            ActionExecutionResult executed = WAO::Execute(resolvedContext.Intent, recipe, *resolvedContext.Runtime);
+            ActionExecutionResult executed = WAO::Execute(
+                resolvedContext.Intent,
+                recipe,
+                *resolvedContext.Runtime,
+                targetRuntime,
+                resolvedContext.Runtime);
             ActionResolveResult result;
             result.Handled = true;
             result.Success = executed.Success;
+            result.Started = true;
+            result.Completed = true;
             result.AppliedEffects = executed.AppliedEffects;
             result.Ledger = executed.Ledger;
             result.Detail = executed.Success ? "Executed by ActionRunner" : "ActionRunner failed";
@@ -159,6 +234,8 @@ namespace Wheatear::WAO {
         ActionResolveResult result;
         result.Handled = true;
         result.Success = true;
+        result.Started = true;
+        result.Completed = true;
         result.Detail = detail.empty() ? "Recipe resolved" : detail;
         result.Ledger.BeginAction(resolvedContext.Intent);
 
@@ -233,7 +310,8 @@ namespace Wheatear::WAO {
             [detail](const ActionResolveContext& context, const ActionRecipe& recipe)
             {
                 return ResolveRecipePreview(context, recipe, detail);
-            });
+            },
+            true);
     }
 
 } // namespace Wheatear::WAO

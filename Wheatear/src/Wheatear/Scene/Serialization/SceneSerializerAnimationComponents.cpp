@@ -157,9 +157,35 @@ namespace Wheatear {
 
 
 
+    template<> struct ComponentSerializer<Animator3DComponent> {
+        static constexpr const char* Key = "Animator3DComponent";
+        static void Serialize(YAML::Emitter& o, const Animator3DComponent& c) {
+            o << YAML::Key << Key << YAML::BeginMap;
+            o << YAML::Key << "DefaultClip" << YAML::Value << c.DefaultClip;
+            o << YAML::Key << "PlayOnStart" << YAML::Value << c.PlayOnStart;
+            o << YAML::Key << "Loop" << YAML::Value << c.Loop;
+            o << YAML::Key << "PlaybackSpeed" << YAML::Value << c.PlaybackSpeed;
+            o << YAML::Key << "FadeDuration" << YAML::Value << c.FadeDuration;
+            o << YAML::EndMap;
+        }
+        static void Deserialize(const YAML::Node& n, Animator3DComponent& c) {
+            c.DefaultClip = n["DefaultClip"].as<std::string>("");
+            c.PlayOnStart = n["PlayOnStart"].as<bool>(true);
+            c.Loop = n["Loop"].as<bool>(true);
+            c.PlaybackSpeed = n["PlaybackSpeed"].as<float>(1.0f);
+            c.FadeDuration = n["FadeDuration"].as<float>(0.2f);
+            c.CurrentClipIndex = -1;
+            c.NextClipIndex = -1;
+            c.Time = 0.0f;
+            c.NextTime = 0.0f;
+            c.FadeElapsed = 0.0f;
+        }
+    };
+
     using AnimationSceneComponents = ComponentGroup
     <
-        SpriteAnimatorComponent
+        SpriteAnimatorComponent,
+        Animator3DComponent
     >;
 
     void SerializeAnimationSceneComponents(YAML::Emitter& out, Entity entity)

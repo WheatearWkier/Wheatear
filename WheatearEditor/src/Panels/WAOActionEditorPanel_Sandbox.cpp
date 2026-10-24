@@ -5,6 +5,8 @@
 #include "Editor/EditorLocale.h"
 #include "Editor/EditorWidgets.h"
 #include "Wheatear/Gameplay/Action/ActionRunner.h"
+#include "Wheatear/Gameplay/Action/EffectFormula.h"
+#include "Wheatear/Gameplay/Action/EffectRegistry.h"
 #include "Wheatear/Gameplay/Action/StateRegistry.h"
 
 #include <imgui/imgui.h>
@@ -28,27 +30,63 @@ namespace Wheatear {
 
         std::vector<std::string> errors;
         std::vector<std::string> warnings;
+        CollectValidationMessages(*recipe, errors, warnings);
 
-        if (recipe->Id.empty())
+        if (errors.empty() && warnings.empty())
+        {
+            ImGui::TextColored(ImVec4(0.35f, 0.90f, 0.45f, 1.0f), "Validation passed.");
+            return;
+        }
+
+        if (!errors.empty())
+        {
+            ImGui::TextColored(ImVec4(1.0f, 0.35f, 0.30f, 1.0f), "Errors");
+            for (const std::string& message : errors)
+                ImGui::BulletText("%s", message.c_str());
+        }
+
+        if (!warnings.empty())
+        {
+            ImGui::TextColored(ImVec4(1.0f, 0.82f, 0.25f, 1.0f), "Warnings");
+            for (const std::string& message : warnings)
+                ImGui::BulletText("%s", message.c_str());
+        }
+    }
+
+    void WAOActionEditorPanel::CollectValidationMessages(
+        const WAO::ActionRecipe& recipe,
+        std::vector<std::string>& errors,
+        std::vector<std::string>& warnings) const
+    {
+        if (recipe.Id.empty())
             errors.push_back("Action id is empty.");
-        if (RecipeSourcePath(recipe->Id).empty())
+        if (RecipeSourcePath(recipe.Id).empty())
             warnings.push_back("No YAML source mapping. Saving is disabled for this id prefix.");
-        if (recipe->DisplayName.empty())
+        if (recipe.DisplayName.empty())
             warnings.push_back("Display name is empty.");
-        if (recipe->Duration < 0.0f || recipe->Startup < 0.0f || recipe->Recovery < 0.0f || recipe->HitTime < 0.0f)
+        if (recipe.Duration < 0.0f || recipe.Startup < 0.0f || recipe.Recovery < 0.0f || recipe.HitTime < 0.0f)
             errors.push_back("Timing values must not be negative.");
-        if (recipe->Duration > 0.0f && recipe->HitTime > recipe->Duration)
+        if (recipe.Duration > 0.0f && recipe.HitTime > recipe.Duration)
             warnings.push_back("Hit time is later than duration.");
-        if (recipe->CancelEnd > 0.0f && recipe->CancelEnd < recipe->CancelStart)
+        if (recipe.CancelEnd > 0.0f && recipe.CancelEnd < recipe.CancelStart)
             errors.push_back("Cancel end is earlier than cancel start.");
-        if (!recipe->IconPath.empty() && !EditorWidgets::ProjectAssetExists(recipe->IconPath))
-            warnings.push_back("Icon path is missing: " + recipe->IconPath);
-        if (!recipe->SoundPath.empty() && !EditorWidgets::ProjectAssetExists(recipe->SoundPath))
-            warnings.push_back("SFX path is missing: " + recipe->SoundPath);
-        if (!recipe->EffectPath.empty() && !EditorWidgets::ProjectAssetExists(recipe->EffectPath))
-            warnings.push_back("VFX path is missing: " + recipe->EffectPath);
+        if (!recipe.IconPath.empty() && !EditorWidgets::ProjectAssetExists(recipe.IconPath))
+            warnings.push_back("Icon path is missing: " + recipe.IconPath);
+        if (!recipe.SoundPath.empty() && !EditorWidgets::ProjectAssetExists(recipe.SoundPath))
+            warnings.push_back("SFX path is missing: " + recipe.SoundPath);
+        if (!recipe.EffectPath.empty() && !EditorWidgets::ProjectAssetExists(recipe.EffectPath))
+            warnings.push_back("VFX path is missing: " + recipe.EffectPath);
+        if (!recipe.BehaviorId.empty() || !recipe.BehaviorEntry.empty() || !recipe.BehaviorFile.empty())
+        {
+            if (recipe.BehaviorId.empty() && recipe.BehaviorEntry.empty())
+                errors.push_back("Behavior wiring needs Behavior Id or Behavior Entry.");
+            if (!recipe.BehaviorFile.empty() && !EditorWidgets::ProjectAssetExists(recipe.BehaviorFile))
+                warnings.push_back("Behavior file is missing: " + recipe.BehaviorFile);
+            if (recipe.BehaviorVersion == 0)
+                warnings.push_back("Behavior version is not pinned; hot reload will use the latest entry.");
+        }
 
-        for (const auto& [id, cost] : recipe->ResourceCost)
+        for (const auto& [id, cost] : recipe.ResourceCost)
         {
             if (id.empty())
                 errors.push_back("Resource cost has an empty id.");
@@ -56,7 +94,7 @@ namespace Wheatear {
                 errors.push_back("Resource cost is negative: " + id);
         }
 
-        for (const auto& [id, value] : recipe->Params)
+        for (const auto& [id, value] : recipe.Params)
         {
             if (id.empty())
                 errors.push_back("Recipe params contain an empty key.");
@@ -80,50 +118,85 @@ namespace Wheatear {
             }
         }
 
-        for (size_t i = 0; i < recipe->Effects.size(); ++i)
+        for (size_t i = 0; i < recipe.Effects.size(); ++i)
         {
-            const WAO::EffectSpec& effect = recipe->Effects[i];
+            const WAO::EffectSpec& effect = recipe.Effects[i];
             const std::string prefix = "Effect " + std::to_string(i + 1) + ": ";
-            if (effect.Type == WAO::EffectType::None)
+            if (effect.Type == WAO::EffectType::None && effect.CustomType.empty())
                 errors.push_back(prefix + "type is None.");
-            if ((effect.Type == WAO::EffectType::ModifyAttribute || effect.Type == WAO::EffectType::Damage || effect.Type == WAO::EffectType::Heal)
-                && effect.AttributeId.empty())
-                warnings.push_back(prefix + "attribute id is empty.");
-            else if ((effect.Type == WAO::EffectType::ModifyAttribute || effect.Type == WAO::EffectType::Damage || effect.Type == WAO::EffectType::Heal)
-                && !IsKnownAttribute(effect.AttributeId))
+
+            if (!effect.CustomType.empty() && !WAO::EffectRegistry::Has(effect.CustomType))
+                errors.push_back(prefix + "unknown custom effect: " + effect.CustomType);
+
+            if (!effect.Formula.empty())
+            {
+                std::string formulaError;
+                if (!WAO::ValidateEffectFormula(effect.Formula, &formulaError))
+                    errors.push_back(prefix + formulaError);
+            }
+
+            const bool usesAttribute =
+                effect.Type == WAO::EffectType::Damage
+                || effect.Type == WAO::EffectType::Heal
+                || effect.Type == WAO::EffectType::ModifyAttribute;
+            if (usesAttribute && effect.AttributeId.empty())
+            {
+                if (effect.Type == WAO::EffectType::ModifyAttribute)
+                    errors.push_back(prefix + "ModifyAttribute needs an attribute id.");
+                else
+                    warnings.push_back(prefix + "attribute id is empty; Health is used.");
+            }
+            else if (usesAttribute && !IsKnownAttribute(effect.AttributeId))
+            {
                 warnings.push_back(prefix + "attribute id '" + effect.AttributeId + "' is not a known attribute.");
+            }
+
+            if (effect.Type == WAO::EffectType::ConsumeResource && effect.AttributeId.empty())
+                errors.push_back(prefix + "ConsumeResource needs a resource id.");
+
             if ((effect.Type == WAO::EffectType::AddState || effect.Type == WAO::EffectType::RemoveState)
                 && effect.StateId.empty())
-                warnings.push_back(prefix + "state id is empty.");
+            {
+                errors.push_back(prefix + "state id is empty.");
+            }
             else if ((effect.Type == WAO::EffectType::AddState || effect.Type == WAO::EffectType::RemoveState)
                 && WAO::FindStateDefinition(effect.StateId) == nullptr)
+            {
                 warnings.push_back(prefix + "state id '" + effect.StateId + "' is not in StateRegistry.");
+            }
+
             if (effect.Type == WAO::EffectType::EmitSignal && effect.SignalId.empty())
                 warnings.push_back(prefix + "signal id is empty.");
-            if (effect.DurationPolicy == WAO::EffectDurationPolicy::Seconds && effect.Seconds <= 0.0f)
+
+            if (effect.Type == WAO::EffectType::StartCooldown
+                && effect.Seconds <= 0.0f && effect.Value <= 0.0f)
+            {
+                errors.push_back(prefix + "StartCooldown needs Seconds > 0.");
+            }
+
+            if (effect.DurationPolicy == WAO::EffectDurationPolicy::Seconds
+                && effect.Seconds <= 0.0f)
+            {
                 warnings.push_back(prefix + "seconds policy needs Seconds > 0.");
-            if (effect.DurationPolicy == WAO::EffectDurationPolicy::Turns && effect.Turns <= 0)
+            }
+            if (effect.DurationPolicy == WAO::EffectDurationPolicy::Turns
+                && effect.Turns <= 0)
+            {
                 warnings.push_back(prefix + "turns policy needs Turns > 0.");
-        }
+            }
+            if (effect.Type == WAO::EffectType::AddState
+                && effect.DurationPolicy != WAO::EffectDurationPolicy::Infinite
+                && effect.Turns <= 0 && effect.Seconds <= 0.0f)
+            {
+                errors.push_back(prefix + "AddState needs Turns, Seconds, or Infinite duration.");
+            }
 
-        if (errors.empty() && warnings.empty())
-        {
-            ImGui::TextColored(ImVec4(0.35f, 0.90f, 0.45f, 1.0f), "Validation passed.");
-            return;
-        }
-
-        if (!errors.empty())
-        {
-            ImGui::TextColored(ImVec4(1.0f, 0.35f, 0.30f, 1.0f), "Errors");
-            for (const std::string& message : errors)
-                ImGui::BulletText("%s", message.c_str());
-        }
-
-        if (!warnings.empty())
-        {
-            ImGui::TextColored(ImVec4(1.0f, 0.82f, 0.25f, 1.0f), "Warnings");
-            for (const std::string& message : warnings)
-                ImGui::BulletText("%s", message.c_str());
+            if ((effect.Type == WAO::EffectType::Launch
+                    || effect.Type == WAO::EffectType::HitStun)
+                && effect.Seconds <= 0.0f)
+            {
+                warnings.push_back(prefix + "default duration will be used (0.2s HitStun / 0.3s Launch).");
+            }
         }
     }
     void WAOActionEditorPanel::DrawPreviewPanel()
@@ -146,7 +219,11 @@ namespace Wheatear {
         const float height = 46.0f;
         ImDrawList* drawList = ImGui::GetWindowDrawList();
         const ImVec2 end = ImVec2(origin.x + width, origin.y + height);
-        drawList->AddRectFilled(origin, end, IM_COL32(22, 28, 34, 255), 4.0f);
+        const bool darkTheme =
+            ImGui::GetStyleColorVec4(ImGuiCol_WindowBg).x < 0.5f;
+        drawList->AddRectFilled(origin, end,
+            darkTheme ? IM_COL32(22, 28, 34, 255)
+                      : IM_COL32(226, 220, 208, 255), 4.0f);
 
         auto drawSegment = [&](float start, float stop, ImU32 color)
         {
@@ -184,33 +261,55 @@ namespace Wheatear {
     }
     void WAOActionEditorPanel::RunSandbox(const WAO::ActionRecipe& recipe)
     {
-        WAO::ActionRuntime runtime;
-        // Seed a baseline so Damage/Heal/Modify land on visible numbers.
-        runtime.Attributes.Set("Health", 100.0f);
-        runtime.Attributes.Set("hp", 100.0f);
-        runtime.Attributes.Set("atk", 10.0f);
-        runtime.Attributes.Set("mana", 50.0f);
+        WAO::ActionRuntime actorRuntime;
+        WAO::ActionRuntime targetRuntime;
+        // Seed both sides so actor- and target-applied effects are visible.
+        for (WAO::ActionRuntime* runtime : { &actorRuntime, &targetRuntime })
+        {
+            runtime->Attributes.Set("Health", 100.0f);
+            runtime->Attributes.Set("MaxHealth", 100.0f);
+            runtime->Attributes.Set("hp", 100.0f);
+            runtime->Attributes.Set("max_hp", 100.0f);
+            runtime->Attributes.Set("atk", 10.0f);
+            runtime->Attributes.Set("attack", 10.0f);
+            runtime->Attributes.Set("mana", 50.0f);
+            runtime->Resources["mana"] = 50.0f;
+        }
+
         for (const auto& [id, cost] : recipe.ResourceCost)
-            runtime.Resources[id] = cost + 10.0f; // allow the cost check to pass
-        runtime.Tags = recipe.RequiredTags;
+        {
+            actorRuntime.Resources[id] = cost + 10.0f;
+            targetRuntime.Resources[id] = cost + 10.0f;
+        }
+        actorRuntime.Tags = recipe.RequiredTags;
+        targetRuntime.Tags = recipe.RequiredTags;
 
         WAO::ActionIntent intent;
         intent.Actor = 1;
+        intent.ExplicitTarget = 2;
         intent.ActionId = recipe.Id;
 
         m_SandboxBefore.clear();
-        for (const auto& [id, value] : runtime.Attributes.Values)
-            m_SandboxBefore[id] = value;
-        m_SandboxBefore["mana"] = 50.0f;
+        auto capture = [this](const char* prefix, const WAO::ActionRuntime& runtime,
+            std::unordered_map<std::string, float>& out)
+        {
+            for (const auto& [id, value] : runtime.Attributes.Values)
+                out[std::string(prefix) + "." + id] = value;
+            for (const auto& [id, value] : runtime.Resources)
+                out[std::string(prefix) + "." + id] = value;
+        };
+        capture("actor", actorRuntime, m_SandboxBefore);
+        capture("target", targetRuntime, m_SandboxBefore);
 
-        m_SandboxResult = WAO::Execute(intent, recipe, runtime);
+        m_SandboxResult = WAO::Execute(
+            intent, recipe, actorRuntime, &targetRuntime, &actorRuntime);
         m_SandboxRan = true;
 
         m_SandboxAfter.clear();
-        for (const auto& [id, value] : runtime.Attributes.Values)
-            m_SandboxAfter[id] = value;
+        capture("actor", actorRuntime, m_SandboxAfter);
+        capture("target", targetRuntime, m_SandboxAfter);
 
-        const bool affordable = WAO::CanAfford(recipe, runtime);
+        const bool affordable = WAO::CanAfford(recipe, actorRuntime);
         if (!m_SandboxResult.Success)
             m_SandboxStatus = affordable ? "Execution failed (see ledger below)." : "Cannot afford resource cost.";
         else

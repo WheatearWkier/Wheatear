@@ -37,10 +37,39 @@ namespace Wheatear {
         glDrawElements(GL_TRIANGLES, count, GL_UNSIGNED_INT, nullptr);
     }
 
+    void OpenGLRendererAPI::DrawIndexedInstanced(const Ref<VertexArray>& vertexArray,
+        uint32_t indexCount, uint32_t instanceCount)
+    {
+        if (!vertexArray || instanceCount == 0)
+            return;
+        vertexArray->Bind();
+        const uint32_t count = indexCount
+            ? indexCount
+            : vertexArray->GetIndexBuffer()->GetCount();
+        glDrawElementsInstanced(GL_TRIANGLES, count, GL_UNSIGNED_INT, nullptr,
+            static_cast<GLsizei>(instanceCount));
+    }
+
+    void OpenGLRendererAPI::DrawIndexedRange(const Ref<VertexArray>& vertexArray,
+        uint32_t indexCount, uint32_t indexOffset)
+    {
+        vertexArray->Bind();
+        glDrawElements(GL_TRIANGLES, indexCount, GL_UNSIGNED_INT,
+            reinterpret_cast<const void*>(
+                static_cast<uintptr_t>(indexOffset) * sizeof(uint32_t)));
+    }
+
     void OpenGLRendererAPI::DrawLines(const Ref<VertexArray>& vertexArray, uint32_t vertexCount)
     {
         vertexArray->Bind();
         glDrawArrays(GL_LINES, 0, vertexCount);
+    }
+
+    void OpenGLRendererAPI::DrawLinesRange(const Ref<VertexArray>& vertexArray,
+        uint32_t vertexOffset, uint32_t vertexCount)
+    {
+        vertexArray->Bind();
+        glDrawArrays(GL_LINES, static_cast<GLint>(vertexOffset), vertexCount);
     }
 
     void OpenGLRendererAPI::DrawArrays(const Ref<VertexArray>& vertexArray, uint32_t vertexCount)

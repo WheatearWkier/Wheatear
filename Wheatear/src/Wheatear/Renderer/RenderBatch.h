@@ -77,16 +77,48 @@ namespace Wheatear {
             return (m_VertexBufferPtr - m_VertexBufferBase) + extraVertices > m_MaxVertices;
         }
 
+        uint32_t GetVertexCount() const
+        {
+            return static_cast<uint32_t>(m_VertexBufferPtr - m_VertexBufferBase);
+        }
+
+        uint32_t GetIndexCount() const { return m_IndexCount; }
+
+        void Upload()
+        {
+            if (GetVertexCount() == 0)
+                return;
+
+            const size_t dataSize = static_cast<size_t>(GetVertexCount()) * sizeof(TVertex);
+            m_VertexBuffer->SetData(m_VertexBufferBase, static_cast<uint32_t>(dataSize));
+        }
+
+        void DrawRange(uint32_t vertexOffset, uint32_t vertexCount,
+            uint32_t indexOffset, uint32_t indexCount)
+        {
+            if (indexCount == 0 && vertexCount == 0)
+                return;
+
+            OnPreDraw();
+            m_Shader->Bind();
+
+            if (m_DrawMode == BatchDrawMode::Lines)
+            {
+                RenderCommand::SetLineWidth(m_LineWidth);
+                RenderCommand::DrawLinesRange(m_VertexArray, vertexOffset, vertexCount);
+            }
+            else
+            {
+                RenderCommand::DrawIndexedRange(m_VertexArray, indexCount, indexOffset);
+            }
+        }
+
         uint32_t Flush(Renderer2D::Statistics& stats)
         {
             if (IsEmpty()) return 0;
 
-            const size_t dataSize =
-                (m_VertexBufferPtr - m_VertexBufferBase) * sizeof(TVertex);
-            m_VertexBuffer->SetData(m_VertexBufferBase, (uint32_t)dataSize);
-
+            Upload();
             OnPreDraw();
-
             m_Shader->Bind();
 
             if (m_DrawMode == BatchDrawMode::Lines)

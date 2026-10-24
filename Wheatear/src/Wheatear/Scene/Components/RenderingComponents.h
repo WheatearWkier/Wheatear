@@ -8,8 +8,10 @@
 #include <glm/glm.hpp>
 
 #include "Wheatear/Core/Core.h"
+#include "Wheatear/Core/UUID.h"
 #include "Wheatear/Renderer/Material.h"
 #include "Wheatear/Renderer/Mesh.h"
+#include "Wheatear/Renderer/Model.h"
 #include "Wheatear/Renderer/Texture.h"
 
 namespace Wheatear {
@@ -18,7 +20,13 @@ namespace Wheatear {
     {
         glm::vec4      Color{ 1.0f, 1.0f, 1.0f, 1.0f };
         Ref<Texture2D> Texture;
+        // Stable reference to the source texture in the asset registry. The
+        // path is still serialized as a fallback for hand-written scenes.
+        UUID           TextureAsset = UUID(0);
         float          TilingFactor = 1.0f;
+
+        int            SortingLayer = 0;
+        int            OrderInLayer = 0;
 
         glm::vec2      UVMin = { 0.0f, 0.0f };
         glm::vec2      UVMax = { 1.0f, 1.0f };
@@ -51,6 +59,8 @@ namespace Wheatear {
         glm::vec4 Color{ 1.0f, 1.0f, 1.0f, 1.0f };
         float     Thickness = 1.0f;
         float     Fade = 0.005f;
+        int       SortingLayer = 0;
+        int       OrderInLayer = 0;
 
         CircleRendererComponent() = default;
         CircleRendererComponent(const CircleRendererComponent&) = default;
@@ -60,6 +70,13 @@ namespace Wheatear {
     {
         Ref<Mesh>     Mesh;
         Ref<Material> Material;
+        Ref<Model>    Model;
+
+        // Stable references to the source assets. ModelAsset points at the
+        // FBX/glTF source; Model::Create resolves the cooked .wtmodel next to
+        // it. Paths are kept in the scene for backwards compatibility.
+        UUID          ModelAsset = UUID(0);
+        UUID          MaterialAsset = UUID(0);
 
         MeshRendererComponent()
         {

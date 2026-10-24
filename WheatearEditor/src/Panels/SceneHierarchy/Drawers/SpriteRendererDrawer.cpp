@@ -45,6 +45,8 @@ namespace Wheatear {
         DrawComponent<SpriteRendererComponent>("Sprite Renderer", entity, [entity](auto& c)
             {
                 ImGui::ColorEdit4("Color", glm::value_ptr(c.Color));
+                ImGui::InputInt(EditorLocale::Text("Sorting Layer", "排序层"), &c.SortingLayer);
+                ImGui::InputInt(EditorLocale::Text("Order In Layer", "层内顺序"), &c.OrderInLayer);
 
                 const ImVec2      buttonSize = { 100.0f, 100.0f };
                 const ImTextureID textureID = c.Texture
@@ -67,6 +69,7 @@ namespace Wheatear {
                         const std::filesystem::path texturePath =
                             AssetPath::ToProjectRelative(AssetPath::GetAssetRoot() / path);
                         c.Texture = Texture2D::Create(texturePath.generic_string());
+                        c.TextureAsset = AssetRegistry::Get().EnsureAsset(texturePath);
                         ApplyTextureImportDefaults(c, texturePath);
                     }
                     ImGui::EndDragDropTarget();
@@ -85,6 +88,11 @@ namespace Wheatear {
                 }
 
                 ImGui::PopID();
+                if (static_cast<uint64_t>(c.TextureAsset) != 0)
+                {
+                    ImGui::TextDisabled("Asset UUID %llu",
+                        static_cast<unsigned long long>(static_cast<uint64_t>(c.TextureAsset)));
+                }
                 ImGui::Checkbox(EditorLocale::Text("Flip X", "水平翻转"), &c.FlipX);
                 // ImGui::Checkbox("Flip Y", &c.FlipY);
                 ImGui::DragFloat(EditorLocale::Text("Tiling Factor", "平铺系数"), &c.TilingFactor, 0.1f, 0.0f, 100.0f);

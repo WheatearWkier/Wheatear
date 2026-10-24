@@ -10,14 +10,17 @@
 #include "Panels/DataFileEditorPanel.h"
 #include "Wheatear/Assets/AssetAliasRegistry.h"
 #include "Wheatear/Assets/AssetPath.h"
+#include "Wheatear/Modules/VisualNovel/VisualNovelScript.h"
 
 #include <imgui/imgui.h>
 
 #include <algorithm>
 #include <cctype>
+#include <cstdlib>
 #include <fstream>
 #include <initializer_list>
 #include <iterator>
+#include <limits>
 #include <sstream>
 
 namespace Wheatear {
@@ -25,34 +28,88 @@ namespace Wheatear {
     using namespace VisualNovelScriptEditorPanelInternal;
 
     namespace {
+
+        const TextEditor::LanguageDefinition& VisualNovelLanguage()
+        {
+            static const TextEditor::LanguageDefinition definition = []()
+            {
+                TextEditor::LanguageDefinition language;
+                language.mName = "Wheatear Visual Novel";
+                language.mCaseSensitive = true;
+                language.mAutoIndentation = false;
+                language.mSingleLineComment = "#";
+                language.mKeywords = {
+                    "@background", "@music", "@bgm", "@speed", "@label",
+                    "@goto", "@end", "@choice", "@expression", "@show",
+                    "@hide", "@character", "@sheet", "@char", "@set", "@if"
+                };
+                language.mTokenRegexStrings = {
+                    { "[@]?[a-zA-Z_][a-zA-Z0-9_:\\.]*", TextEditor::PaletteIndex::Identifier },
+                    { "[0-9]+(\\.[0-9]+)?", TextEditor::PaletteIndex::Number },
+                    { "\"(?:[^\"\\\\]|\\\\.)*\"", TextEditor::PaletteIndex::String },
+                    { "'(?:[^'\\\\]|\\\\.)*'", TextEditor::PaletteIndex::CharLiteral }
+                };
+                return language;
+            }();
+            return definition;
+        }
+
+        void UpdateVisualNovelMarkers(TextEditor& editor, const std::string& text)
+        {
+            std::map<int, std::string> markers;
+            for (const VisualNovelIssue& issue
+                : VisualNovelScript::FromString(text).GetIssues())
+            {
+                if (issue.Error)
+                    markers[issue.SourceLine] = issue.Message;
+            }
+            editor.SetErrorMarkers(markers);
+        }
+
     } // namespace
 
     namespace VisualNovelEditorRequests {
 
-        void RequestOpenScript(const std::string& sourcePath)
+        static bool s_HasPendingOpen = false;
+        static std::string s_PendingOpenPath;
+        static int s_PendingOpenLine = 0;
+
+        void RequestOpenScript(const std::string& sourcePath, int sourceLine)
         {
             s_PendingOpenPath = sourcePath;
+            s_PendingOpenLine = sourceLine;
             s_HasPendingOpen = true;
         }
 
-        bool ConsumeOpenScriptRequest(std::string& sourcePath)
+        bool ConsumeOpenScriptRequest(std::string& sourcePath, int& sourceLine)
         {
             if (!s_HasPendingOpen)
                 return false;
 
             sourcePath = s_PendingOpenPath;
+            sourceLine = s_PendingOpenLine;
             s_PendingOpenPath.clear();
+            s_PendingOpenLine = 0;
             s_HasPendingOpen = false;
             return true;
         }
 
     } // namespace VisualNovelEditorRequests
 
-    void VisualNovelScriptEditorPanel::Open(const std::string& sourcePath)
+    void VisualNovelScriptEditorPanel::Open(const std::string& sourcePath, int sourceLine)
     {
         m_Open = true;
+        if (m_PendingAction != PendingAction::None)
+            return;
+        m_PendingRevealLine = sourceLine;
         if (!sourcePath.empty() && sourcePath != m_SourcePath)
         {
+            if (m_Dirty && m_Loaded)
+            {
+                m_PendingAction = PendingAction::OpenPath;
+                m_PendingPath = sourcePath;
+                return;
+            }
             m_SourcePath = sourcePath;
             m_Loaded = false;
         }
@@ -61,8 +118,9 @@ namespace Wheatear {
     void VisualNovelScriptEditorPanel::OnImGuiRender()
     {
         std::string requestedPath;
-        if (VisualNovelEditorRequests::ConsumeOpenScriptRequest(requestedPath))
-            Open(requestedPath);
+        int requestedLine = 0;
+        if (VisualNovelEditorRequests::ConsumeOpenScriptRequest(requestedPath, requestedLine))
+            Open(requestedPath, requestedLine);
 
         if (!m_Open)
             return;
@@ -70,7 +128,44 @@ namespace Wheatear {
         if (!m_Loaded)
             Load();
 
+        if (m_PendingRevealLine > 0 && !m_Rows.empty())
+        {
+            int best = 0;
+            int bestDistance = std::numeric_limits<int>::max();
+            for (size_t i = 0; i < m_Rows.size(); ++i)
+            {
+                const int distance = std::abs(m_Rows[i].SourceLine - m_PendingRevealLine);
+                if (distance < bestDistance)
+                {
+                    bestDistance = distance;
+                    best = static_cast<int>(i);
+                }
+            }
+            m_SelectedRow = best;
+            m_PendingRevealLine = 0;
+            m_ScrollToSelected = true;
+        }
+
+        const bool wasOpen = m_Open;
+        const std::vector<Row> previousRows = m_Rows;
+        const int previousSelectedRow = m_SelectedRow;
+
+        if (!ImGui::GetIO().WantTextInput)
+        {
+            const ImGuiIO& io = ImGui::GetIO();
+            if (io.KeyCtrl && io.KeyShift && ImGui::IsKeyPressed(ImGuiKey_Z, false))
+                Redo();
+            else if (io.KeyCtrl && ImGui::IsKeyPressed(ImGuiKey_Z, false))
+                Undo();
+            else if (io.KeyCtrl && ImGui::IsKeyPressed(ImGuiKey_Y, false))
+                Redo();
+        }
+
         EditorFloatingWindow::Begin("VN Script Editor", &m_Open, 0, { 1180.0f, 760.0f });
+        if (ImGui::IsWindowFocused(ImGuiFocusedFlags_RootAndChildWindows)
+            && ImGui::GetIO().KeyCtrl
+            && ImGui::IsKeyPressed(ImGuiKey_S, false))
+            Save();
         EditorWidgets::PanelHeader(
             EditorLocale::Text("VN Script Editor", "视觉小说脚本编辑器"),
             EditorLocale::Text("Timeline-first authoring for dialogue, choices, characters, BGM cues, and raw script output.", "以时间线方式编辑对白、选项、角色、BGM 和脚本预览。"));
@@ -126,11 +221,147 @@ namespace Wheatear {
         }
 
         EditorFloatingWindow::End();
+
+        if (!m_SuppressUndoCapture)
+        {
+            const std::string currentText = SerializeRows();
+            if (currentText != m_LastObservedText)
+            {
+                PushUndo(previousRows, previousSelectedRow);
+                m_LastObservedText = currentText;
+                m_Dirty = currentText != m_SavedText;
+            }
+        }
+
+        if (wasOpen && !m_Open && m_Dirty)
+        {
+            m_Open = true;
+            m_PendingAction = PendingAction::Close;
+        }
+
+        DrawUnsavedPopup();
+    }
+
+    void VisualNovelScriptEditorPanel::PushUndo(const std::vector<Row>& rows,
+        int selectedRow)
+    {
+        m_UndoStack.push_back({ rows, selectedRow });
+        if (m_UndoStack.size() > 64)
+            m_UndoStack.erase(m_UndoStack.begin());
+        m_RedoStack.clear();
+    }
+
+    void VisualNovelScriptEditorPanel::Undo()
+    {
+        if (m_UndoStack.empty())
+            return;
+
+        RowSnapshot snapshot = std::move(m_UndoStack.back());
+        m_UndoStack.pop_back();
+        m_RedoStack.push_back({ m_Rows, m_SelectedRow });
+        m_Rows = std::move(snapshot.Rows);
+        m_SelectedRow = snapshot.SelectedRow;
+        m_SuppressUndoCapture = true;
+        m_LastObservedText = SerializeRows();
+        m_SuppressUndoCapture = false;
+        m_Dirty = m_LastObservedText != m_SavedText;
+        m_Status = "Undo.";
+    }
+
+    void VisualNovelScriptEditorPanel::Redo()
+    {
+        if (m_RedoStack.empty())
+            return;
+
+        RowSnapshot snapshot = std::move(m_RedoStack.back());
+        m_RedoStack.pop_back();
+        m_UndoStack.push_back({ m_Rows, m_SelectedRow });
+        m_Rows = std::move(snapshot.Rows);
+        m_SelectedRow = snapshot.SelectedRow;
+        m_SuppressUndoCapture = true;
+        m_LastObservedText = SerializeRows();
+        m_SuppressUndoCapture = false;
+        m_Dirty = m_LastObservedText != m_SavedText;
+        m_Status = "Redo.";
+    }
+
+    void VisualNovelScriptEditorPanel::ExecutePendingAction()
+    {
+        switch (m_PendingAction)
+        {
+        case PendingAction::OpenPath:
+            m_SourcePath = m_PendingPath;
+            m_Loaded = false;
+            m_Dirty = false;
+            break;
+        case PendingAction::Reload:
+            m_Dirty = false;
+            m_Loaded = false;
+            break;
+        case PendingAction::Close:
+            m_Dirty = false;
+            m_Open = false;
+            break;
+        case PendingAction::None:
+            break;
+        }
+        m_PendingAction = PendingAction::None;
+        m_PendingPath.clear();
+    }
+
+    void VisualNovelScriptEditorPanel::DrawUnsavedPopup()
+    {
+        if (m_PendingAction == PendingAction::None)
+            return;
+
+        const char* popupId = "Unsaved VN Script##VNUnsaved";
+        if (!ImGui::IsPopupOpen(popupId))
+            ImGui::OpenPopup(popupId);
+
+        if (ImGui::BeginPopupModal(popupId, nullptr,
+            ImGuiWindowFlags_AlwaysAutoResize))
+        {
+            ImGui::TextUnformatted(EditorLocale::Text(
+                "This script has unsaved changes.",
+                "当前脚本有未保存的修改。"));
+            ImGui::Spacing();
+
+            if (ImGui::Button(EditorLocale::Text("Save", "保存")))
+            {
+                if (Save())
+                {
+                    ExecutePendingAction();
+                    ImGui::CloseCurrentPopup();
+                }
+            }
+            ImGui::SameLine();
+            if (ImGui::Button(EditorLocale::Text("Discard", "放弃")))
+            {
+                ExecutePendingAction();
+                ImGui::CloseCurrentPopup();
+            }
+            ImGui::SameLine();
+            if (ImGui::Button(EditorLocale::Text("Cancel", "取消")))
+            {
+                m_PendingAction = PendingAction::None;
+                m_PendingPath.clear();
+                ImGui::CloseCurrentPopup();
+            }
+            if (!m_Status.empty())
+            {
+                ImGui::Spacing();
+                ImGui::TextWrapped("%s", m_Status.c_str());
+            }
+            ImGui::EndPopup();
+        }
     }
 
     void VisualNovelScriptEditorPanel::Load()
     {
-        m_ResolvedPath = AssetPath::Resolve(m_SourcePath);
+        m_RawEditor.reset();
+        m_RawEditorText.clear();
+        m_RawEditorDirty = false;
+        m_ResolvedPath = AssetPath::Resolve(AssetAliasRegistry::Resolve(m_SourcePath));
         m_Rows.clear();
         m_SelectedRow = -1;
         m_BGMAssets.clear();
@@ -161,6 +392,10 @@ namespace Wheatear {
             m_Loaded = true;
             m_Dirty = false;
             m_Status = "File does not exist yet. Save will create it.";
+            m_LastObservedText = SerializeRows();
+            m_SavedText = m_LastObservedText;
+            m_UndoStack.clear();
+            m_RedoStack.clear();
             return;
         }
 
@@ -170,6 +405,10 @@ namespace Wheatear {
             m_Loaded = true;
             m_Dirty = false;
             m_Status = "Failed to open file.";
+            m_LastObservedText = SerializeRows();
+            m_SavedText = m_LastObservedText;
+            m_UndoStack.clear();
+            m_RedoStack.clear();
             return;
         }
 
@@ -178,11 +417,32 @@ namespace Wheatear {
         m_Loaded = true;
         m_Dirty = false;
         m_Status = "Loaded.";
+        m_LastObservedText = SerializeRows();
+        m_SavedText = m_LastObservedText;
+        m_UndoStack.clear();
+        m_RedoStack.clear();
     }
 
-    void VisualNovelScriptEditorPanel::Save()
+    bool VisualNovelScriptEditorPanel::Save()
     {
-        m_ResolvedPath = AssetPath::Resolve(m_SourcePath);
+        if (m_RawEditorDirty && m_RawEditor)
+        {
+            ParseText(m_RawEditor->GetText());
+            m_RawEditorDirty = false;
+        }
+
+        const std::string text = SerializeRows();
+        const VisualNovelScript candidate = VisualNovelScript::FromString(text);
+        for (const VisualNovelIssue& issue : candidate.GetIssues())
+        {
+            if (!issue.Error)
+                continue;
+            m_Status = "Save blocked at line " + std::to_string(issue.SourceLine)
+                + ": " + issue.Message;
+            return false;
+        }
+
+        m_ResolvedPath = AssetPath::Resolve(AssetAliasRegistry::Resolve(m_SourcePath));
         const std::filesystem::path parent = m_ResolvedPath.parent_path();
         if (!parent.empty())
             std::filesystem::create_directories(parent);
@@ -191,22 +451,30 @@ namespace Wheatear {
         if (!output)
         {
             m_Status = "Failed to save file.";
-            return;
+            return false;
         }
 
-        const std::string text = SerializeRows();
         output.write(text.data(), static_cast<std::streamsize>(text.size()));
         m_Dirty = false;
         m_Status = "Saved.";
+        m_LastObservedText = text;
+        m_SavedText = text;
+        m_RawEditorDirty = false;
+        m_RawEditor.reset();
+        m_RawEditorText.clear();
+        return true;
     }
 
     void VisualNovelScriptEditorPanel::ParseText(const std::string& text)
     {
         std::istringstream stream(text);
         std::string rawLine;
+        int sourceLine = 0;
         while (std::getline(stream, rawLine))
         {
+            ++sourceLine;
             Row row;
+            row.SourceLine = sourceLine;
             row.Raw = rawLine;
 
             const std::string line = Trim(rawLine);
@@ -268,10 +536,11 @@ namespace Wheatear {
                 std::string choicesPayload = payload;
                 if (choicesPayload.rfind("prompt:", 0) == 0)
                 {
-                    const size_t separator = choicesPayload.find('|');
+                    const size_t separator = FindChoiceSeparator(choicesPayload);
                     if (separator != std::string::npos)
                     {
-                        row.Value = StripQuotes(Trim(choicesPayload.substr(7, separator - 7)));
+                        row.Value = UnescapeInlineText(
+                            StripQuotes(Trim(choicesPayload.substr(7, separator - 7))));
                         choicesPayload = choicesPayload.substr(separator + 1);
                     }
                 }
@@ -363,7 +632,7 @@ namespace Wheatear {
                 {
                     row.Kind = RowKind::Dialogue;
                     row.Name = Trim(line.substr(0, colon));
-                    row.Text = Trim(line.substr(colon + 1));
+                    row.Text = UnescapeInlineText(Trim(line.substr(colon + 1)));
                 }
                 else
                 {
@@ -412,20 +681,20 @@ namespace Wheatear {
                     out << "@expression " << row.Name << " " << row.Value;
                     break;
                 case RowKind::Dialogue:
-                    out << row.Name << ": " << row.Text;
+                    out << row.Name << ": " << EscapeInlineText(row.Text);
                     break;
                 case RowKind::Choice:
                     out << "@choice ";
                     if (!row.Value.empty())
-                        out << "prompt:" << row.Value << " | ";
+                        out << "prompt:" << QuoteIfNeeded(row.Value) << " | ";
                     for (size_t i = 0; i < row.Choices.size(); ++i)
                     {
                         if (i > 0)
                             out << " | ";
-                        out << row.Choices[i].Text;
+                        out << QuoteIfNeeded(row.Choices[i].Text);
                         if (!row.Choices[i].Target.empty())
                         {
-                            out << " -> " << row.Choices[i].Target;
+                            out << " -> " << QuoteIfNeeded(row.Choices[i].Target);
                             if (!row.Choices[i].RequiredFlag.empty())
                                 out << " if flag " << row.Choices[i].RequiredFlag;
                             else if (!row.Choices[i].RequiredCondition.empty())
@@ -462,19 +731,52 @@ namespace Wheatear {
         EditorWidgets::SectionHeader("Source", "The script file remains the data source used by runtime VN playback.");
 
         ImGui::PushItemWidth(-1.0f);
-        if (EditorContentPickers::DrawAssetField("Script", m_SourcePath, EditorWidgets::AssetReferenceKind::Script, 512))
-            m_Loaded = false;
+        std::string nextPath = m_SourcePath;
+        if (EditorContentPickers::DrawAssetField("Script", nextPath, EditorWidgets::AssetReferenceKind::Script, 512)
+            && nextPath != m_SourcePath)
+        {
+            if (m_Dirty)
+            {
+                m_PendingAction = PendingAction::OpenPath;
+                m_PendingPath = nextPath;
+            }
+            else
+            {
+                m_SourcePath = nextPath;
+                m_Loaded = false;
+            }
+        }
         ImGui::PopItemWidth();
 
+        ImGui::BeginDisabled(m_UndoStack.empty());
+        if (ImGui::Button(EditorLocale::Text("Undo", "撤销")))
+            Undo();
+        ImGui::EndDisabled();
+        ImGui::SameLine();
+        ImGui::BeginDisabled(m_RedoStack.empty());
+        if (ImGui::Button(EditorLocale::Text("Redo", "重做")))
+            Redo();
+        ImGui::EndDisabled();
+        ImGui::SameLine();
         if (ImGui::Button(EditorLocale::Text("Load", "加载")))
-            Load();
+        {
+            if (m_Dirty)
+                m_PendingAction = PendingAction::Reload;
+            else
+                Load();
+        }
 
         ImGui::SameLine();
         bool reloadClicked = false;
         if (EditorWidgets::DirtySaveBar(m_Dirty, m_Status, "Save", "Reload", &reloadClicked))
             Save();
         if (reloadClicked)
-            Load();
+        {
+            if (m_Dirty)
+                m_PendingAction = PendingAction::Reload;
+            else
+                Load();
+        }
 
         if (!m_ResolvedPath.empty())
             ImGui::TextDisabled("%s", m_ResolvedPath.generic_string().c_str());
@@ -485,17 +787,57 @@ namespace Wheatear {
 
     void VisualNovelScriptEditorPanel::DrawRawPreview()
     {
-        EditorWidgets::SectionHeader("Raw Preview", "Generated script text. Save writes the Timeline data to this format.");
-        std::string preview = SerializeRows();
-        EditorWidgets::InputMultilineString("##RawPreview",
-            preview,
-            ImVec2(-1.0f, -1.0f),
-            std::max<size_t>(preview.size() + 1, 4096),
-            ImGuiInputTextFlags_ReadOnly | ImGuiInputTextFlags_AllowTabInput);
+        EditorWidgets::SectionHeader("Raw Script",
+            "Syntax-highlighted inline editing. Apply writes the text back into the Timeline rows; Save still writes the normalized script.");
+        const std::string preview = SerializeRows();
 
-        ImGui::Spacing();
+        if (!m_RawEditor)
+        {
+            m_RawEditor = std::make_unique<TextEditor>();
+            m_RawEditor->SetLanguageDefinition(VisualNovelLanguage());
+            m_RawEditor->SetPalette(TextEditor::GetDarkPalette());
+            m_RawEditor->SetText(preview);
+            UpdateVisualNovelMarkers(*m_RawEditor, preview);
+            m_RawEditorText = preview;
+        }
+        else if (!m_RawEditorDirty
+            && m_RawEditor->GetText() == m_RawEditorText
+            && m_RawEditorText != preview)
+        {
+            // Timeline rows changed outside raw editing; refresh the text view.
+            m_RawEditor->SetText(preview);
+            UpdateVisualNovelMarkers(*m_RawEditor, preview);
+            m_RawEditorText = preview;
+        }
+
+        m_RawEditor->Render("##VNCodeEditor", ImVec2(-1.0f, -46.0f), true);
+        if (m_RawEditor->IsTextChanged())
+        {
+            m_RawEditorText = m_RawEditor->GetText();
+            UpdateVisualNovelMarkers(*m_RawEditor, m_RawEditorText);
+            m_RawEditorDirty = true;
+            m_Dirty = true;
+        }
+
+        if (ImGui::Button(EditorLocale::Text("Apply Raw to Timeline", "应用到时间线")))
+        {
+            ParseText(m_RawEditorText);
+            m_RawEditorDirty = false;
+            m_Dirty = true;
+            m_Status = "Applied raw text to the timeline.";
+        }
+        ImGui::SameLine();
+        ImGui::BeginDisabled(m_Dirty);
         if (ImGui::Button(EditorLocale::Text("Edit Source in Data File Editor", "在数据文件编辑器中编辑源文件")))
             DataFileEditorRequests::RequestOpen(m_SourcePath);
+        ImGui::EndDisabled();
+        if (m_Dirty)
+        {
+            ImGui::SameLine();
+            ImGui::TextDisabled("%s",
+                EditorLocale::Text("Apply or save before editing the file elsewhere.",
+                    "请先应用或保存，再到其它编辑器修改源文件。"));
+        }
     }
 
     void VisualNovelScriptEditorPanel::AddRow(RowKind kind)

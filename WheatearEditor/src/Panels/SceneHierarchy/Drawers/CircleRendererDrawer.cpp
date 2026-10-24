@@ -16,6 +16,8 @@ namespace Wheatear {
         DrawComponent<CircleRendererComponent>("Circle Renderer", entity, [](auto& c)
             {
                 ImGui::ColorEdit4("Color", glm::value_ptr(c.Color));
+                ImGui::InputInt(EditorLocale::Text("Sorting Layer", "排序层"), &c.SortingLayer);
+                ImGui::InputInt(EditorLocale::Text("Order In Layer", "层内顺序"), &c.OrderInLayer);
                 ImGui::DragFloat(EditorLocale::Text("Thickness", "厚度"), &c.Thickness, 0.025f, 0.0f, 1.0f);
                 ImGui::DragFloat(EditorLocale::Text("Fade", "淡出"), &c.Fade, 0.00025f, 0.0f, 1.0f);
             });

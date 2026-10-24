@@ -82,4 +82,86 @@ namespace Wheatear {
             });
     }
 
+    void DrawAnimator3DComponent(Entity entity)
+    {
+        DrawComponent<Animator3DComponent>("Animator 3D", entity, [entity](auto& c)
+            {
+                Ref<Model> model;
+                if (entity.HasComponent<MeshRendererComponent>())
+                    model = entity.GetComponent<MeshRendererComponent>().Model;
+
+                if (!model || !model->HasSkin())
+                {
+                    ImGui::TextDisabled(EditorLocale::Text(
+                        "Assign a skinned FBX/glTF model to the Mesh Renderer first.",
+                        "请先给 Mesh Renderer 指定带骨骼的 FBX/glTF 模型。"));
+                    return;
+                }
+
+                const auto& animations = model->GetAnimations();
+                if (animations.empty())
+                {
+                    ImGui::TextDisabled(EditorLocale::Text(
+                        "This model has a skeleton but no animation clips.",
+                        "该模型有骨骼但没有动画片段。"));
+                    return;
+                }
+
+                const char* preview = c.DefaultClip.empty()
+                    ? "(first clip)" : c.DefaultClip.c_str();
+                if (ImGui::BeginCombo(EditorLocale::Text("Default Clip", "默认片段"), preview))
+                {
+                    for (const ModelAnimation& animation : animations)
+                    {
+                        const bool selected = animation.Name == c.DefaultClip;
+                        if (ImGui::Selectable(animation.Name.c_str(), selected))
+                        {
+                            c.DefaultClip = animation.Name;
+                            c.CurrentClipIndex = -1;
+                            c.NextClipIndex = -1;
+                            c.Time = 0.0f;
+                        }
+                        if (selected)
+                            ImGui::SetItemDefaultFocus();
+                    }
+                    ImGui::EndCombo();
+                }
+
+                if (ImGui::Button(c.IsPlaying
+                        ? EditorLocale::Text("Pause", "暂停")
+                        : EditorLocale::Text("Play", "播放")))
+                {
+                    c.IsPlaying = !c.IsPlaying;
+                }
+                ImGui::SameLine();
+                if (ImGui::Button(EditorLocale::Text("Restart", "重播")))
+                {
+                    c.Time = 0.0f;
+                    c.NextClipIndex = -1;
+                    c.IsPlaying = true;
+                }
+
+                ImGui::Checkbox(EditorLocale::Text("Loop", "循环"), &c.Loop);
+                ImGui::SameLine();
+                ImGui::Checkbox(EditorLocale::Text("Play On Start", "开始时播放"), &c.PlayOnStart);
+                ImGui::DragFloat(EditorLocale::Text("Speed", "速度"), &c.PlaybackSpeed,
+                    0.01f, 0.0f, 8.0f);
+                ImGui::DragFloat(EditorLocale::Text("Crossfade", "交叉淡化"),
+                    &c.FadeDuration, 0.01f, 0.0f, 5.0f);
+
+                const char* clipName = "(none)";
+                if (c.CurrentClipIndex >= 0
+                    && static_cast<size_t>(c.CurrentClipIndex) < animations.size())
+                {
+                    clipName = animations[c.CurrentClipIndex].Name.c_str();
+                }
+                ImGui::Separator();
+                ImGui::Text(EditorLocale::Text("Playing: %s", "正在播放: %s"), clipName);
+                ImGui::Text(EditorLocale::Text("Time: %.3fs  Bones: %d  Clips: %d",
+                    "时间: %.3fs  骨骼: %d  片段: %d"),
+                    c.Time, static_cast<int>(model->GetBones().size()),
+                    static_cast<int>(animations.size()));
+            });
+    }
+
 } // namespace Wheatear

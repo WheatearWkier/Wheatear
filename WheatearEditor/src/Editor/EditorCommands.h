@@ -326,16 +326,25 @@ namespace Wheatear {
 
         void Execute() override
         {
+            m_Duplicates.clear();
             if (!IsEntityValid(m_Source))
                 return;
 
             m_Duplicate = m_Scene->DuplicateEntity(m_Source);
+            if (IsEntityValid(m_Duplicate))
+                m_Duplicates = m_Scene->CollectSubtree(m_Duplicate);
         }
 
         void Undo() override
         {
-            if (IsEntityValid(m_Duplicate))
-                m_Scene->DestroyEntityImmediate(m_Duplicate);
+            // Destroy children before the root so hierarchy references do not
+            // briefly point at deleted entities.
+            for (auto it = m_Duplicates.rbegin(); it != m_Duplicates.rend(); ++it)
+            {
+                if (IsEntityValid(*it))
+                    m_Scene->DestroyEntityImmediate(*it);
+            }
+            m_Duplicates.clear();
             m_Duplicate = {};
         }
 
@@ -354,6 +363,7 @@ namespace Wheatear {
         Scene* m_Scene = nullptr;
         Entity m_Source;
         Entity m_Duplicate;
+        std::vector<Entity> m_Duplicates;
     };
 
     template<typename T>

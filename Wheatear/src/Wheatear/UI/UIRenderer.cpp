@@ -23,6 +23,12 @@ namespace Wheatear {
     static std::unordered_map<std::string, Ref<Font>> s_FontCache;
     static std::unordered_map<std::string, Ref<Texture2D>> s_UITextureCache;
 
+    void UIRenderer::Shutdown()
+    {
+        s_FontCache.clear();
+        s_UITextureCache.clear();
+    }
+
     static Ref<Font> GetUIFont(const std::string& fontPath)
     {
         if (fontPath.empty())

@@ -1,6 +1,8 @@
 #include "wtpch.h"
 #include "ActionDatabase.h"
 
+#include <utility>
+
 namespace Wheatear::WAO {
 
     std::unordered_map<std::string, ActionRecipe>& ActionDatabase::Recipes()
@@ -22,6 +24,38 @@ namespace Wheatear::WAO {
 
         Recipes()[recipe.Id] = recipe;
         ++RevisionCounter();
+    }
+
+    bool ActionDatabase::Replace(const std::vector<ActionRecipe>& recipes,
+        std::string* error)
+    {
+        if (recipes.empty())
+        {
+            if (error)
+                *error = "Action replacement is empty; keeping the current database.";
+            return false;
+        }
+
+        std::unordered_map<std::string, ActionRecipe> next;
+        for (const ActionRecipe& recipe : recipes)
+        {
+            if (recipe.Id.empty())
+            {
+                if (error)
+                    *error = "Action replacement contains a recipe without an id.";
+                return false;
+            }
+            if (!next.emplace(recipe.Id, recipe).second)
+            {
+                if (error)
+                    *error = "Duplicate action recipe id in replacement: " + recipe.Id;
+                return false;
+            }
+        }
+
+        Recipes().swap(next);
+        ++RevisionCounter();
+        return true;
     }
 
     const ActionRecipe* ActionDatabase::Find(const std::string& id)

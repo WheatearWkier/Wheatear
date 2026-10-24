@@ -52,6 +52,9 @@ Projects/**/assets/**/*.wtmeta
 Projects/**/assets/**/_backup_before_*/
 Projects/**/assets/**/previews/
 Projects/**/assets/**/source_frames/
+Projects/**/Intermediate/
+Projects/**/Saved/
+Projects/**/Binaries/
 PicGeneration/
 vertical_slice.rar
 vertical_slice.tmp

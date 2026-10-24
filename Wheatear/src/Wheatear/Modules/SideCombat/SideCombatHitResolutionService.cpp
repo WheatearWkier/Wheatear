@@ -2,7 +2,9 @@
 #include "SideCombatHitResolutionService.h"
 
 #include "SideCombatActionService.h"
+#include "SideCombatGuardService.h"
 #include "Wheatear/Gameplay/Action/ActionDebugHistory.h"
+#include "Wheatear/Gameplay/Behavior/BehaviorVM.h"
 #include "Wheatear/Gameplay/Services/GameplayCombatService.h"
 #include "Wheatear/Scene/Components.h"
 #include "Wheatear/Scene/Scene.h"
@@ -126,6 +128,26 @@ namespace Wheatear::SideCombatHitResolutionService {
                     true);
             }
 
+            if (result.Blocked)
+            {
+                RecordLedgerEntry(ledger,
+                    intent,
+                    WAO::EffectType::ModifyAttribute,
+                    "GuardBlocked",
+                    result.Damage,
+                    true);
+            }
+
+            if (result.Parried)
+            {
+                RecordLedgerEntry(ledger,
+                    intent,
+                    WAO::EffectType::HitStun,
+                    "Parried",
+                    hitbox.HitStun,
+                    true);
+            }
+
             if (result.TargetDied)
             {
                 RecordLedgerEntry(ledger,
@@ -241,30 +263,47 @@ namespace Wheatear::SideCombatHitResolutionService {
         HitResolutionResult result;
 
         const float requestedDamage = CalculateDamage(hitbox.Damage, target.Defense, tuning.Combat);
-        result.Damage = GameplayCombatService::ApplyDamage(target.Health, requestedDamage);
+        const SideCombatGuardService::GuardDecision guard =
+            SideCombatGuardService::ResolveIncomingHit(target, hitbox);
+        result.Blocked = guard.IsBlocked();
+        result.Parried = guard.IsParried();
+        const float resolvedDamage = result.Parried
+            ? 0.0f
+            : requestedDamage * guard.DamageMultiplier;
+        result.Damage = GameplayCombatService::ApplyDamage(target.Health, resolvedDamage);
         target.Alive = GameplayCombatService::IsAlive(target.Health);
-        target.RuntimeInvulnerableTimer = tuning.Combat.HitInvulnerableTime;
+        if (result.Damage > 0.0f || result.Blocked)
+            target.RuntimeInvulnerableTimer = tuning.Combat.HitInvulnerableTime;
 
         const bool bossSuperArmor =
             scene &&
             target.Team == (int)SideCombatTeam::Enemy &&
             IsBossEntity(scene, targetEntity) &&
             target.RuntimeState == SideCombatState::SuperArmor;
-        const bool suppressControl = bossSuperArmor &&
-            hitbox.AttackKind != SideAttackKind::BreakLimit;
+        const bool suppressControl = result.Blocked ||
+            result.Parried ||
+            (bossSuperArmor && hitbox.AttackKind != SideAttackKind::BreakLimit);
 
-        if (!suppressControl)
+        if (result.Parried)
+            target.RuntimeHitStun = 0.0f;
+        else if (result.Blocked)
+            target.RuntimeHitStun = std::max(
+                target.RuntimeHitStun,
+                hitbox.HitStun * 0.35f);
+        else if (!suppressControl)
             target.RuntimeHitStun = std::max(target.RuntimeHitStun, hitbox.HitStun);
         else
             target.RuntimeHitStun = 0.0f;
 
         result.PlayerWasHit =
             hitbox.Team == (int)SideCombatTeam::Enemy &&
-            target.Team == (int)SideCombatTeam::Player;
+            target.Team == (int)SideCombatTeam::Player &&
+            !result.Blocked &&
+            !result.Parried;
         if (result.PlayerWasHit)
             ++level.RuntimePlayerHitsTaken;
 
-        if (!target.Alive)
+        if (!target.Alive && !result.Parried)
         {
             result.TargetDied = true;
             SetCombatState(target, SideCombatState::Dead);
@@ -288,6 +327,28 @@ namespace Wheatear::SideCombatHitResolutionService {
         if (scene)
         {
             auto& registry = scene->GetRegistry();
+            const entt::entity attackerEntity =
+                static_cast<entt::entity>(hitbox.RuntimeOwnerEntity);
+            if (result.Parried &&
+                attackerEntity != entt::null &&
+                registry.valid(attackerEntity))
+            {
+                if (registry.all_of<SideCombatantComponent>(attackerEntity))
+                {
+                    auto& attacker = registry.get<SideCombatantComponent>(attackerEntity);
+                    attacker.RuntimeHitStun = std::max(
+                        attacker.RuntimeHitStun,
+                        std::max(0.16f, hitbox.HitStun));
+                    attacker.RuntimeVelocity = { 0.0f, 0.0f };
+                }
+                if (registry.all_of<SideEnemyAIComponent>(attackerEntity))
+                    SideCombatActionService::ClearEnemyAction(
+                        registry.get<SideEnemyAIComponent>(attackerEntity));
+                if (registry.all_of<SidePlayerControllerComponent>(attackerEntity))
+                    SideCombatActionService::ClearPlayerAction(
+                        registry.get<SidePlayerControllerComponent>(attackerEntity));
+            }
+
             if (target.Team == (int)SideCombatTeam::Enemy &&
                 registry.all_of<SideEnemyAIComponent>(targetEntity))
             {
@@ -300,7 +361,7 @@ namespace Wheatear::SideCombatHitResolutionService {
                 SideCombatActionService::ClearPlayerAction(registry.get<SidePlayerControllerComponent>(targetEntity));
             }
 
-            if (target.Alive)
+            if (target.Alive && !result.Parried)
             {
                 if (!suppressControl)
                 {
@@ -343,7 +404,7 @@ namespace Wheatear::SideCombatHitResolutionService {
                         hitbox);
                 }
             }
-            else
+            else if (!result.Parried)
             {
                 target.RuntimeVelocity = { 0.0f, 0.0f };
                 target.RuntimeAirVelocity = 0.0f;
@@ -358,6 +419,42 @@ namespace Wheatear::SideCombatHitResolutionService {
             result,
             launched,
             appliedLaunchVelocity);
+
+        if (scene)
+        {
+            WAO::BehaviorEvent event;
+            event.Id = "combat.hit_received";
+            event.Source = ResolveEntityUUID(
+                scene,
+                static_cast<entt::entity>(hitbox.RuntimeOwnerEntity));
+            event.Target = ResolveEntityUUID(scene, targetEntity);
+            event.Payload["damage"] = WAO::BehaviorValue(result.Damage);
+            event.Payload["requestedDamage"] = WAO::BehaviorValue(requestedDamage);
+            event.Payload["hitStun"] = WAO::BehaviorValue(hitbox.HitStun);
+            event.Payload["launched"] = WAO::BehaviorValue(launched);
+            event.Payload["targetDied"] = WAO::BehaviorValue(result.TargetDied);
+            event.Payload["playerWasHit"] = WAO::BehaviorValue(result.PlayerWasHit);
+            event.Payload["blocked"] = WAO::BehaviorValue(result.Blocked);
+            event.Payload["parried"] = WAO::BehaviorValue(result.Parried);
+            event.Payload["attackKind"] = WAO::BehaviorValue(
+                static_cast<int>(hitbox.AttackKind));
+            WAO::BehaviorVM::EmitEvent(scene, event);
+
+            if (result.Blocked || result.Parried)
+            {
+                WAO::BehaviorEvent guardEvent;
+                guardEvent.Id = "combat.guard_resolved";
+                guardEvent.Source = event.Source;
+                guardEvent.Target = event.Target;
+                guardEvent.Payload["blocked"] = WAO::BehaviorValue(result.Blocked);
+                guardEvent.Payload["parried"] = WAO::BehaviorValue(result.Parried);
+                guardEvent.Payload["damage"] = WAO::BehaviorValue(result.Damage);
+                guardEvent.Payload["attackKind"] = WAO::BehaviorValue(
+                    static_cast<int>(hitbox.AttackKind));
+                WAO::BehaviorVM::EmitEvent(scene, guardEvent);
+            }
+        }
+
         return result;
     }
 

@@ -29,6 +29,9 @@ namespace Wheatear::WAO {
     {
         bool Handled = false;
         bool Success = false;
+        bool Started = false;
+        bool Completed = false;
+        uint64_t Handle = 0;
         EffectBundle AppliedEffects;
         EffectLedger Ledger;
         std::string Detail;
@@ -39,7 +42,9 @@ namespace Wheatear::WAO {
     public:
         using Resolver = std::function<ActionResolveResult(const ActionResolveContext&, const ActionRecipe&)>;
 
-        static void RegisterResolver(const std::string& actionPrefix, Resolver resolver);
+        static void RegisterResolver(const std::string& actionPrefix,
+            Resolver resolver,
+            bool previewOnly = false);
         static ActionResolveResult Resolve(const ActionResolveContext& context, const ActionRecipe& recipe);
         static void ClearResolvers();
 
@@ -48,6 +53,7 @@ namespace Wheatear::WAO {
         {
             std::string Prefix;
             Resolver Callback;
+            bool PreviewOnly = false;
         };
 
         static std::vector<ResolverEntry>& Resolvers();

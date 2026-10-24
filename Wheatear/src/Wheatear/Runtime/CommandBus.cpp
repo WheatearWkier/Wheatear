@@ -1,6 +1,7 @@
 #include "wtpch.h"
 #include "CommandBus.h"
 
+#include "Wheatear/Logic/LogicCommandRegistry.h"
 #include "Wheatear/Modules/Progression/GameProgress.h"
 #include "Wheatear/Runtime/SceneTransitionService.h"
 #include "Wheatear/Scene/Components.h"
@@ -431,9 +432,37 @@ namespace Wheatear {
     } // namespace
 
 
-    void CommandBus::RegisterGameplayCommandPrefix(const std::string& prefix)
+    void CommandBus::RegisterGameplayCommandPrefix(const std::string& prefix,
+        const std::string& category,
+        const std::string& description)
     {
         RegisterCommandPrefix(GameplayCommandPrefixes(), prefix);
+        Logic::CommandDescriptor descriptor;
+        descriptor.Name = prefix;
+        descriptor.Category = category.empty() ? "Gameplay" : category;
+        descriptor.Description = description.empty()
+            ? "Gameplay module command prefix."
+            : description;
+        descriptor.Gameplay = true;
+        Logic::CommandRegistry::Register(descriptor);
+    }
+
+    bool CommandBus::ValidateCommand(const std::string& command,
+        std::string* error)
+    {
+        return Logic::CommandRegistry::Validate(command, error);
+    }
+
+    std::vector<std::string> CommandBus::DescribeCommandPrefixes()
+    {
+        std::vector<std::string> result;
+        for (const Logic::CommandDescriptor& descriptor
+            : Logic::CommandRegistry::Snapshot())
+        {
+            result.push_back(descriptor.Name + "	[" + descriptor.Category + "] "
+                + descriptor.Description);
+        }
+        return result;
     }
 
 

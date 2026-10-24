@@ -66,20 +66,77 @@ namespace Wheatear {
 
     Entity Scene::DuplicateEntity(Entity entity)
     {
-        Entity newEntity = CreateEntity(entity.GetName());
-        CopyComponentsIfExist(AllCopyableSceneComponents{}, newEntity, entity);
+        if (!entity)
+            return {};
 
-        // Runtime physics pointers must never be copied: sharing a b2Body
-        // between two entities leads to a double DestroyBody on teardown.
-        // The duplicated entity gets fresh bodies on its next physics step.
-        if (newEntity.HasComponent<Rigidbody2DComponent>())
-            newEntity.GetComponent<Rigidbody2DComponent>().RuntimeBody = nullptr;
-        if (newEntity.HasComponent<BoxCollider2DComponent>())
-            newEntity.GetComponent<BoxCollider2DComponent>().RuntimeFixture = nullptr;
-        if (newEntity.HasComponent<CircleCollider2DComponent>())
-            newEntity.GetComponent<CircleCollider2DComponent>().RuntimeFixture = nullptr;
+        const std::vector<Entity> sources = CollectSubtree(entity);
+        if (sources.empty())
+            return {};
 
-        return newEntity;
+        std::unordered_map<UUID, UUID> idMap;
+        std::vector<std::pair<Entity, Entity>> copies;
+        copies.reserve(sources.size());
+
+        Entity newRoot;
+        for (Entity source : sources)
+        {
+            if (!source)
+                continue;
+
+            Entity copy = CreateEntity(source.GetName());
+            CopyComponentsIfExist(AllCopyableSceneComponents{}, copy, source);
+            if (!newRoot)
+                newRoot = copy;
+
+            idMap[source.GetUUID()] = copy.GetUUID();
+            copies.emplace_back(source, copy);
+
+            // Runtime physics pointers must never be copied: sharing a b2Body
+            // between two entities leads to a double DestroyBody on teardown.
+            if (copy.HasComponent<Rigidbody2DComponent>())
+                copy.GetComponent<Rigidbody2DComponent>().RuntimeBody = nullptr;
+            if (copy.HasComponent<BoxCollider2DComponent>())
+                copy.GetComponent<BoxCollider2DComponent>().RuntimeFixture = nullptr;
+            if (copy.HasComponent<CircleCollider2DComponent>())
+                copy.GetComponent<CircleCollider2DComponent>().RuntimeFixture = nullptr;
+        }
+
+        for (auto& [source, copy] : copies)
+        {
+            if (!copy)
+                continue;
+
+            const bool isRoot = source == entity;
+            if (copy.HasComponent<TransformComponent>()
+                && source.HasComponent<TransformComponent>())
+            {
+                auto& transform = copy.GetComponent<TransformComponent>();
+                if (!isRoot)
+                {
+                    const auto it = idMap.find(
+                        source.GetComponent<TransformComponent>().Parent);
+                    if (it != idMap.end())
+                        transform.Parent = it->second;
+                    else
+                        transform.Parent = UUID(0);
+                }
+            }
+
+            if (copy.HasComponent<UIWidgetComponent>()
+                && source.HasComponent<UIWidgetComponent>()
+                && !isRoot)
+            {
+                auto& widget = copy.GetComponent<UIWidgetComponent>();
+                const auto it = idMap.find(
+                    source.GetComponent<UIWidgetComponent>().ParentEntity);
+                if (it != idMap.end())
+                    widget.ParentEntity = it->second;
+                else
+                    widget.ParentEntity = UUID(0);
+            }
+        }
+
+        return newRoot;
     }
 
 } // namespace Wheatear

@@ -68,6 +68,7 @@ namespace Wheatear {
             Entity entity{ e, scene };
             auto& component = entity.GetComponent<VisualNovelComponent>();
             RuntimeState& state = GetState(entity.GetUUID());
+            state.StartRequested = component.PlayOnStart;
             if (component.PlayOnStart)
                 LoadRuntime(scene, state, component);
         }
@@ -97,22 +98,35 @@ namespace Wheatear {
 
             const std::filesystem::path resolvedPath = AssetPath::ResolveRuntimeData(component.ScriptPath);
             const SavePolicy& policy = GetSceneSavePolicy(scene);
-            if (!state.Loaded
-                || state.LoadedPath != resolvedPath
-                || state.LoadedAutoLoadSlot != policy.AutoLoadSlot
-                || state.LoadedSaveDirectory != policy.SaveDirectory)
+            const bool sourceChanged = state.Loaded
+                && (state.LoadedPath != resolvedPath
+                    || state.LoadedAutoLoadSlot != policy.AutoLoadSlot
+                    || state.LoadedSaveDirectory != policy.SaveDirectory);
+            if (!state.Loaded)
+            {
+                if (state.StartRequested)
+                {
+                    LoadRuntime(scene, state, component);
+                }
+                else
+                {
+                    // PlayOnStart is off: only vn:start may load the script.
+                    for (const std::string& command : vnCommands)
+                        ExecuteCommand(scene, component, state, command);
+                    continue;
+                }
+            }
+            else if (sourceChanged)
             {
                 LoadRuntime(scene, state, component);
             }
             else
             {
                 // Hot reload: if the .vn file changed on disk (edited in the VN
-                // Script Editor), reload the script in place, preserving the
-                // variable table so the designer sees edits immediately without
-                // restarting Play mode. Throttled to 500 ms and guarded against
-                // mid-save truncation (editor writes via truncate): a parse that
-                // yields an empty script while the previous one was non-empty is
-                // treated as an in-progress write and skipped.
+                // Script Editor), reload in place and resume near the current
+                // label. Throttled to 500 ms and guarded against mid-save
+                // truncation: a parse that yields an empty script while the
+                // previous one was non-empty is treated as an in-progress write.
                 state.LastScriptCheckTime += ts.GetSeconds();
                 if (state.LastScriptCheckTime >= 0.5f)
                 {
@@ -124,7 +138,6 @@ namespace Wheatear {
                     if (writeTime != state.LastScriptWriteTime)
                     {
                         const bool previousNonEmpty = !state.Runtime.GetScript().IsEmpty();
-                        const auto variables = state.Runtime.GetVariables();
                         VisualNovelScript reloaded = VisualNovelScript::FromFile(resolvedPath);
                         if (reloaded.IsEmpty() && previousNonEmpty)
                         {
@@ -136,9 +149,7 @@ namespace Wheatear {
                         }
                         else
                         {
-                            state.Runtime.SetScript(std::move(reloaded));
-                            for (const auto& [name, value] : variables)
-                                state.Runtime.SetVariable(name, value);
+                            state.Runtime.SetScriptPreservingPosition(std::move(reloaded));
                             state.LastScriptWriteTime = writeTime;
                             state.SystemMessage = "VN script reloaded (hot).";
                             state.SystemMessageTimer = 2.0f;
@@ -261,6 +272,9 @@ namespace Wheatear {
 
         if (!state.Loaded)
         {
+            // Do not retry a known-bad path every frame; an explicit vn:start
+            // or a component path change will set StartRequested again.
+            state.StartRequested = false;
             WT_CORE_WARN("VisualNovelSystem: failed to load script '{}'", state.LoadedPath.string());
             return false;
         }
@@ -410,6 +424,28 @@ namespace Wheatear {
             return false;
 
         const std::string action = ToLower(command.substr(3));
+
+        // F5/F9 route through vn:save / vn:load; treat them as the save/load
+        // menus so the advertised shortcuts actually work.
+        if (action == "save")
+            return ExecuteCommand(scene, component, state, "vn:savemenu");
+        if (action == "load")
+            return ExecuteCommand(scene, component, state, "vn:loadmenu");
+
+        if (action == "start" || action == "restart")
+        {
+            if (action == "restart" && state.Loaded)
+            {
+                state.Runtime.Restart();
+                PushSystemMessage(state, "剧本已重新开始。");
+                return true;
+            }
+
+            state.StartRequested = true;
+            const bool loaded = LoadRuntime(scene, state, component);
+            PushSystemMessage(state, loaded ? "剧本已开始。" : "剧本加载失败。");
+            return true;
+        }
 
         if (action == "auto")
         {
@@ -645,19 +681,32 @@ namespace Wheatear {
             // displayed N to the underlying script choice so Choose advances to
             // the correct TargetLabel even when earlier options are hidden.
             const std::vector<size_t> visibleIndices = CollectVisibleChoiceIndices(choices, state.Runtime);
-            const size_t maxChoices = std::min<size_t>(visibleIndices.size(), 9);
+            if (visibleIndices.empty())
+            {
+                PushSystemMessage(state, "没有满足条件的选项，已跳过。");
+                state.Runtime.SkipWaitingChoice();
+                state.PreviousAdvancePressed = advancePressed;
+                return;
+            }
+            const size_t visibleLimit = std::min<size_t>(
+                static_cast<size_t>(std::max<uint32_t>(1u, component.MaxVisibleChoices)),
+                state.Runtime.GetCurrentChoices().size());
+            const size_t maxChoices = std::min(
+                visibleIndices.size(),
+                std::min<size_t>(visibleLimit, 9));
 
+            bool choiceConsumed = false;
             for (size_t i = 0; i < maxChoices; ++i)
             {
                 const bool pressed = input.ChoicePressed[i];
-                if (pressed && !state.PreviousChoicePressed[i])
+                if (!choiceConsumed && pressed && !state.PreviousChoicePressed[i])
                 {
+                    choiceConsumed = true;
                     const size_t scriptIndex = visibleIndices[i];
                     if (IsExternalChoiceCommand(choices[scriptIndex].TargetLabel))
                         component.RuntimeRequestedCommand = choices[scriptIndex].TargetLabel;
                     else
                         state.Runtime.Choose(scriptIndex);
-                    break;
                 }
                 state.PreviousChoicePressed[i] = pressed;
             }
@@ -670,9 +719,11 @@ namespace Wheatear {
                     if (IsEntityHoveredButton(scene, component.ChoiceEntityPrefix + std::to_string(i + 1)))
                     {
                         const size_t scriptIndex = visibleIndices[i];
-                        if (IsExternalChoiceCommand(choices[scriptIndex].TargetLabel))
-                            component.RuntimeRequestedCommand = choices[scriptIndex].TargetLabel;
-                        else
+                        // External commands are executed by the UI button's
+                        // OnClick path on release; handling them here too would
+                        // dispatch the same event twice. Internal jumps still
+                        // need the VN mouse path.
+                        if (!IsExternalChoiceCommand(choices[scriptIndex].TargetLabel))
                             state.Runtime.Choose(scriptIndex);
                         break;
                     }

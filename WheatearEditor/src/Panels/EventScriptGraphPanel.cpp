@@ -9,30 +9,88 @@
 #include "Editor/EditorWidgets.h"
 #include "Editor/GameplayEditorShell.h"
 
+#include "Wheatear/Logic/LogicCommandRegistry.h"
+
+#include "TextEditor.h"
+
 #include <imgui/imgui_internal.h>
 
 #include <algorithm>
 #include <cmath>
 #include <cstring>
 #include <iomanip>
+#include <limits>
 
 namespace Wheatear {
 
     using namespace EventScriptGraphPanelInternal;
 
     namespace {
+
+        const TextEditor::LanguageDefinition& EventScriptLanguage()
+        {
+            static const TextEditor::LanguageDefinition definition = []()
+            {
+                TextEditor::LanguageDefinition language;
+                language.mName = "Wheatear Event Script";
+                language.mCaseSensitive = true;
+                language.mAutoIndentation = true;
+                language.mSingleLineComment = "#";
+                language.mKeywords = {
+                    "event", "end", "endevent", "wait", "if", "endif",
+                    "command", "cmd", "quit"
+                };
+                language.mTokenRegexStrings = {
+                    { "[a-zA-Z_][a-zA-Z0-9_:\\.]*", TextEditor::PaletteIndex::Identifier },
+                    { "[0-9]+(\\.[0-9]+)?", TextEditor::PaletteIndex::Number },
+                    { "\"(?:[^\"\\\\]|\\\\.)*\"", TextEditor::PaletteIndex::String },
+                    { "'(?:[^'\\\\]|\\\\.)*'", TextEditor::PaletteIndex::CharLiteral }
+                };
+                return language;
+            }();
+            return definition;
+        }
+
+        void UpdateRawMarkers(TextEditor& editor, const EventScript& script)
+        {
+            std::map<int, std::string> markers;
+            for (const EventScriptIssue& issue : script.Validate())
+            {
+                if (issue.Error)
+                    markers[issue.SourceLine] = issue.Message;
+            }
+            editor.SetErrorMarkers(markers);
+        }
+
+        void ConfigureRawEditor(TextEditor& editor, const std::string& text,
+            const EventScript& script)
+        {
+            editor.SetLanguageDefinition(EventScriptLanguage());
+            editor.SetPalette(TextEditor::GetDarkPalette());
+            editor.SetText(text);
+            UpdateRawMarkers(editor, script);
+        }
+
+    } // namespace
+
+    EventScriptGraphPanel::~EventScriptGraphPanel() = default;
+
+    namespace {
     } // namespace
 
     namespace EventScriptGraphRequests {
 
-        void RequestOpenScript(const std::string& sourcePath, const std::string& eventName)
+        void RequestOpenScript(const std::string& sourcePath,
+            const std::string& eventName, int sourceLine)
         {
             s_HasPendingOpen = true;
             s_PendingOpenPath = sourcePath;
             s_PendingOpenEvent = eventName;
+            s_PendingOpenLine = sourceLine;
         }
 
-        bool ConsumeOpenScriptRequest(std::string& sourcePath, std::string& eventName)
+        bool ConsumeOpenScriptRequest(std::string& sourcePath,
+            std::string& eventName, int& sourceLine)
         {
             if (!s_HasPendingOpen)
                 return false;
@@ -40,17 +98,26 @@ namespace Wheatear {
             s_HasPendingOpen = false;
             sourcePath = s_PendingOpenPath;
             eventName = s_PendingOpenEvent;
+            sourceLine = s_PendingOpenLine;
             s_PendingOpenPath.clear();
             s_PendingOpenEvent.clear();
+            s_PendingOpenLine = 0;
             return true;
         }
 
     } // namespace EventScriptGraphRequests
 
-    void EventScriptGraphPanel::Open(const std::string& sourcePath, const std::string& eventName)
+    void EventScriptGraphPanel::Open(const std::string& sourcePath,
+        const std::string& eventName, int sourceLine)
     {
         const bool sourceChanged = !sourcePath.empty() && sourcePath != m_SourcePath;
         const bool eventChanged = !eventName.empty() && eventName != m_SelectedEvent;
+        if (sourceChanged && m_Loaded && m_SourceEditorState.Dirty)
+        {
+            m_Open = true;
+            m_Status = "Save or reload the current event script before switching files.";
+            return;
+        }
         if (!sourcePath.empty())
             m_SourcePath = sourcePath;
         if (!eventName.empty())
@@ -65,12 +132,40 @@ namespace Wheatear {
             Load();
         else if (!eventName.empty())
             RefreshScriptFromSource();
+
+        if (sourceLine > 0)
+        {
+            int bestDistance = std::numeric_limits<int>::max();
+            for (const EventScriptBlock& block : m_EditableEvents)
+            {
+                for (size_t i = 0; i < block.Instructions.size(); ++i)
+                {
+                    const int distance = std::abs(
+                        block.Instructions[i].SourceLine - sourceLine);
+                    if (distance < bestDistance)
+                    {
+                        bestDistance = distance;
+                        m_SelectedEvent = block.Name;
+                        m_SelectedInstruction = static_cast<int>(i);
+                    }
+                }
+            }
+            m_PendingRevealLine = 0;
+        }
     }
 
     void EventScriptGraphPanel::Load()
     {
+        m_RawEditor.reset();
+        m_RawEditorText.clear();
         EditorUI::LoadTextAsset(m_SourceEditorState, m_SourcePath, SourceEditorCapacity);
         SyncSourcePathInput();
+        const size_t length = EditorUI::GetTextLength(m_SourceEditorState.Buffer);
+        m_LastCommittedSource.assign(m_SourceEditorState.Buffer.data(),
+            m_SourceEditorState.Buffer.data() + length);
+        m_SavedSource = m_LastCommittedSource;
+        m_UndoStack.clear();
+        m_RedoStack.clear();
         RefreshScriptFromSource();
         m_Loaded = true;
     }
@@ -121,11 +216,104 @@ namespace Wheatear {
         m_EditableOrphans = m_Script.GetOrphanLines();
     }
 
+    void EventScriptGraphPanel::CaptureUndoSnapshot(const std::string& nextSource)
+    {
+        if (m_SuppressUndoCapture)
+            return;
+
+        if (m_LastCommittedSource.empty())
+        {
+            m_LastCommittedSource = nextSource;
+            return;
+        }
+        if (nextSource == m_LastCommittedSource)
+            return;
+
+        // Reconstruct the pre-edit state from the last committed source so
+        // callers do not need to capture before every mutation point.
+        const EventScript previous = EventScript::FromString(m_LastCommittedSource);
+        EditSnapshot snapshot;
+        snapshot.Events = previous.GetEvents();
+        snapshot.Orphans = previous.GetOrphanLines();
+        snapshot.SelectedEvent = m_SelectedEvent;
+        snapshot.SelectedInstruction = m_SelectedInstruction;
+        snapshot.Source = m_LastCommittedSource;
+        m_UndoStack.push_back(std::move(snapshot));
+        if (m_UndoStack.size() > 64)
+            m_UndoStack.erase(m_UndoStack.begin());
+        m_RedoStack.clear();
+        m_LastCommittedSource = nextSource;
+    }
+
+    void EventScriptGraphPanel::ApplySnapshot(size_t index, bool redo)
+    {
+        std::vector<EditSnapshot>& source = redo ? m_RedoStack : m_UndoStack;
+        std::vector<EditSnapshot>& destination = redo ? m_UndoStack : m_RedoStack;
+        if (index >= source.size())
+            return;
+
+        EditSnapshot target = std::move(source[index]);
+        source.erase(source.begin() + static_cast<std::ptrdiff_t>(index));
+
+        EditSnapshot current;
+        current.Events = m_EditableEvents;
+        current.Orphans = m_EditableOrphans;
+        current.SelectedEvent = m_SelectedEvent;
+        current.SelectedInstruction = m_SelectedInstruction;
+        current.Source = m_LastCommittedSource;
+        destination.push_back(std::move(current));
+
+        m_EditableEvents = std::move(target.Events);
+        m_EditableOrphans = std::move(target.Orphans);
+        m_SelectedEvent = std::move(target.SelectedEvent);
+        m_SelectedInstruction = target.SelectedInstruction;
+        m_LastCommittedSource = std::move(target.Source);
+
+        const auto selected = std::find_if(m_EditableEvents.begin(), m_EditableEvents.end(),
+            [&](const EventScriptBlock& block) { return block.Name == m_SelectedEvent; });
+        if (selected == m_EditableEvents.end())
+        {
+            m_SelectedEvent = m_EditableEvents.empty() ? std::string() : m_EditableEvents.front().Name;
+            m_SelectedInstruction = -1;
+        }
+        else if (m_SelectedInstruction >= static_cast<int>(selected->Instructions.size()))
+        {
+            m_SelectedInstruction = -1;
+        }
+
+        m_SuppressUndoCapture = true;
+        SyncSourceFromEditableEvents(true);
+        m_SuppressUndoCapture = false;
+        const size_t length = EditorUI::GetTextLength(m_SourceEditorState.Buffer);
+        m_LastCommittedSource.assign(m_SourceEditorState.Buffer.data(),
+            m_SourceEditorState.Buffer.data() + length);
+        m_SourceEditorState.Dirty = m_LastCommittedSource != m_SavedSource;
+        m_Status = redo ? "Redo." : "Undo.";
+    }
+
+    void EventScriptGraphPanel::Undo()
+    {
+        if (m_UndoStack.empty())
+            return;
+        ApplySnapshot(m_UndoStack.size() - 1, false);
+    }
+
+    void EventScriptGraphPanel::Redo()
+    {
+        if (m_RedoStack.empty())
+            return;
+        ApplySnapshot(m_RedoStack.size() - 1, true);
+    }
+
     void EventScriptGraphPanel::SyncSourceFromEditableEvents(bool dirty)
     {
+        const std::string source = SerializeEventScript(
+            m_EditableEvents, m_Script.GetHeaderComments(), m_EditableOrphans);
+        CaptureUndoSnapshot(source);
+
         SetTextAssetBuffer(m_SourceEditorState,
             m_SourcePath,
-            SerializeEventScript(m_EditableEvents, m_Script.GetHeaderComments(), m_EditableOrphans),
+            source,
             dirty,
             SourceEditorCapacity);
 
@@ -157,12 +345,28 @@ namespace Wheatear {
 
     bool EventScriptGraphPanel::SaveGraph()
     {
+        const auto validateBeforeSave = [this]()
+        {
+            for (const EventScriptIssue& issue : m_Script.Validate())
+            {
+                if (issue.Error)
+                {
+                    m_Status = "Save blocked at line "
+                        + std::to_string(issue.SourceLine) + ": " + issue.Message;
+                    return false;
+                }
+            }
+            return true;
+        };
+
         if (m_RawSourceMode && m_RawSourceEdited)
         {
             // Raw text is authoritative: re-parse it so the graph reflects
             // the hand-written edits, then write the buffer verbatim so the
             // author's formatting (blank lines, indentation) survives.
             CommitRawTextToGraph();
+            if (!validateBeforeSave())
+                return false;
             if (!EditorUI::SaveTextAsset(m_SourceEditorState, m_SourcePath))
             {
                 m_Status = m_SourceEditorState.Status;
@@ -170,6 +374,7 @@ namespace Wheatear {
             }
 
             RefreshScriptFromSource();
+            m_SavedSource = m_LastCommittedSource;
             m_Status = "Saved " + std::to_string(m_EditableEvents.size())
                 + " event script event(s) (raw text).";
             EditorCommandBuilder::RefreshAssetChoices();
@@ -177,6 +382,8 @@ namespace Wheatear {
         }
 
         SyncSourceFromEditableEvents(true);
+        if (!validateBeforeSave())
+            return false;
         if (!EditorUI::SaveTextAsset(m_SourceEditorState, m_SourcePath))
         {
             m_Status = m_SourceEditorState.Status;
@@ -184,6 +391,7 @@ namespace Wheatear {
         }
 
         RefreshScriptFromSource();
+        m_SavedSource = m_LastCommittedSource;
         m_Status = "Saved " + std::to_string(m_EditableEvents.size()) + " event script event(s).";
         EditorCommandBuilder::RefreshAssetChoices();
         return true;
@@ -265,11 +473,31 @@ namespace Wheatear {
         ImGui::SameLine();
         if (ImGui::Button(EditorLocale::Text("Load", "加载")) || pathCommitted)
         {
-            m_SourcePath = m_SourcePathInput.data();
-            Load();
+            const std::string nextPath = m_SourcePathInput.data();
+            if (nextPath != m_SourcePath && m_SourceEditorState.Dirty)
+            {
+                m_Status = "Save or reload the current event script before switching files.";
+                CopyToPathInput(m_SourcePathInput, m_SourcePath);
+            }
+            else
+            {
+                m_SourcePath = nextPath;
+                Load();
+            }
         }
 
         const auto& events = m_EditableEvents;
+        ImGui::SameLine();
+        ImGui::BeginDisabled(m_UndoStack.empty());
+        if (ImGui::SmallButton(EditorLocale::Text("Undo", "撤销")))
+            Undo();
+        ImGui::EndDisabled();
+        ImGui::SameLine();
+        ImGui::BeginDisabled(m_RedoStack.empty());
+        if (ImGui::SmallButton(EditorLocale::Text("Redo", "重做")))
+            Redo();
+        ImGui::EndDisabled();
+
         if (ImGui::BeginCombo("Event", m_SelectedEvent.empty() ? "(none)" : m_SelectedEvent.c_str()))
         {
             for (size_t i = 0; i < events.size(); ++i)
@@ -390,7 +618,14 @@ namespace Wheatear {
             ImGui::Spacing();
             const std::string preview = SerializeEventScript(
                 m_EditableEvents, m_Script.GetHeaderComments(), m_EditableOrphans);
-            EditorGameplayShell::DrawRawPreview(preview, "##EventScriptSourcePreview");
+            std::vector<int> errorLines;
+            for (const EventScriptIssue& issue : m_Script.Validate())
+            {
+                if (issue.Error)
+                    errorLines.push_back(issue.SourceLine);
+            }
+            EditorWidgets::DrawCodePreview(preview, "##EventScriptSourcePreview",
+                EditorWidgets::CodeLanguage::EventScript, errorLines);
             return;
         }
 
@@ -405,21 +640,58 @@ namespace Wheatear {
 
         ImGui::Spacing();
 
-        const size_t textLength = EditorUI::GetTextLength(m_SourceEditorState.Buffer);
-        std::string rawText(m_SourceEditorState.Buffer.data(), m_SourceEditorState.Buffer.data() + textLength);
-        if (EditorWidgets::InputMultilineString(
-                "##EventScriptRawEdit",
-                rawText,
-                { -1.0f, -1.0f },
-                SourceEditorCapacity,
-                ImGuiInputTextFlags_AllowTabInput))
+        const std::string bufferText(m_SourceEditorState.Buffer.data(),
+            m_SourceEditorState.Buffer.data() + EditorUI::GetTextLength(m_SourceEditorState.Buffer));
+        if (m_RawEditor && !m_RawSourceEdited
+            && m_RawEditor->GetText() != bufferText)
         {
-            const size_t copyLength = std::min(rawText.size(), SourceEditorCapacity - 1);
-            m_SourceEditorState.Buffer.assign(SourceEditorCapacity, '\0');
-            if (copyLength > 0)
-                std::memcpy(m_SourceEditorState.Buffer.data(), rawText.data(), copyLength);
+            m_RawEditor.reset();
+            m_RawEditorText.clear();
+        }
+
+        if (!m_RawEditor)
+        {
+            m_RawEditor = std::make_unique<TextEditor>();
+            m_RawEditorText = bufferText;
+            ConfigureRawEditor(*m_RawEditor, m_RawEditorText,
+                EventScript::FromString(m_RawEditorText));
+        }
+
+        if (ImGui::BeginCombo(EditorLocale::Text("Insert Command", "插入命令"),
+            "Command Palette"))
+        {
+            for (const Logic::CommandDescriptor& descriptor
+                : Logic::CommandRegistry::Snapshot())
+            {
+                const std::string label = descriptor.Name
+                    + (descriptor.ArgumentHint.empty()
+                        ? std::string()
+                        : "  (" + descriptor.ArgumentHint + ")");
+                if (ImGui::Selectable(label.c_str()))
+                {
+                    const std::string insertion = descriptor.Name == "quit"
+                        ? std::string("quit\n")
+                        : descriptor.Name + ":\n";
+                    m_RawEditor->InsertText(insertion);
+                    m_RawEditorText = m_RawEditor->GetText();
+                    SetTextAssetBuffer(m_SourceEditorState, m_SourcePath,
+                        m_RawEditorText, true, SourceEditorCapacity);
+                    m_RawSourceEdited = true;
+                    m_Status = "Inserted command prefix; complete the payload before saving.";
+                }
+            }
+            ImGui::EndCombo();
+        }
+
+        m_RawEditor->Render("##EventScriptRawEdit", ImVec2(-1.0f, -1.0f), true);
+        if (m_RawEditor->IsTextChanged())
+        {
+            m_RawEditorText = m_RawEditor->GetText();
+            SetTextAssetBuffer(m_SourceEditorState, m_SourcePath,
+                m_RawEditorText, true, SourceEditorCapacity);
             m_RawSourceEdited = true;
-            m_SourceEditorState.Dirty = true;
+            UpdateRawMarkers(*m_RawEditor,
+                EventScript::FromString(m_RawEditorText));
         }
     }
 
@@ -435,6 +707,10 @@ namespace Wheatear {
                 EventScriptInstruction orphan;
                 orphan.Type = EventScriptInstructionType::RawLine;
                 orphan.Text = "raw line";
+                int nextLine = std::numeric_limits<int>::max();
+                for (const EventScriptInstruction& existing : m_EditableOrphans)
+                    nextLine = std::max(nextLine, existing.SourceLine + 1);
+                orphan.SourceLine = nextLine;
                 m_EditableOrphans.push_back(std::move(orphan));
                 SyncSourceFromEditableEvents(true);
                 m_Status = "Added orphan line.";
@@ -447,6 +723,7 @@ namespace Wheatear {
             "游离行保存时保留原文；可转换为命令、编辑或删除。"));
 
         size_t indexToDelete = m_EditableOrphans.size();
+        bool orphanEdited = false;
         for (size_t i = 0; i < m_EditableOrphans.size(); ++i)
         {
             EventScriptInstruction& orphan = m_EditableOrphans[i];
@@ -455,7 +732,10 @@ namespace Wheatear {
             ImGui::SameLine();
             std::string text = orphan.Text;
             if (EditorWidgets::InputString(EditorLocale::Text("Line", "行"), text, 512))
+            {
                 orphan.Text = text;
+                orphanEdited = true;
+            }
 
             ImGui::SameLine();
             if (ImGui::SmallButton(EditorLocale::Text("As Command", "转为命令")))
@@ -463,19 +743,30 @@ namespace Wheatear {
                 orphan.Type = EventScriptInstructionType::Command;
                 SyncSourceFromEditableEvents(true);
                 m_Status = "Converted orphan to command.";
+                ImGui::PopID();
+                return;
             }
             ImGui::SameLine();
             if (ImGui::SmallButton(EditorLocale::Text("Delete", "删除")))
             {
                 indexToDelete = i;
-                SyncSourceFromEditableEvents(true);
-                m_Status = "Deleted orphan line.";
+                ImGui::PopID();
+                break;
             }
             ImGui::PopID();
         }
 
         if (indexToDelete < m_EditableOrphans.size())
+        {
             m_EditableOrphans.erase(m_EditableOrphans.begin() + static_cast<std::ptrdiff_t>(indexToDelete));
+            SyncSourceFromEditableEvents(true);
+            m_Status = "Deleted orphan line.";
+        }
+        else if (orphanEdited)
+        {
+            SyncSourceFromEditableEvents(true);
+            m_Status = "Edited orphan line.";
+        }
     }
 
 
@@ -483,8 +774,10 @@ namespace Wheatear {
     {
         std::string pendingPath;
         std::string pendingEvent;
-        if (EventScriptGraphRequests::ConsumeOpenScriptRequest(pendingPath, pendingEvent))
-            Open(pendingPath, pendingEvent);
+        int pendingLine = 0;
+        if (EventScriptGraphRequests::ConsumeOpenScriptRequest(
+            pendingPath, pendingEvent, pendingLine))
+            Open(pendingPath, pendingEvent, pendingLine);
 
         if (!m_Open)
             return;
@@ -492,8 +785,23 @@ namespace Wheatear {
         if (!m_Loaded)
             Load();
 
+        if (!m_RawSourceMode && !ImGui::GetIO().WantTextInput)
+        {
+            const ImGuiIO& io = ImGui::GetIO();
+            if (io.KeyCtrl && io.KeyShift && ImGui::IsKeyPressed(ImGuiKey_Z, false))
+                Redo();
+            else if (io.KeyCtrl && ImGui::IsKeyPressed(ImGuiKey_Z, false))
+                Undo();
+            else if (io.KeyCtrl && ImGui::IsKeyPressed(ImGuiKey_Y, false))
+                Redo();
+        }
+
         if (EditorFloatingWindow::Begin("Event Script Editor", &m_Open, 0, { 1220.0f, 760.0f }))
         {
+            if (ImGui::IsWindowFocused(ImGuiFocusedFlags_RootAndChildWindows)
+                && ImGui::GetIO().KeyCtrl
+                && ImGui::IsKeyPressed(ImGuiKey_S, false))
+                SaveGraph();
             EditorFloatingWindow::DrawToggleButton("Event Script Editor");
             ImGui::Separator();
             EditorGameplayShell::DrawDocumentStatus({

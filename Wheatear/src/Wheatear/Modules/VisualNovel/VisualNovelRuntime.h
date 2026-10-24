@@ -30,6 +30,9 @@ namespace Wheatear {
     public:
         bool LoadScript(const std::filesystem::path& filepath);
         void SetScript(const VisualNovelScript& script);
+        // Hot-reload entry point: keeps variables/history and resumes at the
+        // nearest label that still exists in the new script.
+        void SetScriptPreservingPosition(const VisualNovelScript& script);
         void Restart();
 
         void Update(float deltaSeconds);
@@ -56,6 +59,9 @@ namespace Wheatear {
         std::string GetVisibleText() const;
         bool IsLineComplete() const;
         bool IsWaitingForChoice() const;
+        // Skips a choice node when every option is filtered out, so a script
+        // can never soft-lock on an empty choice list.
+        bool SkipWaitingChoice();
         bool IsFinished() const { return m_Finished; }
         size_t GetCurrentLineIndex() const { return m_CurrentLineIndex; }
 

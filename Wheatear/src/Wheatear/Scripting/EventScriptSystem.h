@@ -15,7 +15,8 @@ namespace Wheatear {
         void OnUpdateRuntime(Scene* scene, Timestep ts) override;
 
     private:
-        void StartEvent(Scene* scene, entt::entity entity, const std::string& eventName);
+        bool StartEvent(Scene* scene, entt::entity entity,
+            const std::string& eventName, bool reportMissing = true);
         void UpdateScript(Scene* scene, entt::entity entity, float deltaSeconds);
     };
 

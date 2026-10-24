@@ -4,6 +4,12 @@
 #include "Renderer2D.h"
 #include "Renderer3D.h"
 #include "RenderCommand.h"
+#include "Model.h"
+#include "TextRenderer.h"
+#include "Texture.h"
+
+#include "Wheatear/Assets/SpriteSheetAsset.h"
+#include "Wheatear/UI/UIRenderer.h"
 
 namespace Wheatear {
 
@@ -17,6 +23,13 @@ namespace Wheatear {
 
     void Renderer::Shutdown()
     {
+        // Release caches that own GL objects while the context is still alive.
+        UIRenderer::Shutdown();
+        TextRenderer::Shutdown();
+        SpriteSheetAsset::ClearCache();
+        Model::ClearCache();
+        Texture2D::ClearCache();
+
         Renderer2D::Shutdown();
         Renderer3D::Shutdown();
     }

@@ -5,12 +5,75 @@
 #include "Wheatear/Animation/AnimationClip.h"
 #include "Wheatear/Core/Core.h"
 
+#include <glm/glm.hpp>
+
 #include <algorithm>
 #include <cstddef>
 #include <string>
 #include <unordered_map>
+#include <vector>
 
 namespace Wheatear {
+
+    // Plays baked animations from a skinned Model. The AnimationSystem fills
+    // BonePalette each frame; RenderSystem uploads it to the skinning UBO.
+    struct Animator3DComponent
+    {
+        std::string DefaultClip;
+        bool PlayOnStart = true;
+        bool Loop = true;
+        float PlaybackSpeed = 1.0f;
+
+        // Runtime playback state.
+        int CurrentClipIndex = -1;
+        int NextClipIndex = -1;
+        float Time = 0.0f;
+        float NextTime = 0.0f;
+        float FadeDuration = 0.2f;
+        float FadeElapsed = 0.0f;
+        bool IsPlaying = false;
+
+        // Per-entity bone palette (world bone * inverse bind).
+        std::vector<glm::mat4> BonePalette;
+
+        // Crossfade to a baked clip. Index 0 is also used as the bind-pose
+        // fallback when a model has no animation clips.
+        void PlayClip(int index, float fade = 0.15f)
+        {
+            if (index < 0)
+                return;
+            if (CurrentClipIndex < 0)
+            {
+                CurrentClipIndex = index;
+                Time = 0.0f;
+                NextClipIndex = -1;
+                FadeElapsed = 0.0f;
+                IsPlaying = true;
+                return;
+            }
+            if (index == CurrentClipIndex || index == NextClipIndex)
+                return;
+
+            NextClipIndex = index;
+            NextTime = 0.0f;
+            FadeDuration = std::max(fade, 0.0f);
+            FadeElapsed = 0.0f;
+            IsPlaying = true;
+        }
+
+        void ResetPlayback()
+        {
+            CurrentClipIndex = -1;
+            NextClipIndex = -1;
+            Time = 0.0f;
+            NextTime = 0.0f;
+            FadeElapsed = 0.0f;
+            IsPlaying = false;
+        }
+
+        Animator3DComponent() = default;
+        Animator3DComponent(const Animator3DComponent&) = default;
+    };
 
     struct SpriteAnimatorComponent
     {

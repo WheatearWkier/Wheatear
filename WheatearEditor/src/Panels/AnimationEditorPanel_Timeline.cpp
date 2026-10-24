@@ -25,6 +25,16 @@ namespace Wheatear {
 
         using EditorWidgets::InputString;
 
+        static bool IsDarkUi()
+        {
+            return ImGui::GetStyleColorVec4(ImGuiCol_WindowBg).x < 0.5f;
+        }
+
+        static ImU32 ThemedColor(ImU32 dark, ImU32 light)
+        {
+            return IsDarkUi() ? dark : light;
+        }
+
         static void DrawInterpModeCombo(InterpolationMode& mode)
         {
             static const InterpolationMode kModes[] = {
@@ -121,7 +131,8 @@ namespace Wheatear {
             dl->AddRectFilled(
                 ImVec2(origin.x, trackY),
                 ImVec2(origin.x + totalWidth, trackY + kRulerHeight),
-                IM_COL32(45, 45, 45, 255));
+                ThemedColor(IM_COL32(45, 45, 45, 255),
+                    IM_COL32(224, 218, 207, 255)));
 
             float step = 0.1f;
             if (m_PixelsPerSecond < 60.0f) step = 0.5f;
@@ -134,12 +145,14 @@ namespace Wheatear {
                 dl->AddLine(
                     ImVec2(x, trackY + (isMajor ? 4.0f : 10.0f)),
                     ImVec2(x, trackY + kRulerHeight),
-                    IM_COL32(180, 180, 180, 200));
+                    ThemedColor(IM_COL32(180, 180, 180, 200),
+                        IM_COL32(120, 115, 105, 200)));
                 if (isMajor)
                 {
                     char buf[16]; snprintf(buf, sizeof(buf), "%.1fs", t);
                     dl->AddText(ImVec2(x + 2.0f, trackY + 3.0f),
-                        IM_COL32(200, 200, 200, 255), buf);
+                        ThemedColor(IM_COL32(200, 200, 200, 255),
+                            IM_COL32(45, 45, 45, 255)), buf);
                 }
             }
 
@@ -209,7 +222,8 @@ namespace Wheatear {
         const float width = duration * m_PixelsPerSecond + 60.0f;
         dl->AddRectFilled(origin,
             ImVec2(origin.x + width, origin.y + trackHeight),
-            IM_COL32(34, 30, 48, 255));
+            ThemedColor(IM_COL32(34, 30, 48, 255),
+                IM_COL32(232, 226, 240, 255)));
 
         ImGui::SetCursorScreenPos(origin);
         ImGui::InvisibleButton("##event_track_bg", ImVec2(width, trackHeight));
@@ -311,7 +325,8 @@ namespace Wheatear {
             origin,
             ImVec2(origin.x + clip->GetTotalDuration() * m_PixelsPerSecond + 60.0f,
                 origin.y + trackHeight),
-            IM_COL32(35, 35, 35, 255));
+            ThemedColor(IM_COL32(35, 35, 35, 255),
+                IM_COL32(228, 222, 211, 255)));
 
         auto& frames = clip->GetFrames();
         float x = origin.x;
@@ -373,7 +388,8 @@ namespace Wheatear {
             {
                 char buf[8]; snprintf(buf, sizeof(buf), "%d", i);
                 dl->AddText(ImVec2(x + 3.0f, origin.y + 3.0f),
-                    IM_COL32(230, 230, 230, 200), buf);
+                    ThemedColor(IM_COL32(230, 230, 230, 200),
+                        IM_COL32(45, 45, 45, 220)), buf);
             }
 
             x += w;
@@ -393,8 +409,8 @@ namespace Wheatear {
         float totalDur = clip->GetTotalDuration();
 
         ImU32 bgColor = (trackIndex % 2 == 0)
-            ? IM_COL32(38, 38, 38, 255)
-            : IM_COL32(42, 42, 42, 255);
+            ? ThemedColor(IM_COL32(38, 38, 38, 255), IM_COL32(237, 232, 223, 255))
+            : ThemedColor(IM_COL32(42, 42, 42, 255), IM_COL32(245, 241, 233, 255));
         dl->AddRectFilled(
             origin,
             ImVec2(origin.x + totalDur * m_PixelsPerSecond + 60.0f,

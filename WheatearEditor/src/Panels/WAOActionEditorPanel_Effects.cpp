@@ -2,12 +2,14 @@
 #include "WAOActionEditorPanel.h"
 #include "WAOActionEditorPanelInternal.h"
 
+#include "Editor/EditorLocale.h"
 #include "Editor/EditorWidgets.h"
 #include "Wheatear/Gameplay/Action/ActionTypes.h"
 #include "Wheatear/Gameplay/Action/EffectRegistry.h"
 
 #include <imgui/imgui.h>
 
+#include <algorithm>
 #include <string>
 #include <vector>
 
@@ -18,6 +20,12 @@ namespace Wheatear {
     void WAOActionEditorPanel::DrawEffectEditor()
     {
         SectionHeader("Effects");
+
+        for (WAO::EffectSpec& effect : m_EditRecipe.Effects)
+        {
+            if (effect.EditorId == 0)
+                effect.EditorId = m_NextEffectId++;
+        }
 
         if (ImGui::Button("Add Damage"))
         {
@@ -70,6 +78,7 @@ namespace Wheatear {
         if (ImGui::Button("Remove Selected") && canRemove)
         {
             m_EditRecipe.Effects.erase(m_EditRecipe.Effects.begin() + m_SelectedEffectIndex);
+            m_EffectsStructureChanged = true;
             m_SelectedEffectIndex = m_EditRecipe.Effects.empty()
                 ? -1
                 : std::min(m_SelectedEffectIndex, static_cast<int>(m_EditRecipe.Effects.size()) - 1);
@@ -77,6 +86,49 @@ namespace Wheatear {
         }
         if (!canRemove)
             ImGui::EndDisabled();
+
+        ImGui::SameLine();
+        ImGui::BeginDisabled(!canRemove || m_SelectedEffectIndex <= 0);
+        if (ImGui::Button(EditorLocale::Text("Move Up", "上移")))
+        {
+            std::swap(m_EditRecipe.Effects[m_SelectedEffectIndex],
+                m_EditRecipe.Effects[m_SelectedEffectIndex - 1]);
+            --m_SelectedEffectIndex;
+            m_EffectsStructureChanged = true;
+            m_EditDirty = true;
+        }
+        ImGui::EndDisabled();
+        ImGui::SameLine();
+        ImGui::BeginDisabled(!canRemove
+            || m_SelectedEffectIndex + 1 >= static_cast<int>(m_EditRecipe.Effects.size()));
+        if (ImGui::Button(EditorLocale::Text("Move Down", "下移")))
+        {
+            std::swap(m_EditRecipe.Effects[m_SelectedEffectIndex],
+                m_EditRecipe.Effects[m_SelectedEffectIndex + 1]);
+            ++m_SelectedEffectIndex;
+            m_EffectsStructureChanged = true;
+            m_EditDirty = true;
+        }
+        ImGui::EndDisabled();
+        ImGui::SameLine();
+        ImGui::BeginDisabled(!canRemove);
+        if (ImGui::Button(EditorLocale::Text("Duplicate", "复制")))
+        {
+            const WAO::EffectSpec copy = m_EditRecipe.Effects[m_SelectedEffectIndex];
+            const uint64_t sourceId = copy.EditorId;
+            m_EditRecipe.Effects.insert(
+                m_EditRecipe.Effects.begin() + m_SelectedEffectIndex + 1, copy);
+            ++m_SelectedEffectIndex;
+            WAO::EffectSpec& duplicated =
+                m_EditRecipe.Effects[static_cast<size_t>(m_SelectedEffectIndex)];
+            duplicated.EditorId = m_NextEffectId++;
+            const auto origin = m_EffectOrigins.find(sourceId);
+            if (origin != m_EffectOrigins.end())
+                m_EffectOrigins[duplicated.EditorId] = origin->second;
+            m_EffectsStructureChanged = true;
+            m_EditDirty = true;
+        }
+        ImGui::EndDisabled();
 
         if (m_EditRecipe.Effects.empty())
         {
@@ -136,6 +188,44 @@ namespace Wheatear {
         const bool usesValue =
             usesAttribute
             || effect.Type == WAO::EffectType::Launch;
+
+        if (ImGui::BeginCombo("Applies To", TargetSelectorName(effect.TargetSelector)))
+        {
+            for (WAO::EffectTargetSelector selector : {
+                    WAO::EffectTargetSelector::Actor,
+                    WAO::EffectTargetSelector::Target,
+                    WAO::EffectTargetSelector::Source })
+            {
+                const bool selected = effect.TargetSelector == selector;
+                if (ImGui::Selectable(TargetSelectorName(selector), selected))
+                {
+                    effect.TargetSelector = selector;
+                    changed = true;
+                }
+                if (selected)
+                    ImGui::SetItemDefaultFocus();
+            }
+            ImGui::EndCombo();
+        }
+
+        if (ImGui::BeginCombo("Source", TargetSelectorName(effect.SourceSelector)))
+        {
+            for (WAO::EffectTargetSelector selector : {
+                    WAO::EffectTargetSelector::Actor,
+                    WAO::EffectTargetSelector::Target,
+                    WAO::EffectTargetSelector::Source })
+            {
+                const bool selected = effect.SourceSelector == selector;
+                if (ImGui::Selectable(TargetSelectorName(selector), selected))
+                {
+                    effect.SourceSelector = selector;
+                    changed = true;
+                }
+                if (selected)
+                    ImGui::SetItemDefaultFocus();
+            }
+            ImGui::EndCombo();
+        }
 
         if (usesAttribute)
             changed |= EditorWidgets::InputString("Attribute / Resource Id", effect.AttributeId, 128);

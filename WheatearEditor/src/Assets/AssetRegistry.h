@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Wheatear/Core/UUID.h"
+#include "Wheatear/Assets/Import/ModelImporter.h"
 
 #include <cstdint>
 #include <filesystem>
@@ -23,6 +24,7 @@ namespace Wheatear {
         Prefab,
         UITemplate,
         Material,
+        Model,
         Data,
         Metadata,
         AnimationClip
@@ -67,6 +69,7 @@ namespace Wheatear {
         TextureImportSettings Texture;
         AudioImportSettings Audio;
         PrefabImportSettings Prefab;
+        ModelImporter::ImportSettings Model;
 
         std::vector<std::string> Tags;
         std::vector<std::string> References;
@@ -84,6 +87,10 @@ namespace Wheatear {
         const std::vector<EditorAssetMetadata>& GetAssets() const { return m_Assets; }
         EditorAssetMetadata* FindMutableByPath(const std::filesystem::path& relativePath);
         const EditorAssetMetadata* FindByUUID(UUID id) const;
+        // Returns the stable UUID for an asset, creating a registry entry when
+        // the file was imported after the last scan (e.g. a freshly cooked
+        // model dropped into the scene).
+        UUID EnsureAsset(const std::filesystem::path& relativePath);
 
         size_t GetAssetCount() const { return m_Assets.size(); }
         size_t GetReferenceCount() const;

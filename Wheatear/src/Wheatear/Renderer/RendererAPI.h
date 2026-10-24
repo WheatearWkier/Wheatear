@@ -33,8 +33,14 @@ namespace Wheatear {
 
         virtual void DrawIndexed(const Ref<VertexArray>& vertexArray,
             uint32_t indexCount = 0) = 0;
+        virtual void DrawIndexedInstanced(const Ref<VertexArray>& vertexArray,
+            uint32_t indexCount, uint32_t instanceCount) = 0;
+        virtual void DrawIndexedRange(const Ref<VertexArray>& vertexArray,
+            uint32_t indexCount, uint32_t indexOffset) = 0;
         virtual void DrawLines(const Ref<VertexArray>& vertexArray,
             uint32_t vertexCount) = 0;
+        virtual void DrawLinesRange(const Ref<VertexArray>& vertexArray,
+            uint32_t vertexOffset, uint32_t vertexCount) = 0;
         virtual void DrawArrays(const Ref<VertexArray>& vertexArray,
             uint32_t vertexCount) = 0;
 

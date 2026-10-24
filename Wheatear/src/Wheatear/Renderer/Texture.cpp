@@ -127,4 +127,10 @@ namespace Wheatear {
         return texture;
     }
 
+    void Texture2D::ClearCache()
+    {
+        TextureCache().clear();
+        s_TotalCachedBytes = 0;
+    }
+
 } // namespace Wheatear

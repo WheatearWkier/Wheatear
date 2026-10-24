@@ -4,6 +4,7 @@
 #include "Assets/AssetRegistry.h"
 #include "Editor/EditorFloatingWindow.h"
 #include "Editor/EditorLocale.h"
+#include "Editor/EditorSourceNavigation.h"
 #include "Editor/EditorWidgets.h"
 #include "ProjectHealthPanelInternal.h"
 #include "Editor/GameplayEditorShell.h"
@@ -71,7 +72,7 @@ namespace Wheatear {
             // Project-level startup scene lives in assets/game/player.config;
             // fall back to the engine default when the project has none.
             const std::filesystem::path projectConfig =
-                AssetPath::GetProjectRoot() / "assets" / "game" / "player.config";
+                FindRuntimePlayerConfigPath(AssetPath::GetProjectRoot());
             const RuntimePlayerConfig config = LoadRuntimePlayerConfig(projectConfig);
             m_StartupScene = config.StartupScene.generic_string();
         }
@@ -82,13 +83,14 @@ namespace Wheatear {
 
     void ProjectHealthPanel::SaveStartupScene()
     {
+        const std::filesystem::path projectRoot = AssetPath::GetProjectRoot();
         const std::filesystem::path configPath =
-            AssetPath::GetProjectRoot() / "assets" / "game" / "player.config";
+            GetProjectManifestPath(projectRoot);
         // Preserve existing fields (e.g. PackageName) while updating the
         // startup scene.
         RuntimePlayerConfig config = LoadRuntimePlayerConfig(configPath);
         config.StartupScene = m_StartupScene;
-        if (SaveRuntimePlayerConfig(configPath, config, EngineInfo::EditorName))
+        if (SaveProjectConfig(projectRoot, config, EngineInfo::EditorName))
         {
             m_Status = "Startup scene saved to " + configPath.generic_string();
             Refresh();
@@ -133,6 +135,8 @@ namespace Wheatear {
 
         m_Report = AssetDependencyScanner::BuildReport(options);
         m_SourceReport = ProjectSourceScanner::BuildReport(options.ProjectRoot);
+        m_ContentReport = ContentValidator::ValidateDirectory(
+            AssetPath::GetAssetRoot());
         AssetRegistry::Get().Scan(options.ProjectRoot);
         AssetRegistry::Get().WriteRegistry();
         m_HygieneReport = BuildAssetHygieneReport(options.ProjectRoot, m_Report);
@@ -147,7 +151,9 @@ namespace Wheatear {
             + std::to_string(m_HygieneReport.DuplicateGroups.size()) + " duplicate group(s), "
             + std::to_string(m_HygieneReport.AliasIssues.size()) + " alias issue(s), "
             + std::to_string(m_MissingSystemBindings.size()) + " missing system binding(s), "
-            + std::to_string(m_MissingEntityBindings.size()) + " dangling entity binding(s).";
+            + std::to_string(m_MissingEntityBindings.size()) + " dangling entity binding(s), "
+            + std::to_string(m_ContentReport.ErrorCount()) + " content error(s), "
+            + std::to_string(m_ContentReport.WarningCount()) + " content warning(s).";
     }
 
     void ProjectHealthPanel::ScanSystemBindings()
@@ -357,7 +363,7 @@ namespace Wheatear {
         if (!m_Open)
             return;
 
-        if (!EditorFloatingWindow::Begin(EditorLocale::Text("Project Health", "项目健康检查"), &m_Open, 0, { 1120.0f, 720.0f }))
+        if (!EditorFloatingWindow::Begin("Project Health", &m_Open, 0, { 1120.0f, 720.0f }))
         {
             EditorFloatingWindow::End();
             return;
@@ -370,7 +376,8 @@ namespace Wheatear {
             + m_HygieneReport.DuplicateGroups.size()
             + m_HygieneReport.AliasIssues.size()
             + m_MissingSystemBindings.size()
-            + m_MissingEntityBindings.size();
+            + m_MissingEntityBindings.size()
+            + m_ContentReport.ErrorCount();
         EditorWidgets::PanelHeader(EditorLocale::Text("Project Health", "项目健康检查"), "Package dependency, asset hygiene, registry, and source/project sync validation.");
         EditorWidgets::StatusBadge(issueCount == 0 ? "Ready" : "Needs Attention",
             issueCount == 0 ? EditorWidgets::StatusKind::Success : EditorWidgets::StatusKind::Error);
@@ -385,6 +392,9 @@ namespace Wheatear {
         ImGui::SameLine();
         EditorWidgets::StatusBadge((std::to_string(m_HygieneReport.HardcodedAssetPaths.size()) + " hardcoded path(s)").c_str(),
             m_HygieneReport.HardcodedAssetPaths.empty() ? EditorWidgets::StatusKind::Neutral : EditorWidgets::StatusKind::Warning);
+        ImGui::SameLine();
+        EditorWidgets::StatusBadge((std::to_string(m_ContentReport.ErrorCount()) + " content error(s)").c_str(),
+            m_ContentReport.HasErrors() ? EditorWidgets::StatusKind::Error : EditorWidgets::StatusKind::Neutral);
         ImGui::SameLine();
         EditorFloatingWindow::DrawToggleButton(EditorLocale::Text("Project Health", "项目健康检查"));
 
@@ -445,6 +455,11 @@ namespace Wheatear {
             if (ImGui::BeginTabItem(EditorLocale::Text("Parsed Text", "解析文本")))
             {
                 DrawAssetList("ParsedTextAssetTable", m_Report.ParsedTextAssets);
+                ImGui::EndTabItem();
+            }
+            if (ImGui::BeginTabItem(EditorLocale::Text("Content Validation", "内容校验")))
+            {
+                DrawContentValidation();
                 ImGui::EndTabItem();
             }
             if (ImGui::BeginTabItem(EditorLocale::Text("Warnings", "警告")))
@@ -918,6 +933,66 @@ namespace Wheatear {
                 ImGui::TableSetColumnIndex(2);
                 const std::string file = record.File.generic_string();
                 ImGui::TextWrapped("%s", file.c_str());
+            }
+
+            ImGui::EndTable();
+        }
+    }
+
+    void ProjectHealthPanel::DrawContentValidation()
+    {
+        if (m_ContentReport.Issues.empty())
+        {
+            EditorWidgets::EmptyState(
+                EditorLocale::Text("All authored content is valid.", "所有内容校验通过。"),
+                EditorLocale::Text(
+                    "Checked .wts, .vn, .wtb and action YAML for syntax, references and expressions.",
+                    "已检查 .wts、.vn、.wtb 与动作 YAML 的语法、引用和表达式。"));
+            return;
+        }
+
+        ImGui::TextDisabled("%s",
+            EditorLocale::Text("Errors block packaging; warnings are safe to ship.",
+                "错误会阻止打包，警告可随包发布。"));
+
+        if (ImGui::BeginTable("ContentValidationTable", 4,
+            ImGuiTableFlags_Borders | ImGuiTableFlags_RowBg
+                | ImGuiTableFlags_Resizable | ImGuiTableFlags_ScrollY))
+        {
+            ImGui::TableSetupColumn(EditorLocale::Text("Severity", "级别"),
+                ImGuiTableColumnFlags_WidthFixed, 80.0f);
+            ImGui::TableSetupColumn(EditorLocale::Text("Asset", "资源"),
+                ImGuiTableColumnFlags_WidthStretch);
+            ImGui::TableSetupColumn(EditorLocale::Text("Line", "行"),
+                ImGuiTableColumnFlags_WidthFixed, 48.0f);
+            ImGui::TableSetupColumn(EditorLocale::Text("Message", "信息"),
+                ImGuiTableColumnFlags_WidthStretch);
+            ImGui::TableHeadersRow();
+
+            for (const ContentIssue& issue : m_ContentReport.Issues)
+            {
+                ImGui::TableNextRow();
+                ImGui::TableSetColumnIndex(0);
+                const bool error = issue.Severity == ContentIssueSeverity::Error;
+                ImGui::TextColored(error
+                        ? ImVec4(0.92f, 0.35f, 0.35f, 1.0f)
+                        : ImVec4(0.95f, 0.72f, 0.30f, 1.0f),
+                    "%s", error ? "Error" : "Warning");
+                ImGui::TableSetColumnIndex(1);
+                ImGui::TextWrapped("%s", issue.Asset.generic_string().c_str());
+                if (ImGui::IsItemHovered()
+                    && ImGui::IsMouseDoubleClicked(ImGuiMouseButton_Left))
+                {
+                    EditorSourceNavigation::OpenAsset(
+                        issue.Asset.generic_string(), issue.SourceLine);
+                }
+                ImGui::TableSetColumnIndex(2);
+                if (issue.SourceLine > 0)
+                    ImGui::Text("%d", issue.SourceLine);
+                else
+                    ImGui::TextUnformatted("-");
+                ImGui::TableSetColumnIndex(3);
+                ImGui::TextWrapped("%s", issue.Message.c_str());
             }
 
             ImGui::EndTable();

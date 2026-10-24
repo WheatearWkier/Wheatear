@@ -15,6 +15,9 @@ namespace Wheatear {
 
         void OnAttach() override;
 
+        const char* GetWorkspaceLabel() const override { return "3D STUDIO"; }
+        bool Is3DWorkspace() const override { return true; }
+
     protected:
 
 

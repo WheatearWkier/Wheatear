@@ -77,7 +77,7 @@
       <PrecompiledHeaderFile>wtpch.h</PrecompiledHeaderFile>
       <WarningLevel>Level3</WarningLevel>
       <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;WT_PLATFORM_WINDOWS;WT_BUILD_DLL;GLFW_INCLUDE_NONE;WT_DEBUG;WT_ENABLE_ASSERTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>src;vendor\spdlog\include;vendor\GLFW\include;vendor\GLAD\include;vendor\imgui;vendor\glm;vendor\stb_image;vendor\entt\include;vendor\tinyobjloader\include;vendor\yaml-cpp\include;vendor\ImGuizmo;D:\softwares\VulkanSDK\1.4.341.1\Include;vendor\Box2D\include;vendor\miniaudio;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>src;vendor\spdlog\include;vendor\GLFW\include;vendor\GLAD\include;vendor\imgui;vendor\glm;vendor\stb_image;vendor\entt\include;vendor\tinyobjloader\include;vendor\yaml-cpp\include;vendor\ImGuizmo;vendor\ImGuiColorTextEdit;D:\softwares\VulkanSDK\1.4.341.1\Include;vendor\Box2D\include;vendor\miniaudio;vendor\ufbx;vendor\cgltf;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <Optimization>Disabled</Optimization>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
@@ -101,7 +101,7 @@
       <PrecompiledHeaderFile>wtpch.h</PrecompiledHeaderFile>
       <WarningLevel>Level3</WarningLevel>
       <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;WT_PLATFORM_WINDOWS;WT_BUILD_DLL;GLFW_INCLUDE_NONE;WT_RELEASE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>src;vendor\spdlog\include;vendor\GLFW\include;vendor\GLAD\include;vendor\imgui;vendor\glm;vendor\stb_image;vendor\entt\include;vendor\tinyobjloader\include;vendor\yaml-cpp\include;vendor\ImGuizmo;D:\softwares\VulkanSDK\1.4.341.1\Include;vendor\Box2D\include;vendor\miniaudio;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>src;vendor\spdlog\include;vendor\GLFW\include;vendor\GLAD\include;vendor\imgui;vendor\glm;vendor\stb_image;vendor\entt\include;vendor\tinyobjloader\include;vendor\yaml-cpp\include;vendor\ImGuizmo;vendor\ImGuiColorTextEdit;D:\softwares\VulkanSDK\1.4.341.1\Include;vendor\Box2D\include;vendor\miniaudio;vendor\ufbx;vendor\cgltf;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <Optimization>Full</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
@@ -129,7 +129,7 @@
       <PrecompiledHeaderFile>wtpch.h</PrecompiledHeaderFile>
       <WarningLevel>Level3</WarningLevel>
       <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;WT_PLATFORM_WINDOWS;WT_BUILD_DLL;GLFW_INCLUDE_NONE;WT_DIST;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>src;vendor\spdlog\include;vendor\GLFW\include;vendor\GLAD\include;vendor\imgui;vendor\glm;vendor\stb_image;vendor\entt\include;vendor\tinyobjloader\include;vendor\yaml-cpp\include;vendor\ImGuizmo;D:\softwares\VulkanSDK\1.4.341.1\Include;vendor\Box2D\include;vendor\miniaudio;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>src;vendor\spdlog\include;vendor\GLFW\include;vendor\GLAD\include;vendor\imgui;vendor\glm;vendor\stb_image;vendor\entt\include;vendor\tinyobjloader\include;vendor\yaml-cpp\include;vendor\ImGuizmo;vendor\ImGuiColorTextEdit;D:\softwares\VulkanSDK\1.4.341.1\Include;vendor\Box2D\include;vendor\miniaudio;vendor\ufbx;vendor\cgltf;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <Optimization>Full</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
@@ -166,8 +166,11 @@
     <ClInclude Include="src\Wheatear\Animation\AnimationClip.h" />
     <ClInclude Include="src\Wheatear\Animation\AnimationClipSerializer.h" />
     <ClInclude Include="src\Wheatear\Assets\AssetAliasRegistry.h" />
+    <ClInclude Include="src\Wheatear\Assets\AssetDatabase.h" />
     <ClInclude Include="src\Wheatear\Assets\AssetPath.h" />
+    <ClInclude Include="src\Wheatear\Assets\ContentValidation.h" />
     <ClInclude Include="src\Wheatear\Assets\FileSystem.h" />
+    <ClInclude Include="src\Wheatear\Assets\Import\ModelImporter.h" />
     <ClInclude Include="src\Wheatear\Assets\SpriteSheetAsset.h" />
     <ClInclude Include="src\Wheatear\Audio\AudioEngine.h" />
     <ClInclude Include="src\Wheatear\Config\PlayerConfig.h" />
@@ -195,12 +198,21 @@
     <ClInclude Include="src\Wheatear\Gameplay\Action\ActionRecipeQueries.h" />
     <ClInclude Include="src\Wheatear\Gameplay\Action\ActionResolver.h" />
     <ClInclude Include="src\Wheatear\Gameplay\Action\ActionRunner.h" />
+    <ClInclude Include="src\Wheatear\Gameplay\Action\ActionRuntimeStore.h" />
     <ClInclude Include="src\Wheatear\Gameplay\Action\ActionSignalRouter.h" />
     <ClInclude Include="src\Wheatear\Gameplay\Action\ActionTypes.h" />
     <ClInclude Include="src\Wheatear\Gameplay\Action\EffectFormula.h" />
     <ClInclude Include="src\Wheatear\Gameplay\Action\EffectRegistry.h" />
     <ClInclude Include="src\Wheatear\Gameplay\Action\StateRegistry.h" />
-    <ClInclude Include="src\Wheatear\Gameplay\SystemBindingRegistry.h" />
+    <ClInclude Include="src\Wheatear\Gameplay\Behavior\BehaviorAnalysis.h" />
+    <ClInclude Include="src\Wheatear\Gameplay\Behavior\BehaviorAssetLoader.h" />
+    <ClInclude Include="src\Wheatear\Gameplay\Behavior\BehaviorBuiltinPrimitives.h" />
+    <ClInclude Include="src\Wheatear\Gameplay\Behavior\BehaviorCompiler.h" />
+    <ClInclude Include="src\Wheatear\Gameplay\Behavior\BehaviorDatabase.h" />
+    <ClInclude Include="src\Wheatear\Gameplay\Behavior\BehaviorPrimitiveRegistry.h" />
+    <ClInclude Include="src\Wheatear\Gameplay\Behavior\BehaviorSystem.h" />
+    <ClInclude Include="src\Wheatear\Gameplay\Behavior\BehaviorTypes.h" />
+    <ClInclude Include="src\Wheatear\Gameplay\Behavior\BehaviorVM.h" />
     <ClInclude Include="src\Wheatear\Gameplay\Services\GameplayAudioService.h" />
     <ClInclude Include="src\Wheatear\Gameplay\Services\GameplayCombatService.h" />
     <ClInclude Include="src\Wheatear\Gameplay\Services\GameplayEntityService.h" />
@@ -211,12 +223,16 @@
     <ClInclude Include="src\Wheatear\Gameplay\Services\GameplayUILayoutService.h" />
     <ClInclude Include="src\Wheatear\Gameplay\Services\GameplayUIService.h" />
     <ClInclude Include="src\Wheatear\Gameplay\Services\GameplayVisualService.h" />
+    <ClInclude Include="src\Wheatear\Gameplay\SystemBindingRegistry.h" />
     <ClInclude Include="src\Wheatear\ImGui\ImGuiLayer.h" />
     <ClInclude Include="src\Wheatear\Input\Input.h" />
     <ClInclude Include="src\Wheatear\Input\InputActionCatalog.h" />
     <ClInclude Include="src\Wheatear\Input\InputBindingService.h" />
     <ClInclude Include="src\Wheatear\Input\KeyCodes.h" />
     <ClInclude Include="src\Wheatear\Input\MouseButtonCodes.h" />
+    <ClInclude Include="src\Wheatear\Logic\LogicCommandRegistry.h" />
+    <ClInclude Include="src\Wheatear\Logic\LogicDiagnostics.h" />
+    <ClInclude Include="src\Wheatear\Logic\LogicExpression.h" />
     <ClInclude Include="src\Wheatear\Math\Math.h" />
     <ClInclude Include="src\Wheatear\Modules\ArcadeCombat\ArcadeCombatActionResolver.h" />
     <ClInclude Include="src\Wheatear\Modules\ArcadeCombat\ArcadeCombatBossService.h" />
@@ -243,12 +259,22 @@
     <ClInclude Include="src\Wheatear\Modules\Progression\ProgressionSettingsPageService.h" />
     <ClInclude Include="src\Wheatear\Modules\Progression\ProgressionSkillTreePageService.h" />
     <ClInclude Include="src\Wheatear\Modules\Progression\ProgressionSystem.h" />
+    <ClInclude Include="src\Wheatear\Modules\RTS\RTSAISystem.h" />
+    <ClInclude Include="src\Wheatear\Modules\RTS\RTSAnimationSystem.h" />
+    <ClInclude Include="src\Wheatear\Modules\RTS\RTSCameraSystem.h" />
+    <ClInclude Include="src\Wheatear\Modules\RTS\RTSComponents.h" />
+    <ClInclude Include="src\Wheatear\Modules\RTS\RTSModule.h" />
+    <ClInclude Include="src\Wheatear\Modules\RTS\RTSPlayerSystem.h" />
+    <ClInclude Include="src\Wheatear\Modules\RTS\RTSProductionSystem.h" />
+    <ClInclude Include="src\Wheatear\Modules\RTS\RTSUnitSystem.h" />
+    <ClInclude Include="src\Wheatear\Modules\RTS\RTSUtilities.h" />
     <ClInclude Include="src\Wheatear\Modules\SideCombat\SideCombatActionService.h" />
     <ClInclude Include="src\Wheatear\Modules\SideCombat\SideCombatComboService.h" />
     <ClInclude Include="src\Wheatear\Modules\SideCombat\SideCombatComponents.h" />
     <ClInclude Include="src\Wheatear\Modules\SideCombat\SideCombatEnemyAIService.h" />
     <ClInclude Include="src\Wheatear\Modules\SideCombat\SideCombatEntityReferenceService.h" />
     <ClInclude Include="src\Wheatear\Modules\SideCombat\SideCombatFeedbackService.h" />
+    <ClInclude Include="src\Wheatear\Modules\SideCombat\SideCombatGuardService.h" />
     <ClInclude Include="src\Wheatear\Modules\SideCombat\SideCombatHitResolutionService.h" />
     <ClInclude Include="src\Wheatear\Modules\SideCombat\SideCombatHitboxService.h" />
     <ClInclude Include="src\Wheatear\Modules\SideCombat\SideCombatHudService.h" />
@@ -292,16 +318,20 @@
     <ClInclude Include="src\Wheatear\Modules\VisualNovel\VisualNovelScript.h" />
     <ClInclude Include="src\Wheatear\Modules\VisualNovel\VisualNovelSystem.h" />
     <ClInclude Include="src\Wheatear\Modules\VisualNovel\VisualNovelSystemInternal.h" />
+    <ClInclude Include="src\Wheatear\Navigation\DebugDraw3D.h" />
+    <ClInclude Include="src\Wheatear\Navigation\NavGrid.h" />
     <ClInclude Include="src\Wheatear\Physics\ContactListener.h" />
     <ClInclude Include="src\Wheatear\Renderer\Buffer.h" />
     <ClInclude Include="src\Wheatear\Renderer\Camera.h" />
     <ClInclude Include="src\Wheatear\Renderer\EditorCamera.h" />
     <ClInclude Include="src\Wheatear\Renderer\Font.h" />
     <ClInclude Include="src\Wheatear\Renderer\Framebuffer.h" />
+    <ClInclude Include="src\Wheatear\Renderer\Frustum.h" />
     <ClInclude Include="src\Wheatear\Renderer\GraphicsContext.h" />
     <ClInclude Include="src\Wheatear\Renderer\IBLPrecompute.h" />
     <ClInclude Include="src\Wheatear\Renderer\Material.h" />
     <ClInclude Include="src\Wheatear\Renderer\Mesh.h" />
+    <ClInclude Include="src\Wheatear\Renderer\Model.h" />
     <ClInclude Include="src\Wheatear\Renderer\RenderBatch.h" />
     <ClInclude Include="src\Wheatear\Renderer\RenderCommand.h" />
     <ClInclude Include="src\Wheatear\Renderer\Renderer.h" />
@@ -316,6 +346,7 @@
     <ClInclude Include="src\Wheatear\Renderer\UniformBuffer.h" />
     <ClInclude Include="src\Wheatear\Renderer\VertexArray.h" />
     <ClInclude Include="src\Wheatear\Runtime\CommandBus.h" />
+    <ClInclude Include="src\Wheatear\Runtime\RuntimePatchManager.h" />
     <ClInclude Include="src\Wheatear\Runtime\SceneTransitionService.h" />
     <ClInclude Include="src\Wheatear\Scene\ComponentGroup.h" />
     <ClInclude Include="src\Wheatear\Scene\ComponentLifecycleRegistry.h" />
@@ -327,6 +358,7 @@
     <ClInclude Include="src\Wheatear\Scene\Components\Physics2DComponents.h" />
     <ClInclude Include="src\Wheatear\Scene\Components\RenderingComponents.h" />
     <ClInclude Include="src\Wheatear\Scene\Components\ScriptComponents.h" />
+    <ClInclude Include="src\Wheatear\Scene\Components\TerrainComponents.h" />
     <ClInclude Include="src\Wheatear\Scene\Components\UIComponents.h" />
     <ClInclude Include="src\Wheatear\Scene\Entity.h" />
     <ClInclude Include="src\Wheatear\Scene\Entity.inl" />
@@ -343,9 +375,11 @@
     <ClInclude Include="src\Wheatear\Systems\AnimationSystem.h" />
     <ClInclude Include="src\Wheatear\Systems\AudioSystem.h" />
     <ClInclude Include="src\Wheatear\Systems\ISystem.h" />
+    <ClInclude Include="src\Wheatear\Systems\NavigationSystem.h" />
     <ClInclude Include="src\Wheatear\Systems\PhysicsSystem.h" />
     <ClInclude Include="src\Wheatear\Systems\RenderSystem.h" />
     <ClInclude Include="src\Wheatear\Systems\SpriteSheetSystem.h" />
+    <ClInclude Include="src\Wheatear\Systems\TerrainSystem.h" />
     <ClInclude Include="src\Wheatear\Systems\UISystem.h" />
     <ClInclude Include="src\Wheatear\UI\UIInputSystem.h" />
     <ClInclude Include="src\Wheatear\UI\UIRenderer.h" />
@@ -354,6 +388,7 @@
     <ClInclude Include="src\Wheatear\Utils\PlatformUtils.h" />
     <ClInclude Include="src\Wheatear\Utils\StringUtils.h" />
     <ClInclude Include="src\wtpch.h" />
+    <ClInclude Include="vendor\ImGuiColorTextEdit\TextEditor.h" />
     <ClInclude Include="vendor\ImGuizmo\ImGuizmo.h" />
     <ClInclude Include="vendor\glm\glm\common.hpp" />
     <ClInclude Include="vendor\glm\glm\detail\_features.hpp" />
@@ -718,6 +753,8 @@
     <ClInclude Include="vendor\glm\glm\vec4.hpp" />
     <ClInclude Include="vendor\glm\glm\vector_relational.hpp" />
     <ClInclude Include="vendor\stb_image\stb_image.h" />
+    <ClInclude Include="vendor\stb_image\stb_image_write.h" />
+    <ClInclude Include="vendor\ufbx\ufbx.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Platform\OpenGL\OpenGLBuffer.cpp" />
@@ -734,8 +771,11 @@
     <ClCompile Include="src\Platform\Windows\WindowsWindow.cpp" />
     <ClCompile Include="src\Wheatear\Animation\AnimationClipSerializer.cpp" />
     <ClCompile Include="src\Wheatear\Assets\AssetAliasRegistry.cpp" />
+    <ClCompile Include="src\Wheatear\Assets\AssetDatabase.cpp" />
     <ClCompile Include="src\Wheatear\Assets\AssetPath.cpp" />
+    <ClCompile Include="src\Wheatear\Assets\ContentValidation.cpp" />
     <ClCompile Include="src\Wheatear\Assets\FileSystem.cpp" />
+    <ClCompile Include="src\Wheatear\Assets\Import\ModelImporter.cpp" />
     <ClCompile Include="src\Wheatear\Assets\SpriteSheetAsset.cpp" />
     <ClCompile Include="src\Wheatear\Audio\AudioEngine.cpp" />
     <ClCompile Include="src\Wheatear\Config\PlayerConfig.cpp" />
@@ -752,11 +792,21 @@
     <ClCompile Include="src\Wheatear\Gameplay\Action\ActionRecipeQueries.cpp" />
     <ClCompile Include="src\Wheatear\Gameplay\Action\ActionResolver.cpp" />
     <ClCompile Include="src\Wheatear\Gameplay\Action\ActionRunner.cpp" />
+    <ClCompile Include="src\Wheatear\Gameplay\Action\ActionRuntimeStore.cpp" />
     <ClCompile Include="src\Wheatear\Gameplay\Action\ActionSignalRouter.cpp" />
     <ClCompile Include="src\Wheatear\Gameplay\Action\ActionTypes.cpp" />
     <ClCompile Include="src\Wheatear\Gameplay\Action\EffectFormula.cpp" />
     <ClCompile Include="src\Wheatear\Gameplay\Action\EffectRegistry.cpp" />
     <ClCompile Include="src\Wheatear\Gameplay\Action\StateRegistry.cpp" />
+    <ClCompile Include="src\Wheatear\Gameplay\Behavior\BehaviorAnalysis.cpp" />
+    <ClCompile Include="src\Wheatear\Gameplay\Behavior\BehaviorAssetLoader.cpp" />
+    <ClCompile Include="src\Wheatear\Gameplay\Behavior\BehaviorBuiltinPrimitives.cpp" />
+    <ClCompile Include="src\Wheatear\Gameplay\Behavior\BehaviorCompiler.cpp" />
+    <ClCompile Include="src\Wheatear\Gameplay\Behavior\BehaviorDatabase.cpp" />
+    <ClCompile Include="src\Wheatear\Gameplay\Behavior\BehaviorPrimitiveRegistry.cpp" />
+    <ClCompile Include="src\Wheatear\Gameplay\Behavior\BehaviorSystem.cpp" />
+    <ClCompile Include="src\Wheatear\Gameplay\Behavior\BehaviorTypes.cpp" />
+    <ClCompile Include="src\Wheatear\Gameplay\Behavior\BehaviorVM.cpp" />
     <ClCompile Include="src\Wheatear\Gameplay\Services\GameplayAudioService.cpp" />
     <ClCompile Include="src\Wheatear\Gameplay\Services\GameplayCombatService.cpp" />
     <ClCompile Include="src\Wheatear\Gameplay\Services\GameplayEntityService.cpp" />
@@ -770,6 +820,9 @@
     <ClCompile Include="src\Wheatear\ImGui\ImGuiLayer.cpp" />
     <ClCompile Include="src\Wheatear\Input\InputActionCatalog.cpp" />
     <ClCompile Include="src\Wheatear\Input\InputBindingService.cpp" />
+    <ClCompile Include="src\Wheatear\Logic\LogicCommandRegistry.cpp" />
+    <ClCompile Include="src\Wheatear\Logic\LogicDiagnostics.cpp" />
+    <ClCompile Include="src\Wheatear\Logic\LogicExpression.cpp" />
     <ClCompile Include="src\Wheatear\Math\Math.cpp" />
     <ClCompile Include="src\Wheatear\Modules\ArcadeCombat\ArcadeCombatActionResolver.cpp" />
     <ClCompile Include="src\Wheatear\Modules\ArcadeCombat\ArcadeCombatBossService.cpp" />
@@ -792,11 +845,19 @@
     <ClCompile Include="src\Wheatear\Modules\Progression\ProgressionSettingsPageService.cpp" />
     <ClCompile Include="src\Wheatear\Modules\Progression\ProgressionSkillTreePageService.cpp" />
     <ClCompile Include="src\Wheatear\Modules\Progression\ProgressionSystem.cpp" />
+    <ClCompile Include="src\Wheatear\Modules\RTS\RTSAISystem.cpp" />
+    <ClCompile Include="src\Wheatear\Modules\RTS\RTSAnimationSystem.cpp" />
+    <ClCompile Include="src\Wheatear\Modules\RTS\RTSCameraSystem.cpp" />
+    <ClCompile Include="src\Wheatear\Modules\RTS\RTSModule.cpp" />
+    <ClCompile Include="src\Wheatear\Modules\RTS\RTSPlayerSystem.cpp" />
+    <ClCompile Include="src\Wheatear\Modules\RTS\RTSProductionSystem.cpp" />
+    <ClCompile Include="src\Wheatear\Modules\RTS\RTSUnitSystem.cpp" />
     <ClCompile Include="src\Wheatear\Modules\SideCombat\SideCombatActionService.cpp" />
     <ClCompile Include="src\Wheatear\Modules\SideCombat\SideCombatComboService.cpp" />
     <ClCompile Include="src\Wheatear\Modules\SideCombat\SideCombatEnemyAIService.cpp" />
     <ClCompile Include="src\Wheatear\Modules\SideCombat\SideCombatEntityReferenceService.cpp" />
     <ClCompile Include="src\Wheatear\Modules\SideCombat\SideCombatFeedbackService.cpp" />
+    <ClCompile Include="src\Wheatear\Modules\SideCombat\SideCombatGuardService.cpp" />
     <ClCompile Include="src\Wheatear\Modules\SideCombat\SideCombatHitResolutionService.cpp" />
     <ClCompile Include="src\Wheatear\Modules\SideCombat\SideCombatHitboxService.cpp" />
     <ClCompile Include="src\Wheatear\Modules\SideCombat\SideCombatHudService.cpp" />
@@ -836,6 +897,8 @@
     <ClCompile Include="src\Wheatear\Modules\VisualNovel\VisualNovelScript.cpp" />
     <ClCompile Include="src\Wheatear\Modules\VisualNovel\VisualNovelSystem.cpp" />
     <ClCompile Include="src\Wheatear\Modules\VisualNovel\VisualNovelSystem_SceneBindings.cpp" />
+    <ClCompile Include="src\Wheatear\Navigation\DebugDraw3D.cpp" />
+    <ClCompile Include="src\Wheatear\Navigation\NavGrid.cpp" />
     <ClCompile Include="src\Wheatear\Physics\ContactListener.cpp" />
     <ClCompile Include="src\Wheatear\Renderer\Buffer.cpp" />
     <ClCompile Include="src\Wheatear\Renderer\EditorCamera.cpp" />
@@ -844,6 +907,7 @@
     <ClCompile Include="src\Wheatear\Renderer\IBLPrecompute.cpp" />
     <ClCompile Include="src\Wheatear\Renderer\Material.cpp" />
     <ClCompile Include="src\Wheatear\Renderer\Mesh.cpp" />
+    <ClCompile Include="src\Wheatear\Renderer\Model.cpp" />
     <ClCompile Include="src\Wheatear\Renderer\RenderCommand.cpp" />
     <ClCompile Include="src\Wheatear\Renderer\Renderer.cpp" />
     <ClCompile Include="src\Wheatear\Renderer\Renderer2D.cpp" />
@@ -856,6 +920,7 @@
     <ClCompile Include="src\Wheatear\Renderer\UniformBuffer.cpp" />
     <ClCompile Include="src\Wheatear\Renderer\VertexArray.cpp" />
     <ClCompile Include="src\Wheatear\Runtime\CommandBus.cpp" />
+    <ClCompile Include="src\Wheatear\Runtime\RuntimePatchManager.cpp" />
     <ClCompile Include="src\Wheatear\Runtime\SceneTransitionService.cpp" />
     <ClCompile Include="src\Wheatear\Scene\ComponentLifecycleRegistry.cpp" />
     <ClCompile Include="src\Wheatear\Scene\Entity.cpp" />
@@ -878,9 +943,11 @@
     <ClCompile Include="src\Wheatear\Scripting\EventScriptSystem.cpp" />
     <ClCompile Include="src\Wheatear\Systems\AnimationSystem.cpp" />
     <ClCompile Include="src\Wheatear\Systems\AudioSystem.cpp" />
+    <ClCompile Include="src\Wheatear\Systems\NavigationSystem.cpp" />
     <ClCompile Include="src\Wheatear\Systems\PhysicsSystem.cpp" />
     <ClCompile Include="src\Wheatear\Systems\RenderSystem.cpp" />
     <ClCompile Include="src\Wheatear\Systems\SpriteSheetSystem.cpp" />
+    <ClCompile Include="src\Wheatear\Systems\TerrainSystem.cpp" />
     <ClCompile Include="src\Wheatear\Systems\UISystem.cpp" />
     <ClCompile Include="src\Wheatear\UI\UIInputSystem.cpp" />
     <ClCompile Include="src\Wheatear\UI\UIRenderer.cpp" />
@@ -888,8 +955,14 @@
     <ClCompile Include="src\wtpch.cpp">
       <PrecompiledHeader>Create</PrecompiledHeader>
     </ClCompile>
+    <ClCompile Include="vendor\ImGuiColorTextEdit\TextEditor.cpp">
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+    </ClCompile>
     <ClCompile Include="vendor\ImGuizmo\ImGuizmo.cpp" />
     <ClCompile Include="vendor\stb_image\stb_image.cpp" />
+    <ClCompile Include="vendor\ufbx\ufbx.c">
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="vendor\GLFW\GLFW.vcxproj">

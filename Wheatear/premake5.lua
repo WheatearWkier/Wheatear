@@ -15,6 +15,10 @@ project "Wheatear"
         "vendor/glm/glm/**.inl",
         "vendor/ImGuizmo/ImGuizmo.h",
         "vendor/ImGuizmo/ImGuizmo.cpp",
+        "vendor/ImGuiColorTextEdit/TextEditor.h",
+        "vendor/ImGuiColorTextEdit/TextEditor.cpp",
+        "vendor/ufbx/ufbx.c",
+        "vendor/ufbx/ufbx.h",
     }
 
     includedirs {
@@ -29,9 +33,12 @@ project "Wheatear"
         "%{IncludeDir.tinyobjloader}",
         "%{IncludeDir.yaml_cpp}",
         "%{IncludeDir.ImGuizmo}",
+        "vendor/ImGuiColorTextEdit",
         "%{IncludeDir.VulkanSDK}",
         "%{IncludeDir.Box2D}",
         "%{IncludeDir.miniaudio}",
+        "%{IncludeDir.ufbx}",
+        "%{IncludeDir.cgltf}",
     }
 
     links {
@@ -43,6 +50,12 @@ project "Wheatear"
         "Box2D",
     }
 
+
+    filter "files:vendor/ufbx/ufbx.c"
+        flags { "NoPCH" }
+
+    filter "files:vendor/ImGuiColorTextEdit/TextEditor.cpp"
+        flags { "NoPCH" }
 
     filter "system:windows"
         defines {

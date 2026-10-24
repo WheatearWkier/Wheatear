@@ -21,5 +21,6 @@
 #include "Wheatear/Scene/Components/AnimationComponents.h"
 #include "Wheatear/Scene/Components/UIComponents.h"
 #include "Wheatear/Scene/Components/AudioComponents.h"
+#include "Wheatear/Scene/Components/TerrainComponents.h"
 
 #include "Entity.inl"

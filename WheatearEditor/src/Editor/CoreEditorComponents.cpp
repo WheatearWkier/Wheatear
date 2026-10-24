@@ -57,7 +57,8 @@ namespace Wheatear {
         void RegisterEditorComponent(const char* category,
             const char* label,
             void (*draw)(Entity),
-            bool ensureUIWidget = false)
+            bool ensureUIWidget = false,
+            EditorDomain domain = EditorDomain::Any)
         {
             EditorComponentRegistry::Register({
                 category,
@@ -89,7 +90,8 @@ namespace Wheatear {
                 [draw](Entity entity)
                 {
                     draw(entity);
-                }
+                },
+                domain
             });
         }
 
@@ -149,17 +151,20 @@ namespace Wheatear {
         RegisterReadOnlyEditorComponent<TransformComponent>("Core", "Transform", DrawTransformComponent);
 
         RegisterEditorComponent<CameraComponent>("Rendering", EditorLocale::Text("Camera", "相机"), DrawCameraComponent);
-        RegisterEditorComponent<SpriteRendererComponent>("Rendering", EditorLocale::Text("Sprite Renderer", "精灵渲染器"), DrawSpriteRendererComponent);
-        RegisterEditorComponent<SpriteAnimatorComponent>("Rendering", EditorLocale::Text("Sprite Animator", "精灵动画器"), DrawSpriteAnimatorComponent);
-        RegisterEditorComponent<CircleRendererComponent>("Rendering", EditorLocale::Text("Circle Renderer", "圆形渲染器"), DrawCircleRendererComponent);
-        RegisterEditorComponent<MeshRendererComponent>("Rendering", EditorLocale::Text("Mesh Renderer", "网格渲染器"), DrawMeshRendererComponent);
+        RegisterEditorComponent<SpriteRendererComponent>("Rendering", EditorLocale::Text("Sprite Renderer", "精灵渲染器"), DrawSpriteRendererComponent, false, EditorDomain::TwoD);
+        RegisterEditorComponent<SpriteAnimatorComponent>("Rendering", EditorLocale::Text("Sprite Animator", "精灵动画器"), DrawSpriteAnimatorComponent, false, EditorDomain::TwoD);
+        RegisterEditorComponent<Animator3DComponent>("Rendering", EditorLocale::Text("Animator 3D", "3D 动画器"), DrawAnimator3DComponent, false, EditorDomain::ThreeD);
+        RegisterEditorComponent<CircleRendererComponent>("Rendering", EditorLocale::Text("Circle Renderer", "圆形渲染器"), DrawCircleRendererComponent, false, EditorDomain::TwoD);
+        RegisterEditorComponent<MeshRendererComponent>("Rendering", EditorLocale::Text("Mesh Renderer", "网格渲染器"), DrawMeshRendererComponent, false, EditorDomain::ThreeD);
+        RegisterEditorComponent<TerrainComponent>("Environment", EditorLocale::Text("Terrain", "地形"), DrawTerrainComponent, false, EditorDomain::ThreeD);
+        RegisterEditorComponent<NavObstacleComponent>("Environment", EditorLocale::Text("Nav Obstacle", "导航障碍"), DrawNavObstacleComponent, false, EditorDomain::ThreeD);
 
-        RegisterEditorComponent<DirectionalLightComponent>("Lighting", EditorLocale::Text("Directional Light", "方向光"), DrawDirectionalLightComponent);
-        RegisterEditorComponent<PointLightComponent>("Lighting", EditorLocale::Text("Point Light", "点光源"), DrawPointLightComponent);
+        RegisterEditorComponent<DirectionalLightComponent>("Lighting", EditorLocale::Text("Directional Light", "方向光"), DrawDirectionalLightComponent, false, EditorDomain::ThreeD);
+        RegisterEditorComponent<PointLightComponent>("Lighting", EditorLocale::Text("Point Light", "点光源"), DrawPointLightComponent, false, EditorDomain::ThreeD);
 
-        RegisterEditorComponent<Rigidbody2DComponent>("Physics", EditorLocale::Text("Rigidbody 2D", "刚体 2D"), DrawRigidbody2DComponent);
-        RegisterEditorComponent<BoxCollider2DComponent>("Physics", EditorLocale::Text("Box Collider 2D", "盒形碰撞体 2D"), DrawBoxCollider2DComponent);
-        RegisterEditorComponent<CircleCollider2DComponent>("Physics", EditorLocale::Text("Circle Collider 2D", "圆形碰撞体 2D"), DrawCircleCollider2DComponent);
+        RegisterEditorComponent<Rigidbody2DComponent>("Physics", EditorLocale::Text("Rigidbody 2D", "刚体 2D"), DrawRigidbody2DComponent, false, EditorDomain::TwoD);
+        RegisterEditorComponent<BoxCollider2DComponent>("Physics", EditorLocale::Text("Box Collider 2D", "盒形碰撞体 2D"), DrawBoxCollider2DComponent, false, EditorDomain::TwoD);
+        RegisterEditorComponent<CircleCollider2DComponent>("Physics", EditorLocale::Text("Circle Collider 2D", "圆形碰撞体 2D"), DrawCircleCollider2DComponent, false, EditorDomain::TwoD);
 
         RegisterEditorComponent<EventScriptComponent>("Scripting & Audio", EditorLocale::Text("Event Script", "事件脚本"), DrawEventScriptComponent);
         RegisterEditorComponent<AudioSourceComponent>("Scripting & Audio", EditorLocale::Text("Audio Source", "音频源"), DrawAudioSourceComponent);

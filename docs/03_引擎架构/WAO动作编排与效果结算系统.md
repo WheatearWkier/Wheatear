@@ -149,7 +149,7 @@ RPG Maker 类工具强调数据库技能、状态和公式。WAO 也重视数据
 - 战棋格子目标。
 - 回合制行动。
 - 动画事件和特效时序。
-- 编辑器可视化动作流程。
+- 编辑器数据化动作配置与 Behavior Graph 可视化逻辑编排。
 
 所以 WAO 更像“动作编排管线”，不是单纯技能数据库。
 
@@ -638,71 +638,84 @@ WAO 统一：
 
 ### 6. 编辑器设计
 
-WAO 应当有独立编辑器面板（已实现为 `WAO Action Editor`，入口 `Window / WAO Action Editor`）：
-
-```text
-Window / WAO Action Editor
-```
-
-面板结构：
+WAO 的编辑器入口已经实现为 `WAO Action Editor`（`Window / WAO Action Editor`）。当前实际结构是：
 
 ```text
 左侧：Action 列表
-中间：动作流程图
-右侧：属性详情
-底部：调试与预览
+右侧：Recipe / Effects / Validation / Preview / Ledger 标签页
 ```
 
-#### 6.1 动作流程图
+WAO Action Editor 是**数据/表格编辑器**，不是动作流程图。动作的可视化逻辑编排走独立的 `Behavior Graph`，两者通过 `behaviorId / behaviorEntry` 关联。
 
-流程图节点：
-- Intent
-- Condition
-- Cost
-- Cooldown
-- Targeting
-- Timeline
-- Effect
-- Signal
+#### 6.1 动作配置（不是流程图）
 
-示例：
+Recipe 页负责：
+- 元数据：显示名、描述、图标、动画、音效、VFX。
+- 时序：冷却、前摇、命中帧、后摇、取消窗口、移动倍率。
+- 条件：tags、requiredStates、blockedStates、requiredTags、blockedTags。
+- 成本：resourceCost。
+- 参数：params。
+- 行为绑定：behaviorId / behaviorFile / behaviorEntry / behaviorVersion。
 
-```text
-Input U
-  ↓
-CanActivate
-  ↓
-Consume Resource
-  ↓
-Play Animation
-  ↓
-Hit Frame
-  ↓
-Damage + Launch
-  ↓
-VFX + SFX + HitPause
-```
+文档早期设想的 `Intent → Condition → Cost → Cooldown → Targeting → Timeline → Effect → Signal` 动作流图**没有实现**。当前有意不造第二套图编辑器：行为逻辑用 Behavior Graph，动作数值和效果用 Action Editor。
 
-#### 6.2 效果编辑器
+#### 6.2 效果编辑
 
-效果编辑应当尽量少让用户写文本。
-
-控件：
+Effects 页支持行级编辑，核心字段：
 - 效果类型下拉框。
-- 属性名下拉框。
-- 数值输入。
-- 持续方式选择：即时、持续秒数、持续回合。
-- 叠加规则选择。
-- 是否有害。
-- tooltip 预览。
+- `Applies To`：Actor / Target / Source，决定效果作用到哪个 `ActionRuntime`。
+- 属性/资源、状态、信号 id。
+- 数值、Turns、Seconds、DurationPolicy。
+- Custom Effect（EffectRegistry）和 Formula（数值表达式）。
+- 公式在运行时通过 `EvaluateEffectFormula` 求值，结果覆盖 Value。
+- 保存前强制执行 Validation；有 Error 时拒绝写入 YAML。
 
-#### 6.3 调试面板
+当前语义：
+- Damage/Heal 使用 `AttributeId`（空则 Health），并支持 `hp` / `Health` 别名。
+- Damage 取正值表示伤害量，Heal 取正值表示治疗量；治疗会按 MaxHealth 钳制。
+- StartCooldown 使用 `Seconds`。
+- AddState 支持 Turns / Seconds / Infinite。
+- ConsumeResource 钳制到 0。
+- Launch/HitStun 以状态标记（`launch` / `stun`）表达最小语义，具体位移/硬直仍由玩法模块决定。
+- Formula 和 CustomType 走统一的 ActionRunner 路径，不再只在 SideCombat 物品逻辑里生效。
+
+#### 6.3 Behavior Graph
+
+`Behavior Graph` 是当前真正的节点图编辑器，已实现：
+- 画布、节点、控制流连线、平移/缩放、节点拖拽、撤销/重做。
+- 保存前编译校验。
+- 运行时实例列表、当前节点、取消实例。
+- 类型化数据引脚：从 `BehaviorPrimitiveDefinition::Inputs/Outputs` 生成 bool/number/string/UUID 引脚和类型颜色；输入支持 Literal / Local 两种模式。
+- 数据连线：点击输出数据引脚，再点击目标输入引脚，自动生成 `$local` 引用，并在图中画出数据边。
+- 可搜索节点面板（工具栏 Add Node）和画布右键菜单；Flow 节点和已注册 primitive 都可创建。
+- 连线删除：控制流输出和输入 Local 都有 Clear；重新连接通过“点输出 → 点输入”覆盖。
+- Copy / Paste / Duplicate（多选批量）、Fit、Auto Layout、节点搜索高亮。
+- 多选：Ctrl/Shift 点选、空白处框选、Ctrl+A 全选；拖动任一选中节点会整体移动。
+- 批量删除：删除多个节点时，控制流会重定向到相邻存活节点。
+- 批量复制粘贴：内部控制流和 `$local` 数据引用会重映射，外部引用会被清理。
+- 图诊断：重复节点 id、入口缺失、缺失控制流目标、未知 primitive、必填输入缺失、`$local` 无生产者；错误节点红框，Save 会被诊断阻断。
+- 调试器显示 Locals、Applied Effects、Effect Ledger，并支持 Pause / Resume / Step / Breakpoint；Step 现在只执行一条指令。
+- 失败的 behavior 实例会立即写入 Effect Ledger，不再在同一帧被清理后从调试器中消失。
+- Behavior Sandbox 在内存中编译并运行选中 entry，使用 `BehaviorVM::StartWithProgram`，不会把文件注册进全局 `BehaviorDatabase`。
+- 静态分析会报告不可达节点、无挂起点的环、branch producer 顺序、重复 local 写入和缺失分支目标；带 wait/event 的环是警告，无挂起点的环是错误。
+- 空目录或空 manifest 的热重载不会清空行为/动作数据库，而是保留上一份有效数据。
+- 多实例按 handle 顺序更新和展示，调试快照不再随 `unordered_map` 顺序抖动。
+- 秒级状态到期后会从运行时状态列表中移除；回合状态仍由玩法模块的 `TickTurnStates` 推进。
+
+尚未完成：
+- 右键 pin 直接断开、拖拽连线重连手势。
+- 注释组、节点对齐/吸附。
+- 保留 YAML 注释的保存。
+
+这些是后续 Behavior Graph 的增量工作。
+
+#### 6.4 调试面板
 
 运行时调试显示：
 - 当前 Actor 的属性。
 - 当前状态列表。
 - 当前冷却。
-- 最近 20 条 EffectLedger。
+- 最近 EffectLedger。
 - 最近触发的 Signal。
 - 当前执行中的 Action。
 
@@ -872,8 +885,8 @@ Wheatear/src/Wheatear/Modules/ArcadeCombat/ArcadeCombatActionResolver.*
 
 内容：
 - WAO Action Editor。
-- Effect 编辑器。
-- Action 流程图。
+- Effect 行级编辑器。
+- Behavior Graph 可视化逻辑（动作流图不做，避免两套图编辑器）。
 - 运行时 Ledger 调试器。
 - Project Health 检查动作资源引用。
 
@@ -1182,7 +1195,7 @@ WAO::ActionAssetLoader::LoadDirectory("assets/gameplay/actions");
 - 可编辑 `tags`、`signals` 和 `resourceCost`，其中资源消耗格式为 `mana=12, sword=1`。
 - 保存时写回 `assets/gameplay/actions/*.yaml`，并把当前 recipe 重新注册到 `ActionDatabase`。
 
-这一步的定位是“策划/程序都能快速修一条 action 的常用参数”。它不是最终形态的完整技能编辑器：`Effects` 表暂时仍以查看为主，因为伤害、浮空、状态、信号等效果的行级编辑需要更严格的类型化 UI，后续应单独做成 Effect Editor。
+这一步的定位是“策划/程序都能快速修一条 action 的常用参数”。Effects 现在已经支持行级编辑（类型、Applies To、属性/状态/信号、数值、持续时间、Custom Effect、Formula），并支持上移、下移、复制；保存前会跑 Validation，有 Error 时拒绝写回。每个效果带编辑器内部 ID，未知字段会跟随效果一起移动/复制，而不是按数组下标错配。编辑器支持撤销/重做和未保存关闭提示，切换配方时不会静默丢弃编辑缓冲。动作的可视化逻辑仍然走 Behavior Graph，而不是在 Action Editor 里再画一张动作流程图。
 
 ### 2026-08-02 用户设置与输入绑定
 

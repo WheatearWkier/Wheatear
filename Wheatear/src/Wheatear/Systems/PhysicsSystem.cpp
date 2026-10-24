@@ -12,6 +12,7 @@
 #include <box2d/b2_polygon_shape.h>
 #include <box2d/b2_circle_shape.h>
 
+#include <algorithm>
 #include <cmath>
 
 namespace Wheatear {
@@ -52,6 +53,17 @@ namespace Wheatear {
 
     void PhysicsSystem::OnRuntimeStop(Scene* scene)
     {
+        if (scene)
+        {
+            auto& registry = scene->GetRegistry();
+            for (auto e : registry.view<Rigidbody2DComponent>())
+                registry.get<Rigidbody2DComponent>(e).RuntimeBody = nullptr;
+            for (auto e : registry.view<BoxCollider2DComponent>())
+                registry.get<BoxCollider2DComponent>(e).RuntimeFixture = nullptr;
+            for (auto e : registry.view<CircleCollider2DComponent>())
+                registry.get<CircleCollider2DComponent>(e).RuntimeFixture = nullptr;
+        }
+
         // unique_ptr members release the world and listener automatically.
         m_PhysicsWorld.reset();
         m_ContactListener.reset();
@@ -59,11 +71,18 @@ namespace Wheatear {
 
     void PhysicsSystem::OnUpdateRuntime(Scene* scene, Timestep ts)
     {
+        if (!m_PhysicsWorld)
+            return;
+
         constexpr int32_t velocityIterations = 6;
         constexpr int32_t positionIterations = 2;
 
         SyncAnimationDrivenColliders(scene);
-        m_PhysicsWorld->Step(ts, velocityIterations, positionIterations);
+        const float deltaSeconds = std::clamp(
+            static_cast<float>(ts),
+            0.0f,
+            0.05f);
+        m_PhysicsWorld->Step(deltaSeconds, velocityIterations, positionIterations);
 
         auto& registry = scene->GetRegistry();
         auto view = registry.view<TransformComponent, Rigidbody2DComponent>();

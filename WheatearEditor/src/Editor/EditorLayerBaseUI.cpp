@@ -2,6 +2,7 @@
 #include "EditorLayerBase.h"
 
 #include "Wheatear/Core/Application.h"
+#include "Wheatear/Core/Window.h"
 #include "Wheatear/Assets/AssetPath.h"
 #include "Wheatear/Core/EngineInfo.h"
 #include "Wheatear/Input/Input.h"
@@ -14,6 +15,7 @@
 #include "Wheatear/Renderer/Framebuffer.h"
 #include "Wheatear/Renderer/RenderCommand.h"
 #include "Wheatear/Renderer/Renderer2D.h"
+#include "Wheatear/Renderer/Renderer3D.h"
 #include "Wheatear/Renderer/Texture.h"
 #include "Wheatear/Scene/Components.h"
 #include "Wheatear/Scene/Scene.h"
@@ -51,6 +53,7 @@
 #include <algorithm>
 #include <chrono>
 #include <cmath>
+#include <cstdio>
 #include <cstring>
 #include <functional>
 #include <limits>
@@ -221,6 +224,35 @@ namespace Wheatear {
     {
         WT_PROFILE_FUNCTION();
 
+        // Handle Ctrl+wheel before panels consume the wheel for scrolling or
+        // their own zoom, so changing UI scale doesn't also scroll the tree.
+        ImGuiIO& scaleIo = ImGui::GetIO();
+        if (scaleIo.KeyCtrl && scaleIo.MouseWheel != 0.0f && !scaleIo.WantTextInput
+            && !ImGui::IsAnyItemActive())
+        {
+            ImGuiWindow* hovered = GImGui ? GImGui->HoveredWindow : nullptr;
+            while (hovered && hovered->ParentWindow)
+                hovered = hovered->ParentWindow;
+            const std::string hoveredName = hovered ? hovered->Name : "";
+            const bool panelOwnsCtrlWheel =
+                hoveredName == "Viewport"
+                || hoveredName == "UI Canvas Editor"
+                || hoveredName == "Content Browser"
+                || hoveredName == "Animation Editor"
+                || hoveredName == "Sprite Sheet Picker"
+                || hoveredName == "WAO Behavior Graph"
+                || hoveredName == "Event Script Editor";
+            if (!panelOwnsCtrlWheel && !hoveredName.empty()
+                && !m_ViewportImageHovered && !m_ViewportHovered)
+            {
+                if (ImGuiLayer* gui = Application::Get().GetImGuiLayer())
+                {
+                    gui->AdjustUiScale(scaleIo.MouseWheel > 0.0f ? 0.05f : -0.05f);
+                    scaleIo.MouseWheel = 0.0f;
+                }
+            }
+        }
+
         static bool dockspaceOpen   = true;
         static bool opt_fullscreen  = true;
         // Central node is pass-through: dragging a panel into the viewport
@@ -228,11 +260,20 @@ namespace Wheatear {
         static ImGuiDockNodeFlags dockspace_flags = ImGuiDockNodeFlags_PassthruCentralNode;
 
         ImGuiWindowFlags window_flags = ImGuiWindowFlags_MenuBar | ImGuiWindowFlags_NoDocking;
+        UI_TitleBar();
+        const float chromeScale = Application::Get().GetImGuiLayer()
+            ? Application::Get().GetImGuiLayer()->GetUiScale()
+            : 1.0f;
+        const float titleBarHeight = kTitleBarHeight * chromeScale;
+        const float statusBarHeight = kStatusBarHeight * chromeScale;
+
         if (opt_fullscreen)
         {
             ImGuiViewport* viewport = ImGui::GetMainViewport();
-            ImGui::SetNextWindowPos(viewport->WorkPos);
-            ImGui::SetNextWindowSize(viewport->WorkSize);
+            ImGui::SetNextWindowPos(ImVec2(viewport->WorkPos.x,
+                viewport->WorkPos.y + titleBarHeight));
+            ImGui::SetNextWindowSize(ImVec2(viewport->WorkSize.x,
+                viewport->WorkSize.y - titleBarHeight - statusBarHeight));
             ImGui::SetNextWindowViewport(viewport->ID);
             ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 0.0f);
             ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0.0f);
@@ -251,24 +292,39 @@ namespace Wheatear {
 
         ImGuiIO&    io    = ImGui::GetIO();
         ImGuiStyle& style = ImGui::GetStyle();
+        const ImGuiID dockspaceId = ImGui::GetID("MyDockSpace");
+
+        // Menu bar and the fixed action bar must be submitted before the
+        // DockSpace so the dockspace content region starts below them. This
+        // is what keeps scene/editor tabs free of overlapping toolbar buttons.
+        UI_MenuBar();
+        if (m_ToolbarVisible)
+            UI_Toolbar();
+
         const float prevMinX = style.WindowMinSize.x;
         style.WindowMinSize.x = 320.0f;
         if (io.ConfigFlags & ImGuiConfigFlags_DockingEnable)
         {
-            ImGuiID id = ImGui::GetID("MyDockSpace");
-            BuildDefaultDockspaceLayout(id);
-            ImGui::DockSpace(id, ImVec2(0.0f, 0.0f), dockspace_flags);
+            BuildDefaultDockspaceLayout(dockspaceId);
+            ImGui::DockSpace(dockspaceId, ImVec2(0.0f, 0.0f), dockspace_flags);
+            if (ImGuiWindow* viewportWindow = ImGui::FindWindowByName("Viewport"))
+            {
+                if (viewportWindow->DockId != 0)
+                    EditorFloatingWindow::SetDefaultDockNode(viewportWindow->DockId);
+            }
         }
         style.WindowMinSize.x = prevMinX;
 
-        UI_MenuBar();
-
         m_SceneHierarchyPanel->OnImGuiRender();
         m_ContentBrowserPanel->OnImGuiRender();
-        m_AnimationEditorPanel->SetEntity(m_SceneHierarchyPanel->GetSelectedEntity());
-        m_AnimationEditorPanel->OnImGuiRender(m_LastTimestep);
-        m_SpriteSheetPickerPanel->SetEntity(m_SceneHierarchyPanel->GetSelectedEntity());
-        m_SpriteSheetPickerPanel->OnImGuiRender();
+        if (!Is3DWorkspace())
+        {
+            m_AnimationEditorPanel->SetEntity(m_SceneHierarchyPanel->GetSelectedEntity());
+            if (m_AnimationEditorOpen)
+                m_AnimationEditorPanel->OnImGuiRender(m_LastTimestep);
+            m_SpriteSheetPickerPanel->SetEntity(m_SceneHierarchyPanel->GetSelectedEntity());
+            m_SpriteSheetPickerPanel->OnImGuiRender();
+        }
         m_DataFileEditorPanel->OnImGuiRender();
         EditorToolRegistry::ForEach([](const EditorToolDescriptor& tool)
         {
@@ -284,7 +340,6 @@ namespace Wheatear {
 
         UI_Viewport();
         UI_CanvasEditor();
-        UI_Toolbar();
         ProcessDeferredViewportAssetDrop();
 
         DrawUnsavedChangesModal();
@@ -294,6 +349,8 @@ namespace Wheatear {
         m_ConsolePanel->OnImGuiRender();
 
         ImGui::End();
+
+        UI_StatusBar();
     }
 
     void EditorLayerBase::FocusEditorCameraOnPrimarySceneCamera()
@@ -544,7 +601,7 @@ namespace Wheatear {
             return;
 
         const std::filesystem::path clipboardPath =
-            AssetPath::GetProjectRoot() / "assets" / "cache" / "clipboard.wtprefab";
+            AssetPath::GetProjectRoot() / "Intermediate" / "Clipboard.wtprefab";
         std::error_code error;
         std::filesystem::create_directories(clipboardPath.parent_path(), error);
         if (SceneSerializer::SerializePrefab(selected, clipboardPath))
@@ -557,7 +614,7 @@ namespace Wheatear {
             return;
 
         const std::filesystem::path clipboardPath =
-            AssetPath::GetProjectRoot() / "assets" / "cache" / "clipboard.wtprefab";
+            AssetPath::GetProjectRoot() / "Intermediate" / "Clipboard.wtprefab";
         if (!std::filesystem::exists(clipboardPath))
         {
             m_HasClipboardEntity = false;
@@ -680,6 +737,7 @@ namespace Wheatear {
         glm::vec3 minBounds( std::numeric_limits<float>::max());
         glm::vec3 maxBounds(-std::numeric_limits<float>::max());
         bool foundRenderable = false;
+        const bool twoD = !Is3DWorkspace();
 
         for (auto entityID : registry.view<TransformComponent>())
         {
@@ -694,9 +752,33 @@ namespace Wheatear {
                 continue;
 
             const auto& transform = entity.GetComponent<TransformComponent>();
-            const float radius = EntityFrameRadius(entity);
-            minBounds = glm::min(minBounds, transform.Translation - glm::vec3(radius));
-            maxBounds = glm::max(maxBounds, transform.Translation + glm::vec3(radius));
+            if (twoD)
+            {
+                glm::vec2 halfExtent(0.5f);
+                if (entity.HasComponent<SpriteRendererComponent>())
+                {
+                    const auto& sprite = entity.GetComponent<SpriteRendererComponent>();
+                    halfExtent = glm::abs(glm::vec2(transform.Scale)
+                        * sprite.DrawScale) * 0.5f;
+                }
+                else if (entity.HasComponent<CircleRendererComponent>())
+                {
+                    halfExtent = glm::abs(glm::vec2(transform.Scale)) * 0.5f;
+                }
+                halfExtent = glm::max(halfExtent, glm::vec2(0.25f));
+                minBounds = glm::min(minBounds,
+                    transform.Translation - glm::vec3(halfExtent, 0.0f));
+                maxBounds = glm::max(maxBounds,
+                    transform.Translation + glm::vec3(halfExtent, 0.0f));
+            }
+            else
+            {
+                const float radius = EntityFrameRadius(entity);
+                minBounds = glm::min(minBounds,
+                    transform.Translation - glm::vec3(radius));
+                maxBounds = glm::max(maxBounds,
+                    transform.Translation + glm::vec3(radius));
+            }
             foundRenderable = true;
         }
 
@@ -708,11 +790,167 @@ namespace Wheatear {
         }
 
         const glm::vec3 center = (minBounds + maxBounds) * 0.5f;
-        const glm::vec3 extent = maxBounds - minBounds;
-        const float radius = std::max(glm::length(extent) * 0.5f, 1.0f);
+        if (twoD)
+        {
+            // Fit the 2D bounds to the viewport instead of using the 3D
+            // spherical radius (which made wide sprites appear tiny).
+            const float halfWidth = std::max((maxBounds.x - minBounds.x) * 0.5f, 0.5f);
+            const float halfHeight = std::max((maxBounds.y - minBounds.y) * 0.5f, 0.5f);
+            const float aspect = (m_ViewportSize.x > 1.0f && m_ViewportSize.y > 1.0f)
+                ? m_ViewportSize.x / m_ViewportSize.y
+                : 16.0f / 9.0f;
+            const float tanHalfFov = std::tan(glm::radians(15.0f));
+            const float distance = std::max(
+                halfHeight / tanHalfFov,
+                halfWidth / (tanHalfFov * std::max(aspect, 0.25f))) * 1.12f;
+            m_EditorCamera.Frame(center, std::max(distance, 2.0f));
+        }
+        else
+        {
+            const glm::vec3 extent = maxBounds - minBounds;
+            const float radius = std::max(glm::length(extent) * 0.5f, 1.0f);
             m_EditorCamera.Frame(center, std::max(radius * 3.0f, 10.0f));
+        }
         m_SceneHierarchyPanel->SetSelectedEntity({});
         m_AnimationEditorPanel->SetEntity({});
+    }
+
+    void EditorLayerBase::UI_TitleBar()
+    {
+        const float s = Application::Get().GetImGuiLayer()
+            ? Application::Get().GetImGuiLayer()->GetUiScale()
+            : 1.0f;
+        const float textScale = ImGui::GetIO().FontGlobalScale;
+        const float titleHeight = kTitleBarHeight * s;
+        ImGuiViewport* viewport = ImGui::GetMainViewport();
+        ImGui::SetNextWindowPos(viewport->Pos);
+        ImGui::SetNextWindowSize(ImVec2(viewport->Size.x, titleHeight));
+        ImGui::SetNextWindowViewport(viewport->ID);
+        ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0.0f, 0.0f));
+        ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0.0f);
+        ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(0.0f, 0.0f));
+        ImGui::PushStyleColor(ImGuiCol_WindowBg, ImVec4(0.040f, 0.047f, 0.060f, 1.0f));
+
+        ImGui::Begin("##EditorTitleBar", nullptr,
+            ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_NoDocking |
+            ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoMove |
+            ImGuiWindowFlags_NoBringToFrontOnFocus | ImGuiWindowFlags_NoNavFocus);
+
+        const ImVec2 min = ImGui::GetWindowPos();
+        const ImVec2 max(min.x + ImGui::GetWindowWidth(),
+            min.y + ImGui::GetWindowHeight());
+        const float centerY = min.y + titleHeight * 0.5f;
+        Window& nativeWindow = Application::Get().GetWindow();
+        ImGuiLayer* gui = Application::Get().GetImGuiLayer();
+        const bool darkTheme = !gui || gui->IsDarkTheme();
+        const ImU32 titleBg = darkTheme ? IM_COL32(10, 12, 17, 255)
+                                        : IM_COL32(238, 234, 226, 255);
+        const ImU32 titleBorder = darkTheme ? IM_COL32(43, 48, 60, 255)
+                                            : IM_COL32(202, 196, 184, 255);
+        const ImU32 titleInk = darkTheme ? IM_COL32(205, 210, 220, 255)
+                                         : IM_COL32(45, 48, 56, 255);
+        const ImU32 titleMuted = darkTheme ? IM_COL32(175, 181, 194, 255)
+                                           : IM_COL32(92, 96, 106, 255);
+        const ImU32 controlHover = darkTheme ? IM_COL32(40, 44, 56, 255)
+                                             : IM_COL32(218, 212, 200, 255);
+
+        ImGui::SetCursorScreenPos(min);
+        ImGui::InvisibleButton("##TitleDrag",
+            ImVec2(ImGui::GetWindowWidth() - 144.0f * s, titleHeight));
+        const bool titleHovered = ImGui::IsItemHovered();
+        if (titleHovered && ImGui::IsMouseDoubleClicked(ImGuiMouseButton_Left))
+            nativeWindow.ToggleMaximizeWindow();
+        else if (ImGui::IsItemActivated())
+            nativeWindow.BeginWindowDrag();
+
+        ImDrawList* drawList = ImGui::GetWindowDrawList();
+        drawList->AddRectFilled(min, max, titleBg);
+        drawList->AddLine(ImVec2(min.x, max.y - 1.0f),
+            ImVec2(max.x, max.y - 1.0f), titleBorder, 1.0f);
+
+        EditorWidgets::BrandMark(
+            ImVec2(min.x + 22.0f * s, centerY), 23.0f * s, false);
+        drawList->AddText(ImGui::GetFont(), 17.0f * textScale,
+            ImVec2(min.x + 40.0f * s, centerY - 10.0f * s), titleInk, "Wheatear");
+        const float brandWidth = ImGui::CalcTextSize("Wheatear").x
+            * (17.0f / 16.0f);
+        const float studioWidth = ImGui::CalcTextSize("STUDIO").x
+            * (13.0f / 16.0f);
+        drawList->AddText(ImGui::GetFont(), 13.0f * textScale,
+            ImVec2(min.x + 40.0f * s + brandWidth + 7.0f * s,
+                centerY - 8.0f * s),
+            IM_COL32(217, 170, 95, 220), "STUDIO");
+
+        const float badgeX = std::max(min.x + 158.0f * s,
+            min.x + 40.0f * s + brandWidth + studioWidth + 20.0f * s);
+        ImGui::SetCursorScreenPos(ImVec2(badgeX, min.y + 8.0f * s));
+        EditorWidgets::WorkspaceBadge(GetWorkspaceLabel(), Is3DWorkspace());
+
+        std::string sceneTitle = m_EditorScenePath.empty()
+            ? EditorLocale::Text("Untitled Scene", "未命名场景")
+            : m_EditorScenePath.filename().string();
+        if (m_SceneDirty)
+            sceneTitle += " *";
+        const ImVec2 titleSize = ImGui::CalcTextSize(sceneTitle.c_str());
+        drawList->AddText(
+            ImVec2((min.x + max.x - titleSize.x) * 0.5f, centerY - titleSize.y * 0.5f),
+            titleInk, sceneTitle.c_str());
+
+        auto windowButton = [&](const char* id, float x, bool closeButton,
+            bool maximizeButton)
+        {
+            ImGui::SetCursorScreenPos(ImVec2(x, min.y));
+            const bool clicked = ImGui::InvisibleButton(id,
+                ImVec2(46.0f * s, titleHeight));
+            const bool hovered = ImGui::IsItemHovered();
+            const ImVec2 bmin(x, min.y);
+            const ImVec2 bmax(x + 46.0f * s, max.y - 1.0f);
+            if (hovered)
+            {
+                drawList->AddRectFilled(bmin, bmax,
+                    closeButton ? IM_COL32(165, 45, 45, 255) : controlHover);
+            }
+
+            const ImVec2 c(x + 23.0f * s, centerY);
+            const ImU32 ink = hovered ? IM_COL32(245, 245, 248, 255)
+                                      : titleMuted;
+            const float glyph = 5.0f * s;
+            if (closeButton)
+            {
+                drawList->AddLine(ImVec2(c.x - glyph, c.y - glyph),
+                    ImVec2(c.x + glyph, c.y + glyph), ink, 1.4f);
+                drawList->AddLine(ImVec2(c.x + glyph, c.y - glyph),
+                    ImVec2(c.x - glyph, c.y + glyph), ink, 1.4f);
+            }
+            else if (maximizeButton)
+            {
+                drawList->AddRect(ImVec2(c.x - glyph, c.y - glyph),
+                    ImVec2(c.x + glyph, c.y + glyph), ink, 1.0f, 0, 1.2f);
+            }
+            else
+            {
+                drawList->AddLine(ImVec2(c.x - 6.0f * s, c.y),
+                    ImVec2(c.x + 6.0f * s, c.y), ink, 1.4f);
+            }
+
+            if (clicked)
+            {
+                if (closeButton)
+                    nativeWindow.CloseWindow();
+                else if (maximizeButton)
+                    nativeWindow.ToggleMaximizeWindow();
+                else
+                    nativeWindow.MinimizeWindow();
+            }
+        };
+
+        windowButton("##WindowMinimize", max.x - 138.0f * s, false, false);
+        windowButton("##WindowMaximize", max.x - 92.0f * s, false, true);
+        windowButton("##WindowClose", max.x - 46.0f * s, true, false);
+
+        ImGui::End();
+        ImGui::PopStyleColor();
+        ImGui::PopStyleVar(3);
     }
 
     void EditorLayerBase::UI_MenuBar()
@@ -727,7 +965,7 @@ namespace Wheatear {
             const float iconSize = 16.0f;
             if (icon)
                 ImGui::Image(static_cast<ImTextureID>(static_cast<uintptr_t>(icon->GetRendererID())),
-                    ImVec2(iconSize, iconSize));
+                    ImVec2(iconSize, iconSize), ImVec2(0.0f, 1.0f), ImVec2(1.0f, 0.0f));
             else
                 ImGui::Dummy(ImVec2(iconSize, iconSize));
             ImGui::SameLine();
@@ -790,7 +1028,7 @@ namespace Wheatear {
             }
         };
 
-        if (ImGui::BeginMenu(EditorLocale::Text("Scene", "场景")))
+        if (ImGui::BeginMenu(EditorLocale::Text("File", "文件")))
         {
             drawMenuIcon(m_IconNewScene);
             if (ImGui::MenuItem(EditorLocale::Text("New", "新建"), "Ctrl+N"))        NewScene();
@@ -800,6 +1038,10 @@ namespace Wheatear {
             if (ImGui::MenuItem(EditorLocale::Text("Save", "保存"), "Ctrl+S"))        SaveScene();
             drawMenuIcon(m_IconSaveScene);
             if (ImGui::MenuItem(EditorLocale::Text("Save As...", "另存为..."), "Ctrl+Shift+S"))  SaveSceneAs();
+            ImGui::Separator();
+            drawMenuIcon(m_IconLogout);
+            if (ImGui::MenuItem(EditorLocale::Text("Exit", "退出")))
+                RequestSceneChange(PendingSceneAction::Exit);
             ImGui::EndMenu();
         }
 
@@ -878,9 +1120,12 @@ namespace Wheatear {
                 if (!m_UIEditingCanvas)
                     m_UIEditingCanvas = m_SceneHierarchyPanel->GetSelectedEntity();
             }
-            drawMenuIcon(m_IconSpriteSheet);
-            if (ImGui::MenuItem(EditorLocale::Text("Sprite Sheet Picker", "序列帧选择器")))
-                m_SpriteSheetPickerPanel->OpenForEntity(m_SceneHierarchyPanel->GetSelectedEntity());
+            if (!Is3DWorkspace())
+            {
+                drawMenuIcon(m_IconSpriteSheet);
+                if (ImGui::MenuItem(EditorLocale::Text("Sprite Sheet Picker", "序列帧选择器")))
+                    m_SpriteSheetPickerPanel->OpenForEntity(m_SceneHierarchyPanel->GetSelectedEntity());
+            }
             drawMenuIcon(nullptr);
             if (ImGui::MenuItem(EditorLocale::Text("Generate UI Templates", "生成内置 UI 模板")))
             {
@@ -899,14 +1144,20 @@ namespace Wheatear {
                 m_UIEditorOpen = true;
                 m_FocusCanvasEditor = true;
             });
-            drawLocalizedFloatingWindowItem("Animation Editor", [&]()
+            if (!Is3DWorkspace())
             {
-                EditorFloatingWindow::OpenFloating("Animation Editor");
-            });
-            drawLocalizedFloatingWindowItem("Sprite Sheet Picker", [&]()
-            {
-                m_SpriteSheetPickerPanel->OpenForEntity(m_SceneHierarchyPanel->GetSelectedEntity());
-            });
+                drawMenuIcon(m_IconPanel);
+                if (ImGui::MenuItem(EditorLocale::Text("Animation Editor", "动画编辑器"),
+                        nullptr, &m_AnimationEditorOpen))
+                {
+                    if (m_AnimationEditorOpen)
+                        EditorFloatingWindow::Dock("Animation Editor");
+                }
+                drawLocalizedFloatingWindowItem("Sprite Sheet Picker", [&]()
+                {
+                    m_SpriteSheetPickerPanel->OpenForEntity(m_SceneHierarchyPanel->GetSelectedEntity());
+                });
+            }
             drawLocalizedFloatingWindowItem("Event Script Editor", [&]() { openToolByLabel("Event Script Editor"); });
             drawLocalizedFloatingWindowItem("VN Script Editor", [&]() { openToolByLabel("VN Script Editor"); });
             drawLocalizedFloatingWindowItem("Side Combat Tuning Editor", [&]() { openToolByLabel("Side Combat Tuning Editor"); });
@@ -920,6 +1171,8 @@ namespace Wheatear {
                 m_RequestDefaultDockspaceLayout = true;
                 m_DefaultDockspaceLayoutBuilt = false;
             }
+            drawMenuIcon(nullptr);
+            ImGui::MenuItem(EditorLocale::Text("Action Toolbar", "操作工具栏"), nullptr, &m_ToolbarVisible);
             drawToolsByCategory(EditorToolCategory::Window);
             ImGui::EndMenu();
         }
@@ -961,7 +1214,7 @@ namespace Wheatear {
         if (ImGui::BeginMenu(EditorLocale::Text("Build", "构建")))
         {
             drawMenuIcon(m_IconPackage);
-            if (ImGui::MenuItem(EditorLocale::Text("Package Player + Editor", "打包玩家 + 编辑器"), nullptr, false, !m_PlayerBuildRunning))
+            if (ImGui::MenuItem(EditorLocale::Text("Package Game + Editor", "打包游戏 + 编辑器"), nullptr, false, !m_PlayerBuildRunning))
                 StartPlayerPackageBuild();
             drawMenuIcon(nullptr);
             if (ImGui::MenuItem(EditorLocale::Text("Open Player Folder", "打开玩家目录"), nullptr, false, !m_LastPlayerBuildDirectory.empty()))
@@ -982,7 +1235,7 @@ namespace Wheatear {
             ImGui::EndMenu();
         }
 
-        if (ImGui::BeginMenu(EditorLocale::Text("App", "应用")))
+        if (ImGui::BeginMenu(EditorLocale::Text("Settings", "设置")))
         {
             drawMenuIcon(m_IconLanguage);
             if (ImGui::BeginMenu(EditorLocale::Text("Language", "语言")))
@@ -990,10 +1243,57 @@ namespace Wheatear {
                 EditorLocale::DrawLanguageMenu();
                 ImGui::EndMenu();
             }
-            ImGui::Separator();
-            drawMenuIcon(m_IconLogout);
-            if (ImGui::MenuItem(EditorLocale::Text("Exit", "退出")))
-                RequestSceneChange(PendingSceneAction::Exit);
+            if (ImGui::BeginMenu(EditorLocale::Text("Theme", "主题")))
+            {
+                ImGuiLayer* gui = Application::Get().GetImGuiLayer();
+                if (gui)
+                {
+                    if (ImGui::MenuItem(EditorLocale::Text("Midnight", "午夜"), nullptr,
+                            gui->IsDarkTheme()))
+                    {
+                        gui->SetDarkThemeColors();
+                    }
+                    if (ImGui::MenuItem(EditorLocale::Text("Paper", "纸张"), nullptr,
+                            !gui->IsDarkTheme()))
+                    {
+                        gui->SetLightThemeColors();
+                    }
+                }
+                ImGui::EndMenu();
+            }
+            drawMenuIcon(m_IconSettings);
+            if (ImGui::BeginMenu(EditorLocale::Text("UI Scale", "界面缩放")))
+            {
+                ImGuiLayer* gui = Application::Get().GetImGuiLayer();
+                if (gui)
+                {
+                    const float scales[] = {
+                        0.85f, 0.90f, 1.00f, 1.10f, 1.25f, 1.30f,
+                        1.50f, 1.75f, 2.00f
+                    };
+                    for (float scale : scales)
+                    {
+                        char label[32];
+                        std::snprintf(label, sizeof(label), "%d%%",
+                            static_cast<int>(scale * 100.0f + 0.5f));
+                        if (ImGui::MenuItem(label, nullptr,
+                                std::abs(gui->GetUiScale() - scale) < 0.01f))
+                        {
+                            gui->SetUiScale(scale);
+                        }
+                    }
+                    ImGui::Separator();
+                    if (ImGui::MenuItem(EditorLocale::Text(
+                            "Reset to 100%", "恢复 100%")))
+                    {
+                        gui->SetUiScale(1.0f);
+                    }
+                    ImGui::TextDisabled("%s", EditorLocale::Text(
+                        "Ctrl + mouse wheel over a panel",
+                        "在面板上按住 Ctrl 滚轮缩放"));
+                }
+                ImGui::EndMenu();
+            }
             ImGui::EndMenu();
         }
 
@@ -1028,6 +1328,141 @@ namespace Wheatear {
         ImGui::Text(EditorLocale::Text("  Indices:    %d", "  索引:     %d"), stats.GetTotalIndexCount());
 
         ImGui::End();
+    }
+
+    void EditorLayerBase::UI_StatusBar()
+    {
+        const float s = Application::Get().GetImGuiLayer()
+            ? Application::Get().GetImGuiLayer()->GetUiScale()
+            : 1.0f;
+        const float statusHeight = kStatusBarHeight * s;
+        const ImGuiViewport* viewport = ImGui::GetMainViewport();
+        ImGui::SetNextWindowPos(ImVec2(viewport->WorkPos.x,
+            viewport->WorkPos.y + viewport->WorkSize.y - statusHeight));
+        ImGui::SetNextWindowSize(ImVec2(viewport->WorkSize.x, statusHeight));
+        ImGui::SetNextWindowViewport(viewport->ID);
+        ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding,
+            ImVec2(12.0f * s, 3.0f * s));
+        ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0.0f);
+        ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 0.0f);
+        ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing,
+            ImVec2(8.0f * s, 2.0f * s));
+
+        const bool darkTheme = !Application::Get().GetImGuiLayer()
+            || Application::Get().GetImGuiLayer()->IsDarkTheme();
+        const ImVec4 background = darkTheme
+            ? ImVec4(0.045f, 0.050f, 0.064f, 1.0f)
+            : ImVec4(0.925f, 0.914f, 0.890f, 1.0f);
+        const ImVec4 border = darkTheme
+            ? ImVec4(0.16f, 0.18f, 0.22f, 1.0f)
+            : ImVec4(0.78f, 0.76f, 0.72f, 1.0f);
+        ImGui::PushStyleColor(ImGuiCol_WindowBg, background);
+
+        ImGui::Begin("##EditorStatusBar", nullptr,
+            ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_NoDocking |
+            ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoMove |
+            ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoNav |
+            ImGuiWindowFlags_NoBringToFrontOnFocus);
+
+        ImDrawList* drawList = ImGui::GetWindowDrawList();
+        const ImVec2 windowPos = ImGui::GetWindowPos();
+        drawList->AddLine(
+            ImVec2(windowPos.x, windowPos.y),
+            ImVec2(windowPos.x + ImGui::GetWindowWidth(), windowPos.y),
+            ImGui::ColorConvertFloat4ToU32(border), 1.0f);
+
+        ImFont* smallFont = Application::Get().GetImGuiLayer()
+            ? Application::Get().GetImGuiLayer()->GetSmallFont()
+            : nullptr;
+        if (smallFont)
+            ImGui::PushFont(smallFont);
+
+        const ImVec4 accent = ImGui::GetStyleColorVec4(ImGuiCol_CheckMark);
+        const ImVec4 muted = ImGui::GetStyleColorVec4(ImGuiCol_TextDisabled);
+
+        const auto& specification = Application::Get().GetSpecification();
+        const std::string projectName = specification.ProjectRoot.empty()
+            ? std::string("No Project")
+            : specification.ProjectRoot.filename().string();
+        ImGui::TextColored(accent, "%s", projectName.c_str());
+        ImGui::SameLine();
+        ImGui::TextColored(muted, "|");
+        ImGui::SameLine();
+        ImGui::TextColored(accent, "%s", GetWorkspaceLabel());
+
+        ImGui::SameLine();
+        ImGui::TextColored(muted, "|");
+        ImGui::SameLine();
+
+        const bool playing = m_SceneState == SceneState::Play;
+        ImGui::TextColored(playing
+                ? ImVec4(0.95f, 0.52f, 0.32f, 1.0f)
+                : ImVec4(0.42f, 0.78f, 0.58f, 1.0f),
+            "%s", playing ? "PLAY" : "EDIT");
+
+        ImGui::SameLine();
+        const std::string sceneName = m_EditorScenePath.empty()
+            ? EditorLocale::Text("Untitled Scene", "未命名场景")
+            : m_EditorScenePath.filename().string();
+        ImGui::Text("%s%s", sceneName.c_str(), m_SceneDirty ? " *" : "");
+
+        if (Entity selected = m_SceneHierarchyPanel->GetSelectedEntity())
+        {
+            if (selected.HasComponent<TagComponent>())
+            {
+                ImGui::SameLine();
+                ImGui::TextColored(muted, "|");
+                ImGui::SameLine();
+                ImGui::TextDisabled("%s", selected.GetComponent<TagComponent>().Tag.c_str());
+            }
+        }
+
+        if (m_PlayerBuildRunning)
+        {
+            ImGui::SameLine();
+            ImGui::TextColored(ImVec4(0.95f, 0.78f, 0.40f, 1.0f), "%s",
+                EditorLocale::Text("| Packaging...", "| 打包中..."));
+        }
+
+        char performance[192];
+        char performanceCompact[128];
+        const auto stats2D = Renderer2D::GetStats();
+        const auto stats3D = Renderer3D::GetStats();
+        const float uiScale = Application::Get().GetImGuiLayer()
+            ? Application::Get().GetImGuiLayer()->GetUiScale()
+            : 1.0f;
+        const int uiPercent = static_cast<int>(uiScale * 100.0f + 0.5f);
+        std::snprintf(performance, sizeof(performance),
+            "%.0f FPS   %.2f ms   2D %u draws / %u quads   3D %u draws / %u meshes   UI %d%%",
+            ImGui::GetIO().Framerate,
+            ImGui::GetIO().Framerate > 0.0f ? 1000.0f / ImGui::GetIO().Framerate : 0.0f,
+            stats2D.DrawCalls, stats2D.QuadCount,
+            stats3D.DrawCalls, stats3D.MeshCount, uiPercent);
+        std::snprintf(performanceCompact, sizeof(performanceCompact),
+            "%.0f FPS   2D %u   3D %u   UI %d%%",
+            ImGui::GetIO().Framerate,
+            stats2D.DrawCalls, stats3D.DrawCalls, uiPercent);
+
+        const char* performanceText =
+            ImGui::CalcTextSize(performance).x > ImGui::GetWindowWidth() * 0.52f
+                ? performanceCompact
+                : performance;
+        const float rightWidth = ImGui::CalcTextSize(performanceText).x;
+        const float rightX = ImGui::GetWindowWidth() - rightWidth - 12.0f * s;
+        if (ImGui::GetCursorPosX() < rightX)
+            ImGui::SameLine(rightX);
+        const ImVec4 fpsColor = ImGui::GetIO().Framerate >= 55.0f
+            ? muted
+            : (ImGui::GetIO().Framerate >= 25.0f
+                ? ImVec4(0.92f, 0.76f, 0.38f, 1.0f)
+                : ImVec4(0.94f, 0.44f, 0.40f, 1.0f));
+        ImGui::TextColored(fpsColor, "%s", performanceText);
+
+        if (smallFont)
+            ImGui::PopFont();
+        ImGui::End();
+        ImGui::PopStyleColor();
+        ImGui::PopStyleVar(4);
     }
 
     void EditorLayerBase::UI_PlayerBuildScenePicker()

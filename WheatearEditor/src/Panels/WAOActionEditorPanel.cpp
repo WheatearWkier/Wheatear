@@ -54,10 +54,55 @@ namespace Wheatear {
         if (m_NewActionSetKey.empty())
             m_NewActionSetKey = FirstActionSetKey();
 
+        if (m_EditMode && !ImGui::GetIO().WantTextInput)
+        {
+            const ImGuiIO& io = ImGui::GetIO();
+            if (io.KeyCtrl && io.KeyShift && ImGui::IsKeyPressed(ImGuiKey_Z, false))
+                RedoRecipe();
+            else if (io.KeyCtrl && ImGui::IsKeyPressed(ImGuiKey_Z, false))
+                UndoRecipe();
+            else if (io.KeyCtrl && ImGui::IsKeyPressed(ImGuiKey_Y, false))
+                RedoRecipe();
+        }
+
+        const bool wasOpen = m_Open;
         if (!EditorFloatingWindow::Begin("WAO Action Editor", &m_Open, 0, { 1220.0f, 760.0f }))
         {
             EditorFloatingWindow::End();
+            if (wasOpen && !m_Open)
+            {
+                if (m_EditDirty)
+                {
+                    m_Open = true;
+                    m_ClosePrompt = true;
+                }
+                else if (m_ActionSetsDirty)
+                {
+                    m_Open = true;
+                    m_SaveStatus = "Save action set changes before closing.";
+                }
+            }
+            DrawClosePrompt();
             return;
+        }
+
+        if (m_EditMode
+            && ImGui::IsWindowFocused(ImGuiFocusedFlags_RootAndChildWindows)
+            && ImGui::GetIO().KeyCtrl
+            && ImGui::IsKeyPressed(ImGuiKey_S, false))
+        {
+            if (SaveEditedRecipe())
+            {
+                const std::string savedId = m_EditRecipe.Id;
+                const bool reloaded = ReloadActionSources();
+                m_SelectedActionId = savedId;
+                m_EditMode = false;
+                m_EditDirty = false;
+                m_SavedRecipeFingerprint = RecipeFingerprint(m_EditRecipe);
+                m_SaveStatus = reloaded
+                    ? "Saved and reloaded " + savedId
+                    : "Saved " + savedId + ", but no YAML recipes were reloaded.";
+            }
         }
 
         const auto actions = SortedActions();
@@ -131,6 +176,21 @@ namespace Wheatear {
         }
 
         EditorFloatingWindow::End();
+
+        if (wasOpen && !m_Open)
+        {
+            if (m_EditDirty)
+            {
+                m_Open = true;
+                m_ClosePrompt = true;
+            }
+            else if (m_ActionSetsDirty)
+            {
+                m_Open = true;
+                m_SaveStatus = "Save action set changes before closing.";
+            }
+        }
+        DrawClosePrompt();
     }
 
     void WAOActionEditorPanel::DrawActionList()
@@ -191,6 +251,12 @@ namespace Wheatear {
 
     void WAOActionEditorPanel::DrawActionDetails()
     {
+        if (m_EditMode && m_EditDirty && m_SelectedActionId != m_EditingActionId)
+        {
+            m_SelectedActionId = m_EditingActionId;
+            m_SaveStatus = "Save or cancel the current recipe before switching.";
+        }
+
         const bool hasRecipe = FindSelectedRecipe(m_SelectedActionId) != nullptr;
 
         if (ImGui::BeginTabBar("##WAOActionTabs"))
@@ -235,6 +301,14 @@ namespace Wheatear {
 
         if (m_EditMode && m_EditingActionId != recipe->Id)
         {
+            if (m_EditDirty)
+            {
+                // Keep the edit buffer; do not silently discard unsaved changes
+                // when the list selection changes.
+                m_SelectedActionId = m_EditingActionId;
+                m_SaveStatus = "Save or cancel the current recipe before switching.";
+                return;
+            }
             m_EditMode = false;
             m_EditDirty = false;
             m_EditingActionId.clear();
@@ -287,6 +361,12 @@ namespace Wheatear {
         LabelValue("Cancel Start", recipe->CancelStart);
         LabelValue("Cancel End", recipe->CancelEnd);
         LabelValue("Move Scale", recipe->MovementScale);
+
+        SectionHeader("Behavior");
+        LabelValue("Behavior Id", recipe->BehaviorId);
+        EditorWidgets::DrawLabeledPathTools("Behavior File", recipe->BehaviorFile);
+        LabelValue("Behavior Entry", recipe->BehaviorEntry);
+        LabelValue("Behavior Version", static_cast<float>(recipe->BehaviorVersion));
 
         SectionHeader("Resources");
         if (recipe->ResourceCost.empty())
@@ -482,6 +562,58 @@ namespace Wheatear {
         m_EditDirty = false;
         m_SelectedEffectIndex = recipe.Effects.empty() ? -1 : 0;
         m_SaveStatus.clear();
+        m_UndoStack.clear();
+        m_RedoStack.clear();
+        m_EffectsStructureChanged = false;
+
+        m_EffectOrigins.clear();
+        m_NextEffectId = 1;
+        for (WAO::EffectSpec& effect : m_EditRecipe.Effects)
+            effect.EditorId = m_NextEffectId++;
+
+        const std::string relativePath = RecipeSourcePath(recipe.Id);
+        if (!relativePath.empty())
+        {
+            const std::filesystem::path path =
+                EditorWidgets::ResolveProjectAsset(relativePath);
+            if (std::filesystem::is_regular_file(path))
+            {
+                try
+                {
+                    YAML::Node root = YAML::LoadFile(path.string());
+                    YAML::Node action = root;
+                    if (root["actions"] && root["actions"].IsSequence())
+                    {
+                        for (YAML::Node candidate : root["actions"])
+                        {
+                            if (candidate["id"]
+                                && candidate["id"].as<std::string>() == recipe.Id)
+                            {
+                                action = candidate;
+                                break;
+                            }
+                        }
+                    }
+                    const YAML::Node effects = action["effects"];
+                    if (effects && effects.IsSequence())
+                    {
+                        for (size_t i = 0; i < effects.size()
+                            && i < m_EditRecipe.Effects.size(); ++i)
+                        {
+                            m_EffectOrigins[m_EditRecipe.Effects[i].EditorId] =
+                                YAML::Dump(effects[i]);
+                        }
+                    }
+                }
+                catch (const YAML::Exception&)
+                {
+                    // Missing/invalid source falls back to clean effect nodes.
+                }
+            }
+        }
+
+        m_LastRecipeFingerprint = RecipeFingerprint(recipe);
+        m_SavedRecipeFingerprint = m_LastRecipeFingerprint;
     }
 
 
@@ -494,6 +626,9 @@ namespace Wheatear {
             m_EditMode = false;
             return;
         }
+
+        const WAO::ActionRecipe previousRecipe = m_EditRecipe;
+        const int previousEffect = m_SelectedEffectIndex;
 
         ImGui::TextDisabled("Editing");
         ImGui::SameLine(150.0f);
@@ -522,6 +657,19 @@ namespace Wheatear {
         changed |= ImGui::DragFloat("Cancel Start", &m_EditRecipe.CancelStart, 0.005f, 0.0f, 10.0f, "%.3f");
         changed |= ImGui::DragFloat("Cancel End", &m_EditRecipe.CancelEnd, 0.005f, 0.0f, 10.0f, "%.3f");
         changed |= ImGui::DragFloat("Move Scale", &m_EditRecipe.MovementScale, 0.01f, -4.0f, 4.0f, "%.3f");
+
+        SectionHeader("Behavior");
+        changed |= EditorWidgets::InputString("Behavior Id", m_EditRecipe.BehaviorId);
+        changed |= EditorWidgets::DrawAssetReferenceField("Behavior File",
+            m_EditRecipe.BehaviorFile,
+            EditorWidgets::AssetReferenceKind::Any);
+        changed |= EditorWidgets::InputString("Behavior Entry", m_EditRecipe.BehaviorEntry);
+        int behaviorVersion = static_cast<int>(m_EditRecipe.BehaviorVersion);
+        if (ImGui::DragInt("Behavior Version", &behaviorVersion, 1.0f, 0, 100000))
+        {
+            m_EditRecipe.BehaviorVersion = static_cast<uint32_t>(std::max(0, behaviorVersion));
+            changed = true;
+        }
 
         SectionHeader("Lists");
         std::string tags = EditorWidgets::JoinList(m_EditRecipe.Tags);
@@ -582,6 +730,16 @@ namespace Wheatear {
             m_EditDirty = true;
 
         ImGui::Separator();
+        ImGui::BeginDisabled(m_UndoStack.empty());
+        if (ImGui::Button(EditorLocale::Text("Undo", "撤销")))
+            UndoRecipe();
+        ImGui::EndDisabled();
+        ImGui::SameLine();
+        ImGui::BeginDisabled(m_RedoStack.empty());
+        if (ImGui::Button(EditorLocale::Text("Redo", "重做")))
+            RedoRecipe();
+        ImGui::EndDisabled();
+        ImGui::SameLine();
         bool cancelClicked = false;
         if (EditorWidgets::DirtySaveBar(m_EditDirty, m_SaveStatus, "Save YAML", "Cancel", &cancelClicked))
         {
@@ -592,6 +750,7 @@ namespace Wheatear {
                 m_SelectedActionId = savedId;
                 m_EditMode = false;
                 m_EditDirty = false;
+                m_SavedRecipeFingerprint = RecipeFingerprint(m_EditRecipe);
                 m_SaveStatus = reloaded
                     ? "Saved and reloaded " + savedId
                     : "Saved " + savedId + ", but no YAML recipes were reloaded.";
@@ -602,6 +761,123 @@ namespace Wheatear {
             m_EditMode = false;
             m_EditDirty = false;
             m_SaveStatus = "Edit cancelled.";
+        }
+
+        if (m_EditMode && !m_SuppressUndoCapture)
+        {
+            const std::string current = RecipeFingerprint(m_EditRecipe);
+            if (current != m_LastRecipeFingerprint)
+            {
+                PushRecipeUndo(previousRecipe, previousEffect);
+                m_LastRecipeFingerprint = current;
+                m_EditDirty = true;
+            }
+        }
+    }
+
+    std::string WAOActionEditorPanel::RecipeFingerprint(
+        const WAO::ActionRecipe& recipe) const
+    {
+        return YAML::Dump(RecipeToYaml(recipe));
+    }
+
+    void WAOActionEditorPanel::PushRecipeUndo(const WAO::ActionRecipe& recipe,
+        int selectedEffect)
+    {
+        m_UndoStack.push_back({ recipe, selectedEffect });
+        if (m_UndoStack.size() > 64)
+            m_UndoStack.erase(m_UndoStack.begin());
+        m_RedoStack.clear();
+    }
+
+    void WAOActionEditorPanel::UndoRecipe()
+    {
+        if (m_UndoStack.empty())
+            return;
+
+        RecipeSnapshot snapshot = std::move(m_UndoStack.back());
+        m_UndoStack.pop_back();
+        m_RedoStack.push_back({ m_EditRecipe, m_SelectedEffectIndex });
+        m_SuppressUndoCapture = true;
+        m_EditRecipe = std::move(snapshot.Recipe);
+        m_SelectedEffectIndex = snapshot.SelectedEffectIndex;
+        m_LastRecipeFingerprint = RecipeFingerprint(m_EditRecipe);
+        m_SuppressUndoCapture = false;
+        m_EditDirty = m_LastRecipeFingerprint != m_SavedRecipeFingerprint;
+        m_SaveStatus = "Undo.";
+    }
+
+    void WAOActionEditorPanel::RedoRecipe()
+    {
+        if (m_RedoStack.empty())
+            return;
+
+        RecipeSnapshot snapshot = std::move(m_RedoStack.back());
+        m_RedoStack.pop_back();
+        m_UndoStack.push_back({ m_EditRecipe, m_SelectedEffectIndex });
+        m_SuppressUndoCapture = true;
+        m_EditRecipe = std::move(snapshot.Recipe);
+        m_SelectedEffectIndex = snapshot.SelectedEffectIndex;
+        m_LastRecipeFingerprint = RecipeFingerprint(m_EditRecipe);
+        m_SuppressUndoCapture = false;
+        m_EditDirty = m_LastRecipeFingerprint != m_SavedRecipeFingerprint;
+        m_SaveStatus = "Redo.";
+    }
+
+    void WAOActionEditorPanel::DrawClosePrompt()
+    {
+        if (!m_ClosePrompt)
+            return;
+
+        const char* popupId = "Unsaved WAO Recipe##WAOUnsaved";
+        if (!ImGui::IsPopupOpen(popupId))
+            ImGui::OpenPopup(popupId);
+
+        if (ImGui::BeginPopupModal(popupId, nullptr,
+            ImGuiWindowFlags_AlwaysAutoResize))
+        {
+            ImGui::TextUnformatted(EditorLocale::Text(
+                "This recipe has unsaved changes.",
+                "当前配方有未保存的修改。"));
+            ImGui::Spacing();
+            if (ImGui::Button(EditorLocale::Text("Save", "保存")))
+            {
+                if (SaveEditedRecipe())
+                {
+                    const std::string savedId = m_EditRecipe.Id;
+                    const bool reloaded = ReloadActionSources();
+                    m_SelectedActionId = savedId;
+                    m_EditMode = false;
+                    m_EditDirty = false;
+                    m_SavedRecipeFingerprint = RecipeFingerprint(m_EditRecipe);
+                    m_ClosePrompt = false;
+                    m_Open = false;
+                    if (!reloaded)
+                        m_SaveStatus = "Saved " + savedId + ", but no YAML recipes were reloaded.";
+                    ImGui::CloseCurrentPopup();
+                }
+            }
+            ImGui::SameLine();
+            if (ImGui::Button(EditorLocale::Text("Discard", "放弃")))
+            {
+                m_EditMode = false;
+                m_EditDirty = false;
+                m_ClosePrompt = false;
+                m_Open = false;
+                ImGui::CloseCurrentPopup();
+            }
+            ImGui::SameLine();
+            if (ImGui::Button(EditorLocale::Text("Cancel", "取消")))
+            {
+                m_ClosePrompt = false;
+                ImGui::CloseCurrentPopup();
+            }
+            if (!m_SaveStatus.empty())
+            {
+                ImGui::Spacing();
+                ImGui::TextWrapped("%s", m_SaveStatus.c_str());
+            }
+            ImGui::EndPopup();
         }
     }
 
@@ -636,23 +912,39 @@ namespace Wheatear {
                 ImGui::TableNextRow();
                 ImGui::TableSetColumnIndex(0);
                 ImGui::SetNextItemWidth(-1.0f);
-                if (EditorWidgets::InputString("##key", key, 128) && !key.empty() && key != originalKey)
+                if (EditorWidgets::InputString("##key", key, 128) && key != originalKey)
                 {
-                    m_EditRecipe.Params.erase(originalKey);
-                    m_EditRecipe.Params[key] = value;
-                    changed = true;
+                    if (key.empty())
+                    {
+                        m_SaveStatus = "Param key cannot be empty.";
+                        key = originalKey;
+                    }
+                    else if (m_EditRecipe.Params.count(key) > 0 && key != originalKey)
+                    {
+                        m_SaveStatus = "Param '" + key + "' already exists.";
+                        key = originalKey;
+                    }
+                    else
+                    {
+                        m_EditRecipe.Params.erase(originalKey);
+                        m_EditRecipe.Params[key] = value;
+                        changed = true;
+                    }
                 }
 
                 ImGui::TableSetColumnIndex(1);
                 ImGui::SetNextItemWidth(-1.0f);
                 if (EditorWidgets::InputString("##value", value, 256))
                 {
-                    m_EditRecipe.Params[key] = value;
+                    if (!key.empty())
+                        m_EditRecipe.Params[key] = value;
                     changed = true;
                 }
 
                 ImGui::TableSetColumnIndex(2);
-                if (DrawStringChoice("Key", key, CommonParamKeys()) && !key.empty())
+                if (DrawStringChoice("Key", key, CommonParamKeys()) && !key.empty()
+                    && key != originalKey
+                    && m_EditRecipe.Params.count(key) == 0)
                 {
                     m_EditRecipe.Params.erase(originalKey);
                     m_EditRecipe.Params[key] = value;
@@ -713,6 +1005,16 @@ namespace Wheatear {
 
     bool WAOActionEditorPanel::SaveEditedRecipe()
     {
+        std::vector<std::string> errors;
+        std::vector<std::string> warnings;
+        CollectValidationMessages(m_EditRecipe, errors, warnings);
+        (void)warnings;
+        if (!errors.empty())
+        {
+            m_SaveStatus = "Validation failed: " + errors.front();
+            return false;
+        }
+
         const std::string relativePath = RecipeSourcePath(m_EditRecipe.Id);
         if (relativePath.empty())
         {
@@ -742,14 +1044,14 @@ namespace Wheatear {
 
                     if (action["id"].as<std::string>() == m_EditRecipe.Id)
                     {
-                        written = WriteEditableRecipeFields(action, m_EditRecipe);
+                        written = WriteEditableRecipeFields(action, m_EditRecipe, &m_EffectOrigins);
                         break;
                     }
                 }
             }
             else if (root["id"] && root["id"].as<std::string>() == m_EditRecipe.Id)
             {
-                written = WriteEditableRecipeFields(root, m_EditRecipe);
+                written = WriteEditableRecipeFields(root, m_EditRecipe, &m_EffectOrigins);
             }
 
             if (!written)

@@ -31,9 +31,27 @@ namespace Wheatear {
             s_RendererAPI->DrawIndexed(vertexArray, indexCount);
         }
 
+        static void DrawIndexedInstanced(const Ref<VertexArray>& vertexArray,
+            uint32_t indexCount, uint32_t instanceCount)
+        {
+            s_RendererAPI->DrawIndexedInstanced(vertexArray, indexCount, instanceCount);
+        }
+
+        static void DrawIndexedRange(const Ref<VertexArray>& vertexArray,
+            uint32_t indexCount, uint32_t indexOffset)
+        {
+            s_RendererAPI->DrawIndexedRange(vertexArray, indexCount, indexOffset);
+        }
+
         static void DrawLines(const Ref<VertexArray>& vertexArray, uint32_t vertexCount = 0)
         {
             s_RendererAPI->DrawLines(vertexArray, vertexCount);
+        }
+
+        static void DrawLinesRange(const Ref<VertexArray>& vertexArray,
+            uint32_t vertexOffset, uint32_t vertexCount)
+        {
+            s_RendererAPI->DrawLinesRange(vertexArray, vertexOffset, vertexCount);
         }
 
         // Draw non-indexed geometry (e.g. skybox cube, grid quads).

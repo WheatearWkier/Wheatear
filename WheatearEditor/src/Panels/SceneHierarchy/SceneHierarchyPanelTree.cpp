@@ -46,6 +46,7 @@ namespace Wheatear {
 
         static constexpr const char* kHierarchyUIEntityPayload = "WT_HIERARCHY_UI_ENTITY";
         static constexpr const char* kHierarchyFolderMemberPayload = "WT_HIERARCHY_FOLDER_MEMBER";
+        static constexpr const char* kHierarchyTransformEntityPayload = "WT_HIERARCHY_TRANSFORM_ENTITY";
 
     } // namespace
     bool SceneHierarchyPanel::EntityPassesFilter(Entity entity) const
@@ -181,6 +182,59 @@ namespace Wheatear {
     bool SceneHierarchyPanel::IsFolder(Entity entity) const
     {
         return entity && entity.HasComponent<EditorFolderComponent>();
+    }
+
+    bool SceneHierarchyPanel::CanReparentTransform(Entity child, Entity parent) const
+    {
+        if (!m_Context || !child || !parent || child == parent)
+            return false;
+        if (!child.HasComponent<TransformComponent>()
+            || !parent.HasComponent<TransformComponent>())
+        {
+            return false;
+        }
+
+        // UI entities use widget parenting; folders use folder grouping.
+        if (child.HasComponent<UIWidgetComponent>()
+            || child.HasComponent<EditorFolderComponent>()
+            || child.HasComponent<UICanvasComponent>())
+        {
+            return false;
+        }
+
+        Entity cursor = parent;
+        int guard = 0;
+        while (cursor && guard++ < 512)
+        {
+            if (cursor == child)
+                return false;
+            if (!cursor.HasComponent<TransformComponent>())
+                break;
+
+            const UUID parentID = cursor.GetComponent<TransformComponent>().Parent;
+            if (static_cast<uint64_t>(parentID) == 0)
+                break;
+            cursor = m_Context->FindEntityByUUID(parentID);
+        }
+
+        return child.GetComponent<TransformComponent>().Parent != parent.GetUUID();
+    }
+
+    void SceneHierarchyPanel::ReparentTransformWithUndo(Entity child, Entity parent)
+    {
+        if (!CanReparentTransform(child, parent))
+            return;
+
+        auto& transform = child.GetComponent<TransformComponent>();
+        const TransformComponent before = transform;
+        TransformComponent after = before;
+        after.Parent = parent.GetUUID();
+
+        auto command = MakeComponentValueCommand(child, before, after);
+        command->Execute();
+        CommandHistory::Get().Push(std::move(command));
+        m_SelectionContext = child;
+        m_ScrollToSelection = true;
     }
 
     bool SceneHierarchyPanel::CanReparentToFolder(Entity child, Entity folder) const
@@ -414,17 +468,20 @@ namespace Wheatear {
         }
 
         ImGui::PushID(static_cast<int>(key));
-        ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(4.0f, 1.0f));
-        if (ImGui::SmallButton(hiddenInEditor ? "Show" : "Hide"))
+        if (hiddenInEditor)
         {
-            SetEntityHiddenInEditor(entity, !hiddenInEditor);
-            hiddenInEditor = !hiddenInEditor;
+            ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(4.0f, 1.0f));
+            if (ImGui::SmallButton("Show"))
+            {
+                SetEntityHiddenInEditor(entity, false);
+                hiddenInEditor = false;
+            }
+            ImGui::PopStyleVar();
+            if (ImGui::IsItemHovered())
+                ImGui::SetTooltip("Show this entity in the editor");
+            ImGui::SameLine();
         }
-        ImGui::PopStyleVar();
-        if (ImGui::IsItemHovered())
-            ImGui::SetTooltip(hiddenInEditor ? "Show this entity in the editor" : "Hide this entity in the editor");
         ImGui::PopID();
-        ImGui::SameLine();
 
         if (hiddenInEditor)
             ImGui::PushStyleColor(ImGuiCol_Text, ImGui::GetStyleColorVec4(ImGuiCol_TextDisabled));
@@ -508,7 +565,7 @@ namespace Wheatear {
                 if (ImGui::BeginDragDropSource(ImGuiDragDropFlags_SourceAllowNullID))
                 {
                     const uint64_t payload = static_cast<uint64_t>(entity.GetUUID());
-                    ImGui::SetDragDropPayload(kHierarchyFolderMemberPayload, &payload, sizeof(payload));
+                    ImGui::SetDragDropPayload(kHierarchyTransformEntityPayload, &payload, sizeof(payload));
                     ImGui::TextUnformatted(displayName.c_str());
                     ImGui::EndDragDropSource();
                 }
@@ -547,7 +604,7 @@ namespace Wheatear {
             {
                 const ImGuiPayload* previewPayload = ImGui::GetDragDropPayload();
                 if (previewPayload
-                    && previewPayload->IsDataType(kHierarchyFolderMemberPayload)
+                    && previewPayload->IsDataType(kHierarchyTransformEntityPayload)
                     && previewPayload->DataSize == sizeof(uint64_t))
                 {
                     const uint64_t childID = *static_cast<const uint64_t*>(previewPayload->Data);
@@ -555,10 +612,36 @@ namespace Wheatear {
                     if (CanReparentToFolder(child, entity))
                     {
                         const ImGuiPayload* payload = ImGui::AcceptDragDropPayload(
-                            kHierarchyFolderMemberPayload,
+                            kHierarchyTransformEntityPayload,
                             ImGuiDragDropFlags_AcceptBeforeDelivery);
                         if (payload && payload->IsDelivery())
                             ReparentToFolderWithUndo(child, entity);
+                    }
+                }
+                ImGui::EndDragDropTarget();
+            }
+        }
+
+        if (!isFolder
+            && entity.HasComponent<IDComponent>()
+            && entity.HasComponent<TransformComponent>())
+        {
+            if (ImGui::BeginDragDropTarget())
+            {
+                const ImGuiPayload* previewPayload = ImGui::GetDragDropPayload();
+                if (previewPayload
+                    && previewPayload->IsDataType(kHierarchyTransformEntityPayload)
+                    && previewPayload->DataSize == sizeof(uint64_t))
+                {
+                    const uint64_t childID = *static_cast<const uint64_t*>(previewPayload->Data);
+                    Entity child = m_Context ? m_Context->GetEntityByUUID(UUID(childID)) : Entity{};
+                    if (CanReparentTransform(child, entity))
+                    {
+                        const ImGuiPayload* payload = ImGui::AcceptDragDropPayload(
+                            kHierarchyTransformEntityPayload,
+                            ImGuiDragDropFlags_AcceptBeforeDelivery);
+                        if (payload && payload->IsDelivery())
+                            ReparentTransformWithUndo(child, entity);
                     }
                 }
                 ImGui::EndDragDropTarget();

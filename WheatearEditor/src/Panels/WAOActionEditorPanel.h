@@ -25,6 +25,9 @@ namespace Wheatear {
         void DrawEffectsTable();
         void DrawEffectEditor();
         void DrawValidationPanel();
+        void CollectValidationMessages(const WAO::ActionRecipe& recipe,
+            std::vector<std::string>& errors,
+            std::vector<std::string>& warnings) const;
         void DrawPreviewPanel();
         void DrawDebugLedger();
         void DrawActionSetsPanel();
@@ -47,6 +50,19 @@ namespace Wheatear {
         void DrawRenameDialog(const WAO::ActionRecipe& recipe);
         bool PerformRename(const std::string& oldId, const std::string& newId);
 
+        std::string RecipeFingerprint(const WAO::ActionRecipe& recipe) const;
+        void PushRecipeUndo(const WAO::ActionRecipe& recipe, int selectedEffect);
+        void UndoRecipe();
+        void RedoRecipe();
+        void DrawClosePrompt();
+
+    private:
+        struct RecipeSnapshot
+        {
+            WAO::ActionRecipe Recipe;
+            int SelectedEffectIndex = -1;
+        };
+
     private:
         bool m_Open = false;
         bool m_GroupByModule = true;
@@ -58,9 +74,18 @@ namespace Wheatear {
         bool m_EditDirty = false;
         WAO::ActionRecipe m_EditRecipe;
         std::string m_EditingActionId;
+        std::vector<RecipeSnapshot> m_UndoStack;
+        std::vector<RecipeSnapshot> m_RedoStack;
+        std::string m_LastRecipeFingerprint;
+        std::string m_SavedRecipeFingerprint;
+        bool m_SuppressUndoCapture = false;
+        bool m_ClosePrompt = false;
         std::string m_NewActionSetKey;
         std::string m_SaveStatus;
         int m_SelectedEffectIndex = -1;
+        bool m_EffectsStructureChanged = false;
+        std::unordered_map<uint64_t, std::string> m_EffectOrigins;
+        uint64_t m_NextEffectId = 1;
         bool m_ActionSetsLoaded = false;
         bool m_ActionSetsDirty = false;
         std::string m_ActionSetsStatus;

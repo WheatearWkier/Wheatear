@@ -21,6 +21,8 @@ IncludeDir = {
     ImGuizmo      = "%{wks.location}/Wheatear/vendor/ImGuizmo",
     Box2D         = "%{wks.location}/Wheatear/vendor/Box2D/include",
     miniaudio     = "%{wks.location}/Wheatear/vendor/miniaudio",
+    ufbx          = "%{wks.location}/Wheatear/vendor/ufbx",
+    cgltf         = "%{wks.location}/Wheatear/vendor/cgltf",
     VulkanSDK     = path.join(vulkan_sdk, "Include"),
 }
 

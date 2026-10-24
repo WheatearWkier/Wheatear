@@ -1,0 +1,104 @@
+version: 1
+module: demo_combat
+behaviors:
+  - id: demo.behavior_signal
+    version: 1
+    entry: begin
+    nodes:
+      - id: begin
+        position: { x: 42, y: 32 }
+        call: flow.always_true
+        outputs:
+          value: allowed
+        next: emit
+      - id: emit
+        position: { x: 380, y: 32 }
+        call: wao.emit_signal
+        inputs:
+          signal: demo.behavior.executed
+          detail: Behavior VM demo
+        next: finish
+      - id: finish
+        position: { x: 718, y: 32 }
+        end: true
+  - id: demo.hit_reaction
+    version: 1
+    entry: wait
+    nodes:
+      - id: wait
+        position: { x: 42, y: 32 }
+        waitEvent: combat.hit_received
+        timeout: 1.0
+        next: check
+        onTimeout: timeout
+      - id: check
+        position: { x: 380, y: 32 }
+        branch: event.playerWasHit
+        true: hit
+        false: finish
+      - id: hit
+        position: { x: 718, y: -22 }
+        call: wao.emit_signal
+        inputs:
+          signal: demo.hit_reaction
+          detail: Behavior VM consumed combat.hit_received
+        next: finish
+      - id: timeout
+        position: { x: 718, y: 132 }
+        call: wao.emit_signal
+        inputs:
+          signal: demo.hit_reaction.timeout
+          detail: Behavior VM event timeout
+        next: finish
+      - id: finish
+        position: { x: 1056, y: 55 }
+        end: true
+  - id: side.guard
+    version: 1
+    entry: open
+    nodes:
+      - id: open
+        position: { x: 42, y: 32 }
+        call: combat.open_guard_window
+        inputs:
+          duration: 0.24
+          parryWindow: 0.08
+          damageMultiplier: 0.25
+        next: wait
+      - id: wait
+        position: { x: 380, y: 32 }
+        waitEvent: combat.guard_resolved
+        timeout: 0.24
+        next: decide_parry
+        onTimeout: close
+      - id: decide_parry
+        position: { x: 718, y: 32 }
+        branch: event.parried
+        true: parried
+        false: decide_block
+      - id: decide_block
+        position: { x: 1056, y: 132 }
+        branch: event.blocked
+        true: blocked
+        false: close
+      - id: parried
+        position: { x: 1394, y: -22 }
+        call: wao.emit_signal
+        inputs:
+          signal: side.guard.parried
+          detail: Guard window parried the incoming hit
+        next: close
+      - id: blocked
+        position: { x: 1394, y: 132 }
+        call: wao.emit_signal
+        inputs:
+          signal: side.guard.blocked
+          detail: Guard window blocked the incoming hit
+        next: close
+      - id: close
+        position: { x: 1732, y: 55 }
+        call: combat.close_guard_window
+        next: finish
+      - id: finish
+        position: { x: 2070, y: 55 }
+        end: true

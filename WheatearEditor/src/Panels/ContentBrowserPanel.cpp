@@ -8,6 +8,7 @@
 #include "Editor/EditorLocale.h"
 #include "Editor/EditorPlatform.h"
 #include "Editor/EditorWidgets.h"
+#include "Panels/BehaviorGraphPanel.h"
 #include "Panels/EventScriptGraphPanel.h"
 #include "Panels/DataFileEditorPanel.h"
 #include "Modules/VisualNovel/VisualNovelScriptEditorPanel.h"
@@ -15,9 +16,11 @@
 #include "Wheatear/Animation/AnimationClip.h"
 #include "Wheatear/Animation/AnimationClipSerializer.h"
 #include "Wheatear/Assets/AssetPath.h"
+#include "Wheatear/Assets/Import/ModelImporter.h"
 #include "Wheatear/Core/EngineInfo.h"
 #include "Wheatear/Renderer/Framebuffer.h"
 #include "Wheatear/Renderer/Mesh.h"
+#include "Wheatear/Renderer/Model.h"
 #include "Wheatear/Renderer/RenderCommand.h"
 #include "Wheatear/Renderer/Renderer3D.h"
 #include "Wheatear/Renderer/Renderer2D.h"
@@ -181,11 +184,12 @@ namespace Wheatear {
             float& size,
             float minSize,
             float maxSize,
-            bool dragInverts)
+            bool dragInverts,
+            float uiScale)
         {
             ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.10f, 0.13f, 0.16f, 1.0f));
-            ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(0.23f, 0.72f, 0.80f, 0.30f));
-            ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4(0.23f, 0.72f, 0.80f, 0.45f));
+            ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(0.85f, 0.663f, 0.373f, 0.30f));
+            ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4(0.85f, 0.663f, 0.373f, 0.45f));
             ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(3.0f, 2.0f));
             ImGui::InvisibleButton(id, ImVec2(16.0f, -1.0f));
             ImGui::PopStyleVar();
@@ -196,7 +200,8 @@ namespace Wheatear {
 
             if (ImGui::IsItemActive())
             {
-                const float delta = ImGui::GetIO().MouseDelta.x;
+                const float delta = ImGui::GetIO().MouseDelta.x
+                    / std::max(uiScale, 0.5f);
                 size = std::clamp(size + (dragInverts ? -delta : delta), minSize, maxSize);
             }
 
@@ -265,7 +270,6 @@ namespace Wheatear {
         m_Icons[AssetType::SpriteSheet] = Texture2D::Create("Resources/Icons/Editor/sprite_sheet.png");
 
         AssetRegistry::Get().LoadCache(AssetPath::GetProjectRoot());
-        m_RegistryStatus = "Loaded asset registry cache. Use Rescan Assets after adding or replacing resources.";
         NavigateTo(GetEditorAssetPath());
     }
 
@@ -285,7 +289,7 @@ namespace Wheatear {
             return AssetType::Metadata;
         if (ext == ".png" || ext == ".jpg" || ext == ".jpeg" || ext == ".tga" || ext == ".bmp")
             return AssetType::Texture;
-        if (ext == ".obj" || ext == ".fbx")
+        if (ext == ".obj" || ext == ".fbx" || ext == ".gltf" || ext == ".glb")
             return AssetType::Mesh;
         if (ext == ".glsl" || ext == ".hlsl")
             return AssetType::Shader;
@@ -299,7 +303,7 @@ namespace Wheatear {
             return AssetType::AnimationClip;
         if (ext == AssetFileType::SheetExtension)
             return AssetType::SpriteSheet;
-        if (ext == ".yaml" || ext == ".yml" || ext == ".json" || ext == ".txt")
+        if (ext == ".yaml" || ext == ".yml" || ext == ".json" || ext == ".txt" || ext == ".wtb")
             return AssetType::Data;
 
         return AssetType::Unknown;
@@ -386,6 +390,8 @@ namespace Wheatear {
             VisualNovelEditorRequests::RequestOpenScript(relative);
         else if (ext == ".wts")
             EventScriptGraphRequests::RequestOpenScript(relative);
+        else if (ext == ".wtb")
+            BehaviorGraphRequests::RequestOpenBehavior(relative);
         else if (ext == AssetFileType::SceneExtension)
         {
             if (m_OnOpenScene) m_OnOpenScene(path);
@@ -498,10 +504,24 @@ namespace Wheatear {
         {
             Entity meshEntity = scene->CreateEntity("ThumbMesh");
             auto& meshComponent = meshEntity.AddComponent<MeshRendererComponent>();
-            meshComponent.Mesh = Mesh::Create(path.string());
-            if (!meshComponent.Mesh)
-                return false;
-            meshComponent.Material = Material::Create();
+
+            std::string extension = path.extension().string();
+            std::transform(extension.begin(), extension.end(), extension.begin(),
+                [](unsigned char ch) { return static_cast<char>(std::tolower(ch)); });
+
+            if (extension == ".fbx" || extension == ".gltf" || extension == ".glb")
+            {
+                meshComponent.Model = Model::Create(path.string());
+                if (!meshComponent.Model)
+                    return false;
+            }
+            else
+            {
+                meshComponent.Mesh = Mesh::Create(path.string());
+                if (!meshComponent.Mesh)
+                    return false;
+                meshComponent.Material = Material::Create();
+            }
         }
         else if (type == AssetType::AnimationClip)
         {
@@ -614,7 +634,7 @@ namespace Wheatear {
     void ContentBrowserPanel::ImportAssetsIntoCurrentDirectory()
     {
         const std::vector<std::string> files = Wheatear::FileDialogs::OpenFiles(
-            "All Supported Files\0*.png;*.jpg;*.jpeg;*.webp;*.wav;*.mp3;*.ogg;*.ttf;*.ttc;*.otf;*.obj;*.glsl;*.yaml;*.yml;*.json\0"
+            "All Supported Files\0*.png;*.jpg;*.jpeg;*.webp;*.wav;*.mp3;*.ogg;*.ttf;*.ttc;*.otf;*.obj;*.fbx;*.gltf;*.glb;*.glsl;*.yaml;*.yml;*.json\0"
             "All Files\0*.*\0");
         if (files.empty())
             return;
@@ -997,7 +1017,8 @@ namespace Wheatear {
         if (!m_ShowSidebar)
             return;
 
-        ImGui::BeginChild("##sidebar", ImVec2(m_SidebarWidth, 0), true);
+        const float uiScale = ImGui::GetIO().FontGlobalScale;
+        ImGui::BeginChild("##sidebar", ImVec2(m_SidebarWidth * uiScale, 0), true);
 
         // UE-style Sources panel: a root entry plus the folder tree.
         EditorWidgets::SectionHeader(EditorLocale::Text("Sources", "内容"));
@@ -1047,18 +1068,9 @@ namespace Wheatear {
 
     void ContentBrowserPanel::DrawFileGrid()
     {
-        // Ctrl+wheel zooms the thumbnail size (UE-style). Consume the wheel
-        // before the child window's scroll handling reads it, so zoom never
-        // also scrolls the grid.
-        ImGuiIO& io = ImGui::GetIO();
-        if (io.KeyCtrl && io.MouseWheel != 0.0f)
-        {
-            m_ThumbnailSize = std::clamp(
-                m_ThumbnailSize * (1.0f + io.MouseWheel * 0.06f), 32.0f, 160.0f);
-            io.MouseWheel = 0.0f;
-        }
-
         ImGui::BeginChild("##filegrid", ImVec2(0, 0), false);
+
+        ImGuiIO& io = ImGui::GetIO();
 
         const auto entries = GetFilteredEntries();
         if (entries.empty())
@@ -1072,9 +1084,15 @@ namespace Wheatear {
             return;
         }
 
-        const float cellSize    = m_ThumbnailSize + m_Padding;
+        const float textScale = ImGui::GetIO().FontGlobalScale;
+        const float thumbSize = m_ThumbnailSize;
+        const float padding = m_Padding;
+        // Icons keep their own size; the cell grows to fit the larger text
+        // baseline so filenames don't collapse into ellipses.
+        const float cellWidth = std::max(thumbSize + padding,
+            80.0f * textScale);
         const float panelWidth  = ImGui::GetContentRegionAvail().x;
-        const int   columnCount = std::max(1, static_cast<int>(panelWidth / cellSize));
+        const int   columnCount = std::max(1, static_cast<int>(panelWidth / cellWidth));
 
         if (ImGui::IsWindowFocused() && ImGui::GetIO().KeyCtrl && ImGui::IsKeyPressed(ImGuiKey_A))
         {
@@ -1103,7 +1121,7 @@ namespace Wheatear {
         // .wtsheet item can reserve vertical space below its row for the
         // inline cell strip. Pass 1 measures strip heights per row.
         const int   rowCount  = static_cast<int>((entries.size() + columnCount - 1) / columnCount);
-        const float rowHeight = m_ThumbnailSize + m_Padding + 24.0f;
+        const float rowHeight = thumbSize + padding + 24.0f * textScale;
         std::vector<float> rowStripHeight(rowCount, 0.0f);
         for (int i = 0; i < static_cast<int>(entries.size()); ++i)
         {
@@ -1142,8 +1160,11 @@ namespace Wheatear {
             const auto& path = entry.path();
             const int row = i / columnCount;
             const int col = i % columnCount;
-            ImGui::SetCursorScreenPos(ImVec2(gridStartX + col * cellSize,
-                gridStartY + row * rowHeight + rowOffset[row]));
+            const float cellX = gridStartX + col * cellWidth;
+            const float cellY = gridStartY + row * rowHeight + rowOffset[row];
+            const float innerOffset =
+                (cellWidth - (thumbSize + padding)) * 0.5f;
+            ImGui::SetCursorScreenPos(ImVec2(cellX + innerOffset, cellY));
 
             const auto relativePath = std::filesystem::relative(path, GetEditorAssetPath());
             const std::string filename = relativePath.filename().string();
@@ -1186,8 +1207,9 @@ namespace Wheatear {
 
             if (isSelected)
             {
-                const ImVec2 pos = ImGui::GetCursorScreenPos();
-                const ImVec2 size = ImVec2(m_ThumbnailSize + m_Padding, m_ThumbnailSize + m_Padding + 24.0f);
+                const ImVec2 pos(cellX, cellY);
+                const ImVec2 size(cellWidth,
+                    thumbSize + padding + 24.0f * textScale);
                 ImDrawList* drawList = ImGui::GetWindowDrawList();
                 drawList->AddRectFilled(pos, ImVec2(pos.x + size.x, pos.y + size.y),
                     IM_COL32(59, 184, 204, 34), 6.0f);
@@ -1200,8 +1222,9 @@ namespace Wheatear {
             if (m_RevealHighlightTimer > 0.0f && path == m_RevealHighlightPath)
             {
                 const float alpha = std::min(1.0f, m_RevealHighlightTimer);
-                const ImVec2 pos = ImGui::GetCursorScreenPos();
-                const ImVec2 size = ImVec2(m_ThumbnailSize + m_Padding, m_ThumbnailSize + m_Padding + 24.0f);
+                const ImVec2 pos(cellX, cellY);
+                const ImVec2 size(cellWidth,
+                    thumbSize + padding + 24.0f * textScale);
                 ImDrawList* drawList = ImGui::GetWindowDrawList();
                 drawList->AddRectFilled(pos, ImVec2(pos.x + size.x, pos.y + size.y),
                     IM_COL32(255, 170, 60, static_cast<int>(55.0f * alpha)), 6.0f);
@@ -1210,12 +1233,12 @@ namespace Wheatear {
             }
 
             ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0, 0, 0, 0));
-            ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(0.23f, 0.72f, 0.80f, 0.12f));
-            ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4(0.23f, 0.72f, 0.80f, 0.20f));
+            ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(0.85f, 0.663f, 0.373f, 0.12f));
+            ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4(0.85f, 0.663f, 0.373f, 0.20f));
             ImGui::ImageButton(
                 "##AssetIcon",
                 static_cast<ImTextureID>(static_cast<uintptr_t>(displayIcon->GetRendererID())),
-                { m_ThumbnailSize, m_ThumbnailSize },
+                { thumbSize, thumbSize },
                 { 0, 1 }, { 1, 0 }
             );
             ImGui::PopStyleColor(3);
@@ -1293,7 +1316,7 @@ namespace Wheatear {
             // Inline rename field replaces the filename while renaming.
             if (path == m_RenameTarget)
             {
-                ImGui::SetNextItemWidth(m_ThumbnailSize);
+                ImGui::SetNextItemWidth(thumbSize);
                 ImGui::SetKeyboardFocusHere();
                 const bool committed = ImGui::InputText("##rename", m_RenameBuffer,
                     sizeof(m_RenameBuffer),
@@ -1311,9 +1334,8 @@ namespace Wheatear {
                 // list at a fixed position so it is always visible (never
                 // dependent on cursor state), clipped to the cell width with
                 // an ellipsis and centered.
-                const ImVec2 thumbMin = ImGui::GetItemRectMin();
                 const ImVec2 thumbMax = ImGui::GetItemRectMax();
-                const float nameMaxWidth = m_ThumbnailSize + m_Padding - 6.0f;
+                const float nameMaxWidth = cellWidth - 8.0f * textScale;
                 std::string shortName = filename;
                 while (!shortName.empty()
                     && ImGui::CalcTextSize((shortName + "...").c_str()).x > nameMaxWidth)
@@ -1324,10 +1346,10 @@ namespace Wheatear {
                     shortName += "...";
 
                 const float nameWidth = ImGui::CalcTextSize(shortName.c_str()).x;
-                const float nameX = thumbMin.x
-                    + std::max(0.0f, (m_ThumbnailSize + m_Padding - nameWidth) * 0.5f);
+                const float nameX = cellX
+                    + std::max(0.0f, (cellWidth - nameWidth) * 0.5f);
                 ImGui::GetWindowDrawList()->AddText(
-                    ImVec2(nameX, thumbMax.y + 3.0f),
+                    ImVec2(nameX, thumbMax.y + 3.0f * textScale),
                     ImGui::GetColorU32(ImGuiCol_Text),
                     shortName.c_str());
             }
@@ -1342,7 +1364,7 @@ namespace Wheatear {
                 const bool expanded = (path.string() == m_ExpandedSheetPath);
                 ImGui::SetCursorScreenPos(ImVec2(thumbMax.x - 20.0f, thumbMin.y + 3.0f));
                 ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0, 0, 0, 0));
-                ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(0.23f, 0.72f, 0.80f, 0.25f));
+                ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(0.85f, 0.663f, 0.373f, 0.25f));
                 if (ImGui::SmallButton(expanded ? "▾" : "▸"))
                 {
                     if (expanded)
@@ -1412,6 +1434,35 @@ namespace Wheatear {
                 else
                 {
                     m_RegistryStatus = "Failed to create event script.";
+                }
+            }
+            if (ImGui::MenuItem(EditorLocale::Text("New Behavior Graph (.wtb)", "新建行为图 (.wtb)")))
+            {
+                std::filesystem::path candidate = m_CurrentDirectory / "new_behavior.wtb";
+                for (int i = 2; std::filesystem::exists(candidate); ++i)
+                    candidate = m_CurrentDirectory / ("new_behavior_" + std::to_string(i) + ".wtb");
+
+                const std::string templateText =
+                    "version: 1\n"
+                    "module: gameplay\n"
+                    "behaviors:\n"
+                    "  - id: gameplay.new_behavior\n"
+                    "    version: 1\n"
+                    "    entry: begin\n"
+                    "    nodes:\n"
+                    "      - id: begin\n"
+                    "        end: true\n";
+
+                if (EditorWidgets::WriteFileText(candidate, templateText))
+                {
+                    m_SelectedPath = candidate;
+                    m_RegistryStatus = "Created behavior graph: " + candidate.filename().string();
+                    BehaviorGraphRequests::RequestOpenBehavior(
+                        AssetPath::ToProjectRelative(candidate).generic_string());
+                }
+                else
+                {
+                    m_RegistryStatus = "Failed to create behavior graph.";
                 }
             }
             if (ImGui::MenuItem(EditorLocale::Text("New VN Script (.vn)", "新建视觉小说脚本 (.vn)")))
@@ -1525,7 +1576,11 @@ namespace Wheatear {
         const float stripWidth  = ImGui::GetContentRegionAvail().x;
         const float stripHeight = (cellRows + rectRows) * kSheetCellRowHeight + kSheetStripPadding;
 
-        ImGui::PushStyleColor(ImGuiCol_ChildBg, ImVec4(0.05f, 0.06f, 0.08f, 0.85f));
+        const bool darkTheme =
+            ImGui::GetStyleColorVec4(ImGuiCol_WindowBg).x < 0.5f;
+        ImGui::PushStyleColor(ImGuiCol_ChildBg, darkTheme
+            ? ImVec4(0.05f, 0.06f, 0.08f, 0.85f)
+            : ImVec4(0.955f, 0.945f, 0.925f, 0.92f));
         ImGui::BeginChild("##sheetcells", ImVec2(stripWidth, stripHeight), true);
 
         const ImTextureID texId =
@@ -1641,7 +1696,8 @@ namespace Wheatear {
         if (!m_ShowInspector)
             return;
 
-        ImGui::BeginChild("##inspector", ImVec2(180, 0), true);
+        const float uiScale = ImGui::GetIO().FontGlobalScale;
+        ImGui::BeginChild("##inspector", ImVec2(m_InspectorWidth * uiScale, 0), true);
         EditorWidgets::SectionHeader(
             EditorLocale::Text("Inspector", "检查器"),
             EditorLocale::Text("Selected asset metadata and import settings.",
@@ -1764,6 +1820,48 @@ namespace Wheatear {
                             const float y = cursor.y + (area.y - barHeight) * 0.5f;
                             drawList->AddRectFilled(ImVec2(x + 1.0f, y),
                                 ImVec2(x + barWidth - 1.0f, y + barHeight), barColor);
+                        }
+                    }
+                }
+                else if (metadata->Kind == EditorAssetKind::Model)
+                {
+                    ImGui::Spacing();
+                    ImGui::TextDisabled("Model Import");
+                    changed |= ImGui::DragFloat(EditorLocale::Text("Scale", "缩放"),
+                        &metadata->Model.Scale, 0.01f, 0.001f, 100.0f, "%.3f");
+                    changed |= ImGui::Checkbox(EditorLocale::Text("Convert To Y-Up", "转换为 Y-Up"),
+                        &metadata->Model.ConvertToYUp);
+                    changed |= ImGui::Checkbox(EditorLocale::Text("Flip Normal Green", "翻转法线绿通道"),
+                        &metadata->Model.FlipNormalGreen);
+
+                    const char* channelModes[] = { "Separate", "ORM", "Metallic/Smoothness" };
+                    int channelMode = static_cast<int>(metadata->Model.ChannelMode);
+                    if (ImGui::Combo(EditorLocale::Text("Material Channels", "材质通道"),
+                            &channelMode, channelModes, IM_ARRAYSIZE(channelModes)))
+                    {
+                        metadata->Model.ChannelMode =
+                            static_cast<ModelImporter::MaterialChannelMode>(channelMode);
+                        changed = true;
+                    }
+                    changed |= EditorWidgets::InputString(
+                        EditorLocale::Text("Texture Search Path", "纹理搜索路径"),
+                        metadata->Model.TextureSearchPath, 256);
+
+                    if (ImGui::Button(EditorLocale::Text("Re-Cook Model", "重新烘焙模型")))
+                    {
+                        std::filesystem::path cookedPath = m_SelectedPath;
+                        cookedPath.replace_extension(".wtmodel");
+                        std::string error;
+                        if (ModelImporter::Cook(
+                                m_SelectedPath, cookedPath,
+                                metadata->Model, &error))
+                        {
+                            Model::ClearCache();
+                            m_RegistryStatus = "Model cooked: " + cookedPath.filename().string();
+                        }
+                        else
+                        {
+                            m_RegistryStatus = "Cook failed: " + error;
                         }
                     }
                 }
@@ -1912,6 +2010,28 @@ namespace Wheatear {
             m_RevealHighlightTimer = 2.0f;
         }
 
+        // Thumbnail zoom is scoped to the Content Browser window. Handling it
+        // here (before child windows) prevents Ctrl+wheel in the viewport from
+        // mutating the browser size.
+        auto zoomThumbnailsIfHovered = [this]()
+        {
+            ImGuiIO& io = ImGui::GetIO();
+            if (!io.KeyCtrl || io.MouseWheel == 0.0f)
+                return;
+            const ImVec2 pos = ImGui::GetWindowPos();
+            const ImVec2 size = ImGui::GetWindowSize();
+            const bool hovered = ImGui::IsWindowHovered(
+                    ImGuiHoveredFlags_ChildWindows)
+                || ImGui::IsMouseHoveringRect(pos,
+                    ImVec2(pos.x + size.x, pos.y + size.y));
+            if (!hovered)
+                return;
+            m_ThumbnailSize = std::clamp(
+                m_ThumbnailSize * (1.0f + io.MouseWheel * 0.06f),
+                32.0f, 160.0f);
+            io.MouseWheel = 0.0f;
+        };
+
         if (m_DrawerMode)
         {
             // Fold the docked window to a tab bar and show the floating
@@ -1933,6 +2053,7 @@ namespace Wheatear {
                 ImGuiWindowFlags_NoDocking | ImGuiWindowFlags_NoCollapse
                 | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize
                 | ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoSavedSettings);
+            zoomThumbnailsIfHovered();
             DrawPanelContent();
             ImGui::End();
             ImGui::PopStyleVar(2);
@@ -1944,33 +2065,38 @@ namespace Wheatear {
             return;
         }
 
-        ImGui::Begin(EditorLocale::Text("Content Browser", "资源浏览器"));
+        ImGui::Begin("Content Browser");
+        zoomThumbnailsIfHovered();
         DrawPanelContent();
         ImGui::End();
     }
 
     void ContentBrowserPanel::DrawPanelContent()
     {
-        EditorWidgets::PanelHeader(EditorLocale::Text("Content Browser", "资源浏览器"));
+        const float uiScale = ImGui::GetIO().FontGlobalScale;
         DrawToolbar();
 
         if (m_ShowSidebar)
         {
             DrawSidebar();
             ImGui::SameLine();
-            DrawVerticalSplitter("##sidebar_split", m_SidebarWidth, 90.0f, 420.0f, false);
+            DrawVerticalSplitter("##sidebar_split", m_SidebarWidth,
+                90.0f, 420.0f, false, uiScale);
             ImGui::SameLine();
         }
 
         if (m_ShowInspector)
         {
-            const float gridWidth = std::max(120.0f, ImGui::GetContentRegionAvail().x - m_InspectorWidth);
+            const float inspectorWidth = m_InspectorWidth * uiScale;
+            const float gridWidth = std::max(120.0f,
+                ImGui::GetContentRegionAvail().x - inspectorWidth);
             ImGui::BeginChild("##gridwrap", ImVec2(gridWidth, 0), false);
             DrawFileGrid();
             ImGui::EndChild();
 
             ImGui::SameLine();
-            DrawVerticalSplitter("##inspector_split", m_InspectorWidth, 140.0f, 420.0f, true);
+            DrawVerticalSplitter("##inspector_split", m_InspectorWidth,
+                140.0f, 420.0f, true, uiScale);
             ImGui::SameLine();
             DrawInspector();
         }

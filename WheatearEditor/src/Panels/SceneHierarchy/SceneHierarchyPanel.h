@@ -75,6 +75,10 @@ namespace Wheatear {
             Entity parent,
             const UIChildMap& childMap);
 
+        // Generic Transform hierarchy reparenting for non-UI entities.
+        bool CanReparentTransform(Entity child, Entity parent) const;
+        void ReparentTransformWithUndo(Entity child, Entity parent);
+
         // Editor folder grouping (non-UI entities only).
         bool IsFolder(Entity entity) const;
         bool CanReparentToFolder(Entity child, Entity folder) const;
@@ -104,6 +108,8 @@ namespace Wheatear {
         char m_RenameBuffer[256] = {};
         char m_SearchBuffer[128] = {};
         char m_AddComponentSearch[128] = {};
+        bool m_AddComponentPopupRequested = false;
+        bool m_AddComponentPopupJustOpened = false;
         bool m_ShowOnlyUI = false;
         bool m_SceneSettingsEditing = false;
         bool m_SceneSettingsEditStartCanSave = true;

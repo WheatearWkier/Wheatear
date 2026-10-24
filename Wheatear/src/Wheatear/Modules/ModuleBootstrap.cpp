@@ -17,6 +17,9 @@
 #include "Wheatear/Gameplay/Action/ActionAssetLoader.h"
 #include "Wheatear/Gameplay/Action/ActionResolver.h"
 #include "Wheatear/Gameplay/Action/EffectRegistry.h"
+#include "Wheatear/Gameplay/Behavior/BehaviorAssetLoader.h"
+#include "Wheatear/Gameplay/Behavior/BehaviorBuiltinPrimitives.h"
+#include "Wheatear/Gameplay/Behavior/BehaviorSystem.h"
 #include "Wheatear/Runtime/CommandBus.h"
 #include "Wheatear/Scene/SceneSystemRegistry.h"
 #include "Wheatear/Scripting/EventScriptSystem.h"
@@ -126,7 +129,10 @@ namespace Wheatear {
         WAO::RegisterRecipePreviewResolver("tactical.", "Tactical action recipe resolved");
         RegisterExampleCustomEffects();
         RegisterExampleSkillBehaviors();
+        WAO::RegisterBuiltinBehaviorPrimitives();
         AssetAliasRegistry::Load();
+        WAO::BehaviorAssetLoader::LoadDirectory(
+            AssetAliasRegistry::Path("wao.behavior_directory", "assets/gameplay/behaviors"));
         const size_t actionRecipeCount = WAO::ActionAssetLoader::LoadManifest(
             AssetAliasRegistry::Path("wao.action_sets", "assets/gameplay/actions/action_sets.yaml"));
         if (actionRecipeCount == 0)
@@ -134,6 +140,10 @@ namespace Wheatear {
             WAO::ActionAssetLoader::LoadDirectory(
                 AssetAliasRegistry::Path("wao.action_directory", "assets/gameplay/actions"));
         }
+
+        SceneSystemRegistry::RegisterRuntimeSystem(
+            "Behavior",
+            []() -> Scope<ISystem> { return CreateScope<WAO::BehaviorSystem>(); });
 
         SceneSystemRegistry::RegisterRuntimeSystem(
             "VisualNovel",

@@ -9,10 +9,10 @@
 Wheatear 采用中央资源数据库作为唯一真相源：
 
 ```text
-<项目根>/assets/.wheatear/asset_registry.yaml
+<项目根>/Intermediate/AssetRegistry.yaml
 ```
 
-（默认项目即 `Projects/WheatearDemo/assets/.wheatear/asset_registry.yaml`。
+（默认项目即 `Projects/WheatearDemo/Intermediate/AssetRegistry.yaml`。
 注意它不是引擎目录 `WheatearEditor/assets` 下的文件。）
 
 它记录：
@@ -48,7 +48,7 @@ Wheatear 采用中央资源数据库作为唯一真相源：
 | 材质 | `.wtmaterial` | 运行时材质 | 是 |
 | 事件脚本 | `.wts` | 原生事件脚本 | 是 |
 | UI 模板 | `.wtuit` | 编辑器 UI 模板描述 | 否 |
-| 资源数据库 | `assets/.wheatear/asset_registry.yaml` | 编辑器资源索引 | 否 |
+| 资源数据库 | `Intermediate/AssetRegistry.yaml` | 编辑器资源索引 | 否 |
 | 旧元数据 | `.wtmeta` | 历史 sidecar，当前不使用 | 否 |
 
 `.wtuit` 是编辑器资产，它用于告诉编辑器要创建哪一种 UI 模板。真正实例化后，场景里保存的是普通 ECS 实体和 UI 组件，不依赖 `.wtuit` 在运行时存在。
@@ -140,7 +140,7 @@ Entities:
 
 运行时打包只关心游戏真正需要的资源。以下内容不会进入 `.wtpack`：
 
-- `assets/.wheatear`
+- `Intermediate/` 与项目内的 `assets/.wheatear/archive`
 - `.wtuit`
 - `.wtmeta`
 - `assets/cache`

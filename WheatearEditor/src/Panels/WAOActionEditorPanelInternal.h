@@ -74,8 +74,18 @@ namespace Wheatear::WAOActionEditorInternal {
             }
         }
 
-        inline const char* DurationPolicyName(WAO::EffectDurationPolicy policy)
+        inline const char* TargetSelectorName(WAO::EffectTargetSelector selector)
         {
+            switch (selector)
+            {
+            case WAO::EffectTargetSelector::Target: return "Target";
+            case WAO::EffectTargetSelector::Source: return "Source";
+            case WAO::EffectTargetSelector::Actor:
+            default: return "Actor";
+            }
+        }
+
+        inline const char* DurationPolicyName(WAO::EffectDurationPolicy policy)        {
             switch (policy)
             {
             case WAO::EffectDurationPolicy::Seconds: return "Seconds";
@@ -200,25 +210,30 @@ namespace Wheatear::WAOActionEditorInternal {
             {
             case WAO::EffectType::Damage:
                 effect.AttributeId = "hp";
-                effect.Value = -10.0f;
+                effect.Value = 10.0f;
+                effect.TargetSelector = WAO::EffectTargetSelector::Target;
                 break;
             case WAO::EffectType::Heal:
                 effect.AttributeId = "hp";
                 effect.Value = 10.0f;
+                effect.TargetSelector = WAO::EffectTargetSelector::Target;
                 break;
             case WAO::EffectType::ModifyAttribute:
                 effect.AttributeId = "atk";
                 effect.Value = 1.0f;
+                effect.TargetSelector = WAO::EffectTargetSelector::Target;
                 effect.DurationPolicy = WAO::EffectDurationPolicy::Turns;
                 effect.Turns = 1;
                 break;
             case WAO::EffectType::AddState:
                 effect.StateId = WAO::StateIds::Stun;
+                effect.TargetSelector = WAO::EffectTargetSelector::Target;
                 effect.DurationPolicy = WAO::EffectDurationPolicy::Turns;
                 effect.Turns = 1;
                 break;
             case WAO::EffectType::RemoveState:
                 effect.StateId = WAO::StateIds::Stun;
+                effect.TargetSelector = WAO::EffectTargetSelector::Target;
                 break;
             case WAO::EffectType::StartCooldown:
                 effect.Seconds = 1.0f;
@@ -230,10 +245,14 @@ namespace Wheatear::WAOActionEditorInternal {
                 break;
             case WAO::EffectType::Launch:
                 effect.Value = 1.0f;
+                effect.Seconds = 0.30f;
+                effect.DurationPolicy = WAO::EffectDurationPolicy::Seconds;
+                effect.TargetSelector = WAO::EffectTargetSelector::Target;
                 break;
             case WAO::EffectType::HitStun:
                 effect.Seconds = 0.20f;
                 effect.DurationPolicy = WAO::EffectDurationPolicy::Seconds;
+                effect.TargetSelector = WAO::EffectTargetSelector::Target;
                 break;
             case WAO::EffectType::EmitSignal:
                 effect.SignalId = "action_hit";
@@ -245,10 +264,10 @@ namespace Wheatear::WAOActionEditorInternal {
             return effect;
         }
 
-        // Known attribute ids: the runner's hardcoded Health key (ActionRunner.cpp
-        // uses the literal "Health" for Damage/Heal), the editor template seeds
-        // (hp/atk/mana), and every attribute referenced by any recipe's effects.
-        // Cached on ActionDatabase::Revision so the set refreshes on recipe reload.
+        // Known attribute ids: the canonical health/max-health keys, the editor
+        // template seeds (hp/atk/mana), and every attribute referenced by any
+        // recipe's effects. Cached on ActionDatabase::Revision so the set
+        // refreshes on recipe reload.
         inline const std::unordered_map<std::string, float>& KnownAttributes()
         {
             static std::unordered_map<std::string, float> attributes;
@@ -260,7 +279,13 @@ namespace Wheatear::WAOActionEditorInternal {
                 attributes.clear();
                 attributes["Health"] = 0.0f;
                 attributes["hp"] = 0.0f;
+                attributes["MaxHealth"] = 0.0f;
+                attributes["max_health"] = 0.0f;
+                attributes["max_hp"] = 0.0f;
                 attributes["atk"] = 0.0f;
+                attributes["attack"] = 0.0f;
+                attributes["def"] = 0.0f;
+                attributes["defense"] = 0.0f;
                 attributes["mana"] = 0.0f;
                 for (const WAO::ActionRecipe& recipe : WAO::ActionDatabase::All())
                 {
@@ -790,41 +815,72 @@ namespace Wheatear::WAOActionEditorInternal {
             node["params"] = map;
         }
 
-        inline void WriteEffects(YAML::Node node, const std::vector<WAO::EffectSpec>& effects)
+        inline void WriteEffects(YAML::Node node,
+            const std::vector<WAO::EffectSpec>& effects,
+            const std::unordered_map<uint64_t, std::string>* origins)
         {
-            // Original "type" spellings are preserved (e.g. "Damage") so an
-            // edit round-trip does not rewrite unrelated casing in git diffs.
-            std::vector<std::string> originalTypes;
-            if (const YAML::Node original = node["effects"])
-            {
-                if (original.IsSequence())
-                {
-                    for (const YAML::Node& entry : original)
-                    {
-                        if (entry && entry["type"])
-                            originalTypes.push_back(entry["type"].as<std::string>());
-                        else
-                            originalTypes.emplace_back();
-                    }
-                }
-            }
+            static const char* const knownKeys[] = {
+                "type", "target", "source", "attribute", "state", "signal",
+                "value", "turns", "seconds", "durationPolicy", "customType",
+                "formula"
+            };
 
             YAML::Node sequence(YAML::NodeType::Sequence);
-            size_t index = 0;
             for (const WAO::EffectSpec& effect : effects)
             {
                 YAML::Node item(YAML::NodeType::Map);
+                if (origins && effect.EditorId != 0)
+                {
+                    const auto origin = origins->find(effect.EditorId);
+                    if (origin != origins->end() && !origin->second.empty())
+                    {
+                        try { item = YAML::Load(origin->second); }
+                        catch (const YAML::Exception&) { item = YAML::Node(YAML::NodeType::Map); }
+                    }
+                }
+                if (!item.IsMap())
+                    item = YAML::Node(YAML::NodeType::Map);
+
+                for (const char* key : knownKeys)
+                    item.remove(key);
+
                 const std::string canonical = EffectTypeYamlName(effect.Type);
                 std::string typeText = canonical;
-                if (index < originalTypes.size())
+                if (origins && effect.EditorId != 0)
                 {
-                    const std::string originalLower =
-                        StringUtils::ToLower(StringUtils::Trim(originalTypes[index]));
-                    if (!originalLower.empty() && originalLower == StringUtils::ToLower(canonical))
-                        typeText = originalTypes[index];   // keep original casing
+                    const auto origin = origins->find(effect.EditorId);
+                    if (origin != origins->end() && !origin->second.empty())
+                    {
+                        try
+                        {
+                            const YAML::Node original = YAML::Load(origin->second);
+                            if (original["type"])
+                            {
+                                const std::string originalType =
+                                    original["type"].as<std::string>();
+                                if (!originalType.empty()
+                                    && StringUtils::ToLower(StringUtils::Trim(originalType))
+                                        == StringUtils::ToLower(canonical))
+                                    typeText = originalType;
+                            }
+                        }
+                        catch (const YAML::Exception&) {}
+                    }
                 }
                 item["type"] = typeText;
-                ++index;
+
+                if (effect.Target != 0)
+                    item["target"] = static_cast<uint64_t>(effect.Target);
+                else if (effect.TargetSelector != WAO::EffectTargetSelector::Actor)
+                    item["target"] = effect.TargetSelector == WAO::EffectTargetSelector::Target
+                        ? "target" : "source";
+
+                if (effect.Source != 0)
+                    item["source"] = static_cast<uint64_t>(effect.Source);
+                else if (effect.SourceSelector != WAO::EffectTargetSelector::Actor)
+                    item["source"] = effect.SourceSelector == WAO::EffectTargetSelector::Target
+                        ? "target" : "source";
+
                 if (!effect.AttributeId.empty())
                     item["attribute"] = effect.AttributeId;
                 if (!effect.StateId.empty())
@@ -837,7 +893,8 @@ namespace Wheatear::WAOActionEditorInternal {
                     item["turns"] = effect.Turns;
                 if (effect.Seconds > 0.0f)
                     item["seconds"] = effect.Seconds;
-                item["durationPolicy"] = DurationPolicyYamlName(effect.DurationPolicy);
+                if (effect.DurationPolicy != WAO::EffectDurationPolicy::Instant)
+                    item["durationPolicy"] = DurationPolicyYamlName(effect.DurationPolicy);
                 if (!effect.CustomType.empty())
                     item["customType"] = effect.CustomType;
                 if (!effect.Formula.empty())
@@ -847,12 +904,15 @@ namespace Wheatear::WAOActionEditorInternal {
             node["effects"] = sequence;
         }
 
-        inline bool WriteEditableRecipeFields(YAML::Node node, const WAO::ActionRecipe& recipe)
+        inline bool WriteEditableRecipeFields(YAML::Node node,
+            const WAO::ActionRecipe& recipe,
+            const std::unordered_map<uint64_t, std::string>* effectOrigins = nullptr)
         {
             if (!node)
                 return false;
 
             node["id"] = recipe.Id;
+
             node["displayName"] = recipe.DisplayName;
             node["description"] = recipe.Description;
             node["icon"] = AuthoringPath(recipe.IconPath);
@@ -864,15 +924,9 @@ namespace Wheatear::WAOActionEditorInternal {
             node["startup"] = recipe.Startup;
             node["hitTime"] = recipe.HitTime;
             node["recovery"] = recipe.Recovery;
-            // Template-only fields: only overwrite when the source YAML already
-            // carries them, so saving an older recipe does not add fields that
-            // were never authored (keeps git diffs minimal).
-            if (node["cancelStart"])
-                node["cancelStart"] = recipe.CancelStart;
-            if (node["cancelEnd"])
-                node["cancelEnd"] = recipe.CancelEnd;
-            if (node["movementScale"])
-                node["movementScale"] = recipe.MovementScale;
+            node["cancelStart"] = recipe.CancelStart;
+            node["cancelEnd"] = recipe.CancelEnd;
+            node["movementScale"] = recipe.MovementScale;
             WriteStringSequence(node, "tags", recipe.Tags);
             WriteStringSequence(node, "requiredStates", recipe.RequiredStates);
             WriteStringSequence(node, "blockedStates", recipe.BlockedStates);
@@ -881,7 +935,15 @@ namespace Wheatear::WAOActionEditorInternal {
             WriteStringSequence(node, "signals", recipe.Signals);
             WriteResourceCost(node, recipe.ResourceCost);
             WriteParams(node, recipe.Params);
-            WriteEffects(node, recipe.Effects);
+            WriteEffects(node, recipe.Effects, effectOrigins);
+            if (!recipe.BehaviorId.empty() || node["behaviorId"])
+                node["behaviorId"] = recipe.BehaviorId;
+            if (!recipe.BehaviorFile.empty() || node["behaviorFile"])
+                node["behaviorFile"] = AuthoringPath(recipe.BehaviorFile);
+            if (!recipe.BehaviorEntry.empty() || node["behaviorEntry"])
+                node["behaviorEntry"] = recipe.BehaviorEntry;
+            if (recipe.BehaviorVersion > 0 || node["behaviorVersion"])
+                node["behaviorVersion"] = recipe.BehaviorVersion;
             return true;
         }
 
@@ -921,13 +983,19 @@ namespace Wheatear::WAOActionEditorInternal {
 
         inline std::string EffectTargetText(const WAO::EffectSpec& effect)
         {
+            std::string prefix;
+            if (effect.TargetSelector == WAO::EffectTargetSelector::Target)
+                prefix = "target: ";
+            else if (effect.TargetSelector == WAO::EffectTargetSelector::Source)
+                prefix = "source: ";
+
             if (!effect.AttributeId.empty())
-                return effect.AttributeId;
+                return prefix + effect.AttributeId;
             if (!effect.StateId.empty())
-                return effect.StateId;
+                return prefix + effect.StateId;
             if (!effect.SignalId.empty())
-                return effect.SignalId;
-            return "-";
+                return prefix + effect.SignalId;
+            return prefix.empty() ? "-" : prefix + "-";
         }
 
         inline void SectionHeader(const char* label)

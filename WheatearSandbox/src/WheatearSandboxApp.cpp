@@ -1,130 +1,27 @@
 ﻿#include <Wheatear.h>
 #include <Wheatear/Core/EntryPoint.h>
+#include <Wheatear/Runtime/RuntimePatchManager.h>
 
+#include "RTSGameLayer.h"
 #include "RuntimeSceneLayer.h"
 
-#include "stb_image/stb_image.h"
+#include <Wheatear/Assets/ContentValidation.h>
+#include <Wheatear/Renderer/Model.h>
+
+int RunWAOSelfTests();
+int RunLogicSelfTests();
 
 #include <algorithm>
-#include <cstring>
-#include <cstdint>
 #include <cstdlib>
 #include <filesystem>
 #include <fstream>
-#include <iomanip>
-#include <limits>
-#include <sstream>
+#include <iostream>
 #include <string>
 #include <system_error>
-#include <vector>
 
 namespace {
 
 	constexpr const char* kAssetPackFilename = "content.wtpack";
-	constexpr char kAssetPackMagic[8] = { 'W', 'T', 'P', 'A', 'C', 'K', '1', '\0' };
-	constexpr uint32_t kAssetPackVersion = 1;
-	constexpr uint32_t kAssetPackMethodStore = 0;
-	constexpr uint32_t kAssetPackMethodZlib = 1;
-
-	static bool FirstPartEquals(const std::filesystem::path& path, const char* expected)
-	{
-		for (const auto& part : path)
-		{
-			const std::string text = part.generic_string();
-			if (text.empty() || text == ".")
-				continue;
-			return text == expected;
-		}
-		return false;
-	}
-
-	static bool IsSafePackEntryPath(const std::filesystem::path& path)
-	{
-		if (path.empty() || path.is_absolute() || !FirstPartEquals(path, "assets"))
-			return false;
-
-		for (const auto& part : path)
-		{
-			const std::string text = part.generic_string();
-			if (text == "..")
-				return false;
-		}
-		return true;
-	}
-
-	// The asset pack format is little-endian by design; read explicitly so
-	// the reader is independent of host byte order.
-	static bool ReadU16(std::istream& input, uint16_t* value)
-	{
-		char bytes[2] = {};
-		input.read(bytes, sizeof(bytes));
-		if (!input.good())
-			return false;
-		*value = static_cast<uint16_t>(
-			static_cast<uint8_t>(bytes[0]) |
-			(static_cast<uint16_t>(static_cast<uint8_t>(bytes[1])) << 8));
-		return true;
-	}
-
-	static bool ReadU32(std::istream& input, uint32_t* value)
-	{
-		char bytes[4] = {};
-		input.read(bytes, sizeof(bytes));
-		if (!input.good())
-			return false;
-		*value = static_cast<uint32_t>(static_cast<uint8_t>(bytes[0]))
-			| (static_cast<uint32_t>(static_cast<uint8_t>(bytes[1])) << 8)
-			| (static_cast<uint32_t>(static_cast<uint8_t>(bytes[2])) << 16)
-			| (static_cast<uint32_t>(static_cast<uint8_t>(bytes[3])) << 24);
-		return true;
-	}
-
-	static bool ReadU64(std::istream& input, uint64_t* value)
-	{
-		char bytes[8] = {};
-		input.read(bytes, sizeof(bytes));
-		if (!input.good())
-			return false;
-		uint64_t result = 0;
-		for (int i = 7; i >= 0; --i)
-			result = (result << 8) | static_cast<uint8_t>(bytes[i]);
-		*value = result;
-		return true;
-	}
-
-	static bool ReadBytes(std::istream& input, void* data, size_t size)
-	{
-		if (size == 0)
-			return true;
-
-		input.read(reinterpret_cast<char*>(data), static_cast<std::streamsize>(size));
-		return input.good();
-	}
-
-	static uint64_t HashString(const std::string& value)
-	{
-		uint64_t hash = 1469598103934665603ull;
-		for (unsigned char c : value)
-		{
-			hash ^= c;
-			hash *= 1099511628211ull;
-		}
-		return hash;
-	}
-
-	static std::string BuildPackFingerprint(const std::filesystem::path& packPath)
-	{
-		std::error_code error;
-		const uint64_t size = static_cast<uint64_t>(std::filesystem::file_size(packPath, error));
-		const auto writeTime = std::filesystem::last_write_time(packPath, error).time_since_epoch().count();
-
-		std::ostringstream input;
-		input << packPath.generic_string() << ':' << size << ':' << writeTime;
-
-		std::ostringstream output;
-		output << "wtpack_" << std::hex << HashString(input.str());
-		return output.str();
-	}
 
 	static std::filesystem::path GetExecutableDirectory()
 	{
@@ -142,7 +39,8 @@ namespace {
 		// Prefer a cache directory next to the executable so packaged games do
 		// not consume the system drive; fall back to the user profile when the
 		// install directory is not writable (e.g. Program Files).
-		const std::filesystem::path exeCache = GetExecutableDirectory() / ".wheatear_cache";
+		const std::filesystem::path exeCache =
+			GetExecutableDirectory() / "Saved" / "Cache" / "Runtime";
 		{
 			std::error_code error;
 			if (std::filesystem::create_directories(exeCache, error) || !error)
@@ -160,16 +58,33 @@ namespace {
 
 	static std::filesystem::path FindRuntimeAssetPack()
 	{
+		// Packaged output is self-contained: prefer the pack next to the
+		// executable, independent of the shell's current directory.
+		const std::filesystem::path exeDirectory = GetExecutableDirectory();
+		const std::filesystem::path exeCandidates[] = {
+			exeDirectory / "Content" / "Paks" / kAssetPackFilename,
+			exeDirectory / kAssetPackFilename,
+			exeDirectory / "assets" / "game" / kAssetPackFilename
+		};
+		for (const auto& candidate : exeCandidates)
+		{
+			if (std::filesystem::is_regular_file(candidate))
+				return candidate;
+		}
+
 		std::filesystem::path cursor = std::filesystem::current_path();
 		while (!cursor.empty())
 		{
-			const std::filesystem::path directPack = cursor / kAssetPackFilename;
-			if (std::filesystem::is_regular_file(directPack))
-				return directPack;
-
-			const std::filesystem::path gamePack = cursor / "assets" / "game" / kAssetPackFilename;
-			if (std::filesystem::is_regular_file(gamePack))
-				return gamePack;
+			const std::filesystem::path candidates[] = {
+				cursor / "Content" / "Paks" / kAssetPackFilename,
+				cursor / kAssetPackFilename,
+				cursor / "assets" / "game" / kAssetPackFilename
+			};
+			for (const auto& candidate : candidates)
+			{
+				if (std::filesystem::is_regular_file(candidate))
+					return candidate;
+			}
 
 			const std::filesystem::path parent = cursor.parent_path();
 			if (parent == cursor)
@@ -180,152 +95,38 @@ namespace {
 		return {};
 	}
 
-	static bool WriteExtractedFile(const std::filesystem::path& outputPath,
-		const unsigned char* bytes,
-		size_t size)
-	{
-		std::error_code error;
-		std::filesystem::create_directories(outputPath.parent_path(), error);
-		if (error)
-			return false;
-
-		std::ofstream output(outputPath, std::ios::binary | std::ios::trunc);
-		if (!output.is_open())
-			return false;
-
-		if (size > 0)
-			output.write(reinterpret_cast<const char*>(bytes), static_cast<std::streamsize>(size));
-		return output.good();
-	}
-
-	static bool ExtractAssetPack(const std::filesystem::path& packPath,
-		const std::filesystem::path& cacheRoot)
-	{
-		std::ifstream input(packPath, std::ios::binary);
-		if (!input.is_open())
-			return false;
-
-		input.seekg(0, std::ios::end);
-		const std::streampos fileSize = input.tellg();
-		input.seekg(0, std::ios::beg);
-		if (fileSize < 0)
-			return false;
-
-		char magic[sizeof(kAssetPackMagic)] = {};
-		if (!ReadBytes(input, magic, sizeof(magic)) ||
-			std::memcmp(magic, kAssetPackMagic, sizeof(kAssetPackMagic)) != 0)
-		{
-			WT_CORE_ERROR("Runtime asset pack has an invalid header: {}", packPath.string());
-			return false;
-		}
-
-		uint32_t version = 0;
-		uint32_t entryCount = 0;
-		if (!ReadU32(input, &version) || !ReadU32(input, &entryCount) ||
-			version != kAssetPackVersion)
-		{
-			WT_CORE_ERROR("Runtime asset pack version is not supported: {}", packPath.string());
-			return false;
-		}
-
-		std::error_code error;
-		std::filesystem::remove_all(cacheRoot, error);
-		std::filesystem::create_directories(cacheRoot, error);
-		if (error)
-			return false;
-
-		for (uint32_t i = 0; i < entryCount; ++i)
-		{
-			uint16_t pathLength = 0;
-			uint32_t method = 0;
-			uint64_t originalSize = 0;
-			uint64_t storedSize = 0;
-			if (!ReadU16(input, &pathLength) ||
-				!ReadU32(input, &method) ||
-				!ReadU64(input, &originalSize) ||
-				!ReadU64(input, &storedSize))
-			{
-				return false;
-			}
-
-			std::string entryPath(pathLength, '\0');
-			if (!ReadBytes(input, entryPath.data(), entryPath.size()))
-				return false;
-
-			std::replace(entryPath.begin(), entryPath.end(), '\\', '/');
-			const std::filesystem::path relativePath = std::filesystem::path(entryPath).lexically_normal();
-			if (!IsSafePackEntryPath(relativePath) ||
-				originalSize > static_cast<uint64_t>(std::numeric_limits<int>::max()))
-			{
-				WT_CORE_ERROR("Runtime asset pack contains an invalid entry: {}", entryPath);
-				return false;
-			}
-
-			// A truncated or hand-tampered pack can claim an arbitrary
-			// storedSize; only allocate what the file can actually deliver,
-			// otherwise a bogus entry triggers a multi-GB allocation
-			// (std::bad_alloc -> crash) before the read below can fail.
-			const std::streampos position = input.tellg();
-			const uint64_t remaining = (position >= 0 && fileSize > position)
-				? static_cast<uint64_t>(fileSize - position) : 0;
-			if (storedSize > remaining)
-			{
-				WT_CORE_ERROR("Runtime asset pack entry '{}' claims {} bytes but only {} remain in the pack.",
-					entryPath, storedSize, remaining);
-				return false;
-			}
-
-			std::vector<unsigned char> storedBytes(static_cast<size_t>(storedSize));
-			if (!ReadBytes(input, storedBytes.data(), storedBytes.size()))
-				return false;
-
-			const std::filesystem::path outputPath = cacheRoot / relativePath;
-			if (method == kAssetPackMethodStore)
-			{
-				if (originalSize != storedSize ||
-					!WriteExtractedFile(outputPath, storedBytes.data(), storedBytes.size()))
-				{
-					return false;
-				}
-			}
-			else if (method == kAssetPackMethodZlib)
-			{
-				int decodedSize = 0;
-				char* decoded = stbi_zlib_decode_malloc(
-					reinterpret_cast<const char*>(storedBytes.data()),
-					static_cast<int>(storedBytes.size()),
-					&decodedSize);
-
-				const bool ok = decoded &&
-					decodedSize == static_cast<int>(originalSize) &&
-					WriteExtractedFile(outputPath,
-						reinterpret_cast<const unsigned char*>(decoded),
-						static_cast<size_t>(decodedSize));
-
-				if (decoded)
-					stbi_image_free(decoded);
-				if (!ok)
-					return false;
-			}
-			else
-			{
-				WT_CORE_ERROR("Runtime asset pack contains an unknown compression method: {}", method);
-				return false;
-			}
-		}
-
-		std::ofstream marker(cacheRoot / ".complete", std::ios::binary | std::ios::trunc);
-		marker << BuildPackFingerprint(packPath) << ':' << entryCount;
-		return marker.good();
-	}
-
 	static std::filesystem::path PreparePackagedAssetRoot()
 	{
 		const std::filesystem::path packPath = FindRuntimeAssetPack();
 		if (packPath.empty())
 			return {};
 
-		const std::string fingerprint = BuildPackFingerprint(packPath);
+		// Packaged games run with their own directory as the working root so
+		// Config/Saved and relative content consistently resolve beside the exe.
+		{
+			std::error_code cwdError;
+			std::filesystem::current_path(GetExecutableDirectory(), cwdError);
+		}
+
+		std::string recoveryError;
+		const std::filesystem::path executableDirectory = GetExecutableDirectory();
+		if (!Wheatear::RuntimePatchManager::RecoverInterruptedActivation(
+			executableDirectory,
+			&recoveryError) ||
+			!Wheatear::RuntimePatchManager::RecoverFailedLaunch(
+				executableDirectory,
+				&recoveryError))
+		{
+			WT_CORE_ERROR(
+				"Failed to recover runtime patch state: {}",
+				recoveryError);
+			return {};
+		}
+
+		const Wheatear::RuntimePatchSet activePatches =
+			Wheatear::RuntimePatchManager::DiscoverActivePatches(executableDirectory);
+		const std::string fingerprint =
+			Wheatear::RuntimePatchManager::BuildContentFingerprint(packPath, activePatches);
 		const std::filesystem::path cacheRoot = GetRuntimeCacheRoot() / fingerprint;
 		const std::filesystem::path marker = cacheRoot / ".complete";
 		if (std::filesystem::exists(marker) &&
@@ -346,13 +147,72 @@ namespace {
 					markerText.end(),
 					[](unsigned char c) { return c >= '0' && c <= '9'; });
 			if (markerFingerprint == fingerprint && saneCount)
+			{
+				std::string launchError;
+				if (!Wheatear::RuntimePatchManager::BeginLaunch(
+					executableDirectory,
+					fingerprint,
+					&launchError))
+				{
+					WT_CORE_WARN(
+						"Could not write runtime launch marker: {}",
+						launchError);
+				}
 				return cacheRoot;
+			}
 		}
 
-		if (!ExtractAssetPack(packPath, cacheRoot))
+		std::string materializeError;
+		if (!Wheatear::RuntimePatchManager::MaterializeRuntimeRoot(
+			packPath,
+			activePatches,
+			cacheRoot,
+			&materializeError))
 		{
-			WT_CORE_ERROR("Failed to extract runtime asset pack: {}", packPath.string());
+			WT_CORE_ERROR("Failed to materialize runtime content: {}", materializeError);
+			std::error_code removeError;
+			std::filesystem::remove_all(cacheRoot, removeError);
 			return {};
+		}
+
+		// UUID mappings are kept outside the pack (the pack only accepts
+		// assets/ entries); copy the project registry into the materialized
+		// root so AssetDatabase can resolve serialized UUID references.
+		const std::filesystem::path packageRegistry =
+			GetExecutableDirectory() / "Intermediate" / "AssetRegistry.yaml";
+		if (std::filesystem::exists(packageRegistry))
+		{
+			std::error_code copyError;
+			std::filesystem::create_directories(cacheRoot / "Intermediate", copyError);
+			std::filesystem::copy_file(packageRegistry,
+				cacheRoot / "Intermediate" / "AssetRegistry.yaml",
+				std::filesystem::copy_options::overwrite_existing, copyError);
+		}
+
+		// The target is committed only after the base pack, every verified
+		// overlay, and every deletion marker have completed successfully.
+		{
+			std::ofstream markerOutput(
+				cacheRoot / ".complete",
+				std::ios::binary | std::ios::trunc);
+			markerOutput << fingerprint << ':' << activePatches.Patches.size();
+			if (!markerOutput.good())
+			{
+				WT_CORE_ERROR("Failed to write runtime content marker '{}'",
+					(cacheRoot / ".complete").string());
+				return {};
+			}
+		}
+
+		std::string launchError;
+		if (!Wheatear::RuntimePatchManager::BeginLaunch(
+			executableDirectory,
+			fingerprint,
+			&launchError))
+		{
+			WT_CORE_WARN(
+				"Could not write runtime launch marker: {}",
+				launchError);
 		}
 
 		// Prune stale fingerprint directories from previous packs so the
@@ -388,6 +248,16 @@ static std::filesystem::path ReadProjectArgument(const Wheatear::ApplicationComm
 	return {};
 }
 
+static bool HasArgument(const Wheatear::ApplicationCommandLineArgs& args, const char* flag)
+{
+	for (int i = 1; i < args.Count; ++i)
+	{
+		if (std::string(args[i]) == flag)
+			return true;
+	}
+	return false;
+}
+
 // Default project when running loose from the engine repository (no wtpack,
 // no --project): Projects/WheatearDemo, falling back to discovery.
 static std::filesystem::path DefaultProjectRoot()
@@ -405,6 +275,25 @@ static Wheatear::ApplicationSpecification CreateWheatearSandboxSpecification(
 	Wheatear::ApplicationSpecification specification;
 	specification.Name = "Wheatear Sandbox";
 	specification.CommandLineArgs = args;
+
+	if (HasArgument(args, "--fixed-step"))
+	{
+		specification.UseFixedTimestep = true;
+		for (int i = 1; i + 1 < args.Count; ++i)
+		{
+			if (std::string(args[i]) == "--fixed-step-hz")
+			{
+				try
+				{
+					specification.FixedTimestepHz = std::max(
+						1.0f, std::stof(args[i + 1]));
+				}
+				catch (...)
+				{
+				}
+			}
+		}
+	}
 
 	// --project <dir> runs any project's loose assets straight from the
 	// engine repository (developer mode); otherwise the packaged wtpack
@@ -440,8 +329,23 @@ public:
 	WheatearSandbox(const Wheatear::ApplicationCommandLineArgs& args)
 		: Wheatear::Application(CreateWheatearSandboxSpecification(args))
 	{
-		Wheatear::RegisterDefaultGameplayModules();
-		PushLayer(std::make_unique<RuntimeSceneLayer>());
+		for (int i = 1; i + 1 < args.Count; ++i)
+		{
+			if (std::string(args[i]) == "--cook-model")
+			{
+				const bool cooked = Wheatear::Model::Cook(args[i + 1]);
+				std::exit(cooked ? 0 : 1);
+			}
+		}
+
+		const bool rtsMode = HasArgument(args, "--rts");
+		if (!rtsMode)
+			Wheatear::RegisterDefaultGameplayModules();
+
+		if (rtsMode)
+			PushLayer(std::make_unique<Wheatear::RTSGameLayer>());
+		else
+			PushLayer(std::make_unique<RuntimeSceneLayer>());
 	}
 
 	~WheatearSandbox()
@@ -451,5 +355,51 @@ public:
 
 Wheatear::Application* Wheatear::CreateApplication(Wheatear::ApplicationCommandLineArgs args)
 {
+	if (HasArgument(args, "--test-wao"))
+	{
+		const int result = RunWAOSelfTests();
+		std::exit(result);
+	}
+
+	if (HasArgument(args, "--test-logic"))
+	{
+		const int result = RunLogicSelfTests();
+		std::exit(result);
+	}
+
+	if (HasArgument(args, "--validate-content"))
+	{
+		std::filesystem::path target = "assets";
+		for (int i = 1; i + 1 < args.Count; ++i)
+		{
+			if (std::string(args[i]) == "--validate-content")
+			{
+				const std::string value = args[i + 1];
+				if (!value.empty() && value.front() != '-')
+					target = value;
+				break;
+			}
+		}
+
+		const ContentValidationReport report =
+			ContentValidator::ValidateDirectory(target);
+		for (const ContentIssue& issue : report.Issues)
+		{
+			std::ostream& stream = issue.Severity == ContentIssueSeverity::Error
+				? std::cerr
+				: std::cout;
+			stream << (issue.Severity == ContentIssueSeverity::Error
+					? "[ERROR] " : "[WARN] ")
+				<< issue.Asset.generic_string();
+			if (issue.SourceLine > 0)
+				stream << ":" << issue.SourceLine;
+			stream << ": " << issue.Message << '\n';
+		}
+		std::cout << "Validated " << report.FilesChecked << " file(s): "
+			<< report.ErrorCount() << " error(s), "
+			<< report.WarningCount() << " warning(s).\n";
+		std::exit(report.HasErrors() ? 1 : 0);
+	}
+
 	return new WheatearSandbox(args);
 }

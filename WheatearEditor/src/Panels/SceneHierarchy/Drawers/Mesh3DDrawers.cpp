@@ -2,12 +2,18 @@
 #include "Mesh3DDrawers.h"
 #include "../ComponentDrawers.h"
 #include "Editor/EditorLocale.h"
+#include "Assets/AssetRegistry.h"
 #include "Wheatear/Assets/AssetPath.h"
+#include "Wheatear/Assets/Import/ModelImporter.h"
 #include "Wheatear/Core/EngineInfo.h"
+#include "Wheatear/Systems/TerrainSystem.h"
 #include "Wheatear/Scene/Components.h"
 #include "Wheatear/Renderer/Mesh.h"
+#include "Wheatear/Renderer/Model.h"
 #include <imgui/imgui.h>
 #include <glm/gtc/type_ptr.hpp>
+#include <algorithm>
+#include <cctype>
 #include <filesystem>
 
 namespace Wheatear {
@@ -17,10 +23,14 @@ namespace Wheatear {
     // -------------------------------------------------------------------------
     void DrawMeshRendererComponent(Entity entity)
     {
-        DrawComponent<MeshRendererComponent>("Mesh Renderer", entity, [](auto& c)
+        DrawComponent<MeshRendererComponent>("Mesh Renderer", entity, [entity](auto& c)
             {
                 std::string meshName = "None";
-                if (c.Mesh)
+                if (c.Model)
+                {
+                    meshName = std::filesystem::path(c.Model->GetPath()).filename().string();
+                }
+                else if (c.Mesh)
                 {
                     auto& path = c.Mesh->GetFilepath();
                     meshName = path.empty() ? "[Built-in]"
@@ -38,16 +48,118 @@ namespace Wheatear {
                         const wchar_t* wpath = static_cast<const wchar_t*>(payload->Data);
                         std::filesystem::path fullPath =
                             AssetPath::GetAssetRoot() / wpath;
-                        if (fullPath.extension() == ".obj")
-                            c.Mesh = Mesh::Create(AssetPath::ToProjectRelative(fullPath).generic_string());
+                        std::string extension = fullPath.extension().string();
+                        std::transform(extension.begin(), extension.end(), extension.begin(),
+                            [](unsigned char ch) { return static_cast<char>(std::tolower(ch)); });
+
+                        const std::string relative =
+                            AssetPath::ToProjectRelative(fullPath).generic_string();
+                        if (extension == ".wtmodel")
+                        {
+                            c.Model = Model::Create(relative);
+                            c.Mesh = nullptr;
+                            c.Material = nullptr;
+                            c.ModelAsset = AssetRegistry::Get().EnsureAsset(relative);
+                            c.MaterialAsset = UUID(0);
+
+                            Entity owner = entity;
+                            if (c.Model && c.Model->HasSkin()
+                                && !owner.HasComponent<Animator3DComponent>())
+                            {
+                                auto& animator =
+                                    owner.AddComponent<Animator3DComponent>();
+                                if (!c.Model->GetAnimations().empty())
+                                    animator.DefaultClip =
+                                        c.Model->GetAnimations().front().Name;
+                            }
+                        }
+                        else if (extension == ".fbx" || extension == ".gltf" || extension == ".glb")
+                        {
+                            const EditorAssetMetadata* metadata =
+                                AssetRegistry::Get().FindMutableByPath(relative);
+                            if (metadata)
+                            {
+                                std::filesystem::path cookedPath = fullPath;
+                                cookedPath.replace_extension(".wtmodel");
+                                std::string cookError;
+                                if (!ModelImporter::Cook(fullPath, cookedPath,
+                                        metadata->Model, &cookError))
+                                {
+                                    WT_CORE_ERROR("Model cook failed for '{}': {}",
+                                        relative, cookError);
+                                }
+                            }
+                            else
+                            {
+                                Model::Cook(relative);
+                            }
+                            c.Model = Model::Create(relative);
+                            c.Mesh = nullptr;
+                            c.Material = nullptr;
+                            c.ModelAsset = AssetRegistry::Get().EnsureAsset(relative);
+                            c.MaterialAsset = UUID(0);
+
+                            Entity owner = entity;
+                            if (c.Model && c.Model->HasSkin()
+                                && !owner.HasComponent<Animator3DComponent>())
+                            {
+                                auto& animator =
+                                    owner.AddComponent<Animator3DComponent>();
+                                if (!c.Model->GetAnimations().empty())
+                                    animator.DefaultClip =
+                                        c.Model->GetAnimations().front().Name;
+                            }
+                        }
+                        else if (extension == ".obj")
+                        {
+                            c.Model = nullptr;
+                            c.Mesh = Mesh::Create(relative);
+                            c.ModelAsset = UUID(0);
+                        }
                     }
                     ImGui::EndDragDropTarget();
                 }
+
+                if (c.Model)
+                {
+                    ImGui::TextDisabled("%s", c.Model->GetPath().c_str());
+                    ImGui::SameLine();
+                    if (ImGui::SmallButton(EditorLocale::Text("Clear Model", "清除模型")))
+                    {
+                        c.Model = nullptr;
+                        c.ModelAsset = UUID(0);
+                    }
+                    if (static_cast<uint64_t>(c.ModelAsset) != 0)
+                    {
+                        ImGui::TextDisabled("Asset UUID %llu",
+                            static_cast<unsigned long long>(static_cast<uint64_t>(c.ModelAsset)));
+                    }
+                }
+
                 ImGui::Spacing();
-                if (ImGui::Button(EditorLocale::Text("Cube", "立方体")))   c.Mesh = Mesh::CreateCube();
+                if (ImGui::Button(EditorLocale::Text("Cube", "立方体")))
+                {
+                    c.Model = nullptr;
+                    c.ModelAsset = UUID(0);
+                    c.Mesh = Mesh::CreateCube();
+                }
                 ImGui::SameLine();
-                if (ImGui::Button(EditorLocale::Text("Sphere", "球体"))) c.Mesh = Mesh::CreateSphere();
+                if (ImGui::Button(EditorLocale::Text("Sphere", "球体")))
+                {
+                    c.Model = nullptr;
+                    c.ModelAsset = UUID(0);
+                    c.Mesh = Mesh::CreateSphere();
+                }
                 ImGui::Separator();
+
+                if (c.Model)
+                {
+                    ImGui::TextDisabled(EditorLocale::Text(
+                        "Model materials are imported per submesh.",
+                        "模型材质按子网格导入。"));
+                    ImGui::Separator();
+                    return;
+                }
 
                 ImGui::Text(EditorLocale::Text("Material", "材质"));
                 ImGui::SameLine();
@@ -68,13 +180,21 @@ namespace Wheatear {
                         std::filesystem::path fullPath =
                             AssetPath::GetAssetRoot() / wpath;
                         if (fullPath.extension() == AssetFileType::MaterialExtension)
-                            c.Material = Material::Load(AssetPath::ToProjectRelative(fullPath).generic_string());
+                        {
+                            const std::string relative =
+                                AssetPath::ToProjectRelative(fullPath).generic_string();
+                            c.Material = Material::Load(relative);
+                            c.MaterialAsset = AssetRegistry::Get().EnsureAsset(relative);
+                        }
                     }
                     ImGui::EndDragDropTarget();
                 }
 
                 if (ImGui::Button(EditorLocale::Text("New Material", "新建材质")))
+                {
                     c.Material = Material::Create();
+                    c.MaterialAsset = UUID(0);
+                }
 
                 ImGui::SameLine();
 
@@ -86,10 +206,12 @@ namespace Wheatear {
                         {
                             std::string savePath = std::string("assets/materials/NewMaterial") + AssetFileType::MaterialExtension;
                             c.Material->Save(savePath);
+                            c.MaterialAsset = AssetRegistry::Get().EnsureAsset(savePath);
                         }
                         else
                         {
                             c.Material->Save();
+                            c.MaterialAsset = AssetRegistry::Get().EnsureAsset(c.Material->GetPath());
                         }
                     }
                 }
@@ -198,6 +320,51 @@ namespace Wheatear {
                         ImGui::TextDisabled(EditorLocale::Text("Effective radius: ~%.1f units", "有效半径: ~%.1f 单位"), r > 0 ? r : 0.0f);
                     }
                 }
+            });
+    }
+
+    void DrawTerrainComponent(Entity entity)
+    {
+        DrawComponent<TerrainComponent>("Terrain", entity, [entity](auto& c)
+            {
+                bool changed = false;
+                changed |= ImGui::DragInt(EditorLocale::Text("Cells X", "X 网格"), &c.CellsX, 1.0f, 4, 512);
+                changed |= ImGui::DragInt(EditorLocale::Text("Cells Z", "Z 网格"), &c.CellsZ, 1.0f, 4, 512);
+                changed |= ImGui::DragFloat(EditorLocale::Text("Cell Size", "格子尺寸"), &c.CellSize, 0.05f, 0.25f, 8.0f);
+                changed |= ImGui::DragFloat(EditorLocale::Text("Height Scale", "高度缩放"), &c.HeightScale, 0.01f, 0.0f, 8.0f);
+                changed |= ImGui::InputScalar(EditorLocale::Text("Seed", "种子"), ImGuiDataType_U32, &c.Seed);
+
+                if (changed)
+                    c.Dirty = true;
+
+                if (ImGui::Button(EditorLocale::Text("Regenerate Heightmap", "重新生成高度图")))
+                {
+                    c.GenerateProcedural();
+                    c.Dirty = true;
+                }
+                ImGui::SameLine();
+                if (ImGui::Button(EditorLocale::Text("Rebuild Mesh", "重建网格")))
+                {
+                    if (entity.GetScene())
+                        TerrainSystem::BuildTerrain(entity.GetScene(), c);
+                }
+
+                ImGui::TextDisabled(EditorLocale::Text(
+                    "Vertices: %d x %d  Heights: %d",
+                    "顶点: %d x %d  高度: %d"),
+                    c.GetVertexCountX(), c.GetVertexCountZ(),
+                    static_cast<int>(c.Heights.size()));
+            });
+    }
+
+    void DrawNavObstacleComponent(Entity entity)
+    {
+        DrawComponent<NavObstacleComponent>("Nav Obstacle", entity, [](auto& c)
+            {
+                ImGui::Checkbox(EditorLocale::Text("Enabled", "启用"), &c.Enabled);
+                ImGui::TextDisabled(EditorLocale::Text(
+                    "Blocks nav-grid cells covered by this entity's mesh bounds.",
+                    "用该实体的网格包围盒阻挡导航格子。"));
             });
     }
 

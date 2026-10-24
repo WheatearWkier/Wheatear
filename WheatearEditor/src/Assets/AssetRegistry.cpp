@@ -3,6 +3,7 @@
 
 #include "Build/AssetDependencyScanner.h"
 
+#include "Wheatear/Assets/AssetDatabase.h"
 #include "Wheatear/Assets/AssetPath.h"
 #include "Wheatear/Utils/StringUtils.h"
 #include "Wheatear/Core/EngineInfo.h"
@@ -258,7 +259,7 @@ namespace Wheatear {
                 else if (StringUtils::StartsWith(trimmed, "References:")) { listSection = "References"; importSection.clear(); }
                 else if (StringUtils::StartsWith(trimmed, "ReferencedBy:")) { listSection = "ReferencedBy"; importSection.clear(); }
                 else if (StringUtils::StartsWith(trimmed, "Import:")) { listSection.clear(); importSection.clear(); }
-                else if (trimmed == "Texture:" || trimmed == "Audio:" || trimmed == "Prefab:")
+                else if (trimmed == "Texture:" || trimmed == "Audio:" || trimmed == "Prefab:" || trimmed == "Model:")
                 {
                     importSection = trimmed.substr(0, trimmed.size() - 1);
                     listSection.clear();
@@ -294,6 +295,14 @@ namespace Wheatear {
                     if (StringUtils::StartsWith(trimmed, "Category:")) current.Prefab.Category = ScalarAfter(trimmed, "Category:");
                     else if (StringUtils::StartsWith(trimmed, "TemplateKind:")) current.Prefab.TemplateKind = ScalarAfter(trimmed, "TemplateKind:");
                     else if (StringUtils::StartsWith(trimmed, "Description:")) current.Prefab.Description = ScalarAfter(trimmed, "Description:");
+                }
+                else if (importSection == "Model")
+                {
+                    if (StringUtils::StartsWith(trimmed, "Scale:")) current.Model.Scale = ParseFloat(trimmed.substr(6), current.Model.Scale);
+                    else if (StringUtils::StartsWith(trimmed, "ConvertToYUp:")) current.Model.ConvertToYUp = ParseBool(trimmed.substr(13), current.Model.ConvertToYUp);
+                    else if (StringUtils::StartsWith(trimmed, "FlipNormalGreen:")) current.Model.FlipNormalGreen = ParseBool(trimmed.substr(16), current.Model.FlipNormalGreen);
+                    else if (StringUtils::StartsWith(trimmed, "ChannelMode:")) current.Model.ChannelMode = static_cast<ModelImporter::MaterialChannelMode>(ParseInt(trimmed.substr(12), 0));
+                    else if (StringUtils::StartsWith(trimmed, "TextureSearchPath:")) current.Model.TextureSearchPath = ScalarAfter(trimmed, "TextureSearchPath:");
                 }
             }
 
@@ -333,6 +342,17 @@ namespace Wheatear {
                 out << YAML::Key << "Category" << YAML::Value << YAML::DoubleQuoted << metadata.Prefab.Category;
                 out << YAML::Key << "TemplateKind" << YAML::Value << YAML::DoubleQuoted << metadata.Prefab.TemplateKind;
                 out << YAML::Key << "Description" << YAML::Value << YAML::DoubleQuoted << metadata.Prefab.Description;
+                out << YAML::EndMap;
+            }
+
+            if (metadata.Kind == EditorAssetKind::Model)
+            {
+                out << YAML::Key << "Model" << YAML::Value << YAML::BeginMap;
+                out << YAML::Key << "Scale" << YAML::Value << metadata.Model.Scale;
+                out << YAML::Key << "ConvertToYUp" << YAML::Value << metadata.Model.ConvertToYUp;
+                out << YAML::Key << "FlipNormalGreen" << YAML::Value << metadata.Model.FlipNormalGreen;
+                out << YAML::Key << "ChannelMode" << YAML::Value << static_cast<int>(metadata.Model.ChannelMode);
+                out << YAML::Key << "TextureSearchPath" << YAML::Value << YAML::DoubleQuoted << metadata.Model.TextureSearchPath;
                 out << YAML::EndMap;
             }
 
@@ -469,6 +489,8 @@ namespace Wheatear {
         if (!output.is_open())
             return false;
         output << out.c_str();
+        output.close();
+        AssetDatabase::Get().Reload();
         return true;
     }
 
@@ -483,6 +505,41 @@ namespace Wheatear {
     {
         auto it = m_UUIDToIndex.find(static_cast<uint64_t>(id));
         return it == m_UUIDToIndex.end() ? nullptr : &m_Assets[it->second];
+    }
+
+    UUID AssetRegistry::EnsureAsset(const std::filesystem::path& relativePath)
+    {
+        const std::string normalized = NormalizePath(relativePath);
+        if (normalized.empty())
+            return UUID(0);
+
+        const auto existing = m_PathToIndex.find(normalized);
+        if (existing != m_PathToIndex.end())
+            return m_Assets[existing->second].ID;
+
+        const std::filesystem::path root = m_ProjectRoot.empty()
+            ? AssetPath::GetProjectRoot()
+            : m_ProjectRoot;
+        const std::filesystem::path absolutePath = root / normalized;
+
+        EditorAssetMetadata metadata;
+        metadata.ID = UUID();
+        metadata.RelativePath = normalized;
+        metadata.Kind = DetectKind(normalized);
+        metadata.DisplayName = std::filesystem::path(normalized).filename().generic_string();
+
+        std::error_code error;
+        if (std::filesystem::is_regular_file(absolutePath, error))
+        {
+            metadata.SizeBytes = std::filesystem::file_size(absolutePath, error);
+            metadata.LastWriteTime = ToStableWriteTime(
+                std::filesystem::last_write_time(absolutePath, error));
+        }
+
+        m_Assets.push_back(std::move(metadata));
+        RebuildIndexes();
+        RebuildReverseReferences();
+        return m_Assets.back().ID;
     }
 
     size_t AssetRegistry::GetReferenceCount() const
@@ -507,6 +564,7 @@ namespace Wheatear {
         case EditorAssetKind::Prefab: return "Prefab";
         case EditorAssetKind::UITemplate: return "UITemplate";
         case EditorAssetKind::Material: return "Material";
+        case EditorAssetKind::Model: return "Model";
         case EditorAssetKind::Data: return "Data";
         case EditorAssetKind::Metadata: return "Metadata";
         case EditorAssetKind::AnimationClip: return "AnimationClip";
@@ -526,6 +584,7 @@ namespace Wheatear {
         if (value == "Prefab") return EditorAssetKind::Prefab;
         if (value == "UITemplate") return EditorAssetKind::UITemplate;
         if (value == "Material") return EditorAssetKind::Material;
+        if (value == "Model") return EditorAssetKind::Model;
         if (value == "Data") return EditorAssetKind::Data;
         if (value == "Metadata") return EditorAssetKind::Metadata;
         if (value == "AnimationClip") return EditorAssetKind::AnimationClip;
@@ -550,6 +609,9 @@ namespace Wheatear {
         if (extension == ".lua" || extension == ".cs" || extension == ".vn") return EditorAssetKind::Script;
         if (extension == ".yaml" || extension == ".yml" || extension == ".json" || extension == ".txt")
             return EditorAssetKind::Data;
+        if (extension == ".fbx" || extension == ".gltf" || extension == ".glb"
+            || extension == ".obj")
+            return EditorAssetKind::Model;
         return EditorAssetKind::Unknown;
     }
 
@@ -560,15 +622,23 @@ namespace Wheatear {
 
     std::filesystem::path AssetRegistry::GetRegistryPath(const std::filesystem::path& projectRoot)
     {
-        return projectRoot / "assets" / ".wheatear" / "asset_registry.yaml";
+        return projectRoot / "Intermediate" / "AssetRegistry.yaml";
     }
 
     void AssetRegistry::LoadRegistryCache()
     {
         m_Assets.clear();
 
-        const std::filesystem::path registryPath = GetRegistryPath(m_ProjectRoot.empty() ? AssetPath::GetProjectRoot() : m_ProjectRoot);
+        const std::filesystem::path root =
+            m_ProjectRoot.empty() ? AssetPath::GetProjectRoot() : m_ProjectRoot;
+        const std::filesystem::path registryPath = GetRegistryPath(root);
         LoadRegistryCacheFile(registryPath, &m_Assets);
+        if (m_Assets.empty())
+        {
+            // One-time compatibility with pre-Intermediate projects.
+            LoadRegistryCacheFile(root / "assets" / ".wheatear" / "asset_registry.yaml",
+                &m_Assets);
+        }
 
         WT_CORE_INFO("AssetRegistry: refreshing UI template descriptors");
         for (auto& metadata : m_Assets)
@@ -628,6 +698,7 @@ namespace Wheatear {
             metadata.Texture = stored.Texture;
             metadata.Audio = stored.Audio;
             metadata.Prefab = stored.Prefab;
+            metadata.Model = stored.Model;
         }
 
         if (static_cast<uint64_t>(metadata.ID) == 0)

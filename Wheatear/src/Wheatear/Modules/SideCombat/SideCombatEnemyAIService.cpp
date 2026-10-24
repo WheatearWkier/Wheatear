@@ -194,7 +194,16 @@ namespace Wheatear::SideCombatEnemyAIService {
                 const std::string recipeId = ActionRecipeId(selectedAttackId);
                 if (attackKind != SideAttackKind::EnemyShockwave)
                     combatant.RuntimeVelocity = { 0.0f, 0.0f };
-                BeginEnemyAction(ai, attack, selectedAttackId, recipeId, entityName, attackKind, facing);
+                BeginEnemyAction(
+                    ai,
+                    attack,
+                    selectedAttackId,
+                    recipeId,
+                    entityName,
+                    attackKind,
+                    facing,
+                    scene,
+                    enemy.GetUUID());
                 ai.RuntimeLastActionAttackId = selectedAttackId;
                 return;
             }
@@ -202,7 +211,16 @@ namespace Wheatear::SideCombatEnemyAIService {
             ai.RuntimeAttackTimer = ai.AttackInterval;
             const auto& attack = GetAttack(tuning, "enemy_claw");
             const std::string recipeId = ActionRecipeId("enemy_claw");
-            BeginEnemyAction(ai, attack, "enemy_claw", recipeId, "Side_EnemyClaw", SideAttackKind::EnemyMelee, facing);
+            BeginEnemyAction(
+                ai,
+                attack,
+                "enemy_claw",
+                recipeId,
+                "Side_EnemyClaw",
+                SideAttackKind::EnemyMelee,
+                facing,
+                scene,
+                enemy.GetUUID());
             ai.RuntimeLastActionAttackId = "enemy_claw";
         }
 

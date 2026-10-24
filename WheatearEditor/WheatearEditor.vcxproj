@@ -80,7 +80,7 @@
       <PrecompiledHeaderFile>wepch.h</PrecompiledHeaderFile>
       <WarningLevel>Level3</WarningLevel>
       <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;WT_PLATFORM_WINDOWS;WT_DEBUG;WT_ENABLE_ASSERTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>..\Wheatear\vendor\spdlog\include;..\Wheatear\src;..\Wheatear\vendor;..\Wheatear\vendor\glm;..\Wheatear\vendor\entt\include;src;..\Wheatear\vendor\GLAD\include;..\Wheatear\vendor\ImGuizmo;..\Wheatear\vendor\miniaudio;..\Wheatear\vendor\yaml-cpp\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\Wheatear\vendor\spdlog\include;..\Wheatear\src;..\Wheatear\vendor;..\Wheatear\vendor\glm;..\Wheatear\vendor\entt\include;src;..\Wheatear\vendor\GLAD\include;..\Wheatear\vendor\imgui;..\Wheatear\vendor\ImGuizmo;..\Wheatear\vendor\miniaudio;..\Wheatear\vendor\yaml-cpp\include;..\Wheatear\vendor\ImGuiColorTextEdit;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <ForcedIncludeFiles>wepch.h</ForcedIncludeFiles>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <Optimization>Disabled</Optimization>
@@ -103,7 +103,7 @@
       <PrecompiledHeaderFile>wepch.h</PrecompiledHeaderFile>
       <WarningLevel>Level3</WarningLevel>
       <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;WT_PLATFORM_WINDOWS;WT_RELEASE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>..\Wheatear\vendor\spdlog\include;..\Wheatear\src;..\Wheatear\vendor;..\Wheatear\vendor\glm;..\Wheatear\vendor\entt\include;src;..\Wheatear\vendor\GLAD\include;..\Wheatear\vendor\ImGuizmo;..\Wheatear\vendor\miniaudio;..\Wheatear\vendor\yaml-cpp\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\Wheatear\vendor\spdlog\include;..\Wheatear\src;..\Wheatear\vendor;..\Wheatear\vendor\glm;..\Wheatear\vendor\entt\include;src;..\Wheatear\vendor\GLAD\include;..\Wheatear\vendor\imgui;..\Wheatear\vendor\ImGuizmo;..\Wheatear\vendor\miniaudio;..\Wheatear\vendor\yaml-cpp\include;..\Wheatear\vendor\ImGuiColorTextEdit;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <ForcedIncludeFiles>wepch.h</ForcedIncludeFiles>
       <Optimization>Full</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
@@ -130,7 +130,7 @@
       <PrecompiledHeaderFile>wepch.h</PrecompiledHeaderFile>
       <WarningLevel>Level3</WarningLevel>
       <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;WT_PLATFORM_WINDOWS;WT_DIST;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>..\Wheatear\vendor\spdlog\include;..\Wheatear\src;..\Wheatear\vendor;..\Wheatear\vendor\glm;..\Wheatear\vendor\entt\include;src;..\Wheatear\vendor\GLAD\include;..\Wheatear\vendor\ImGuizmo;..\Wheatear\vendor\miniaudio;..\Wheatear\vendor\yaml-cpp\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\Wheatear\vendor\spdlog\include;..\Wheatear\src;..\Wheatear\vendor;..\Wheatear\vendor\glm;..\Wheatear\vendor\entt\include;src;..\Wheatear\vendor\GLAD\include;..\Wheatear\vendor\imgui;..\Wheatear\vendor\ImGuizmo;..\Wheatear\vendor\miniaudio;..\Wheatear\vendor\yaml-cpp\include;..\Wheatear\vendor\ImGuiColorTextEdit;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <ForcedIncludeFiles>wepch.h</ForcedIncludeFiles>
       <Optimization>Full</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
@@ -171,8 +171,11 @@
     <ClInclude Include="src\Editor\EditorLocale.h" />
     <ClInclude Include="src\Editor\EditorPlatform.h" />
     <ClInclude Include="src\Editor\EditorRequests.h" />
+    <ClInclude Include="src\Editor\EditorSourceNavigation.h" />
+    <ClInclude Include="src\Editor\EditorTemplates.h" />
     <ClInclude Include="src\Editor\EditorToolRegistry.h" />
     <ClInclude Include="src\Editor\EditorWidgets.h" />
+    <ClInclude Include="src\Editor\EditorWorkspace.h" />
     <ClInclude Include="src\Editor\GameplayEditorShell.h" />
     <ClInclude Include="src\Editor\ModeSelectLayer.h" />
     <ClInclude Include="src\Editor\TextAssetEditor.h" />
@@ -195,6 +198,7 @@
     <ClInclude Include="src\Modules\VisualNovel\VisualNovelScriptEditorPanelInternal.h" />
     <ClInclude Include="src\Panels\AnimationEditorPanel.h" />
     <ClInclude Include="src\Panels\AssetAliasManifestEditorPanel.h" />
+    <ClInclude Include="src\Panels\BehaviorGraphPanel.h" />
     <ClInclude Include="src\Panels\ConsolePanel.h" />
     <ClInclude Include="src\Panels\ContentBrowserPanel.h" />
     <ClInclude Include="src\Panels\ContentBrowserRequests.h" />
@@ -203,6 +207,7 @@
     <ClInclude Include="src\Panels\EventScriptGraphPanel.h" />
     <ClInclude Include="src\Panels\EventScriptGraphPanelInternal.h" />
     <ClInclude Include="src\Panels\InputBindingsPanel.h" />
+    <ClInclude Include="src\Panels\LogicDiagnosticsPanel.h" />
     <ClInclude Include="src\Panels\ProjectHealthPanel.h" />
     <ClInclude Include="src\Panels\ProjectHealthPanelInternal.h" />
     <ClInclude Include="src\Panels\SceneHierarchy\ComponentDrawers.h" />
@@ -242,6 +247,7 @@
     <ClCompile Include="src\Editor\EditorLayerBaseUI_Viewport.cpp" />
     <ClCompile Include="src\Editor\EditorLayerDockspace.cpp" />
     <ClCompile Include="src\Editor\EditorPlatform.cpp" />
+    <ClCompile Include="src\Editor\EditorSourceNavigation.cpp" />
     <ClCompile Include="src\Editor\EditorWidgets.cpp" />
     <ClCompile Include="src\Editor\ModeSelectLayer.cpp" />
     <ClCompile Include="src\Modules\ArcadeCombat\ArcadeCombatDrawer.cpp" />
@@ -263,6 +269,7 @@
     <ClCompile Include="src\Panels\AnimationEditorPanelSections.cpp" />
     <ClCompile Include="src\Panels\AnimationEditorPanel_Timeline.cpp" />
     <ClCompile Include="src\Panels\AssetAliasManifestEditorPanel.cpp" />
+    <ClCompile Include="src\Panels\BehaviorGraphPanel.cpp" />
     <ClCompile Include="src\Panels\ConsolePanel.cpp" />
     <ClCompile Include="src\Panels\ContentBrowserPanel.cpp" />
     <ClCompile Include="src\Panels\DataFileEditorPanel.cpp" />
@@ -270,6 +277,7 @@
     <ClCompile Include="src\Panels\EventScriptGraphPanel.cpp" />
     <ClCompile Include="src\Panels\EventScriptGraphPanel_Graph.cpp" />
     <ClCompile Include="src\Panels\InputBindingsPanel.cpp" />
+    <ClCompile Include="src\Panels\LogicDiagnosticsPanel.cpp" />
     <ClCompile Include="src\Panels\ProjectHealthPanel.cpp" />
     <ClCompile Include="src\Panels\ProjectHealthPanel_Hygiene.cpp" />
     <ClCompile Include="src\Panels\SceneHierarchy\Drawers\AudioDrawer.cpp" />

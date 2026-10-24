@@ -22,6 +22,9 @@
     <Filter Include="src\Wheatear\Assets">
       <UniqueIdentifier>{0F793740-7BDA-144E-0448-5B0070A84B0D}</UniqueIdentifier>
     </Filter>
+    <Filter Include="src\Wheatear\Assets\Import">
+      <UniqueIdentifier>{3950FEC5-2560-AA96-8E19-0FB57A48992F}</UniqueIdentifier>
+    </Filter>
     <Filter Include="src\Wheatear\Audio">
       <UniqueIdentifier>{8EAE9DAC-7A92-5E02-E3F2-5855CFF54884}</UniqueIdentifier>
     </Filter>
@@ -43,6 +46,9 @@
     <Filter Include="src\Wheatear\Gameplay\Action">
       <UniqueIdentifier>{796495D3-651F-857F-0ED7-FDC9FA70CF0F}</UniqueIdentifier>
     </Filter>
+    <Filter Include="src\Wheatear\Gameplay\Behavior">
+      <UniqueIdentifier>{ABD92B78-97FF-F5DE-8045-7BAA6C0A1BAB}</UniqueIdentifier>
+    </Filter>
     <Filter Include="src\Wheatear\Gameplay\Services">
       <UniqueIdentifier>{BF595341-AB7F-1DA8-94C5-A273808A4274}</UniqueIdentifier>
     </Filter>
@@ -51,6 +57,9 @@
     </Filter>
     <Filter Include="src\Wheatear\Input">
       <UniqueIdentifier>{8CD02AAD-78B4-EB02-E114-E655CD17D684}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\Wheatear\Logic">
+      <UniqueIdentifier>{8A7E61AD-7662-2203-DFC2-1C56CBC50C85}</UniqueIdentifier>
     </Filter>
     <Filter Include="src\Wheatear\Math">
       <UniqueIdentifier>{C627871C-323E-85B2-7BB5-10D4E70A563A}</UniqueIdentifier>
@@ -64,6 +73,9 @@
     <Filter Include="src\Wheatear\Modules\Progression">
       <UniqueIdentifier>{3F9033C2-2BE1-1E04-5445-0DC640F5B16D}</UniqueIdentifier>
     </Filter>
+    <Filter Include="src\Wheatear\Modules\RTS">
+      <UniqueIdentifier>{DD748BFE-C999-DA7E-F2E4-BF0EDE68D99C}</UniqueIdentifier>
+    </Filter>
     <Filter Include="src\Wheatear\Modules\SideCombat">
       <UniqueIdentifier>{BF602EE3-2B44-3D23-3447-6B5FA0A90374}</UniqueIdentifier>
     </Filter>
@@ -75,6 +87,9 @@
     </Filter>
     <Filter Include="src\Wheatear\Modules\VisualNovel">
       <UniqueIdentifier>{5CABA26C-48FC-8DAE-7160-7C705D102118}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\Wheatear\Navigation">
+      <UniqueIdentifier>{ECE67BEF-581E-C486-6128-28AACDDEEA7F}</UniqueIdentifier>
     </Filter>
     <Filter Include="src\Wheatear\Physics">
       <UniqueIdentifier>{3F7B9BB0-2B0A-257A-D428-3975C0963520}</UniqueIdentifier>
@@ -109,6 +124,9 @@
     <Filter Include="vendor">
       <UniqueIdentifier>{B3738122-9F15-ACF8-88D0-BF4C74113349}</UniqueIdentifier>
     </Filter>
+    <Filter Include="vendor\ImGuiColorTextEdit">
+      <UniqueIdentifier>{A7401EB4-1303-523E-5CB3-E0CAC8B42A1C}</UniqueIdentifier>
+    </Filter>
     <Filter Include="vendor\ImGuizmo">
       <UniqueIdentifier>{73BF7F4C-DF4A-ED10-E85B-700554664911}</UniqueIdentifier>
     </Filter>
@@ -132,6 +150,9 @@
     </Filter>
     <Filter Include="vendor\stb_image">
       <UniqueIdentifier>{0DA0BA59-F998-D9AB-22CB-BE300E23B9B7}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="vendor\ufbx">
+      <UniqueIdentifier>{972281C1-03D8-F9B6-8CCC-F38DF880F0BA}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -177,11 +198,20 @@
     <ClInclude Include="src\Wheatear\Assets\AssetAliasRegistry.h">
       <Filter>src\Wheatear\Assets</Filter>
     </ClInclude>
+    <ClInclude Include="src\Wheatear\Assets\AssetDatabase.h">
+      <Filter>src\Wheatear\Assets</Filter>
+    </ClInclude>
     <ClInclude Include="src\Wheatear\Assets\AssetPath.h">
+      <Filter>src\Wheatear\Assets</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Wheatear\Assets\ContentValidation.h">
       <Filter>src\Wheatear\Assets</Filter>
     </ClInclude>
     <ClInclude Include="src\Wheatear\Assets\FileSystem.h">
       <Filter>src\Wheatear\Assets</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Wheatear\Assets\Import\ModelImporter.h">
+      <Filter>src\Wheatear\Assets\Import</Filter>
     </ClInclude>
     <ClInclude Include="src\Wheatear\Assets\SpriteSheetAsset.h">
       <Filter>src\Wheatear\Assets</Filter>
@@ -264,6 +294,9 @@
     <ClInclude Include="src\Wheatear\Gameplay\Action\ActionRunner.h">
       <Filter>src\Wheatear\Gameplay\Action</Filter>
     </ClInclude>
+    <ClInclude Include="src\Wheatear\Gameplay\Action\ActionRuntimeStore.h">
+      <Filter>src\Wheatear\Gameplay\Action</Filter>
+    </ClInclude>
     <ClInclude Include="src\Wheatear\Gameplay\Action\ActionSignalRouter.h">
       <Filter>src\Wheatear\Gameplay\Action</Filter>
     </ClInclude>
@@ -279,8 +312,32 @@
     <ClInclude Include="src\Wheatear\Gameplay\Action\StateRegistry.h">
       <Filter>src\Wheatear\Gameplay\Action</Filter>
     </ClInclude>
-    <ClInclude Include="src\Wheatear\Gameplay\SystemBindingRegistry.h">
-      <Filter>src\Wheatear\Gameplay</Filter>
+    <ClInclude Include="src\Wheatear\Gameplay\Behavior\BehaviorAnalysis.h">
+      <Filter>src\Wheatear\Gameplay\Behavior</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Wheatear\Gameplay\Behavior\BehaviorAssetLoader.h">
+      <Filter>src\Wheatear\Gameplay\Behavior</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Wheatear\Gameplay\Behavior\BehaviorBuiltinPrimitives.h">
+      <Filter>src\Wheatear\Gameplay\Behavior</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Wheatear\Gameplay\Behavior\BehaviorCompiler.h">
+      <Filter>src\Wheatear\Gameplay\Behavior</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Wheatear\Gameplay\Behavior\BehaviorDatabase.h">
+      <Filter>src\Wheatear\Gameplay\Behavior</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Wheatear\Gameplay\Behavior\BehaviorPrimitiveRegistry.h">
+      <Filter>src\Wheatear\Gameplay\Behavior</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Wheatear\Gameplay\Behavior\BehaviorSystem.h">
+      <Filter>src\Wheatear\Gameplay\Behavior</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Wheatear\Gameplay\Behavior\BehaviorTypes.h">
+      <Filter>src\Wheatear\Gameplay\Behavior</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Wheatear\Gameplay\Behavior\BehaviorVM.h">
+      <Filter>src\Wheatear\Gameplay\Behavior</Filter>
     </ClInclude>
     <ClInclude Include="src\Wheatear\Gameplay\Services\GameplayAudioService.h">
       <Filter>src\Wheatear\Gameplay\Services</Filter>
@@ -312,6 +369,9 @@
     <ClInclude Include="src\Wheatear\Gameplay\Services\GameplayVisualService.h">
       <Filter>src\Wheatear\Gameplay\Services</Filter>
     </ClInclude>
+    <ClInclude Include="src\Wheatear\Gameplay\SystemBindingRegistry.h">
+      <Filter>src\Wheatear\Gameplay</Filter>
+    </ClInclude>
     <ClInclude Include="src\Wheatear\ImGui\ImGuiLayer.h">
       <Filter>src\Wheatear\ImGui</Filter>
     </ClInclude>
@@ -329,6 +389,15 @@
     </ClInclude>
     <ClInclude Include="src\Wheatear\Input\MouseButtonCodes.h">
       <Filter>src\Wheatear\Input</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Wheatear\Logic\LogicCommandRegistry.h">
+      <Filter>src\Wheatear\Logic</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Wheatear\Logic\LogicDiagnostics.h">
+      <Filter>src\Wheatear\Logic</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Wheatear\Logic\LogicExpression.h">
+      <Filter>src\Wheatear\Logic</Filter>
     </ClInclude>
     <ClInclude Include="src\Wheatear\Math\Math.h">
       <Filter>src\Wheatear\Math</Filter>
@@ -408,6 +477,33 @@
     <ClInclude Include="src\Wheatear\Modules\Progression\ProgressionSystem.h">
       <Filter>src\Wheatear\Modules\Progression</Filter>
     </ClInclude>
+    <ClInclude Include="src\Wheatear\Modules\RTS\RTSAISystem.h">
+      <Filter>src\Wheatear\Modules\RTS</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Wheatear\Modules\RTS\RTSAnimationSystem.h">
+      <Filter>src\Wheatear\Modules\RTS</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Wheatear\Modules\RTS\RTSCameraSystem.h">
+      <Filter>src\Wheatear\Modules\RTS</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Wheatear\Modules\RTS\RTSComponents.h">
+      <Filter>src\Wheatear\Modules\RTS</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Wheatear\Modules\RTS\RTSModule.h">
+      <Filter>src\Wheatear\Modules\RTS</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Wheatear\Modules\RTS\RTSPlayerSystem.h">
+      <Filter>src\Wheatear\Modules\RTS</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Wheatear\Modules\RTS\RTSProductionSystem.h">
+      <Filter>src\Wheatear\Modules\RTS</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Wheatear\Modules\RTS\RTSUnitSystem.h">
+      <Filter>src\Wheatear\Modules\RTS</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Wheatear\Modules\RTS\RTSUtilities.h">
+      <Filter>src\Wheatear\Modules\RTS</Filter>
+    </ClInclude>
     <ClInclude Include="src\Wheatear\Modules\SideCombat\SideCombatActionService.h">
       <Filter>src\Wheatear\Modules\SideCombat</Filter>
     </ClInclude>
@@ -424,6 +520,9 @@
       <Filter>src\Wheatear\Modules\SideCombat</Filter>
     </ClInclude>
     <ClInclude Include="src\Wheatear\Modules\SideCombat\SideCombatFeedbackService.h">
+      <Filter>src\Wheatear\Modules\SideCombat</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Wheatear\Modules\SideCombat\SideCombatGuardService.h">
       <Filter>src\Wheatear\Modules\SideCombat</Filter>
     </ClInclude>
     <ClInclude Include="src\Wheatear\Modules\SideCombat\SideCombatHitResolutionService.h">
@@ -555,6 +654,12 @@
     <ClInclude Include="src\Wheatear\Modules\VisualNovel\VisualNovelSystemInternal.h">
       <Filter>src\Wheatear\Modules\VisualNovel</Filter>
     </ClInclude>
+    <ClInclude Include="src\Wheatear\Navigation\DebugDraw3D.h">
+      <Filter>src\Wheatear\Navigation</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Wheatear\Navigation\NavGrid.h">
+      <Filter>src\Wheatear\Navigation</Filter>
+    </ClInclude>
     <ClInclude Include="src\Wheatear\Physics\ContactListener.h">
       <Filter>src\Wheatear\Physics</Filter>
     </ClInclude>
@@ -573,6 +678,9 @@
     <ClInclude Include="src\Wheatear\Renderer\Framebuffer.h">
       <Filter>src\Wheatear\Renderer</Filter>
     </ClInclude>
+    <ClInclude Include="src\Wheatear\Renderer\Frustum.h">
+      <Filter>src\Wheatear\Renderer</Filter>
+    </ClInclude>
     <ClInclude Include="src\Wheatear\Renderer\GraphicsContext.h">
       <Filter>src\Wheatear\Renderer</Filter>
     </ClInclude>
@@ -583,6 +691,9 @@
       <Filter>src\Wheatear\Renderer</Filter>
     </ClInclude>
     <ClInclude Include="src\Wheatear\Renderer\Mesh.h">
+      <Filter>src\Wheatear\Renderer</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Wheatear\Renderer\Model.h">
       <Filter>src\Wheatear\Renderer</Filter>
     </ClInclude>
     <ClInclude Include="src\Wheatear\Renderer\RenderBatch.h">
@@ -627,6 +738,9 @@
     <ClInclude Include="src\Wheatear\Runtime\CommandBus.h">
       <Filter>src\Wheatear\Runtime</Filter>
     </ClInclude>
+    <ClInclude Include="src\Wheatear\Runtime\RuntimePatchManager.h">
+      <Filter>src\Wheatear\Runtime</Filter>
+    </ClInclude>
     <ClInclude Include="src\Wheatear\Runtime\SceneTransitionService.h">
       <Filter>src\Wheatear\Runtime</Filter>
     </ClInclude>
@@ -658,6 +772,9 @@
       <Filter>src\Wheatear\Scene\Components</Filter>
     </ClInclude>
     <ClInclude Include="src\Wheatear\Scene\Components\ScriptComponents.h">
+      <Filter>src\Wheatear\Scene\Components</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Wheatear\Scene\Components\TerrainComponents.h">
       <Filter>src\Wheatear\Scene\Components</Filter>
     </ClInclude>
     <ClInclude Include="src\Wheatear\Scene\Components\UIComponents.h">
@@ -708,6 +825,9 @@
     <ClInclude Include="src\Wheatear\Systems\ISystem.h">
       <Filter>src\Wheatear\Systems</Filter>
     </ClInclude>
+    <ClInclude Include="src\Wheatear\Systems\NavigationSystem.h">
+      <Filter>src\Wheatear\Systems</Filter>
+    </ClInclude>
     <ClInclude Include="src\Wheatear\Systems\PhysicsSystem.h">
       <Filter>src\Wheatear\Systems</Filter>
     </ClInclude>
@@ -715,6 +835,9 @@
       <Filter>src\Wheatear\Systems</Filter>
     </ClInclude>
     <ClInclude Include="src\Wheatear\Systems\SpriteSheetSystem.h">
+      <Filter>src\Wheatear\Systems</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Wheatear\Systems\TerrainSystem.h">
       <Filter>src\Wheatear\Systems</Filter>
     </ClInclude>
     <ClInclude Include="src\Wheatear\Systems\UISystem.h">
@@ -740,6 +863,9 @@
     </ClInclude>
     <ClInclude Include="src\wtpch.h">
       <Filter>src</Filter>
+    </ClInclude>
+    <ClInclude Include="vendor\ImGuiColorTextEdit\TextEditor.h">
+      <Filter>vendor\ImGuiColorTextEdit</Filter>
     </ClInclude>
     <ClInclude Include="vendor\ImGuizmo\ImGuizmo.h">
       <Filter>vendor\ImGuizmo</Filter>
@@ -1833,6 +1959,12 @@
     <ClInclude Include="vendor\stb_image\stb_image.h">
       <Filter>vendor\stb_image</Filter>
     </ClInclude>
+    <ClInclude Include="vendor\stb_image\stb_image_write.h">
+      <Filter>vendor\stb_image</Filter>
+    </ClInclude>
+    <ClInclude Include="vendor\ufbx\ufbx.h">
+      <Filter>vendor\ufbx</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Platform\OpenGL\OpenGLBuffer.cpp">
@@ -1877,11 +2009,20 @@
     <ClCompile Include="src\Wheatear\Assets\AssetAliasRegistry.cpp">
       <Filter>src\Wheatear\Assets</Filter>
     </ClCompile>
+    <ClCompile Include="src\Wheatear\Assets\AssetDatabase.cpp">
+      <Filter>src\Wheatear\Assets</Filter>
+    </ClCompile>
     <ClCompile Include="src\Wheatear\Assets\AssetPath.cpp">
+      <Filter>src\Wheatear\Assets</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Wheatear\Assets\ContentValidation.cpp">
       <Filter>src\Wheatear\Assets</Filter>
     </ClCompile>
     <ClCompile Include="src\Wheatear\Assets\FileSystem.cpp">
       <Filter>src\Wheatear\Assets</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Wheatear\Assets\Import\ModelImporter.cpp">
+      <Filter>src\Wheatear\Assets\Import</Filter>
     </ClCompile>
     <ClCompile Include="src\Wheatear\Assets\SpriteSheetAsset.cpp">
       <Filter>src\Wheatear\Assets</Filter>
@@ -1931,6 +2072,9 @@
     <ClCompile Include="src\Wheatear\Gameplay\Action\ActionRunner.cpp">
       <Filter>src\Wheatear\Gameplay\Action</Filter>
     </ClCompile>
+    <ClCompile Include="src\Wheatear\Gameplay\Action\ActionRuntimeStore.cpp">
+      <Filter>src\Wheatear\Gameplay\Action</Filter>
+    </ClCompile>
     <ClCompile Include="src\Wheatear\Gameplay\Action\ActionSignalRouter.cpp">
       <Filter>src\Wheatear\Gameplay\Action</Filter>
     </ClCompile>
@@ -1945,6 +2089,33 @@
     </ClCompile>
     <ClCompile Include="src\Wheatear\Gameplay\Action\StateRegistry.cpp">
       <Filter>src\Wheatear\Gameplay\Action</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Wheatear\Gameplay\Behavior\BehaviorAnalysis.cpp">
+      <Filter>src\Wheatear\Gameplay\Behavior</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Wheatear\Gameplay\Behavior\BehaviorAssetLoader.cpp">
+      <Filter>src\Wheatear\Gameplay\Behavior</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Wheatear\Gameplay\Behavior\BehaviorBuiltinPrimitives.cpp">
+      <Filter>src\Wheatear\Gameplay\Behavior</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Wheatear\Gameplay\Behavior\BehaviorCompiler.cpp">
+      <Filter>src\Wheatear\Gameplay\Behavior</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Wheatear\Gameplay\Behavior\BehaviorDatabase.cpp">
+      <Filter>src\Wheatear\Gameplay\Behavior</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Wheatear\Gameplay\Behavior\BehaviorPrimitiveRegistry.cpp">
+      <Filter>src\Wheatear\Gameplay\Behavior</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Wheatear\Gameplay\Behavior\BehaviorSystem.cpp">
+      <Filter>src\Wheatear\Gameplay\Behavior</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Wheatear\Gameplay\Behavior\BehaviorTypes.cpp">
+      <Filter>src\Wheatear\Gameplay\Behavior</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Wheatear\Gameplay\Behavior\BehaviorVM.cpp">
+      <Filter>src\Wheatear\Gameplay\Behavior</Filter>
     </ClCompile>
     <ClCompile Include="src\Wheatear\Gameplay\Services\GameplayAudioService.cpp">
       <Filter>src\Wheatear\Gameplay\Services</Filter>
@@ -1984,6 +2155,15 @@
     </ClCompile>
     <ClCompile Include="src\Wheatear\Input\InputBindingService.cpp">
       <Filter>src\Wheatear\Input</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Wheatear\Logic\LogicCommandRegistry.cpp">
+      <Filter>src\Wheatear\Logic</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Wheatear\Logic\LogicDiagnostics.cpp">
+      <Filter>src\Wheatear\Logic</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Wheatear\Logic\LogicExpression.cpp">
+      <Filter>src\Wheatear\Logic</Filter>
     </ClCompile>
     <ClCompile Include="src\Wheatear\Math\Math.cpp">
       <Filter>src\Wheatear\Math</Filter>
@@ -2051,6 +2231,27 @@
     <ClCompile Include="src\Wheatear\Modules\Progression\ProgressionSystem.cpp">
       <Filter>src\Wheatear\Modules\Progression</Filter>
     </ClCompile>
+    <ClCompile Include="src\Wheatear\Modules\RTS\RTSAISystem.cpp">
+      <Filter>src\Wheatear\Modules\RTS</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Wheatear\Modules\RTS\RTSAnimationSystem.cpp">
+      <Filter>src\Wheatear\Modules\RTS</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Wheatear\Modules\RTS\RTSCameraSystem.cpp">
+      <Filter>src\Wheatear\Modules\RTS</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Wheatear\Modules\RTS\RTSModule.cpp">
+      <Filter>src\Wheatear\Modules\RTS</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Wheatear\Modules\RTS\RTSPlayerSystem.cpp">
+      <Filter>src\Wheatear\Modules\RTS</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Wheatear\Modules\RTS\RTSProductionSystem.cpp">
+      <Filter>src\Wheatear\Modules\RTS</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Wheatear\Modules\RTS\RTSUnitSystem.cpp">
+      <Filter>src\Wheatear\Modules\RTS</Filter>
+    </ClCompile>
     <ClCompile Include="src\Wheatear\Modules\SideCombat\SideCombatActionService.cpp">
       <Filter>src\Wheatear\Modules\SideCombat</Filter>
     </ClCompile>
@@ -2064,6 +2265,9 @@
       <Filter>src\Wheatear\Modules\SideCombat</Filter>
     </ClCompile>
     <ClCompile Include="src\Wheatear\Modules\SideCombat\SideCombatFeedbackService.cpp">
+      <Filter>src\Wheatear\Modules\SideCombat</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Wheatear\Modules\SideCombat\SideCombatGuardService.cpp">
       <Filter>src\Wheatear\Modules\SideCombat</Filter>
     </ClCompile>
     <ClCompile Include="src\Wheatear\Modules\SideCombat\SideCombatHitResolutionService.cpp">
@@ -2183,6 +2387,12 @@
     <ClCompile Include="src\Wheatear\Modules\VisualNovel\VisualNovelSystem_SceneBindings.cpp">
       <Filter>src\Wheatear\Modules\VisualNovel</Filter>
     </ClCompile>
+    <ClCompile Include="src\Wheatear\Navigation\DebugDraw3D.cpp">
+      <Filter>src\Wheatear\Navigation</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Wheatear\Navigation\NavGrid.cpp">
+      <Filter>src\Wheatear\Navigation</Filter>
+    </ClCompile>
     <ClCompile Include="src\Wheatear\Physics\ContactListener.cpp">
       <Filter>src\Wheatear\Physics</Filter>
     </ClCompile>
@@ -2205,6 +2415,9 @@
       <Filter>src\Wheatear\Renderer</Filter>
     </ClCompile>
     <ClCompile Include="src\Wheatear\Renderer\Mesh.cpp">
+      <Filter>src\Wheatear\Renderer</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Wheatear\Renderer\Model.cpp">
       <Filter>src\Wheatear\Renderer</Filter>
     </ClCompile>
     <ClCompile Include="src\Wheatear\Renderer\RenderCommand.cpp">
@@ -2241,6 +2454,9 @@
       <Filter>src\Wheatear\Renderer</Filter>
     </ClCompile>
     <ClCompile Include="src\Wheatear\Runtime\CommandBus.cpp">
+      <Filter>src\Wheatear\Runtime</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Wheatear\Runtime\RuntimePatchManager.cpp">
       <Filter>src\Wheatear\Runtime</Filter>
     </ClCompile>
     <ClCompile Include="src\Wheatear\Runtime\SceneTransitionService.cpp">
@@ -2309,6 +2525,9 @@
     <ClCompile Include="src\Wheatear\Systems\AudioSystem.cpp">
       <Filter>src\Wheatear\Systems</Filter>
     </ClCompile>
+    <ClCompile Include="src\Wheatear\Systems\NavigationSystem.cpp">
+      <Filter>src\Wheatear\Systems</Filter>
+    </ClCompile>
     <ClCompile Include="src\Wheatear\Systems\PhysicsSystem.cpp">
       <Filter>src\Wheatear\Systems</Filter>
     </ClCompile>
@@ -2316,6 +2535,9 @@
       <Filter>src\Wheatear\Systems</Filter>
     </ClCompile>
     <ClCompile Include="src\Wheatear\Systems\SpriteSheetSystem.cpp">
+      <Filter>src\Wheatear\Systems</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Wheatear\Systems\TerrainSystem.cpp">
       <Filter>src\Wheatear\Systems</Filter>
     </ClCompile>
     <ClCompile Include="src\Wheatear\Systems\UISystem.cpp">
@@ -2333,11 +2555,17 @@
     <ClCompile Include="src\wtpch.cpp">
       <Filter>src</Filter>
     </ClCompile>
+    <ClCompile Include="vendor\ImGuiColorTextEdit\TextEditor.cpp">
+      <Filter>vendor\ImGuiColorTextEdit</Filter>
+    </ClCompile>
     <ClCompile Include="vendor\ImGuizmo\ImGuizmo.cpp">
       <Filter>vendor\ImGuizmo</Filter>
     </ClCompile>
     <ClCompile Include="vendor\stb_image\stb_image.cpp">
       <Filter>vendor\stb_image</Filter>
+    </ClCompile>
+    <ClCompile Include="vendor\ufbx\ufbx.c">
+      <Filter>vendor\ufbx</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

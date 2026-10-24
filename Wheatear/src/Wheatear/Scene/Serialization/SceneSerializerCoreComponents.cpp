@@ -1,5 +1,6 @@
 #include "wtpch.h"
 #include "SceneSerializerComponentSupport.h"
+#include "Wheatear/Assets/AssetDatabase.h"
 
 namespace Wheatear {
 
@@ -36,12 +37,14 @@ namespace Wheatear {
             o << YAML::Key << "Translation" << YAML::Value << c.Translation;
             o << YAML::Key << "Rotation" << YAML::Value << c.Rotation;
             o << YAML::Key << "Scale" << YAML::Value << c.Scale;
+            o << YAML::Key << "Parent" << YAML::Value << static_cast<uint64_t>(c.Parent);
             o << YAML::EndMap;
         }
         static void Deserialize(const YAML::Node& n, TransformComponent& c) {
             c.Translation = n["Translation"].as<glm::vec3>(c.Translation);
             c.Rotation = n["Rotation"].as<glm::vec3>(c.Rotation);
             c.Scale = n["Scale"].as<glm::vec3>(c.Scale);
+            c.Parent = UUID(n["Parent"].as<uint64_t>(0));
         }
     };
 
@@ -83,7 +86,10 @@ namespace Wheatear {
             o << YAML::Key << Key << YAML::BeginMap;
             o << YAML::Key << "Color" << YAML::Value << c.Color;
             o << YAML::Key << "Texture" << YAML::Value << (c.Texture ? c.Texture->GetPath() : "");
+            o << YAML::Key << "TextureAsset" << YAML::Value << static_cast<uint64_t>(c.TextureAsset);
             o << YAML::Key << "TilingFactor" << YAML::Value << c.TilingFactor;
+            o << YAML::Key << "SortingLayer" << YAML::Value << c.SortingLayer;
+            o << YAML::Key << "OrderInLayer" << YAML::Value << c.OrderInLayer;
             o << YAML::Key << "UVMin" << YAML::Value << c.UVMin;
             o << YAML::Key << "UVMax" << YAML::Value << c.UVMax;
             o << YAML::Key << "FlipX" << YAML::Value << c.FlipX;
@@ -98,6 +104,8 @@ namespace Wheatear {
         static void Deserialize(const YAML::Node& n, SpriteRendererComponent& c) {
             c.Color = n["Color"].as<glm::vec4>(c.Color);
             c.TilingFactor = n["TilingFactor"].as<float>(1.0f);
+            c.SortingLayer = n["SortingLayer"].as<int>(0);
+            c.OrderInLayer = n["OrderInLayer"].as<int>(0);
             c.UVMin = n["UVMin"].as<glm::vec2>(c.UVMin);
             c.UVMax = n["UVMax"].as<glm::vec2>(c.UVMax);
             c.FlipX = n["FlipX"].as<bool>(c.FlipX);
@@ -107,9 +115,15 @@ namespace Wheatear {
             c.SpriteSheet = n["SpriteSheet"].as<std::string>("");
             c.CellIndex = n["CellIndex"].as<int>(-1);
             c.SubRect = n["SubRect"].as<std::string>("");
-            c.CellIndex = n["CellIndex"].as<int>(-1);
-            if (auto p = n["Texture"].as<std::string>(""); !p.empty())
-                c.Texture = Texture2D::Create(p);
+            c.TextureAsset = UUID(n["TextureAsset"].as<uint64_t>(0));
+            std::string texturePath = n["Texture"].as<std::string>("");
+            if (const std::string resolved = AssetDatabase::Get().GetPath(c.TextureAsset);
+                !resolved.empty())
+            {
+                texturePath = resolved;
+            }
+            if (!texturePath.empty())
+                c.Texture = Texture2D::Create(texturePath);
         }
     };
 
@@ -120,12 +134,16 @@ namespace Wheatear {
             o << YAML::Key << "Color" << YAML::Value << c.Color;
             o << YAML::Key << "Thickness" << YAML::Value << c.Thickness;
             o << YAML::Key << "Fade" << YAML::Value << c.Fade;
+            o << YAML::Key << "SortingLayer" << YAML::Value << c.SortingLayer;
+            o << YAML::Key << "OrderInLayer" << YAML::Value << c.OrderInLayer;
             o << YAML::EndMap;
         }
         static void Deserialize(const YAML::Node& n, CircleRendererComponent& c) {
             c.Color = n["Color"].as<glm::vec4>(c.Color);
             c.Thickness = n["Thickness"].as<float>(c.Thickness);
             c.Fade = n["Fade"].as<float>(c.Fade);
+            c.SortingLayer = n["SortingLayer"].as<int>(0);
+            c.OrderInLayer = n["OrderInLayer"].as<int>(0);
         }
     };
 
@@ -201,17 +219,100 @@ namespace Wheatear {
                 << (c.Mesh ? c.Mesh->GetFilepath() : "");
             o << YAML::Key << "MaterialPath" << YAML::Value
                 << (c.Material ? c.Material->GetPath() : "");
+            o << YAML::Key << "ModelPath" << YAML::Value
+                << (c.Model ? c.Model->GetPath() : "");
+            o << YAML::Key << "ModelAsset" << YAML::Value
+                << static_cast<uint64_t>(c.ModelAsset);
+            o << YAML::Key << "MaterialAsset" << YAML::Value
+                << static_cast<uint64_t>(c.MaterialAsset);
             o << YAML::EndMap;
         }
         static void Deserialize(const YAML::Node& n, MeshRendererComponent& c)
         {
+            c.ModelAsset = UUID(n["ModelAsset"].as<uint64_t>(0));
+            c.MaterialAsset = UUID(n["MaterialAsset"].as<uint64_t>(0));
+
+            std::string modelPath = n["ModelPath"].as<std::string>("");
+            if (const std::string resolved = AssetDatabase::Get().GetPath(c.ModelAsset);
+                !resolved.empty())
+            {
+                modelPath = resolved;
+            }
+            else if (!modelPath.empty() && static_cast<uint64_t>(c.ModelAsset) != 0)
+            {
+                WT_CORE_WARN("Model asset UUID {} is not in the asset registry; "
+                    "falling back to path '{}'", static_cast<uint64_t>(c.ModelAsset),
+                    modelPath);
+            }
+
+            if (!modelPath.empty())
+            {
+                c.Model = Model::Create(modelPath);
+                c.Mesh = nullptr;
+                c.Material = nullptr;
+                if (!c.Model)
+                {
+                    WT_CORE_ERROR("Failed to load model '{}' for MeshRendererComponent",
+                        modelPath);
+                }
+                return;
+            }
+
+            c.Model = nullptr;
             auto meshPath = n["MeshPath"].as<std::string>("");
             if (!meshPath.empty()) c.Mesh = Mesh::Create(meshPath);
             else                   c.Mesh = Mesh::CreateCube();
 
-            auto matPath = n["MaterialPath"].as<std::string>("");
+            std::string matPath = n["MaterialPath"].as<std::string>("");
+            if (const std::string resolved = AssetDatabase::Get().GetPath(c.MaterialAsset);
+                !resolved.empty())
+            {
+                matPath = resolved;
+            }
             if (!matPath.empty()) c.Material = Material::Load(matPath);
             else                  c.Material = Material::Create();
+        }
+    };
+
+    template<> struct ComponentSerializer<TerrainComponent>
+    {
+        static constexpr const char* Key = "TerrainComponent";
+        static void Serialize(YAML::Emitter& o, const TerrainComponent& c)
+        {
+            o << YAML::Key << Key << YAML::BeginMap;
+            o << YAML::Key << "CellsX" << YAML::Value << c.CellsX;
+            o << YAML::Key << "CellsZ" << YAML::Value << c.CellsZ;
+            o << YAML::Key << "CellSize" << YAML::Value << c.CellSize;
+            o << YAML::Key << "HeightScale" << YAML::Value << c.HeightScale;
+            o << YAML::Key << "Seed" << YAML::Value << c.Seed;
+            o << YAML::EndMap;
+        }
+        static void Deserialize(const YAML::Node& n, TerrainComponent& c)
+        {
+            c.CellsX = n["CellsX"].as<int>(60);
+            c.CellsZ = n["CellsZ"].as<int>(60);
+            c.CellSize = n["CellSize"].as<float>(1.0f);
+            c.HeightScale = n["HeightScale"].as<float>(1.0f);
+            c.Seed = n["Seed"].as<uint32_t>(1337);
+            c.Heights.clear();
+            c.Mesh = nullptr;
+            c.Material = nullptr;
+            c.Dirty = true;
+        }
+    };
+
+    template<> struct ComponentSerializer<NavObstacleComponent>
+    {
+        static constexpr const char* Key = "NavObstacleComponent";
+        static void Serialize(YAML::Emitter& o, const NavObstacleComponent& c)
+        {
+            o << YAML::Key << Key << YAML::BeginMap;
+            o << YAML::Key << "Enabled" << YAML::Value << c.Enabled;
+            o << YAML::EndMap;
+        }
+        static void Deserialize(const YAML::Node& n, NavObstacleComponent& c)
+        {
+            c.Enabled = n["Enabled"].as<bool>(true);
         }
     };
 
@@ -266,6 +367,8 @@ namespace Wheatear {
         BoxCollider2DComponent,
         CircleCollider2DComponent,
         MeshRendererComponent,
+        TerrainComponent,
+        NavObstacleComponent,
         DirectionalLightComponent,
         PointLightComponent
     >;

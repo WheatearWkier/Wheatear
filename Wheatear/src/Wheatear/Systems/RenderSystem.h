@@ -29,7 +29,15 @@ namespace Wheatear {
 
         // Reused across frames to avoid per-frame heap allocation for the
         // back-to-front sprite sort.
-        std::vector<entt::entity> m_SpriteSortBuffer;
+        struct SpriteSortItem
+        {
+            entt::entity Entity = entt::null;
+            glm::mat4 World = glm::mat4(1.0f);
+            int SortingLayer = 0;
+            int OrderInLayer = 0;
+            bool IsCircle = false;
+        };
+        std::vector<SpriteSortItem> m_SpriteSortBuffer;
     };
 
 } // namespace Wheatear

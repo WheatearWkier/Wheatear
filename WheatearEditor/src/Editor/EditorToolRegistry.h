@@ -1,5 +1,6 @@
 #pragma once
 
+#include "Editor/EditorWorkspace.h"
 #include "Wheatear/Scene/Entity.h"
 
 #include <functional>
@@ -34,6 +35,7 @@ namespace Wheatear {
         EditorToolCategory Category = EditorToolCategory::Gameplay;
         std::function<void(const EditorToolContext&)> Open;
         std::function<void()> Draw;
+        EditorDomain Domain = EditorDomain::Any;
     };
 
     class EditorToolRegistry
@@ -63,10 +65,31 @@ namespace Wheatear {
                 return;
 
             for (const auto& tool : Tools())
-                visitor(tool);
+            {
+                if (EditorWorkspaceContext::IsVisible(ClassifyDomain(tool)))
+                    visitor(tool);
+            }
         }
 
     private:
+        static EditorDomain ClassifyDomain(const EditorToolDescriptor& tool)
+        {
+            if (tool.Domain != EditorDomain::Any)
+                return tool.Domain;
+            const std::string& label = tool.MenuLabel;
+            if (label.find("Sprite Sheet") != std::string::npos
+                || label.find("Visual Novel") != std::string::npos
+                || label.find("VN Script") != std::string::npos
+                || label.find("Side Combat") != std::string::npos
+                || label.find("Turn Combat") != std::string::npos
+                || label.find("Arcade Combat") != std::string::npos
+                || label.find("Tactical") != std::string::npos)
+            {
+                return EditorDomain::TwoD;
+            }
+            return EditorDomain::Any;
+        }
+
         static std::vector<EditorToolDescriptor>& Tools()
         {
             static std::vector<EditorToolDescriptor> tools;

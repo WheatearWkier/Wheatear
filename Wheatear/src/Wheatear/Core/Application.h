@@ -38,6 +38,13 @@ namespace Wheatear {
 		std::filesystem::path ProjectRoot;
 		std::filesystem::path AssetDirectoryName = "assets";
 		ApplicationCommandLineArgs CommandLineArgs;
+
+		// Opt-in deterministic update loop. Games that need fixed-step physics
+		// can enable this without changing every layer.
+		bool UseFixedTimestep = false;
+		float FixedTimestepHz = 60.0f;
+		float MaxFrameDelta = 0.25f;
+		int MaxFixedStepsPerFrame = 8;
 	};
 
 	class Application
@@ -100,6 +107,7 @@ namespace Wheatear {
 		std::vector<Layer*> m_PendingOverlaysToPop;
 
 		double m_LastFrameTime = 0.0;
+		double m_FixedTimeAccumulator = 0.0;
 
 		static Application* s_Instance;
 	};

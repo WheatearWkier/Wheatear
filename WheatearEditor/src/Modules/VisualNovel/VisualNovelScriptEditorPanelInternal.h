@@ -55,6 +55,58 @@ namespace Wheatear::VisualNovelScriptEditorPanelInternal {
             return result;
         }
 
+        inline static std::string EscapeInlineText(const std::string& value)
+        {
+            std::string escaped;
+            escaped.reserve(value.size());
+            for (char c : value)
+            {
+                if (c == '\\')
+                {
+                    escaped += "\\\\";
+                }
+                else if (c == '\n')
+                {
+                    escaped += "\\n";
+                }
+                else if (c == '\r')
+                {
+                    continue;
+                }
+                else
+                {
+                    escaped.push_back(c);
+                }
+            }
+            return escaped;
+        }
+
+        inline static std::string UnescapeInlineText(const std::string& value)
+        {
+            std::string result;
+            result.reserve(value.size());
+            for (size_t i = 0; i < value.size(); ++i)
+            {
+                if (value[i] == '\\' && i + 1 < value.size())
+                {
+                    if (value[i + 1] == 'n')
+                    {
+                        result.push_back('\n');
+                        ++i;
+                        continue;
+                    }
+                    if (value[i + 1] == '\\')
+                    {
+                        result.push_back('\\');
+                        ++i;
+                        continue;
+                    }
+                }
+                result.push_back(value[i]);
+            }
+            return result;
+        }
+
         inline static std::string QuoteIfNeeded(const std::string& value)
         {
             if (value.empty())
@@ -62,7 +114,7 @@ namespace Wheatear::VisualNovelScriptEditorPanelInternal {
 
             const bool needsQuote = value.find_first_of(" \t\r\n|") != std::string::npos;
             if (!needsQuote)
-                return value;
+                return EscapeInlineText(value);
 
             std::string escaped;
             escaped.reserve(value.size() + 2);
@@ -70,8 +122,22 @@ namespace Wheatear::VisualNovelScriptEditorPanelInternal {
             for (char c : value)
             {
                 if (c == '"' || c == '\\')
+                {
                     escaped.push_back('\\');
-                escaped.push_back(c);
+                    escaped.push_back(c);
+                }
+                else if (c == '\n')
+                {
+                    escaped += "\\n";
+                }
+                else if (c == '\r')
+                {
+                    continue;
+                }
+                else
+                {
+                    escaped.push_back(c);
+                }
             }
             escaped.push_back('"');
             return escaped;
@@ -148,9 +214,8 @@ namespace Wheatear::VisualNovelScriptEditorPanelInternal {
                 ImGuiInputTextFlags_AllowTabInput);
         }
 
-        // Mirrors the runtime grammar: an optional trailing " if flag <id>" /
-// "if flag:<id>" clause (the last three whitespace tokens after "->")
-// gates this option behind a progression story flag.
+        // Mirrors the runtime grammar: the trailing standalone " if ..." clause
+        // gates this option, e.g. "-> ending if gold >= 5" or "-> ending if flag CH02".
 static void ExtractChoiceRequiredCondition(std::string& target,
             std::string& outFlag,
             std::string& outCondition)
@@ -166,13 +231,23 @@ static void ExtractChoiceRequiredCondition(std::string& target,
                 while (w >> w0)
                     words.push_back(w0);
             }
-            // Trailing clause after a standalone " if ":  "if flag <id>" or
-            // "if <expr>". Anything else is left as a plain label.
-            if (words.size() < 3 || words[words.size() - 3] != "if")
+            if (words.size() < 3)
+                return;
+
+            size_t ifIndex = std::string::npos;
+            for (size_t i = words.size() - 1; i > 0; --i)
+            {
+                if (words[i - 1] == "if")
+                {
+                    ifIndex = i - 1;
+                    break;
+                }
+            }
+            if (ifIndex == std::string::npos || ifIndex + 1 >= words.size())
                 return;
 
             std::string label;
-            for (size_t i = 0; i < words.size() - 3; ++i)
+            for (size_t i = 0; i < ifIndex; ++i)
             {
                 if (!label.empty())
                     label += " ";
@@ -180,22 +255,23 @@ static void ExtractChoiceRequiredCondition(std::string& target,
             }
 
             std::string clause;
-            for (size_t i = words.size() - 2; i < words.size(); ++i)
+            for (size_t i = ifIndex + 1; i < words.size(); ++i)
             {
                 if (!clause.empty())
                     clause += " ";
                 clause += words[i];
             }
 
-            // "if flag <id>" is a 4-token trailing clause ("Label if flag X");
-            // match on the second-last token being "flag" (mirrors runtime
-            // ExtractRequiredCondition in VisualNovelScript.cpp).
-            if (words.size() >= 3 && words[words.size() - 3] == "if" && words[words.size() - 2] == "flag")
+            if (words.size() >= 3 && words[words.size() - 3] == "flag")
             {
                 std::string flagId = words.back();
                 if (flagId.rfind("flag:", 0) == 0 && flagId.size() > 5)
                     flagId = flagId.substr(5);
                 outFlag = Trim(flagId);
+            }
+            else if (clause.rfind("flag:", 0) == 0)
+            {
+                outFlag = Trim(clause.substr(5));
             }
             else
             {
@@ -205,26 +281,129 @@ static void ExtractChoiceRequiredCondition(std::string& target,
             target = Trim(label);
         }
 
+        inline static bool IsChoiceQuoteOpener(const std::string& text,
+            size_t index, char c)
+        {
+            if (c == '"')
+                return true;
+            if (c != '\'')
+                return false;
+            if (index == 0)
+                return true;
+            const char previous = text[index - 1];
+            return std::isspace(static_cast<unsigned char>(previous))
+                || previous == '|' || previous == '>' || previous == '('
+                || previous == '[' || previous == '{' || previous == '='
+                || previous == ':' || previous == ',';
+        }
+
+        inline static std::vector<std::string> SplitChoiceSegments(
+            const std::string& text)
+        {
+            std::vector<std::string> parts;
+            std::string current;
+            char quote = '\0';
+            for (size_t i = 0; i < text.size(); ++i)
+            {
+                const char c = text[i];
+                if (quote != '\0')
+                {
+                    current.push_back(c);
+                    if (c == '\\' && i + 1 < text.size())
+                        current.push_back(text[++i]);
+                    else if (c == quote)
+                        quote = '\0';
+                    continue;
+                }
+                if (IsChoiceQuoteOpener(text, i, c))
+                {
+                    quote = c;
+                    current.push_back(c);
+                    continue;
+                }
+                if (c == '|')
+                {
+                    parts.push_back(Trim(current));
+                    current.clear();
+                    continue;
+                }
+                current.push_back(c);
+            }
+            parts.push_back(Trim(current));
+            return parts;
+        }
+
+        inline static size_t FindChoiceArrow(const std::string& text)
+        {
+            char quote = '\0';
+            for (size_t i = 0; i < text.size(); ++i)
+            {
+                const char c = text[i];
+                if (quote != '\0')
+                {
+                    if (c == '\\')
+                    {
+                        ++i;
+                        continue;
+                    }
+                    if (c == quote)
+                        quote = '\0';
+                    continue;
+                }
+                if (IsChoiceQuoteOpener(text, i, c))
+                {
+                    quote = c;
+                    continue;
+                }
+                if (text.compare(i, 2, "->") == 0)
+                    return i;
+            }
+            return std::string::npos;
+        }
+
+        inline static size_t FindChoiceSeparator(const std::string& text)
+        {
+            char quote = '\0';
+            for (size_t i = 0; i < text.size(); ++i)
+            {
+                const char c = text[i];
+                if (quote != '\0')
+                {
+                    if (c == '\\')
+                        ++i;
+                    else if (c == quote)
+                        quote = '\0';
+                    continue;
+                }
+                if (IsChoiceQuoteOpener(text, i, c))
+                {
+                    quote = c;
+                    continue;
+                }
+                if (c == '|')
+                    return i;
+            }
+            return std::string::npos;
+        }
+
         inline static std::vector<VisualNovelScriptEditorPanel::ChoiceEntry> ParseChoices(const std::string& payload)
         {
             std::vector<VisualNovelScriptEditorPanel::ChoiceEntry> choices;
-            std::stringstream stream(payload);
-            std::string segment;
-            while (std::getline(stream, segment, '|'))
+            for (std::string segment : SplitChoiceSegments(payload))
             {
                 segment = Trim(segment);
                 if (segment.empty())
                     continue;
 
-                const size_t arrow = segment.find("->");
+                const size_t arrow = FindChoiceArrow(segment);
                 VisualNovelScriptEditorPanel::ChoiceEntry choice;
                 if (arrow == std::string::npos)
                 {
-                    choice.Text = StripQuotes(segment);
+                    choice.Text = UnescapeInlineText(StripQuotes(segment));
                 }
                 else
                 {
-                    choice.Text = StripQuotes(segment.substr(0, arrow));
+                    choice.Text = UnescapeInlineText(StripQuotes(segment.substr(0, arrow)));
                     choice.Target = StripQuotes(segment.substr(arrow + 2));
                     ExtractChoiceRequiredCondition(choice.Target, choice.RequiredFlag, choice.RequiredCondition);
                 }

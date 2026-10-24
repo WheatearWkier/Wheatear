@@ -42,6 +42,13 @@ namespace Wheatear {
         std::vector<std::string> LeadingComments;
     };
 
+    struct EventScriptIssue
+    {
+        int SourceLine = 0;
+        bool Error = false;
+        std::string Message;
+    };
+
     class WHEATEAR_API EventScript
     {
     public:
@@ -60,6 +67,9 @@ namespace Wheatear {
         // Total count of preserved-but-uninterpretable lines (unknown
         // instructions inside events plus orphan lines).
         size_t GetUnrecognizedLineCount() const;
+        // Static validation independent of runtime state: command prefixes,
+        // conditions, wait ranges, if/endif balance and duplicate events.
+        std::vector<EventScriptIssue> Validate() const;
 
     private:
         void Parse(const std::string& text);

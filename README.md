@@ -35,6 +35,31 @@ https://github.com/user-attachments/assets/594114a5-ba8b-4847-9f34-6be1f15181f7
   <img src="docs/readme-media/side_combat_2.png" width="49%" alt="横版战斗演示" />
 </p>
 
+### 编辑器界面
+
+新版编辑器使用统一的视觉系统（仍基于 Dear ImGui，不引入 Qt/CEF 等重型 UI 框架）：
+
+- **Inter + 微软雅黑** 合并字体：拉丁字符使用 Inter，中文使用系统雅黑，16px 正文 / 13px 辅助 / 22px 标题；面板边距、控件高度和 Tab 同步收紧到现代商业引擎密度。
+- **Midnight + Wheat** 主题：深色中性面板、麦穗金强调色，统一圆角、边框、间距、Tab、Dock 分隔条和 hover 状态。
+- 顶部品牌区与透明麦穗 Logo（无深色底、细金环）；窗口图标、`.ico` 应用图标同步更新。
+- 主操作工具栏固定在菜单栏下方（不再悬浮遮挡场景/编辑器 Tab），包含新建/打开/保存、撤销/重做、播放/停止/单步、聚焦、UI/事件工具、健康检查、打包、重置布局与资源抽屉；右侧可一键收起，Window → Action Toolbar 可恢复。
+- 编辑器启动即最大化，避免高 DPI 下右侧 Inspector / 底部 Dock 落到屏幕外；标题栏、工具栏、Dock 与状态栏按同一套几何约束布局；无边框窗口支持鼠标拖动边缘缩放，最小尺寸 900×560。
+- 界面缩放：`Ctrl + 鼠标滚轮` 在面板上缩放字体与控件间距，`Settings → UI Scale` 提供 85%–200% 预设；100% 使用更大的文字基准（约原先 143% 的文字），图标保持独立尺寸，Content Browser 缩略图仍用自身 Ctrl+滚轮缩放。
+- 启动器按 1920×1080 设计空间整体缩放：字体、图标、卡片、间距随窗口尺寸同步变化，内容卡片铺满窗口；自绘标题栏 + 渐变/网格/麦穗光晕背景避免大片纯黑边。
+- 新增底部状态栏：项目、工作区、Edit/Play、场景与脏标记、当前选中实体、FPS、帧耗时、2D/3D draw call 数。
+- 新增稳定 Dock 体系：窗口标题不再使用会随语言变化的本地化字符串；Dock 版本号变化时自动清理旧 `imgui.ini` 并重建，修复打开场景后窗口散落成独立浮动窗的问题；工具窗口默认停靠到中央文档区。
+- Viewport 内嵌工具条：Select/Move/Rotate/Scale、Frame、编辑/播放状态，不再使用悬浮按钮覆盖场景。
+- 图标统一为 128px 源图、2.35px 圆头线宽；资源类型按语义着色，播放/暂停/停止/单步使用实心圆角图形；所有 ImGui 图标采样统一修正垂直翻转，避免上下颠倒。
+- `PanelHeader` 使用标题字体 + 强调色竖条；`StatusBadge` 改为深色胶囊标签；`IconButton` 等编辑器控件统一到新主题。
+- 启动器改为 **Workspace + Template + Project** 三段式：2D/3D 工作区卡片、2D/3D 模板卡片、项目列表，新建项目自动写入模板场景、示例流程脚本、`TEMPLATE.md` 与 `Workspace` 配置；启动器同样最大化并垂直居中内容。
+- 2D/3D 编辑器顶部显示工作区徽章（2D Studio 蓝色 / 3D Studio 绿色），保留共享底层但明确制作边界。
+- 编辑器使用无边框窗口 + 自绘标题栏：品牌、工作区徽章、场景名、最小化/最大化/关闭、拖动和边缘缩放。
+- 项目列表支持搜索过滤、最近项目、收藏星标、拖拽排序与持久化顺序；保存场景时自动把编辑器最后一帧写成项目缩略图（`Saved/Thumbnails/project_thumbnail.png`）。
+- 工作区功能隔离：2D 工作区只显示 Sprite/Circle/2D Physics/精灵动画等工具与组件；3D 工作区只显示 Mesh/Terrain/Nav/Light/Animator 3D；Dock 布局、Object 创建菜单、Add Component、Window/Toolbar 菜单同步过滤。
+- 主题支持 **Midnight / Paper** 切换，并持久化到编辑器设置目录；图编辑画布、控制台日志颜色、WAO 时间条、动画时间轴与资源浏览器自定义背景均适配浅色主题。
+- 模板场景开始内容化：UI 模板带标题文本、RTS 模板带地形/基地占位、2D 模板带相机与角色占位；模板自动附带可运行的 `assets/events/start_flow.wts` 流程控制器。
+- 视口缩放改为在渲染前统一重建 Framebuffer，避免拖动分隔条时出现“天空 → 黑屏 → 天空”的闪烁。
+
 ## 项目定位
 
 Wheatear 由三个主要部分组成：
@@ -147,13 +172,29 @@ Application
 已实现内容包括：
 
 - Mesh 与 Material。
-- OBJ 模型加载。
+- 静态 FBX / glTF / GLB / OBJ 模型导入（ufbx + cgltf），支持材质拆分子网格。
+- 模型 cook 为引擎原生 `.wtmodel` 二进制（`--cook-model` 或编辑器 Re-Cook），运行时优先加载 cooked 文件。
+- 导入设置：缩放、Y-up 转换、法线绿通道翻转、Separate / ORM / Metallic-Smoothness 通道模式、纹理搜索路径。
+- glTF / FBX 内嵌纹理提取，法线/ORM 贴图派生写出。
+- 场景引用使用资源 UUID（模型、材质、Sprite/UI 纹理），注册表更新路径后引用仍指向同一 ID；跨路径移动资产时的自动 ID 迁移（`.meta`）尚未接入，UUID 缺失时回退到旧路径字段。
+- 骨骼动画与 GPU 蒙皮：glTF skin/joint/weight、FBX cluster 权重、最多 4 骨骼影响/顶点、`Animator3DComponent` 播放/循环/交叉淡化；FBX 动画在导入时烘焙为逐帧蒙皮矩阵，避免 FBX 继承/单位规则导致姿态失真。
+- 网格 AABB + 相机/阴影视锥剔除。
+- 相同 Mesh + 相同材质状态的静态网格自动合批为实例化绘制（运行时；编辑器保持逐对象绘制以支持 picking）。
+- Heightfield `TerrainComponent`（程序化高度图、编辑器重新生成/重建网格）。
+- 网格导航：`NavObstacleComponent` 阻挡 + A* 8 邻域寻路 + 视线字符串拉直 + 地形高度采样；`NavAgentComponent` 路径跟随。
+- 单位移动：空间哈希局部避让、圆 vs 阻挡格碰撞修正（不会穿过岩石/建筑）、按移动方向旋转的编队落点、追击目标定时重算路径。
+- 单位状态机：Idle / Move / Attack / Dying，死亡单位保留 0.8 秒做倒地表现后再销毁；有 `Animator3DComponent` 的骨骼单位按状态交叉淡化 Idle/Walk/Attack/Death 片段，纯网格单位使用灰盒缩放动画反馈。
+- RTS 经济：金币资源点、Harvester 自动采集、人口/补给上限、基地与兵营血量、建造中/已完工状态。
+- 生产与 AI：兵营队列（Soldier 50 / Harvester 75）、按 `1`/`2` 快捷训练、`B` 进入兵营放置模式；AI 拥有被动收入、自动补兵和周期进攻波次，摧毁敌方基地获胜。
+- 导航调试：F3 显示网格、阻挡格、路径与 waypoint；F4 选中全部玩家单位并寻路到地图另一侧，用于快速验证绕障。
 - 天空盒。
 - 方向光和点光源。
 - 阴影。
 - IBL。
 - SSAO。
 - 3D 编辑器相机和场景预览。
+
+当前动画随 `.wtmodel` 一起 cook，独立可复用的 `.wtanim3d` 片段、动画状态机资产和 root motion 尚未接入。FBX 会按 Y-up / 目标单位转换，glTF 使用规范单位；材质支持 base color、metallic、roughness 与法线贴图。DDS/KTX 与 BC 纹理压缩仍在后续阶段。
 
 当前渲染后端主要为 OpenGL。构建工程时仍需要 Vulkan SDK，主要用于 ShaderC 和 SPIR-V Cross 等 shader 工具链依赖，而不是表示当前已经实现 Vulkan 渲染后端。
 
@@ -464,7 +505,7 @@ Content Browser 的设计参考了 UE Content Browser 的资源组织方式，�
 编辑器使用中央资源注册表：
 
 ```text
-assets/.wheatear/asset_registry.yaml
+Intermediate/AssetRegistry.yaml
 ```
 
 注册表记录：
@@ -552,6 +593,13 @@ bin\Release-windows-x86_64\WheatearSandbox\WheatearSandbox.exe `
     --project Projects\WheatearDemo
 ```
 
+编辑器启动器中的 **Open Project Folder...** 可以直接打开任意位置的
+`WheatearProject.wtproject` 项目，并记住到已导入项目列表。命令行等价方式：
+
+```powershell
+WheatearEditor.exe --project D:\Games\MyProject
+```
+
 ### 打包玩家版本
 
 编辑器界面支持选择启动场景并打包。
@@ -559,18 +607,75 @@ bin\Release-windows-x86_64\WheatearSandbox\WheatearSandbox.exe `
 也可以使用命令行：
 
 ```powershell
-Builds\Windows\Editor\WheatearEditor.exe `
-    --package-player `
+Builds\Win64\Editor\WheatearEditor.exe `
+    --package `
     --project Projects\WheatearDemo
 ```
 
-默认玩家包输出到：
+默认游戏包输出到：
 
 ```text
-Builds/Windows/Player/<PackageName>/
+Builds/Win64/<GameName>/
 ```
 
 GUI 打包默认使用 Release 配置。命令行可以通过 `--configuration Debug|Release` 指定配置。
+
+## 项目结构
+
+Wheatear 采用轻量但规范的 Project / Build 结构，不需要安装器：
+
+```text
+Projects/<ProjectName>/
+    WheatearProject.wtproject   项目描述（名称、版本、工作区、启动场景）
+    Config/
+        DefaultGame.ini         运行/打包配置
+    assets/                     游戏内容（Unity 风格的 Assets）
+        scenes/
+        gameplay/
+        models/
+        materials/
+        ui_templates/
+        ...
+    Saved/
+        Logs/
+        Config/
+        Thumbnails/             项目缩略图
+    Intermediate/
+        AssetRegistry.yaml      UUID / 路径注册表
+        Cache/
+        Cooked/
+    Binaries/
+        Win64/                  项目构建产物占位
+```
+
+编辑器本身是可移植目录：
+
+```text
+Builds/Win64/Editor/
+    WheatearEditor.exe
+    assets/shaders/
+    Resources/
+    ContentTemplates/
+```
+
+把整个 `Editor` 目录复制到任意位置即可运行，不需要安装器；启动后可直接打开/导入项目。
+
+游戏包：
+
+```text
+Builds/Win64/<GameName>/
+    <GameName>.exe
+    Content/
+        Paks/content.wtpack
+    Config/
+        DefaultGame.ini
+    WheatearProject.wtproject
+    Saved/
+    README.txt
+```
+
+编辑器通过 `WheatearProject.wtproject` 识别项目；`assets/` 是引擎的内容根，
+`Intermediate/`、`Saved/`、`Binaries/` 不会被当作资源扫描。
 
 ## 技术栈
 
@@ -610,7 +715,8 @@ docs/
     架构说明、玩法设计、编辑器手册和开发记录
 
 Builds/
-    编辑器与玩家打包产物
+    Win64/Editor/       便携编辑器（exe + Resources + assets/shaders + ContentTemplates）
+    Win64/<GameName>/   独立游戏（exe + Content/Paks + Config + Saved）
 
 scripts/
     构建、检查和工程辅助脚本
@@ -640,7 +746,8 @@ Wheatear 目前仍是面向学习、验证和作品展示的自研引擎项目�
 - [命令、数据表与事件脚本](docs/03_引擎架构/命令数据表与事件脚本.md)
 - [WAO 动作编排与效果结算系统](docs/03_引擎架构/WAO动作编排与效果结算系统.md)
 - [资源数据库与 UI 模板系统](docs/03_引擎架构/资源数据库与UI模板系统.md)
-- [从地基到 Sandbox 系列文档](docs/从地基到Sandbox/00_总纲.md)
+- [逻辑运行时与 DSL 统一](docs/03_引擎架构/逻辑运行时与DSL统一.md)
+- [从地基到 Sandbox](docs/从地基到Sandbox/从地基到Sandbox.md)
 
 ## 素材说明
 

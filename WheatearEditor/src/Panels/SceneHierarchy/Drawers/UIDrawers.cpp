@@ -1,6 +1,7 @@
 #include "wepch.h"
 #include "UIDrawers.h"
 #include "../ComponentDrawers.h"
+#include "Assets/AssetRegistry.h"
 #include "Editor/CommandBuilder.h"
 #include "Editor/EditorCanvasTools.h"
 #include "Editor/EditorLocale.h"
@@ -402,6 +403,7 @@ namespace Wheatear {
                         const std::filesystem::path texturePath =
                             AssetPath::ToProjectRelative(AssetPath::GetAssetRoot() / path);
                         image.Texture = Texture2D::Create(texturePath.generic_string());
+                        image.TextureAsset = AssetRegistry::Get().EnsureAsset(texturePath);
                     }
                     ImGui::EndDragDropTarget();
                 }
@@ -424,7 +426,10 @@ namespace Wheatear {
                 {
                     ImGui::SameLine();
                     if (ImGui::Button("Clear"))
+                    {
                         image.Texture = nullptr;
+                        image.TextureAsset = UUID(0);
+                    }
                 }
 
                 std::string texturePath = image.Texture ? image.Texture->GetPath() : std::string{};
@@ -435,6 +440,14 @@ namespace Wheatear {
                     image.Texture = texturePath.empty()
                         ? nullptr
                         : Texture2D::Create(texturePath);
+                    image.TextureAsset = texturePath.empty()
+                        ? UUID(0)
+                        : AssetRegistry::Get().EnsureAsset(texturePath);
+                }
+                if (static_cast<uint64_t>(image.TextureAsset) != 0)
+                {
+                    ImGui::TextDisabled("Asset UUID %llu",
+                        static_cast<unsigned long long>(static_cast<uint64_t>(image.TextureAsset)));
                 }
 
                 if (ImGui::Button("Open Sprite Sheet Picker"))

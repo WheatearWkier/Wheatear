@@ -19,9 +19,11 @@ project "WheatearEditor"
     includedirs {
         "src",
         "%{IncludeDir.GLAD}",
+        "%{IncludeDir.ImGui}",
         "%{IncludeDir.ImGuizmo}",
         "%{IncludeDir.miniaudio}",
         "%{IncludeDir.yaml_cpp}",
+        "%{wks.location}/Wheatear/vendor/ImGuiColorTextEdit",
     }
 
     links { "Wheatear", "yaml-cpp" }

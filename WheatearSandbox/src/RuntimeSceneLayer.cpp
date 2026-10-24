@@ -14,6 +14,7 @@
 #include "Wheatear/Modules/Progression/GameProgress.h"
 #include "Wheatear/Renderer/RenderCommand.h"
 #include "Wheatear/Runtime/CommandBus.h"
+#include "Wheatear/Runtime/RuntimePatchManager.h"
 #include "Wheatear/Runtime/SceneTransitionService.h"
 #include "Wheatear/Scene/Scene.h"
 #include "Wheatear/Scene/SceneSerializer.h"
@@ -48,8 +49,8 @@ void RuntimeSceneLayer::OnAttach()
     if (Wheatear::FindRuntimePlayerConfigPath().empty())
     {
         const std::filesystem::path projectConfig =
-            Wheatear::AssetPath::GetProjectRoot() / "assets" / "game" / "player.config";
-        if (std::filesystem::exists(projectConfig))
+            Wheatear::FindRuntimePlayerConfigPath(Wheatear::AssetPath::GetProjectRoot());
+        if (!projectConfig.empty())
             config = Wheatear::LoadRuntimePlayerConfig(projectConfig);
     }
     std::filesystem::path requestedPath = config.StartupScene.empty()
@@ -59,10 +60,10 @@ void RuntimeSceneLayer::OnAttach()
     for (int i = 1; i < args.Count; ++i)
     {
         const std::string argument = args[i];
-        if (argument == "--project")
+        if (argument == "--project" || argument == "--fixed-step-hz")
         {
-            // The project path belongs to the application bootstrapper, not
-            // to the scene selector below.
+            // These arguments belong to the application bootstrapper, not to
+            // the scene selector below.
             if (i + 1 < args.Count)
                 ++i;
             continue;
@@ -76,6 +77,18 @@ void RuntimeSceneLayer::OnAttach()
     }
 
     LoadScene(requestedPath);
+    if (m_ActiveScene)
+    {
+        std::string healthError;
+        if (!Wheatear::RuntimePatchManager::MarkLaunchHealthy(
+            Wheatear::AssetPath::GetWritableRoot(),
+            &healthError))
+        {
+            WT_CORE_WARN(
+                "RuntimeSceneLayer: could not clear launch health marker: {}",
+                healthError);
+        }
+    }
 }
 
 void RuntimeSceneLayer::OnDetach()
@@ -99,6 +112,7 @@ void RuntimeSceneLayer::OnUpdate(Wheatear::Timestep ts)
 
     // Hot-reload WAO action recipes while the game is running.
     Wheatear::UpdateActionHotReload();
+    Wheatear::UpdateBehaviorHotReload();
 
     m_ActiveScene->OnUpdateRuntime(ts);
     ConsumeRuntimeSceneCommands();

@@ -10,6 +10,7 @@
 #include <yaml-cpp/yaml.h>
 
 #include <algorithm>
+#include <cctype>
 #include <system_error>
 #include <vector>
 
@@ -108,6 +109,40 @@ namespace Wheatear::WAO {
             return EffectDurationPolicy::Instant;
         }
 
+        EffectTargetSelector ParseTargetSelector(const std::string& text,
+            EffectTargetSelector fallback)
+        {
+            const std::string value = ToLower(text);
+            if (value.empty())
+                return fallback;
+            if (value == "actor" || value == "self")
+                return EffectTargetSelector::Actor;
+            if (value == "target" || value == "explicit" || value == "explicit_target")
+                return EffectTargetSelector::Target;
+            if (value == "source")
+                return EffectTargetSelector::Source;
+            return fallback;
+        }
+
+        bool TryParseUuid(const std::string& text, UUID& out)
+        {
+            if (text.empty())
+                return false;
+            if (!std::all_of(text.begin(), text.end(),
+                    [](unsigned char c) { return std::isdigit(c) != 0; }))
+                return false;
+
+            try
+            {
+                out = UUID(static_cast<uint64_t>(std::stoull(text)));
+                return true;
+            }
+            catch (...)
+            {
+                return false;
+            }
+        }
+
         void ReadResourceCost(const YAML::Node& node, ActionRecipe* recipe)
         {
             if (!node || !node.IsMap() || !recipe)
@@ -152,6 +187,19 @@ namespace Wheatear::WAO {
             effect.DurationPolicy = ParseDurationPolicy(ReadString(node, { "durationPolicy", "DurationPolicy" }));
             effect.CustomType = ReadString(node, { "customType", "custom" });
             effect.Formula = ReadString(node, { "formula", "Formula" });
+
+            const std::string targetText = ReadString(node, { "target", "Target" });
+            if (TryParseUuid(targetText, effect.Target))
+                effect.TargetSelector = EffectTargetSelector::Target;
+            else
+                effect.TargetSelector = ParseTargetSelector(
+                    targetText, EffectTargetSelector::Actor);
+
+            const std::string sourceText = ReadString(node, { "source", "Source" });
+            if (!TryParseUuid(sourceText, effect.Source))
+                effect.SourceSelector = ParseTargetSelector(
+                    sourceText, EffectTargetSelector::Actor);
+
             return effect;
         }
 
@@ -185,6 +233,13 @@ namespace Wheatear::WAO {
             parsed.RequiredTags = ReadStringList(FirstNode(node, { "requiredTags", "RequiredTags" }));
             parsed.BlockedTags = ReadStringList(FirstNode(node, { "blockedTags", "BlockedTags" }));
             parsed.Signals = ReadStringList(FirstNode(node, { "signals", "Signals" }));
+            parsed.BehaviorId = ReadString(node, { "behaviorId", "BehaviorId" });
+            parsed.BehaviorFile = AssetAliasRegistry::Resolve(
+                ReadString(node, { "behaviorFile", "BehaviorFile" }));
+            parsed.BehaviorEntry = ReadString(node, { "behaviorEntry", "BehaviorEntry" });
+            parsed.BehaviorVersion = static_cast<uint32_t>(std::max(
+                0,
+                ReadInt(node, { "behaviorVersion", "BehaviorVersion" })));
 
             ReadResourceCost(FirstNode(node, { "resourceCost", "ResourceCost", "resources", "Resources" }), &parsed);
             ReadParams(FirstNode(node, { "params", "Params" }), &parsed);
@@ -200,8 +255,12 @@ namespace Wheatear::WAO {
             return true;
         }
 
-        size_t LoadNode(const YAML::Node& root)
+        size_t ParseNode(const YAML::Node& root,
+            std::vector<ActionRecipe>* recipes)
         {
+            if (!recipes)
+                return 0;
+
             size_t loaded = 0;
             YAML::Node actions = root["actions"];
             if (actions && actions.IsSequence())
@@ -211,7 +270,7 @@ namespace Wheatear::WAO {
                     ActionRecipe recipe;
                     if (ReadRecipe(node, &recipe))
                     {
-                        ActionDatabase::Register(recipe);
+                        recipes->push_back(std::move(recipe));
                         ++loaded;
                     }
                 }
@@ -221,11 +280,46 @@ namespace Wheatear::WAO {
             ActionRecipe recipe;
             if (ReadRecipe(root, &recipe))
             {
-                ActionDatabase::Register(recipe);
+                recipes->push_back(std::move(recipe));
                 return 1;
             }
 
             return 0;
+        }
+
+        bool ParseFile(const std::filesystem::path& path,
+            std::vector<ActionRecipe>* recipes,
+            std::string* error)
+        {
+            try
+            {
+                const YAML::Node root = YAML::LoadFile(path.string());
+                ParseNode(root, recipes);
+                return true;
+            }
+            catch (const YAML::Exception& exception)
+            {
+                if (error)
+                    *error = exception.what();
+                return false;
+            }
+        }
+
+        void CollectYamlFiles(const std::filesystem::path& directory,
+            std::vector<std::filesystem::path>* files)
+        {
+            if (!files || !std::filesystem::is_directory(directory))
+                return;
+
+            std::error_code error;
+            for (const auto& entry :
+                std::filesystem::recursive_directory_iterator(directory, error))
+            {
+                if (error || !entry.is_regular_file() || !IsYamlFile(entry.path()))
+                    continue;
+                files->push_back(entry.path());
+            }
+            std::sort(files->begin(), files->end());
         }
 
     } // namespace
@@ -238,7 +332,13 @@ namespace Wheatear::WAO {
 
         try
         {
-            return LoadNode(YAML::LoadFile(resolved.string()));
+            std::vector<ActionRecipe> recipes;
+            const size_t loaded = ParseNode(
+                YAML::LoadFile(resolved.string()),
+                &recipes);
+            for (const ActionRecipe& recipe : recipes)
+                ActionDatabase::Register(recipe);
+            return loaded;
         }
         catch (const YAML::Exception& exception)
         {
@@ -313,14 +413,96 @@ namespace Wheatear::WAO {
 
     size_t ActionAssetLoader::ReloadDirectory(const std::filesystem::path& path)
     {
-        ActionDatabase::Clear();
-        return LoadDirectory(path);
+        const std::filesystem::path resolved = AssetPath::ResolveRuntimeData(path);
+        if (!std::filesystem::is_directory(resolved))
+            return 0;
+
+        std::vector<std::filesystem::path> files;
+        CollectYamlFiles(resolved, &files);
+        std::vector<ActionRecipe> recipes;
+        for (const auto& file : files)
+        {
+            std::string parseError;
+            if (!ParseFile(file, &recipes, &parseError))
+            {
+                WT_CORE_WARN("ActionAssetLoader: atomic reload rejected '{}': {}",
+                    file.string(),
+                    parseError);
+                return 0;
+            }
+        }
+
+        std::string replaceError;
+        if (!ActionDatabase::Replace(recipes, &replaceError))
+        {
+            WT_CORE_WARN("ActionAssetLoader: atomic reload rejected '{}': {}",
+                resolved.string(),
+                replaceError);
+            return 0;
+        }
+        return recipes.size();
     }
 
     size_t ActionAssetLoader::ReloadManifest(const std::filesystem::path& path)
     {
-        ActionDatabase::Clear();
-        return LoadManifest(path);
+        const std::filesystem::path resolved = AssetPath::ResolveRuntimeData(path);
+        if (!std::filesystem::is_regular_file(resolved))
+            return 0;
+
+        try
+        {
+            const YAML::Node root = YAML::LoadFile(resolved.string());
+            const YAML::Node sets = root["sets"];
+            if (!sets || !sets.IsSequence())
+                return 0;
+
+            std::vector<ActionRecipe> recipes;
+            for (const YAML::Node& set : sets)
+            {
+                const std::string source = ReadString(
+                    set,
+                    { "path", "file", "directory" });
+                if (source.empty())
+                    continue;
+
+                const std::filesystem::path sourcePath =
+                    AssetPath::ResolveRuntimeData(source);
+                std::vector<std::filesystem::path> files;
+                if (std::filesystem::is_directory(sourcePath))
+                    CollectYamlFiles(sourcePath, &files);
+                else if (std::filesystem::is_regular_file(sourcePath))
+                    files.push_back(sourcePath);
+
+                for (const auto& file : files)
+                {
+                    std::string parseError;
+                    if (!ParseFile(file, &recipes, &parseError))
+                    {
+                        WT_CORE_WARN("ActionAssetLoader: atomic manifest reload rejected '{}': {}",
+                            file.string(),
+                            parseError);
+                        return 0;
+                    }
+                }
+            }
+
+            std::string replaceError;
+            if (!ActionDatabase::Replace(recipes, &replaceError))
+            {
+                WT_CORE_WARN("ActionAssetLoader: atomic manifest reload rejected '{}': {}",
+                    resolved.string(),
+                    replaceError);
+                return 0;
+            }
+            return recipes.size();
+        }
+        catch (const YAML::Exception& exception)
+        {
+            WT_CORE_WARN("ActionAssetLoader: failed to atomically reload manifest '{}': {}",
+                resolved.string(),
+                exception.what());
+            return 0;
+        }
     }
 
 } // namespace Wheatear::WAO

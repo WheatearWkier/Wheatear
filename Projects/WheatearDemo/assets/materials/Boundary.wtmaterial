@@ -1,0 +1,9 @@
+Material:
+  Albedo: [0.28, 0.22, 0.16, 1]
+  Metallic: 0
+  Roughness: 0.85
+  FlipNormals: false
+  AlbedoMap: ""
+  NormalMap: ""
+  RoughnessMap: ""
+  MetallicMap: ""

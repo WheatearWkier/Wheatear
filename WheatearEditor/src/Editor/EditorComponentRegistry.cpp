@@ -42,7 +42,10 @@ namespace Wheatear {
             return;
 
         for (const auto& descriptor : Descriptors())
-            visitor(descriptor);
+        {
+            if (EditorWorkspaceContext::IsVisible(descriptor.Domain))
+                visitor(descriptor);
+        }
     }
 
 } // namespace Wheatear

@@ -1,5 +1,6 @@
 #pragma once
 
+#include "Editor/EditorWorkspace.h"
 #include "Wheatear/Scene/Entity.h"
 
 #include <functional>
@@ -14,6 +15,7 @@ namespace Wheatear {
         std::function<bool(Entity)> CanAdd;
         std::function<void(Entity)> Add;
         std::function<void(Entity)> Draw;
+        EditorDomain Domain = EditorDomain::Any;
     };
 
     class EditorComponentRegistry

@@ -15,13 +15,18 @@
 如果把 `CommandBus` 看成命令交通枢纽，那么 `EventScript` 就是“流程编排层”。
 
 ```text
-UI / VN / Battle / Scene Trigger
-    ↓ event:
-CommandBus
-    ↓
+场景启动 + RunOnStart
+    -> EventScriptSystem::StartEvent(StartEvent)
+
+UIInputSystem / VisualNovelSystem / 玩法结果 / C++
+    -> 生成 event:xxx
+    -> CommandBus
+    -> EventCommandQueue
+    -> EventScriptSystem::StartEvent(xxx)
+
 EventScriptSystem
-    ↓ command / wait / if
-CommandBus / GameProgress / SceneTransitionService / 各玩法系统
+    -> .wts 中的 command / wait / if
+    -> CommandBus / GameProgress / SceneTransitionService / 各玩法系统
 ```
 
 它的职责很明确：
@@ -29,6 +34,8 @@ CommandBus / GameProgress / SceneTransitionService / 各玩法系统
 - 把按钮、剧情节点、战斗结果、门禁、过场串成脚本
 - 把“什么时候发生什么”从 C++ 里挪出来
 - 让编辑器可以直接维护文本流程
+
+这里有一个必须说清楚的边界：`.wts` 不负责发现点击、按键、攻击或受击。外部系统先发现操作或结果，再生成一个 `event:` 请求；WTS 只负责请求到达之后的流程编排。
 
 ## 5.2 本章要读的源码
 
@@ -65,6 +72,50 @@ CommandBus / GameProgress / SceneTransitionService / 各玩法系统
 - 敌人 AI
 - 复杂状态机
 - 高频碰撞
+
+### 5.3.1 WTS 不负责发现事件
+
+可以把 `.wts` 理解成“事件名到流程块的映射表”，而不是一个一直监听输入的脚本线程：
+
+```text
+事件请求 event:go_skill_tree
+    -> EventScriptSystem 找到 event go_skill_tree:
+    -> 从第一条指令开始推进
+```
+
+因此，`.wts` 文件本身就是一张提前写好的“事件名 -> 流程指令列表”表：事件名和后续要执行的步骤在内容制作时已经写入文件，运行时只负责根据请求查找并推进对应的块。
+
+要特别区分下面三种文本：
+
+| 文本 | 所在位置 | 含义 |
+| --- | --- | --- |
+| `event go_skill_tree:` | `.wts` | 定义一个名为 `go_skill_tree` 的事件处理块 |
+| `event:go_skill_tree` | UI、VN、玩法结果或 WTS 指令 | 请求启动这个事件处理块 |
+| `OnClickFunction: event:go_skill_tree` | `.wt` 场景按钮配置 | 告诉 UI 点击后要发出什么命令 |
+
+所以 WTS 不是运行时临时生成的，也不是通过轮询去猜“玩家现在想做什么”。如果某个事件名没有提前写在 `.wts` 中，`EventScriptSystem` 就找不到对应的流程块并发出警告。
+
+以据点场景为例，`Hub.wt` 中的按钮配置可能是：
+
+```text
+OnClickFunction: event:go_skill_tree
+```
+
+完整链路是：
+
+1. `UIInputSystem` 做鼠标命中测试，确认这个按钮被点击。
+2. `UIInputSystem::FireOnClick()` 读取 `OnClickFunction`。
+3. `CommandBus::Execute()` 识别 `event:go_skill_tree`，把它放入事件队列。
+4. 下一次 `EventScriptSystem::OnUpdateRuntime()` 先取出事件请求。
+5. 系统在 `sandbox_flow.wts` 中找到 `go_skill_tree` 事件块并开始执行。
+
+如果按钮配置的是：
+
+```text
+OnClickFunction: scene:assets/scenes/SkillTree.wt
+```
+
+它会直接走 `CommandBus -> SceneTransitionService`，不会经过 WTS。`RunOnStart` 也属于另一条路径：场景启动时由 `EventScriptSystem` 直接调用 `StartEvent(StartEvent)`，不是等待玩家点击。
 
 ## 5.4 脚本长什么样
 
@@ -109,6 +160,31 @@ end
 - `end` / `endevent`
 
 不知道怎么解释的行不会直接丢掉，而是保留成 `RawLine`。
+
+这里的“裸命令”不是指 `CommandBus` 能认识的所有命令。当前解析器允许直接写入 WTS 的主要是：
+
+```text
+quit
+scene:...
+newgame:...
+loadgame:...
+progression:...
+gamesave:...
+ui:...
+event:...
+```
+
+对于 `anim:`、`vn:`、`side:`、`turn:`、`tactic:` 等命令，建议显式写成：
+
+```text
+command anim:play:@17382910492300000000:idle
+command vn:advance
+command side:basic
+command turn:wait
+command tactic:move:player:3:4
+```
+
+否则这一行可能会成为 `RawLine`：编辑器会保留它，但运行时会跳过它。解析器是否把一行识别成可执行指令，和 `CommandBus` 运行时是否认识这个前缀，是两个不同问题。
 
 ## 5.5 `EventScript` 解析器做了什么
 
@@ -190,14 +266,26 @@ struct EventScriptComponent
 2. `CommandBus` 把它存成事件请求
 3. `EventScriptSystem` 再按目标实体启动对应事件
 
-然后系统会继续推进每个正在执行的脚本。
+事件队列是在推进活动脚本之前清空的。于是，如果某个正在执行的 WTS 又发出：
+
+```text
+event:another_event
+```
+
+这个新请求会进入队列，但不会在当前这次 `DrainEventCommands()` 中立刻被取出，通常要等下一次更新再启动。
+
+父事件在发出 `event:` 后会暂停；下一次更新把子事件压入同一个组件的 `RuntimeFrames` 调用栈，子事件结束后父事件再从下一条指令继续。这样就不是“子事件覆盖父事件”，也不是同步跳进另一个事件块。
+
+处理完本批事件后，系统才会继续推进每个正在执行的脚本。广播 `event:name` 只会在实际包含该事件的组件上启动，不会对场景中每个组件刷 “event not found”。
 
 ### 5.8.3 `UpdateScript()`
 
 每条指令按顺序执行：
 
-- `Command`：交给 `CommandBus::Execute(scene, instruction.Text)`
-- `Wait`：暂停若干秒
+- `Command`：交给 `CommandBus::Execute(scene, instruction.Text)`；失败会记录脚本路径、行号和原因
+- `event:`：把子事件压入调用栈，父事件暂停；同一事件已在栈中时拒绝递归，栈深上限为 8
+- `scene:` / `newgame:` / `loadgame:`：成功后清空当前组件的调用栈
+- `Wait`：暂停当前栈帧若干秒
 - `If`：条件满足才继续，否则跳到匹配的 `EndIf`
 - `EndIf`：单纯往后走
 - `RawLine`：跳过，但不执行
@@ -402,6 +490,70 @@ event:xxx
 
 这是编辑器友好性的关键。
 
+### 5.13.6 一次 `UpdateScript()` 的实际推进方式
+
+脚本并不是启动后从头到尾阻塞执行，而是由 `RuntimeInstructionIndex` 记录当前位置，每次更新从这个位置继续：
+
+```text
+如果 RuntimeWaitRemaining > 0
+    扣除本帧 deltaSeconds
+    如果仍然大于 0，结束本帧更新
+
+while RuntimeInstructionIndex < 当前事件的指令数量
+    取出当前指令
+
+    Command
+        CommandBus::Execute(scene, instruction.Text)
+        指令下标 + 1
+        继续看下一条
+
+    Wait
+        指令下标 + 1
+        设置 RuntimeWaitRemaining
+        如果等待时间 > 0，结束本帧更新
+
+    If
+        条件成立：下标 + 1
+        条件失败：跳到匹配的 EndIf
+
+    EndIf / RawLine
+        指令下标 + 1
+
+循环结束
+    RuntimeActive = false
+    RuntimeCompleted = true
+```
+
+因此普通命令可能在同一帧连续执行，而 `wait` 才会把控制权交给后续帧。例如：
+
+```text
+event demo:
+    progression:set_flag:FLAG_A
+    progression:set_flag:FLAG_B
+    wait 1.0
+    progression:set_flag:FLAG_C
+end
+```
+
+通常第一帧会设置 `FLAG_A` 和 `FLAG_B`，然后停在 `wait 1.0`；约 1 秒后才继续设置 `FLAG_C`。
+
+### 5.13.7 `wait` 不是等待用户输入
+
+当前 `wait` 只有“等待一段时间”的语义：
+
+```text
+wait 0.5
+```
+
+它不能表示：
+
+- 等待玩家点击 UI
+- 等待玩家按下攻击键
+- 等待某个敌人被击中
+- 等待 VN 玩家点下一句
+
+这些事实必须由对应的外部系统发现。事实发生后，外部系统可以再次调用 `CommandBus`，例如投递 `event:on_player_hit`，由 WTS 启动后续流程。WTS 本身不会轮询输入或碰撞。
+
 ## 5.14 条件语言怎么工作
 
 `EvaluateCondition()` 读取的是 `GameProgress::GetState()`。
@@ -490,13 +642,60 @@ end
 
 ```text
 按钮
+ -> UIInputSystem::FireOnClick()
  -> event:menu_new_game
+ -> CommandBus / EventCommandQueue
  -> EventScriptSystem
  -> newgame:assets/scenes/Intro.wt
  -> SceneTransitionService
  -> RuntimeSceneLayer
  -> LoadScene()
 ```
+
+按钮点击是 UI 系统发现的，WTS 只从 `event:menu_new_game` 开始接手。
+
+### 5.16.1 VN 点击“下一句”
+
+VN 的普通“点击继续”并不经过 WTS。当前实现的链路是：
+
+```text
+鼠标或 vn.advance 输入
+    -> VisualNovelSystem::UpdateInput()
+    -> VisualNovelRuntime::Advance()
+    -> VN 内部推进到下一行
+```
+
+这是 VN 自己的高频交互状态，不需要为每一句话都生成一个 WTS 事件。
+
+但 VN 选项可以把流程交给外部命令。例如：
+
+```text
+@choice 进入第一章假玩法 -> event:go_fake_combat | 先吐槽两句 -> roast
+```
+
+选择 `event:go_fake_combat` 时，VN 系统把这个外部命令记录到 `RuntimeRequestedCommand`，之后再由场景运行时交给 `CommandBus`；选择 `roast` 时，则仍然是 VN 运行时内部跳转到标签。也就是说，VN 同时支持“内部剧情跳转”和“跨系统流程请求”，但只有后者会进入 WTS。
+
+### 5.16.2 横板战斗中的攻击、受击和喝药
+
+横板战斗也不是“所有动作都通过 WTS”：
+
+```text
+键盘 / 手柄输入
+    -> InputBindingService
+    -> SideCombatPlayerService
+
+UI 或 WTS 发出 side:basic
+    -> CommandBus / GameplayCommandQueue
+    -> SideCombatSystem
+    -> InjectActionPress("side.basic")
+    -> SideCombatPlayerService
+```
+
+之后两条路径会汇合到动作、攻击判定和命中结算。攻击、受击、硬直、浮空、死亡属于高频玩法规则，由横板战斗服务和 `SideCombatHitResolutionService` 处理；当前命中结算会记录 `PlayerWasHit`、受击次数和效果账本，但不会自动生成 `event:on_player_hit`。
+
+物品也类似：`side:item:1` 先由 `SideCombatSystem` 根据配置找到第 1 个物品槽，再注入对应动作。当前示例配置中第 1 格是治疗物品，但“使用治疗物品”仍然是玩法动作，不是 WTS 监听到的事件。
+
+战斗胜利则属于低频结果，适合桥接到 WTS：战斗结果系统在延迟后发出场景配置里的 `event:side_combat_victory`，WTS 再负责设置旗标、等待和决定返回哪个场景。
 
 ## 5.17 真实链路拆解：战斗胜利后的返回
 
@@ -520,6 +719,8 @@ end
 event:side_combat_victory
 ```
 
+当前实现中，`SideCombatSystem` 在关卡运行态初始化时把 `VictorySceneCommand` 设置为这个字符串；`SideCombatOutcomeService` 等待结算延迟结束后，再通过 `GameplayFlowService` 发出它。于是 WTS 不是每帧检查“敌人是否死光”，而是在玩法系统已经确认胜利后，接收一个低频结果请求。
+
 ### 5.17.1 这说明了什么
 
 - 战斗系统只管“胜利了”
@@ -535,6 +736,38 @@ event:side_combat_victory
 - 结果系统给一个事件
 - `.wts` 决定重试到哪里
 - 命令系统负责执行跳转
+
+### 5.17.3 当前实现没有自动的 `on_*` 事件桥
+
+当前 `EventScriptSystem` 能直接处理的指令类型只有：
+
+```text
+Command / Wait / If / EndIf / RawLine
+```
+
+它没有内建“按钮一点击就自动调用 `on_click`”“玩家一受击就自动调用 `on_player_hit`”这样的映射。是否进入 WTS，取决于外部系统有没有显式发出 `event:` 请求。
+
+以横板受击为例，当前代码的事实是：
+
+```text
+敌人攻击命中玩家
+    -> SideCombatHitResolutionService
+    -> HitResolutionResult.PlayerWasHit = true
+    -> RuntimePlayerHitsTaken 增加
+    -> 写入 PlayerHitTaken 效果记录
+```
+
+到这里流程就结束了，并不会自动生成 WTS 事件。若以后需要受击触发剧情，可以在确认命中结果的位置增加桥接：
+
+```text
+SideCombatHitResolutionService
+    -> CommandBus::QueueEventCommand({ flowEntity, "on_player_hit" })
+    -> EventScriptSystem 下一次更新时启动 on_player_hit
+```
+
+这是一项明确的扩展设计，而不是当前 WTS 已经具备的能力。
+
+另外，`EventScriptSystem` 当前忽略了 `CommandBus::Execute()` 返回的 `CommandResult`。所以脚本中的命令失败不会自动让脚本进入错误状态；如果面试时被问到错误处理，应把它作为当前实现边界说清楚。
 
 ## 5.18 把 `EventScriptSystem` 看成一个状态机
 
@@ -614,21 +847,17 @@ component.RuntimeWaitRemaining =
 
 条件是 `.wts` 从“命令列表”变成“流程脚本”的关键。
 
-### 5.19.1 条件表达式如何拆词
+### 5.19.1 条件表达式如何求值
 
-源码使用 `SplitWords()` 把表达式拆成空格分隔的单词：
-
-```text
-last_dungeon CH02_MAIN_BearAwakening
-```
-
-会变成：
+条件先经过 `Logic::NormalizeCondition` 做历史语法兼容，再交给共享表达式求值器：
 
 ```text
-["last_dungeon", "CH02_MAIN_BearAwakening"]
+flag CH01              -> flag:CH01
+material iron >= 3     -> material:iron >= 3
+not flag CH01          -> not (flag:CH01)
 ```
 
-因此当前条件语法不支持带空格的字符串字面量。
+求值器支持比较、算术、括号、`and` / `or` / `not`，以及 `min` / `max` / `clamp` / `abs` / `round` / `floor` / `ceil` / `if`。标识符可以带 `:`、`.`、`_`，因此进度谓词和普通变量共用一套语法。
 
 ### 5.19.2 条件如何读取游戏状态
 
@@ -647,6 +876,8 @@ endif
 ```cpp
 state.StoryFlags.count("FLAG_CH02_TUTORIAL_STARTED") > 0
 ```
+
+实际求值由 `Logic::ResolveGameplayPredicate` 统一处理 `chapter`、`flag:`、`skill:`、`dungeon:`、`completed:`、`last_dungeon:`、`equipment:`、`equipped:` 和 `material:`；未识别的标识符返回 0，不会抛异常。非法表达式会在加载和保存时被 `EventScript::Validate` 拦下，并写入 `Diagnostics -> Logic Diagnostics`。
 
 `chapter` 和 `material` 还会进一步解析比较运算符：
 
@@ -962,6 +1193,8 @@ event:go_hub
 
 > `.wts` 负责低频流程，C++ 负责高频规则。
 
+这里的“按钮点击”需要准确理解为“按钮点击后的低频流程适合写进 `.wts`”，而不是“`.wts` 自己负责监听点击”。输入发现仍由 `UIInputSystem` 完成，VN 推进由 `VisualNovelSystem` 完成，战斗动作和命中由玩法系统完成。
+
 ## 5.25 和 Unity / UE 的对照
 
 Unity 常用协程、事件函数、Timeline、ScriptableObject。  
@@ -981,8 +1214,9 @@ Wheatear 的选择更轻：
 
 > 我们用 `.wts` 做低频流程编排。  
 > 场景里挂 `EventScriptComponent`，`EventScriptSystem` 负责解析和执行脚本，支持 `wait`、条件分支和热重载。  
-> 当脚本里遇到 `scene:`、`newgame:`、`progression:` 这类命令时，会回到 `CommandBus`，再交给 `SceneTransitionService`、`GameProgress` 或对应系统处理。  
-> 这样就把“什么时候做什么”和“具体怎么做”拆开了。
+> UI、VN 或玩法系统先发现操作或结果，再通过 `CommandBus` 投递 `event:xxx`；`EventScriptSystem` 根据事件名找到对应的 WTS 事件块。
+> 脚本执行到 `scene:`、`newgame:`、`progression:` 这类命令时，再回到 `CommandBus`，交给 `SceneTransitionService`、`GameProgress` 或对应系统处理。
+> 因此 WTS 负责的是“事件已经发生后，按什么顺序编排后续流程”，而不是监听输入或每帧执行玩法规则。
 
 ## 5.27 本章小结
 
@@ -999,8 +1233,9 @@ GameProgress 和 SceneTransitionService 是最终落地的状态与宿主。
 如果把它缩成一条线，就是：
 
 ```text
-事件请求
- -> .wts
+场景启动或外部系统发现操作 / 结果
+ -> StartEvent 或 event:xxx
+ -> EventScriptSystem 找到 .wts 事件块
  -> 条件 / 等待 / 命令
  -> CommandBus
  -> 引擎状态变化

@@ -18,6 +18,47 @@ namespace Wheatear {
 
     using namespace EventScriptGraphPanelInternal;
 
+    namespace {
+
+        constexpr float kSplitterWidth = 16.0f;
+        constexpr float kMinimumGraphWidth = 260.0f;
+        constexpr float kMinimumDetailsWidth = 220.0f;
+
+        void DrawVerticalSplitter(const char* id,
+            float& size,
+            float minSize,
+            float maxSize)
+        {
+            ImGui::InvisibleButton(id, ImVec2(kSplitterWidth, -1.0f));
+
+            if (ImGui::IsItemHovered())
+                ImGui::SetMouseCursor(ImGuiMouseCursor_ResizeEW);
+
+            if (ImGui::IsItemActive())
+            {
+                // `size` is the width of the panel on the right, so the
+                // delta is inverted to make the splitter follow the cursor.
+                size = std::clamp(size - ImGui::GetIO().MouseDelta.x, minSize, maxSize);
+            }
+
+            const ImVec2 min = ImGui::GetItemRectMin();
+            const ImVec2 max = ImGui::GetItemRectMax();
+            const float x = (min.x + max.x) * 0.5f;
+            const bool hot = ImGui::IsItemHovered() || ImGui::IsItemActive();
+            ImGui::GetWindowDrawList()->AddLine(
+                ImVec2(x - 1.0f, min.y + 3.0f),
+                ImVec2(x - 1.0f, max.y - 3.0f),
+                hot ? IM_COL32(90, 210, 230, 255) : IM_COL32(120, 140, 150, 70),
+                hot ? 2.0f : 1.0f);
+            ImGui::GetWindowDrawList()->AddLine(
+                ImVec2(x + 1.0f, min.y + 3.0f),
+                ImVec2(x + 1.0f, max.y - 3.0f),
+                hot ? IM_COL32(90, 210, 230, 255) : IM_COL32(120, 140, 150, 70),
+                hot ? 2.0f : 1.0f);
+        }
+
+    } // namespace
+
     void EventScriptGraphPanel::DrawGraph()
     {
         const EventScriptBlock* block = GetSelectedBlock();
@@ -27,9 +68,27 @@ namespace Wheatear {
             return;
         }
 
-        const float detailWidth = 300.0f;
-        ImVec2 graphSize = ImGui::GetContentRegionAvail();
-        graphSize.x = std::max(260.0f, graphSize.x - detailWidth - ImGui::GetStyle().ItemSpacing.x);
+        const ImVec2 contentSize = ImGui::GetContentRegionAvail();
+        const float spacing = ImGui::GetStyle().ItemSpacing.x;
+        const float panelsWidth = std::max(0.0f,
+            contentSize.x - kSplitterWidth - spacing * 2.0f);
+        const float minimumDetailsWidth = std::min(
+            kMinimumDetailsWidth,
+            panelsWidth * 0.45f);
+        const float minimumGraphWidth = std::min(
+            kMinimumGraphWidth,
+            std::max(0.0f, panelsWidth - minimumDetailsWidth));
+        const float maximumDetailsWidth = std::max(
+            minimumDetailsWidth,
+            panelsWidth - minimumGraphWidth);
+
+        m_DetailsWidth = std::clamp(
+            m_DetailsWidth,
+            minimumDetailsWidth,
+            maximumDetailsWidth);
+
+        ImVec2 graphSize = contentSize;
+        graphSize.x = std::max(0.0f, panelsWidth - m_DetailsWidth);
 
         ImGui::BeginChild("EventGraphCanvas", graphSize, true,
             ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse);
@@ -39,7 +98,10 @@ namespace Wheatear {
         const ImVec2 canvasMax = { canvasMin.x + canvasSize.x, canvasMin.y + canvasSize.y };
         ImDrawList* drawList = ImGui::GetWindowDrawList();
 
-        drawList->AddRectFilled(canvasMin, canvasMax, IM_COL32(12, 18, 21, 246), 4.0f);
+        const bool darkTheme = ImGui::GetStyleColorVec4(ImGuiCol_WindowBg).x < 0.5f;
+        drawList->AddRectFilled(canvasMin, canvasMax,
+            darkTheme ? IM_COL32(12, 18, 21, 246) : IM_COL32(246, 242, 234, 246),
+            4.0f);
         DrawGrid(drawList, canvasMin, canvasMax, m_GraphPan, m_Zoom);
 
         ImGui::InvisibleButton("##EventGraphSurface", canvasSize,
@@ -179,12 +241,17 @@ namespace Wheatear {
         drawList->PopClipRect();
         ImGui::EndChild();
 
-        ImGui::SameLine();
+        ImGui::SameLine(0.0f, spacing);
+        DrawVerticalSplitter("##EventGraphDetailsSplitter",
+            m_DetailsWidth,
+            minimumDetailsWidth,
+            maximumDetailsWidth);
+        ImGui::SameLine(0.0f, spacing);
         DrawDetails(block);
     }
     void EventScriptGraphPanel::DrawDetails(const EventScriptBlock* block)
     {
-        ImGui::BeginChild("EventGraphDetails", { 0.0f, 0.0f }, true);
+        ImGui::BeginChild("EventGraphDetails", { m_DetailsWidth, 0.0f }, true);
         ImGui::TextUnformatted("Event Graph");
         ImGui::Separator();
 
@@ -511,7 +578,11 @@ namespace Wheatear {
         }
         ImGui::EndDisabled();
         ImGui::SameLine();
-        ImGui::BeginDisabled(instruction.Type != EventScriptInstructionType::If);
+        const bool selectedIsIf = m_SelectedInstruction >= 0
+            && m_SelectedInstruction < static_cast<int>(mutableBlock->Instructions.size())
+            && mutableBlock->Instructions[static_cast<size_t>(m_SelectedInstruction)].Type
+                == EventScriptInstructionType::If;
+        ImGui::BeginDisabled(!selectedIsIf);
         if (ImGui::SmallButton("Insert EndIf After"))
         {
             EventScriptInstruction endIfInstruction;

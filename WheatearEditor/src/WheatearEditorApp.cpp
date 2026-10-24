@@ -3,11 +3,14 @@
 #include "Assets/AssetRegistry.h"
 #include "Assets/UITemplateFactory.h"
 #include "Editor/ModeSelectLayer.h"
+#include "Editor/EditorLayerBase.h"
 #include "Editor/CoreEditorComponents.h"
 #include "Build/AssetDependencyScanner.h"
 #include "Build/PlayerPackager.h"
 #include "Build/ProjectSourceScanner.h"
+#include "Wheatear/Assets/ContentValidation.h"
 #include "Modules/ModuleEditorBootstrap.h"
+#include "Panels/BehaviorGraphPanel.h"
 
 #include <Wheatear/Core/EngineInfo.h>
 #include <Wheatear/Core/EntryPoint.h>
@@ -27,11 +30,48 @@ namespace Wheatear
             return argument.rfind("--", 0) == 0;
         }
 
+        static bool HasCommandOption(ApplicationCommandLineArgs args, const char* option)
+        {
+            for (int i = 1; i < args.Count; ++i)
+            {
+                if (std::string(args[i]) == option)
+                    return true;
+            }
+            return false;
+        }
+
         static std::filesystem::path GetEditorConfigDirectory()
         {
             if (const char* localAppData = std::getenv("LOCALAPPDATA"))
                 return std::filesystem::path(localAppData) / "Wheatear";
             return std::filesystem::temp_directory_path() / "Wheatear";
+        }
+
+        // Runs before the first ImGui frame. Deleting imgui.ini here (rather
+        // than after ImGui has loaded it) guarantees a clean dock layout and
+        // removes orphan entries from older panel naming schemes.
+        static void ResetEditorLayoutBeforeImGuiInit()
+        {
+            const std::filesystem::path settings =
+                GetEditorConfigDirectory() / EngineInfo::EditorName;
+            std::error_code error;
+            std::filesystem::create_directories(settings, error);
+            if (error)
+                return;
+
+            const std::filesystem::path versionPath =
+                settings / "editor_layout_version.txt";
+            int storedVersion = 0;
+            if (std::ifstream input(versionPath); input.is_open())
+                input >> storedVersion;
+
+            if (storedVersion != EditorLayerBase::kLayoutVersion)
+            {
+                std::filesystem::remove(settings / "imgui.ini", error);
+                std::ofstream output(versionPath, std::ios::trunc);
+                if (output.is_open())
+                    output << EditorLayerBase::kLayoutVersion << "\n";
+            }
         }
 
         static std::filesystem::path ReadLastProject()
@@ -153,7 +193,7 @@ namespace Wheatear
             // No explicit argument: honour the project-level startup scene
             // (assets/game/player.config) before the engine default.
             if (!projectRoot.empty())
-                return LoadRuntimePlayerConfig(projectRoot / "assets" / "game" / "player.config").StartupScene;
+                return LoadRuntimePlayerConfig(FindRuntimePlayerConfigPath(projectRoot)).StartupScene;
             return EngineInfo::DefaultStartupScene;
         }
 
@@ -174,7 +214,7 @@ namespace Wheatear
             // No explicit argument: honour the project-level startup scene
             // (assets/game/player.config) before the engine default.
             if (!projectRoot.empty())
-                return LoadRuntimePlayerConfig(projectRoot / "assets" / "game" / "player.config").StartupScene;
+                return LoadRuntimePlayerConfig(FindRuntimePlayerConfigPath(projectRoot)).StartupScene;
             return EngineInfo::DefaultStartupScene;
         }
 
@@ -210,6 +250,8 @@ namespace Wheatear
 
             const AssetDependencyReport dependencyReport = AssetDependencyScanner::BuildReport(options);
             const ProjectSourceReport sourceReport = ProjectSourceScanner::BuildReport(options.ProjectRoot);
+            const ContentValidationReport contentReport =
+                ContentValidator::ValidateDirectory(AssetPath::GetAssetRoot());
             AssetRegistry::Get().Scan(options.ProjectRoot);
             const bool registryWritten = AssetRegistry::Get().WriteRegistry();
 
@@ -218,6 +260,7 @@ namespace Wheatear
             const size_t blockingIssues = dependencyReport.MissingReferences.size()
                 + dependencyReport.MissingSceneTransitions.size()
                 + sourceSyncIssues
+                + contentReport.ErrorCount()
                 + (registryWritten ? 0 : 1);
 
             WT_CORE_INFO("Project health startup '{}'", options.StartupAsset.string());
@@ -226,6 +269,8 @@ namespace Wheatear
             WT_CORE_INFO("Project health missing references: {}", dependencyReport.MissingReferences.size());
             WT_CORE_INFO("Project health missing scene transitions: {}", dependencyReport.MissingSceneTransitions.size());
             WT_CORE_INFO("Project health source sync issues: {}", sourceSyncIssues);
+            WT_CORE_INFO("Project health content errors: {}", contentReport.ErrorCount());
+            WT_CORE_INFO("Project health content warnings: {}", contentReport.WarningCount());
             WT_CORE_INFO("Project health registry write: {}", registryWritten ? "ok" : "failed");
 
             for (const AssetReferenceRecord& record : dependencyReport.MissingReferences)
@@ -238,6 +283,16 @@ namespace Wheatear
                 WT_CORE_ERROR("Source file missing from project: '{}' ({})", source.File.string(), source.ProjectName);
             for (const ProjectSourceRecord& source : sourceReport.StaleProjectEntries)
                 WT_CORE_ERROR("Stale project entry: '{}' ({})", source.File.string(), source.ProjectName);
+            for (const ContentIssue& issue : contentReport.Issues)
+            {
+                const std::string message = issue.Asset.generic_string()
+                    + (issue.SourceLine > 0 ? ":" + std::to_string(issue.SourceLine) : "")
+                    + ": " + issue.Message;
+                if (issue.Severity == ContentIssueSeverity::Error)
+                    WT_CORE_ERROR("Content: {}", message);
+                else
+                    WT_CORE_WARN("Content: {}", message);
+            }
 
             if (blockingIssues == 0)
             {
@@ -318,6 +373,12 @@ namespace Wheatear
         WheatearEditor(ApplicationCommandLineArgs args)
             : Application(CreateEditorSpecification(args))
         {
+            if (!IsProjectHealthCommand(args)
+                && !IsRefreshAssetRegistryCommand(args)
+                && !IsPackagePlayerCommand(args))
+            {
+                ResetEditorLayoutBeforeImGuiInit();
+            }
             if (IsRefreshAssetRegistryCommand(args))
             {
                 const std::filesystem::path projectRoot = GetSpecification().ProjectRoot.empty()
@@ -326,7 +387,7 @@ namespace Wheatear
                 UITemplateFactory::WriteBuiltinTemplateAssets(projectRoot);
                 AssetRegistry::Get().Scan(projectRoot);
                 if (AssetRegistry::Get().WriteRegistry())
-                    WT_CORE_INFO("AssetRegistry refreshed at '{}'", (projectRoot / "assets" / ".wheatear" / "asset_registry.yaml").string());
+                    WT_CORE_INFO("AssetRegistry refreshed at '{}'", (projectRoot / "Intermediate" / "AssetRegistry.yaml").string());
                 else
                     WT_CORE_ERROR("AssetRegistry failed to write registry under '{}'", projectRoot.string());
                 Close();
@@ -337,13 +398,24 @@ namespace Wheatear
             RegisterDefaultGameplayEditorModules();
             RegisterDefaultGameplayModules();
 
+            if (HasCommandOption(args, "--open-behavior-graph"))
+            {
+                BehaviorGraphRequests::RequestOpenBehavior(
+                    "assets/gameplay/behaviors/demo_combat.wtb");
+            }
+
             const std::filesystem::path projectRoot = GetSpecification().ProjectRoot.empty()
                 ? AssetPath::GetProjectRoot()
                 : GetSpecification().ProjectRoot;
             UITemplateFactory::WriteBuiltinTemplateAssets(projectRoot);
             AssetRegistry::Get().LoadCache(projectRoot);
 
-            PushLayer(std::make_unique<ModeSelectLayer>());
+            if (HasCommandOption(args, "--2d") || HasCommandOption(args, "--workspace-2d"))
+                PushLayer(std::make_unique<ModeSelectLayer>(EditorWorkspace::TwoD));
+            else if (HasCommandOption(args, "--3d") || HasCommandOption(args, "--workspace-3d"))
+                PushLayer(std::make_unique<ModeSelectLayer>(EditorWorkspace::ThreeD));
+            else
+                PushLayer(std::make_unique<ModeSelectLayer>());
         }
 
         ~WheatearEditor() = default;

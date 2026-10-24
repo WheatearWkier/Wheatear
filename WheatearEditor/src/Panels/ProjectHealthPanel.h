@@ -4,6 +4,7 @@
 #include "Build/ProjectSourceScanner.h"
 #include "Editor/EditorToolRegistry.h"
 #include "Editor/YamlAssetDocument.h"
+#include "Wheatear/Assets/ContentValidation.h"
 
 #include <filesystem>
 #include <string>
@@ -102,6 +103,7 @@ namespace Wheatear {
         void DrawHygieneCleanupPlan();
         void DrawAliasManifestEditor();
         void DrawSourceSync() const;
+        void DrawContentValidation();
         void LoadAliasManifest();
         void SaveAliasManifest();
         void SaveStartupScene();
@@ -121,6 +123,7 @@ namespace Wheatear {
         std::string m_NewAliasTarget = "assets/";
         AssetDependencyReport m_Report;
         ProjectSourceReport m_SourceReport;
+        ContentValidationReport m_ContentReport;
         AssetHygieneReport m_HygieneReport;
         std::vector<AssetHygieneAction> m_HygieneActions;
         // Dangling entity-name / @UUID bindings found inside scene files

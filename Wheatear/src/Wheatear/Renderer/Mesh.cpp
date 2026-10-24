@@ -105,6 +105,19 @@ namespace Wheatear {
     void Mesh::UploadToGPU(const std::vector<MeshVertex>& vertices,
         const std::vector<uint32_t>& indices)
     {
+        m_BoundsMin = glm::vec3(0.0f);
+        m_BoundsMax = glm::vec3(0.0f);
+        if (!vertices.empty())
+        {
+            m_BoundsMin = vertices.front().Position;
+            m_BoundsMax = vertices.front().Position;
+            for (const MeshVertex& vertex : vertices)
+            {
+                m_BoundsMin = glm::min(m_BoundsMin, vertex.Position);
+                m_BoundsMax = glm::max(m_BoundsMax, vertex.Position);
+            }
+        }
+
         m_VertexArray = VertexArray::Create();
 
         // VBO
@@ -114,11 +127,14 @@ namespace Wheatear {
         vbo->SetData(vertices.data(),
             (uint32_t)(vertices.size() * sizeof(MeshVertex)));
         vbo->SetLayout({
-            { "a_Position", ShaderDataType::Float3 },
-            { "a_Normal",   ShaderDataType::Float3 },
-            { "a_TexCoord", ShaderDataType::Float2 },
+            { "a_Position",    ShaderDataType::Float3 },
+            { "a_Normal",      ShaderDataType::Float3 },
+            { "a_TexCoord",    ShaderDataType::Float2 },
+            { "a_BoneIndices", ShaderDataType::Int4 },
+            { "a_BoneWeights", ShaderDataType::Float4 },
             });
         m_VertexArray->AddVertexBuffer(vbo);
+        m_VertexBuffer = vbo;
 
         // IBO
         auto ibo = IndexBuffer::Create(
@@ -126,8 +142,37 @@ namespace Wheatear {
             (uint32_t)indices.size()
         );
         m_VertexArray->SetIndexBuffer(ibo);
+        m_IndexBuffer = ibo;
 
         m_IndexCount = (uint32_t)indices.size();
+    }
+
+    Ref<VertexArray> Mesh::CreateInstancedVAO(
+        const std::vector<glm::mat4>& transforms) const
+    {
+        if (!m_VertexBuffer || !m_IndexBuffer || transforms.empty())
+            return nullptr;
+
+        // Reuse the VAO and instance buffer across frames; only the matrix
+        // data is re-uploaded. Recreate when a larger batch needs more room.
+        if (!m_InstancedVAO || m_InstanceCapacity < transforms.size())
+        {
+            m_InstancedVAO = VertexArray::Create();
+            m_InstancedVAO->AddVertexBuffer(m_VertexBuffer);
+            m_InstancedVAO->SetIndexBuffer(m_IndexBuffer);
+
+            m_InstanceCapacity = transforms.size();
+            m_InstanceBuffer = VertexBuffer::Create(
+                static_cast<uint32_t>(sizeof(glm::mat4) * m_InstanceCapacity));
+            m_InstanceBuffer->SetLayout({
+                { "a_InstanceModel", ShaderDataType::Mat4 },
+                });
+            m_InstancedVAO->AddVertexBuffer(m_InstanceBuffer);
+        }
+
+        m_InstanceBuffer->SetData(transforms.data(),
+            static_cast<uint32_t>(sizeof(glm::mat4) * transforms.size()));
+        return m_InstancedVAO;
     }
 
     // -------------------------------------------------------------------------

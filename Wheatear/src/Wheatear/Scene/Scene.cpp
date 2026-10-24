@@ -15,8 +15,13 @@
 #include "Wheatear/Systems/AudioSystem.h"
 #include "Wheatear/Systems/UISystem.h"
 #include "Wheatear/Systems/RenderSystem.h"
+#include "Wheatear/Systems/TerrainSystem.h"
+#include "Wheatear/Systems/NavigationSystem.h"
 
 #include <glm/glm.hpp>
+
+#include <functional>
+#include <unordered_set>
 
 
 namespace Wheatear {
@@ -153,6 +158,8 @@ namespace Wheatear {
 
     void Scene::ConfigureRuntimeSystems()
     {
+        RegisterSystem<TerrainSystem>();
+        RegisterSystem<NavigationSystem>();
         RegisterSystem<PhysicsSystem>();
         RegisterSystem<AnimationSystem>();
         RegisterSystem<SpriteSheetSystem>();
@@ -170,6 +177,8 @@ namespace Wheatear {
 
     void Scene::ConfigureEditorSystems()
     {
+        RegisterSystem<TerrainSystem>();
+        RegisterSystem<NavigationSystem>();
         RegisterSystem<AnimationSystem>();
         RegisterSystem<SpriteSheetSystem>();
         RegisterSystem<UISystem>();
@@ -321,6 +330,109 @@ namespace Wheatear {
             if (m_Registry.get<CameraComponent>(e).Primary)
                 return { e, this };
         return {};
+    }
+
+    glm::mat4 Scene::GetWorldTransform(Entity entity)
+    {
+        std::unordered_set<UUID> visited;
+        std::function<glm::mat4(Entity)> resolve = [&](Entity current) -> glm::mat4
+        {
+            if (!current || !current.HasComponent<TransformComponent>())
+                return glm::mat4(1.0f);
+
+            const auto& transform = current.GetComponent<TransformComponent>();
+            const glm::mat4 local = transform.GetTransform();
+            if (transform.Parent == 0)
+                return local;
+
+            if (!visited.insert(transform.Parent).second)
+                return local;
+
+            Entity parent = FindEntityByUUID(transform.Parent);
+            if (!parent)
+                return local;
+
+            return resolve(parent) * local;
+        };
+
+        return resolve(entity);
+    }
+
+    glm::vec3 Scene::GetWorldTranslation(Entity entity)
+    {
+        const glm::mat4 world = GetWorldTransform(entity);
+        return glm::vec3(world[3]);
+    }
+
+    bool Scene::SetParent(Entity child, Entity parent)
+    {
+        if (!child || !child.HasComponent<TransformComponent>())
+            return false;
+
+        if (parent && parent == child)
+            return false;
+
+        // Reject cycles before mutating the child.
+        Entity cursor = parent;
+        int guard = 0;
+        while (cursor && guard++ < 512)
+        {
+            if (cursor == child)
+                return false;
+
+            if (!cursor.HasComponent<TransformComponent>())
+                break;
+
+            const UUID parentID = cursor.GetComponent<TransformComponent>().Parent;
+            if (parentID == 0)
+                break;
+            cursor = FindEntityByUUID(parentID);
+        }
+
+        auto& transform = child.GetComponent<TransformComponent>();
+        transform.Parent = parent ? parent.GetUUID() : UUID(0);
+        return true;
+    }
+
+    void Scene::ClearParent(Entity child)
+    {
+        SetParent(child, {});
+    }
+
+    std::vector<Entity> Scene::CollectSubtree(Entity root)
+    {
+        std::vector<Entity> result;
+        if (!root)
+            return result;
+
+        std::unordered_set<uint32_t> visited;
+        std::function<void(Entity)> visit = [&](Entity current)
+        {
+            if (!current)
+                return;
+
+            const uint32_t key = static_cast<uint32_t>(
+                static_cast<entt::entity>(current));
+            if (!visited.insert(key).second)
+                return;
+
+            result.push_back(current);
+
+            const UUID id = current.GetUUID();
+            for (auto entityID : m_Registry.view<IDComponent, TransformComponent>())
+            {
+                if (m_Registry.get<TransformComponent>(entityID).Parent == id)
+                    visit({ entityID, this });
+            }
+            for (auto entityID : m_Registry.view<IDComponent, UIWidgetComponent>())
+            {
+                if (m_Registry.get<UIWidgetComponent>(entityID).ParentEntity == id)
+                    visit({ entityID, this });
+            }
+        };
+
+        visit(root);
+        return result;
     }
 
     void Scene::InvalidateEntityLookupCache()

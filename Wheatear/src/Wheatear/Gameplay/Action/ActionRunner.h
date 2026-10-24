@@ -24,10 +24,30 @@ namespace Wheatear::WAO {
         EffectBundle AppliedEffects;
     };
 
+    struct ActionActivationResult
+    {
+        bool Success = false;
+        EffectLedger Ledger;
+        EffectBundle AppliedEffects;
+        std::string Detail;
+    };
+
     WHEATEAR_API bool CanAfford(const ActionRecipe& recipe, const ActionRuntime& runtime);
     WHEATEAR_API bool CanActivate(const ActionRecipe& recipe, const ActionRuntime& runtime);
+    WHEATEAR_API ActionActivationResult BeginAction(const ActionIntent& intent,
+        const ActionRecipe& recipe,
+        ActionRuntime& runtime,
+        ActionRuntime* targetRuntime = nullptr,
+        ActionRuntime* sourceRuntime = nullptr);
+    WHEATEAR_API ActionExecutionResult ExecuteBody(const ActionIntent& intent,
+        const ActionRecipe& recipe,
+        ActionRuntime& runtime,
+        ActionRuntime* targetRuntime = nullptr,
+        ActionRuntime* sourceRuntime = nullptr);
     WHEATEAR_API ActionExecutionResult Execute(const ActionIntent& intent,
         const ActionRecipe& recipe,
-        ActionRuntime& runtime);
+        ActionRuntime& runtime,
+        ActionRuntime* targetRuntime = nullptr,
+        ActionRuntime* sourceRuntime = nullptr);
 
 } // namespace Wheatear::WAO
